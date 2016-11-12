@@ -1,0 +1,123 @@
+/*
+ * The MIT License (MIT)
+ *
+ * Copyright (c) SpongePowered <https://www.spongepowered.org>
+ * Copyright (c) contributors
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
+package org.spongepowered.despector.ast;
+
+import static com.google.common.base.Preconditions.checkNotNull;
+
+import com.google.common.collect.Maps;
+import org.spongepowered.despector.ast.type.ArrayTypeEntry;
+import org.spongepowered.despector.ast.type.EnumEntry;
+import org.spongepowered.despector.ast.type.InterfaceEntry;
+import org.spongepowered.despector.ast.type.TypeEntry;
+
+import java.util.Collection;
+import java.util.Map;
+
+/**
+ * A source set for types which are part of the obfuscated source being mapped.
+ */
+public class SourceSet {
+
+    private final Map<String, TypeEntry> classes = Maps.newHashMap();
+    private final Map<String, EnumEntry> enums = Maps.newHashMap();
+    private final Map<String, InterfaceEntry> interfaces = Maps.newHashMap();
+    private final Map<String, ArrayTypeEntry> array_types = Maps.newHashMap();
+
+//    private final Map<String, TypeEntry> unique_string_constants = Maps.newHashMap();
+//    private final Set<String> non_unique_string_constants = Sets.newHashSet();
+
+    public SourceSet() {
+    }
+
+    /**
+     * Inserts the given type into this source set.
+     */
+    public void add(TypeEntry e) {
+        checkNotNull(e);
+        if (e instanceof EnumEntry) {
+            this.enums.put(e.getName(), (EnumEntry) e);
+        } else if (e instanceof InterfaceEntry) {
+            this.interfaces.put(e.getName(), (InterfaceEntry) e);
+        }
+        this.classes.put(e.getName(), e);
+    }
+
+    public TypeEntry get(String name) {
+        checkNotNull(name);
+//        if (!ObfUtil.isMinecraftSource(name)) {
+//            return ClasspathSourceSet.classpath.get(name);
+//        }
+        if (name.endsWith("[]")) {
+            ArrayTypeEntry entry = this.array_types.get(name);
+            if (entry == null) {
+                TypeEntry comp = get(name.substring(0, name.length() - 2));
+                entry = new ArrayTypeEntry(this, comp.getName());
+                this.array_types.put(name, entry);
+            }
+            return entry;
+        }
+        TypeEntry entry = this.classes.get(name);
+        return entry;
+    }
+
+    public EnumEntry getEnum(String name) {
+//        if (!ObfUtil.isMinecraftSource(name)) {
+//            return ClasspathSourceSet.classpath.getEnum(name);
+//        }
+        EnumEntry entry = this.enums.get(name);
+        return entry;
+    }
+
+    public InterfaceEntry getInterface(String name) {
+//        if (!ObfUtil.isMinecraftSource(name)) {
+//            return ClasspathSourceSet.classpath.getInterface(name);
+//        }
+        InterfaceEntry entry = this.interfaces.get(name);
+        return entry;
+    }
+
+    /**
+     * Gets all classes in the source set. This also includes all interfaces and
+     * enums.
+     */
+    public Collection<TypeEntry> getAllClasses() {
+        return this.classes.values();
+    }
+
+    /**
+     * Gets all enum types in the source set.
+     */
+    public Collection<EnumEntry> getAllEnums() {
+        return this.enums.values();
+    }
+
+    /**
+     * Gets all interface types in the source set.
+     */
+    public Collection<InterfaceEntry> getAllInterfaces() {
+        return this.interfaces.values();
+    }
+
+}
