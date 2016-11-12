@@ -44,6 +44,7 @@ import org.spongepowered.despector.ast.members.insn.arg.field.StaticFieldArg;
 import org.spongepowered.despector.ast.members.insn.arg.operator.AddArg;
 import org.spongepowered.despector.ast.members.insn.arg.operator.DivideArg;
 import org.spongepowered.despector.ast.members.insn.arg.operator.MultiplyArg;
+import org.spongepowered.despector.ast.members.insn.arg.operator.NegArg;
 import org.spongepowered.despector.ast.members.insn.arg.operator.RemainerArg;
 import org.spongepowered.despector.ast.members.insn.arg.operator.ShiftLeftArg;
 import org.spongepowered.despector.ast.members.insn.arg.operator.ShiftRightArg;
@@ -165,6 +166,9 @@ public abstract class InstructionVisitor {
     }
 
     public void visitInstanceFunctionArg(InstanceFunctionArg instanceFunctionArg) {
+    }
+
+    public void visitNegArg(NegArg negArg) {
     }
 
     public void visitCastArg(CastArg castArg) {

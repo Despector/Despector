@@ -52,6 +52,7 @@ import org.spongepowered.despector.ast.members.insn.arg.field.InstanceFieldArg;
 import org.spongepowered.despector.ast.members.insn.arg.field.LocalArg;
 import org.spongepowered.despector.ast.members.insn.arg.field.StaticFieldArg;
 import org.spongepowered.despector.ast.members.insn.arg.operator.AddArg;
+import org.spongepowered.despector.ast.members.insn.arg.operator.NegArg;
 import org.spongepowered.despector.ast.members.insn.arg.operator.OperatorArg;
 import org.spongepowered.despector.ast.members.insn.arg.operator.SubtractArg;
 import org.spongepowered.despector.ast.members.insn.assign.ArrayAssign;
@@ -1027,6 +1028,8 @@ public class SourceEmitter implements ClassEmitter {
             emitOperator((OperatorArg) arg);
         } else if (arg instanceof CastArg) {
             emitCastArg((CastArg) arg);
+        } else if (arg instanceof NegArg) {
+            emitNegArg((NegArg) arg);
         } else if (arg instanceof NewArrayArg) {
             emitNewArray((NewArrayArg) arg);
         } else if (arg instanceof ArrayLoadArg) {
@@ -1261,6 +1264,17 @@ public class SourceEmitter implements ClassEmitter {
         printString(") ");
         emitArg(arg.getVal(), null);
         printString(")");
+    }
+
+    protected void emitNegArg(NegArg arg) {
+        printString("-");
+        if (arg.getOperand() instanceof OperatorArg) {
+            printString("(");
+            emitArg(arg.getOperand(), null);
+            printString(")");
+        } else {
+            emitArg(arg.getOperand(), null);
+        }
     }
 
     protected void emitNewArray(NewArrayArg arg) {

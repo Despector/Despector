@@ -90,6 +90,7 @@ import org.spongepowered.despector.ast.members.insn.arg.field.StaticFieldArg;
 import org.spongepowered.despector.ast.members.insn.arg.operator.AddArg;
 import org.spongepowered.despector.ast.members.insn.arg.operator.DivideArg;
 import org.spongepowered.despector.ast.members.insn.arg.operator.MultiplyArg;
+import org.spongepowered.despector.ast.members.insn.arg.operator.NegArg;
 import org.spongepowered.despector.ast.members.insn.arg.operator.OperatorArg;
 import org.spongepowered.despector.ast.members.insn.arg.operator.RemainerArg;
 import org.spongepowered.despector.ast.members.insn.arg.operator.ShiftLeftArg;
@@ -1134,6 +1135,13 @@ public class OpcodeDecompiler {
         handlers[LREM] = new OperatorHandler(RemainerArg::new);
         handlers[FREM] = new OperatorHandler(RemainerArg::new);
         handlers[DREM] = new OperatorHandler(RemainerArg::new);
+        OpHandler neg = (state, next) -> {
+            state.push(new NegArg(state.pop()));
+        };
+        handlers[INEG] = neg;
+        handlers[LNEG] = neg;
+        handlers[FNEG] = neg;
+        handlers[DNEG] = neg;
         handlers[ISHL] = new OperatorHandler(ShiftLeftArg::new);
         handlers[LSHL] = new OperatorHandler(ShiftLeftArg::new);
         handlers[ISHR] = new OperatorHandler(ShiftRightArg::new);

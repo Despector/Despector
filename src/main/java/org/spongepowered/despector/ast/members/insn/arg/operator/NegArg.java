@@ -22,34 +22,45 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.test.ast;
+package org.spongepowered.despector.ast.members.insn.arg.operator;
 
-import static org.junit.Assert.assertEquals;
+import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
+import org.spongepowered.despector.ast.members.insn.arg.Instruction;
 
-import org.junit.Test;
+/**
+ * An instruction which negates the current value on the stack
+ *
+ * <p>Example: -(val)</p>
+ */
+public class NegArg implements Instruction {
 
-import java.io.IOException;
+    private Instruction val;
 
-public class OperatorsTest {
-
-    private void mth_intconstant() {
-        int i = 65;
+    public NegArg(Instruction val) {
+        this.val = val;
     }
 
-    @Test
-    public void testIntConstant() throws IOException {
-        String mth = TestHelper.getAsString(getClass(), "mth_intconstant");
-        assertEquals("int i = 65;", mth);
+    public Instruction getOperand() {
+        return this.val;
     }
 
-    private void mth_neg(int a, int b) {
-        int i = -(a + b);
+    public void setOperand(Instruction insn) {
+        this.val = insn;
     }
 
-    @Test
-    public void testmth_neg() throws IOException {
-        String mth = TestHelper.getAsString(getClass(), "mth_neg");
-        assertEquals("int i = -(a + b);", mth);
+    @Override
+    public String inferType() {
+        return this.val.inferType();
     }
 
+    @Override
+    public void accept(InstructionVisitor visitor) {
+        visitor.visitNegArg(this);
+        this.val.accept(visitor);
+    }
+
+    @Override
+    public String toString() {
+        return "-(" + this.val.toString() + ")";
+    }
 }
