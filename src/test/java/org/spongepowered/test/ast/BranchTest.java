@@ -22,45 +22,37 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.despector.ast.members.insn.arg.field;
+package org.spongepowered.test.ast;
 
-import org.spongepowered.despector.ast.members.insn.arg.Instruction;
-import org.spongepowered.despector.util.TypeHelper;
+import static org.junit.Assert.assertEquals;
 
-/**
- * An instruction which loads a value from a field.
- */
-public abstract class FieldArg implements Instruction {
+import org.junit.Test;
 
-    protected final String field_name;
-    protected final String field_desc;
-    protected final String owner;
+import java.io.IOException;
 
-    public FieldArg(String name, String desc, String owner) {
-        this.field_name = name;
-        this.field_desc = desc;
-        this.owner = owner;
+public class BranchTest {
+
+    private void mth_simpleif(boolean a) {
+        if (a) {
+            System.out.println(a);
+        }
     }
 
-    public String getFieldName() {
-        return this.field_name;
+    @Test
+    public void testSimpleIf() throws IOException {
+        String insn = TestHelper.getAsString(BranchTest.class, "mth_simpleif");
+        String good = "if (a) {\n    System.out.println(a);\n}";
+        assertEquals(good, insn);
     }
 
-    public String getTypeDescriptor() {
-        return this.field_desc;
+    public void mth_basicternary(boolean a) {
+        int r = a ? 6 : 3;
     }
 
-    public String getOwner() {
-        return this.owner;
+    @Test
+    public void testBasicTernary() throws IOException {
+        String insn = TestHelper.getAsString(BranchTest.class, "mth_basicternary");
+        String good = "int r = a ? 6 : 3;";
+        assertEquals(good, insn);
     }
-
-    public String getOwnerName() {
-        return TypeHelper.descToType(this.owner);
-    }
-
-    @Override
-    public String inferType() {
-        return this.field_desc;
-    }
-
 }

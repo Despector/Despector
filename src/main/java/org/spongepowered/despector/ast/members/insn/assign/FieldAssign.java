@@ -25,6 +25,7 @@
 package org.spongepowered.despector.ast.members.insn.assign;
 
 import org.spongepowered.despector.ast.members.insn.arg.Instruction;
+import org.spongepowered.despector.util.TypeHelper;
 
 public abstract class FieldAssign extends Assignment {
 
@@ -49,6 +50,10 @@ public abstract class FieldAssign extends Assignment {
 
     public String getOwner() {
         return this.owner;
+    }
+    
+    public String getOwnerName() {
+        return TypeHelper.descToType(this.owner);
     }
 
 //    @Override

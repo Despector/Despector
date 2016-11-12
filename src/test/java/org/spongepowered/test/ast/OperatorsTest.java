@@ -22,45 +22,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.despector.ast.members.insn.arg.field;
+package org.spongepowered.test.ast;
 
-import org.spongepowered.despector.ast.members.insn.arg.Instruction;
-import org.spongepowered.despector.util.TypeHelper;
+import static org.junit.Assert.assertEquals;
 
-/**
- * An instruction which loads a value from a field.
- */
-public abstract class FieldArg implements Instruction {
+import org.junit.Test;
 
-    protected final String field_name;
-    protected final String field_desc;
-    protected final String owner;
+import java.io.IOException;
 
-    public FieldArg(String name, String desc, String owner) {
-        this.field_name = name;
-        this.field_desc = desc;
-        this.owner = owner;
+public class OperatorsTest {
+
+    private void mth_intconstant() {
+        int i = 65;
     }
 
-    public String getFieldName() {
-        return this.field_name;
-    }
-
-    public String getTypeDescriptor() {
-        return this.field_desc;
-    }
-
-    public String getOwner() {
-        return this.owner;
-    }
-
-    public String getOwnerName() {
-        return TypeHelper.descToType(this.owner);
-    }
-
-    @Override
-    public String inferType() {
-        return this.field_desc;
+    @Test
+    public void testIntConstant() throws IOException {
+        String mth = TestHelper.getAsString(getClass(), "mth_intconstant");
+        assertEquals("int i = 65;", mth);
     }
 
 }

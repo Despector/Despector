@@ -25,6 +25,7 @@
 package org.spongepowered.despector.ast.io.insn;
 
 import org.spongepowered.despector.ast.members.insn.arg.Instruction;
+import org.spongepowered.despector.util.TypeHelper;
 
 import java.util.Arrays;
 
@@ -40,8 +41,7 @@ public class Locals {
     }
 
     /**
-     * Creates a new {@link Locals} instance using the same locals as the given
-     * object.
+     * Creates a new {@link Locals} instance using the same locals as the given object.
      */
     public Locals(Locals other) {
         this.locals = new Local[other.locals.length];
@@ -91,12 +91,12 @@ public class Locals {
      */
     public static class Local {
 
-        private final int index;
-        private String type;
+        private final int   index;
+        private String      type;
         private Instruction value;
-        private String name;
-        private boolean parameter = false;
-        private String[] generics = null;
+        private String      name;
+        private boolean     parameter = false;
+        private String[]    generics  = null;
 
         public Local(int i, String type) {
             this.index = i;
@@ -135,6 +135,10 @@ public class Locals {
 
         public String getType() {
             return this.type;
+        }
+
+        public String getTypeName() {
+            return TypeHelper.descToType(this.type);
         }
 
         public void setType(String type) {

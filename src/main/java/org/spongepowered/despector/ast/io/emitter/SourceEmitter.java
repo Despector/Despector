@@ -192,13 +192,13 @@ public class SourceEmitter implements ClassEmitter {
         printString(" ");
         if (!type.getSuperclass().equals("Ljava/lang/Object;")) {
             printString("extends ");
-            emitTypeName(TypeHelper.descToTypeName(type.getSuperclass()));
+            emitTypeName(type.getSuperclassName());
             printString(" ");
         }
         if (!type.getInterfaces().isEmpty()) {
             printString("implements ");
             for (int i = 0; i < type.getInterfaces().size(); i++) {
-                emitTypeName(TypeHelper.descToTypeName(type.getInterfaces().get(i)));
+                emitType(type.getInterfaces().get(i));
                 if (i < type.getInterfaces().size() - 1) {
                     printString(", ");
                 }
@@ -286,7 +286,7 @@ public class SourceEmitter implements ClassEmitter {
         if (!type.getInterfaces().isEmpty()) {
             printString(" implements");
             for (int i = 0; i < type.getInterfaces().size(); i++) {
-                emitTypeName(TypeHelper.descToTypeName(type.getInterfaces().get(i)));
+                emitType(type.getInterfaces().get(i));
                 if (i < type.getInterfaces().size() - 1) {
                     printString(", ");
                 }
@@ -426,7 +426,7 @@ public class SourceEmitter implements ClassEmitter {
         if (!type.getInterfaces().isEmpty()) {
             printString(" extends");
             for (int i = 0; i < type.getInterfaces().size(); i++) {
-                emitTypeName(TypeHelper.descToTypeName(type.getInterfaces().get(i)));
+                emitType(type.getInterfaces().get(i));
                 if (i < type.getInterfaces().size() - 1) {
                     printString(", ");
                 }
@@ -500,7 +500,7 @@ public class SourceEmitter implements ClassEmitter {
             }
         }
         if (method.getName().equals("<init>")) {
-            emitTypeName(method.getOwner());
+            emitTypeName(method.getOwnerName());
         } else {
             if (method.isStatic()) {
                 printString("static ");
@@ -511,7 +511,7 @@ public class SourceEmitter implements ClassEmitter {
             if (method.isAbstract() && !(this.this$ instanceof InterfaceEntry)) {
                 printString("abstract ");
             }
-            emitTypeName(method.getReturnType());
+            emitType(method.getReturnType());
             printString(" ");
             printString(method.getName());
         }
@@ -519,7 +519,7 @@ public class SourceEmitter implements ClassEmitter {
         StatementBlock block = method.getInstructions();
         int start = this.this$ instanceof EnumEntry ? 2 : 0;
         for (int i = start; i < method.getParamTypes().size(); i++) {
-            emitTypeName(method.getParamTypes().get(i));
+            emitType(method.getParamTypes().get(i));
             printString(" ");
             if (block == null) {
                 printString("local" + (i + 1));
@@ -551,25 +551,21 @@ public class SourceEmitter implements ClassEmitter {
     public void emitBody(StatementBlock instructions) {
         if (instructions == null) {
             printIndentation();
-            printString("// Error decompiling block\n");
+            printString("// Error decompiling block");
             return;
         }
         this.state.resetForInsn(instructions, instructions.getLocals());
-        boolean print_since_indentation = true;
+        boolean last_success = false;
         for (int i = 0; i < instructions.getStatements().size(); i++) {
             Statement insn = instructions.getStatements().get(i);
             if (insn instanceof ReturnVoid && instructions.getType() == StatementBlock.Type.METHOD && i == instructions.getStatements().size() - 1) {
                 break;
             }
-            printIndentation();
-            print_since_indentation = false;
-            if (emitInstruction(insn, true)) {
+            if (last_success) {
                 printString("\n");
-                print_since_indentation = true;
             }
-        }
-        if (!print_since_indentation) {
-            printString("\n");
+            printIndentation();
+            last_success = emitInstruction(insn, true);
         }
     }
 
@@ -618,11 +614,11 @@ public class SourceEmitter implements ClassEmitter {
         LocalState lstate = this.state.getLocalState(insn.getLocal().getIndex());
         if (!lstate.isDefined()) {
             Local local = insn.getLocal();
-            emitTypeName(TypeHelper.descToType(local.getType()));
+            emitTypeName(local.getTypeName());
             if (local.getGenericTypes() != null) {
                 printString("<");
                 for (int i = 0; i < local.getGenericTypes().length; i++) {
-                    emitTypeName(TypeHelper.descToTypeName(local.getGenericTypes()[i]));
+                    emitTypeName(local.getGenericTypes()[i]);
                     if (i < local.getGenericTypes().length - 1) {
                         printString(",");
                     }
@@ -688,7 +684,7 @@ public class SourceEmitter implements ClassEmitter {
     protected void emitFieldAssign(FieldAssign insn) {
         if (insn instanceof StaticFieldAssign) {
             if (!((StaticFieldAssign) insn).getOwner().equals(this.this$.getDescriptor())) {
-                emitTypeName(TypeHelper.descToType(((StaticFieldAssign) insn).getOwner()));
+                emitTypeName(((StaticFieldAssign) insn).getOwnerName());
                 printString(".");
             }
         } else if (insn instanceof InstanceFieldAssign) {
@@ -730,7 +726,7 @@ public class SourceEmitter implements ClassEmitter {
     }
 
     protected void emitStaticFunction(StaticMethodCall insn) {
-        emitTypeName(TypeHelper.descToType(insn.getOwner()));
+        emitType(insn.getOwner());
         printString(".");
         printString(insn.getMethodName());
         printString("(");
@@ -775,7 +771,7 @@ public class SourceEmitter implements ClassEmitter {
 
     protected void emitNew(NewInstance insn) {
         printString("new ");
-        emitTypeName(TypeHelper.descToType(insn.getType()));
+        emitType(insn.getType());
         printString("(");
         // TODO param types from ast
         for (int i = 0; i < insn.getParams().length; i++) {
@@ -805,9 +801,12 @@ public class SourceEmitter implements ClassEmitter {
         printString("if (");
         emitCondition(insn.getCondition());
         printString(") {\n");
-        this.indentation++;
-        emitBody(insn.getIfBody());
-        this.indentation--;
+        if (!insn.getIfBody().getStatements().isEmpty()) {
+            this.indentation++;
+            emitBody(insn.getIfBody());
+            this.indentation--;
+            printString("\n");
+        }
         printIndentation();
         ElseBlock else_ = insn.getElseBlock();
         if (else_ == null) {
@@ -820,9 +819,12 @@ public class SourceEmitter implements ClassEmitter {
                 return;
             }
             printString("} else {\n");
-            this.indentation++;
-            emitBody(else_.getElseBody());
-            this.indentation--;
+            if (!else_.getElseBody().getStatements().isEmpty()) {
+                this.indentation++;
+                emitBody(else_.getElseBody());
+                this.indentation--;
+                printString("\n");
+            }
             printIndentation();
             printString("}");
         }
@@ -840,9 +842,12 @@ public class SourceEmitter implements ClassEmitter {
             emitInstruction(loop.getIncr(), false);
         }
         printString(") {\n");
-        this.indentation++;
-        emitBody(loop.getBody());
-        this.indentation--;
+        if (!loop.getBody().getStatements().isEmpty()) {
+            this.indentation++;
+            emitBody(loop.getBody());
+            this.indentation--;
+            printString("\n");
+        }
         printIndentation();
         printString("}");
     }
@@ -851,18 +856,24 @@ public class SourceEmitter implements ClassEmitter {
         printString("while (");
         emitCondition(loop.getCondition());
         printString(") {\n");
-        this.indentation++;
-        emitBody(loop.getBody());
-        this.indentation--;
+        if (!loop.getBody().getStatements().isEmpty()) {
+            this.indentation++;
+            emitBody(loop.getBody());
+            this.indentation--;
+            printString("\n");
+        }
         printIndentation();
         printString("}");
     }
 
     protected void emitDoWhileLoop(DoWhileLoop loop) {
         printString("do {\n");
-        this.indentation++;
-        emitBody(loop.getBody());
-        this.indentation--;
+        if (!loop.getBody().getStatements().isEmpty()) {
+            this.indentation++;
+            emitBody(loop.getBody());
+            this.indentation--;
+            printString("\n");
+        }
         printIndentation();
         printString("} while (");
         emitCondition(loop.getCondition());
@@ -885,11 +896,15 @@ public class SourceEmitter implements ClassEmitter {
             }
             this.indentation++;
             emitBody(cs.getBody());
+            if (!cs.getBody().getStatements().isEmpty()) {
+                printString("\n");
+            }
             if (cs.doesBreak()) {
                 printIndentation();
                 printString("break;\n");
             }
             this.indentation--;
+            printString("\n");
         }
         printIndentation();
         printString("}");
@@ -987,7 +1002,7 @@ public class SourceEmitter implements ClassEmitter {
         } else if (arg instanceof DoubleConstantArg) {
             printString(String.valueOf(((DoubleConstantArg) arg).getConstant()));
         } else if (arg instanceof TypeConstantArg) {
-            emitTypeName(((TypeConstantArg) arg).getConstant().getClassName());
+            emitTypeClassName(((TypeConstantArg) arg).getConstant().getClassName());
             printString(".class");
         } else if (arg instanceof Ternary) {
             emitTernary((Ternary) arg, inferred_type);
@@ -996,9 +1011,17 @@ public class SourceEmitter implements ClassEmitter {
         }
     }
 
+    protected void emitType(String name) {
+        emitTypeClassName(TypeHelper.descToType(name).replace('/', '.'));
+    }
+
     protected void emitTypeName(String name) {
+        emitTypeClassName(name.replace('/', '.'));
+    }
+
+    protected void emitTypeClassName(String name) {
         if (name.endsWith("[]")) {
-            emitTypeName(name.substring(0, name.length() - 2));
+            emitTypeClassName(name.substring(0, name.length() - 2));
             printString("[]");
         }
         if (name.indexOf('.') != -1) {
@@ -1040,7 +1063,7 @@ public class SourceEmitter implements ClassEmitter {
 
     protected void emitFieldArg(FieldArg arg) {
         if (arg instanceof StaticFieldArg) {
-            emitTypeName(TypeHelper.descToType(((StaticFieldArg) arg).getOwner()));
+            emitTypeName(((StaticFieldArg) arg).getOwnerName());
             printString(".");
             printString(arg.getFieldName());
         } else if (arg instanceof InstanceFieldArg) {
@@ -1128,7 +1151,7 @@ public class SourceEmitter implements ClassEmitter {
 
     protected void emitNewRefArg(NewRefArg arg) {
         printString("new ");
-        emitTypeName(TypeHelper.descToType(arg.getType()));
+        emitType(arg.getType());
         printString("(");
         // TODO get param types if we have the ast
         for (int i = 0; i < arg.getParams().length; i++) {
@@ -1198,7 +1221,7 @@ public class SourceEmitter implements ClassEmitter {
 
     protected void emitCastArg(CastArg arg) {
         printString("((");
-        emitTypeName(TypeHelper.descToType(arg.getType()));
+        emitType(arg.getType());
         printString(") ");
         emitArg(arg.getVal(), null);
         printString(")");
@@ -1206,7 +1229,7 @@ public class SourceEmitter implements ClassEmitter {
 
     protected void emitNewArray(NewArrayArg arg) {
         printString("new ");
-        emitTypeName(TypeHelper.descToType(arg.getType()));
+        emitType(arg.getType());
         if (arg.getInitializer().length == 0) {
             printString("[");
             emitArg(arg.getSize(), "I");
@@ -1301,14 +1324,18 @@ public class SourceEmitter implements ClassEmitter {
             if (true_value.getConstant() == 1 && false_value.getConstant() == 0) {
                 emitCondition(ternary.getCondition());
                 return;
+            } else if (true_value.getConstant() == 0 && false_value.getConstant() == 1) {
+
+                emitCondition(new InverseCondition(ternary.getCondition()));
+                return;
             }
         }
         if (ternary.getCondition() instanceof CompareCondition) {
-            emitCondition(ternary.getCondition());
-        } else {
             printString("(");
             emitCondition(ternary.getCondition());
             printString(")");
+        } else {
+            emitCondition(ternary.getCondition());
         }
         printString(" ? ");
         emitArg(ternary.getTrueValue(), inferred_type);

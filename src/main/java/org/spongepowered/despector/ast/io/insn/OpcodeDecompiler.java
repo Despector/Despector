@@ -360,7 +360,7 @@ public class OpcodeDecompiler {
                     block.append(dowhile);
                     index = result.end;
                 } else {
-                    StatementBlock body_block = buildBlock(StatementBlock.Type.IF, result.end + 1, result.block_end);
+                    StatementBlock body_block = buildBlock(StatementBlock.Type.IF, result.end, result.block_end);
                     boolean is_ternary = false;
                     Instruction true_val = null;
                     Instruction false_val = null;
@@ -420,7 +420,6 @@ public class OpcodeDecompiler {
         for (; condition_end < this.intermediates.size(); condition_end++) {
             IntermediateOpcode onext = this.intermediates.get(condition_end);
             if (onext instanceof IntermediateStatement || onext instanceof IntermediateGoto || onext instanceof IntermediateStackValue) {
-                condition_end--;
                 break;
             }
         }
