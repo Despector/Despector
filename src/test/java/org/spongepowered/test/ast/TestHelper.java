@@ -29,6 +29,7 @@ import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.despector.ast.io.SingularClassLoader;
 import org.spongepowered.despector.ast.io.emitter.SourceEmitter;
+import org.spongepowered.despector.ast.members.MethodEntry;
 import org.spongepowered.despector.ast.members.insn.StatementBlock;
 import org.spongepowered.despector.ast.type.TypeEntry;
 
@@ -65,10 +66,10 @@ public class TestHelper {
             cr.accept(cn, 0);
             type = SingularClassLoader.instance.load(cn, null);
         }
-        StatementBlock stmt = type.getMethod(method_name).getInstructions();
+        MethodEntry method = type.getMethod(method_name);
         StringWriter writer = new StringWriter();
         SourceEmitter emitter = new SourceEmitter(writer);
-        emitter.emitBody(stmt);
+        emitter.emitBody(method, type);
         return writer.toString();
     }
 

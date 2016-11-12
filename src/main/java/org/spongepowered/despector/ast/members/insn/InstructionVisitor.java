@@ -61,7 +61,6 @@ import org.spongepowered.despector.ast.members.insn.branch.ElseBlock;
 import org.spongepowered.despector.ast.members.insn.branch.ForLoop;
 import org.spongepowered.despector.ast.members.insn.branch.IfBlock;
 import org.spongepowered.despector.ast.members.insn.branch.TableSwitch;
-import org.spongepowered.despector.ast.members.insn.branch.TableSwitch.Case;
 import org.spongepowered.despector.ast.members.insn.branch.Ternary;
 import org.spongepowered.despector.ast.members.insn.branch.WhileLoop;
 import org.spongepowered.despector.ast.members.insn.branch.condition.AndCondition;
@@ -115,7 +114,7 @@ public abstract class InstructionVisitor {
     public void visitSwitch(TableSwitch tableSwitch) {
     }
 
-    public void visitSwitchCase(Case case1) {
+    public void visitSwitchCase(TableSwitch.Case case1) {
     }
 
     public void visitTernary(Ternary ternary) {

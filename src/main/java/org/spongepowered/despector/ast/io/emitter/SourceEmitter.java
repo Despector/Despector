@@ -100,16 +100,16 @@ public class SourceEmitter implements ClassEmitter {
 
     // TODO rewrite as Vistor pattern
 
-    private static final String[] indentations = new String[] { "", "    ", "        ", "            ", "                ", "                    ", };
+    private static final String[] indentations = new String[] {"", "    ", "        ", "            ", "                ", "                    ",};
 
-    private Writer                output;
-    private StringBuilder         buffer       = null;
-    private final State           state        = new State();
-    private Set<String>           imports      = null;
-    private TypeEntry             this$        = null;
-    private MethodEntry           this$method;
+    private Writer output;
+    private StringBuilder buffer = null;
+    private final State state = new State();
+    private Set<String> imports = null;
+    private TypeEntry this$ = null;
+    private MethodEntry this$method;
 
-    private int                   indentation  = 0;
+    private int indentation = 0;
 
     public SourceEmitter(Writer output) {
         this.output = output;
@@ -548,6 +548,14 @@ public class SourceEmitter implements ClassEmitter {
     /**
      * Emits the given instruction block from this emitter.
      */
+    public void emitBody(MethodEntry method, TypeEntry type) {
+        this.this$ = type;
+        this.this$method = method;
+        emitBody(method.getInstructions());
+        this.this$method = null;
+        this.this$ = null;
+    }
+
     public void emitBody(StatementBlock instructions) {
         if (instructions == null) {
             printIndentation();
@@ -882,7 +890,7 @@ public class SourceEmitter implements ClassEmitter {
 
     protected void emitTableSwitch(TableSwitch tswitch) {
         printString("switch (");
-        emitArg(tswitch.getSwitchVar(), null);
+        emitArg(tswitch.getSwitchVar(), "I");
         printString(") {\n");
         for (Case cs : tswitch.getCases()) {
             for (int i = 0; i < cs.getIndices().size(); i++) {
@@ -1291,24 +1299,24 @@ public class SourceEmitter implements ClassEmitter {
             emitArg(compare.getRight(), null);
         } else if (condition instanceof AndCondition) {
             AndCondition and = (AndCondition) condition;
-            for (int i = 0; i < and.getOperands().length; i++) {
-                Condition cond = and.getOperands()[i];
+            for (int i = 0; i < and.getOperands().size(); i++) {
+                Condition cond = and.getOperands().get(i);
                 if (cond instanceof OrCondition) {
                     printString("(");
-                    emitCondition(and.getOperands()[i]);
+                    emitCondition(cond);
                     printString(")");
                 } else {
-                    emitCondition(and.getOperands()[i]);
+                    emitCondition(cond);
                 }
-                if (i < and.getOperands().length - 1) {
+                if (i < and.getOperands().size() - 1) {
                     printString(" && ");
                 }
             }
         } else if (condition instanceof OrCondition) {
             OrCondition and = (OrCondition) condition;
-            for (int i = 0; i < and.getOperands().length; i++) {
-                emitCondition(and.getOperands()[i]);
-                if (i < and.getOperands().length - 1) {
+            for (int i = 0; i < and.getOperands().size(); i++) {
+                emitCondition(and.getOperands().get(i));
+                if (i < and.getOperands().size() - 1) {
                     printString(" || ");
                 }
             }
@@ -1325,8 +1333,7 @@ public class SourceEmitter implements ClassEmitter {
                 emitCondition(ternary.getCondition());
                 return;
             } else if (true_value.getConstant() == 0 && false_value.getConstant() == 1) {
-
-                emitCondition(new InverseCondition(ternary.getCondition()));
+                emitCondition(ConditionSimplifier.invert(ternary.getCondition()));
                 return;
             }
         }
@@ -1394,7 +1401,7 @@ public class SourceEmitter implements ClassEmitter {
     private static class LocalState {
 
         private final Local local;
-        private boolean     defined = false;
+        private boolean defined = false;
 
         public LocalState(Local l) {
             this.local = l;

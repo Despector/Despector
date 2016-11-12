@@ -31,7 +31,7 @@ import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
  */
 public class InverseCondition extends Condition {
 
-    private final Condition value;
+    private Condition value;
 
     public InverseCondition(Condition value) {
         this.value = value;
@@ -39,6 +39,10 @@ public class InverseCondition extends Condition {
 
     public Condition getConditionValue() {
         return this.value;
+    }
+
+    public void setConditionValue(Condition val) {
+        this.value = val;
     }
 
     @Override

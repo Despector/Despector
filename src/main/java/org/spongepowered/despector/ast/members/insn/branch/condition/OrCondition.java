@@ -24,27 +24,34 @@
  */
 package org.spongepowered.despector.ast.members.insn.branch.condition;
 
+import com.google.common.collect.Lists;
 import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
+
+import java.util.List;
 
 /**
  * A condition for the or of several other conditions.
  */
 public class OrCondition extends Condition {
 
-    private final Condition[] args;
+    private List<Condition> args;
 
     public OrCondition(Condition... args) {
+        this.args = Lists.newArrayList(args);
+    }
+
+    public OrCondition(List<Condition> args) {
         this.args = args;
     }
 
-    public Condition[] getOperands() {
+    public List<Condition> getOperands() {
         return this.args;
     }
 
     @Override
     public void accept(InstructionVisitor visitor) {
         visitor.visitOrCondition(this);
-        for(Condition c: this.args) {
+        for (Condition c : this.args) {
             c.accept(visitor);
         }
     }
@@ -52,9 +59,9 @@ public class OrCondition extends Condition {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < this.args.length; i++) {
-            sb.append(this.args[i].toString());
-            if (i < this.args.length - 1) {
+        for (int i = 0; i < this.args.size(); i++) {
+            sb.append(this.args.get(i).toString());
+            if (i < this.args.size() - 1) {
                 sb.append(" || ");
             }
         }

@@ -32,8 +32,8 @@ import org.spongepowered.despector.ast.members.insn.arg.Instruction;
  */
 public class BooleanCondition extends Condition {
 
-    private final Instruction value;
-    private final boolean inverse;
+    private Instruction value;
+    private boolean inverse;
 
     public BooleanCondition(Instruction value, boolean inverse) {
         this.value = value;
@@ -44,8 +44,16 @@ public class BooleanCondition extends Condition {
         return this.value;
     }
 
+    public void setConditionValue(Instruction insn) {
+        this.value = insn;
+    }
+
     public boolean isInverse() {
         return this.inverse;
+    }
+
+    public void setInverse(boolean state) {
+        this.inverse = state;
     }
 
     @Override

@@ -47,6 +47,7 @@ import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.TableSwitchInsnNode;
 import org.objectweb.asm.tree.TypeInsnNode;
 import org.objectweb.asm.tree.VarInsnNode;
+import org.spongepowered.despector.ast.io.emitter.ConditionSimplifier;
 import org.spongepowered.despector.ast.io.insn.IntermediateOpcode.AbstractSwitch;
 import org.spongepowered.despector.ast.io.insn.IntermediateOpcode.DummyInstruction;
 import org.spongepowered.despector.ast.io.insn.IntermediateOpcode.IntermediateCompareJump;
@@ -104,7 +105,6 @@ import org.spongepowered.despector.ast.members.insn.branch.ElseBlock;
 import org.spongepowered.despector.ast.members.insn.branch.ForLoop;
 import org.spongepowered.despector.ast.members.insn.branch.IfBlock;
 import org.spongepowered.despector.ast.members.insn.branch.TableSwitch;
-import org.spongepowered.despector.ast.members.insn.branch.TableSwitch.Case;
 import org.spongepowered.despector.ast.members.insn.branch.Ternary;
 import org.spongepowered.despector.ast.members.insn.branch.WhileLoop;
 import org.spongepowered.despector.ast.members.insn.branch.condition.AndCondition;
@@ -112,7 +112,6 @@ import org.spongepowered.despector.ast.members.insn.branch.condition.BooleanCond
 import org.spongepowered.despector.ast.members.insn.branch.condition.CompareCondition;
 import org.spongepowered.despector.ast.members.insn.branch.condition.CompareCondition.CompareOp;
 import org.spongepowered.despector.ast.members.insn.branch.condition.Condition;
-import org.spongepowered.despector.ast.members.insn.branch.condition.InverseCondition;
 import org.spongepowered.despector.ast.members.insn.branch.condition.OrCondition;
 import org.spongepowered.despector.ast.members.insn.function.InstanceMethodCall;
 import org.spongepowered.despector.ast.members.insn.function.NewInstance;
@@ -134,7 +133,10 @@ import java.util.function.BiFunction;
 @SuppressWarnings("unchecked")
 public class OpcodeDecompiler {
 
+    private final DecompilerOptions options;
+
     private Deque<Instruction> stack;
+    private List<Instruction> pop_list;
     private Locals locals;
     private List<AbstractInsnNode> instructions;
     private int instructions_index;
@@ -142,13 +144,15 @@ public class OpcodeDecompiler {
     private List<IntermediateOpcode> intermediates;
     private Map<Label, Integer> label_indices;
 
-    public OpcodeDecompiler() {
+    public OpcodeDecompiler(DecompilerOptions options) {
+        this.options = options;
     }
 
     public StatementBlock decompile(InsnList instructions, Locals locals) {
         this.stack = Queues.newArrayDeque();
         this.locals = locals;
         this.intermediates = Lists.newArrayList();
+        this.pop_list = Lists.newArrayList();
 
         buildIntermediates(instructions, locals);
 
@@ -207,7 +211,6 @@ public class OpcodeDecompiler {
             } else if (next instanceof AbstractSwitch) {
                 AbstractSwitch aswitch = (AbstractSwitch) next;
                 Instruction var = aswitch.getSwitchVar();
-
                 TableSwitch tswitch = new TableSwitch(var);
                 boolean added_dflt = false;
                 List<LabelNode> labels = aswitch.getLabels();
@@ -249,7 +252,7 @@ public class OpcodeDecompiler {
                                 }
                             }
                             StatementBlock body_block = buildBlock(StatementBlock.Type.SWITCH, last, case_end);
-                            tswitch.addCase(new Case(body_block, breaks, is_def, indices));
+                            tswitch.addCase(new TableSwitch.Case(body_block, breaks, is_def, indices));
 
                             last = i;
                             last_label = ((IntermediateLabel) cnext).getLabel();
@@ -280,7 +283,7 @@ public class OpcodeDecompiler {
                                     }
                                     StatementBlock last_block = buildBlock(StatementBlock.Type.SWITCH, i, last_end);
 
-                                    tswitch.addCase(new Case(last_block, false, is_def, indices));
+                                    tswitch.addCase(new TableSwitch.Case(last_block, false, is_def, indices));
                                     switch_end = last_end;
                                     if (breaks) {
                                         switch_end++;
@@ -306,7 +309,7 @@ public class OpcodeDecompiler {
                                         last_end--;
                                     }
                                     StatementBlock last_block = buildBlock(StatementBlock.Type.SWITCH, i, last_end);
-                                    tswitch.addCase(new Case(last_block, false, is_def, indices));
+                                    tswitch.addCase(new TableSwitch.Case(last_block, false, is_def, indices));
                                     switch_end = case_end;
                                 }
                             }
@@ -335,19 +338,19 @@ public class OpcodeDecompiler {
                                 block.getStatements().remove(init);
                                 if (references(incr, local)) {
                                     body_block.getStatements().remove(incr);
-                                    ForLoop forloop = new ForLoop(init, new InverseCondition(result.condition), incr, body_block);
+                                    ForLoop forloop = new ForLoop(init, ConditionSimplifier.invert(result.condition), incr, body_block);
                                     block.append(forloop);
                                     index = result.end;
                                     continue;
                                 }
-                                ForLoop forloop = new ForLoop(init, new InverseCondition(result.condition), null, body_block);
+                                ForLoop forloop = new ForLoop(init, ConditionSimplifier.invert(result.condition), null, body_block);
                                 block.append(forloop);
                                 index = result.end;
                                 continue;
                             }
                         }
                     }
-                    WhileLoop whileloop = new WhileLoop(new InverseCondition(result.condition), body_block);
+                    WhileLoop whileloop = new WhileLoop(ConditionSimplifier.invert(result.condition), body_block);
                     block.append(whileloop);
                     index = result.end;
                     continue;
@@ -356,7 +359,7 @@ public class OpcodeDecompiler {
                 if (result.block_end < index) {
                     StatementBlock body_block = buildBlock(StatementBlock.Type.WHILE, result.block_end, index - 1);
                     block.getStatements().removeAll(body_block.getStatements());
-                    DoWhileLoop dowhile = new DoWhileLoop(new InverseCondition(result.condition), body_block);
+                    DoWhileLoop dowhile = new DoWhileLoop(ConditionSimplifier.invert(result.condition), body_block);
                     block.append(dowhile);
                     index = result.end;
                 } else {
@@ -538,7 +541,7 @@ public class OpcodeDecompiler {
                                 if (nop == CompareOps.OR || nop == CompareOps.MID) {
                                     ops_stack.pop();
                                     Condition left = stack.pop();
-                                    Condition right = new InverseCondition(stack.pop());
+                                    Condition right = ConditionSimplifier.invert(stack.pop());
                                     OrCondition cond = new OrCondition(right, left);
                                     stack.push(cond);
                                     ops_stack.push(CompareOps.AND);
@@ -575,7 +578,7 @@ public class OpcodeDecompiler {
                         if (ops_stack.peek() == CompareOps.MID) {
                             ops_stack.pop();
                             Condition left = stack.pop();
-                            Condition right = new InverseCondition(stack.pop());
+                            Condition right = ConditionSimplifier.invert(stack.pop());
                             OrCondition cond = new OrCondition(right, left);
                             stack.push(cond);
                         }
@@ -681,7 +684,11 @@ public class OpcodeDecompiler {
                 this.stack.push(new DummyInstruction());
                 intermediate_stack = false;
             }
-            this.intermediates.add(new IntermediateFrame((FrameNode) next));
+            FrameNode frame = (FrameNode) next;
+            if (frame.type == F_SAME1 && this.stack.isEmpty()) {
+                this.stack.push(this.pop_list.get(this.pop_list.size() - 1));
+            }
+            this.intermediates.add(new IntermediateFrame(frame));
         } else {
             if (intermediate_stack && !this.stack.isEmpty() && next.getOpcode() >= IRETURN && next.getOpcode() <= ARETURN) {
                 this.intermediates.add(this.intermediates.size() - 1, new IntermediateStackValue(this.stack.pop()));
@@ -729,7 +736,9 @@ public class OpcodeDecompiler {
     }
 
     public Instruction pop() {
-        return this.stack.pop();
+        Instruction insn = this.stack.pop();
+        this.pop_list.add(insn);
+        return insn;
     }
 
     public Instruction peek() {

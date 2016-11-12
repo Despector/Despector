@@ -73,7 +73,8 @@ public final class InstructionTreeBuilder {
         for (int i = 0; i <= TypeHelper.paramCount(asm.desc) - offs; i++) {
             locals.getLocal(i).setAsParameter();
         }
-        return new OpcodeDecompiler().decompile(asm.instructions, locals);
+        DecompilerOptions options = new DecompilerOptions();
+        return new OpcodeDecompiler(options).decompile(asm.instructions, locals);
     }
 
     private InstructionTreeBuilder() {
