@@ -22,38 +22,40 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.despector.ast.members.insn.assign;
+package org.spongepowered.despector.ast.io.insn;
 
-import org.spongepowered.despector.ast.io.insn.Locals.LocalInstance;
+import org.spongepowered.despector.ast.io.insn.Locals.DummyLocalInstance;
 import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
-import org.spongepowered.despector.ast.members.insn.arg.Instruction;
+import org.spongepowered.despector.ast.members.insn.arg.field.LocalArg;
+import org.spongepowered.despector.ast.members.insn.assign.LocalAssign;
+import org.spongepowered.despector.ast.members.insn.misc.IncrementStatement;
 
-public class LocalAssign extends Assignment {
+public class LocalDefineVisitor extends InstructionVisitor {
 
-    private LocalInstance local;
+    private int index;
 
-    public LocalAssign(LocalInstance local, Instruction val) {
-        super(val);
-        this.local = local;
-    }
-
-    public LocalInstance getLocal() {
-        return this.local;
-    }
-
-    public void setLocal(LocalInstance local) {
-        this.local = local;
+    public LocalDefineVisitor(int index) {
+        this.index = index;
     }
 
     @Override
-    public void accept(InstructionVisitor visitor) {
-        visitor.visitLocalAssign(this);
-        this.val.accept(visitor);
+    public void visitLocalArg(LocalArg arg) {
+        if (arg.getLocal() instanceof DummyLocalInstance) {
+            arg.setLocal(arg.getLocal().getLocal().getInstance(this.index));
+        }
     }
 
     @Override
-    public String toString() {
-        return this.local.getName() + " = " + this.val.toString() + ";";
+    public void visitLocalAssign(LocalAssign assign) {
+        if (assign.getLocal() instanceof DummyLocalInstance) {
+            assign.setLocal(assign.getLocal().getLocal().getInstance(this.index));
+        }
     }
 
+    @Override
+    public void visitIncrement(IncrementStatement arg) {
+        if (arg.getLocal() instanceof DummyLocalInstance) {
+            arg.setLocal(arg.getLocal().getLocal().getInstance(this.index));
+        }
+    }
 }

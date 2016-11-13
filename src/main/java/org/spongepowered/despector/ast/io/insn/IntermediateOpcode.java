@@ -30,6 +30,7 @@ import org.objectweb.asm.tree.JumpInsnNode;
 import org.objectweb.asm.tree.LabelNode;
 import org.objectweb.asm.tree.LookupSwitchInsnNode;
 import org.objectweb.asm.tree.TableSwitchInsnNode;
+import org.spongepowered.despector.ast.io.insn.Locals.Local;
 import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
 import org.spongepowered.despector.ast.members.insn.Statement;
 import org.spongepowered.despector.ast.members.insn.arg.Instruction;
@@ -312,6 +313,50 @@ public interface IntermediateOpcode {
 
         @Override
         public void accept(InstructionVisitor visitor) {
+        }
+
+    }
+
+    public static abstract class TryCatch implements IntermediateOpcode {
+
+        private final int index;
+
+        public TryCatch(int index) {
+            this.index = index;
+        }
+
+        public int getIndex() {
+            return this.index;
+        }
+
+    }
+
+    public static class TryStart extends TryCatch {
+
+        public TryStart(int index) {
+            super(index);
+        }
+
+    }
+
+    public static class TryEnd extends TryCatch {
+
+        public TryEnd(int index) {
+            super(index);
+        }
+
+    }
+
+    public static class CatchLocal implements IntermediateOpcode {
+
+        private final Local local;
+
+        public CatchLocal(Local local) {
+            this.local = local;
+        }
+
+        public Local getLocal() {
+            return this.local;
         }
 
     }

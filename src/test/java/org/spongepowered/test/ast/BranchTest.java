@@ -434,4 +434,68 @@ public class BranchTest {
                     + "}";
         assertEquals(good, insn);
     }
+
+    public void mth_trycatch(int i, Object o) {
+        try {
+            i = o.hashCode();
+        } catch (NullPointerException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Test
+    public void testmth_trycatch() throws IOException {
+        String insn = TestHelper.getAsString(BranchTest.class, "mth_trycatch");
+        String good = "try {\n"
+                    + "    i = o.hashCode();\n"
+                    + "} catch (NullPointerException e) {\n"
+                    + "    e.printStackTrace();\n"
+                    + "}";
+        assertEquals(good, insn);
+    }
+
+    public void mth_trycatch2(int i, Object o) {
+        try {
+            i = o.hashCode();
+        } catch (NullPointerException e) {
+            e.printStackTrace();
+        } catch (OutOfMemoryError e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Test
+    public void testmth_trycatch2() throws IOException {
+        String insn = TestHelper.getAsString(BranchTest.class, "mth_trycatch2");
+        String good = "try {\n"
+                    + "    i = o.hashCode();\n"
+                    + "} catch (NullPointerException e) {\n"
+                    + "    e.printStackTrace();\n"
+                    + "} catch (OutOfMemoryError e) {\n"
+                    + "    e.printStackTrace();\n"
+                    + "}";
+        assertEquals(good, insn);
+    }
+
+    public void mth_trycatch3(int i, Object o) {
+        try {
+            i = o.hashCode();
+        } catch (NullPointerException | IllegalArgumentException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Test
+    public void testmth_trycatch3() throws IOException {
+        String insn = TestHelper.getAsString(BranchTest.class, "mth_trycatch3");
+        String good = "try {\n"
+                    + "    i = o.hashCode();\n"
+                    + "} catch (NullPointerException | IllegalArgumentException e) {\n"
+                    + "    e.printStackTrace();\n"
+                    + "}";
+        assertEquals(good, insn);
+    }
+    
+    
+
 }

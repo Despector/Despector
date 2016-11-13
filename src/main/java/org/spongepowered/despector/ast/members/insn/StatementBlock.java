@@ -42,7 +42,10 @@ public class StatementBlock {
         IF,
         WHILE,
         METHOD,
-        SWITCH
+        SWITCH,
+        TRY,
+        CATCH,
+        FINALLY
     }
 
     private final Type type;

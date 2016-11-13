@@ -24,20 +24,24 @@
  */
 package org.spongepowered.despector.ast.members.insn.arg.field;
 
-import org.spongepowered.despector.ast.io.insn.Locals.Local;
+import org.spongepowered.despector.ast.io.insn.Locals.LocalInstance;
 import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
 import org.spongepowered.despector.ast.members.insn.arg.Instruction;
 
 public class LocalArg implements Instruction {
 
-    private final Local local;
+    private LocalInstance local;
 
-    public LocalArg(Local local) {
+    public LocalArg(LocalInstance local) {
         this.local = local;
     }
 
-    public Local getLocal() {
+    public LocalInstance getLocal() {
         return this.local;
+    }
+
+    public void setLocal(LocalInstance local) {
+        this.local = local;
     }
 
     @Override

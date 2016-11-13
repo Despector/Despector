@@ -65,10 +65,12 @@ public class IfBlock implements Statement {
     public void accept(InstructionVisitor visitor) {
         visitor.visitIfBlock(this);
         this.condition.accept(visitor);
-        for(Statement stmt: this.block.getStatements()) {
+        for (Statement stmt : this.block.getStatements()) {
             stmt.accept(visitor);
         }
-        this.else_block.accept(visitor);
+        if (this.else_block != null) {
+            this.else_block.accept(visitor);
+        }
     }
 
     @Override

@@ -56,12 +56,14 @@ import org.spongepowered.despector.ast.members.insn.assign.ArrayAssign;
 import org.spongepowered.despector.ast.members.insn.assign.InstanceFieldAssign;
 import org.spongepowered.despector.ast.members.insn.assign.LocalAssign;
 import org.spongepowered.despector.ast.members.insn.assign.StaticFieldAssign;
+import org.spongepowered.despector.ast.members.insn.branch.CatchBlock;
 import org.spongepowered.despector.ast.members.insn.branch.DoWhileLoop;
 import org.spongepowered.despector.ast.members.insn.branch.ElseBlock;
 import org.spongepowered.despector.ast.members.insn.branch.ForLoop;
 import org.spongepowered.despector.ast.members.insn.branch.IfBlock;
 import org.spongepowered.despector.ast.members.insn.branch.TableSwitch;
 import org.spongepowered.despector.ast.members.insn.branch.Ternary;
+import org.spongepowered.despector.ast.members.insn.branch.TryBlock;
 import org.spongepowered.despector.ast.members.insn.branch.WhileLoop;
 import org.spongepowered.despector.ast.members.insn.branch.condition.AndCondition;
 import org.spongepowered.despector.ast.members.insn.branch.condition.BooleanCondition;
@@ -232,6 +234,12 @@ public abstract class InstructionVisitor {
     }
 
     public void visitXorOperatorArg(XorArg xorArg) {
+    }
+
+    public void visitTryBlock(TryBlock tryBlock) {
+    }
+
+    public void visitCatchBlock(CatchBlock catchBlock) {
     }
 
 }

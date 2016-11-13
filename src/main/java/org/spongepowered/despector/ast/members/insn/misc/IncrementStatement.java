@@ -24,7 +24,7 @@
  */
 package org.spongepowered.despector.ast.members.insn.misc;
 
-import org.spongepowered.despector.ast.io.insn.Locals.Local;
+import org.spongepowered.despector.ast.io.insn.Locals.LocalInstance;
 import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
 import org.spongepowered.despector.ast.members.insn.Statement;
 
@@ -33,16 +33,20 @@ import org.spongepowered.despector.ast.members.insn.Statement;
  */
 public class IncrementStatement implements Statement {
 
-    private final Local local;
+    private LocalInstance local;
     private final int val;
 
-    public IncrementStatement(Local local, int val) {
+    public IncrementStatement(LocalInstance local, int val) {
         this.local = local;
         this.val = val;
     }
 
-    public Local getLocal() {
+    public LocalInstance getLocal() {
         return this.local;
+    }
+
+    public void setLocal(LocalInstance local) {
+        this.local = local;
     }
 
     public int getIncrementVal() {

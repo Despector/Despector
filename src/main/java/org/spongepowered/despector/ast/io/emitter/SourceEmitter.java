@@ -27,8 +27,8 @@ package org.spongepowered.despector.ast.io.emitter;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import org.spongepowered.despector.ast.AccessModifier;
-import org.spongepowered.despector.ast.io.insn.Locals;
 import org.spongepowered.despector.ast.io.insn.Locals.Local;
+import org.spongepowered.despector.ast.io.insn.Locals.LocalInstance;
 import org.spongepowered.despector.ast.members.FieldEntry;
 import org.spongepowered.despector.ast.members.MethodEntry;
 import org.spongepowered.despector.ast.members.insn.Statement;
@@ -59,6 +59,7 @@ import org.spongepowered.despector.ast.members.insn.assign.FieldAssign;
 import org.spongepowered.despector.ast.members.insn.assign.InstanceFieldAssign;
 import org.spongepowered.despector.ast.members.insn.assign.LocalAssign;
 import org.spongepowered.despector.ast.members.insn.assign.StaticFieldAssign;
+import org.spongepowered.despector.ast.members.insn.branch.CatchBlock;
 import org.spongepowered.despector.ast.members.insn.branch.DoWhileLoop;
 import org.spongepowered.despector.ast.members.insn.branch.ElseBlock;
 import org.spongepowered.despector.ast.members.insn.branch.ForLoop;
@@ -66,6 +67,7 @@ import org.spongepowered.despector.ast.members.insn.branch.IfBlock;
 import org.spongepowered.despector.ast.members.insn.branch.TableSwitch;
 import org.spongepowered.despector.ast.members.insn.branch.TableSwitch.Case;
 import org.spongepowered.despector.ast.members.insn.branch.Ternary;
+import org.spongepowered.despector.ast.members.insn.branch.TryBlock;
 import org.spongepowered.despector.ast.members.insn.branch.WhileLoop;
 import org.spongepowered.despector.ast.members.insn.branch.condition.AndCondition;
 import org.spongepowered.despector.ast.members.insn.branch.condition.BooleanCondition;
@@ -104,7 +106,7 @@ public class SourceEmitter implements ClassEmitter {
 
     private Writer output;
     private StringBuilder buffer = null;
-    private final State state = new State();
+    private Set<LocalInstance> defined_locals = Sets.newHashSet();
     private Set<String> imports = null;
     private TypeEntry this$ = null;
     private MethodEntry this$method;
@@ -525,7 +527,7 @@ public class SourceEmitter implements ClassEmitter {
                 printString("local" + (i + 1));
             } else {
                 Local local = block.getLocals().getLocal(i + 1);
-                printString(local.getName());
+                printString(local.getParameterInstance().getName());
             }
             if (i < method.getParamTypes().size() - 1) {
                 printString(", ");
@@ -562,7 +564,7 @@ public class SourceEmitter implements ClassEmitter {
             printString("// Error decompiling block");
             return;
         }
-        this.state.resetForInsn(instructions, instructions.getLocals());
+        this.defined_locals.clear();
         boolean last_success = false;
         for (int i = 0; i < instructions.getStatements().size(); i++) {
             Statement insn = instructions.getStatements().get(i);
@@ -609,19 +611,21 @@ public class SourceEmitter implements ClassEmitter {
             emitFieldAssign((FieldAssign) insn);
         } else if (insn instanceof TableSwitch) {
             emitTableSwitch((TableSwitch) insn);
+        } else if (insn instanceof TryBlock) {
+            emitTryBlock((TryBlock) insn);
         } else {
             throw new IllegalStateException("Unknown statement: " + insn);
         }
-        if (success && withSemicolon && !(insn instanceof ForLoop) && !(insn instanceof IfBlock) && !(insn instanceof WhileLoop)) {
+        if (success && withSemicolon && !(insn instanceof ForLoop) && !(insn instanceof IfBlock) && !(insn instanceof WhileLoop)
+                && !(insn instanceof TryBlock)) {
             printString(";");
         }
         return success;
     }
 
     protected void emitLocalAssign(LocalAssign insn) {
-        LocalState lstate = this.state.getLocalState(insn.getLocal().getIndex());
-        if (!lstate.isDefined()) {
-            Local local = insn.getLocal();
+        if (!insn.getLocal().getLocal().isParameter() && !this.defined_locals.contains(insn.getLocal())) {
+            LocalInstance local = insn.getLocal();
             emitTypeName(local.getTypeName());
             if (local.getGenericTypes() != null) {
                 printString("<");
@@ -634,7 +638,7 @@ public class SourceEmitter implements ClassEmitter {
                 printString(">");
             }
             printString(" ");
-            lstate.markDefined();
+            this.defined_locals.add(insn.getLocal());
         } else {
             // TODO replace with more generic handling from FieldAssign
             Instruction val = insn.getValue();
@@ -976,6 +980,34 @@ public class SourceEmitter implements ClassEmitter {
         emitArg(insn.getException(), null);
     }
 
+    protected void emitTryBlock(TryBlock try_block) {
+        printString("try {\n");
+        this.indentation++;
+        emitBody(try_block.getTryBlock());
+        this.indentation--;
+        printString("\n");
+        for (CatchBlock c : try_block.getCatchBlocks()) {
+            printIndentation();
+            printString("} catch (");
+            for (int i = 0; i < c.getExceptions().size(); i++) {
+                emitType(c.getExceptions().get(i));
+                if (i < c.getExceptions().size() - 1) {
+                    printString(" | ");
+                }
+            }
+            printString(" ");
+            printString(c.getExceptionLocal().getName());
+            this.defined_locals.add(c.getExceptionLocal());
+            printString(") {\n");
+            this.indentation++;
+            emitBody(c.getBlock());
+            this.indentation--;
+            printString("\n");
+        }
+        printIndentation();
+        printString("}");
+    }
+
     protected void emitArg(Instruction arg, String inferred_type) {
         if (arg instanceof StringConstantArg) {
             printString("\"");
@@ -1150,10 +1182,6 @@ public class SourceEmitter implements ClassEmitter {
     }
 
     protected void emitLocalArg(LocalArg arg) {
-        LocalState lstate = this.state.getLocalState(arg.getLocal().getIndex());
-        if (!lstate.isDefined()) {
-            throw new IllegalStateException("Local " + arg.getLocal().getName() + " accessed before its defined");
-        }
         printString(arg.getLocal().getName());
     }
 
@@ -1369,57 +1397,6 @@ public class SourceEmitter implements ClassEmitter {
             }
         } else {
             this.buffer.append(line);
-        }
-    }
-
-    private static class State {
-
-        private LocalState[] locals;
-
-        public State() {
-
-        }
-
-        public LocalState getLocalState(int index) {
-            return this.locals[index];
-        }
-
-        public void resetForInsn(StatementBlock insns, Locals ilocals) {
-            LocalState[] olocals = this.locals;
-            this.locals = new LocalState[ilocals.getLocalCount()];
-            for (int i = 0; i < ilocals.getLocalCount(); i++) {
-                if (olocals != null && i < olocals.length && ilocals.getLocal(i) == olocals[i].getLocal()) {
-                    this.locals[i] = olocals[i];
-                } else {
-                    this.locals[i] = new LocalState(ilocals.getLocal(i));
-                }
-            }
-        }
-
-    }
-
-    private static class LocalState {
-
-        private final Local local;
-        private boolean defined = false;
-
-        public LocalState(Local l) {
-            this.local = l;
-            if (l.getName().equals("this")) {
-                this.defined = true;
-            }
-        }
-
-        public Local getLocal() {
-            return this.local;
-        }
-
-        public boolean isDefined() {
-            return this.defined || this.local.isParameter();
-        }
-
-        public void markDefined() {
-            this.defined = true;
         }
     }
 

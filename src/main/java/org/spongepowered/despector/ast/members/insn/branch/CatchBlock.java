@@ -22,38 +22,44 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.despector.ast.members.insn.assign;
+package org.spongepowered.despector.ast.members.insn.branch;
 
 import org.spongepowered.despector.ast.io.insn.Locals.LocalInstance;
 import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
-import org.spongepowered.despector.ast.members.insn.arg.Instruction;
+import org.spongepowered.despector.ast.members.insn.Statement;
+import org.spongepowered.despector.ast.members.insn.StatementBlock;
 
-public class LocalAssign extends Assignment {
+import java.util.List;
 
-    private LocalInstance local;
+public class CatchBlock {
 
-    public LocalAssign(LocalInstance local, Instruction val) {
-        super(val);
-        this.local = local;
+    private LocalInstance exception_local;
+    private List<String> exceptions;
+    private StatementBlock block;
+
+    public CatchBlock(LocalInstance exception_local, List<String> ex, StatementBlock block) {
+        this.exception_local = exception_local;
+        this.exceptions = ex;
+        this.block = block;
     }
 
-    public LocalInstance getLocal() {
-        return this.local;
+    public LocalInstance getExceptionLocal() {
+        return this.exception_local;
     }
 
-    public void setLocal(LocalInstance local) {
-        this.local = local;
+    public List<String> getExceptions() {
+        return this.exceptions;
     }
 
-    @Override
+    public StatementBlock getBlock() {
+        return this.block;
+    }
+
     public void accept(InstructionVisitor visitor) {
-        visitor.visitLocalAssign(this);
-        this.val.accept(visitor);
-    }
-
-    @Override
-    public String toString() {
-        return this.local.getName() + " = " + this.val.toString() + ";";
+        visitor.visitCatchBlock(this);
+        for (Statement stmt : this.block.getStatements()) {
+            stmt.accept(visitor);
+        }
     }
 
 }

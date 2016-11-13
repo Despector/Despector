@@ -29,6 +29,7 @@ import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.LocalVariableNode;
 import org.objectweb.asm.tree.MethodNode;
 import org.spongepowered.despector.ast.io.insn.Locals.Local;
+import org.spongepowered.despector.ast.io.insn.Locals.LocalInstance;
 import org.spongepowered.despector.ast.members.insn.StatementBlock;
 import org.spongepowered.despector.util.TypeHelper;
 
@@ -49,32 +50,17 @@ public final class InstructionTreeBuilder {
         Set<String> names = Sets.newHashSet();
         for (LocalVariableNode node : (List<LocalVariableNode>) asm.localVariables) {
             Local local = locals.getLocal(node.index);
-            String name = node.name;
-            if ("☃".equals(name)) {
-                name = "local";
-            }
-            if (names.contains(name)) {
-                String possible_name = name + "1";
-                int i = 1;
-                while (names.contains(possible_name)) {
-                    possible_name = name + (++i);
-                }
-                name = possible_name;
-            }
-            local.setName(name);
-            names.add(name);
-            local.setType(node.desc);
-            if (node.signature != null) {
-                String[] generics = TypeHelper.getGenericContents(node.signature);
-                local.setGenericTypes(generics);
-            }
+            local.addLVT(node);
         }
         int offs = ((asm.access & Opcodes.ACC_STATIC) != 0) ? 1 : 0;
         for (int i = 0; i <= TypeHelper.paramCount(asm.desc) - offs; i++) {
-            locals.getLocal(i).setAsParameter();
+            Local local = locals.getLocal(i);
+            local.setAsParameter();
+            LocalVariableNode lvt = local.getLVT().get(0);
+            local.setParameterInstance(new LocalInstance(local, lvt.name, lvt.desc, -1, -1));
         }
         DecompilerOptions options = new DecompilerOptions();
-        return new OpcodeDecompiler(options).decompile(asm.instructions, locals);
+        return new OpcodeDecompiler(options).decompile(asm.instructions, locals, asm.tryCatchBlocks);
     }
 
     private InstructionTreeBuilder() {

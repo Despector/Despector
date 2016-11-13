@@ -45,10 +45,12 @@ import org.objectweb.asm.tree.LineNumberNode;
 import org.objectweb.asm.tree.LookupSwitchInsnNode;
 import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.TableSwitchInsnNode;
+import org.objectweb.asm.tree.TryCatchBlockNode;
 import org.objectweb.asm.tree.TypeInsnNode;
 import org.objectweb.asm.tree.VarInsnNode;
 import org.spongepowered.despector.ast.io.emitter.ConditionSimplifier;
 import org.spongepowered.despector.ast.io.insn.IntermediateOpcode.AbstractSwitch;
+import org.spongepowered.despector.ast.io.insn.IntermediateOpcode.CatchLocal;
 import org.spongepowered.despector.ast.io.insn.IntermediateOpcode.DummyInstruction;
 import org.spongepowered.despector.ast.io.insn.IntermediateOpcode.IntermediateCompareJump;
 import org.spongepowered.despector.ast.io.insn.IntermediateOpcode.IntermediateConditionalJump;
@@ -60,6 +62,9 @@ import org.spongepowered.despector.ast.io.insn.IntermediateOpcode.IntermediateLo
 import org.spongepowered.despector.ast.io.insn.IntermediateOpcode.IntermediateStackValue;
 import org.spongepowered.despector.ast.io.insn.IntermediateOpcode.IntermediateStatement;
 import org.spongepowered.despector.ast.io.insn.IntermediateOpcode.IntermediateTableSwitch;
+import org.spongepowered.despector.ast.io.insn.IntermediateOpcode.TryEnd;
+import org.spongepowered.despector.ast.io.insn.IntermediateOpcode.TryStart;
+import org.spongepowered.despector.ast.io.insn.Locals.DummyLocalInstance;
 import org.spongepowered.despector.ast.io.insn.Locals.Local;
 import org.spongepowered.despector.ast.members.insn.Statement;
 import org.spongepowered.despector.ast.members.insn.StatementBlock;
@@ -100,12 +105,14 @@ import org.spongepowered.despector.ast.members.insn.assign.FieldAssign;
 import org.spongepowered.despector.ast.members.insn.assign.InstanceFieldAssign;
 import org.spongepowered.despector.ast.members.insn.assign.LocalAssign;
 import org.spongepowered.despector.ast.members.insn.assign.StaticFieldAssign;
+import org.spongepowered.despector.ast.members.insn.branch.CatchBlock;
 import org.spongepowered.despector.ast.members.insn.branch.DoWhileLoop;
 import org.spongepowered.despector.ast.members.insn.branch.ElseBlock;
 import org.spongepowered.despector.ast.members.insn.branch.ForLoop;
 import org.spongepowered.despector.ast.members.insn.branch.IfBlock;
 import org.spongepowered.despector.ast.members.insn.branch.TableSwitch;
 import org.spongepowered.despector.ast.members.insn.branch.Ternary;
+import org.spongepowered.despector.ast.members.insn.branch.TryBlock;
 import org.spongepowered.despector.ast.members.insn.branch.WhileLoop;
 import org.spongepowered.despector.ast.members.insn.branch.condition.AndCondition;
 import org.spongepowered.despector.ast.members.insn.branch.condition.BooleanCondition;
@@ -140,6 +147,8 @@ public class OpcodeDecompiler {
     private Locals locals;
     private List<AbstractInsnNode> instructions;
     private int instructions_index;
+    private TryCatchBlockNode[] trycatch_blocks;
+    private int[] trycatch_indices;
 
     private List<IntermediateOpcode> intermediates;
     private Map<Label, Integer> label_indices;
@@ -148,15 +157,32 @@ public class OpcodeDecompiler {
         this.options = options;
     }
 
-    public StatementBlock decompile(InsnList instructions, Locals locals) {
+    public StatementBlock decompile(InsnList instructions, Locals locals, List<TryCatchBlockNode> trycatch) {
         this.stack = Queues.newArrayDeque();
         this.locals = locals;
         this.intermediates = Lists.newArrayList();
         this.pop_list = Lists.newArrayList();
 
+        this.trycatch_blocks = trycatch.toArray(new TryCatchBlockNode[trycatch.size()]);
+        this.trycatch_indices = new int[this.trycatch_blocks.length];
+        int next_index = 0;
+        outer: for (int i = 0; i < trycatch.size(); i++) {
+            TryCatchBlockNode next = trycatch.get(i);
+            for (int o = i - 1; o >= 0; o--) {
+                TryCatchBlockNode last = trycatch.get(o);
+                if (next.start == last.start && next.end == last.end) {
+                    this.trycatch_indices[i] = this.trycatch_indices[o];
+                    continue outer;
+                }
+            }
+            this.trycatch_indices[i] = next_index++;
+        }
+
         buildIntermediates(instructions, locals);
 
         this.label_indices = calcLabelIndices();
+
+        locals.bakeInstances(this.label_indices);
 
         return buildBlock(StatementBlock.Type.METHOD, 0, this.intermediates.size());
     }
@@ -166,9 +192,9 @@ public class OpcodeDecompiler {
             return false;
         }
         if (insn instanceof LocalAssign) {
-            return ((LocalAssign) insn).getLocal() == local;
+            return ((LocalAssign) insn).getLocal().getLocal() == local;
         } else if (insn instanceof IncrementStatement) {
-            return ((IncrementStatement) insn).getLocal() == local;
+            return ((IncrementStatement) insn).getLocal().getLocal() == local;
         }
         return false;
     }
@@ -184,7 +210,7 @@ public class OpcodeDecompiler {
 
     private static boolean references(Instruction arg, Local local) {
         if (arg instanceof LocalArg) {
-            return ((LocalArg) arg).getLocal() == local;
+            return ((LocalArg) arg).getLocal().getLocal() == local;
         }
         return false;
     }
@@ -196,6 +222,7 @@ public class OpcodeDecompiler {
             IntermediateOpcode next = this.intermediates.get(index);
             if (next instanceof IntermediateStatement) {
                 Statement stmt = ((IntermediateStatement) next).getStatement();
+                stmt.accept(new LocalDefineVisitor(index));
                 if (tmp_ternary != null) {
                     if (stmt instanceof Assignment) {
                         ((Assignment) stmt).setValue(tmp_ternary);
@@ -316,6 +343,7 @@ public class OpcodeDecompiler {
                         }
                     }
                 }
+                tswitch.accept(new LocalDefineVisitor(index));
                 block.append(tswitch);
                 index = switch_end;
             } else if (next instanceof IntermediateJump) {
@@ -333,17 +361,19 @@ public class OpcodeDecompiler {
                             incr = body_block.getStatements().get(body_block.getStatements().size() - 1);
                         }
                         if (init instanceof LocalAssign) {
-                            Local local = ((LocalAssign) init).getLocal();
+                            Local local = ((LocalAssign) init).getLocal().getLocal();
                             if (references(result.condition, local) || references(incr, local)) {
                                 block.getStatements().remove(init);
                                 if (references(incr, local)) {
                                     body_block.getStatements().remove(incr);
                                     ForLoop forloop = new ForLoop(init, ConditionSimplifier.invert(result.condition), incr, body_block);
+                                    forloop.accept(new LocalDefineVisitor(index));
                                     block.append(forloop);
                                     index = result.end;
                                     continue;
                                 }
                                 ForLoop forloop = new ForLoop(init, ConditionSimplifier.invert(result.condition), null, body_block);
+                                forloop.accept(new LocalDefineVisitor(index));
                                 block.append(forloop);
                                 index = result.end;
                                 continue;
@@ -351,6 +381,7 @@ public class OpcodeDecompiler {
                         }
                     }
                     WhileLoop whileloop = new WhileLoop(ConditionSimplifier.invert(result.condition), body_block);
+                    whileloop.accept(new LocalDefineVisitor(index));
                     block.append(whileloop);
                     index = result.end;
                     continue;
@@ -360,6 +391,7 @@ public class OpcodeDecompiler {
                     StatementBlock body_block = buildBlock(StatementBlock.Type.WHILE, result.block_end, index - 1);
                     block.getStatements().removeAll(body_block.getStatements());
                     DoWhileLoop dowhile = new DoWhileLoop(ConditionSimplifier.invert(result.condition), body_block);
+                    dowhile.accept(new LocalDefineVisitor(index));
                     block.append(dowhile);
                     index = result.end;
                 } else {
@@ -391,12 +423,70 @@ public class OpcodeDecompiler {
                             throw new IllegalStateException();
                         }
                         Ternary ternary = new Ternary(result.condition, true_val, false_val);
+                        ternary.accept(new LocalDefineVisitor(index));
                         tmp_ternary = ternary;
                     } else {
+                        if_block.accept(new LocalDefineVisitor(index));
                         block.append(if_block);
                     }
                     index = result.block_end;
                 }
+            } else if (next instanceof TryStart) {
+                int try_start = index + 1;
+                int try_end = try_start;
+                int try_index = ((TryStart) next).getIndex();
+                for (; try_end < end; try_end++) {
+                    IntermediateOpcode trynext = this.intermediates.get(try_end);
+                    if (trynext instanceof TryEnd && ((TryEnd) trynext).getIndex() == try_index) {
+                        break;
+                    }
+                }
+                IntermediateOpcode last = this.intermediates.get(try_end - 1);
+                List<CatchBlock> catches = Lists.newArrayList();
+                int after_catch = try_end;
+                if (last instanceof IntermediateGoto) {
+                    try_end--;
+
+                    LabelNode after_catch_label = ((IntermediateGoto) last).getNode().label;
+                    after_catch = this.label_indices.get(after_catch_label.getLabel());
+                    int last_end = try_end + 2;
+                    for (int i = 0; i < this.trycatch_indices.length; i++) {
+                        if (this.trycatch_indices[i] == try_index) {
+                            int catch_begin = this.label_indices.get(this.trycatch_blocks[i].handler.getLabel());
+                            int catch_end = after_catch;
+                            Local exception_local = null;
+                            for (int o = last_end; o < after_catch; o++) {
+                                IntermediateOpcode op = this.intermediates.get(o);
+                                if (op instanceof CatchLocal) {
+                                    exception_local = ((CatchLocal) op).getLocal();
+                                } else if (op instanceof IntermediateGoto && ((IntermediateGoto) op).getNode().label == after_catch_label) {
+                                    catch_end = o;
+                                    break;
+                                }
+                            }
+                            last_end = catch_end + 1;
+                            StatementBlock catch_block = buildBlock(StatementBlock.Type.CATCH, catch_begin, catch_end);
+                            List<String> exceptions = Lists.newArrayList();
+                            exceptions.add("L" + this.trycatch_blocks[i].type + ";");
+                            for (int o = i + 1; o < this.trycatch_indices.length; o++) {
+                                if (this.trycatch_indices[o] == try_index && this.trycatch_blocks[o].handler == this.trycatch_blocks[i].handler) {
+                                    exceptions.add("L" + this.trycatch_blocks[o].type + ";");
+                                    i = o;
+                                }
+                            }
+                            catches.add(new CatchBlock(exception_local.getInstance(catch_end - 1), exceptions, catch_block));
+                        }
+                    }
+
+                }
+                StatementBlock try_body = buildBlock(StatementBlock.Type.TRY, try_start, try_end);
+                TryBlock try_block = new TryBlock(try_body);
+                for (CatchBlock c : catches) {
+                    try_block.getCatchBlocks().add(c);
+                }
+                try_block.accept(new LocalDefineVisitor(index));
+                block.append(try_block);
+                index = after_catch;
             }
         }
         return block;
@@ -678,6 +768,27 @@ public class OpcodeDecompiler {
         } else if (next instanceof LineNumberNode) {
         } else if (next instanceof LabelNode) {
             this.intermediates.add(new IntermediateLabel((LabelNode) next));
+            if (this.trycatch_blocks != null) {
+                for (int i = 0; i < this.trycatch_blocks.length; i++) {
+                    TryCatchBlockNode trycatch = this.trycatch_blocks[i];
+                    if (trycatch.start == next) {
+                        this.intermediates.add(new TryStart(this.trycatch_indices[i]));
+                        break;
+                    } else if (trycatch.end == next) {
+                        AbstractInsnNode after = this.instructions.get(this.instructions_index);
+                        if (after instanceof LineNumberNode) {
+                            this.instructions_index++;
+                            after = this.instructions.get(this.instructions_index);
+                        }
+                        if (after.getOpcode() == GOTO) {
+                            this.instructions_index++;
+                            this.intermediates.add(new IntermediateGoto((JumpInsnNode) after));
+                        }
+                        this.intermediates.add(new TryEnd(this.trycatch_indices[i]));
+                        break;
+                    }
+                }
+            }
         } else if (next instanceof FrameNode) {
             if (!this.stack.isEmpty()) {
                 this.intermediates.add(this.intermediates.size() - 1, new IntermediateStackValue(this.stack.pop()));
@@ -686,6 +797,20 @@ public class OpcodeDecompiler {
             }
             FrameNode frame = (FrameNode) next;
             if (frame.type == F_SAME1 && this.stack.isEmpty()) {
+                IntermediateOpcode last = this.intermediates.get(this.intermediates.size() - 1);
+                if (last instanceof IntermediateLabel) {
+                    for (int i = 0; i < this.trycatch_blocks.length; i++) {
+                        if (this.trycatch_blocks[i].handler == ((IntermediateLabel) last).getLabel()) {
+                            AbstractInsnNode after = this.instructions.get(this.instructions_index);
+                            if (after.getOpcode() == ASTORE) {
+                                this.intermediates.add(new CatchLocal(this.locals.getLocal(((VarInsnNode) after).var)));
+                                this.instructions_index++;
+                            }
+                            this.intermediates.add(new IntermediateFrame(frame));
+                            return;
+                        }
+                    }
+                }
                 this.stack.push(this.pop_list.get(this.pop_list.size() - 1));
             }
             this.intermediates.add(new IntermediateFrame(frame));
@@ -858,11 +983,7 @@ public class OpcodeDecompiler {
         OpHandler local_load = (state, next) -> {
             VarInsnNode var = (VarInsnNode) next;
             Local local = state.getLocal(var.var);
-            if (local.getName() == null) {
-                // if the local has no name defined we give it a simple name.
-                local.setName("local" + local.getIndex());
-            }
-            LocalArg arg = new LocalArg(local);
+            LocalArg arg = new LocalArg(new DummyLocalInstance(local));
             state.push(arg);
         };
         handlers[ILOAD] = local_load;
@@ -888,8 +1009,7 @@ public class OpcodeDecompiler {
             VarInsnNode var = (VarInsnNode) next;
             Instruction val = state.pop();
             Local local = state.getLocal(var.var);
-            local.set(val);
-            LocalAssign insn = new LocalAssign(local, val);
+            LocalAssign insn = new LocalAssign(new DummyLocalInstance(local), val);
             state.append(insn);
         };
         handlers[ISTORE] = local_store;
@@ -1028,7 +1148,8 @@ public class OpcodeDecompiler {
         handlers[LXOR] = new OperatorHandler(XorArg::new);
         handlers[IINC] = (state, next) -> {
             IincInsnNode inc = (IincInsnNode) next;
-            IncrementStatement insn = new IncrementStatement(state.getLocal(inc.var), inc.incr);
+            Local local = state.getLocal(inc.var);
+            IncrementStatement insn = new IncrementStatement(new DummyLocalInstance(local), inc.incr);
             state.append(insn);
         };
         // Casting
