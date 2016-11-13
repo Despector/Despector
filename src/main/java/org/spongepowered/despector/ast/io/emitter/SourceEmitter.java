@@ -914,7 +914,7 @@ public class SourceEmitter implements ClassEmitter {
             }
             if (cs.doesBreak()) {
                 printIndentation();
-                printString("break;\n");
+                printString("break;");
             }
             this.indentation--;
             printString("\n");
@@ -1071,8 +1071,12 @@ public class SourceEmitter implements ClassEmitter {
             if (name.startsWith("java.lang.")) {
                 name = name.substring("java.lang.".length());
             } else if (this.this$ != null) {
-                String this_package = this.this$.getName().substring(0, this.this$.getName().lastIndexOf('.'));
-                String target_package = name.substring(0, name.lastIndexOf('.'));
+                String this_package = "";
+                String target_package = name;
+                if (this.this$.getName().indexOf('.') != -1) {
+                    this_package = this.this$.getName().substring(0, this.this$.getName().lastIndexOf('.'));
+                    target_package = name.substring(0, name.lastIndexOf('.'));
+                }
                 if (this_package.equals(target_package)) {
                     name = name.substring(name.lastIndexOf('.') + 1);
                 } else if (checkImport(name)) {
