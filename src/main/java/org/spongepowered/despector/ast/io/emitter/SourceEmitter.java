@@ -101,8 +101,6 @@ import java.util.Set;
  */
 public class SourceEmitter implements ClassEmitter {
 
-    // TODO rewrite as Vistor pattern
-
     private static final String[] indentations = new String[] {"", "    ", "        ", "            ", "                ", "                    ",};
 
     private Writer output;
@@ -118,7 +116,7 @@ public class SourceEmitter implements ClassEmitter {
         this.output = output;
     }
 
-    // @Expansion: Should make this follow a configurable format (perhaps an
+    // TODO Should make this follow a configurable format (perhaps an
     // eclipse formatter export file)
 
     @Override
@@ -126,6 +124,9 @@ public class SourceEmitter implements ClassEmitter {
         this.buffer = new StringBuilder();
         this.imports = Sets.newHashSet();
         this.this$ = type;
+
+        // We set a buffer for this part and emit the entire class contents into
+        // that buffer so that we can collect required imports as we go.
 
         if (type instanceof ClassEntry) {
             emitClass((ClassEntry) type);
@@ -137,6 +138,11 @@ public class SourceEmitter implements ClassEmitter {
             throw new IllegalStateException();
         }
         printString("\n");
+
+        // Then once we have finished emitting the class contents we detach the
+        // buffer and then sort and emit the imports into the actual output and
+        // then finally replay the buffer into the output.
+
         List<String> sorted_imports = Lists.newArrayList(this.imports);
         Collections.sort(sorted_imports);
 
@@ -161,6 +167,7 @@ public class SourceEmitter implements ClassEmitter {
             printString("\n");
         }
 
+        // Replay the buffer.
         try {
             this.output.write(buf.toString());
         } catch (IOException e) {
@@ -209,6 +216,9 @@ public class SourceEmitter implements ClassEmitter {
             printString(" ");
         }
         printString("{\n\n");
+
+        // Ordering is static fields -> static methods -> instance fields ->
+        // instance methods
 
         this.indentation++;
         if (!type.getStaticFields().isEmpty()) {
@@ -300,6 +310,10 @@ public class SourceEmitter implements ClassEmitter {
 
         this.indentation++;
 
+        // we look through the class initializer to find the enum constant
+        // initializers so that we can emit those specially before the rest of
+        // the class contents.
+
         MethodEntry clinit = type.getStaticMethod("<clinit>");
         List<Statement> remaining = Lists.newArrayList();
         Set<String> found = Sets.newHashSet();
@@ -333,6 +347,7 @@ public class SourceEmitter implements ClassEmitter {
                     printString("),\n");
                 }
             }
+            // We store any remaining statements to be emitted later
             while (initializers.hasNext()) {
                 remaining.add(initializers.next());
             }
@@ -344,10 +359,13 @@ public class SourceEmitter implements ClassEmitter {
         if (!type.getStaticFields().isEmpty()) {
             boolean at_least_one = false;
             for (FieldEntry field : type.getStaticFields()) {
-                if (field.getName().equals("$VALUES")) {
+                if (field.isSynthetic()) {
+                    // Skip the values array.
                     continue;
                 }
                 if (found.contains(field.getName())) {
+                    // Skip the fields for any of the enum constants that we
+                    // found earlier.
                     continue;
                 }
                 printIndentation();
@@ -360,6 +378,8 @@ public class SourceEmitter implements ClassEmitter {
             }
         }
         if (!remaining.isEmpty()) {
+            // if we found any additional statements in the class initializer
+            // while looking for enum constants we emit them here
             printIndentation();
             printString("static {\n");
             this.indentation++;
@@ -375,6 +395,8 @@ public class SourceEmitter implements ClassEmitter {
         if (!type.getStaticMethods().isEmpty()) {
             for (MethodEntry mth : type.getStaticMethods()) {
                 if (mth.getName().equals("valueOf") || mth.getName().equals("values") || mth.getName().equals("<clinit>")) {
+                    // Can skip these boilerplate methods and the class
+                    // initializer
                     continue;
                 } else if (mth.isSynthetic()) {
                     continue;
@@ -398,6 +420,9 @@ public class SourceEmitter implements ClassEmitter {
                     continue;
                 }
                 if (mth.getName().equals("<init>") && mth.getInstructions().getStatements().size() == 1) {
+                    // If the initializer contains only one statement (which
+                    // will be the invoke of the super constructor) then we can
+                    // skip emitting it
                     continue;
                 }
                 printIndentation();
@@ -462,6 +487,8 @@ public class SourceEmitter implements ClassEmitter {
                 if (mth.isSynthetic()) {
                     continue;
                 }
+                // TODO need something for emitting 'default' for default
+                // methods
                 printIndentation();
                 emitMethod(mth);
                 printString("\n\n");
@@ -520,6 +547,8 @@ public class SourceEmitter implements ClassEmitter {
         }
         printString("(");
         StatementBlock block = method.getInstructions();
+        // If this is an enum type then we skip the first two ctor parameters
+        // (which are the index and name of the enum constant)
         int start = this.this$ instanceof EnumEntry ? 2 : 0;
         for (int i = start; i < method.getParamTypes().size(); i++) {
             emitType(method.getParamTypes().get(i));
@@ -715,6 +744,9 @@ public class SourceEmitter implements ClassEmitter {
                 InstanceFieldArg left_field = (InstanceFieldArg) left;
                 Instruction owner = left_field.getOwnerInsn();
                 if (owner instanceof LocalArg && ((LocalArg) owner).getLocal().getIndex() == 0) {
+                    // If the field assign is of the form 'field = field + x'
+                    // where + is any operator then we collapse it to the '+='
+                    // form of the assignment.
                     if (left_field.getFieldName().equals(insn.getFieldName())) {
                         printString(op);
                         if (insn.getTypeDescription().equals("Z")) {
@@ -760,6 +792,9 @@ public class SourceEmitter implements ClassEmitter {
                 printString("this(");
             } else {
                 if (insn.getParams().length == 0 || this.this$ instanceof EnumEntry) {
+                    // if we're calling a no-args constructor or this is an enum
+                    // type then we omit the super function call as it is
+                    // implicit.
                     return false;
                 }
                 printString("super(");
@@ -827,6 +862,9 @@ public class SourceEmitter implements ClassEmitter {
         } else {
             StatementBlock else_block = else_.getElseBody();
             if (else_block.getStatements().size() == 1 && else_block.getStatements().get(0) instanceof IfBlock) {
+                // if the only statement in the else block is another if
+                // statement then we have one of our bastardized elif statements
+                // until I bother to add better elif support in the ast.
                 printString("} else ");
                 emitIfBlock((IfBlock) else_block.getStatements().get(0));
                 return;
@@ -1090,6 +1128,8 @@ public class SourceEmitter implements ClassEmitter {
     }
 
     protected void emitIntConstant(int cst, String inferred_type) {
+        // Some basic constant replacement, TODO should probably make this
+        // better
         if (cst == Integer.MAX_VALUE) {
             printString("Integer.MAX_VALUE");
             return;
@@ -1124,9 +1164,14 @@ public class SourceEmitter implements ClassEmitter {
 
     protected void emitInstanceFunctionArg(InstanceFunctionArg arg) {
         if (arg.getOwner().equals("Ljava/lang/StringBuilder;") && arg.getMethodName().equals("toString")) {
+            // We detect and collapse string builder chains used to perform
+            // string concatentation into simple "foo" + "bar" form
             boolean valid = true;
             Instruction callee = arg.getCallee();
             List<Instruction> constants = Lists.newArrayList();
+            // We add all the constants to the front of this list as we have to
+            // replay them in the reverse of the ordering that we will encounter
+            // them in
             while (callee != null) {
                 if (callee instanceof InstanceFunctionArg) {
                     InstanceFunctionArg call = (InstanceFunctionArg) callee;
@@ -1211,6 +1256,7 @@ public class SourceEmitter implements ClassEmitter {
         String owner = TypeHelper.descToType(arg.getOwner());
         if (arg.getMethodName().startsWith("access$") && this.this$ != null) {
             // synthetic accessor
+            // we resolve these to the field that they are accessing directly
             TypeEntry owner_type = this.this$.getSource().get(owner);
             if (owner_type != null) {
                 MethodEntry accessor = owner_type.getStaticMethod(arg.getMethodName());
@@ -1373,6 +1419,8 @@ public class SourceEmitter implements ClassEmitter {
 
     protected void emitTernary(Ternary ternary, String inferred_type) {
         if ("Z".equals(inferred_type) && ternary.getTrueValue() instanceof IntConstantArg && ternary.getFalseValue() instanceof IntConstantArg) {
+            // if the ternary contains simple boolean constants on both sides
+            // then we can simplify it to simply be the condition
             IntConstantArg true_value = (IntConstantArg) ternary.getTrueValue();
             IntConstantArg false_value = (IntConstantArg) ternary.getFalseValue();
             if (true_value.getConstant() == 1 && false_value.getConstant() == 0) {

@@ -108,6 +108,7 @@ public class SingularClassLoader {
             f.setName(fn.name);
             f.setOwner(cn.name);
             f.setStatic((fn.access & ACC_STATIC) != 0);
+            f.setSynthetic((fn.access & ACC_SYNTHETIC) != 0);
             f.setType(fn.desc);
             entry.addField(f);
         }

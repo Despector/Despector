@@ -44,6 +44,7 @@ public class FieldEntry extends AstEntry {
 
     protected boolean is_final;
     protected boolean is_static;
+    protected boolean is_synthetic;
 
     public FieldEntry(SourceSet source) {
         super(source);
@@ -82,6 +83,14 @@ public class FieldEntry extends AstEntry {
 
     public void setStatic(boolean state) {
         this.is_static = state;
+    }
+
+    public boolean isSynthetic() {
+        return this.is_synthetic;
+    }
+
+    public void setSynthetic(boolean state) {
+        this.is_synthetic = state;
     }
 
     /**
