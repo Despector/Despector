@@ -34,17 +34,37 @@ import java.util.List;
 public class CatchBlock {
 
     private LocalInstance exception_local;
+    private String dummy_name;
     private List<String> exceptions;
     private StatementBlock block;
 
     public CatchBlock(LocalInstance exception_local, List<String> ex, StatementBlock block) {
         this.exception_local = exception_local;
+        this.dummy_name = null;
+        this.exceptions = ex;
+        this.block = block;
+    }
+
+    public CatchBlock(String dummy_name, List<String> ex, StatementBlock block) {
+        this.exception_local = null;
+        this.dummy_name = dummy_name;
         this.exceptions = ex;
         this.block = block;
     }
 
     public LocalInstance getExceptionLocal() {
         return this.exception_local;
+    }
+
+    public String getDummyName() {
+        if (this.exception_local != null) {
+            return this.exception_local.getName();
+        }
+        return this.dummy_name;
+    }
+
+    public void setDummyName(String name) {
+        this.dummy_name = name;
     }
 
     public List<String> getExceptions() {

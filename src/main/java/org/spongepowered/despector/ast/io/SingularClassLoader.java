@@ -124,6 +124,9 @@ public class SingularClassLoader {
             m.setSignature(mn.desc);
             m.setStatic((mn.access & ACC_STATIC) != 0);
             m.setSynthetic((mn.access & ACC_SYNTHETIC) != 0);
+            if(mn.name.contains("SWITCH_TABLE")) {
+                System.out.println();
+            }
             try {
                 StatementBlock insns = InstructionTreeBuilder.build(mn);
                 m.setInstructions(insns);

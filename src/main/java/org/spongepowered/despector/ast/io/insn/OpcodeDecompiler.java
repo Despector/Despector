@@ -466,12 +466,15 @@ public class OpcodeDecompiler {
                             }
                         }
                         if (catch_end == -1) {
-                            catch_end = exception_local.getInstance(catch_begin + 3).getEnd();
+                            if (exception_local == null) {
+                                catch_end = catch_begin;
+                            } else {
+                                catch_end = exception_local.getInstance(catch_begin + 3).getEnd();
+                            }
                             last_end = catch_end;
                         } else {
                             last_end = catch_end + 1;
                         }
-                        StatementBlock catch_block = buildBlock(StatementBlock.Type.CATCH, catch_begin, catch_end);
                         List<String> exceptions = Lists.newArrayList();
                         exceptions.add("L" + this.trycatch_blocks[i].type + ";");
                         for (int o = i + 1; o < this.trycatch_indices.length; o++) {
@@ -480,7 +483,12 @@ public class OpcodeDecompiler {
                                 i = o;
                             }
                         }
-                        catches.add(new CatchBlock(exception_local.getInstance(catch_end - 1), exceptions, catch_block));
+                        if (catch_end != catch_begin) {
+                            StatementBlock catch_block = buildBlock(StatementBlock.Type.CATCH, catch_begin, catch_end);
+                            catches.add(new CatchBlock(exception_local.getInstance(catch_end - 1), exceptions, catch_block));
+                        } else {
+                            catches.add(new CatchBlock(this.locals.getNonConflictingName("e", catch_begin), exceptions, new StatementBlock(StatementBlock.Type.CATCH, this.locals)));
+                        }
                     }
                 }
                 StatementBlock try_body = buildBlock(StatementBlock.Type.TRY, try_start, try_end);
@@ -803,7 +811,7 @@ public class OpcodeDecompiler {
                 intermediate_stack = false;
             }
             FrameNode frame = (FrameNode) next;
-            if (frame.type == F_SAME1 && this.stack.isEmpty()) {
+            if ((frame.type == F_SAME1 && this.stack.isEmpty()) || (frame.type == F_FULL && frame.stack.size() == this.stack.size() + 1)) {
                 IntermediateOpcode last = this.intermediates.get(this.intermediates.size() - 1);
                 if (last instanceof IntermediateLabel) {
                     for (int i = 0; i < this.trycatch_blocks.length; i++) {
@@ -811,6 +819,8 @@ public class OpcodeDecompiler {
                             AbstractInsnNode after = this.instructions.get(this.instructions_index);
                             if (after.getOpcode() == ASTORE) {
                                 this.intermediates.add(new CatchLocal(this.locals.getLocal(((VarInsnNode) after).var)));
+                                this.instructions_index++;
+                            } else if (after.getOpcode() == POP) {
                                 this.instructions_index++;
                             }
                             this.intermediates.add(new IntermediateFrame(frame));

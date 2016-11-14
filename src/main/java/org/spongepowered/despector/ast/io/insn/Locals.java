@@ -80,6 +80,25 @@ public class Locals {
         }
     }
 
+    public String getNonConflictingName(String name, int index) {
+        int i = 1;
+        while (true) {
+            boolean conflict = false;
+            for (Local local : this.locals) {
+                LocalInstance insn = local.getInstance(index);
+                if (insn != null && insn.getName().equals(name)) {
+                    conflict = true;
+                    break;
+                }
+            }
+            if (!conflict) {
+                break;
+            }
+            name = name + (i++);
+        }
+        return name;
+    }
+
     /**
      * A helper object for a specific local.
      */

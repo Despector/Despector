@@ -1035,8 +1035,12 @@ public class SourceEmitter implements ClassEmitter {
                 }
             }
             printString(" ");
-            printString(c.getExceptionLocal().getName());
-            this.defined_locals.add(c.getExceptionLocal());
+            if(c.getExceptionLocal() != null) {
+                printString(c.getExceptionLocal().getName());
+                this.defined_locals.add(c.getExceptionLocal());
+            } else {
+                printString(c.getDummyName());
+            }
             printString(") {\n");
             this.indentation++;
             emitBody(c.getBlock());

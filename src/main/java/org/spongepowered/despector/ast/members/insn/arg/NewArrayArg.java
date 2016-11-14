@@ -60,8 +60,10 @@ public class NewArrayArg implements Instruction {
     public void accept(InstructionVisitor visitor) {
         visitor.visitNewArrayArg(this);
         this.size.accept(visitor);
-        for (Instruction value : this.values) {
-            value.accept(visitor);
+        if (this.values != null) {
+            for (Instruction value : this.values) {
+                value.accept(visitor);
+            }
         }
     }
 
