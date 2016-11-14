@@ -40,7 +40,7 @@ public class BranchTest {
 
     @Test
     public void testSimpleIf() throws IOException {
-        String insn = TestHelper.getAsString(BranchTest.class, "mth_simpleif");
+        String insn = TestHelper.getAsString(getClass(), "mth_simpleif");
         String good = "if (a) {\n    System.out.println(a);\n}";
         assertEquals(good, insn);
     }
@@ -51,7 +51,7 @@ public class BranchTest {
 
     @Test
     public void testBasicTernary() throws IOException {
-        String insn = TestHelper.getAsString(BranchTest.class, "mth_basicternary");
+        String insn = TestHelper.getAsString(getClass(), "mth_basicternary");
         String good = "int r = a ? 6 : 3;";
         assertEquals(good, insn);
     }
@@ -62,7 +62,7 @@ public class BranchTest {
 
     @Test
     public void testMorecomplexternary() throws IOException {
-        String insn = TestHelper.getAsString(BranchTest.class, "mth_morecomplexternary");
+        String insn = TestHelper.getAsString(getClass(), "mth_morecomplexternary");
         String good = "int i = a || b ? 0 - j * 24 + Integer.MAX_VALUE : 1 + j;";
         assertEquals(good, insn);
     }
@@ -75,10 +75,10 @@ public class BranchTest {
 
     @Test
     public void testmth_if1() throws IOException {
-        String insn = TestHelper.getAsString(BranchTest.class, "mth_if1");
+        String insn = TestHelper.getAsString(getClass(), "mth_if1");
         String good = "if (i < 3 || o != null) {\n"
-                    + "    i++;\n"
-                    + "}";
+                + "    i++;\n"
+                + "}";
         assertEquals(good, insn);
     }
 
@@ -90,10 +90,10 @@ public class BranchTest {
 
     @Test
     public void testmth_if2() throws IOException {
-        String insn = TestHelper.getAsString(BranchTest.class, "mth_if2");
+        String insn = TestHelper.getAsString(getClass(), "mth_if2");
         String good = "if (a) {\n"
-                    + "    i += 5;\n"
-                    + "}";
+                + "    i += 5;\n"
+                + "}";
         assertEquals(good, insn);
     }
 
@@ -105,10 +105,10 @@ public class BranchTest {
 
     @Test
     public void testmth_if3() throws IOException {
-        String insn = TestHelper.getAsString(BranchTest.class, "mth_if3");
+        String insn = TestHelper.getAsString(getClass(), "mth_if3");
         String good = "if (a || b) {\n"
-                    + "    i += 5;\n"
-                    + "}";
+                + "    i += 5;\n"
+                + "}";
         assertEquals(good, insn);
     }
 
@@ -120,10 +120,10 @@ public class BranchTest {
 
     @Test
     public void testmth_if4() throws IOException {
-        String insn = TestHelper.getAsString(BranchTest.class, "mth_if4");
+        String insn = TestHelper.getAsString(getClass(), "mth_if4");
         String good = "if (a && b) {\n"
-                    + "    i += 5;\n"
-                    + "}";
+                + "    i += 5;\n"
+                + "}";
         assertEquals(good, insn);
     }
 
@@ -135,10 +135,10 @@ public class BranchTest {
 
     @Test
     public void testmth_if5() throws IOException {
-        String insn = TestHelper.getAsString(BranchTest.class, "mth_if5");
+        String insn = TestHelper.getAsString(getClass(), "mth_if5");
         String good = "if (a && b && c) {\n"
-                    + "    i += 5;\n"
-                    + "}";
+                + "    i += 5;\n"
+                + "}";
         assertEquals(good, insn);
     }
 
@@ -150,10 +150,10 @@ public class BranchTest {
 
     @Test
     public void testmth_if6() throws IOException {
-        String insn = TestHelper.getAsString(BranchTest.class, "mth_if6");
+        String insn = TestHelper.getAsString(getClass(), "mth_if6");
         String good = "if (a || b || c) {\n"
-                    + "    i += 5;\n"
-                    + "}";
+                + "    i += 5;\n"
+                + "}";
         assertEquals(good, insn);
     }
 
@@ -165,10 +165,10 @@ public class BranchTest {
 
     @Test
     public void testmth_if7() throws IOException {
-        String insn = TestHelper.getAsString(BranchTest.class, "mth_if7");
+        String insn = TestHelper.getAsString(getClass(), "mth_if7");
         String good = "if (a || b && c) {\n"
-                    + "    i += 5;\n"
-                    + "}";
+                + "    i += 5;\n"
+                + "}";
         assertEquals(good, insn);
     }
 
@@ -180,10 +180,10 @@ public class BranchTest {
 
     @Test
     public void testmth_if8() throws IOException {
-        String insn = TestHelper.getAsString(BranchTest.class, "mth_if8");
+        String insn = TestHelper.getAsString(getClass(), "mth_if8");
         String good = "if (a && b || c) {\n"
-                    + "    i += 5;\n"
-                    + "}";
+                + "    i += 5;\n"
+                + "}";
         assertEquals(good, insn);
     }
 
@@ -195,10 +195,10 @@ public class BranchTest {
 
     @Test
     public void testmth_if9() throws IOException {
-        String insn = TestHelper.getAsString(BranchTest.class, "mth_if9");
+        String insn = TestHelper.getAsString(getClass(), "mth_if9");
         String good = "if ((a || d) && (b || c)) {\n"
-                    + "    i += 5;\n"
-                    + "}";
+                + "    i += 5;\n"
+                + "}";
         assertEquals(good, insn);
     }
 
@@ -210,10 +210,10 @@ public class BranchTest {
 
     @Test
     public void testmth_if10() throws IOException {
-        String insn = TestHelper.getAsString(BranchTest.class, "mth_if10");
+        String insn = TestHelper.getAsString(getClass(), "mth_if10");
         String good = "if (a && d || b && c) {\n"
-                    + "    i += 5;\n"
-                    + "}";
+                + "    i += 5;\n"
+                + "}";
         assertEquals(good, insn);
     }
 
@@ -225,10 +225,10 @@ public class BranchTest {
 
     @Test
     public void testmth_if11() throws IOException {
-        String insn = TestHelper.getAsString(BranchTest.class, "mth_if11");
+        String insn = TestHelper.getAsString(getClass(), "mth_if11");
         String good = "if ((a || e) && d || b && c) {\n"
-                    + "    i += 5;\n"
-                    + "}";
+                + "    i += 5;\n"
+                + "}";
         assertEquals(good, insn);
     }
 
@@ -240,10 +240,10 @@ public class BranchTest {
 
     @Test
     public void testmth_if12() throws IOException {
-        String insn = TestHelper.getAsString(BranchTest.class, "mth_if12");
+        String insn = TestHelper.getAsString(getClass(), "mth_if12");
         String good = "if (a && (c || e) || b || d && f) {\n"
-                    + "    i += 5;\n"
-                    + "}";
+                + "    i += 5;\n"
+                + "}";
         assertEquals(good, insn);
     }
 
@@ -262,17 +262,17 @@ public class BranchTest {
 
     @Test
     public void testmth_if13() throws IOException {
-        String insn = TestHelper.getAsString(BranchTest.class, "mth_if13");
+        String insn = TestHelper.getAsString(getClass(), "mth_if13");
         String good = "if (a && (c || e)) {\n"
-                    + "    if (b || d && f) {\n"
-                    + "        System.out.println(e);\n"
-                    + "    } else {\n"
-                    + "        System.out.println(a);\n"
-                    + "    }\n"
-                    + "    System.out.println(c);\n"
-                    + "} else {\n"
-                    + "    System.out.println(d);\n"
-                    + "}";
+                + "    if (b || d && f) {\n"
+                + "        System.out.println(e);\n"
+                + "    } else {\n"
+                + "        System.out.println(a);\n"
+                + "    }\n"
+                + "    System.out.println(c);\n"
+                + "} else {\n"
+                + "    System.out.println(d);\n"
+                + "}";
         assertEquals(good, insn);
     }
 
@@ -290,16 +290,16 @@ public class BranchTest {
 
     @Test
     public void testmth_if15() throws IOException {
-        String insn = TestHelper.getAsString(BranchTest.class, "mth_if15");
+        String insn = TestHelper.getAsString(getClass(), "mth_if15");
         String good = "if (a && b) {\n"
-                    + "    System.out.println(a);\n"
-                    + "} else if (c && d) {\n"
-                    + "    System.out.println(b);\n"
-                    + "} else if (e ^ f) {\n"
-                    + "    System.out.println(c);\n"
-                    + "} else {\n"
-                    + "    System.out.println(f);\n"
-                    + "}";
+                + "    System.out.println(a);\n"
+                + "} else if (c && d) {\n"
+                + "    System.out.println(b);\n"
+                + "} else if (e ^ f) {\n"
+                + "    System.out.println(c);\n"
+                + "} else {\n"
+                + "    System.out.println(f);\n"
+                + "}";
         assertEquals(good, insn);
     }
 
@@ -311,10 +311,10 @@ public class BranchTest {
 
     @Test
     public void testmth_for() throws IOException {
-        String insn = TestHelper.getAsString(BranchTest.class, "mth_for");
+        String insn = TestHelper.getAsString(getClass(), "mth_for");
         String good = "for (i = 0; i < 5; i++) {\n"
-                    + "    System.out.println(c);\n"
-                    + "}";
+                + "    System.out.println(c);\n"
+                + "}";
         assertEquals(good, insn);
     }
 
@@ -326,10 +326,10 @@ public class BranchTest {
 
     @Test
     public void testmth_for2() throws IOException {
-        String insn = TestHelper.getAsString(BranchTest.class, "mth_for2");
+        String insn = TestHelper.getAsString(getClass(), "mth_for2");
         String good = "while (e && d) {\n"
-                    + "    System.out.println(f);\n"
-                    + "}";
+                + "    System.out.println(f);\n"
+                + "}";
         assertEquals(good, insn);
     }
 
@@ -341,10 +341,10 @@ public class BranchTest {
 
     @Test
     public void testmth_while() throws IOException {
-        String insn = TestHelper.getAsString(BranchTest.class, "mth_while");
+        String insn = TestHelper.getAsString(getClass(), "mth_while");
         String good = "while (a ^ d) {\n"
-                    + "    System.out.println(e);\n"
-                    + "}";
+                + "    System.out.println(e);\n"
+                + "}";
         assertEquals(good, insn);
     }
 
@@ -356,10 +356,10 @@ public class BranchTest {
 
     @Test
     public void testmth_dowhile() throws IOException {
-        String insn = TestHelper.getAsString(BranchTest.class, "mth_dowhile");
+        String insn = TestHelper.getAsString(getClass(), "mth_dowhile");
         String good = "do {\n"
-                    + "    System.out.println(d);\n"
-                    + "} while (d || e || f);";
+                + "    System.out.println(d);\n"
+                + "} while (d || e || f);";
         assertEquals(good, insn);
     }
 
@@ -378,124 +378,61 @@ public class BranchTest {
 
     public void mth_lookupswitch(int i, TestEnum ie, boolean a, boolean c, boolean d) {
         switch (ie) {
-        case ONE:
-            System.out.println(a);
-            break;
-        case EIGHT:
-            System.out.println(c);
-            break;
-        default:
-            System.out.println(d);
+            case ONE:
+                System.out.println(a);
+                break;
+            case EIGHT:
+                System.out.println(c);
+                break;
+            default:
+                System.out.println(d);
         }
     }
 
     @Test
     public void testmth_lookupswitch() throws IOException {
-        String insn = TestHelper.getAsString(BranchTest.class, "mth_lookupswitch");
+        String insn = TestHelper.getAsString(getClass(), "mth_lookupswitch");
         String good = "switch (ie) {\n"
-                    + "case ONE:\n"
-                    + "    System.out.println(a);\n"
-                    + "    break;\n"
-                    + "case EIGHT:\n"
-                    + "    System.out.println(c);\n"
-                    + "    break;\n"
-                    + "default:\n"
-                    + "    System.out.println(d);\n"
-                    + "}";
+                + "case ONE:\n"
+                + "    System.out.println(a);\n"
+                + "    break;\n"
+                + "case EIGHT:\n"
+                + "    System.out.println(c);\n"
+                + "    break;\n"
+                + "default:\n"
+                + "    System.out.println(d);\n"
+                + "}";
         assertEquals(good, insn);
     }
 
     public void mth_tableswitch(int i, TestEnum ie, boolean a, boolean c, boolean d) {
         switch (ie) {
-        case ONE:
-            System.out.println(a);
-            break;
-        case TWO:
-            System.out.println(c);
-            break;
-        default:
-            System.out.println(d);
+            case ONE:
+                System.out.println(a);
+                break;
+            case TWO:
+                System.out.println(c);
+                break;
+            default:
+                System.out.println(d);
         }
 
     }
 
     @Test
     public void testmth_tableswitch() throws IOException {
-        String insn = TestHelper.getAsString(BranchTest.class, "mth_tableswitch");
+        String insn = TestHelper.getAsString(getClass(), "mth_tableswitch");
         String good = "switch (ie) {\n"
-                    + "case ONE:\n"
-                    + "    System.out.println(a);\n"
-                    + "    break;\n"
-                    + "case TWO:\n"
-                    + "    System.out.println(c);\n"
-                    + "    break;\n"
-                    + "default:\n"
-                    + "    System.out.println(d);\n"
-                    + "}";
+                + "case ONE:\n"
+                + "    System.out.println(a);\n"
+                + "    break;\n"
+                + "case TWO:\n"
+                + "    System.out.println(c);\n"
+                + "    break;\n"
+                + "default:\n"
+                + "    System.out.println(d);\n"
+                + "}";
         assertEquals(good, insn);
     }
-
-    public void mth_trycatch(int i, Object o) {
-        try {
-            i = o.hashCode();
-        } catch (NullPointerException e) {
-            e.printStackTrace();
-        }
-    }
-
-    @Test
-    public void testmth_trycatch() throws IOException {
-        String insn = TestHelper.getAsString(BranchTest.class, "mth_trycatch");
-        String good = "try {\n"
-                    + "    i = o.hashCode();\n"
-                    + "} catch (NullPointerException e) {\n"
-                    + "    e.printStackTrace();\n"
-                    + "}";
-        assertEquals(good, insn);
-    }
-
-    public void mth_trycatch2(int i, Object o) {
-        try {
-            i = o.hashCode();
-        } catch (NullPointerException e) {
-            e.printStackTrace();
-        } catch (OutOfMemoryError e) {
-            e.printStackTrace();
-        }
-    }
-
-    @Test
-    public void testmth_trycatch2() throws IOException {
-        String insn = TestHelper.getAsString(BranchTest.class, "mth_trycatch2");
-        String good = "try {\n"
-                    + "    i = o.hashCode();\n"
-                    + "} catch (NullPointerException e) {\n"
-                    + "    e.printStackTrace();\n"
-                    + "} catch (OutOfMemoryError e) {\n"
-                    + "    e.printStackTrace();\n"
-                    + "}";
-        assertEquals(good, insn);
-    }
-
-    public void mth_trycatch3(int i, Object o) {
-        try {
-            i = o.hashCode();
-        } catch (NullPointerException | IllegalArgumentException e) {
-            e.printStackTrace();
-        }
-    }
-
-    @Test
-    public void testmth_trycatch3() throws IOException {
-        String insn = TestHelper.getAsString(BranchTest.class, "mth_trycatch3");
-        String good = "try {\n"
-                    + "    i = o.hashCode();\n"
-                    + "} catch (NullPointerException | IllegalArgumentException e) {\n"
-                    + "    e.printStackTrace();\n"
-                    + "}";
-        assertEquals(good, insn);
-    }
-    
-    
 
 }

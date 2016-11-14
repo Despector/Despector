@@ -444,41 +444,44 @@ public class OpcodeDecompiler {
                 }
                 IntermediateOpcode last = this.intermediates.get(try_end - 1);
                 List<CatchBlock> catches = Lists.newArrayList();
-                int after_catch = try_end;
+                LabelNode after_catch_label = null;
                 if (last instanceof IntermediateGoto) {
                     try_end--;
-
-                    LabelNode after_catch_label = ((IntermediateGoto) last).getNode().label;
-                    after_catch = this.label_indices.get(after_catch_label.getLabel());
-                    int last_end = try_end + 2;
-                    for (int i = 0; i < this.trycatch_indices.length; i++) {
-                        if (this.trycatch_indices[i] == try_index) {
-                            int catch_begin = this.label_indices.get(this.trycatch_blocks[i].handler.getLabel());
-                            int catch_end = after_catch;
-                            Local exception_local = null;
-                            for (int o = last_end; o < after_catch; o++) {
-                                IntermediateOpcode op = this.intermediates.get(o);
-                                if (op instanceof CatchLocal) {
-                                    exception_local = ((CatchLocal) op).getLocal();
-                                } else if (op instanceof IntermediateGoto && ((IntermediateGoto) op).getNode().label == after_catch_label) {
-                                    catch_end = o;
-                                    break;
-                                }
+                    after_catch_label = ((IntermediateGoto) last).getNode().label;
+                }
+                int last_end = try_end + 2;
+                for (int i = 0; i < this.trycatch_indices.length; i++) {
+                    if (this.trycatch_indices[i] == try_index) {
+                        int catch_begin = this.label_indices.get(this.trycatch_blocks[i].handler.getLabel());
+                        int catch_end = -1;
+                        Local exception_local = null;
+                        for (int o = last_end; o < end; o++) {
+                            IntermediateOpcode op = this.intermediates.get(o);
+                            if (op instanceof CatchLocal) {
+                                exception_local = ((CatchLocal) op).getLocal();
+                            } else if (after_catch_label != null && op instanceof IntermediateGoto
+                                    && ((IntermediateGoto) op).getNode().label == after_catch_label) {
+                                catch_end = o;
+                                break;
                             }
-                            last_end = catch_end + 1;
-                            StatementBlock catch_block = buildBlock(StatementBlock.Type.CATCH, catch_begin, catch_end);
-                            List<String> exceptions = Lists.newArrayList();
-                            exceptions.add("L" + this.trycatch_blocks[i].type + ";");
-                            for (int o = i + 1; o < this.trycatch_indices.length; o++) {
-                                if (this.trycatch_indices[o] == try_index && this.trycatch_blocks[o].handler == this.trycatch_blocks[i].handler) {
-                                    exceptions.add("L" + this.trycatch_blocks[o].type + ";");
-                                    i = o;
-                                }
-                            }
-                            catches.add(new CatchBlock(exception_local.getInstance(catch_end - 1), exceptions, catch_block));
                         }
+                        if (catch_end == -1) {
+                            catch_end = exception_local.getInstance(catch_begin + 3).getEnd();
+                            last_end = catch_end;
+                        } else {
+                            last_end = catch_end + 1;
+                        }
+                        StatementBlock catch_block = buildBlock(StatementBlock.Type.CATCH, catch_begin, catch_end);
+                        List<String> exceptions = Lists.newArrayList();
+                        exceptions.add("L" + this.trycatch_blocks[i].type + ";");
+                        for (int o = i + 1; o < this.trycatch_indices.length; o++) {
+                            if (this.trycatch_indices[o] == try_index && this.trycatch_blocks[o].handler == this.trycatch_blocks[i].handler) {
+                                exceptions.add("L" + this.trycatch_blocks[o].type + ";");
+                                i = o;
+                            }
+                        }
+                        catches.add(new CatchBlock(exception_local.getInstance(catch_end - 1), exceptions, catch_block));
                     }
-
                 }
                 StatementBlock try_body = buildBlock(StatementBlock.Type.TRY, try_start, try_end);
                 TryBlock try_block = new TryBlock(try_body);
@@ -487,7 +490,7 @@ public class OpcodeDecompiler {
                 }
                 try_block.accept(new LocalDefineVisitor(index));
                 block.append(try_block);
-                index = after_catch;
+                index = last_end;
             }
         }
         return block;
@@ -784,6 +787,9 @@ public class OpcodeDecompiler {
                         if (after.getOpcode() == GOTO) {
                             this.instructions_index++;
                             this.intermediates.add(new IntermediateGoto((JumpInsnNode) after));
+                        } else if (after.getOpcode() >= IRETURN && after.getOpcode() <= ARETURN) {
+                            this.instructions_index++;
+                            handleIntermediate(after);
                         }
                         this.intermediates.add(new TryEnd(this.trycatch_indices[i]));
                         break;

@@ -83,6 +83,7 @@ public class SingularClassLoader {
 
     @SuppressWarnings("unchecked")
     public TypeEntry load(ClassNode cn, SourceSet src) {
+        System.out.println("Decompiling class " + cn.name);
         int acc = cn.access;
         TypeEntry entry = null;
         if ((acc & ACC_ENUM) != 0) {

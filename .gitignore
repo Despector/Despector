@@ -39,3 +39,4 @@ target/
 test.sh
 /bin/
 /build/
+/run/

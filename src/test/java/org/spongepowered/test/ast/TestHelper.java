@@ -52,6 +52,7 @@ public class TestHelper {
             ClassNode cn = new ClassNode();
             cr.accept(cn, 0);
             type = SingularClassLoader.instance.load(cn, null);
+            cached_types.put(cls, type);
         }
         return type.getMethod(method_name).getInstructions();
     }
@@ -65,6 +66,7 @@ public class TestHelper {
             ClassNode cn = new ClassNode();
             cr.accept(cn, 0);
             type = SingularClassLoader.instance.load(cn, null);
+            cached_types.put(cls, type);
         }
         MethodEntry method = type.getMethod(method_name);
         StringWriter writer = new StringWriter();

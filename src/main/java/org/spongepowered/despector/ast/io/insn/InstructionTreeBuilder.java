@@ -47,7 +47,6 @@ public final class InstructionTreeBuilder {
             return null;
         }
         Locals locals = new Locals();
-        Set<String> names = Sets.newHashSet();
         for (LocalVariableNode node : (List<LocalVariableNode>) asm.localVariables) {
             Local local = locals.getLocal(node.index);
             local.addLVT(node);
