@@ -28,7 +28,6 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import org.spongepowered.despector.ast.AccessModifier;
-import org.spongepowered.despector.ast.io.insn.IntermediateOpcode.TryCatch;
 import org.spongepowered.despector.ast.io.insn.Locals.Local;
 import org.spongepowered.despector.ast.io.insn.Locals.LocalInstance;
 import org.spongepowered.despector.ast.members.FieldEntry;
@@ -196,7 +195,7 @@ public class SourceEmitter implements ClassEmitter {
 //            printString("abstract ");
 //        }
         printString("class ");
-        String name = type.getName();
+        String name = type.getName().replace('/', '.');
         if (name.indexOf('.') != -1) {
             name = name.substring(name.lastIndexOf('.') + 1, name.length());
         }
@@ -292,7 +291,7 @@ public class SourceEmitter implements ClassEmitter {
             printString("final ");
         }
         printString("enum ");
-        String name = type.getName();
+        String name = type.getName().replace('/', '.');
         if (name.indexOf('.') != -1) {
             name = name.substring(name.lastIndexOf('.') + 1, name.length());
         }
@@ -440,7 +439,7 @@ public class SourceEmitter implements ClassEmitter {
     }
 
     protected void emitInterface(InterfaceEntry type) {
-        String name = type.getName();
+        String name = type.getName().replace('/', '.');
         if (name.indexOf('.') != -1) {
             name = name.substring(name.lastIndexOf('.') + 1, name.length());
         }
@@ -521,6 +520,7 @@ public class SourceEmitter implements ClassEmitter {
             printString("static {\n");
             this.indentation++;
             emitBody(method.getInstructions());
+            printString("\n");
             this.indentation--;
             printIndentation();
             printString("}");
@@ -571,6 +571,7 @@ public class SourceEmitter implements ClassEmitter {
             printString(" {\n");
             this.indentation++;
             emitBody(block);
+            printString("\n");
             this.indentation--;
             printIndentation();
             printString("}");
@@ -1163,8 +1164,9 @@ public class SourceEmitter implements ClassEmitter {
             } else if (this.this$ != null) {
                 String this_package = "";
                 String target_package = name;
-                if (this.this$.getName().indexOf('.') != -1) {
-                    this_package = this.this$.getName().substring(0, this.this$.getName().lastIndexOf('.'));
+                String this$name = this.this$.getName().replace('/', '.');
+                if (this$name.indexOf('.') != -1) {
+                    this_package = this$name.substring(0, this$name.lastIndexOf('.'));
                     target_package = name.substring(0, name.lastIndexOf('.'));
                 }
                 if (this_package.equals(target_package)) {

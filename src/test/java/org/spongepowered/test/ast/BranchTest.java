@@ -45,28 +45,6 @@ public class BranchTest {
         assertEquals(good, insn);
     }
 
-    public void mth_basicternary(boolean a) {
-        int r = a ? 6 : 3;
-    }
-
-    @Test
-    public void testBasicTernary() throws IOException {
-        String insn = TestHelper.getAsString(getClass(), "mth_basicternary");
-        String good = "int r = a ? 6 : 3;";
-        assertEquals(good, insn);
-    }
-
-    public void mth_morecomplexternary(boolean a, boolean b, int j) {
-        int i = a || b ? 0 - j * 24 + Integer.MAX_VALUE : 1 + j;
-    }
-
-    @Test
-    public void testMorecomplexternary() throws IOException {
-        String insn = TestHelper.getAsString(getClass(), "mth_morecomplexternary");
-        String good = "int i = a || b ? 0 - j * 24 + Integer.MAX_VALUE : 1 + j;";
-        assertEquals(good, insn);
-    }
-
     public void mth_if1(Object o, int i) {
         if (i < 3 || o != null) {
             i++;

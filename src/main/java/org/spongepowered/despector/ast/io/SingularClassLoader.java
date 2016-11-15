@@ -38,6 +38,7 @@ import org.objectweb.asm.tree.FieldNode;
 import org.objectweb.asm.tree.MethodNode;
 import org.spongepowered.despector.ast.AccessModifier;
 import org.spongepowered.despector.ast.SourceSet;
+import org.spongepowered.despector.ast.io.emitter.SourceEmitter;
 import org.spongepowered.despector.ast.io.insn.InstructionTreeBuilder;
 import org.spongepowered.despector.ast.members.FieldEntry;
 import org.spongepowered.despector.ast.members.MethodEntry;
@@ -54,6 +55,7 @@ import org.spongepowered.despector.util.TypeHelper;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.nio.file.Path;
 import java.util.Iterator;
 import java.util.List;
@@ -61,6 +63,8 @@ import java.util.List;
 public class SingularClassLoader {
 
     public static final SingularClassLoader instance = new SingularClassLoader();
+
+    private static final boolean EMIT_SOURCE_ON_LOAD = true;
 
     private SingularClassLoader() {
     }
@@ -124,7 +128,7 @@ public class SingularClassLoader {
             m.setSignature(mn.desc);
             m.setStatic((mn.access & ACC_STATIC) != 0);
             m.setSynthetic((mn.access & ACC_SYNTHETIC) != 0);
-            if(mn.name.equals("mth_tableswitch")) {
+            if (mn.name.equals("mth_basicTernaryToField")) {
                 System.out.println();
             }
             try {
@@ -161,6 +165,12 @@ public class SingularClassLoader {
         }
         if (src != null) {
             src.add(entry);
+        }
+        if (EMIT_SOURCE_ON_LOAD) {
+            PrintWriter out = new PrintWriter(System.out);
+            SourceEmitter emitter = new SourceEmitter(out);
+            emitter.emitType(entry);
+            out.flush();
         }
         return entry;
 
