@@ -56,6 +56,7 @@ public class TableSwitch implements Statement {
     @Override
     public void accept(InstructionVisitor visitor) {
         visitor.visitSwitch(this);
+        this.variable.accept(visitor);
         for (Case cs : this.cases) {
             cs.accept(visitor);
         }

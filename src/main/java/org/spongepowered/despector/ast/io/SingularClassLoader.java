@@ -124,7 +124,7 @@ public class SingularClassLoader {
             m.setSignature(mn.desc);
             m.setStatic((mn.access & ACC_STATIC) != 0);
             m.setSynthetic((mn.access & ACC_SYNTHETIC) != 0);
-            if(mn.name.contains("SWITCH_TABLE")) {
+            if(mn.name.equals("mth_tableswitch")) {
                 System.out.println();
             }
             try {

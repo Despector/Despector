@@ -25,8 +25,10 @@
 package org.spongepowered.despector.ast.io.emitter;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import org.spongepowered.despector.ast.AccessModifier;
+import org.spongepowered.despector.ast.io.insn.IntermediateOpcode.TryCatch;
 import org.spongepowered.despector.ast.io.insn.Locals.Local;
 import org.spongepowered.despector.ast.io.insn.Locals.LocalInstance;
 import org.spongepowered.despector.ast.members.FieldEntry;
@@ -94,6 +96,7 @@ import java.io.Writer;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -647,7 +650,7 @@ public class SourceEmitter implements ClassEmitter {
             throw new IllegalStateException("Unknown statement: " + insn);
         }
         if (success && withSemicolon && !(insn instanceof ForLoop) && !(insn instanceof IfBlock) && !(insn instanceof WhileLoop)
-                && !(insn instanceof TryBlock)) {
+                && !(insn instanceof TryBlock) && !(insn instanceof TableSwitch)) {
             printString(";");
         }
         return success;
@@ -931,15 +934,60 @@ public class SourceEmitter implements ClassEmitter {
         printString(")");
     }
 
+    private Map<Integer, String> buildSwitchTable(MethodEntry mth) {
+        Map<Integer, String> table = Maps.newHashMap();
+
+        for (Statement stmt : mth.getInstructions().getStatements()) {
+            if (stmt instanceof TryBlock) {
+                TryBlock next = (TryBlock) stmt;
+                ArrayAssign assign = (ArrayAssign) next.getTryBlock().getStatements().get(0);
+                int jump_index = ((IntConstantArg) assign.getValue()).getConstant();
+                InstanceFunctionArg ordinal = (InstanceFunctionArg) assign.getIndex();
+                StaticFieldArg callee = (StaticFieldArg) ordinal.getCallee();
+                table.put(jump_index, callee.getFieldName());
+            }
+        }
+
+        return table;
+    }
+
     protected void emitTableSwitch(TableSwitch tswitch) {
+        Map<Integer, String> table = null;
         printString("switch (");
-        emitArg(tswitch.getSwitchVar(), "I");
+        boolean synthetic = false;
+        if (tswitch.getSwitchVar() instanceof ArrayLoadArg) {
+            ArrayLoadArg var = (ArrayLoadArg) tswitch.getSwitchVar();
+            if (var.getArrayVar() instanceof StaticFunctionArg) {
+                StaticFunctionArg arg = (StaticFunctionArg) var.getArrayVar();
+                if (arg.getMethodName().contains("$SWITCH_TABLE$") && this.this$ != null) {
+                    MethodEntry mth = this.this$.getStaticMethod(arg.getMethodName(), arg.getMethodDescription());
+                    table = buildSwitchTable(mth);
+                    String enum_type = arg.getMethodName().substring("$SWITCH_TABLE$".length()).replace('$', '/');
+                    emitArg(((InstanceFunctionArg) var.getIndex()).getCallee(), "L" + enum_type + ";");
+                    synthetic = true;
+                }
+            }
+        }
+        if (!synthetic) {
+            emitArg(tswitch.getSwitchVar(), "I");
+        }
         printString(") {\n");
         for (Case cs : tswitch.getCases()) {
             for (int i = 0; i < cs.getIndices().size(); i++) {
                 printIndentation();
                 printString("case ");
-                printString(cs.getIndices().get(i) + ":\n");
+                int index = cs.getIndices().get(i);
+                if (table != null) {
+                    String label = table.get(index);
+                    if (label == null) {
+                        printString(String.valueOf(index));
+                    } else {
+                        printString(label);
+                    }
+                } else {
+                    printString(String.valueOf(cs.getIndices().get(i)));
+                }
+                printString(":\n");
             }
             if (cs.isDefault()) {
                 printIndentation();
@@ -953,9 +1001,9 @@ public class SourceEmitter implements ClassEmitter {
             if (cs.doesBreak()) {
                 printIndentation();
                 printString("break;");
+                printString("\n");
             }
             this.indentation--;
-            printString("\n");
         }
         printIndentation();
         printString("}");
@@ -1035,7 +1083,7 @@ public class SourceEmitter implements ClassEmitter {
                 }
             }
             printString(" ");
-            if(c.getExceptionLocal() != null) {
+            if (c.getExceptionLocal() != null) {
                 printString(c.getExceptionLocal().getName());
                 this.defined_locals.add(c.getExceptionLocal());
             } else {

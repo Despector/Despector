@@ -24,7 +24,6 @@
  */
 package org.spongepowered.despector.ast.io.insn;
 
-import com.google.common.collect.Sets;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.LocalVariableNode;
 import org.objectweb.asm.tree.MethodNode;
@@ -34,7 +33,6 @@ import org.spongepowered.despector.ast.members.insn.StatementBlock;
 import org.spongepowered.despector.util.TypeHelper;
 
 import java.util.List;
-import java.util.Set;
 
 /**
  * A builder for creating the AST from an instruction list.
