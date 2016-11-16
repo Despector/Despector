@@ -56,7 +56,7 @@ public class LocalArg implements Instruction {
 
     @Override
     public String toString() {
-        return this.local.getName();
+        return this.local.toString();
     }
 
 }

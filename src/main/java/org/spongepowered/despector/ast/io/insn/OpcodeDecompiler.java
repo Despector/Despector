@@ -487,7 +487,8 @@ public class OpcodeDecompiler {
                             StatementBlock catch_block = buildBlock(StatementBlock.Type.CATCH, catch_begin, catch_end);
                             catches.add(new CatchBlock(exception_local.getInstance(catch_end - 1), exceptions, catch_block));
                         } else {
-                            catches.add(new CatchBlock(this.locals.getNonConflictingName("e", catch_begin), exceptions, new StatementBlock(StatementBlock.Type.CATCH, this.locals)));
+                            catches.add(new CatchBlock(this.locals.getNonConflictingName("e", catch_begin), exceptions,
+                                    new StatementBlock(StatementBlock.Type.CATCH, this.locals)));
                         }
                     }
                 }
@@ -754,13 +755,13 @@ public class OpcodeDecompiler {
     }
 
     private static boolean intermediate_stack = false;
+    private static boolean expecting_intermediate_stack = false;
 
     private void handleIntermediate(AbstractInsnNode next) {
         if (next instanceof JumpInsnNode) {
             if (next.getOpcode() == GOTO) {
                 if (!this.stack.isEmpty()) {
-                    intermediate_stack = true;
-                    this.intermediates.add(new IntermediateStackValue(this.stack.pop()));
+                    expecting_intermediate_stack = true;
                 }
                 this.intermediates.add(new IntermediateGoto((JumpInsnNode) next));
             } else if (next.getOpcode() == IF_ACMPEQ || next.getOpcode() == IF_ACMPNE || next.getOpcode() == IF_ICMPEQ
@@ -805,11 +806,6 @@ public class OpcodeDecompiler {
                 }
             }
         } else if (next instanceof FrameNode) {
-            if (!this.stack.isEmpty()) {
-                this.intermediates.add(this.intermediates.size() - 1, new IntermediateStackValue(this.stack.pop()));
-                this.stack.push(new DummyInstruction());
-                intermediate_stack = false;
-            }
             FrameNode frame = (FrameNode) next;
             if ((frame.type == F_SAME1 && this.stack.isEmpty()) || (frame.type == F_FULL && frame.stack.size() == this.stack.size() + 1)) {
                 IntermediateOpcode last = this.intermediates.get(this.intermediates.size() - 1);
@@ -829,6 +825,19 @@ public class OpcodeDecompiler {
                     }
                 }
                 this.stack.push(this.pop_list.get(this.pop_list.size() - 1));
+            } else if ((frame.type == F_SAME1 && this.stack.size() == 1) || (frame.type == F_FULL && frame.stack.size() == this.stack.size())) {
+                if (intermediate_stack && !this.stack.isEmpty()) {
+                    this.intermediates.add(this.intermediates.size() - 1, new IntermediateStackValue(this.stack.pop()));
+                    this.stack.push(new DummyInstruction());
+                    intermediate_stack = false;
+                }
+            } else if ((frame.type == F_SAME && this.stack.size() == 1) || (frame.type == F_FULL && frame.stack.size() == this.stack.size() - 1)
+                    || (frame.type == F_SAME1 && this.stack.size() == 2)) {
+                if (expecting_intermediate_stack && !this.stack.isEmpty()) {
+                    this.intermediates.add(this.intermediates.size() - 2, new IntermediateStackValue(this.stack.pop()));
+                    expecting_intermediate_stack = false;
+                    intermediate_stack = true;
+                }
             }
             this.intermediates.add(new IntermediateFrame(frame));
         } else {
@@ -854,10 +863,15 @@ public class OpcodeDecompiler {
             this.instructions.add(next);
         }
         intermediate_stack = false;
+        expecting_intermediate_stack = false;
         for (this.instructions_index = 0; this.instructions_index < this.instructions.size();) {
             AbstractInsnNode next = this.instructions.get(this.instructions_index++);
             System.out.println(AstUtil.insnToString(next));
             handleIntermediate(next);
+        }
+        System.out.println("Intermediates:");
+        for (IntermediateOpcode op : this.intermediates) {
+            System.out.println(op.toString());
         }
     }
 

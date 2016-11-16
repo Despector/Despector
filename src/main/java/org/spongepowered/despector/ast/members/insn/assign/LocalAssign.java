@@ -53,7 +53,7 @@ public class LocalAssign extends Assignment {
 
     @Override
     public String toString() {
-        return this.local.getName() + " = " + this.val.toString() + ";";
+        return this.local.toString() + " = " + this.val.toString() + ";";
     }
 
 }

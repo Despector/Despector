@@ -27,7 +27,6 @@ package org.spongepowered.despector.ast.io.insn;
 import com.google.common.collect.Lists;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.tree.LocalVariableNode;
-import org.spongepowered.despector.ast.members.insn.arg.Instruction;
 import org.spongepowered.despector.util.TypeHelper;
 
 import java.util.Arrays;
@@ -167,6 +166,11 @@ public class Locals {
             this.parameter_instance = insn;
         }
 
+        @Override
+        public String toString() {
+            return "Local " + this.index;
+        }
+
     }
 
     public static class DummyLocalInstance extends LocalInstance {
@@ -182,7 +186,6 @@ public class Locals {
         private final Local local;
         private String name;
         private String type;
-        private Instruction value;
         private int start;
         private int end;
         private String[] generics = null;
@@ -237,6 +240,11 @@ public class Locals {
 
         public void setGenericTypes(String[] generic_types) {
             this.generics = generic_types;
+        }
+
+        @Override
+        public String toString() {
+            return this.name != null ? this.name : this.local.toString();
         }
 
     }

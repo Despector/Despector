@@ -115,7 +115,7 @@ public interface IntermediateOpcode {
 
         @Override
         public String toString() {
-            return AstUtil.insnToString(this.jump) + " on " + this.variable.toString();
+            return AstUtil.insnToString(this.jump) + " switch on " + this.variable.toString();
         }
 
     }
@@ -157,7 +157,7 @@ public interface IntermediateOpcode {
 
         @Override
         public String toString() {
-            return AstUtil.insnToString(this.jump) + " on " + this.variable.toString();
+            return AstUtil.insnToString(this.jump) + " switch on " + this.variable.toString();
         }
 
     }
@@ -234,7 +234,7 @@ public interface IntermediateOpcode {
 
         @Override
         public String toString() {
-            return this.statement.toString();
+            return "IntermediateStatement: " + this.statement.toString();
         }
 
     }
@@ -290,15 +290,14 @@ public interface IntermediateOpcode {
         }
 
         @Override
-        public String toString() {
-            return this.val.toString();
-        }
-
-        @Override
         public void accept(InstructionVisitor visitor) {
             this.val.accept(visitor);
         }
 
+        @Override
+        public String toString() {
+            return "IntermediateStackValue: " + this.val.toString();
+        }
     }
 
     public static class DummyInstruction implements Instruction {
@@ -313,6 +312,11 @@ public interface IntermediateOpcode {
 
         @Override
         public void accept(InstructionVisitor visitor) {
+        }
+
+        @Override
+        public String toString() {
+            return "DummyInstruction";
         }
 
     }
@@ -337,12 +341,22 @@ public interface IntermediateOpcode {
             super(index);
         }
 
+        @Override
+        public String toString() {
+            return "TryStart";
+        }
+
     }
 
     public static class TryEnd extends TryCatch {
 
         public TryEnd(int index) {
             super(index);
+        }
+
+        @Override
+        public String toString() {
+            return "TryEnd";
         }
 
     }
@@ -357,6 +371,11 @@ public interface IntermediateOpcode {
 
         public Local getLocal() {
             return this.local;
+        }
+
+        @Override
+        public String toString() {
+            return "CatchLocal " + this.local;
         }
 
     }
