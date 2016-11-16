@@ -29,6 +29,7 @@ import org.objectweb.asm.tree.LocalVariableNode;
 import org.objectweb.asm.tree.MethodNode;
 import org.spongepowered.despector.ast.io.insn.Locals.Local;
 import org.spongepowered.despector.ast.io.insn.Locals.LocalInstance;
+import org.spongepowered.despector.ast.members.MethodEntry;
 import org.spongepowered.despector.ast.members.insn.StatementBlock;
 import org.spongepowered.despector.util.TypeHelper;
 
@@ -40,7 +41,7 @@ import java.util.List;
 public final class InstructionTreeBuilder {
 
     @SuppressWarnings("unchecked")
-    public static StatementBlock build(MethodNode asm) {
+    public static StatementBlock build(MethodEntry entry, MethodNode asm) {
         if (asm.instructions.size() == 0) {
             return null;
         }
@@ -49,12 +50,21 @@ public final class InstructionTreeBuilder {
             Local local = locals.getLocal(node.index);
             local.addLVT(node);
         }
-        int offs = ((asm.access & Opcodes.ACC_STATIC) != 0) ? 1 : 0;
-        for (int i = 0; i <= TypeHelper.paramCount(asm.desc) - offs; i++) {
+        int offs = ((asm.access & Opcodes.ACC_STATIC) != 0) ? 0 : 1;
+        String[] param_types = TypeHelper.splitSig(asm.desc);
+        for (int i = 0; i < param_types.length + offs; i++) {
             Local local = locals.getLocal(i);
             local.setAsParameter();
-            LocalVariableNode lvt = local.getLVT().get(0);
-            local.setParameterInstance(new LocalInstance(local, lvt.name, lvt.desc, -1, -1));
+            if (local.getLVT().isEmpty()) {
+                if (i < offs) {
+                    local.setParameterInstance(new LocalInstance(local, "this", entry.getOwner(), -1, -1));
+                } else {
+                    local.setParameterInstance(new LocalInstance(local, "param" + i, param_types[i - offs], -1, -1));
+                }
+            } else {
+                LocalVariableNode lvt = local.getLVT().get(0);
+                local.setParameterInstance(new LocalInstance(local, lvt.name, lvt.desc, -1, -1));
+            }
         }
         DecompilerOptions options = new DecompilerOptions();
         return new OpcodeDecompiler(options).decompile(asm.instructions, locals, asm.tryCatchBlocks);

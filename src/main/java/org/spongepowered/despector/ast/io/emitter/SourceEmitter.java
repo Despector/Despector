@@ -35,6 +35,7 @@ import org.spongepowered.despector.ast.members.MethodEntry;
 import org.spongepowered.despector.ast.members.insn.Statement;
 import org.spongepowered.despector.ast.members.insn.StatementBlock;
 import org.spongepowered.despector.ast.members.insn.arg.CastArg;
+import org.spongepowered.despector.ast.members.insn.arg.CompareArg;
 import org.spongepowered.despector.ast.members.insn.arg.InstanceFunctionArg;
 import org.spongepowered.despector.ast.members.insn.arg.Instruction;
 import org.spongepowered.despector.ast.members.insn.arg.NewArrayArg;
@@ -321,6 +322,7 @@ public class SourceEmitter implements ClassEmitter {
         Set<String> found = Sets.newHashSet();
         if (clinit != null) {
             Iterator<Statement> initializers = clinit.getInstructions().getStatements().iterator();
+            boolean first = true;
             while (initializers.hasNext()) {
                 Statement next = initializers.next();
                 if (!(next instanceof StaticFieldAssign)) {
@@ -331,13 +333,14 @@ public class SourceEmitter implements ClassEmitter {
                     remaining.add(assign);
                     break;
                 }
+                if(!first) {
+                    printString(",\n");
+                }
                 NewRefArg val = (NewRefArg) assign.getValue();
                 printIndentation();
                 printString(assign.getFieldName());
                 found.add(assign.getFieldName());
-                if (val.getParams().length == 2) {
-                    printString(",\n");
-                } else {
+                if (val.getParams().length != 2) {
                     printString("(");
                     // TODO ctor params
                     for (int i = 2; i < val.getParams().length; i++) {
@@ -346,8 +349,12 @@ public class SourceEmitter implements ClassEmitter {
                             printString(", ");
                         }
                     }
-                    printString("),\n");
+                    printString(")");
                 }
+                first = false;
+            }
+            if(!first) {
+                printString(";\n");
             }
             // We store any remaining statements to be emitted later
             while (initializers.hasNext()) {
@@ -421,9 +428,9 @@ public class SourceEmitter implements ClassEmitter {
                 if (mth.isSynthetic()) {
                     continue;
                 }
-                if (mth.getName().equals("<init>") && mth.getInstructions().getStatements().size() == 1) {
-                    // If the initializer contains only one statement (which
-                    // will be the invoke of the super constructor) then we can
+                if (mth.getName().equals("<init>") && mth.getInstructions().getStatements().size() == 2) {
+                    // If the initializer contains only two statement (which
+                    // will be the invoke of the super constructor and the void return) then we can
                     // skip emitting it
                     continue;
                 }
@@ -1140,6 +1147,14 @@ public class SourceEmitter implements ClassEmitter {
             printString(".class");
         } else if (arg instanceof Ternary) {
             emitTernary((Ternary) arg, inferred_type);
+        } else if (arg instanceof CompareArg) {
+            // A fallback, compare args should be optimized out of conditions
+            // where they commonly appear
+            printString("Integer.signum(");
+            emitArg(((CompareArg) arg).getRight(), arg.inferType());
+            printString(" - ");
+            emitArg(((CompareArg) arg).getLeft(), arg.inferType());
+            printString(")");
         } else {
             throw new IllegalStateException("Unknown arg type " + arg.getClass().getName() + " : " + arg.toString());
         }

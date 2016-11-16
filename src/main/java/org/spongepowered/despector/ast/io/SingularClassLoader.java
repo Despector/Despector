@@ -128,11 +128,11 @@ public class SingularClassLoader {
             m.setSignature(mn.desc);
             m.setStatic((mn.access & ACC_STATIC) != 0);
             m.setSynthetic((mn.access & ACC_SYNTHETIC) != 0);
-            if (mn.name.equals("mth_basicTernaryToField")) {
+            if (cn.name.endsWith("EnumOffsetType") && mn.name.equals("<init>")) {
                 System.out.println();
             }
             try {
-                StatementBlock insns = InstructionTreeBuilder.build(mn);
+                StatementBlock insns = InstructionTreeBuilder.build(m, mn);
                 m.setInstructions(insns);
             } catch (Exception ex) {
                 System.err.println("Error decompiling method body for " + cn.name + " " + m.toString());

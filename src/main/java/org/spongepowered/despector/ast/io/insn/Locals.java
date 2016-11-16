@@ -66,8 +66,8 @@ public class Locals {
         if (i >= this.locals.length) {
             int old = this.locals.length;
             this.locals = Arrays.copyOf(this.locals, i + 1);
-            for (int o = old; o < i + 1; o++) {
-                this.locals[o] = new Local(o, null);
+            for (int o = old; o <= i; o++) {
+                this.locals[o] = new Local(o);
             }
         }
         return this.locals[i];
@@ -106,10 +106,10 @@ public class Locals {
         private final int index;
         private boolean parameter = false;
         private LocalInstance parameter_instance = null;
-        private List<LocalVariableNode> lvt = Lists.newArrayList();
-        private List<LocalInstance> instances = Lists.newArrayList();
+        private final List<LocalVariableNode> lvt = Lists.newArrayList();
+        private final List<LocalInstance> instances = Lists.newArrayList();
 
-        public Local(int i, String type) {
+        public Local(int i) {
             this.index = i;
         }
 
