@@ -1,5 +1,5 @@
 /*
- * The MIT License (MIT)
+ * This file is part of SpongeAPI, licensed under the MIT License (MIT).
  *
  * Copyright (c) SpongePowered <https://www.spongepowered.org>
  * Copyright (c) contributors
@@ -22,35 +22,42 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.test.ast;
+package org.spongepowered.despector.ast.members.insn.arg;
 
-import static org.junit.Assert.assertEquals;
+import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
 
-import org.junit.Test;
+public class CompareArg implements Instruction {
 
-import java.io.IOException;
+    protected final Instruction left;
+    protected final Instruction right;
 
-@SuppressWarnings("unused")
-public class OperatorsTest {
-
-    private void mth_intconstant() {
-        int i = 65;
+    public CompareArg(Instruction left, Instruction right) {
+        this.left = left;
+        this.right = right;
     }
 
-    @Test
-    public void testIntConstant() throws IOException {
-        String mth = TestHelper.getAsString(getClass(), "mth_intconstant");
-        assertEquals("int i = 65;", mth);
+    public Instruction getLeft() {
+        return this.left;
     }
 
-    private void mth_neg(int a, int b) {
-        int i = -(a + b);
+    public Instruction getRight() {
+        return this.right;
     }
 
-    @Test
-    public void testmth_neg() throws IOException {
-        String mth = TestHelper.getAsString(getClass(), "mth_neg");
-        assertEquals("int i = -(a + b);", mth);
+    @Override
+    public void accept(InstructionVisitor visitor) {
+        visitor.visitCompareArg(this);
+        this.left.accept(visitor);
+        this.right.accept(visitor);
     }
 
+    @Override
+    public String inferType() {
+        return this.left.inferType();
+    }
+
+    @Override
+    public String toString() {
+        return "Integer.signum(" + this.right.toString() + " - " + this.left.toString() + ");";
+    }
 }

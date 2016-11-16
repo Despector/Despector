@@ -25,6 +25,7 @@
 package org.spongepowered.despector.ast.members.insn;
 
 import org.spongepowered.despector.ast.members.insn.arg.CastArg;
+import org.spongepowered.despector.ast.members.insn.arg.CompareArg;
 import org.spongepowered.despector.ast.members.insn.arg.InstanceFunctionArg;
 import org.spongepowered.despector.ast.members.insn.arg.InstanceOfArg;
 import org.spongepowered.despector.ast.members.insn.arg.NewArrayArg;
@@ -244,6 +245,9 @@ public abstract class InstructionVisitor {
     }
 
     public void visitCatchBlock(CatchBlock catchBlock) {
+    }
+
+    public void visitCompareArg(CompareArg compareArg) {
     }
 
 }

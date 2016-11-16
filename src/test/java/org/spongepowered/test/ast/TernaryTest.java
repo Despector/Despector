@@ -30,6 +30,7 @@ import org.junit.Test;
 
 import java.io.IOException;
 
+@SuppressWarnings("unused")
 public class TernaryTest {
 
     public void mth_basicTernary(boolean a) {

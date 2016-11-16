@@ -30,6 +30,7 @@ import org.junit.Test;
 
 import java.io.IOException;
 
+@SuppressWarnings("unused")
 public class BranchTest {
 
     private void mth_simpleif(boolean a) {

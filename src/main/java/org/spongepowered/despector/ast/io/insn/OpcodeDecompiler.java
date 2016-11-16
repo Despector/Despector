@@ -69,6 +69,7 @@ import org.spongepowered.despector.ast.io.insn.Locals.Local;
 import org.spongepowered.despector.ast.members.insn.Statement;
 import org.spongepowered.despector.ast.members.insn.StatementBlock;
 import org.spongepowered.despector.ast.members.insn.arg.CastArg;
+import org.spongepowered.despector.ast.members.insn.arg.CompareArg;
 import org.spongepowered.despector.ast.members.insn.arg.InstanceFunctionArg;
 import org.spongepowered.despector.ast.members.insn.arg.InstanceOfArg;
 import org.spongepowered.despector.ast.members.insn.arg.Instruction;
@@ -866,13 +867,13 @@ public class OpcodeDecompiler {
         expecting_intermediate_stack = false;
         for (this.instructions_index = 0; this.instructions_index < this.instructions.size();) {
             AbstractInsnNode next = this.instructions.get(this.instructions_index++);
-            System.out.println(AstUtil.insnToString(next));
+//            System.out.println(AstUtil.insnToString(next));
             handleIntermediate(next);
         }
-        System.out.println("Intermediates:");
-        for (IntermediateOpcode op : this.intermediates) {
-            System.out.println(op.toString());
-        }
+//        System.out.println("Intermediates:");
+//        for (IntermediateOpcode op : this.intermediates) {
+//            System.out.println(op.toString());
+//        }
     }
 
     private Map<Label, Integer> calcLabelIndices() {
@@ -1206,12 +1207,17 @@ public class OpcodeDecompiler {
         handlers[I2B] = new CastHandler("B");
         handlers[I2C] = new CastHandler("C");
         handlers[I2S] = new CastHandler("S");
+        OpHandler compare = (state, next)-> {
+            Instruction right = state.pop();
+            Instruction left = state.pop();
+            state.push(new CompareArg(left, right));
+        };
+        handlers[LCMP] = compare;
+        handlers[FCMPL] = compare;
+        handlers[FCMPG] = compare;
+        handlers[DCMPL] = compare;
+        handlers[DCMPG] = compare;
         // Jumping
-        handlers[LCMP] = null; // TODO LCMP
-        handlers[FCMPL] = null; // TODO FCMPL
-        handlers[FCMPG] = null; // TODO FCMPG
-        handlers[DCMPL] = null; // TODO DCMPL
-        handlers[DCMPG] = null; // TODO DCMPG
         handlers[IFEQ] = null; // handled in the post process
         handlers[IFNE] = null; // --
         handlers[IFGE] = null; // --
