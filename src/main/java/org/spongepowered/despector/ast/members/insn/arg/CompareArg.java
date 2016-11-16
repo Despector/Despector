@@ -1,5 +1,5 @@
 /*
- * This file is part of SpongeAPI, licensed under the MIT License (MIT).
+ * The MIT License (MIT)
  *
  * Copyright (c) SpongePowered <https://www.spongepowered.org>
  * Copyright (c) contributors
