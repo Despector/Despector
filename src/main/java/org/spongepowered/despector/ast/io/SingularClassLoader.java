@@ -128,7 +128,7 @@ public class SingularClassLoader {
             m.setSignature(mn.desc);
             m.setStatic((mn.access & ACC_STATIC) != 0);
             m.setSynthetic((mn.access & ACC_SYNTHETIC) != 0);
-            if (cn.name.endsWith("Block") && mn.name.equals("dropBlockAsItemWithChance")) {
+            if (cn.name.endsWith("Block") && mn.name.equals("dropXpOnBlockBreak")) {
                 System.out.println();
             }
             try {

@@ -398,9 +398,9 @@ public class OpcodeDecompiler {
                     index = result.end;
                 } else {
                     IntermediateOpcode last = this.intermediates.get(result.block_end - 1);
-                    if(last instanceof IntermediateGoto) {
+                    if (last instanceof IntermediateGoto) {
                         int last_target = this.label_indices.get(((IntermediateGoto) last).getNode().label.getLabel());
-                        if(last_target < result.end) {
+                        if (last_target < result.end) {
                             StatementBlock body_block = buildBlock(StatementBlock.Type.WHILE, result.end, result.block_end - 1);
                             if (!block.getStatements().isEmpty()) {
                                 Statement init = block.getStatements().get(block.getStatements().size() - 1);
@@ -542,7 +542,7 @@ public class OpcodeDecompiler {
                 index = last_end;
             }
         }
-        if(tmp_ternary != null) {
+        if (tmp_ternary != null) {
             block.append(new IntermediateStackValue(tmp_ternary));
         }
         return block;
@@ -575,11 +575,24 @@ public class OpcodeDecompiler {
         Set<LabelNode> seen_labels = Sets.newHashSet();
         List<IntermediateOpcode> group = Lists.newArrayList();
         int farthest = 0;
-        for (int i = condition_start; i < condition_end; i++) {
+        outer: for (int i = condition_start; i < condition_end; i++) {
             IntermediateOpcode cnext = this.intermediates.get(i);
             if (cnext instanceof IntermediateLabel) {
                 if (i == condition_end - 1) {
                     break;
+                }
+                for (int o = i + 1; o < this.intermediates.size(); o++) {
+                    IntermediateOpcode onext = this.intermediates.get(o);
+                    if (onext instanceof IntermediateGoto) {
+                        if (((IntermediateLabel) cnext).getLabel() == ((IntermediateGoto) onext).getNode().label) {
+                            for (int c = condition_start; c < i; c++) {
+                                group.add(this.intermediates.get(c));
+                            }
+                            condition_end = i;
+                            farthest = -1;
+                            break outer;
+                        }
+                    }
                 }
                 boolean sharing = false;
                 for (int o = i + 1; o < condition_end; o++) {

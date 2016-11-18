@@ -357,14 +357,14 @@ public class BranchTest {
 
     public void mth_lookupswitch(int i, TestEnum ie, boolean a, boolean c, boolean d) {
         switch (ie) {
-            case ONE:
-                System.out.println(a);
-                break;
-            case EIGHT:
-                System.out.println(c);
-                break;
-            default:
-                System.out.println(d);
+        case ONE:
+            System.out.println(a);
+            break;
+        case EIGHT:
+            System.out.println(c);
+            break;
+        default:
+            System.out.println(d);
         }
     }
 
@@ -386,14 +386,14 @@ public class BranchTest {
 
     public void mth_tableswitch(int i, TestEnum ie, boolean a, boolean c, boolean d) {
         switch (ie) {
-            case ONE:
-                System.out.println(a);
-                break;
-            case TWO:
-                System.out.println(c);
-                break;
-            default:
-                System.out.println(d);
+        case ONE:
+            System.out.println(a);
+            break;
+        case TWO:
+            System.out.println(c);
+            break;
+        default:
+            System.out.println(d);
         }
 
     }
@@ -413,5 +413,9 @@ public class BranchTest {
                 + "}";
         assertEquals(good, insn);
     }
+
+    // TODO need test rig for creating methods directly from bytecode for
+    // patterns that a local compiler may not normally make (like inverted while
+    // loops)
 
 }

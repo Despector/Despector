@@ -37,6 +37,7 @@ import org.spongepowered.despector.ast.members.insn.StatementBlock;
 import org.spongepowered.despector.ast.members.insn.arg.CastArg;
 import org.spongepowered.despector.ast.members.insn.arg.CompareArg;
 import org.spongepowered.despector.ast.members.insn.arg.InstanceFunctionArg;
+import org.spongepowered.despector.ast.members.insn.arg.InstanceOfArg;
 import org.spongepowered.despector.ast.members.insn.arg.Instruction;
 import org.spongepowered.despector.ast.members.insn.arg.NewArrayArg;
 import org.spongepowered.despector.ast.members.insn.arg.NewRefArg;
@@ -333,7 +334,7 @@ public class SourceEmitter implements ClassEmitter {
                     remaining.add(assign);
                     break;
                 }
-                if(!first) {
+                if (!first) {
                     printString(",\n");
                 }
                 NewRefArg val = (NewRefArg) assign.getValue();
@@ -353,7 +354,7 @@ public class SourceEmitter implements ClassEmitter {
                 }
                 first = false;
             }
-            if(!first) {
+            if (!first) {
                 printString(";\n");
             }
             // We store any remaining statements to be emitted later
@@ -430,7 +431,8 @@ public class SourceEmitter implements ClassEmitter {
                 }
                 if (mth.getName().equals("<init>") && mth.getInstructions().getStatements().size() == 2) {
                     // If the initializer contains only two statement (which
-                    // will be the invoke of the super constructor and the void return) then we can
+                    // will be the invoke of the super constructor and the void
+                    // return) then we can
                     // skip emitting it
                     continue;
                 }
@@ -1155,6 +1157,8 @@ public class SourceEmitter implements ClassEmitter {
             printString(" - ");
             emitArg(((CompareArg) arg).getLeft(), arg.inferType());
             printString(")");
+        } else if (arg instanceof InstanceOfArg) {
+            emitInstanceOf((InstanceOfArg) arg);
         } else {
             throw new IllegalStateException("Unknown arg type " + arg.getClass().getName() + " : " + arg.toString());
         }
@@ -1420,6 +1424,12 @@ public class SourceEmitter implements ClassEmitter {
         printString("[");
         emitArg(arg.getIndex(), "I");
         printString("]");
+    }
+
+    protected void emitInstanceOf(InstanceOfArg arg) {
+        emitArg(arg.getCheckedValue(), null);
+        printString(" instanceof ");
+        emitType(arg.getType());
     }
 
     protected void emitCondition(Condition condition) {
