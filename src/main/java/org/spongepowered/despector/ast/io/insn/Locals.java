@@ -168,7 +168,7 @@ public class Locals {
 
         @Override
         public String toString() {
-            return "Local " + this.index;
+            return "Local" + this.index;
         }
 
     }

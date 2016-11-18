@@ -60,7 +60,7 @@ public class IncrementStatement implements Statement {
 
     @Override
     public String toString() {
-        return this.local.getName() + " += " + this.val + ";";
+        return this.local.toString() + " += " + this.val + ";";
     }
 
 }

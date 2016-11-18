@@ -128,10 +128,11 @@ public class SingularClassLoader {
             m.setSignature(mn.desc);
             m.setStatic((mn.access & ACC_STATIC) != 0);
             m.setSynthetic((mn.access & ACC_SYNTHETIC) != 0);
-            if (cn.name.endsWith("EnumOffsetType") && mn.name.equals("<init>")) {
+            if (cn.name.endsWith("Block") && mn.name.equals("dropBlockAsItemWithChance")) {
                 System.out.println();
             }
             try {
+                System.out.println("Decompiling method " + mn.name);
                 StatementBlock insns = InstructionTreeBuilder.build(m, mn);
                 m.setInstructions(insns);
             } catch (Exception ex) {
@@ -163,6 +164,7 @@ public class SingularClassLoader {
                 }
             }
         }
+        System.out.println("Done!");
         if (src != null) {
             src.add(entry);
         }

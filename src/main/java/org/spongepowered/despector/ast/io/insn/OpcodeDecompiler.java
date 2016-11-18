@@ -397,6 +397,44 @@ public class OpcodeDecompiler {
                     block.append(dowhile);
                     index = result.end;
                 } else {
+                    IntermediateOpcode last = this.intermediates.get(result.block_end - 1);
+                    if(last instanceof IntermediateGoto) {
+                        int last_target = this.label_indices.get(((IntermediateGoto) last).getNode().label.getLabel());
+                        if(last_target < result.end) {
+                            StatementBlock body_block = buildBlock(StatementBlock.Type.WHILE, result.end, result.block_end - 1);
+                            if (!block.getStatements().isEmpty()) {
+                                Statement init = block.getStatements().get(block.getStatements().size() - 1);
+                                Statement incr = null;
+                                if (!body_block.getStatements().isEmpty()) {
+                                    incr = body_block.getStatements().get(body_block.getStatements().size() - 1);
+                                }
+                                if (init instanceof LocalAssign) {
+                                    Local local = ((LocalAssign) init).getLocal().getLocal();
+                                    if (references(result.condition, local) || references(incr, local)) {
+                                        block.getStatements().remove(init);
+                                        if (references(incr, local)) {
+                                            body_block.getStatements().remove(incr);
+                                            ForLoop forloop = new ForLoop(init, result.condition, incr, body_block);
+                                            forloop.accept(new LocalDefineVisitor(index));
+                                            block.append(forloop);
+                                            index = result.end;
+                                            continue;
+                                        }
+                                        ForLoop forloop = new ForLoop(init, result.condition, null, body_block);
+                                        forloop.accept(new LocalDefineVisitor(index));
+                                        block.append(forloop);
+                                        index = result.end;
+                                        continue;
+                                    }
+                                }
+                            }
+                            WhileLoop whileloop = new WhileLoop(result.condition, body_block);
+                            whileloop.accept(new LocalDefineVisitor(index));
+                            block.append(whileloop);
+                            index = result.end;
+                            continue;
+                        }
+                    }
                     StatementBlock body_block = buildBlock(StatementBlock.Type.IF, result.end, result.block_end);
                     boolean is_ternary = false;
                     Instruction true_val = null;
@@ -406,19 +444,20 @@ public class OpcodeDecompiler {
                         true_val = ((IntermediateStackValue) body_block.getStatements().get(0)).getStackVal();
                     }
                     IfBlock if_block = new IfBlock(result.condition, body_block);
-                    IntermediateOpcode last = this.intermediates.get(result.block_end - 1);
                     if (last instanceof IntermediateGoto) {
                         int target = this.label_indices.get(((IntermediateGoto) last).getNode().label.getLabel());
-                        StatementBlock else_block = buildBlock(StatementBlock.Type.IF, result.block_end + 1, target);
-                        if (is_ternary) {
-                            if (!(else_block.getStatements().get(0) instanceof IntermediateStackValue)) {
-                                throw new IllegalStateException();
+                        if (target > result.block_end) {
+                            StatementBlock else_block = buildBlock(StatementBlock.Type.IF, result.block_end + 1, target);
+                            if (is_ternary) {
+                                if (!(else_block.getStatements().get(0) instanceof IntermediateStackValue)) {
+                                    throw new IllegalStateException();
+                                }
+                                false_val = ((IntermediateStackValue) else_block.getStatements().get(0)).getStackVal();
                             }
-                            false_val = ((IntermediateStackValue) else_block.getStatements().get(0)).getStackVal();
+                            ElseBlock elseblock = new ElseBlock(else_block);
+                            if_block.setElseBlock(elseblock);
+                            result.block_end = target;
                         }
-                        ElseBlock elseblock = new ElseBlock(else_block);
-                        if_block.setElseBlock(elseblock);
-                        result.block_end = target;
                     }
                     if (is_ternary) {
                         if (false_val == null || true_val == null) {
@@ -502,6 +541,9 @@ public class OpcodeDecompiler {
                 block.append(try_block);
                 index = last_end;
             }
+        }
+        if(tmp_ternary != null) {
+            block.append(new IntermediateStackValue(tmp_ternary));
         }
         return block;
     }
@@ -757,6 +799,7 @@ public class OpcodeDecompiler {
 
     private static boolean intermediate_stack = false;
     private static boolean expecting_intermediate_stack = false;
+    private static int ternary_depth = 0;
 
     private void handleIntermediate(AbstractInsnNode next) {
         if (next instanceof JumpInsnNode) {
@@ -830,14 +873,18 @@ public class OpcodeDecompiler {
                 if (intermediate_stack && !this.stack.isEmpty()) {
                     this.intermediates.add(this.intermediates.size() - 1, new IntermediateStackValue(this.stack.pop()));
                     this.stack.push(new DummyInstruction());
-                    intermediate_stack = false;
+                    ternary_depth--;
+                    if (ternary_depth == 0) {
+                        intermediate_stack = false;
+                    }
                 }
             } else if ((frame.type == F_SAME && this.stack.size() == 1) || (frame.type == F_FULL && frame.stack.size() == this.stack.size() - 1)
-                    || (frame.type == F_SAME1 && this.stack.size() == 2)) {
+                    || (frame.type == F_SAME1 && this.stack.size() == 2) || (frame.type == F_APPEND && this.stack.size() == 1)) {
                 if (expecting_intermediate_stack && !this.stack.isEmpty()) {
                     this.intermediates.add(this.intermediates.size() - 2, new IntermediateStackValue(this.stack.pop()));
                     expecting_intermediate_stack = false;
                     intermediate_stack = true;
+                    ternary_depth++;
                 }
             }
             this.intermediates.add(new IntermediateFrame(frame));
@@ -845,7 +892,10 @@ public class OpcodeDecompiler {
             if (intermediate_stack && !this.stack.isEmpty() && next.getOpcode() >= IRETURN && next.getOpcode() <= ARETURN) {
                 this.intermediates.add(this.intermediates.size() - 1, new IntermediateStackValue(this.stack.pop()));
                 this.stack.push(new DummyInstruction());
-                intermediate_stack = false;
+                ternary_depth--;
+                if (ternary_depth == 0) {
+                    intermediate_stack = false;
+                }
             }
             OpHandler handle = handlers[next.getOpcode()];
             if (handle == null) {
@@ -865,6 +915,7 @@ public class OpcodeDecompiler {
         }
         intermediate_stack = false;
         expecting_intermediate_stack = false;
+        ternary_depth = 0;
         for (this.instructions_index = 0; this.instructions_index < this.instructions.size();) {
             AbstractInsnNode next = this.instructions.get(this.instructions_index++);
 //            System.out.println(AstUtil.insnToString(next));
@@ -1207,7 +1258,7 @@ public class OpcodeDecompiler {
         handlers[I2B] = new CastHandler("B");
         handlers[I2C] = new CastHandler("C");
         handlers[I2S] = new CastHandler("S");
-        OpHandler compare = (state, next)-> {
+        OpHandler compare = (state, next) -> {
             Instruction right = state.pop();
             Instruction left = state.pop();
             state.push(new CompareArg(left, right));
