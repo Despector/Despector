@@ -81,6 +81,10 @@ public class Main {
         if (!Files.exists(output)) {
             Files.createDirectories(output);
         }
+        Path formatter_path = Paths.get(".").resolve(ConfigManager.getConfig().emitter.formatting_path);
+        Path importorder_path = Paths.get(".").resolve(ConfigManager.getConfig().emitter.imports_path);
+        FormatLoader formatter_loader = FormatLoader.getLoader(ConfigManager.getConfig().emitter.formatting_type);
+        EmitterFormat formatter = formatter_loader.load(formatter_path, importorder_path);
 
         SourceSet source = new SourceSet();
         for (String s : sources) {
@@ -110,10 +114,6 @@ public class Main {
             return;
         }
         
-        Path formatter_path = Paths.get(".").resolve(ConfigManager.getConfig().emitter.formatting_path);
-        Path importorder_path = Paths.get(".").resolve(ConfigManager.getConfig().emitter.imports_path);
-        FormatLoader formatter_loader = FormatLoader.getLoader(ConfigManager.getConfig().emitter.formatting_type);
-        EmitterFormat formatter = formatter_loader.load(formatter_path, importorder_path);
         for (TypeEntry type : source.getAllClasses()) {
             Path out = output.resolve(type.getName() + ".java");
             if (!Files.exists(out.getParent())) {

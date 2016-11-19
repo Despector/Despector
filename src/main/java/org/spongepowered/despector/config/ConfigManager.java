@@ -43,14 +43,13 @@ public class ConfigManager {
     private static ConfigBase config = null;
 
     public static ConfigBase getConfig() {
+        if (config == null) {
+            config = new ConfigBase();
+        }
         return config;
     }
 
     public static void load(Path path) {
-        if (config != null) {
-            System.err.println("Config already loaded.");
-            return;
-        }
         System.out.println("Loading config from " + path.toString());
         try {
             Files.createDirectories(path.getParent());
