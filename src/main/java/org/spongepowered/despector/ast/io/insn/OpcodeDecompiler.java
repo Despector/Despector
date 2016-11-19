@@ -1550,7 +1550,7 @@ public class OpcodeDecompiler {
         handlers[ANEWARRAY] = array_init;
         // Misc
         handlers[ARRAYLENGTH] = (state, next) -> {
-            FieldArg arg = new InstanceFieldArg("length", "I", null, state.pop());
+            FieldArg arg = new InstanceFieldArg("length", "I", "hidden-array-field", state.pop());
             state.push(arg);
         };
         handlers[ATHROW] = (state, next) -> {

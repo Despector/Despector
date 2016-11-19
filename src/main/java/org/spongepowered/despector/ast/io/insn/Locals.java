@@ -134,10 +134,15 @@ public class Locals {
         }
 
         public void bakeInstances(Map<Label, Integer> label_indices) {
+            if (this.lvt.isEmpty()) {
+                if (this.index == 0) {
+                    this.instances.add(new LocalInstance(this, "this", "", -1, Short.MAX_VALUE));
+                }
+            }
             for (LocalVariableNode l : this.lvt) {
                 int start = label_indices.get(l.start.getLabel());
                 int end = label_indices.get(l.end.getLabel());
-                LocalInstance insn = new LocalInstance(this, l.name, l.desc, start, end);
+                LocalInstance insn = new LocalInstance(this, l.name, l.desc, start - 1, end);
                 if (l.signature != null) {
                     String[] generics = TypeHelper.getGenericContents(l.signature);
                     insn.setGenericTypes(generics);
