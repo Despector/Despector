@@ -128,22 +128,22 @@ public class SingularClassLoader {
             m.setSignature(mn.desc);
             m.setStatic((mn.access & ACC_STATIC) != 0);
             m.setSynthetic((mn.access & ACC_SYNTHETIC) != 0);
-            if (cn.name.endsWith("Block") && mn.name.equals("dropXpOnBlockBreak")) {
+            if (cn.name.endsWith("Block") && mn.name.equals("isEqualTo")) {
                 System.out.println();
             }
-            try {
+//            try {
                 System.out.println("Decompiling method " + mn.name);
                 StatementBlock insns = InstructionTreeBuilder.build(m, mn);
                 m.setInstructions(insns);
-            } catch (Exception ex) {
-                System.err.println("Error decompiling method body for " + cn.name + " " + m.toString());
-                ex.printStackTrace();
-                System.err.println("Offending method bytecode:");
-                Iterator<AbstractInsnNode> it = mn.instructions.iterator();
-                while (it.hasNext()) {
-                    System.err.println(AstUtil.insnToString(it.next()));
-                }
-            }
+//            } catch (Exception ex) {
+//                System.err.println("Error decompiling method body for " + cn.name + " " + m.toString());
+//                ex.printStackTrace();
+//                System.err.println("Offending method bytecode:");
+//                Iterator<AbstractInsnNode> it = mn.instructions.iterator();
+//                while (it.hasNext()) {
+//                    System.err.println(AstUtil.insnToString(it.next()));
+//                }
+//            }
             entry.addMethod(m);
         }
 

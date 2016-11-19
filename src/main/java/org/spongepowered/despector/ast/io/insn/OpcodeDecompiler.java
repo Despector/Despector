@@ -236,7 +236,11 @@ public class OpcodeDecompiler {
                 }
                 block.append(stmt);
             } else if (next instanceof IntermediateStackValue) {
-                block.append((IntermediateStackValue) next);
+                IntermediateStackValue next_sv = (IntermediateStackValue) next;
+                block.append(next_sv);
+                if(next_sv.getStackVal() instanceof DummyInstruction) {
+                    return block;
+                }
             } else if (next instanceof AbstractSwitch) {
                 AbstractSwitch aswitch = (AbstractSwitch) next;
                 Instruction var = aswitch.getSwitchVar();
@@ -437,6 +441,7 @@ public class OpcodeDecompiler {
                     }
                     StatementBlock body_block = buildBlock(StatementBlock.Type.IF, result.end, result.block_end);
                     boolean is_ternary = false;
+                    boolean is_intermediate_ternary = false;
                     Instruction true_val = null;
                     Instruction false_val = null;
                     if (body_block.getStatements().get(0) instanceof IntermediateStackValue) {
@@ -452,6 +457,9 @@ public class OpcodeDecompiler {
                                 if (!(else_block.getStatements().get(0) instanceof IntermediateStackValue)) {
                                     throw new IllegalStateException();
                                 }
+                                if(else_block.getStatements().size() == 2 && else_block.getStatements().get(1) instanceof IntermediateStackValue) {
+                                    is_intermediate_ternary = true;
+                                }
                                 false_val = ((IntermediateStackValue) else_block.getStatements().get(0)).getStackVal();
                             }
                             ElseBlock elseblock = new ElseBlock(else_block);
@@ -465,6 +473,10 @@ public class OpcodeDecompiler {
                         }
                         Ternary ternary = new Ternary(result.condition, true_val, false_val);
                         ternary.accept(new LocalDefineVisitor(index));
+                        if(is_intermediate_ternary) {
+                            block.append(new IntermediateStackValue(ternary));
+                            return block;
+                        }
                         tmp_ternary = ternary;
                     } else {
                         if_block.accept(new LocalDefineVisitor(index));
@@ -639,7 +651,29 @@ public class OpcodeDecompiler {
                 break;
             }
             group.remove(group.get(c));
+            condition_end--;
         }
+        
+        Set<LabelNode> outer = Sets.newHashSet();
+        boolean broken = false;
+        for(Iterator<IntermediateOpcode> it = group.iterator(); it.hasNext();) {
+            IntermediateOpcode next = it.next();
+            if(broken) {
+                it.remove();
+                continue;
+            }
+            if(next instanceof IntermediateJump) {
+                int target = this.label_indices.get(((IntermediateJump) next).getNode().label.getLabel());
+                if(target > condition_end + 1 || target < condition_start) {
+                    outer.add(((IntermediateJump) next).getNode().label);
+                    if(outer.size() > 1) {
+                        broken = true;
+                        it.remove();
+                    }
+                }
+            }
+        }
+        condition_end = condition_start + group.size();
 
         Condition condition = makeCondition(group);
         LabelNode break_node = ((IntermediateJump) group.get(group.size() - 1)).getNode().label;
@@ -810,15 +844,14 @@ public class OpcodeDecompiler {
         return stack.pop();
     }
 
-    private static boolean intermediate_stack = false;
-    private static boolean expecting_intermediate_stack = false;
-    private static int ternary_depth = 0;
+    private static int intermediate_stack = 0;
+    private static int expecting_intermediate_stack = 0;
 
     private void handleIntermediate(AbstractInsnNode next) {
         if (next instanceof JumpInsnNode) {
             if (next.getOpcode() == GOTO) {
                 if (!this.stack.isEmpty()) {
-                    expecting_intermediate_stack = true;
+                    expecting_intermediate_stack++;
                 }
                 this.intermediates.add(new IntermediateGoto((JumpInsnNode) next));
             } else if (next.getOpcode() == IF_ACMPEQ || next.getOpcode() == IF_ACMPNE || next.getOpcode() == IF_ICMPEQ
@@ -883,32 +916,29 @@ public class OpcodeDecompiler {
                 }
                 this.stack.push(this.pop_list.get(this.pop_list.size() - 1));
             } else if ((frame.type == F_SAME1 && this.stack.size() == 1) || (frame.type == F_FULL && frame.stack.size() == this.stack.size())) {
-                if (intermediate_stack && !this.stack.isEmpty()) {
+                if (intermediate_stack > 0 && !this.stack.isEmpty()) {
                     this.intermediates.add(this.intermediates.size() - 1, new IntermediateStackValue(this.stack.pop()));
                     this.stack.push(new DummyInstruction());
-                    ternary_depth--;
-                    if (ternary_depth == 0) {
-                        intermediate_stack = false;
-                    }
+                    intermediate_stack--;
                 }
             } else if ((frame.type == F_SAME && this.stack.size() == 1) || (frame.type == F_FULL && frame.stack.size() == this.stack.size() - 1)
                     || (frame.type == F_SAME1 && this.stack.size() == 2) || (frame.type == F_APPEND && this.stack.size() == 1)) {
-                if (expecting_intermediate_stack && !this.stack.isEmpty()) {
+                if (expecting_intermediate_stack > 0 && !this.stack.isEmpty()) {
                     this.intermediates.add(this.intermediates.size() - 2, new IntermediateStackValue(this.stack.pop()));
-                    expecting_intermediate_stack = false;
-                    intermediate_stack = true;
-                    ternary_depth++;
+                    expecting_intermediate_stack--;
+                    if(intermediate_stack > 0) {
+                        this.intermediates.add(this.intermediates.size() - 2, new IntermediateStackValue(new DummyInstruction()));
+                        intermediate_stack--;
+                    }
+                    intermediate_stack++;
                 }
             }
             this.intermediates.add(new IntermediateFrame(frame));
         } else {
-            if (intermediate_stack && !this.stack.isEmpty() && next.getOpcode() >= IRETURN && next.getOpcode() <= ARETURN) {
+            if (intermediate_stack > 0 && !this.stack.isEmpty() && next.getOpcode() >= IRETURN && next.getOpcode() <= ARETURN) {
                 this.intermediates.add(this.intermediates.size() - 1, new IntermediateStackValue(this.stack.pop()));
                 this.stack.push(new DummyInstruction());
-                ternary_depth--;
-                if (ternary_depth == 0) {
-                    intermediate_stack = false;
-                }
+                intermediate_stack--;
             }
             OpHandler handle = handlers[next.getOpcode()];
             if (handle == null) {
@@ -926,12 +956,11 @@ public class OpcodeDecompiler {
             AbstractInsnNode next = it.next();
             this.instructions.add(next);
         }
-        intermediate_stack = false;
-        expecting_intermediate_stack = false;
-        ternary_depth = 0;
+        intermediate_stack = 0;
+        expecting_intermediate_stack = 0;
         for (this.instructions_index = 0; this.instructions_index < this.instructions.size();) {
             AbstractInsnNode next = this.instructions.get(this.instructions_index++);
-//            System.out.println(AstUtil.insnToString(next));
+            System.out.println(AstUtil.insnToString(next));
             handleIntermediate(next);
         }
 //        System.out.println("Intermediates:");
