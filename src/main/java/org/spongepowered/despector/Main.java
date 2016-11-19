@@ -25,12 +25,14 @@
 package org.spongepowered.despector;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import org.spongepowered.despector.ast.SourceSet;
 import org.spongepowered.despector.ast.io.DirectoryWalker;
 import org.spongepowered.despector.ast.io.JarWalker;
 import org.spongepowered.despector.ast.io.SingularClassLoader;
 import org.spongepowered.despector.ast.io.emitter.SourceEmitter;
 import org.spongepowered.despector.ast.type.TypeEntry;
+import org.spongepowered.despector.config.ConfigManager;
 
 import java.io.FileWriter;
 import java.io.IOException;
@@ -38,8 +40,20 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Consumer;
 
 public class Main {
+
+    private static final Map<String, Consumer<String>> flags = Maps.newHashMap();
+
+    static {
+        flags.put("--config=", (arg) -> {
+            String config = arg.substring(9);
+            Path config_path = Paths.get(".").resolve(config);
+            ConfigManager.load(config_path);
+        });
+    }
 
     public static void main(String[] args) throws IOException {
         if (args.length < 2) {
@@ -47,9 +61,15 @@ public class Main {
             return;
         }
         List<String> sources = Lists.newArrayList();
-        for (int i = 0; i < args.length - 1; i++) {
+        outer: for (int i = 0; i < args.length - 1; i++) {
             if (args[i].startsWith("-")) {
-                // TODO parse flags
+                for (String flag : flags.keySet()) {
+                    if (args[i].startsWith(flag)) {
+                        flags.get(flag).accept(args[i]);
+                        continue outer;
+                    }
+                }
+                System.err.println("Unknown flag: " + args[i]);
             } else {
                 sources.add(args[i]);
             }

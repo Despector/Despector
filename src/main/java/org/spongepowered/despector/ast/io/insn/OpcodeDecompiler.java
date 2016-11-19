@@ -960,7 +960,7 @@ public class OpcodeDecompiler {
         expecting_intermediate_stack = 0;
         for (this.instructions_index = 0; this.instructions_index < this.instructions.size();) {
             AbstractInsnNode next = this.instructions.get(this.instructions_index++);
-            System.out.println(AstUtil.insnToString(next));
+//            System.out.println(AstUtil.insnToString(next));
             handleIntermediate(next);
         }
 //        System.out.println("Intermediates:");

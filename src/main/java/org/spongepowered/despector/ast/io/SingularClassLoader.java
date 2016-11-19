@@ -50,6 +50,7 @@ import org.spongepowered.despector.ast.type.ClassEntry;
 import org.spongepowered.despector.ast.type.EnumEntry;
 import org.spongepowered.despector.ast.type.InterfaceEntry;
 import org.spongepowered.despector.ast.type.TypeEntry;
+import org.spongepowered.despector.config.ConfigManager;
 import org.spongepowered.despector.util.AstUtil;
 import org.spongepowered.despector.util.TypeHelper;
 
@@ -63,8 +64,6 @@ import java.util.List;
 public class SingularClassLoader {
 
     public static final SingularClassLoader instance = new SingularClassLoader();
-
-    private static final boolean EMIT_SOURCE_ON_LOAD = true;
 
     private SingularClassLoader() {
     }
@@ -128,22 +127,24 @@ public class SingularClassLoader {
             m.setSignature(mn.desc);
             m.setStatic((mn.access & ACC_STATIC) != 0);
             m.setSynthetic((mn.access & ACC_SYNTHETIC) != 0);
-            if (cn.name.endsWith("Block") && mn.name.equals("isEqualTo")) {
-                System.out.println();
-            }
-//            try {
+//            if (cn.name.endsWith("Block") && mn.name.equals("registerBlocks")) {
+//                System.out.println();
+//            }
+            try {
                 System.out.println("Decompiling method " + mn.name);
                 StatementBlock insns = InstructionTreeBuilder.build(m, mn);
                 m.setInstructions(insns);
-//            } catch (Exception ex) {
-//                System.err.println("Error decompiling method body for " + cn.name + " " + m.toString());
-//                ex.printStackTrace();
-//                System.err.println("Offending method bytecode:");
-//                Iterator<AbstractInsnNode> it = mn.instructions.iterator();
-//                while (it.hasNext()) {
-//                    System.err.println(AstUtil.insnToString(it.next()));
-//                }
-//            }
+            } catch (Exception ex) {
+                System.err.println("Error decompiling method body for " + cn.name + " " + m.toString());
+                ex.printStackTrace();
+                if (ConfigManager.getConfig().print_opcodes_on_error) {
+                    System.err.println("Offending method bytecode:");
+                    Iterator<AbstractInsnNode> it = mn.instructions.iterator();
+                    while (it.hasNext()) {
+                        System.err.println(AstUtil.insnToString(it.next()));
+                    }
+                }
+            }
             entry.addMethod(m);
         }
 
@@ -168,7 +169,7 @@ public class SingularClassLoader {
         if (src != null) {
             src.add(entry);
         }
-        if (EMIT_SOURCE_ON_LOAD) {
+        if (ConfigManager.getConfig().emit_source_on_load) {
             PrintWriter out = new PrintWriter(System.out);
             SourceEmitter emitter = new SourceEmitter(out);
             emitter.emitType(entry);
