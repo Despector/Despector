@@ -22,11 +22,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.despector.ast.members.insn.arg;
+package org.spongepowered.despector.util;
 
-/**
- * An instruction which may be used as a statement.
- */
-public interface AllowStatement {
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+
+import javax.annotation.Nonnull;
+import javax.annotation.meta.TypeQualifierDefault;
+
+@Nonnull
+@TypeQualifierDefault(
+        {
+                ElementType.FIELD,
+                ElementType.METHOD,
+                ElementType.PARAMETER
+        }
+)
+@Retention(RetentionPolicy.RUNTIME)
+public @interface NonnullByDefault {
 
 }

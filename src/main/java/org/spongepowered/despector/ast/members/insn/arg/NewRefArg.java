@@ -24,23 +24,29 @@
  */
 package org.spongepowered.despector.ast.members.insn.arg;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
 import org.spongepowered.despector.util.TypeHelper;
 
 public class NewRefArg implements Instruction {
 
-    private final String type;
-    private final String ctor;
-    private final Instruction[] params;
+    private String type;
+    private String ctor;
+    private Instruction[] params;
 
     public NewRefArg(String type, String ctor_desc, Instruction[] args) {
-        this.type = type;
-        this.ctor = ctor_desc;
-        this.params = args;
+        this.type = checkNotNull(type, "type");
+        this.ctor = checkNotNull(ctor_desc, "ctor_desc");
+        this.params = checkNotNull(args, "args");
     }
 
-    public String getCtor() {
+    public String getCtorDescription() {
         return this.ctor;
+    }
+
+    public void setCtorDescription(String desc) {
+        this.ctor = checkNotNull(desc, "desc");
     }
 
     public String getType() {
@@ -51,8 +57,16 @@ public class NewRefArg implements Instruction {
         return TypeHelper.descToType(this.type);
     }
 
-    public Instruction[] getParams() {
+    public void setType(String type) {
+        this.type = checkNotNull(type, "type");
+    }
+
+    public Instruction[] getParameters() {
         return this.params;
+    }
+
+    public void setParameters(Instruction... params) {
+        this.params = checkNotNull(params, "params");
     }
 
     @Override
@@ -72,7 +86,7 @@ public class NewRefArg implements Instruction {
     public String toString() {
         StringBuilder params = new StringBuilder();
         for (int i = 0; i < this.params.length; i++) {
-            params.append(this.params[i].toString());
+            params.append(this.params[i]);
             if (i < this.params.length - 1) {
                 params.append(", ");
             }

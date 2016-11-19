@@ -24,42 +24,64 @@
  */
 package org.spongepowered.despector.ast.members.insn.branch;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
 import org.spongepowered.despector.ast.members.insn.Statement;
 import org.spongepowered.despector.ast.members.insn.StatementBlock;
 import org.spongepowered.despector.ast.members.insn.branch.condition.Condition;
+
+import javax.annotation.Nullable;
 
 /**
  * A for loop.
  */
 public class ForLoop implements Statement {
 
-    private final Statement init;
-    private final Condition condition;
-    private final Statement incr;
-    private final StatementBlock body;
+    private Statement init;
+    private Condition condition;
+    private Statement incr;
+    private StatementBlock body;
 
-    public ForLoop(Statement init, Condition condition, Statement incr, StatementBlock body) {
+    public ForLoop(@Nullable Statement init, Condition condition, @Nullable Statement incr, StatementBlock body) {
         this.init = init;
-        this.condition = condition;
+        this.condition = checkNotNull(condition, "condition");
         this.incr = incr;
-        this.body = body;
+        this.body = checkNotNull(body, "body");
     }
 
+    @Nullable
     public Statement getInit() {
         return this.init;
+    }
+
+    public void setInit(@Nullable Statement init) {
+        this.init = init;
     }
 
     public Condition getCondition() {
         return this.condition;
     }
 
+    public void setCondition(Condition condition) {
+        this.condition = checkNotNull(condition, "condition");
+    }
+
+    @Nullable
     public Statement getIncr() {
         return this.incr;
     }
 
+    public void setIncr(@Nullable Statement incr) {
+        this.incr = incr;
+    }
+
     public StatementBlock getBody() {
         return this.body;
+    }
+
+    public void setBody(StatementBlock block) {
+        this.body = checkNotNull(block, "block");
     }
 
     @Override
@@ -78,17 +100,17 @@ public class ForLoop implements Statement {
         StringBuilder sb = new StringBuilder();
         sb.append("for (");
         if (this.init != null) {
-            sb.append(this.init.toString());
+            sb.append(this.init);
         }
         sb.append(";");
-        sb.append(this.condition.toString());
+        sb.append(this.condition);
         sb.append(";");
         if (this.incr != null) {
-            sb.append(this.incr.toString());
+            sb.append(this.incr);
         }
         sb.append(") {\n");
         for (Statement insn : this.body.getStatements()) {
-            sb.append("    ").append(insn.toString()).append("\n");
+            sb.append("    ").append(insn).append("\n");
         }
         sb.append("}");
         return sb.toString();

@@ -24,42 +24,56 @@
  */
 package org.spongepowered.despector.ast.members.insn.function;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
 import org.spongepowered.despector.ast.members.insn.Statement;
 import org.spongepowered.despector.ast.members.insn.arg.Instruction;
 import org.spongepowered.despector.util.TypeHelper;
 
 /**
- * A statement instanciating a new instance of a type.
+ * A statement instantiating a new instance of a type.
  */
 public class NewInstance implements Statement {
 
-    private final String type;
-    private final String ctor;
-    private final Instruction[] params;
+    private String type;
+    private String ctor;
+    private Instruction[] params;
 
     public NewInstance(String type, String ctor_desc, Instruction[] args) {
-        this.type = type;
-        this.ctor = ctor_desc;
-        this.params = args;
+        this.type = checkNotNull(type, "type");
+        this.ctor = checkNotNull(ctor_desc, "ctor_desc");
+        this.params = checkNotNull(args, "args");
     }
 
-    public String getCtor() {
+    public String getCtorDescription() {
         return this.ctor;
+    }
+
+    public void setCtorDescription(String desc) {
+        this.ctor = checkNotNull(desc, "ctor_desc");
     }
 
     public String getType() {
         return this.type;
     }
 
+    public void setType(String type) {
+        this.type = checkNotNull(type, "type");
+    }
+
     public Instruction[] getParams() {
         return this.params;
+    }
+
+    public void setParameters(Instruction... args) {
+        this.params = checkNotNull(args, "args");
     }
 
     @Override
     public void accept(InstructionVisitor visitor) {
         visitor.visitNewInstance(this);
-        for(Instruction insn: this.params) {
+        for (Instruction insn : this.params) {
             insn.accept(visitor);
         }
     }
@@ -68,7 +82,7 @@ public class NewInstance implements Statement {
     public String toString() {
         StringBuilder params = new StringBuilder();
         for (int i = 0; i < this.params.length; i++) {
-            params.append(this.params[i].toString());
+            params.append(this.params[i]);
             if (i < this.params.length - 1) {
                 params.append(", ");
             }

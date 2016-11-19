@@ -24,32 +24,46 @@
  */
 package org.spongepowered.despector.ast.members.insn.branch;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
 import org.spongepowered.despector.ast.members.insn.arg.Instruction;
 import org.spongepowered.despector.ast.members.insn.branch.condition.Condition;
 
 public class Ternary implements Instruction {
 
-    private final Condition condition;
-    private final Instruction true_val;
-    private final Instruction false_val;
+    private Condition condition;
+    private Instruction true_val;
+    private Instruction false_val;
 
     public Ternary(Condition cond, Instruction true_val, Instruction false_val) {
-        this.condition = cond;
-        this.true_val = true_val;
-        this.false_val = false_val;
+        this.condition = checkNotNull(cond, "condition");
+        this.true_val = checkNotNull(true_val, "true_val");
+        this.false_val = checkNotNull(false_val, "false_val");
     }
 
     public Condition getCondition() {
         return this.condition;
     }
 
+    public void setCondition(Condition condition) {
+        this.condition = checkNotNull(condition, "condition");
+    }
+
     public Instruction getTrueValue() {
         return this.true_val;
     }
 
+    public void setTrueValue(Instruction val) {
+        this.true_val = checkNotNull(val, "true_val");
+    }
+
     public Instruction getFalseValue() {
         return this.false_val;
+    }
+
+    public void setFalseValue(Instruction val) {
+        this.false_val = checkNotNull(val, "false_val");
     }
 
     @Override
@@ -67,7 +81,7 @@ public class Ternary implements Instruction {
 
     @Override
     public String toString() {
-        return this.condition.toString() + " ? " + this.true_val.toString() + " : " + this.false_val.toString();
+        return this.condition + " ? " + this.true_val + " : " + this.false_val;
     }
 
 }

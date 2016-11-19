@@ -36,6 +36,7 @@ repositories {
 dependencies {
     compile 'org.ow2.asm:asm-all:5.0.3'
     compile 'com.google.guava:guava:18.0'
+    compile 'com.google.code.findbugs:jsr305:1.3.9'
 
     testCompile 'junit:junit:4.11'
     testCompile 'org.mockito:mockito-core:1.9.5'

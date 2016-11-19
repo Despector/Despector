@@ -24,6 +24,8 @@
  */
 package org.spongepowered.despector.ast.members.insn;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import com.google.common.collect.Lists;
 import org.spongepowered.despector.ast.io.insn.Locals;
 
@@ -49,13 +51,12 @@ public class StatementBlock {
     }
 
     private final Type type;
-    private Locals locals;
-    private List<Statement> statements;
-    private boolean locked = false;
+    private final Locals locals;
+    private final List<Statement> statements;
 
     public StatementBlock(Type type, Locals locals) {
-        this.type = type;
-        this.locals = locals;
+        this.type = checkNotNull(type, "type");
+        this.locals = checkNotNull(locals, "locals");
         this.statements = Lists.newArrayList();
     }
 
@@ -63,7 +64,6 @@ public class StatementBlock {
         this.type = block.type;
         this.locals = new Locals(block.locals);
         this.statements = Lists.newArrayList(block.statements);
-        this.locked = block.locked;
     }
 
     public Type getType() {
@@ -79,7 +79,7 @@ public class StatementBlock {
     }
 
     public void append(Statement insn) {
-        this.statements.add(insn);
+        this.statements.add(checkNotNull(insn, "insn"));
     }
 
     public Statement popStatement() {

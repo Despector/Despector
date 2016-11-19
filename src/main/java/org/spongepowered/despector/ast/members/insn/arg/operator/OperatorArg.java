@@ -24,6 +24,8 @@
  */
 package org.spongepowered.despector.ast.members.insn.arg.operator;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
 import org.spongepowered.despector.ast.members.insn.arg.Instruction;
 
@@ -32,20 +34,28 @@ import org.spongepowered.despector.ast.members.insn.arg.Instruction;
  */
 public abstract class OperatorArg implements Instruction {
 
-    protected final Instruction left;
-    protected final Instruction right;
+    protected Instruction left;
+    protected Instruction right;
 
     public OperatorArg(Instruction left, Instruction right) {
-        this.left = left;
-        this.right = right;
+        this.left = checkNotNull(left, "left");
+        this.right = checkNotNull(right, "right");
     }
 
-    public Instruction getLeft() {
+    public Instruction getLeftOperand() {
         return this.left;
     }
 
-    public Instruction getRight() {
+    public void setLeftOperand(Instruction left) {
+        this.left = checkNotNull(left, "left");
+    }
+
+    public Instruction getRightOperand() {
         return this.right;
+    }
+
+    public void setRightOperand(Instruction right) {
+        this.right = checkNotNull(right, "right");
     }
 
     public abstract String getOperator();
@@ -59,6 +69,11 @@ public abstract class OperatorArg implements Instruction {
     @Override
     public String inferType() {
         return this.left.inferType();
+    }
+
+    @Override
+    public String toString() {
+        return this.left.toString() + " " + getOperator() + " " + this.right.toString();
     }
 
 }

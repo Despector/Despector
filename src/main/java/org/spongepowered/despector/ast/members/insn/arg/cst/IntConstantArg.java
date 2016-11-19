@@ -28,7 +28,7 @@ import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
 
 public class IntConstantArg extends ConstantArg {
 
-    private final int cst;
+    private int cst;
 
     public IntConstantArg(int val) {
         this.cst = val;
@@ -36,6 +36,10 @@ public class IntConstantArg extends ConstantArg {
 
     public int getConstant() {
         return this.cst;
+    }
+
+    public void setConstant(int cst) {
+        this.cst = cst;
     }
 
     @Override

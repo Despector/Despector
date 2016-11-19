@@ -24,6 +24,7 @@
  */
 package org.spongepowered.despector.ast.members.insn.arg.field;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import org.spongepowered.despector.ast.members.insn.arg.Instruction;
 import org.spongepowered.despector.util.TypeHelper;
 
@@ -32,30 +33,42 @@ import org.spongepowered.despector.util.TypeHelper;
  */
 public abstract class FieldArg implements Instruction {
 
-    protected final String field_name;
-    protected final String field_desc;
-    protected final String owner;
+    protected String field_name;
+    protected String field_desc;
+    protected String owner_type;
 
     public FieldArg(String name, String desc, String owner) {
-        this.field_name = name;
-        this.field_desc = desc;
-        this.owner = owner;
+        this.field_name = checkNotNull(name, "name");
+        this.field_desc = checkNotNull(desc, "desc");
+        this.owner_type = checkNotNull(owner, "owner");
     }
 
     public String getFieldName() {
         return this.field_name;
     }
 
+    public void setFieldName(String name) {
+        this.field_name = checkNotNull(name, "name");
+    }
+
     public String getTypeDescriptor() {
         return this.field_desc;
     }
 
+    public void setTypeDescriptor(String desc) {
+        this.field_desc = checkNotNull(desc, "desc");
+    }
+
     public String getOwner() {
-        return this.owner;
+        return this.owner_type;
+    }
+
+    public void setOwner(String owner) {
+        this.owner_type = checkNotNull(owner, "owner");
     }
 
     public String getOwnerName() {
-        return TypeHelper.descToType(this.owner);
+        return TypeHelper.descToType(this.owner_type);
     }
 
     @Override

@@ -24,6 +24,8 @@
  */
 package org.spongepowered.despector.ast.members.insn.branch;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
 import org.spongepowered.despector.ast.members.insn.Statement;
 import org.spongepowered.despector.ast.members.insn.StatementBlock;
@@ -35,14 +37,18 @@ import org.spongepowered.despector.ast.members.insn.StatementBlock;
  */
 public class ElseBlock {
 
-    private final StatementBlock block;
+    private StatementBlock block;
 
-    public ElseBlock(StatementBlock insn) {
-        this.block = insn;
+    public ElseBlock(StatementBlock block) {
+        this.block = checkNotNull(block, "block");
     }
 
     public StatementBlock getElseBody() {
         return this.block;
+    }
+
+    public void setElseBody(StatementBlock block) {
+        this.block = checkNotNull(block, "block");
     }
 
     public void accept(InstructionVisitor visitor) {

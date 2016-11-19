@@ -28,7 +28,7 @@ import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
 
 public class FloatConstantArg extends ConstantArg {
 
-    private final float cst;
+    private float cst;
 
     public FloatConstantArg(float val) {
         this.cst = val;
@@ -36,6 +36,10 @@ public class FloatConstantArg extends ConstantArg {
 
     public float getConstant() {
         return this.cst;
+    }
+
+    public void setConstant(float cst) {
+        this.cst = cst;
     }
 
     @Override

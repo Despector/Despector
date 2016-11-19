@@ -157,7 +157,7 @@ public class SingularClassLoader {
                         break;
                     }
                     StaticFieldAssign assign = (StaticFieldAssign) next;
-                    if (!TypeHelper.descToType(assign.getOwner()).equals(entry.getName()) || !(assign.getValue() instanceof NewRefArg)) {
+                    if (!TypeHelper.descToType(assign.getOwnerType()).equals(entry.getName()) || !(assign.getValue() instanceof NewRefArg)) {
                         break;
                     }
                     ((EnumEntry) entry).addEnumConstant(assign.getFieldName());

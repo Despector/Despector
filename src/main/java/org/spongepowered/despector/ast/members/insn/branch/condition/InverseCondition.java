@@ -24,6 +24,8 @@
  */
 package org.spongepowered.despector.ast.members.insn.branch.condition;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
 
 /**
@@ -34,7 +36,7 @@ public class InverseCondition extends Condition {
     private Condition value;
 
     public InverseCondition(Condition value) {
-        this.value = value;
+        this.value = checkNotNull(value, "value");
     }
 
     public Condition getConditionValue() {
@@ -42,7 +44,7 @@ public class InverseCondition extends Condition {
     }
 
     public void setConditionValue(Condition val) {
-        this.value = val;
+        this.value = checkNotNull(val, "value");
     }
 
     @Override
@@ -53,7 +55,7 @@ public class InverseCondition extends Condition {
 
     @Override
     public String toString() {
-        return "!" + this.value.toString();
+        return "!" + this.value;
     }
 
 }

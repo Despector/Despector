@@ -24,6 +24,8 @@
  */
 package org.spongepowered.despector.ast.members.insn.branch.condition;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
 import org.spongepowered.despector.ast.members.insn.arg.Instruction;
 
@@ -36,7 +38,7 @@ public class BooleanCondition extends Condition {
     private boolean inverse;
 
     public BooleanCondition(Instruction value, boolean inverse) {
-        this.value = value;
+        this.value = checkNotNull(value, "value");
         this.inverse = inverse;
     }
 
@@ -45,7 +47,7 @@ public class BooleanCondition extends Condition {
     }
 
     public void setConditionValue(Instruction insn) {
-        this.value = insn;
+        this.value = checkNotNull(insn, "value");
     }
 
     public boolean isInverse() {
@@ -64,7 +66,7 @@ public class BooleanCondition extends Condition {
 
     @Override
     public String toString() {
-        return (this.inverse ? "!" : "") + this.value.toString();
+        return (this.inverse ? "!" : "") + this.value;
     }
 
 }

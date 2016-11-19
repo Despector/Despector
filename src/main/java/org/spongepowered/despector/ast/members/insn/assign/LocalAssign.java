@@ -24,6 +24,8 @@
  */
 package org.spongepowered.despector.ast.members.insn.assign;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import org.spongepowered.despector.ast.io.insn.Locals.LocalInstance;
 import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
 import org.spongepowered.despector.ast.members.insn.arg.Instruction;
@@ -34,7 +36,7 @@ public class LocalAssign extends Assignment {
 
     public LocalAssign(LocalInstance local, Instruction val) {
         super(val);
-        this.local = local;
+        this.local = checkNotNull(local, "local");
     }
 
     public LocalInstance getLocal() {
@@ -42,7 +44,7 @@ public class LocalAssign extends Assignment {
     }
 
     public void setLocal(LocalInstance local) {
-        this.local = local;
+        this.local = checkNotNull(local, "local");
     }
 
     @Override
@@ -53,7 +55,7 @@ public class LocalAssign extends Assignment {
 
     @Override
     public String toString() {
-        return this.local.toString() + " = " + this.val.toString() + ";";
+        return this.local + " = " + this.val + ";";
     }
 
 }

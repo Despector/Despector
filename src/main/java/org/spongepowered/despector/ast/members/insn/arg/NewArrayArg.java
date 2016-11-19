@@ -24,18 +24,22 @@
  */
 package org.spongepowered.despector.ast.members.insn.arg;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
 import org.spongepowered.despector.util.TypeHelper;
 
+import javax.annotation.Nullable;
+
 public class NewArrayArg implements Instruction {
 
-    private final String type;
-    private final Instruction size;
-    private final Instruction[] values;
+    private String type;
+    private Instruction size;
+    private Instruction[] values;
 
-    public NewArrayArg(String type, Instruction size, Instruction[] values) {
-        this.type = type;
-        this.size = size;
+    public NewArrayArg(String type, Instruction size, @Nullable Instruction[] values) {
+        this.type = checkNotNull(type, "type");
+        this.size = checkNotNull(size, "size");
         this.values = values;
     }
 
@@ -43,12 +47,25 @@ public class NewArrayArg implements Instruction {
         return this.type;
     }
 
+    public void setType(String type) {
+        this.type = checkNotNull(type, "type");
+    }
+
     public Instruction getSize() {
         return this.size;
     }
 
+    public void setSize(Instruction size) {
+        this.size = checkNotNull(size, "size");
+    }
+
+    @Nullable
     public Instruction[] getInitializer() {
         return this.values;
+    }
+
+    public void setInitialValues(@Nullable Instruction... values) {
+        this.values = values;
     }
 
     @Override
@@ -70,11 +87,11 @@ public class NewArrayArg implements Instruction {
     @Override
     public String toString() {
         if (this.values == null) {
-            return "new " + TypeHelper.descToType(this.type) + "[" + this.size.toString() + "]";
+            return "new " + TypeHelper.descToType(this.type) + "[" + this.size + "]";
         }
         String result = "new " + TypeHelper.descToType(this.type) + "[] {";
         for (int i = 0; i < this.values.length; i++) {
-            result += this.values[i].toString();
+            result += this.values[i];
             if (i < this.values.length - 1) {
                 result += ", ";
             }

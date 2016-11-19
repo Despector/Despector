@@ -24,6 +24,7 @@
  */
 package org.spongepowered.despector.ast.members.insn.arg.field;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
 import org.spongepowered.despector.ast.members.insn.arg.Instruction;
 
@@ -34,25 +35,33 @@ import org.spongepowered.despector.ast.members.insn.arg.Instruction;
  */
 public class ArrayLoadArg implements Instruction {
 
-    private final Instruction array;
-    private final Instruction index;
+    private Instruction array;
+    private Instruction index;
 
     public ArrayLoadArg(Instruction array, Instruction index) {
-        this.array = array;
-        this.index = index;
+        this.array = checkNotNull(array, "array");
+        this.index = checkNotNull(index, "index");
     }
 
     public Instruction getArrayVar() {
         return this.array;
     }
 
+    public void setArrayVar(Instruction array) {
+        this.array = checkNotNull(array, "array");
+    }
+
     public Instruction getIndex() {
         return this.index;
     }
 
+    public void setIndex(Instruction index) {
+        this.index = checkNotNull(index, "index");
+    }
+
     @Override
     public String inferType() {
-        return this.array.inferType();
+        return this.array.inferType().substring(1);
     }
 
     @Override
@@ -64,7 +73,7 @@ public class ArrayLoadArg implements Instruction {
 
     @Override
     public String toString() {
-        return this.array.toString() + "[" + this.index + "]";
+        return this.array + "[" + this.index + "]";
     }
 
 }

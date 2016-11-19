@@ -24,6 +24,8 @@
  */
 package org.spongepowered.despector.ast.members.insn.arg.field;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import org.spongepowered.despector.ast.io.insn.Locals.LocalInstance;
 import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
 import org.spongepowered.despector.ast.members.insn.arg.Instruction;
@@ -33,7 +35,7 @@ public class LocalArg implements Instruction {
     private LocalInstance local;
 
     public LocalArg(LocalInstance local) {
-        this.local = local;
+        this.local = checkNotNull(local, "local");
     }
 
     public LocalInstance getLocal() {
@@ -41,7 +43,7 @@ public class LocalArg implements Instruction {
     }
 
     public void setLocal(LocalInstance local) {
-        this.local = local;
+        this.local = checkNotNull(local, "local");
     }
 
     @Override

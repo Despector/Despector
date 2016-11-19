@@ -24,10 +24,14 @@
  */
 package org.spongepowered.despector.ast.members.insn.branch;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
 import org.spongepowered.despector.ast.members.insn.Statement;
 import org.spongepowered.despector.ast.members.insn.StatementBlock;
 import org.spongepowered.despector.ast.members.insn.branch.condition.Condition;
+
+import javax.annotation.Nullable;
 
 /**
  * An if block.
@@ -36,28 +40,37 @@ public class IfBlock implements Statement {
 
     // TODO better elif support
 
-    private final Condition condition;
-    private final StatementBlock block;
+    private Condition condition;
+    private StatementBlock block;
     private ElseBlock else_block;
 
     public IfBlock(Condition condition, StatementBlock insn) {
-        this.condition = condition;
-        this.block = insn;
+        this.condition = checkNotNull(condition, "condition");
+        this.block = checkNotNull(insn, "block");
     }
 
     public Condition getCondition() {
         return this.condition;
     }
 
+    public void setCondition(Condition condition) {
+        this.condition = checkNotNull(condition, "condition");
+    }
+
     public StatementBlock getIfBody() {
         return this.block;
     }
 
+    public void setBody(StatementBlock block) {
+        this.block = checkNotNull(block, "block");
+    }
+
+    @Nullable
     public ElseBlock getElseBlock() {
         return this.else_block;
     }
 
-    public void setElseBlock(ElseBlock else_block) {
+    public void setElseBlock(@Nullable ElseBlock else_block) {
         this.else_block = else_block;
     }
 
@@ -77,13 +90,13 @@ public class IfBlock implements Statement {
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("if (");
-        sb.append(this.condition.toString()).append(") {\n");
+        sb.append(this.condition).append(") {\n");
         for (Statement insn : this.block.getStatements()) {
             sb.append("    ").append(insn).append("\n");
         }
         sb.append("}");
         if (this.else_block != null) {
-            sb.append(" ").append(this.else_block.toString());
+            sb.append(" ").append(this.else_block);
         }
         return sb.toString();
     }

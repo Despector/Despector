@@ -24,21 +24,27 @@
  */
 package org.spongepowered.despector.ast.members.insn.arg;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
 import org.spongepowered.despector.util.TypeHelper;
 
 public class InstanceOfArg implements Instruction {
 
-    private final Instruction check;
-    private final String type;
+    private Instruction check;
+    private String type;
 
     public InstanceOfArg(Instruction check, String type) {
-        this.check = check;
-        this.type = type;
+        this.check = checkNotNull(check, "check");
+        this.type = checkNotNull(type, "type");
     }
 
     public Instruction getCheckedValue() {
         return this.check;
+    }
+
+    public void setCheckedValue(Instruction val) {
+        this.check = checkNotNull(val, "check");
     }
 
     public String getType() {
@@ -47,6 +53,10 @@ public class InstanceOfArg implements Instruction {
 
     public String getTypeName() {
         return TypeHelper.descToType(this.type);
+    }
+
+    public void setType(String type) {
+        this.type = checkNotNull(type, "type");
     }
 
     @Override
@@ -62,7 +72,7 @@ public class InstanceOfArg implements Instruction {
 
     @Override
     public String toString() {
-        return this.check.toString() + " instanceof " + getTypeName();
+        return this.check + " instanceof " + getTypeName();
     }
 
 }

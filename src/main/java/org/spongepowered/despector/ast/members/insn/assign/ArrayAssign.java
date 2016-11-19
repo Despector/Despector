@@ -24,6 +24,8 @@
  */
 package org.spongepowered.despector.ast.members.insn.assign;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
 import org.spongepowered.despector.ast.members.insn.arg.Instruction;
 
@@ -34,21 +36,29 @@ import org.spongepowered.despector.ast.members.insn.arg.Instruction;
  */
 public class ArrayAssign extends Assignment {
 
-    private final Instruction array;
-    private final Instruction index;
+    private Instruction array;
+    private Instruction index;
 
     public ArrayAssign(Instruction array, Instruction index, Instruction val) {
         super(val);
-        this.index = index;
-        this.array = array;
+        this.index = checkNotNull(index, "index");
+        this.array = checkNotNull(array, "array");
     }
 
     public Instruction getArray() {
         return this.array;
     }
 
+    public void setArray(Instruction array) {
+        this.array = checkNotNull(array, "array");
+    }
+
     public Instruction getIndex() {
         return this.index;
+    }
+
+    public void setIndex(Instruction index) {
+        this.index = checkNotNull(index, "index");
     }
 
     @Override
@@ -61,7 +71,7 @@ public class ArrayAssign extends Assignment {
 
     @Override
     public String toString() {
-        return this.array.toString() + "[" + this.index.toString() + "] = " + this.val.toString() + ";";
+        return this.array + "[" + this.index + "] = " + this.val + ";";
     }
 
 }

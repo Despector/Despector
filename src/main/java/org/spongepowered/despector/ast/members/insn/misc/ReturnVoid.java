@@ -33,7 +33,6 @@ import org.spongepowered.despector.ast.members.insn.Statement;
 public class ReturnVoid implements Statement {
 
     public ReturnVoid() {
-
     }
 
     @Override

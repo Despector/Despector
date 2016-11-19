@@ -24,6 +24,8 @@
  */
 package org.spongepowered.despector.ast.members.insn.misc;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import org.spongepowered.despector.ast.io.insn.Locals.LocalInstance;
 import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
 import org.spongepowered.despector.ast.members.insn.Statement;
@@ -34,10 +36,10 @@ import org.spongepowered.despector.ast.members.insn.Statement;
 public class IncrementStatement implements Statement {
 
     private LocalInstance local;
-    private final int val;
+    private int val;
 
     public IncrementStatement(LocalInstance local, int val) {
-        this.local = local;
+        this.local = checkNotNull(local, "local");
         this.val = val;
     }
 
@@ -46,11 +48,15 @@ public class IncrementStatement implements Statement {
     }
 
     public void setLocal(LocalInstance local) {
-        this.local = local;
+        this.local = checkNotNull(local, "local");
     }
 
-    public int getIncrementVal() {
+    public int getIncrementValue() {
         return this.val;
+    }
+
+    public void setIncrementValue(int val) {
+        this.val = val;
     }
 
     @Override
@@ -60,7 +66,7 @@ public class IncrementStatement implements Statement {
 
     @Override
     public String toString() {
-        return this.local.toString() + " += " + this.val + ";";
+        return this.local + " += " + this.val + ";";
     }
 
 }

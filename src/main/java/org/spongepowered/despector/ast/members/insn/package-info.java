@@ -22,39 +22,5 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.despector.ast.members.insn.arg.field;
-
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
-import org.spongepowered.despector.ast.members.insn.arg.Instruction;
-
-public class InstanceFieldArg extends FieldArg {
-
-    private Instruction owner;
-
-    public InstanceFieldArg(String name, String desc, String owner_type, Instruction owner) {
-        super(name, desc, owner_type);
-        this.owner = checkNotNull(owner, "owner");
-    }
-
-    public Instruction getFieldOwner() {
-        return this.owner;
-    }
-
-    public void setFieldOwner(Instruction owner) {
-        this.owner = checkNotNull(owner, "owner");
-    }
-
-    @Override
-    public void accept(InstructionVisitor visitor) {
-        visitor.visitInstanceFieldArg(this);
-        this.owner.accept(visitor);
-    }
-
-    @Override
-    public String toString() {
-        return this.owner + "." + this.field_name;
-    }
-
-}
+@org.spongepowered.despector.util.NonnullByDefault
+package org.spongepowered.despector.ast.members.insn;

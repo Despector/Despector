@@ -24,41 +24,50 @@
  */
 package org.spongepowered.despector.ast.members.insn.assign;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import org.spongepowered.despector.ast.members.insn.arg.Instruction;
 import org.spongepowered.despector.util.TypeHelper;
 
 public abstract class FieldAssign extends Assignment {
 
-    protected final String field_name;
-    protected final String type_desc;
-    protected final String owner;
+    protected String field_name;
+    protected String type_desc;
+    protected String owner_type;
 
     public FieldAssign(String field, String type_desc, String owner, Instruction val) {
         super(val);
-        this.field_name = field;
-        this.type_desc = type_desc;
-        this.owner = owner;
+        this.field_name = checkNotNull(field, "field");
+        this.type_desc = checkNotNull(type_desc, "field_desc");
+        this.owner_type = checkNotNull(owner, "owner");
     }
 
     public String getFieldName() {
         return this.field_name;
     }
 
-    public String getTypeDescription() {
+    public void setFieldName(String name) {
+        this.field_name = checkNotNull(name, "name");
+    }
+
+    public String getFieldDescription() {
         return this.type_desc;
     }
 
-    public String getOwner() {
-        return this.owner;
-    }
-    
-    public String getOwnerName() {
-        return TypeHelper.descToType(this.owner);
+    public void setFieldDescription(String desc) {
+        this.type_desc = checkNotNull(desc, "desc");
     }
 
-//    @Override
-//    public TypeEntry inferType() {
-//        return this.field.getType();
-//    }
+    public String getOwnerType() {
+        return this.owner_type;
+    }
+
+    public String getOwnerName() {
+        return TypeHelper.descToType(this.owner_type);
+    }
+
+    public void setOwner(String owner) {
+        this.owner_type = checkNotNull(owner, "owner");
+    }
 
 }

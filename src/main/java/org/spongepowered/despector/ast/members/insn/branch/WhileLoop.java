@@ -24,6 +24,8 @@
  */
 package org.spongepowered.despector.ast.members.insn.branch;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
 import org.spongepowered.despector.ast.members.insn.Statement;
 import org.spongepowered.despector.ast.members.insn.StatementBlock;
@@ -34,20 +36,28 @@ import org.spongepowered.despector.ast.members.insn.branch.condition.Condition;
  */
 public class WhileLoop implements Statement {
 
-    private final Condition condition;
-    private final StatementBlock body;
+    private Condition condition;
+    private StatementBlock body;
 
     public WhileLoop(Condition condition, StatementBlock body) {
-        this.condition = condition;
-        this.body = body;
+        this.condition = checkNotNull(condition, "condition");
+        this.body = checkNotNull(body, "body");
     }
 
     public Condition getCondition() {
         return this.condition;
     }
 
+    public void setCondition(Condition condition) {
+        this.condition = checkNotNull(condition, "condition");
+    }
+
     public StatementBlock getBody() {
         return this.body;
+    }
+
+    public void setBody(StatementBlock block) {
+        this.body = checkNotNull(block, "body");
     }
 
     @Override
@@ -63,10 +73,10 @@ public class WhileLoop implements Statement {
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("while (");
-        sb.append(this.condition.toString());
+        sb.append(this.condition);
         sb.append(") {\n");
         for (Statement insn : this.body.getStatements()) {
-            sb.append("    ").append(insn.toString()).append("\n");
+            sb.append("    ").append(insn).append("\n");
         }
         sb.append("}");
         return sb.toString();

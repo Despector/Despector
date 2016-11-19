@@ -52,7 +52,7 @@ public class StaticMethodCall extends MethodCall {
     public String toString() {
         StringBuilder params = new StringBuilder();
         for (int i = 0; i < this.params.length; i++) {
-            params.append(this.params[i].toString());
+            params.append(this.params[i]);
             if (i < this.params.length - 1) {
                 params.append(", ");
             }

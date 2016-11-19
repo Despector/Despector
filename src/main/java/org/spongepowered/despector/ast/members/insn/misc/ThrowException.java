@@ -24,6 +24,8 @@
  */
 package org.spongepowered.despector.ast.members.insn.misc;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
 import org.spongepowered.despector.ast.members.insn.Statement;
 import org.spongepowered.despector.ast.members.insn.arg.Instruction;
@@ -33,14 +35,18 @@ import org.spongepowered.despector.ast.members.insn.arg.Instruction;
  */
 public class ThrowException implements Statement {
 
-    private final Instruction ex;
+    private Instruction ex;
 
     public ThrowException(Instruction arg) {
-        this.ex = arg;
+        this.ex = checkNotNull(arg, "exception");
     }
 
     public Instruction getException() {
         return this.ex;
+    }
+
+    public void setException(Instruction ex) {
+        this.ex = checkNotNull(ex, "exception");
     }
 
     @Override
@@ -51,7 +57,7 @@ public class ThrowException implements Statement {
 
     @Override
     public String toString() {
-        return "throw " + this.ex.toString() + ";";
+        return "throw " + this.ex + ";";
     }
 
 }

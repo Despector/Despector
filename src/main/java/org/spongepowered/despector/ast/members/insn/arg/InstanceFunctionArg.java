@@ -24,6 +24,8 @@
  */
 package org.spongepowered.despector.ast.members.insn.arg;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
 import org.spongepowered.despector.util.TypeHelper;
 
@@ -32,22 +34,26 @@ import org.spongepowered.despector.util.TypeHelper;
  */
 public class InstanceFunctionArg implements Instruction {
 
-    private final String method_name;
-    private final String method_desc;
-    private final String method_owner;
-    private final Instruction[] params;
-    private final Instruction callee;
+    private String method_name;
+    private String method_desc;
+    private String method_owner;
+    private Instruction[] params;
+    private Instruction callee;
 
     public InstanceFunctionArg(String name, String desc, String owner, Instruction[] args, Instruction call) {
-        this.method_name = name;
-        this.method_desc = desc;
-        this.method_owner = owner;
-        this.params = args;
-        this.callee = call;
+        this.method_name = checkNotNull(name, "method_name");
+        this.method_desc = checkNotNull(desc, "method_desc");
+        this.method_owner = checkNotNull(owner, "owner");
+        this.params = checkNotNull(args, "args");
+        this.callee = checkNotNull(call, "call");
     }
 
     public String getMethodName() {
         return this.method_name;
+    }
+
+    public void setMethodName(String name) {
+        this.method_name = checkNotNull(name, "method_name");
     }
 
     public String getMethodDescription() {
@@ -58,16 +64,32 @@ public class InstanceFunctionArg implements Instruction {
         return TypeHelper.getRet(this.method_desc);
     }
 
+    public void setMethodDescription(String desc) {
+        this.method_desc = checkNotNull(desc, "method_desc");
+    }
+
     public String getOwner() {
         return this.method_owner;
+    }
+
+    public void setOwner(String owner) {
+        this.method_owner = checkNotNull(owner, "owner");
     }
 
     public Instruction getCallee() {
         return this.callee;
     }
 
+    public void setCallee(Instruction callee) {
+        this.callee = checkNotNull(callee, "callee");
+    }
+
     public Instruction[] getParams() {
         return this.params;
+    }
+
+    public void setParams(Instruction... params) {
+        this.params = checkNotNull(params, "params");
     }
 
     @Override
@@ -88,7 +110,7 @@ public class InstanceFunctionArg implements Instruction {
     public String toString() {
         StringBuilder params = new StringBuilder();
         for (int i = 0; i < this.params.length; i++) {
-            params.append(this.params[i].toString());
+            params.append(this.params[i]);
             if (i < this.params.length - 1) {
                 params.append(", ");
             }

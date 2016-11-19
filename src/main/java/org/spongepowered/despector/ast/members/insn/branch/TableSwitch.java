@@ -24,6 +24,8 @@
  */
 package org.spongepowered.despector.ast.members.insn.branch;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import com.google.common.collect.Lists;
 import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
 import org.spongepowered.despector.ast.members.insn.Statement;
@@ -34,15 +36,19 @@ import java.util.List;
 
 public class TableSwitch implements Statement {
 
-    private final Instruction variable;
+    private Instruction variable;
     private final List<Case> cases = Lists.newArrayList();
 
     public TableSwitch(Instruction var) {
-        this.variable = var;
+        this.variable = checkNotNull(var, "var");
     }
 
     public Instruction getSwitchVar() {
         return this.variable;
+    }
+
+    public void setSwitchVar(Instruction var) {
+        this.variable = checkNotNull(var, "var");
     }
 
     public List<Case> getCases() {
@@ -64,28 +70,40 @@ public class TableSwitch implements Statement {
 
     public static class Case {
 
-        private final StatementBlock body;
-        private final boolean breaks;
-        private final boolean is_default;
+        private StatementBlock body;
+        private boolean breaks;
+        private boolean is_default;
         private final List<Integer> indices;
 
         public Case(StatementBlock block, boolean br, boolean def, List<Integer> indices) {
-            this.body = block;
+            this.body = checkNotNull(block, "block");
             this.breaks = br;
             this.is_default = def;
-            this.indices = indices;
+            this.indices = indices == null ? Lists.newArrayList() : indices;
         }
 
         public StatementBlock getBody() {
             return this.body;
         }
 
+        public void setBody(StatementBlock block) {
+            this.body = checkNotNull(block, "block");
+        }
+
         public boolean doesBreak() {
             return this.breaks;
         }
 
+        public void setBreak(boolean state) {
+            this.breaks = state;
+        }
+
         public boolean isDefault() {
             return this.is_default;
+        }
+
+        public void setDefault(boolean state) {
+            this.is_default = state;
         }
 
         public List<Integer> getIndices() {

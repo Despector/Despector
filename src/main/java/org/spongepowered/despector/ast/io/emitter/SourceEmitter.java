@@ -330,7 +330,7 @@ public class SourceEmitter implements ClassEmitter {
                     break;
                 }
                 StaticFieldAssign assign = (StaticFieldAssign) next;
-                if (!TypeHelper.descToType(assign.getOwner()).equals(type.getName()) || !(assign.getValue() instanceof NewRefArg)) {
+                if (!TypeHelper.descToType(assign.getOwnerType()).equals(type.getName()) || !(assign.getValue() instanceof NewRefArg)) {
                     remaining.add(assign);
                     break;
                 }
@@ -341,12 +341,12 @@ public class SourceEmitter implements ClassEmitter {
                 printIndentation();
                 printString(assign.getFieldName());
                 found.add(assign.getFieldName());
-                if (val.getParams().length != 2) {
+                if (val.getParameters().length != 2) {
                     printString("(");
                     // TODO ctor params
-                    for (int i = 2; i < val.getParams().length; i++) {
-                        emitArg(val.getParams()[i], null);
-                        if (i < val.getParams().length - 1) {
+                    for (int i = 2; i < val.getParameters().length; i++) {
+                        emitArg(val.getParameters()[i], null);
+                        if (i < val.getParameters().length - 1) {
                             printString(", ");
                         }
                     }
@@ -686,15 +686,15 @@ public class SourceEmitter implements ClassEmitter {
             // TODO replace with more generic handling from FieldAssign
             Instruction val = insn.getValue();
             if (val instanceof CastArg) {
-                val = ((CastArg) val).getVal();
+                val = ((CastArg) val).getValue();
             } else if (val instanceof AddArg) {
                 AddArg add = (AddArg) val;
-                if (add.getLeft() instanceof LocalArg) {
-                    LocalArg local = (LocalArg) add.getLeft();
+                if (add.getLeftOperand() instanceof LocalArg) {
+                    LocalArg local = (LocalArg) add.getLeftOperand();
                     if (local.getLocal().getIndex() == insn.getLocal().getIndex()) {
                         printString(insn.getLocal().getName());
-                        if (add.getRight() instanceof IntConstantArg) {
-                            IntConstantArg right = (IntConstantArg) add.getRight();
+                        if (add.getRightOperand() instanceof IntConstantArg) {
+                            IntConstantArg right = (IntConstantArg) add.getRightOperand();
                             if (right.getConstant() == 1) {
                                 printString("++");
                                 return;
@@ -704,18 +704,18 @@ public class SourceEmitter implements ClassEmitter {
                             }
                         }
                         printString(" += ");
-                        emitArg(add.getRight(), null);
+                        emitArg(add.getRightOperand(), null);
                         return;
                     }
                 }
             } else if (val instanceof SubtractArg) {
                 SubtractArg sub = (SubtractArg) val;
-                if (sub.getLeft() instanceof LocalArg) {
-                    LocalArg local = (LocalArg) sub.getLeft();
+                if (sub.getLeftOperand() instanceof LocalArg) {
+                    LocalArg local = (LocalArg) sub.getLeftOperand();
                     if (local.getLocal().getIndex() == insn.getLocal().getIndex()) {
                         printString(insn.getLocal().getName());
-                        if (sub.getRight() instanceof IntConstantArg) {
-                            IntConstantArg right = (IntConstantArg) sub.getRight();
+                        if (sub.getRightOperand() instanceof IntConstantArg) {
+                            IntConstantArg right = (IntConstantArg) sub.getRightOperand();
                             if (right.getConstant() == 1) {
                                 printString("--");
                                 return;
@@ -725,7 +725,7 @@ public class SourceEmitter implements ClassEmitter {
                             }
                         }
                         printString(" += ");
-                        emitArg(sub.getRight(), local.getLocal().getType());
+                        emitArg(sub.getRightOperand(), local.getLocal().getType());
                         return;
                     }
                 }
@@ -738,31 +738,31 @@ public class SourceEmitter implements ClassEmitter {
 
     protected void emitFieldAssign(FieldAssign insn) {
         if (insn instanceof StaticFieldAssign) {
-            if (!((StaticFieldAssign) insn).getOwner().equals(this.this$.getDescriptor())) {
+            if (!((StaticFieldAssign) insn).getOwnerType().equals(this.this$.getDescriptor())) {
                 emitTypeName(((StaticFieldAssign) insn).getOwnerName());
                 printString(".");
             }
         } else if (insn instanceof InstanceFieldAssign) {
-            emitArg(((InstanceFieldAssign) insn).getOwnerInsn(), insn.getOwner());
+            emitArg(((InstanceFieldAssign) insn).getOwner(), insn.getOwnerType());
             printString(".");
         }
 
         printString(insn.getFieldName());
         Instruction val = insn.getValue();
         if (val instanceof OperatorArg) {
-            Instruction left = ((OperatorArg) val).getLeft();
-            Instruction right = ((OperatorArg) val).getRight();
+            Instruction left = ((OperatorArg) val).getLeftOperand();
+            Instruction right = ((OperatorArg) val).getRightOperand();
             String op = " " + ((OperatorArg) val).getOperator() + "= ";
             if (left instanceof InstanceFieldArg) {
                 InstanceFieldArg left_field = (InstanceFieldArg) left;
-                Instruction owner = left_field.getOwnerInsn();
+                Instruction owner = left_field.getFieldOwner();
                 if (owner instanceof LocalArg && ((LocalArg) owner).getLocal().getIndex() == 0) {
                     // If the field assign is of the form 'field = field + x'
                     // where + is any operator then we collapse it to the '+='
                     // form of the assignment.
                     if (left_field.getFieldName().equals(insn.getFieldName())) {
                         printString(op);
-                        if (insn.getTypeDescription().equals("Z")) {
+                        if (insn.getFieldDescription().equals("Z")) {
                             if (val instanceof IntConstantArg) {
                                 IntConstantArg cst = (IntConstantArg) insn.getValue();
                                 if (cst.getConstant() == 1) {
@@ -773,14 +773,14 @@ public class SourceEmitter implements ClassEmitter {
                                 return;
                             }
                         }
-                        emitArg(right, insn.getTypeDescription());
+                        emitArg(right, insn.getFieldDescription());
                         return;
                     }
                 }
             }
         }
         printString(" = ");
-        emitArg(val, insn.getTypeDescription());
+        emitArg(val, insn.getFieldDescription());
     }
 
     protected void emitStaticFunction(StaticMethodCall insn) {
@@ -847,15 +847,15 @@ public class SourceEmitter implements ClassEmitter {
 
     protected void emitIinc(IncrementStatement insn) {
         printString(insn.getLocal().getName());
-        if (insn.getIncrementVal() == 1) {
+        if (insn.getIncrementValue() == 1) {
             printString("++");
             return;
-        } else if (insn.getIncrementVal() == -1) {
+        } else if (insn.getIncrementValue() == -1) {
             printString("--");
             return;
         }
         printString(" += ");
-        printString(String.valueOf(insn.getIncrementVal()));
+        printString(String.valueOf(insn.getIncrementValue()));
     }
 
     protected void emitIfBlock(IfBlock insn) {
@@ -1153,9 +1153,9 @@ public class SourceEmitter implements ClassEmitter {
             // A fallback, compare args should be optimized out of conditions
             // where they commonly appear
             printString("Integer.signum(");
-            emitArg(((CompareArg) arg).getRight(), arg.inferType());
+            emitArg(((CompareArg) arg).getRightOperand(), arg.inferType());
             printString(" - ");
-            emitArg(((CompareArg) arg).getLeft(), arg.inferType());
+            emitArg(((CompareArg) arg).getLeftOperand(), arg.inferType());
             printString(")");
         } else if (arg instanceof InstanceOfArg) {
             emitInstanceOf((InstanceOfArg) arg);
@@ -1227,7 +1227,7 @@ public class SourceEmitter implements ClassEmitter {
             printString(".");
             printString(arg.getFieldName());
         } else if (arg instanceof InstanceFieldArg) {
-            emitArg(((InstanceFieldArg) arg).getOwnerInsn(), arg.getOwner());
+            emitArg(((InstanceFieldArg) arg).getFieldOwner(), arg.getOwner());
             printString(".");
             printString(arg.getFieldName());
         } else {
@@ -1256,8 +1256,8 @@ public class SourceEmitter implements ClassEmitter {
                 } else if (callee instanceof NewRefArg) {
                     NewRefArg ref = (NewRefArg) callee;
                     if ("Ljava/lang/StringBuilder;".equals(ref.getType())) {
-                        if (ref.getParams().length == 1) {
-                            Instruction initial = ref.getParams()[0];
+                        if (ref.getParameters().length == 1) {
+                            Instruction initial = ref.getParameters()[0];
                             if (initial instanceof StaticFunctionArg) {
                                 StaticFunctionArg valueof = (StaticFunctionArg) initial;
                                 if (valueof.getMethodName().equals("valueOf") && valueof.getOwner().equals("Ljava/lang/String;")) {
@@ -1315,10 +1315,10 @@ public class SourceEmitter implements ClassEmitter {
         emitType(arg.getType());
         printString("(");
         // TODO get param types if we have the ast
-        for (int i = 0; i < arg.getParams().length; i++) {
-            Instruction param = arg.getParams()[i];
+        for (int i = 0; i < arg.getParameters().length; i++) {
+            Instruction param = arg.getParameters()[i];
             emitArg(param, null);
-            if (i < arg.getParams().length - 1) {
+            if (i < arg.getParameters().length - 1) {
                 printString(", ");
             }
         }
@@ -1338,10 +1338,10 @@ public class SourceEmitter implements ClassEmitter {
                     FieldAssign assign = (FieldAssign) accessor.getInstructions().getStatements().get(0);
                     FieldAssign replacement = null;
                     if (arg.getParams().length == 2) {
-                        replacement = new InstanceFieldAssign(assign.getFieldName(), assign.getTypeDescription(), assign.getOwner(),
+                        replacement = new InstanceFieldAssign(assign.getFieldName(), assign.getFieldDescription(), assign.getOwnerType(),
                                 arg.getParams()[0], arg.getParams()[1]);
                     } else {
-                        replacement = new StaticFieldAssign(assign.getFieldName(), assign.getTypeDescription(), assign.getOwner(),
+                        replacement = new StaticFieldAssign(assign.getFieldName(), assign.getFieldDescription(), assign.getOwnerType(),
                                 arg.getParams()[0]);
                     }
                     emitFieldAssign(replacement);
@@ -1376,16 +1376,16 @@ public class SourceEmitter implements ClassEmitter {
     }
 
     protected void emitOperator(OperatorArg arg) {
-        emitArg(arg.getLeft(), null);
+        emitArg(arg.getLeftOperand(), null);
         printString(" " + arg.getOperator() + " ");
-        emitArg(arg.getRight(), null);
+        emitArg(arg.getRightOperand(), null);
     }
 
     protected void emitCastArg(CastArg arg) {
         printString("((");
         emitType(arg.getType());
         printString(") ");
-        emitArg(arg.getVal(), null);
+        emitArg(arg.getValue(), null);
         printString(")");
     }
 

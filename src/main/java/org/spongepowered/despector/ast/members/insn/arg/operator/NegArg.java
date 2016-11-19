@@ -24,6 +24,8 @@
  */
 package org.spongepowered.despector.ast.members.insn.arg.operator;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
 import org.spongepowered.despector.ast.members.insn.arg.Instruction;
 
@@ -37,7 +39,7 @@ public class NegArg implements Instruction {
     private Instruction val;
 
     public NegArg(Instruction val) {
-        this.val = val;
+        this.val = checkNotNull(val, "val");
     }
 
     public Instruction getOperand() {
@@ -45,7 +47,7 @@ public class NegArg implements Instruction {
     }
 
     public void setOperand(Instruction insn) {
-        this.val = insn;
+        this.val = checkNotNull(insn, "val");
     }
 
     @Override

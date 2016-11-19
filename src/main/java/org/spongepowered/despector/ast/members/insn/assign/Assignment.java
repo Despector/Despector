@@ -24,6 +24,8 @@
  */
 package org.spongepowered.despector.ast.members.insn.assign;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import org.spongepowered.despector.ast.members.insn.Statement;
 import org.spongepowered.despector.ast.members.insn.arg.Instruction;
 
@@ -35,7 +37,7 @@ public abstract class Assignment implements Statement {
     protected Instruction val;
 
     protected Assignment(Instruction val) {
-        this.val = val;
+        this.val = checkNotNull(val, "val");
     }
 
     public Instruction getValue() {
@@ -43,7 +45,7 @@ public abstract class Assignment implements Statement {
     }
 
     public void setValue(Instruction insn) {
-        this.val = insn;
+        this.val = checkNotNull(insn, "insn");
     }
 
 }

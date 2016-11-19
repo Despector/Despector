@@ -31,10 +31,6 @@ public class NullConstantArg extends ConstantArg {
     public NullConstantArg() {
     }
 
-    public Object getConstant() {
-        return null;
-    }
-
     @Override
     public String inferType() {
         return "null";

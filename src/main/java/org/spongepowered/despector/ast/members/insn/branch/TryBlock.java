@@ -24,6 +24,8 @@
  */
 package org.spongepowered.despector.ast.members.insn.branch;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import com.google.common.collect.Lists;
 import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
 import org.spongepowered.despector.ast.members.insn.Statement;
@@ -37,11 +39,15 @@ public class TryBlock implements Statement {
     private final List<CatchBlock> catch_blocks = Lists.newArrayList();
 
     public TryBlock(StatementBlock block) {
-        this.block = block;
+        this.block = checkNotNull(block, "block");
     }
 
     public StatementBlock getTryBlock() {
         return this.block;
+    }
+
+    public void setBlock(StatementBlock block) {
+        this.block = checkNotNull(block, "block");
     }
 
     public List<CatchBlock> getCatchBlocks() {

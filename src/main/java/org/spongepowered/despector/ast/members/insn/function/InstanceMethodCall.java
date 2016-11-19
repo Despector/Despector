@@ -24,6 +24,8 @@
  */
 package org.spongepowered.despector.ast.members.insn.function;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
 import org.spongepowered.despector.ast.members.insn.arg.InstanceFunctionArg;
 import org.spongepowered.despector.ast.members.insn.arg.Instruction;
@@ -33,11 +35,11 @@ import org.spongepowered.despector.ast.members.insn.arg.Instruction;
  */
 public class InstanceMethodCall extends MethodCall {
 
-    private final Instruction callee;
+    private Instruction callee;
 
     public InstanceMethodCall(String name, String desc, String owner, Instruction[] args, Instruction call) {
         super(name, desc, owner, args);
-        this.callee = call;
+        this.callee = checkNotNull(call, "callee");
     }
 
     public InstanceMethodCall(InstanceFunctionArg arg) {
@@ -47,6 +49,10 @@ public class InstanceMethodCall extends MethodCall {
 
     public Instruction getCallee() {
         return this.callee;
+    }
+
+    public void setCallee(Instruction callee) {
+        this.callee = checkNotNull(callee, "callee");
     }
 
     @Override
@@ -60,7 +66,7 @@ public class InstanceMethodCall extends MethodCall {
     public String toString() {
         StringBuilder params = new StringBuilder();
         for (int i = 0; i < this.params.length; i++) {
-            params.append(this.params[i].toString());
+            params.append(this.params[i]);
             if (i < this.params.length - 1) {
                 params.append(", ");
             }

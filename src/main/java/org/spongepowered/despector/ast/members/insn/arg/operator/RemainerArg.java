@@ -47,9 +47,4 @@ public class RemainerArg extends OperatorArg {
         super.accept(visitor);
     }
 
-    @Override
-    public String toString() {
-        return this.left.toString() + " % " + this.right.toString();
-    }
-
 }

@@ -24,6 +24,8 @@
  */
 package org.spongepowered.despector.ast.members.insn.function;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
 import org.spongepowered.despector.ast.members.insn.Statement;
 import org.spongepowered.despector.ast.members.insn.arg.Instruction;
@@ -34,20 +36,24 @@ import org.spongepowered.despector.util.TypeHelper;
  */
 public abstract class MethodCall implements Statement {
 
-    protected final String        method_name;
-    protected final String        method_desc;
-    protected final String        method_owner;
-    protected final Instruction[] params;
+    protected String method_name;
+    protected String method_desc;
+    protected String method_owner;
+    protected Instruction[] params;
 
     public MethodCall(String name, String desc, String owner, Instruction[] args) {
-        this.method_name = name;
-        this.method_desc = desc;
-        this.method_owner = owner;
-        this.params = args;
+        this.method_name = checkNotNull(name, "name");
+        this.method_desc = checkNotNull(desc, "desc");
+        this.method_owner = checkNotNull(owner, "owner");
+        this.params = checkNotNull(args, "args");
     }
 
     public String getMethodName() {
         return this.method_name;
+    }
+
+    public void setMethodName(String name) {
+        this.method_name = checkNotNull(name, "name");
     }
 
     public String getMethodDescription() {
@@ -58,12 +64,24 @@ public abstract class MethodCall implements Statement {
         return TypeHelper.getRet(this.method_desc);
     }
 
+    public void setMethodDescription(String desc) {
+        this.method_desc = checkNotNull(desc, "desc");
+    }
+
     public String getOwner() {
         return this.method_owner;
     }
 
+    public void setOwner(String type) {
+        this.method_owner = checkNotNull(type, "owner");
+    }
+
     public Instruction[] getParams() {
         return this.params;
+    }
+
+    public void setParameters(Instruction... args) {
+        this.params = checkNotNull(args, "args");
     }
 
     @Override

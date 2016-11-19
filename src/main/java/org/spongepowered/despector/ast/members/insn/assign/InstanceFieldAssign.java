@@ -24,20 +24,26 @@
  */
 package org.spongepowered.despector.ast.members.insn.assign;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
 import org.spongepowered.despector.ast.members.insn.arg.Instruction;
 
 public class InstanceFieldAssign extends FieldAssign {
 
-    private final Instruction owner;
+    private Instruction owner;
 
     public InstanceFieldAssign(String field_name, String type_desc, String owner_type, Instruction owner, Instruction val) {
         super(field_name, type_desc, owner_type, val);
-        this.owner = owner;
+        this.owner = checkNotNull(owner, "owner");
     }
 
-    public Instruction getOwnerInsn() {
+    public Instruction getOwner() {
         return this.owner;
+    }
+
+    public void setOwner(Instruction owner) {
+        this.owner = checkNotNull(owner, "owner");
     }
 
     @Override
@@ -49,7 +55,7 @@ public class InstanceFieldAssign extends FieldAssign {
 
     @Override
     public String toString() {
-        return this.owner.toString() + "." + this.field_name + " = " + this.val.toString() + ";";
+        return this.owner + "." + this.field_name + " = " + this.val + ";";
     }
 
 }

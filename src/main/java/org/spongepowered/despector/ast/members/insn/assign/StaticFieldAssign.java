@@ -41,7 +41,7 @@ public class StaticFieldAssign extends FieldAssign {
 
     @Override
     public String toString() {
-        return this.owner + "." + this.field_name + " = " + this.val.toString() + ";";
+        return this.owner_type + "." + this.field_name + " = " + this.val + ";";
     }
 
 }

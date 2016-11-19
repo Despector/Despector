@@ -24,6 +24,8 @@
  */
 package org.spongepowered.despector.ast.members.insn.branch.condition;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import com.google.common.collect.Lists;
 import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
 
@@ -34,14 +36,14 @@ import java.util.List;
  */
 public class AndCondition extends Condition {
 
-    private List<Condition> args;
+    private final List<Condition> args;
 
     public AndCondition(Condition... args) {
-        this.args = Lists.newArrayList(args);
+        this.args = Lists.newArrayList(checkNotNull(args, "args"));
     }
 
     public AndCondition(List<Condition> args) {
-        this.args = args;
+        this.args = checkNotNull(args, "args");
     }
 
     public List<Condition> getOperands() {
@@ -60,7 +62,7 @@ public class AndCondition extends Condition {
     public String toString() {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < this.args.size(); i++) {
-            sb.append(this.args.get(i).toString());
+            sb.append(this.args.get(i));
             if (i < this.args.size() - 1) {
                 sb.append(" && ");
             }

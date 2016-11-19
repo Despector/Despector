@@ -39,7 +39,7 @@ public class StaticFieldArg extends FieldArg {
 
     @Override
     public String toString() {
-        return this.owner + "." + this.field_name;
+        return this.owner_type + "." + this.field_name;
     }
 
 }

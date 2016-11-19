@@ -24,6 +24,7 @@
  */
 package org.spongepowered.despector.ast.members.insn.branch.condition;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static org.objectweb.asm.Opcodes.*;
 
 import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
@@ -88,7 +89,7 @@ public class CompareCondition extends Condition {
         private CompareOp inverse;
 
         CompareOp(String str) {
-            this.str = str;
+            this.str = checkNotNull(str, "str");
         }
 
         public String asString() {
@@ -105,17 +106,25 @@ public class CompareCondition extends Condition {
     private CompareOp op;
 
     public CompareCondition(Instruction left, Instruction right, CompareOp op) {
-        this.left = left;
-        this.right = right;
-        this.op = op;
+        this.left = checkNotNull(left, "left");
+        this.right = checkNotNull(right, "right");
+        this.op = checkNotNull(op, "op");
     }
 
     public Instruction getLeft() {
         return this.left;
     }
 
+    public void setLeft(Instruction left) {
+        this.left = checkNotNull(left, "left");
+    }
+
     public Instruction getRight() {
         return this.right;
+    }
+
+    public void setRight(Instruction right) {
+        this.right = checkNotNull(right, "right");
     }
 
     public CompareOp getOp() {
@@ -123,7 +132,7 @@ public class CompareCondition extends Condition {
     }
 
     public void setOp(CompareOp op) {
-        this.op = op;
+        this.op = checkNotNull(op, "op");
     }
 
     @Override
@@ -135,7 +144,7 @@ public class CompareCondition extends Condition {
 
     @Override
     public String toString() {
-        return this.left.toString() + this.op.asString() + this.right.toString();
+        return this.left + this.op.asString() + this.right;
     }
 
 }

@@ -24,19 +24,24 @@
  */
 package org.spongepowered.despector.ast.members.insn.arg.cst;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import org.objectweb.asm.Type;
 import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
 
 public class TypeConstantArg extends ConstantArg {
 
-    private final Type cst;
+    private Type cst;
 
     public TypeConstantArg(Type cst) {
-        this.cst = cst;
+        this.cst = checkNotNull(cst, "type");
     }
 
     public Type getConstant() {
         return this.cst;
+    }
+
+    public void setConstant(Type type) {
+        this.cst = checkNotNull(type, "type");
     }
 
     @Override

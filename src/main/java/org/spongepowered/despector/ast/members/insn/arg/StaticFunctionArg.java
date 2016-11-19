@@ -24,25 +24,31 @@
  */
 package org.spongepowered.despector.ast.members.insn.arg;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
 import org.spongepowered.despector.util.TypeHelper;
 
 public class StaticFunctionArg implements Instruction {
 
-    private final String method_name;
-    private final String method_desc;
-    private final String method_owner;
-    private final Instruction[] params;
+    private String method_name;
+    private String method_desc;
+    private String method_owner;
+    private Instruction[] params;
 
     public StaticFunctionArg(String name, String desc, String owner, Instruction[] args) {
-        this.method_name = name;
-        this.method_desc = desc;
-        this.method_owner = owner;
-        this.params = args;
+        this.method_name = checkNotNull(name, "name");
+        this.method_desc = checkNotNull(desc, "desc");
+        this.method_owner = checkNotNull(owner, "owner");
+        this.params = checkNotNull(args, "args");
     }
 
     public String getMethodName() {
         return this.method_name;
+    }
+
+    public void setMethodName(String name) {
+        this.method_name = checkNotNull(name, "name");
     }
 
     public String getMethodDescription() {
@@ -53,12 +59,24 @@ public class StaticFunctionArg implements Instruction {
         return TypeHelper.descToType(this.method_desc);
     }
 
+    public void setMethodDescription(String desc) {
+        this.method_desc = checkNotNull(desc, "desc");
+    }
+
     public String getOwner() {
         return this.method_owner;
     }
 
+    public void setOwner(String owner) {
+        this.method_owner = checkNotNull(owner, "owner");
+    }
+
     public Instruction[] getParams() {
         return this.params;
+    }
+
+    public void setParameters(Instruction... args) {
+        this.params = checkNotNull(args, "args");
     }
 
     @Override
@@ -69,7 +87,7 @@ public class StaticFunctionArg implements Instruction {
     @Override
     public void accept(InstructionVisitor visitor) {
         visitor.visitStaticFunctionArg(this);
-        for(Instruction i: this.params) {
+        for (Instruction i : this.params) {
             i.accept(visitor);
         }
     }
@@ -78,7 +96,7 @@ public class StaticFunctionArg implements Instruction {
     public String toString() {
         StringBuilder params = new StringBuilder();
         for (int i = 0; i < this.params.length; i++) {
-            params.append(this.params[i].toString());
+            params.append(this.params[i]);
             if (i < this.params.length - 1) {
                 params.append(", ");
             }

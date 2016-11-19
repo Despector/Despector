@@ -24,6 +24,8 @@
  */
 package org.spongepowered.despector.ast.members.insn.arg;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
 import org.spongepowered.despector.util.TypeHelper;
 
@@ -34,20 +36,28 @@ import org.spongepowered.despector.util.TypeHelper;
  */
 public class CastArg implements Instruction {
 
-    private final String type;
-    private final Instruction val;
+    private String type;
+    private Instruction val;
 
     public CastArg(String type, Instruction val) {
-        this.type = type;
-        this.val = val;
+        this.type = checkNotNull(type, "type");
+        this.val = checkNotNull(val, "val");
     }
 
     public String getType() {
         return this.type;
     }
 
-    public Instruction getVal() {
+    public void setType(String type) {
+        this.type = checkNotNull(type, "type");
+    }
+
+    public Instruction getValue() {
         return this.val;
+    }
+
+    public void setValue(Instruction val) {
+        this.val = checkNotNull(val, "val");
     }
 
     @Override
@@ -63,7 +73,7 @@ public class CastArg implements Instruction {
 
     @Override
     public String toString() {
-        return "((" + TypeHelper.descToType(this.type) + ") " + this.val.toString() + ")";
+        return "((" + TypeHelper.descToType(this.type) + ") " + this.val + ")";
     }
 
 }

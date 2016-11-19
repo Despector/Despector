@@ -24,24 +24,34 @@
  */
 package org.spongepowered.despector.ast.members.insn.arg;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
 
 public class CompareArg implements Instruction {
 
-    protected final Instruction left;
-    protected final Instruction right;
+    protected Instruction left;
+    protected Instruction right;
 
     public CompareArg(Instruction left, Instruction right) {
-        this.left = left;
-        this.right = right;
+        this.left = checkNotNull(left, "left");
+        this.right = checkNotNull(right, "right");
     }
 
-    public Instruction getLeft() {
+    public Instruction getLeftOperand() {
         return this.left;
     }
 
-    public Instruction getRight() {
+    public void setLeftOperand(Instruction left) {
+        this.left = checkNotNull(left, "left");
+    }
+
+    public Instruction getRightOperand() {
         return this.right;
+    }
+
+    public void setRightOperand(Instruction right) {
+        this.right = checkNotNull(right, "right");
     }
 
     @Override
@@ -58,6 +68,6 @@ public class CompareArg implements Instruction {
 
     @Override
     public String toString() {
-        return "Integer.signum(" + this.right.toString() + " - " + this.left.toString() + ");";
+        return "Integer.signum(" + this.right + " - " + this.left + ");";
     }
 }

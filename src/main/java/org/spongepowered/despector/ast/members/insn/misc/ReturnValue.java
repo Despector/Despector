@@ -24,6 +24,8 @@
  */
 package org.spongepowered.despector.ast.members.insn.misc;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
 import org.spongepowered.despector.ast.members.insn.Statement;
 import org.spongepowered.despector.ast.members.insn.arg.Instruction;
@@ -36,7 +38,7 @@ public class ReturnValue implements Statement {
     private Instruction value;
 
     public ReturnValue(Instruction val) {
-        this.value = val;
+        this.value = checkNotNull(val, "value");
     }
 
     public Instruction getValue() {
@@ -44,7 +46,7 @@ public class ReturnValue implements Statement {
     }
 
     public void setValue(Instruction insn) {
-        this.value = insn;
+        this.value = checkNotNull(insn, "value");
     }
 
     @Override
@@ -55,7 +57,7 @@ public class ReturnValue implements Statement {
 
     @Override
     public String toString() {
-        return "return " + this.value.toString() + ";";
+        return "return " + this.value + ";";
     }
 
 }
