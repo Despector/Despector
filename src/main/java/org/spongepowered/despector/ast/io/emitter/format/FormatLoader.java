@@ -24,25 +24,17 @@
  */
 package org.spongepowered.despector.ast.io.emitter.format;
 
-import com.google.common.collect.Lists;
+import java.io.IOException;
+import java.nio.file.Path;
 
-import java.util.List;
+public interface FormatLoader {
 
-public class EmitterFormat {
-
-    public final List<String> import_order = Lists.newArrayList();
-
-    private static final EmitterFormat default_format = new EmitterFormat();
-
-    public static EmitterFormat defaults() {
-        return default_format;
+    public static FormatLoader getLoader(String name) {
+        if ("eclipse".equalsIgnoreCase(name)) {
+            return EclipseFormatLoader.instance;
+        }
+        throw new IllegalArgumentException("Unknown formatter type: " + name);
     }
 
-    static {
-        default_format.import_order.add("/#");
-        default_format.import_order.add("");
-        default_format.import_order.add("java");
-        default_format.import_order.add("javax");
-    }
-
+    EmitterFormat load(Path formatter, Path import_order) throws IOException;
 }

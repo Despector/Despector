@@ -28,6 +28,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import org.spongepowered.despector.ast.AccessModifier;
+import org.spongepowered.despector.ast.io.emitter.format.EmitterFormat;
 import org.spongepowered.despector.ast.io.insn.Locals.Local;
 import org.spongepowered.despector.ast.io.insn.Locals.LocalInstance;
 import org.spongepowered.despector.ast.members.FieldEntry;
@@ -107,6 +108,7 @@ public class SourceEmitter implements ClassEmitter {
 
     private static final String[] indentations = new String[] {"", "    ", "        ", "            ", "                ", "                    ",};
 
+    private EmitterFormat format;
     private Writer output;
     private StringBuilder buffer = null;
     private Set<LocalInstance> defined_locals = Sets.newHashSet();
@@ -116,8 +118,9 @@ public class SourceEmitter implements ClassEmitter {
 
     private int indentation = 0;
 
-    public SourceEmitter(Writer output) {
+    public SourceEmitter(Writer output, EmitterFormat format) {
         this.output = output;
+        this.format = format;
     }
 
     // TODO Should make this follow a configurable format (perhaps an
@@ -147,9 +150,6 @@ public class SourceEmitter implements ClassEmitter {
         // buffer and then sort and emit the imports into the actual output and
         // then finally replay the buffer into the output.
 
-        List<String> sorted_imports = Lists.newArrayList(this.imports);
-        Collections.sort(sorted_imports);
-
         StringBuilder buf = this.buffer;
         this.buffer = null;
 
@@ -162,14 +162,7 @@ public class SourceEmitter implements ClassEmitter {
             printString(";\n\n");
         }
 
-        for (String import_ : sorted_imports) {
-            printString("import ");
-            printString(import_);
-            printString(";\n");
-        }
-        if (!sorted_imports.isEmpty()) {
-            printString("\n");
-        }
+        emitImports();
 
         // Replay the buffer.
         try {
@@ -180,6 +173,33 @@ public class SourceEmitter implements ClassEmitter {
         this.imports = null;
         this.buffer = null;
         this.this$ = null;
+    }
+
+    protected void emitImports() {
+        List<String> imports = Lists.newArrayList(this.imports);
+        for (String group : this.format.import_order) {
+            if (group.startsWith("/#")) {
+                // don't have static imports yet
+                continue;
+            }
+            List<String> group_imports = Lists.newArrayList();
+            for (Iterator<String> it = imports.iterator(); it.hasNext();) {
+                String import_ = it.next();
+                if (import_.startsWith(group)) {
+                    group_imports.add(import_);
+                    it.remove();
+                }
+            }
+            Collections.sort(group_imports);
+            for (String import_ : group_imports) {
+                printString("import ");
+                printString(import_);
+                printString(";\n");
+            }
+            if (!group_imports.isEmpty()) {
+                printString("\n");
+            }
+        }
     }
 
     protected void emitClass(ClassEntry type) {

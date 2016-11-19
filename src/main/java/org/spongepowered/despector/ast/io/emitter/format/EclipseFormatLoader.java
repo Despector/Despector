@@ -24,12 +24,45 @@
  */
 package org.spongepowered.despector.ast.io.emitter.format;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 import java.nio.file.Path;
 
-public class EclipseFormatLoader {
+public class EclipseFormatLoader implements FormatLoader {
 
-    public static EmitterFormat load(Path config) {
+    public static final EclipseFormatLoader instance = new EclipseFormatLoader();
+
+    private EclipseFormatLoader() {
+    }
+
+    @Override
+    public EmitterFormat load(Path formatter, Path import_order) throws IOException {
         EmitterFormat format = new EmitterFormat();
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(import_order.toFile()))) {
+            String line = null;
+            while ((line = reader.readLine()) != null) {
+                if (line.startsWith("#")) {
+                    continue;
+                }
+                String[] parts = line.split("=");
+                if (parts.length != 2) {
+                    System.err.println("Malformed importorder file");
+                    continue;
+                }
+                int part = Integer.parseInt(parts[0]);
+                String path = parts[1];
+                if (part < format.import_order.size()) {
+                    format.import_order.set(part, path);
+                } else {
+                    while (part > format.import_order.size()) {
+                        format.import_order.add(null);
+                    }
+                    format.import_order.add(path);
+                }
+            }
+        }
 
         return format;
     }

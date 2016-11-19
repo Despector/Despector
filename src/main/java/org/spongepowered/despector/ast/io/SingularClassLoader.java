@@ -39,6 +39,7 @@ import org.objectweb.asm.tree.MethodNode;
 import org.spongepowered.despector.ast.AccessModifier;
 import org.spongepowered.despector.ast.SourceSet;
 import org.spongepowered.despector.ast.io.emitter.SourceEmitter;
+import org.spongepowered.despector.ast.io.emitter.format.EmitterFormat;
 import org.spongepowered.despector.ast.io.insn.InstructionTreeBuilder;
 import org.spongepowered.despector.ast.members.FieldEntry;
 import org.spongepowered.despector.ast.members.MethodEntry;
@@ -171,7 +172,7 @@ public class SingularClassLoader {
         }
         if (ConfigManager.getConfig().emit_source_on_load) {
             PrintWriter out = new PrintWriter(System.out);
-            SourceEmitter emitter = new SourceEmitter(out);
+            SourceEmitter emitter = new SourceEmitter(out, EmitterFormat.defaults());
             emitter.emitType(entry);
             out.flush();
         }

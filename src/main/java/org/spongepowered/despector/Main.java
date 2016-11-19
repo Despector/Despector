@@ -31,6 +31,8 @@ import org.spongepowered.despector.ast.io.DirectoryWalker;
 import org.spongepowered.despector.ast.io.JarWalker;
 import org.spongepowered.despector.ast.io.SingularClassLoader;
 import org.spongepowered.despector.ast.io.emitter.SourceEmitter;
+import org.spongepowered.despector.ast.io.emitter.format.EmitterFormat;
+import org.spongepowered.despector.ast.io.emitter.format.FormatLoader;
 import org.spongepowered.despector.ast.type.TypeEntry;
 import org.spongepowered.despector.config.ConfigManager;
 
@@ -107,14 +109,18 @@ public class Main {
             System.err.println("No sources found.");
             return;
         }
-
+        
+        Path formatter_path = Paths.get(".").resolve(ConfigManager.getConfig().emitter.formatting_path);
+        Path importorder_path = Paths.get(".").resolve(ConfigManager.getConfig().emitter.imports_path);
+        FormatLoader formatter_loader = FormatLoader.getLoader(ConfigManager.getConfig().emitter.formatting_type);
+        EmitterFormat formatter = formatter_loader.load(formatter_path, importorder_path);
         for (TypeEntry type : source.getAllClasses()) {
             Path out = output.resolve(type.getName() + ".java");
             if (!Files.exists(out.getParent())) {
                 Files.createDirectories(out.getParent());
             }
             try (FileWriter writer = new FileWriter(out.toFile())) {
-                SourceEmitter emitter = new SourceEmitter(writer);
+                SourceEmitter emitter = new SourceEmitter(writer, formatter);
                 emitter.emitType(type);
             }
         }
