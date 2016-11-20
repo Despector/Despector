@@ -106,8 +106,6 @@ import java.util.Set;
  */
 public class SourceEmitter implements ClassEmitter {
 
-    private static final String[] indentations = new String[] {"", "    ", "        ", "            ", "                ", "                    ",};
-
     private EmitterFormat format;
     private Writer output;
     private StringBuilder buffer = null;
@@ -122,9 +120,6 @@ public class SourceEmitter implements ClassEmitter {
         this.output = output;
         this.format = format;
     }
-
-    // TODO Should make this follow a configurable format (perhaps an
-    // eclipse formatter export file)
 
     @Override
     public void emitType(TypeEntry type) {
@@ -156,13 +151,26 @@ public class SourceEmitter implements ClassEmitter {
         String pkg = type.getName();
         int last = pkg.lastIndexOf('.');
         if (last != -1) {
+            for (int i = 0; i < this.format.blank_lines_before_package; i++) {
+                printString("\n");
+            }
             pkg = pkg.substring(0, last);
             printString("package ");
             printString(pkg);
-            printString(";\n\n");
+            printString(";\n");
+        }
+        int lines = Math.max(this.format.blank_lines_after_package, this.format.blank_lines_before_imports);
+        for (int i = 0; i < lines; i++) {
+            printString("\n");
         }
 
         emitImports();
+
+        if (!this.imports.isEmpty()) {
+            for (int i = 0; i < this.format.blank_lines_after_imports; i++) {
+                printString("\n");
+            }
+        }
 
         // Replay the buffer.
         try {
@@ -197,7 +205,9 @@ public class SourceEmitter implements ClassEmitter {
                 printString(";\n");
             }
             if (!group_imports.isEmpty()) {
-                printString("\n");
+                for (int i = 0; i < this.format.blank_lines_between_import_groups; i++) {
+                    printString("\n");
+                }
             }
         }
     }
@@ -223,23 +233,32 @@ public class SourceEmitter implements ClassEmitter {
         }
         name = name.replace('$', '.');
         printString(name);
-        printString(" ");
         if (!type.getSuperclass().equals("Ljava/lang/Object;")) {
-            printString("extends ");
+            printString(" extends ");
             emitTypeName(type.getSuperclassName());
-            printString(" ");
         }
         if (!type.getInterfaces().isEmpty()) {
-            printString("implements ");
+            printString(" implements ");
             for (int i = 0; i < type.getInterfaces().size(); i++) {
                 emitType(type.getInterfaces().get(i));
                 if (i < type.getInterfaces().size() - 1) {
-                    printString(", ");
+                    if (this.format.insert_space_before_comma_in_superinterfaces) {
+                        printString(" ");
+                    }
+                    printString(",");
+                    if (this.format.insert_space_after_comma_in_superinterfaces) {
+                        printString(" ");
+                    }
                 }
             }
+        }
+        if(this.format.insert_space_before_opening_brace_in_type_declaration) {
             printString(" ");
         }
-        printString("{\n\n");
+        printString("{\n");
+        for(int i = 0; i < this.format.blank_lines_before_first_class_body_declaration; i++) {
+            printString("\n");
+        }
 
         // Ordering is static fields -> static methods -> instance fields ->
         // instance methods
@@ -332,15 +351,22 @@ public class SourceEmitter implements ClassEmitter {
         }
         name = name.replace('$', '.');
         printString(name);
-        printString(" ");
         if (!type.getInterfaces().isEmpty()) {
-            printString(" implements");
+            printString(" implements ");
             for (int i = 0; i < type.getInterfaces().size(); i++) {
                 emitType(type.getInterfaces().get(i));
                 if (i < type.getInterfaces().size() - 1) {
-                    printString(", ");
+                    if (this.format.insert_space_before_comma_in_superinterfaces) {
+                        printString(" ");
+                    }
+                    printString(",");
+                    if (this.format.insert_space_after_comma_in_superinterfaces) {
+                        printString(" ");
+                    }
                 }
             }
+        }
+        if(this.format.insert_space_before_opening_brace_in_type_declaration) {
             printString(" ");
         }
         printString("{\n\n");
@@ -495,15 +521,22 @@ public class SourceEmitter implements ClassEmitter {
         }
         printString("interface ");
         printString(name);
-        printString(" ");
         if (!type.getInterfaces().isEmpty()) {
-            printString(" extends");
+            printString(" extends ");
             for (int i = 0; i < type.getInterfaces().size(); i++) {
                 emitType(type.getInterfaces().get(i));
                 if (i < type.getInterfaces().size() - 1) {
-                    printString(", ");
+                    if (this.format.insert_space_before_comma_in_superinterfaces) {
+                        printString(" ");
+                    }
+                    printString(",");
+                    if (this.format.insert_space_after_comma_in_superinterfaces) {
+                        printString(" ");
+                    }
                 }
             }
+        }
+        if(this.format.insert_space_before_opening_brace_in_type_declaration) {
             printString(" ");
         }
         printString("{\n\n");
@@ -1582,11 +1615,13 @@ public class SourceEmitter implements ClassEmitter {
     }
 
     protected void printIndentation() {
-        if (this.indentation < indentations.length) {
-            printString(indentations[this.indentation]);
+        if (this.format.indent_with_spaces) {
+            for (int i = 0; i < this.indentation * this.format.indentation_size; i++) {
+                printString(" ");
+            }
         } else {
             for (int i = 0; i < this.indentation; i++) {
-                printString("    ");
+                printString("\t");
             }
         }
     }
