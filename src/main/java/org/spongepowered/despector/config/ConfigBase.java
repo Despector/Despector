@@ -24,13 +24,18 @@
  */
 package org.spongepowered.despector.config;
 
+import com.google.common.collect.Lists;
 import ninja.leaping.configurate.objectmapping.Setting;
 import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
+
+import java.util.List;
 
 public class ConfigBase {
 
     @Setting(comment = "Emitter configuration")
     public EmitterConfig emitter = new EmitterConfig();
+    @Setting(comment = "Cleanup configuration")
+    public CleanupConfig cleanup = new CleanupConfig();
     
     @Setting(value = "emit-source-on-load", comment = "Emits source when loading classes (useful when debugging the decompiler).")
     public boolean emit_source_on_load = Boolean.valueOf(System.getProperty("despector.debug.emit", "false"));
@@ -47,6 +52,14 @@ public class ConfigBase {
         @Setting(value = "formatting-type", comment = "One of: eclipse,intellij")
         public String formatting_type = "eclipse";
 
+    }
+
+    @ConfigSerializable
+    public static class CleanupConfig {
+
+        @Setting(value = "operations", comment = "Cleanup operations to apply before emitting")
+        public List<String> operations = Lists.newArrayList();
+        
     }
 
 }

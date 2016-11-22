@@ -33,6 +33,8 @@ import org.spongepowered.despector.ast.io.SingularClassLoader;
 import org.spongepowered.despector.ast.io.emitter.SourceEmitter;
 import org.spongepowered.despector.ast.io.emitter.format.EmitterFormat;
 import org.spongepowered.despector.ast.io.emitter.format.FormatLoader;
+import org.spongepowered.despector.ast.transform.TypeTransformer;
+import org.spongepowered.despector.ast.transform.cleanup.CleanupOperations;
 import org.spongepowered.despector.ast.type.TypeEntry;
 import org.spongepowered.despector.config.ConfigManager;
 
@@ -117,6 +119,25 @@ public class Main {
         if (source.getAllClasses().isEmpty()) {
             System.err.println("No sources found.");
             return;
+        }
+
+        if (!ConfigManager.getConfig().cleanup.operations.isEmpty()) {
+            List<TypeTransformer> transformers = Lists.newArrayList();
+            for (String operation : ConfigManager.getConfig().cleanup.operations) {
+                TypeTransformer transformer = CleanupOperations.getOperation(operation);
+                if (transformer == null) {
+                    System.err.println("Unknown cleanup operation: " + operation);
+                } else {
+                    transformers.add(transformer);
+                }
+            }
+            if (!transformers.isEmpty()) {
+                for (TypeEntry type : source.getAllClasses()) {
+                    for (TypeTransformer transformer : transformers) {
+                        transformer.transform(type);
+                    }
+                }
+            }
         }
 
         for (TypeEntry type : source.getAllClasses()) {
