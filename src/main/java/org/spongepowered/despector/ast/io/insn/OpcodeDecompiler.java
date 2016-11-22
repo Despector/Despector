@@ -1385,9 +1385,8 @@ public class OpcodeDecompiler {
         // Method invocation
         OpHandler method_invoke = (state, next) -> {
             MethodInsnNode method = (MethodInsnNode) next;
-            String[] param_types = TypeHelper.splitSig(method.desc);
             String ret = TypeHelper.getRet(method.desc);
-            Instruction[] args = new Instruction[param_types.length];
+            Instruction[] args = new Instruction[TypeHelper.paramCount(method.desc)];
             for (int i = args.length - 1; i >= 0; i--) {
                 args[i] = state.pop();
             }
@@ -1407,9 +1406,8 @@ public class OpcodeDecompiler {
         handlers[INVOKESPECIAL] = method_invoke;
         handlers[INVOKESTATIC] = (state, next) -> {
             MethodInsnNode method = (MethodInsnNode) next;
-            String[] param_types = TypeHelper.splitSig(method.desc);
             String ret = TypeHelper.getRet(method.desc);
-            Instruction[] args = new Instruction[param_types.length];
+            Instruction[] args = new Instruction[TypeHelper.paramCount(method.desc)];
             for (int i = args.length - 1; i >= 0; i--) {
                 args[i] = state.pop();
             }
@@ -1445,8 +1443,7 @@ public class OpcodeDecompiler {
                 state.handleIntermediate(next);
             }
             MethodInsnNode ctor = (MethodInsnNode) next;
-            String[] ctor_params = TypeHelper.splitSig(ctor.desc);
-            Instruction[] args = new Instruction[ctor_params.length];
+            Instruction[] args = new Instruction[TypeHelper.paramCount(ctor.desc)];
             for (int i = 0; i < args.length; i++) {
                 args[i] = state.pop();
             }

@@ -247,6 +247,9 @@ public class SourceEmitter implements ClassEmitter {
         this.indentation++;
         if (!type.getStaticFields().isEmpty()) {
             for (FieldEntry field : type.getStaticFields()) {
+                if (field.isSynthetic()) {
+                    continue;
+                }
                 printIndentation();
                 emitField(field);
                 printString(";\n");
@@ -265,6 +268,9 @@ public class SourceEmitter implements ClassEmitter {
         }
         if (!type.getFields().isEmpty()) {
             for (FieldEntry field : type.getFields()) {
+                if (field.isSynthetic()) {
+                    continue;
+                }
                 printIndentation();
                 emitField(field);
                 printString(";\n");
@@ -438,6 +444,9 @@ public class SourceEmitter implements ClassEmitter {
         }
         if (!type.getFields().isEmpty()) {
             for (FieldEntry field : type.getFields()) {
+                if (field.isSynthetic()) {
+                    continue;
+                }
                 printIndentation();
                 emitField(field);
                 printString(";\n");
@@ -497,6 +506,9 @@ public class SourceEmitter implements ClassEmitter {
         this.indentation++;
         if (!type.getStaticFields().isEmpty()) {
             for (FieldEntry field : type.getStaticFields()) {
+                if (field.isSynthetic()) {
+                    continue;
+                }
                 printIndentation();
                 emitField(field);
                 printString(";\n");
@@ -532,6 +544,9 @@ public class SourceEmitter implements ClassEmitter {
     }
 
     protected boolean checkImport(String type) {
+        if(type.indexOf('$') != -1) {
+            type = type.substring(0, type.indexOf('$'));
+        }
         if (this.imports == null) {
             return false;
         }
@@ -561,7 +576,7 @@ public class SourceEmitter implements ClassEmitter {
                 printString(" ");
             }
         }
-        if (method.getName().equals("<init>")) {
+        if ("<init>".equals(method.getName())) {
             emitTypeName(method.getOwnerName());
         } else {
             if (method.isStatic()) {
@@ -579,16 +594,24 @@ public class SourceEmitter implements ClassEmitter {
         }
         printString("(");
         StatementBlock block = method.getInstructions();
-        // If this is an enum type then we skip the first two ctor parameters
-        // (which are the index and name of the enum constant)
-        int start = this.this$ instanceof EnumEntry ? 2 : 0;
+        int start = 0;
+        if ("<init>".equals(method.getName()) && this.this$ instanceof EnumEntry) {
+            // If this is an enum type then we skip the first two ctor
+            // parameters
+            // (which are the index and name of the enum constant)
+            start += 2;
+        }
         for (int i = start; i < method.getParamTypes().size(); i++) {
+            int param_index = i;
+            if (!method.isStatic()) {
+                param_index++;
+            }
             emitType(method.getParamTypes().get(i));
             printString(" ");
             if (block == null) {
-                printString("local" + (i + 1));
+                printString("local" + param_index);
             } else {
-                Local local = block.getLocals().getLocal(i + 1);
+                Local local = block.getLocals().getLocal(param_index);
                 printString(local.getParameterInstance().getName());
             }
             if (i < method.getParamTypes().size() - 1) {
@@ -1196,6 +1219,7 @@ public class SourceEmitter implements ClassEmitter {
         if (name.endsWith("[]")) {
             emitTypeClassName(name.substring(0, name.length() - 2));
             printString("[]");
+            return;
         }
         if (name.indexOf('.') != -1) {
             if (name.startsWith("java.lang.")) {

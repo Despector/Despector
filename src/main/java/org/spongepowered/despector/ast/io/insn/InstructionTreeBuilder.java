@@ -51,15 +51,15 @@ public final class InstructionTreeBuilder {
             local.addLVT(node);
         }
         int offs = ((asm.access & Opcodes.ACC_STATIC) != 0) ? 0 : 1;
-        String[] param_types = TypeHelper.splitSig(asm.desc);
-        for (int i = 0; i < param_types.length + offs; i++) {
+        List<String> param_types = TypeHelper.splitSig(asm.desc);
+        for (int i = 0; i < param_types.size() + offs; i++) {
             Local local = locals.getLocal(i);
             local.setAsParameter();
             if (local.getLVT().isEmpty()) {
                 if (i < offs) {
                     local.setParameterInstance(new LocalInstance(local, "this", entry.getOwner(), -1, -1));
                 } else {
-                    local.setParameterInstance(new LocalInstance(local, "param" + i, param_types[i - offs], -1, -1));
+                    local.setParameterInstance(new LocalInstance(local, "param" + i, param_types.get(i - offs), -1, -1));
                 }
             } else {
                 LocalVariableNode lvt = local.getLVT().get(0);

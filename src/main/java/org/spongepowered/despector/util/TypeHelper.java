@@ -180,7 +180,7 @@ public final class TypeHelper {
         return count;
     }
 
-    public static String[] splitSig(String sig) {
+    public static List<String> splitSig(String sig) {
         if (sig == null) {
             return null;
         }
@@ -238,7 +238,7 @@ public final class TypeHelper {
             accu = "";
             is_array = false;
         }
-        return params.toArray(new String[params.size()]);
+        return params;
     }
 
     private static final Pattern DESC = Pattern.compile("\\([^\\)]*\\)(.*)");

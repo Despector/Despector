@@ -33,9 +33,9 @@ public class ConfigBase {
     public EmitterConfig emitter = new EmitterConfig();
     
     @Setting(value = "emit-source-on-load", comment = "Emits source when loading classes (useful when debugging the decompiler).")
-    public boolean emit_source_on_load = false;
+    public boolean emit_source_on_load = Boolean.valueOf(System.getProperty("despector.debug.emit", "false"));
     @Setting(value = "print-opcodes-on-error", comment = "Prints out opcodes of a method when it fails to decompile.")
-    public boolean print_opcodes_on_error = false;
+    public boolean print_opcodes_on_error = Boolean.valueOf(System.getProperty("despector.debug.printerrors", "false"));
 
     @ConfigSerializable
     public static class EmitterConfig {

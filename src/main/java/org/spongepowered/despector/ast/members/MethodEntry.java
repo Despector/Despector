@@ -154,6 +154,8 @@ public class MethodEntry extends AstEntry {
     public void setSignature(String signature) {
         this.signature = signature;
         this.return_type = TypeHelper.getRet(signature);
+        this.param_types.clear();
+        this.param_types.addAll(TypeHelper.splitSig(signature));
     }
 
     /**
