@@ -246,45 +246,52 @@ public class SourceEmitter implements ClassEmitter {
 
         this.indentation++;
         if (!type.getStaticFields().isEmpty()) {
+            boolean at_least_one = false;
             for (FieldEntry field : type.getStaticFields()) {
                 if (field.isSynthetic()) {
                     continue;
                 }
+                at_least_one = true;
                 printIndentation();
                 emitField(field);
                 printString(";\n");
             }
-            printString("\n");
+            if (at_least_one) {
+                printString("\n");
+            }
         }
         if (!type.getStaticMethods().isEmpty()) {
             for (MethodEntry mth : type.getStaticMethods()) {
                 if (mth.isSynthetic()) {
                     continue;
                 }
-                printIndentation();
                 emitMethod(mth);
                 printString("\n\n");
             }
         }
         if (!type.getFields().isEmpty()) {
+            boolean at_least_one = false;
             for (FieldEntry field : type.getFields()) {
                 if (field.isSynthetic()) {
                     continue;
                 }
+                at_least_one = true;
                 printIndentation();
                 emitField(field);
                 printString(";\n");
             }
-            printString("\n");
+            if (at_least_one) {
+                printString("\n");
+            }
         }
         if (!type.getMethods().isEmpty()) {
             for (MethodEntry mth : type.getMethods()) {
                 if (mth.isSynthetic()) {
                     continue;
                 }
-                printIndentation();
-                emitMethod(mth);
-                printString("\n\n");
+                if (emitMethod(mth)) {
+                    printString("\n\n");
+                }
             }
         }
         this.indentation--;
@@ -437,7 +444,6 @@ public class SourceEmitter implements ClassEmitter {
                 } else if (mth.isSynthetic()) {
                     continue;
                 }
-                printIndentation();
                 emitMethod(mth);
                 printString("\n\n");
             }
@@ -465,7 +471,6 @@ public class SourceEmitter implements ClassEmitter {
                     // skip emitting it
                     continue;
                 }
-                printIndentation();
                 emitMethod(mth);
                 printString("\n\n");
             }
@@ -505,22 +510,25 @@ public class SourceEmitter implements ClassEmitter {
 
         this.indentation++;
         if (!type.getStaticFields().isEmpty()) {
+            boolean at_least_one = false;
             for (FieldEntry field : type.getStaticFields()) {
                 if (field.isSynthetic()) {
                     continue;
                 }
+                at_least_one = true;
                 printIndentation();
                 emitField(field);
                 printString(";\n");
             }
-            printString("\n");
+            if (at_least_one) {
+                printString("\n");
+            }
         }
         if (!type.getStaticMethods().isEmpty()) {
             for (MethodEntry mth : type.getStaticMethods()) {
                 if (mth.isSynthetic()) {
                     continue;
                 }
-                printIndentation();
                 emitMethod(mth);
                 printString("\n\n");
             }
@@ -532,7 +540,6 @@ public class SourceEmitter implements ClassEmitter {
                 }
                 // TODO need something for emitting 'default' for default
                 // methods
-                printIndentation();
                 emitMethod(mth);
                 printString("\n\n");
             }
@@ -544,7 +551,7 @@ public class SourceEmitter implements ClassEmitter {
     }
 
     protected boolean checkImport(String type) {
-        if(type.indexOf('$') != -1) {
+        if (type.indexOf('$') != -1) {
             type = type.substring(0, type.indexOf('$'));
         }
         if (this.imports == null) {
@@ -558,9 +565,10 @@ public class SourceEmitter implements ClassEmitter {
     }
 
     @Override
-    public void emitMethod(MethodEntry method) {
+    public boolean emitMethod(MethodEntry method) {
         this.this$method = method;
         if (method.getName().equals("<clinit>")) {
+            printIndentation();
             printString("static {\n");
             this.indentation++;
             emitBody(method.getInstructions());
@@ -568,8 +576,13 @@ public class SourceEmitter implements ClassEmitter {
             this.indentation--;
             printIndentation();
             printString("}");
-            return;
+            return true;
         }
+        if ("<init>".equals(method.getName()) && method.getAccessModifier() == AccessModifier.PUBLIC && method.getParamTypes().isEmpty()
+                && method.getInstructions().getStatements().size() == 2) {
+            return false;
+        }
+        printIndentation();
         if (!(this.this$ instanceof InterfaceEntry) && !(this.this$ instanceof EnumEntry && method.getName().equals("<init>"))) {
             printString(method.getAccessModifier().identifier());
             if (method.getAccessModifier() != AccessModifier.PACKAGE_PRIVATE) {
@@ -631,6 +644,7 @@ public class SourceEmitter implements ClassEmitter {
             printString(";");
         }
         this.this$method = null;
+        return true;
     }
 
     /**

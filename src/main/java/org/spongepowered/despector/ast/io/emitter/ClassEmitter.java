@@ -31,6 +31,6 @@ public interface ClassEmitter {
 
     void emitType(TypeEntry type);
 
-    void emitMethod(MethodEntry method);
+    boolean emitMethod(MethodEntry method);
 
 }
