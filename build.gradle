@@ -112,6 +112,8 @@ shadowJar {
     dependencies {
         include(dependency('com.google.guava:guava:18.0'))
         include(dependency('org.ow2.asm:asm-all:5.0.3'))
+        include(dependency('ninja.leaping.configurate:configurate-core:3.2'))
+        include(dependency('ninja.leaping.configurate:configurate-hocon:3.2'))
     }
 }
 
