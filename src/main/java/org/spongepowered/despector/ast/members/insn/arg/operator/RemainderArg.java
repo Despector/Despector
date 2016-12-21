@@ -30,9 +30,9 @@ import org.spongepowered.despector.ast.members.insn.arg.Instruction;
 /**
  * The integer remainder operator.
  */
-public class RemainerArg extends OperatorArg {
+public class RemainderArg extends OperatorArg {
 
-    public RemainerArg(Instruction left, Instruction right) {
+    public RemainderArg(Instruction left, Instruction right) {
         super(left, right);
     }
 

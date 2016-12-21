@@ -26,53 +26,103 @@ package org.spongepowered.test.ast;
 
 import com.google.common.collect.Maps;
 import org.objectweb.asm.ClassReader;
+import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.ClassNode;
-import org.spongepowered.despector.ast.io.SingularClassLoader;
+import org.objectweb.asm.tree.MethodNode;
 import org.spongepowered.despector.ast.io.emitter.SourceEmitter;
 import org.spongepowered.despector.ast.io.emitter.format.EmitterFormat;
-import org.spongepowered.despector.ast.members.MethodEntry;
+import org.spongepowered.despector.ast.io.insn.InstructionTreeBuilder;
 import org.spongepowered.despector.ast.members.insn.StatementBlock;
-import org.spongepowered.despector.ast.type.TypeEntry;
+import org.spongepowered.despector.util.AstUtil;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.StringWriter;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 public class TestHelper {
 
-    private static final Map<Class<?>, TypeEntry> cached_types = Maps.newHashMap();
+    private static final Map<Class<?>, ClassNode> cached_types = Maps.newHashMap();
 
+    @SuppressWarnings("unchecked")
     public static StatementBlock get(Class<?> cls, String method_name) throws IOException {
-        TypeEntry type = cached_types.get(cls);
+        ClassNode type = cached_types.get(cls);
         if (type == null) {
             String path = cls.getProtectionDomain().getCodeSource().getLocation().getPath();
             File file = new File(path, cls.getName().replace('.', '/') + ".class");
             ClassReader cr = new ClassReader(new FileInputStream(file));
-            ClassNode cn = new ClassNode();
-            cr.accept(cn, 0);
-            type = SingularClassLoader.instance.load(cn, null);
+            type = new ClassNode();
+            cr.accept(type, 0);
             cached_types.put(cls, type);
         }
-        return type.getMethod(method_name).getInstructions();
+        MethodNode mn = null;
+        for (MethodNode m : ((List<MethodNode>) type.methods)) {
+            if (m.name.equals(method_name)) {
+                mn = m;
+                break;
+            }
+        }
+        if (mn == null) {
+            return null;
+        }
+        StatementBlock insns = null;
+        try {
+            System.out.println("Decompiling method " + mn.name);
+            insns = InstructionTreeBuilder.build(mn);
+        } catch (Exception ex) {
+            System.err.println("Error decompiling method body for " + type.name + " " + method_name);
+            ex.printStackTrace();
+            System.err.println("Offending method bytecode:");
+            Iterator<AbstractInsnNode> it = mn.instructions.iterator();
+            while (it.hasNext()) {
+                System.err.println(AstUtil.insnToString(it.next()));
+            }
+            return null;
+        }
+        return insns;
     }
 
+    @SuppressWarnings("unchecked")
     public static String getAsString(Class<?> cls, String method_name) throws IOException {
-        TypeEntry type = cached_types.get(cls);
+        ClassNode type = cached_types.get(cls);
         if (type == null) {
             String path = cls.getProtectionDomain().getCodeSource().getLocation().getPath();
             File file = new File(path, cls.getName().replace('.', '/') + ".class");
             ClassReader cr = new ClassReader(new FileInputStream(file));
-            ClassNode cn = new ClassNode();
-            cr.accept(cn, 0);
-            type = SingularClassLoader.instance.load(cn, null);
+            type = new ClassNode();
+            cr.accept(type, 0);
             cached_types.put(cls, type);
         }
-        MethodEntry method = type.getMethod(method_name);
+        MethodNode mn = null;
+        for (MethodNode m : ((List<MethodNode>) type.methods)) {
+            if (m.name.equals(method_name)) {
+                mn = m;
+                break;
+            }
+        }
+        if (mn == null) {
+            return "";
+        }
+        StatementBlock insns = null;
+        try {
+            System.out.println("Decompiling method " + mn.name);
+            insns = InstructionTreeBuilder.build(mn);
+        } catch (Exception ex) {
+            System.err.println("Error decompiling method body for " + type.name + " " + method_name);
+            ex.printStackTrace();
+            System.err.println("Offending method bytecode:");
+            Iterator<AbstractInsnNode> it = mn.instructions.iterator();
+            while (it.hasNext()) {
+                System.err.println(AstUtil.insnToString(it.next()));
+            }
+            return "";
+        }
         StringWriter writer = new StringWriter();
         SourceEmitter emitter = new SourceEmitter(writer, EmitterFormat.defaults());
-        emitter.emitBody(method, type);
+        emitter.emitBody(insns);
         return writer.toString();
     }
 

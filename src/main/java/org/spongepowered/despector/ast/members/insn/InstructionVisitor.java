@@ -46,7 +46,7 @@ import org.spongepowered.despector.ast.members.insn.arg.operator.AddArg;
 import org.spongepowered.despector.ast.members.insn.arg.operator.DivideArg;
 import org.spongepowered.despector.ast.members.insn.arg.operator.MultiplyArg;
 import org.spongepowered.despector.ast.members.insn.arg.operator.NegArg;
-import org.spongepowered.despector.ast.members.insn.arg.operator.RemainerArg;
+import org.spongepowered.despector.ast.members.insn.arg.operator.RemainderArg;
 import org.spongepowered.despector.ast.members.insn.arg.operator.ShiftLeftArg;
 import org.spongepowered.despector.ast.members.insn.arg.operator.ShiftRightArg;
 import org.spongepowered.despector.ast.members.insn.arg.operator.SubtractArg;
@@ -220,7 +220,7 @@ public abstract class InstructionVisitor {
     public void visitShiftLeftOperatorArg(ShiftLeftArg shiftLeftArg) {
     }
 
-    public void visitRemainderOperatorArg(RemainerArg remainerArg) {
+    public void visitRemainderOperatorArg(RemainderArg remainerArg) {
     }
 
     public void visitMultiplyOperatorArg(MultiplyArg multiplyArg) {

@@ -38,9 +38,9 @@ import org.spongepowered.despector.util.AstUtil;
 
 import java.util.List;
 
-public interface IntermediateOpcode {
+public interface OldIntermediateOpcode {
 
-    public static interface IntermediateJump extends IntermediateOpcode {
+    public static interface IntermediateJump extends OldIntermediateOpcode {
 
         JumpInsnNode getNode();
 
@@ -78,7 +78,7 @@ public interface IntermediateOpcode {
 
     }
 
-    public static class IntermediateTableSwitch extends AbstractSwitch implements IntermediateOpcode {
+    public static class IntermediateTableSwitch extends AbstractSwitch implements OldIntermediateOpcode {
 
         private final Instruction variable;
         private final TableSwitchInsnNode jump;
@@ -120,7 +120,7 @@ public interface IntermediateOpcode {
 
     }
 
-    public static class IntermediateLookupSwitch extends AbstractSwitch implements IntermediateOpcode {
+    public static class IntermediateLookupSwitch extends AbstractSwitch implements OldIntermediateOpcode {
 
         private final Instruction variable;
         private final LookupSwitchInsnNode jump;
@@ -220,7 +220,7 @@ public interface IntermediateOpcode {
 
     }
 
-    public static class IntermediateStatement implements IntermediateOpcode {
+    public static class IntermediateStatement implements OldIntermediateOpcode {
 
         private final Statement statement;
 
@@ -239,7 +239,7 @@ public interface IntermediateOpcode {
 
     }
 
-    public static class IntermediateLabel implements IntermediateOpcode {
+    public static class IntermediateLabel implements OldIntermediateOpcode {
 
         private final LabelNode label;
 
@@ -258,7 +258,7 @@ public interface IntermediateOpcode {
 
     }
 
-    public static class IntermediateFrame implements IntermediateOpcode {
+    public static class IntermediateFrame implements OldIntermediateOpcode {
 
         private final FrameNode label;
 
@@ -277,7 +277,7 @@ public interface IntermediateOpcode {
 
     }
 
-    public static class IntermediateStackValue implements IntermediateOpcode, Statement {
+    public static class IntermediateStackValue implements OldIntermediateOpcode, Statement {
 
         private final Instruction val;
 
@@ -321,7 +321,7 @@ public interface IntermediateOpcode {
 
     }
 
-    public static abstract class TryCatch implements IntermediateOpcode {
+    public static abstract class TryCatch implements OldIntermediateOpcode {
 
         private final int index;
 
@@ -361,7 +361,7 @@ public interface IntermediateOpcode {
 
     }
 
-    public static class CatchLocal implements IntermediateOpcode {
+    public static class CatchLocal implements OldIntermediateOpcode {
 
         private final Local local;
 

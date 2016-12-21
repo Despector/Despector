@@ -67,7 +67,37 @@ public final class InstructionTreeBuilder {
             }
         }
         DecompilerOptions options = new DecompilerOptions();
-        return new OpcodeDecompiler(options).decompile(asm.instructions, locals, asm.tryCatchBlocks);
+        return OpcodeDecompiler.decompile(asm.instructions, locals, asm.tryCatchBlocks, options);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static StatementBlock build(MethodNode asm) {
+        if (asm.instructions.size() == 0) {
+            return null;
+        }
+        Locals locals = new Locals();
+        for (LocalVariableNode node : (List<LocalVariableNode>) asm.localVariables) {
+            Local local = locals.getLocal(node.index);
+            local.addLVT(node);
+        }
+        int offs = ((asm.access & Opcodes.ACC_STATIC) != 0) ? 0 : 1;
+        List<String> param_types = TypeHelper.splitSig(asm.desc);
+        for (int i = 0; i < param_types.size() + offs; i++) {
+            Local local = locals.getLocal(i);
+            local.setAsParameter();
+            if (local.getLVT().isEmpty()) {
+                if (i < offs) {
+                    local.setParameterInstance(new LocalInstance(local, "this", "Ljava/lang/Object;", -1, -1));
+                } else {
+                    local.setParameterInstance(new LocalInstance(local, "param" + i, param_types.get(i - offs), -1, -1));
+                }
+            } else {
+                LocalVariableNode lvt = local.getLVT().get(0);
+                local.setParameterInstance(new LocalInstance(local, lvt.name, lvt.desc, -1, -1));
+            }
+        }
+        DecompilerOptions options = new DecompilerOptions();
+        return OpcodeDecompiler.decompile(asm.instructions, locals, asm.tryCatchBlocks, options);
     }
 
     private InstructionTreeBuilder() {
