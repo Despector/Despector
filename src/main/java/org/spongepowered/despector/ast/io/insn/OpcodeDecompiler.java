@@ -25,7 +25,6 @@ import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.TryCatchBlockNode;
 import org.objectweb.asm.tree.TypeInsnNode;
 import org.objectweb.asm.tree.VarInsnNode;
-import org.spongepowered.despector.ast.io.insn.Locals.DummyLocalInstance;
 import org.spongepowered.despector.ast.io.insn.Locals.Local;
 import org.spongepowered.despector.ast.members.insn.StatementBlock;
 import org.spongepowered.despector.ast.members.insn.arg.CastArg;
@@ -65,6 +64,12 @@ import org.spongepowered.despector.ast.members.insn.assign.FieldAssign;
 import org.spongepowered.despector.ast.members.insn.assign.InstanceFieldAssign;
 import org.spongepowered.despector.ast.members.insn.assign.LocalAssign;
 import org.spongepowered.despector.ast.members.insn.assign.StaticFieldAssign;
+import org.spongepowered.despector.ast.members.insn.branch.IfBlock;
+import org.spongepowered.despector.ast.members.insn.branch.condition.BooleanCondition;
+import org.spongepowered.despector.ast.members.insn.branch.condition.CompareCondition;
+import org.spongepowered.despector.ast.members.insn.branch.condition.CompareCondition.CompareOp;
+import org.spongepowered.despector.ast.members.insn.branch.condition.Condition;
+import org.spongepowered.despector.ast.members.insn.branch.condition.OrCondition;
 import org.spongepowered.despector.ast.members.insn.function.InstanceMethodCall;
 import org.spongepowered.despector.ast.members.insn.function.NewInstance;
 import org.spongepowered.despector.ast.members.insn.function.StaticMethodCall;
@@ -75,20 +80,21 @@ import org.spongepowered.despector.ast.members.insn.misc.ThrowException;
 import org.spongepowered.despector.util.AstUtil;
 import org.spongepowered.despector.util.TypeHelper;
 
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Deque;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class OpcodeDecompiler {
 
     @SuppressWarnings("unchecked")
     public static StatementBlock decompile(InsnList instructions, Locals locals, List<TryCatchBlockNode> tryCatchBlocks, DecompilerOptions options) {
-        List<AbstractInsnNode> ops = Lists.newArrayList();
-        Iterator<AbstractInsnNode> it = instructions.iterator();
-        while (it.hasNext()) {
-            ops.add(it.next());
-        }
+        List<AbstractInsnNode> ops = Lists.newArrayList(instructions.iterator());
         StatementBlock block = new StatementBlock(StatementBlock.Type.METHOD, locals);
 
         Map<Label, Integer> label_indices = Maps.newHashMap();
@@ -100,31 +106,212 @@ public class OpcodeDecompiler {
         }
         locals.bakeInstances(label_indices);
 
-        Deque<Instruction> stack = Queues.newArrayDeque();
-        Map<Label, Integer> label_block_indices = Maps.newHashMap();
-        Deque<StatementBlock> block_stack = Queues.newArrayDeque();
-        Deque<LabelNode> block_ends = Queues.newArrayDeque();
+        List<OpcodeBlock> graph = makeGraph(ops, label_indices);
+        cleanupGraph(graph);
 
-        for (int index = 0; index < ops.size(); index++) {
-            AbstractInsnNode next = ops.get(index);
-            if (next instanceof LabelNode) {
-                label_block_indices.put(((LabelNode) next).getLabel(), block.getStatements().size());
-                if (stack.peek() instanceof JumpIntermediate) {
-                    JumpIntermediate jmp = (JumpIntermediate) stack.pop();
-                    List<JumpIntermediate> conditions = Lists.newArrayList();
-                    conditions.add(jmp);
-                    while (stack.peek() instanceof JumpIntermediate) {
-                        JumpIntermediate next_jmp = (JumpIntermediate) stack.pop();
-                        if (jmp.jump.label != jmp.jump.label) {
-                            stack.push(next_jmp);
+        for (OpcodeBlock op : graph) {
+            op.print();
+        }
+
+        List<BlockSection> flat_graph = flattenGraph(graph);
+
+        for (BlockSection op : flat_graph) {
+            appendBlock(op, block);
+        }
+
+        return block;
+    }
+
+    private static List<OpcodeBlock> makeGraph(List<AbstractInsnNode> instructions, Map<Label, Integer> label_indices) {
+        Set<Integer> break_points = new HashSet<>();
+
+        for (int i = 0; i < instructions.size(); i++) {
+            AbstractInsnNode next = instructions.get(i);
+            if (next instanceof JumpInsnNode) {
+                break_points.add(i);
+                break_points.add(label_indices.get(((JumpInsnNode) next).label.getLabel()));
+                continue;
+            }
+            int op = next.getOpcode();
+            if (op <= RETURN && op >= IRETURN) {
+                break_points.add(i);
+            }
+        }
+
+        List<Integer> sorted_break_points = new ArrayList<>(break_points);
+        sorted_break_points.sort(Comparator.naturalOrder());
+        Map<Integer, OpcodeBlock> blocks = new HashMap<>();
+        List<OpcodeBlock> block_list = new ArrayList<>();
+
+        int last_brk = 0;
+        for (int brk : sorted_break_points) {
+            OpcodeBlock block = new OpcodeBlock();
+            block_list.add(block);
+            block.break_point = brk;
+            for (int i = last_brk; i < brk; i++) {
+                block.opcodes.add(instructions.get(i));
+            }
+            AbstractInsnNode last = instructions.get(brk);
+            block.last = last;
+            blocks.put(brk, block);
+            last_brk = brk + 1;
+        }
+
+        for (Map.Entry<Integer, OpcodeBlock> e : blocks.entrySet()) {
+            OpcodeBlock block = e.getValue();
+            if (block.last instanceof LabelNode) {
+                OpcodeBlock next = blocks.get(sorted_break_points.get(sorted_break_points.indexOf(e.getKey()) + 1));
+                block.last = null;
+                block.target = next;
+            } else if (block.last instanceof JumpInsnNode) {
+                Label label = ((JumpInsnNode) block.last).label.getLabel();
+                block.target = blocks.get(sorted_break_points.get(sorted_break_points.indexOf(label_indices.get(label)) + 1));
+                if (block.last.getOpcode() != GOTO) {
+                    OpcodeBlock next = blocks.get(sorted_break_points.get(sorted_break_points.indexOf(e.getKey()) + 1));
+                    block.else_target = next;
+                }
+            }
+        }
+
+        return block_list;
+    }
+
+    private static void cleanupGraph(List<OpcodeBlock> blocks) {
+        for (Iterator<OpcodeBlock> it = blocks.iterator(); it.hasNext();) {
+            OpcodeBlock block = it.next();
+            if (block.opcodes.isEmpty() && block.last == null) {
+                // some conditions can create an empty block as a breakpoint
+                // gets inserted on either side of a label immediately following
+                // a jump
+
+                for (OpcodeBlock other : blocks) {
+                    if (other == block) {
+                        continue;
+                    }
+                    if (other.target == block) {
+                        other.target = block.target;
+                    }
+                    if (other.else_target == block) {
+                        other.else_target = block.target;
+                    }
+                }
+                it.remove();
+            }
+        }
+    }
+
+    private static List<BlockSection> flattenGraph(List<OpcodeBlock> blocks) {
+        List<BlockSection> final_blocks = new ArrayList<>();
+
+        for (int i = 0; i < blocks.size(); i++) {
+            OpcodeBlock next = blocks.get(i);
+
+            if (next.isConditional()) {
+                IfBlockSection ifblock = new IfBlockSection(next);
+                OpcodeBlock target = next.target;
+                if (next.else_target.isConditional() && next.target == next.else_target.else_target) {
+                    ifblock.ext_conditions.add(next.else_target);
+                    i++;
+                    target = next.else_target.target;
+                }
+                if (next.else_target.break_point > next.break_point) {
+                    // if-statement
+                    List<OpcodeBlock> body = new ArrayList<>();
+                    for (i++;; i++) {
+                        OpcodeBlock n = blocks.get(i);
+                        if (target == n) {
+                            i--;
                             break;
                         }
-                        conditions.add(next_jmp);
+                        body.add(n);
                     }
-                    block_ends.push(jmp.jump.label);
-                } else if (block_ends.peek() == next) {
-                    block = block_stack.pop();
+                    ifblock.body.addAll(flattenGraph(body));
+
+                    final_blocks.add(ifblock);
                 }
+            } else {
+                final_blocks.add(new InlineBlockSection(next));
+            }
+        }
+
+        return final_blocks;
+    }
+
+    private static void appendBlock(BlockSection block_section, StatementBlock block) {
+        Deque<Instruction> stack = Queues.newArrayDeque();
+
+        if (block_section instanceof IfBlockSection) {
+            IfBlockSection ifblock = (IfBlockSection) block_section;
+            appendBlock(ifblock.condition, block, block.getLocals(), stack);
+            if (stack.isEmpty()) {
+                throw new IllegalStateException("Missing condition");
+            }
+            int jump_op = ifblock.condition.last.getOpcode();
+            Condition condition;
+            if (jump_op >= IF_ICMPEQ && jump_op <= IF_ACMPNE) {
+                Instruction right = stack.pop();
+                condition = new CompareCondition(stack.pop(), right, CompareCondition.fromOpcode(jump_op));
+            } else if (jump_op == IFNULL || jump_op == IFNONNULL) {
+                condition = new CompareCondition(stack.pop(), new NullConstantArg(), jump_op == IFNULL ? CompareOp.NOT_EQUAL : CompareOp.EQUAL);
+            } else {
+                Instruction val = stack.pop();
+                if (val.inferType() == "Z") {
+                    condition = new BooleanCondition(val, CompareCondition.fromOpcode(jump_op) == CompareOp.EQUAL);
+                } else {
+                    condition = new CompareCondition(stack.pop(), new IntConstantArg(0), CompareCondition.fromOpcode(jump_op));
+                }
+            }
+            if(!stack.isEmpty()) {
+                throw new IllegalStateException("Condition building did not empty stack");
+            }
+            for (OpcodeBlock ext : ifblock.ext_conditions) {
+                // we pass a null block so that attempting to add any actual
+                // statements is an error
+                appendBlock(ext, null, block.getLocals(), stack);
+                jump_op = ext.last.getOpcode();
+                Condition ext_cond;
+                if (jump_op >= IF_ICMPEQ && jump_op <= IF_ACMPNE) {
+                    Instruction right = stack.pop();
+                    ext_cond = new CompareCondition(stack.pop(), right, CompareCondition.fromOpcode(jump_op));
+                } else if (jump_op == IFNULL || jump_op == IFNONNULL) {
+                    ext_cond = new CompareCondition(stack.pop(), new NullConstantArg(), jump_op == IFNULL ? CompareOp.NOT_EQUAL : CompareOp.EQUAL);
+                } else {
+                    Instruction val = stack.pop();
+                    if (val.inferType() == "Z") {
+                        ext_cond = new BooleanCondition(val, CompareCondition.fromOpcode(jump_op) == CompareOp.EQUAL);
+                    } else {
+                        ext_cond = new CompareCondition(stack.pop(), new IntConstantArg(0), CompareCondition.fromOpcode(jump_op));
+                    }
+                }
+                if(!stack.isEmpty()) {
+                    throw new IllegalStateException("Condition building did not empty stack");
+                }
+                condition = new OrCondition(condition, ext_cond);
+            }
+            StatementBlock body = new StatementBlock(StatementBlock.Type.IF, block.getLocals());
+            for (BlockSection body_section : ifblock.body) {
+                appendBlock(body_section, body);
+            }
+            IfBlock iff = new IfBlock(condition, body);
+            block.append(iff);
+        } else if (block_section instanceof InlineBlockSection) {
+            OpcodeBlock op = ((InlineBlockSection) block_section).block;
+            appendBlock(op, block, block.getLocals(), stack);
+        }
+    }
+
+    private static void appendBlock(OpcodeBlock op, StatementBlock block, Locals locals, Deque<Instruction> stack) {
+        for (int index = 0; index < op.opcodes.size() + 1; index++) {
+            int label_index = op.break_point - (op.opcodes.size() - index);
+            AbstractInsnNode next;
+            if (index < op.opcodes.size()) {
+                next = op.opcodes.get(index);
+            } else if (op.isReturn()) {
+                next = op.last;
+            } else {
+                break;
+            }
+            if (next instanceof LabelNode) {
                 continue;
             } else if (next instanceof FrameNode) {
                 continue;
@@ -195,7 +382,8 @@ public class OpcodeDecompiler {
                 } else if (ldc.cst instanceof Float) {
                     stack.push(new FloatConstantArg((Float) ldc.cst));
                 } else if (ldc.cst instanceof Long) {
-                    // LDC_W appears to be merged with this opcode by asm so long
+                    // LDC_W appears to be merged with this opcode by asm so
+                    // long
                     // and double constants will also be here
                     stack.push(new LongConstantArg((Long) ldc.cst));
                 } else if (ldc.cst instanceof Double) {
@@ -214,7 +402,7 @@ public class OpcodeDecompiler {
             case ALOAD: {
                 VarInsnNode var = (VarInsnNode) next;
                 Local local = locals.getLocal(var.var);
-                stack.push(new LocalArg(local.getInstance(index)));
+                stack.push(new LocalArg(local.getInstance(label_index)));
                 break;
             }
             case IALOAD:
@@ -238,7 +426,7 @@ public class OpcodeDecompiler {
                 VarInsnNode var = (VarInsnNode) next;
                 Instruction val = stack.pop();
                 Local local = locals.getLocal(var.var);
-                block.append(new LocalAssign(local.getInstance(index), val));
+                block.append(new LocalAssign(local.getInstance(label_index), val));
                 break;
             }
             case IASTORE:
@@ -442,7 +630,7 @@ public class OpcodeDecompiler {
             case IINC: {
                 IincInsnNode inc = (IincInsnNode) next;
                 Local local = locals.getLocal(inc.var);
-                IncrementStatement insn = new IncrementStatement(new DummyLocalInstance(local), inc.incr);
+                IncrementStatement insn = new IncrementStatement(local.getInstance(label_index), inc.incr);
                 block.append(insn);
                 break;
             }
@@ -490,11 +678,7 @@ public class OpcodeDecompiler {
             case IFLT:
             case IFGE:
             case IFGT:
-            case IFLE: {
-                Instruction val = stack.pop();
-                stack.push(new JumpIntermediate((JumpInsnNode) next, val));
-                break;
-            }
+            case IFLE:
             case IF_ICMPEQ:
             case IF_ICMPNE:
             case IF_ICMPLT:
@@ -508,9 +692,9 @@ public class OpcodeDecompiler {
             case RET:
             case IFNULL:
             case IFNONNULL:
-                throw new IllegalStateException();
-                // TODO
-                // break;
+                // All jumps are handled by the implicit structure of the
+                // graph
+                break;
             case IRETURN:
             case LRETURN:
             case FRETURN:
@@ -686,10 +870,70 @@ public class OpcodeDecompiler {
                 System.err.println("Unsupported opcode: " + next.getOpcode());
                 throw new IllegalStateException();
             }
+        }
+    }
+
+    private static class OpcodeBlock {
+
+        public int break_point;
+        public final List<AbstractInsnNode> opcodes = new ArrayList<>();
+        public AbstractInsnNode last;
+        public OpcodeBlock target;
+        public OpcodeBlock else_target;
+
+        public OpcodeBlock() {
 
         }
 
-        return block;
+        public boolean isJump() {
+            return this.last != null && this.last instanceof JumpInsnNode;
+        }
+
+        public boolean isReturn() {
+            return this.last != null && this.last.getOpcode() >= IRETURN && this.last.getOpcode() <= RETURN;
+        }
+
+        public boolean isConditional() {
+            return this.else_target != null;
+        }
+
+        public void print() {
+            System.out.println("Block " + this.break_point + ":");
+            for (AbstractInsnNode op : this.opcodes) {
+                System.out.println(AstUtil.insnToString(op));
+            }
+            System.out.println("Last: " + (this.last != null ? AstUtil.insnToString(this.last) : "null"));
+            System.out.println("Target: " + (this.target != null ? this.target.break_point : -1));
+            System.out.println("Else Target: " + (this.else_target != null ? this.else_target.break_point : -1));
+        }
+
+    }
+
+    private static abstract class BlockSection {
+
+        public BlockSection() {
+        }
+
+    }
+
+    private static class InlineBlockSection extends BlockSection {
+
+        public OpcodeBlock block;
+
+        public InlineBlockSection(OpcodeBlock block) {
+            this.block = block;
+        }
+    }
+
+    private static class IfBlockSection extends BlockSection {
+
+        public OpcodeBlock condition;
+        public List<OpcodeBlock> ext_conditions = new ArrayList<>();
+        public List<BlockSection> body = new ArrayList<>();
+
+        public IfBlockSection(OpcodeBlock cond) {
+            this.condition = cond;
+        }
     }
 
 }

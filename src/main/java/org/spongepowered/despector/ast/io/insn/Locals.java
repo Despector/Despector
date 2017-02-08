@@ -178,14 +178,6 @@ public class Locals {
 
     }
 
-    public static class DummyLocalInstance extends LocalInstance {
-
-        public DummyLocalInstance(Local l) {
-            super(l, null, null, -1, -1);
-        }
-
-    }
-
     public static class LocalInstance {
 
         private final Local local;
