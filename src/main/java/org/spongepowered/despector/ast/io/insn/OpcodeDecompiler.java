@@ -65,10 +65,12 @@ import org.spongepowered.despector.ast.members.insn.assign.InstanceFieldAssign;
 import org.spongepowered.despector.ast.members.insn.assign.LocalAssign;
 import org.spongepowered.despector.ast.members.insn.assign.StaticFieldAssign;
 import org.spongepowered.despector.ast.members.insn.branch.IfBlock;
+import org.spongepowered.despector.ast.members.insn.branch.condition.AndCondition;
 import org.spongepowered.despector.ast.members.insn.branch.condition.BooleanCondition;
 import org.spongepowered.despector.ast.members.insn.branch.condition.CompareCondition;
 import org.spongepowered.despector.ast.members.insn.branch.condition.CompareCondition.CompareOp;
 import org.spongepowered.despector.ast.members.insn.branch.condition.Condition;
+import org.spongepowered.despector.ast.members.insn.branch.condition.InverseCondition;
 import org.spongepowered.despector.ast.members.insn.branch.condition.OrCondition;
 import org.spongepowered.despector.ast.members.insn.function.InstanceMethodCall;
 import org.spongepowered.despector.ast.members.insn.function.NewInstance;
@@ -80,6 +82,7 @@ import org.spongepowered.despector.ast.members.insn.misc.ThrowException;
 import org.spongepowered.despector.util.AstUtil;
 import org.spongepowered.despector.util.TypeHelper;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Deque;
@@ -208,16 +211,72 @@ public class OpcodeDecompiler {
 
             if (next.isConditional()) {
                 IfBlockSection ifblock = new IfBlockSection(next);
-                OpcodeBlock target = next.target;
-                if (next.else_target.isConditional() && next.target == next.else_target.else_target) {
-                    ifblock.ext_conditions.add(next.else_target);
-                    i++;
-                    target = next.else_target.target;
+                OpcodeBlock current = next;
+                Deque<OpcodeBlock> condition_blocks = new ArrayDeque<>();
+
+                OpcodeBlock target = current.target;
+                condition_blocks.push(current);
+                current = current.else_target;
+                int possible = -1;
+                OpcodeBlock old_target = null;
+                while (current.isConditional()) {
+                    if (current == old_target) {
+                        possible = -1;
+                        break;
+                    } else if (target != current.target && target != current.else_target && possible != -1) {
+                        break;
+                    } else if (target == current.else_target) {
+                        if(target.isConditional()) {
+                            target = target.target;
+                        } else {
+                            condition_blocks.push(current);
+                            break;
+                        }
+                    } else {
+                        possible = condition_blocks.size();
+                        old_target = target;
+                        target = current.target;
+                    }
+                    condition_blocks.push(current);
+                    current = current.else_target;
                 }
-                if (next.else_target.break_point > next.break_point) {
+                if (possible != -1) {
+                    while (condition_blocks.size() > possible) {
+                        condition_blocks.pop();
+                    }
+                    target = old_target;
+                }
+                OpcodeBlock else_target = condition_blocks.peek().else_target;
+                if (else_target == target) {
+                    else_target = condition_blocks.peek().target;
+                }
+                ifblock.condition = new ConditionBlock(condition_blocks.pop());
+                if (target.break_point < else_target.break_point) {
+                    OpcodeBlock t = else_target;
+                    else_target = target;
+                    target = t;
+                    ifblock.condition.inverted = true;
+                }
+                // target is always break
+                // else_target is always body
+                for (OpcodeBlock cond_block : condition_blocks) {
+                    if (cond_block.target == target) {
+                        ifblock.condition = new AndConditionPart(new ConditionBlock(cond_block), ifblock.condition);
+                    } else {
+                        ifblock.condition.inverted = !ifblock.condition.inverted;
+                        ConditionBlock new_block = new ConditionBlock(cond_block);
+                        new_block.inverted = true;
+                        ifblock.condition = new OrConditionPart(new_block, ifblock.condition);
+                    }
+                }
+                // TODO this isn't right at all, need to actually figure out
+                // which of target and else_target is the body and which is the
+                // break
+                if (else_target.break_point > next.break_point) {
+                    i = blocks.indexOf(else_target);
                     // if-statement
                     List<OpcodeBlock> body = new ArrayList<>();
-                    for (i++;; i++) {
+                    for (;; i++) {
                         OpcodeBlock n = blocks.get(i);
                         if (target == n) {
                             i--;
@@ -237,17 +296,28 @@ public class OpcodeDecompiler {
         return final_blocks;
     }
 
-    private static void appendBlock(BlockSection block_section, StatementBlock block) {
-        Deque<Instruction> stack = Queues.newArrayDeque();
-
-        if (block_section instanceof IfBlockSection) {
-            IfBlockSection ifblock = (IfBlockSection) block_section;
-            appendBlock(ifblock.condition, block, block.getLocals(), stack);
-            if (stack.isEmpty()) {
-                throw new IllegalStateException("Missing condition");
+    private static Condition buildCondition(ConditionPart part, StatementBlock block, Deque<Instruction> stack) {
+        Condition condition = null;
+        if (part instanceof OrConditionPart) {
+            Condition left = buildCondition(((OrConditionPart) part).left, block, stack);
+            Condition right = buildCondition(((OrConditionPart) part).right, block, stack);
+            if (part.inverted) {
+                condition = new AndCondition(new InverseCondition(left), new InverseCondition(right));
+            } else {
+                condition = new OrCondition(left, right);
             }
-            int jump_op = ifblock.condition.last.getOpcode();
-            Condition condition;
+        } else if (part instanceof AndConditionPart) {
+            Condition left = buildCondition(((AndConditionPart) part).left, block, stack);
+            Condition right = buildCondition(((AndConditionPart) part).right, block, stack);
+            if (part.inverted) {
+                condition = new OrCondition(new InverseCondition(left), new InverseCondition(right));
+            } else {
+                condition = new AndCondition(left, right);
+            }
+        } else if (part instanceof ConditionBlock) {
+            OpcodeBlock op = ((ConditionBlock) part).block;
+            appendBlock(op, block, block.getLocals(), stack);
+            int jump_op = op.last.getOpcode();
             if (jump_op >= IF_ICMPEQ && jump_op <= IF_ACMPNE) {
                 Instruction right = stack.pop();
                 condition = new CompareCondition(stack.pop(), right, CompareCondition.fromOpcode(jump_op));
@@ -255,39 +325,29 @@ public class OpcodeDecompiler {
                 condition = new CompareCondition(stack.pop(), new NullConstantArg(), jump_op == IFNULL ? CompareOp.NOT_EQUAL : CompareOp.EQUAL);
             } else {
                 Instruction val = stack.pop();
-                if (val.inferType() == "Z") {
-                    condition = new BooleanCondition(val, CompareCondition.fromOpcode(jump_op) == CompareOp.EQUAL);
+                if (val.inferType().equals("Z")) {
+                    boolean inverted = CompareCondition.fromOpcode(jump_op) == CompareOp.NOT_EQUAL;
+                    if (part.inverted) {
+                        inverted = !inverted;
+                    }
+                    condition = new BooleanCondition(val, inverted);
                 } else {
-                    condition = new CompareCondition(stack.pop(), new IntConstantArg(0), CompareCondition.fromOpcode(jump_op));
+                    condition = new CompareCondition(val, new IntConstantArg(0), CompareCondition.fromOpcode(jump_op));
                 }
             }
-            if(!stack.isEmpty()) {
+            if (!stack.isEmpty()) {
                 throw new IllegalStateException("Condition building did not empty stack");
             }
-            for (OpcodeBlock ext : ifblock.ext_conditions) {
-                // we pass a null block so that attempting to add any actual
-                // statements is an error
-                appendBlock(ext, null, block.getLocals(), stack);
-                jump_op = ext.last.getOpcode();
-                Condition ext_cond;
-                if (jump_op >= IF_ICMPEQ && jump_op <= IF_ACMPNE) {
-                    Instruction right = stack.pop();
-                    ext_cond = new CompareCondition(stack.pop(), right, CompareCondition.fromOpcode(jump_op));
-                } else if (jump_op == IFNULL || jump_op == IFNONNULL) {
-                    ext_cond = new CompareCondition(stack.pop(), new NullConstantArg(), jump_op == IFNULL ? CompareOp.NOT_EQUAL : CompareOp.EQUAL);
-                } else {
-                    Instruction val = stack.pop();
-                    if (val.inferType() == "Z") {
-                        ext_cond = new BooleanCondition(val, CompareCondition.fromOpcode(jump_op) == CompareOp.EQUAL);
-                    } else {
-                        ext_cond = new CompareCondition(stack.pop(), new IntConstantArg(0), CompareCondition.fromOpcode(jump_op));
-                    }
-                }
-                if(!stack.isEmpty()) {
-                    throw new IllegalStateException("Condition building did not empty stack");
-                }
-                condition = new OrCondition(condition, ext_cond);
-            }
+        }
+        return condition;
+    }
+
+    private static void appendBlock(BlockSection block_section, StatementBlock block) {
+        Deque<Instruction> stack = Queues.newArrayDeque();
+
+        if (block_section instanceof IfBlockSection) {
+            IfBlockSection ifblock = (IfBlockSection) block_section;
+            Condition condition = buildCondition(ifblock.condition, block, stack);
             StatementBlock body = new StatementBlock(StatementBlock.Type.IF, block.getLocals());
             for (BlockSection body_section : ifblock.body) {
                 appendBlock(body_section, body);
@@ -925,14 +985,53 @@ public class OpcodeDecompiler {
         }
     }
 
+    private static abstract class ConditionPart {
+
+        public boolean inverted = false;
+    }
+
+    private static class ConditionBlock extends ConditionPart {
+
+        public OpcodeBlock block;
+
+        public ConditionBlock(OpcodeBlock op) {
+            this.block = op;
+        }
+    }
+
+    private static class OrConditionPart extends ConditionPart {
+
+        public ConditionPart left;
+        public ConditionPart right;
+
+        public OrConditionPart(ConditionPart l, ConditionPart r) {
+            this.left = l;
+            this.right = r;
+        }
+    }
+
+    private static class AndConditionPart extends ConditionPart {
+
+        public ConditionPart left;
+        public ConditionPart right;
+
+        public AndConditionPart(ConditionPart l, ConditionPart r) {
+            this.left = l;
+            this.right = r;
+        }
+    }
+
     private static class IfBlockSection extends BlockSection {
 
-        public OpcodeBlock condition;
-        public List<OpcodeBlock> ext_conditions = new ArrayList<>();
+        public ConditionPart condition;
         public List<BlockSection> body = new ArrayList<>();
 
-        public IfBlockSection(OpcodeBlock cond) {
+        public IfBlockSection(ConditionPart cond) {
             this.condition = cond;
+        }
+
+        public IfBlockSection(OpcodeBlock cond) {
+            this.condition = new ConditionBlock(cond);
         }
     }
 
