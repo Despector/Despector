@@ -226,10 +226,11 @@ public class OpcodeDecompiler {
                     } else if (target != current.target && target != current.else_target && possible != -1) {
                         break;
                     } else if (target == current.else_target) {
-                        if(target.isConditional()) {
+                        if (target.isConditional()) {
                             target = target.target;
                         } else {
                             condition_blocks.push(current);
+                            possible = -1;
                             break;
                         }
                     } else {
@@ -240,7 +241,7 @@ public class OpcodeDecompiler {
                     condition_blocks.push(current);
                     current = current.else_target;
                 }
-                if (possible != -1) {
+                if (possible != -1 && current.isConditional()) {
                     while (condition_blocks.size() > possible) {
                         condition_blocks.pop();
                     }
@@ -255,23 +256,26 @@ public class OpcodeDecompiler {
                     OpcodeBlock t = else_target;
                     else_target = target;
                     target = t;
-                    ifblock.condition.inverted = true;
                 }
                 // target is always break
                 // else_target is always body
+                boolean isFirst = true;
                 for (OpcodeBlock cond_block : condition_blocks) {
                     if (cond_block.target == target) {
                         ifblock.condition = new AndConditionPart(new ConditionBlock(cond_block), ifblock.condition);
+                    } else if (cond_block.target.isConditional() && cond_block.target.target == target) {
+                        if (ifblock.condition instanceof OrConditionPart) {
+                            OrConditionPart existing = (OrConditionPart) ifblock.condition;
+                            existing.left = new AndConditionPart(new ConditionBlock(cond_block), existing.left);
+                        } else {
+                            ifblock.condition = new AndConditionPart(new ConditionBlock(cond_block), ifblock.condition);
+                        }
                     } else {
-                        ifblock.condition.inverted = !ifblock.condition.inverted;
                         ConditionBlock new_block = new ConditionBlock(cond_block);
                         new_block.inverted = true;
                         ifblock.condition = new OrConditionPart(new_block, ifblock.condition);
                     }
                 }
-                // TODO this isn't right at all, need to actually figure out
-                // which of target and else_target is the body and which is the
-                // break
                 if (else_target.break_point > next.break_point) {
                     i = blocks.indexOf(else_target);
                     // if-statement
@@ -935,11 +939,11 @@ public class OpcodeDecompiler {
 
     private static class OpcodeBlock {
 
-        public int break_point;
+        public int                          break_point;
         public final List<AbstractInsnNode> opcodes = new ArrayList<>();
-        public AbstractInsnNode last;
-        public OpcodeBlock target;
-        public OpcodeBlock else_target;
+        public AbstractInsnNode             last;
+        public OpcodeBlock                  target;
+        public OpcodeBlock                  else_target;
 
         public OpcodeBlock() {
 
@@ -1023,7 +1027,7 @@ public class OpcodeDecompiler {
 
     private static class IfBlockSection extends BlockSection {
 
-        public ConditionPart condition;
+        public ConditionPart      condition;
         public List<BlockSection> body = new ArrayList<>();
 
         public IfBlockSection(ConditionPart cond) {
