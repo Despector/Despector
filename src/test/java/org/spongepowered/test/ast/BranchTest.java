@@ -33,8 +33,11 @@ import java.io.IOException;
 @SuppressWarnings("unused")
 public class BranchTest {
 
-    private void mth_simpleif(boolean a) {
+    private void mth_simpleif(boolean a, boolean b) {
         if (a) {
+            System.out.println(a);
+        }
+        if (b) {
             System.out.println(a);
         }
     }

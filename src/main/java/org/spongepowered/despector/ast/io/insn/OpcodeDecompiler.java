@@ -1,10 +1,31 @@
 /*
- * Copyright (c) 2015-2016 VoxelBox <http://engine.thevoxelbox.com>.
- * All Rights Reserved.
+ * The MIT License (MIT)
+ *
+ * Copyright (c) SpongePowered <https://www.spongepowered.org>
+ * Copyright (c) contributors
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
  */
 package org.spongepowered.despector.ast.io.insn;
 
 import static org.objectweb.asm.Opcodes.*;
+import static org.spongepowered.despector.util.AstUtil.inverse;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -68,9 +89,7 @@ import org.spongepowered.despector.ast.members.insn.branch.IfBlock;
 import org.spongepowered.despector.ast.members.insn.branch.condition.AndCondition;
 import org.spongepowered.despector.ast.members.insn.branch.condition.BooleanCondition;
 import org.spongepowered.despector.ast.members.insn.branch.condition.CompareCondition;
-import org.spongepowered.despector.ast.members.insn.branch.condition.CompareCondition.CompareOp;
 import org.spongepowered.despector.ast.members.insn.branch.condition.Condition;
-import org.spongepowered.despector.ast.members.insn.branch.condition.InverseCondition;
 import org.spongepowered.despector.ast.members.insn.branch.condition.OrCondition;
 import org.spongepowered.despector.ast.members.insn.function.InstanceMethodCall;
 import org.spongepowered.despector.ast.members.insn.function.NewInstance;
@@ -112,11 +131,11 @@ public class OpcodeDecompiler {
         List<OpcodeBlock> graph = makeGraph(ops, label_indices);
         cleanupGraph(graph);
 
-        for (OpcodeBlock op : graph) {
-            op.print();
+        for (OpcodeBlock b : graph) {
+            b.print();
         }
 
-        List<BlockSection> flat_graph = flattenGraph(graph);
+        List<BlockSection> flat_graph = flattenGraph(graph, locals);
 
         for (BlockSection op : flat_graph) {
             appendBlock(op, block);
@@ -182,7 +201,7 @@ public class OpcodeDecompiler {
     private static void cleanupGraph(List<OpcodeBlock> blocks) {
         for (Iterator<OpcodeBlock> it = blocks.iterator(); it.hasNext();) {
             OpcodeBlock block = it.next();
-            if (block.opcodes.isEmpty() && block.last == null) {
+            if (AstUtil.isEmptyOfLogic(block.opcodes) && block.last == null) {
                 // some conditions can create an empty block as a breakpoint
                 // gets inserted on either side of a label immediately following
                 // a jump
@@ -201,149 +220,291 @@ public class OpcodeDecompiler {
                 it.remove();
             }
         }
-    }
 
-    private static List<BlockSection> flattenGraph(List<OpcodeBlock> blocks) {
-        List<BlockSection> final_blocks = new ArrayList<>();
-
-        for (int i = 0; i < blocks.size(); i++) {
-            OpcodeBlock next = blocks.get(i);
-
-            if (next.isConditional()) {
-                IfBlockSection ifblock = new IfBlockSection(next);
-                OpcodeBlock current = next;
-                Deque<OpcodeBlock> condition_blocks = new ArrayDeque<>();
-
-                OpcodeBlock target = current.target;
-                condition_blocks.push(current);
-                current = current.else_target;
-                int possible = -1;
-                OpcodeBlock old_target = null;
-                while (current.isConditional()) {
-                    if (current == old_target) {
-                        possible = -1;
-                        break;
-                    } else if (target != current.target && target != current.else_target && possible != -1) {
-                        break;
-                    } else if (target == current.else_target) {
-                        if (target.isConditional()) {
-                            target = target.target;
-                        } else {
-                            condition_blocks.push(current);
-                            possible = -1;
-                            break;
+        List<OpcodeBlock> fblocks = new ArrayList<>();
+        for (OpcodeBlock block : blocks) {
+            if (block.isConditional()) {
+                int cond_start = AstUtil.findStartLastStatement(block.opcodes, block.last);
+                if (cond_start > 0) {
+                    OpcodeBlock header = new OpcodeBlock();
+                    for (int i = 0; i < cond_start; i++) {
+                        header.opcodes.add(block.opcodes.get(i));
+                    }
+                    if(AstUtil.isEmptyOfLogic(header.opcodes)) {
+                        continue;
+                    }
+                    for (int i = cond_start - 1; i >= 0; i--) {
+                        block.opcodes.remove(i);
+                    }
+                    for (OpcodeBlock other : blocks) {
+                        if (other.target == block) {
+                            other.target = header;
                         }
-                    } else {
-                        possible = condition_blocks.size();
-                        old_target = target;
-                        target = current.target;
-                    }
-                    condition_blocks.push(current);
-                    current = current.else_target;
-                }
-                if (possible != -1 && current.isConditional()) {
-                    while (condition_blocks.size() > possible) {
-                        condition_blocks.pop();
-                    }
-                    target = old_target;
-                }
-                OpcodeBlock else_target = condition_blocks.peek().else_target;
-                if (else_target == target) {
-                    else_target = condition_blocks.peek().target;
-                }
-                ifblock.condition = new ConditionBlock(condition_blocks.pop());
-                if (target.break_point < else_target.break_point) {
-                    OpcodeBlock t = else_target;
-                    else_target = target;
-                    target = t;
-                }
-                // target is always break
-                // else_target is always body
-                boolean isFirst = true;
-                for (OpcodeBlock cond_block : condition_blocks) {
-                    if (cond_block.target == target) {
-                        ifblock.condition = new AndConditionPart(new ConditionBlock(cond_block), ifblock.condition);
-                    } else if (cond_block.target.isConditional() && cond_block.target.target == target) {
-                        if (ifblock.condition instanceof OrConditionPart) {
-                            OrConditionPart existing = (OrConditionPart) ifblock.condition;
-                            existing.left = new AndConditionPart(new ConditionBlock(cond_block), existing.left);
-                        } else {
-                            ifblock.condition = new AndConditionPart(new ConditionBlock(cond_block), ifblock.condition);
+                        if (other.else_target == block) {
+                            other.else_target = header;
                         }
-                    } else {
-                        ConditionBlock new_block = new ConditionBlock(cond_block);
-                        new_block.inverted = true;
-                        ifblock.condition = new OrConditionPart(new_block, ifblock.condition);
                     }
-                }
-                if (else_target.break_point > next.break_point) {
-                    i = blocks.indexOf(else_target);
-                    // if-statement
-                    List<OpcodeBlock> body = new ArrayList<>();
-                    for (;; i++) {
-                        OpcodeBlock n = blocks.get(i);
-                        if (target == n) {
-                            i--;
-                            break;
+                    for (OpcodeBlock other : fblocks) {
+                        if (other.target == block) {
+                            other.target = header;
                         }
-                        body.add(n);
+                        if (other.else_target == block) {
+                            other.else_target = header;
+                        }
                     }
-                    ifblock.body.addAll(flattenGraph(body));
-
-                    final_blocks.add(ifblock);
+                    header.target = block;
+                    fblocks.add(header);
+                    fblocks.add(block);
+                } else {
+                    fblocks.add(block);
                 }
             } else {
-                final_blocks.add(new InlineBlockSection(next));
+                fblocks.add(block);
             }
+        }
+
+        // TODO identify ternary blocks (but no transformations yet)
+
+        for (int i = 0; i < blocks.size(); i++) {
+            OpcodeBlock block = blocks.get(i);
+            if (block.isConditional()) {
+                block.else_target.targetted_by.add(block);
+            }
+            if (block.isJump()) {
+                block.target.targetted_by.add(block);
+            } else if (block.target != null && blocks.indexOf(block.target) != i + 1) {
+                block.target.targetted_by.add(block);
+            }
+        }
+    }
+
+    private static List<BlockSection> flattenGraph(List<OpcodeBlock> blocks, Locals locals) {
+        List<BlockSection> final_blocks = new ArrayList<>();
+
+        List<OpcodeBlock> region = new ArrayList<>();
+
+        for (int i = 0; i < blocks.size(); i++) {
+            OpcodeBlock region_start = blocks.get(i);
+            if (!region_start.isConditional()) {
+                final_blocks.add(new InlineBlockSection(region_start));
+                continue;
+            }
+
+            int end = getRegionEnd(blocks, i);
+
+            if (end == -1) {
+                throw new IllegalStateException();
+            }
+
+            region.clear();
+            for (int o = i; o < end; o++) {
+                region.add(blocks.get(o));
+            }
+
+            final_blocks.add(processRegion(region, locals, blocks.get(end)));
+            i = end;
         }
 
         return final_blocks;
     }
 
-    private static Condition buildCondition(ConditionPart part, StatementBlock block, Deque<Instruction> stack) {
-        Condition condition = null;
-        if (part instanceof OrConditionPart) {
-            Condition left = buildCondition(((OrConditionPart) part).left, block, stack);
-            Condition right = buildCondition(((OrConditionPart) part).right, block, stack);
-            if (part.inverted) {
-                condition = new AndCondition(new InverseCondition(left), new InverseCondition(right));
-            } else {
-                condition = new OrCondition(left, right);
+    private static BlockSection processRegion(List<OpcodeBlock> region, Locals locals, OpcodeBlock ret) {
+
+        // sub regions
+
+        for (int i = 1; i < region.size() - 1; i++) {
+            OpcodeBlock next = region.get(i);
+            if (!next.isConditional()) {
+                continue;
             }
-        } else if (part instanceof AndConditionPart) {
-            Condition left = buildCondition(((AndConditionPart) part).left, block, stack);
-            Condition right = buildCondition(((AndConditionPart) part).right, block, stack);
-            if (part.inverted) {
-                condition = new OrCondition(new InverseCondition(left), new InverseCondition(right));
-            } else {
-                condition = new AndCondition(left, right);
-            }
-        } else if (part instanceof ConditionBlock) {
-            OpcodeBlock op = ((ConditionBlock) part).block;
-            appendBlock(op, block, block.getLocals(), stack);
-            int jump_op = op.last.getOpcode();
-            if (jump_op >= IF_ICMPEQ && jump_op <= IF_ACMPNE) {
-                Instruction right = stack.pop();
-                condition = new CompareCondition(stack.pop(), right, CompareCondition.fromOpcode(jump_op));
-            } else if (jump_op == IFNULL || jump_op == IFNONNULL) {
-                condition = new CompareCondition(stack.pop(), new NullConstantArg(), jump_op == IFNULL ? CompareOp.NOT_EQUAL : CompareOp.EQUAL);
-            } else {
-                Instruction val = stack.pop();
-                if (val.inferType().equals("Z")) {
-                    boolean inverted = CompareCondition.fromOpcode(jump_op) == CompareOp.NOT_EQUAL;
-                    if (part.inverted) {
-                        inverted = !inverted;
-                    }
-                    condition = new BooleanCondition(val, inverted);
-                } else {
-                    condition = new CompareCondition(val, new IntConstantArg(0), CompareCondition.fromOpcode(jump_op));
+
+            int end = getRegionEnd(region, i);
+
+            if (end != -1 && end < region.size() - 1) {
+
+                List<OpcodeBlock> subregion = new ArrayList<>();
+                for (int o = i; o < end; o++) {
+                    subregion.add(region.get(o));
+                }
+
+                BlockSection s = processRegion(subregion, locals, region.get(end));
+                OpcodeBlock replacement = region.get(i);
+                replacement.internal = s;
+                replacement.target = region.get(end);
+                replacement.else_target = null;
+                replacement.opcodes.clear();
+
+                for (int o = 1; o < subregion.size(); o++) {
+                    region.remove(subregion.get(o));
                 }
             }
-            if (!stack.isEmpty()) {
-                throw new IllegalStateException("Condition building did not empty stack");
+        }
+
+        int body_start = 1;
+        OpcodeBlock next = region.get(body_start);
+        while (next.isConditional()) {
+            body_start++;
+            next = region.get(body_start);
+        }
+
+        Condition cond = makeCondition(region.get(0), locals, region.get(body_start), ret);
+
+        IfBlockSection section = new IfBlockSection(cond);
+
+        for (int i = body_start; i < region.size(); i++) {
+            next = region.get(i);
+            if (next.internal != null) {
+                section.body.add(next.internal);
+            } else if (next.isConditional()) {
+                throw new IllegalStateException();
+            } else {
+                section.body.add(new InlineBlockSection(next));
             }
         }
-        return condition;
+
+        return section;
+    }
+
+    private static int getRegionEnd(List<OpcodeBlock> blocks, int start) {
+        OpcodeBlock region_start = blocks.get(start);
+        int end_a = blocks.indexOf(region_start.target);
+        if(end_a == -1 && region_start.target != null) end_a = blocks.size();
+        int end_b = blocks.indexOf(region_start.else_target);
+        if(end_b == -1 && region_start.else_target != null) end_b = blocks.size();
+
+        int end = Math.max(end_a, end_b);
+
+        check: while (true) {
+            for (int o = 0; o < start; o++) {
+                OpcodeBlock next = blocks.get(o);
+                end_a = blocks.indexOf(next.target);
+                if(end_a == -1 && next.target != null) end_a = blocks.size();
+                end_b = blocks.indexOf(next.else_target);
+                if(end_b == -1 && next.else_target != null) end_b = blocks.size();
+                if ((end_a > start && end_a < end) || (end_b > start && end_b < end)) {
+                    return -1;
+                }
+            }
+            for (int o = start + 1; o < end; o++) {
+                OpcodeBlock next = blocks.get(o);
+                end_a = blocks.indexOf(next.target);
+                if(end_a == -1 && next.target != null) end_a = blocks.size();
+                end_b = blocks.indexOf(next.else_target);
+                if(end_b == -1 && next.else_target != null) end_b = blocks.size();
+
+                int new_end = Math.max(end_a, end_b);
+
+                if (new_end > end) {
+                    end = new_end;
+                    continue check;
+                }
+            }
+            for (int o = end + 1; o < blocks.size(); o++) {
+                OpcodeBlock next = blocks.get(o);
+                end_a = blocks.indexOf(next.target);
+                if(end_a == -1 && next.target != null) end_a = blocks.size();
+                end_b = blocks.indexOf(next.else_target);
+                if(end_b == -1 && next.else_target != null) end_b = blocks.size();
+                if ((end_a > start && end_a < end) || (end_b > start && end_b < end)) {
+                    return -1;
+                }
+            }
+            break;
+        }
+        if(end >= blocks.size()) {
+            return -1;
+        }
+        return end;
+    }
+
+    private static Condition makeCondition(OpcodeBlock block, Locals locals, OpcodeBlock body, OpcodeBlock ret) {
+        return makeCondition(block, locals, body, ret, new HashSet<>());
+    }
+
+    private static Condition makeCondition(OpcodeBlock block, Locals locals, OpcodeBlock body, OpcodeBlock ret, Set<OpcodeBlock> seen) {
+        Condition this_condition = null;
+        StatementBlock dummy = new StatementBlock(StatementBlock.Type.IF, locals);
+        Deque<Instruction> dummy_stack = new ArrayDeque<>();
+        appendBlock(block, dummy, locals, dummy_stack);
+
+        switch (block.last.getOpcode()) {
+        case IFEQ: {
+            if (dummy_stack.size() != 1 || !dummy.getStatements().isEmpty()) {
+                throw new IllegalStateException();
+            }
+            Instruction val = dummy_stack.pop();
+            this_condition = new BooleanCondition(val, false);
+            break;
+        }
+        case IFNE: {
+            if (dummy_stack.size() != 1 || !dummy.getStatements().isEmpty()) {
+                throw new IllegalStateException();
+            }
+            Instruction val = dummy_stack.pop();
+            this_condition = new BooleanCondition(val, true);
+            break;
+        }
+        case IF_ICMPLT: {
+            if (dummy_stack.size() != 2 || !dummy.getStatements().isEmpty()) {
+                throw new IllegalStateException();
+            }
+            Instruction b = dummy_stack.pop();
+            Instruction a = dummy_stack.pop();
+            this_condition = new CompareCondition(a, b, CompareCondition.fromOpcode(block.last.getOpcode()).inverse());
+            break;
+        }
+        case IFNULL: {
+            if (dummy_stack.size() != 1 || !dummy.getStatements().isEmpty()) {
+                throw new IllegalStateException();
+            }
+            Instruction val = dummy_stack.pop();
+            this_condition = new CompareCondition(val, new NullConstantArg(), CompareCondition.CompareOp.NOT_EQUAL);
+            break;
+        }
+        case IFNONNULL: {
+            if (dummy_stack.size() != 1 || !dummy.getStatements().isEmpty()) {
+                throw new IllegalStateException();
+            }
+            Instruction val = dummy_stack.pop();
+            this_condition = new CompareCondition(val, new NullConstantArg(), CompareCondition.CompareOp.EQUAL);
+            break;
+        }
+        default:
+            throw new IllegalStateException();
+        }
+
+        if (!block.target.isConditional() && !block.else_target.isConditional()) {
+            seen.add(block.target);
+            seen.add(block.else_target);
+            return this_condition;
+        }
+
+        if (!block.target.isConditional()) {
+            seen.add(block.target);
+            if (block.target == body) {
+                if(seen.contains(block.else_target)) {
+                    return inverse(this_condition);
+                }
+                return new OrCondition(inverse(this_condition), makeCondition(block.else_target, locals, body, ret, seen));
+            } else if (block.target == ret) {
+                if(seen.contains(block.else_target)) {
+                    return inverse(this_condition);
+                }
+                return new AndCondition(this_condition, makeCondition(block.else_target, locals, body, ret, seen));
+            }
+        } else {
+            seen.add(block.target);
+            seen.remove(ret);
+            Condition a = makeCondition(block.else_target, locals, body, ret, seen);
+            if(seen.contains(ret)) {
+                Condition and = new OrCondition(inverse(this_condition), inverse(a));
+                return new AndCondition(and, makeCondition(block.target, locals, body, ret));
+            }
+            Condition and = new AndCondition(this_condition, a);
+            return new OrCondition(and, makeCondition(block.target, locals, body, ret));
+        }
+
+        throw new IllegalStateException();
     }
 
     private static void appendBlock(BlockSection block_section, StatementBlock block) {
@@ -351,18 +512,63 @@ public class OpcodeDecompiler {
 
         if (block_section instanceof IfBlockSection) {
             IfBlockSection ifblock = (IfBlockSection) block_section;
-            Condition condition = buildCondition(ifblock.condition, block, stack);
             StatementBlock body = new StatementBlock(StatementBlock.Type.IF, block.getLocals());
             for (BlockSection body_section : ifblock.body) {
                 appendBlock(body_section, body);
             }
-            IfBlock iff = new IfBlock(condition, body);
+            IfBlock iff = new IfBlock(ifblock.condition, body);
             block.append(iff);
         } else if (block_section instanceof InlineBlockSection) {
             OpcodeBlock op = ((InlineBlockSection) block_section).block;
             appendBlock(op, block, block.getLocals(), stack);
         }
     }
+
+//    private static Condition buildCondition(ConditionPart part, StatementBlock block, Deque<Instruction> stack) {
+//        Condition condition = null;
+//        if (part instanceof OrConditionPart) {
+//            Condition left = buildCondition(((OrConditionPart) part).left, block, stack);
+//            Condition right = buildCondition(((OrConditionPart) part).right, block, stack);
+//            if (part.inverted) {
+//                condition = new AndCondition(new InverseCondition(left), new InverseCondition(right));
+//            } else {
+//                condition = new OrCondition(left, right);
+//            }
+//        } else if (part instanceof AndConditionPart) {
+//            Condition left = buildCondition(((AndConditionPart) part).left, block, stack);
+//            Condition right = buildCondition(((AndConditionPart) part).right, block, stack);
+//            if (part.inverted) {
+//                condition = new OrCondition(new InverseCondition(left), new InverseCondition(right));
+//            } else {
+//                condition = new AndCondition(left, right);
+//            }
+//        } else if (part instanceof ConditionBlock) {
+//            OpcodeBlock op = ((ConditionBlock) part).block;
+//            appendBlock(op, block, block.getLocals(), stack);
+//            int jump_op = op.last.getOpcode();
+//            if (jump_op >= IF_ICMPEQ && jump_op <= IF_ACMPNE) {
+//                Instruction right = stack.pop();
+//                condition = new CompareCondition(stack.pop(), right, CompareCondition.fromOpcode(jump_op));
+//            } else if (jump_op == IFNULL || jump_op == IFNONNULL) {
+//                condition = new CompareCondition(stack.pop(), new NullConstantArg(), jump_op == IFNULL ? CompareOp.NOT_EQUAL : CompareOp.EQUAL);
+//            } else {
+//                Instruction val = stack.pop();
+//                if (val.inferType().equals("Z")) {
+//                    boolean inverted = CompareCondition.fromOpcode(jump_op) == CompareOp.NOT_EQUAL;
+//                    if (part.inverted) {
+//                        inverted = !inverted;
+//                    }
+//                    condition = new BooleanCondition(val, inverted);
+//                } else {
+//                    condition = new CompareCondition(val, new IntConstantArg(0), CompareCondition.fromOpcode(jump_op));
+//                }
+//            }
+//            if (!stack.isEmpty()) {
+//                throw new IllegalStateException("Condition building did not empty stack");
+//            }
+//        }
+//        return condition;
+//    }
 
     private static void appendBlock(OpcodeBlock op, StatementBlock block, Locals locals, Deque<Instruction> stack) {
         for (int index = 0; index < op.opcodes.size() + 1; index++) {
@@ -939,11 +1145,14 @@ public class OpcodeDecompiler {
 
     private static class OpcodeBlock {
 
-        public int                          break_point;
+        public int break_point;
         public final List<AbstractInsnNode> opcodes = new ArrayList<>();
-        public AbstractInsnNode             last;
-        public OpcodeBlock                  target;
-        public OpcodeBlock                  else_target;
+        public AbstractInsnNode last;
+        public OpcodeBlock target;
+        public OpcodeBlock else_target;
+
+        public Set<OpcodeBlock> targetted_by = new HashSet<>();
+        public BlockSection internal = null;
 
         public OpcodeBlock() {
 
@@ -989,53 +1198,13 @@ public class OpcodeDecompiler {
         }
     }
 
-    private static abstract class ConditionPart {
-
-        public boolean inverted = false;
-    }
-
-    private static class ConditionBlock extends ConditionPart {
-
-        public OpcodeBlock block;
-
-        public ConditionBlock(OpcodeBlock op) {
-            this.block = op;
-        }
-    }
-
-    private static class OrConditionPart extends ConditionPart {
-
-        public ConditionPart left;
-        public ConditionPart right;
-
-        public OrConditionPart(ConditionPart l, ConditionPart r) {
-            this.left = l;
-            this.right = r;
-        }
-    }
-
-    private static class AndConditionPart extends ConditionPart {
-
-        public ConditionPart left;
-        public ConditionPart right;
-
-        public AndConditionPart(ConditionPart l, ConditionPart r) {
-            this.left = l;
-            this.right = r;
-        }
-    }
-
     private static class IfBlockSection extends BlockSection {
 
-        public ConditionPart      condition;
+        public Condition condition;
         public List<BlockSection> body = new ArrayList<>();
 
-        public IfBlockSection(ConditionPart cond) {
+        public IfBlockSection(Condition cond) {
             this.condition = cond;
-        }
-
-        public IfBlockSection(OpcodeBlock cond) {
-            this.condition = new ConditionBlock(cond);
         }
     }
 
