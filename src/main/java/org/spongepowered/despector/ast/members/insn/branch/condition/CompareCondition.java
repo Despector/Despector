@@ -40,28 +40,28 @@ public class CompareCondition extends Condition {
      */
     public static CompareOp fromOpcode(int op) {
         switch (op) {
-            case IFEQ:
-            case IF_ACMPEQ:
-            case IF_ICMPEQ:
-                return CompareOp.EQUAL;
-            case IFNE:
-            case IF_ACMPNE:
-            case IF_ICMPNE:
-                return CompareOp.NOT_EQUAL;
-            case IFGE:
-            case IF_ICMPGE:
-                return CompareOp.GREATER_EQUAL;
-            case IFGT:
-            case IF_ICMPGT:
-                return CompareOp.GREATER;
-            case IFLE:
-            case IF_ICMPLE:
-                return CompareOp.LESS_EQUAL;
-            case IFLT:
-            case IF_ICMPLT:
-                return CompareOp.LESS;
-            default:
-                throw new UnsupportedOperationException("Not a conditional jump opcode: " + op);
+        case IFEQ:
+        case IF_ACMPEQ:
+        case IF_ICMPEQ:
+            return CompareOp.EQUAL;
+        case IFNE:
+        case IF_ACMPNE:
+        case IF_ICMPNE:
+            return CompareOp.NOT_EQUAL;
+        case IFGE:
+        case IF_ICMPGE:
+            return CompareOp.GREATER_EQUAL;
+        case IFGT:
+        case IF_ICMPGT:
+            return CompareOp.GREATER;
+        case IFLE:
+        case IF_ICMPLE:
+            return CompareOp.LESS_EQUAL;
+        case IFLT:
+        case IF_ICMPLT:
+            return CompareOp.LESS;
+        default:
+            throw new UnsupportedOperationException("Not a conditional jump opcode: " + op);
         }
     }
 
@@ -145,6 +145,18 @@ public class CompareCondition extends Condition {
     @Override
     public String toString() {
         return this.left + this.op.asString() + this.right;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == this) {
+            return true;
+        }
+        if (!(o instanceof CompareCondition)) {
+            return false;
+        }
+        CompareCondition and = (CompareCondition) o;
+        return and.right.equals(this.right) && and.left.equals(this.left) && this.op == and.op;
     }
 
 }

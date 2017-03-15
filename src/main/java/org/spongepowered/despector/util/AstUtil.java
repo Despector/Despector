@@ -44,7 +44,12 @@ import org.spongepowered.despector.ast.members.insn.branch.condition.OrCondition
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+
+import javax.sound.sampled.AudioFormat.Encoding;
 
 /**
  * Various utilities for working with AST elements.
@@ -54,7 +59,7 @@ public final class AstUtil {
     public static Condition inverse(Condition condition) {
         if (condition instanceof BooleanCondition) {
             BooleanCondition b = (BooleanCondition) condition;
-            b.setInverse(!b.isInverse());
+            return new BooleanCondition(b.getConditionValue(), !b.isInverse());
         } else if (condition instanceof AndCondition) {
             AndCondition and = (AndCondition) condition;
             List<Condition> args = new ArrayList<>();
@@ -72,10 +77,8 @@ public final class AstUtil {
         } else if (condition instanceof CompareCondition) {
             CompareCondition cmp = (CompareCondition) condition;
             return new CompareCondition(cmp.getLeft(), cmp.getRight(), cmp.getOp().inverse());
-        } else {
-            return new InverseCondition(condition);
         }
-        return condition;
+        return new InverseCondition(condition);
     }
 
     public static String opcodeToType(int op) {
@@ -367,6 +370,329 @@ public final class AstUtil {
             return false;
         }
         return true;
+    }
+
+    private static boolean isInverse(Condition a, Condition other) {
+        if (other instanceof BooleanCondition && a instanceof BooleanCondition) {
+            BooleanCondition ab = (BooleanCondition) a;
+            BooleanCondition ob = (BooleanCondition) other;
+            return ab.getConditionValue().equals(ob.getConditionValue()) && ab.isInverse() != ob.isInverse();
+        }
+        if (other instanceof CompareCondition && a instanceof CompareCondition) {
+            CompareCondition ab = (CompareCondition) a;
+            CompareCondition ob = (CompareCondition) other;
+            return ab.getLeft().equals(ob.getLeft()) && ab.getRight().equals(ob.getRight()) && ab.getOp() == ob.getOp().inverse();
+        }
+        return false;
+    }
+
+    private static int getMapping(Map<Condition, Integer> mapping, Condition c) {
+        if (mapping.containsKey(c)) {
+            return mapping.get(c);
+        }
+        int highest = 1;
+        for (Condition key : mapping.keySet()) {
+            int kvalue = mapping.get(key);
+            if (isInverse(c, key)) {
+                mapping.put(c, -kvalue);
+                return -kvalue;
+            }
+            if (c.equals(key)) {
+                mapping.put(c, kvalue);
+                return kvalue;
+            }
+            if (kvalue >= highest) {
+                highest = kvalue + 1;
+            }
+        }
+        mapping.put(c, highest);
+        return highest;
+    }
+
+    private static int[] encode(AndCondition and, Map<Condition, Integer> mapping) {
+        int[] encoding = new int[and.getOperands().size()];
+        int i = 0;
+        for (Condition c : and.getOperands()) {
+            int m = getMapping(mapping, c);
+            encoding[i++] = m;
+        }
+        return encoding;
+    }
+
+    /**
+     * Gets is the first param contains the inverse of the second param.
+     */
+    private static boolean containsInverse(int[] a, int[] b) {
+        outer: for (int i = 0; i < b.length; i++) {
+            int next = b[i];
+            for (int o = 0; o < a.length; o++) {
+                if (a[o] == -next) {
+                    continue outer;
+                }
+            }
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Gets is the first param contains the second param.
+     */
+    private static boolean contains(int[] a, int[] b) {
+        outer: for (int i = 0; i < b.length; i++) {
+            int next = b[i];
+            for (int o = 0; o < a.length; o++) {
+                if (a[o] == next) {
+                    continue outer;
+                }
+            }
+            return false;
+        }
+        return true;
+    }
+
+    private static Pair<int[], int[]> simplifyCommonSubparts(int[] a, int[] b, List<int[]> encodings) {
+        if (a.length < b.length) {
+            return null;
+        }
+        int[] common = new int[Math.max(a.length, b.length)];
+        int common_length = 0;
+
+        for (int i = 0; i < a.length; i++) {
+            for (int j = 0; j < b.length; j++) {
+                if (a[i] == b[j]) {
+                    common[common_length++] = a[i];
+                    break;
+                }
+            }
+        }
+        if (common_length == 0) {
+            return null;
+        }
+
+        int[] a_b = new int[a.length - common_length];
+        int o = 0;
+        int u = 0;
+        for (int i = 0; i < a.length; i++) {
+            if (a[i] == common[o]) {
+                o++;
+            } else {
+                a_b[u++] = a[i];
+            }
+        }
+        int[] b_a = new int[b.length - common_length];
+        o = 0;
+        u = 0;
+        for (int i = 0; i < b.length; i++) {
+            if (b[i] == common[o]) {
+                o++;
+            } else {
+                b_a[u++] = b[i];
+            }
+        }
+
+        if (containsInverse(a_b, b_a)) {
+            if (a_b.length == b_a.length) {
+                int[] m = new int[common_length];
+                for (int i = 0; i < common_length; i++) {
+                    m[i] = common[i];
+                }
+                return new Pair(m, null);
+            }
+            int[] new_m = new int[a.length - b_a.length];
+            int d = 0;
+            outer: for (int j = 0; j < a.length; j++) {
+                for (int v = 0; v < b_a.length; v++) {
+                    if (a[j] == -b_a[v]) {
+                        continue outer;
+                    }
+                }
+                new_m[d++] = a[j];
+            }
+            return new Pair(new_m, null);
+        } else if (a_b.length == b_a.length && a_b.length == 1) {
+            int[] new_m = new int[common_length];
+            for (int i = 0; i < common_length; i++) {
+                new_m[i] = common[i];
+            }
+
+            int[] dm = new int[] {-a_b[0], -b_a[0]};
+
+            for (int i = 0; i < encodings.size(); i++) {
+                int[] n = encodings.get(i);
+                if (n == a || n == b) {
+                    continue;
+                }
+                if (n.length == 2 && contains(n, dm)) {
+                    return new Pair(null, new_m);
+                }
+            }
+
+        }
+        return null;
+    }
+
+    private static Condition reverse(Map<Condition, Integer> mapping, int val) {
+        for (Map.Entry<Condition, Integer> e : mapping.entrySet()) {
+            if (e.getValue() == val) {
+                return e.getKey();
+            }
+        }
+        return null;
+    }
+
+    private static List<Condition> reverseEncoding(List<int[]> encodings, Map<Condition, Integer> mapping) {
+        List<Condition> reverse = new ArrayList<>();
+        for (int i = 0; i < encodings.size(); i++) {
+            List<Condition> partial = new ArrayList<>();
+            int[] next = encodings.get(i);
+            for (int o = 0; o < next.length; o++) {
+                int val = next[o];
+                Condition p = reverse(mapping, val);
+                if (p == null) {
+                    p = inverse(reverse(mapping, -val));
+                    if (p == null) {
+                        throw new IllegalStateException();
+                    }
+                }
+                partial.add(p);
+            }
+            if (partial.size() == 1) {
+                reverse.add(partial.get(0));
+            } else {
+                reverse.add(new AndCondition(partial));
+            }
+        }
+        return reverse;
+    }
+
+    private static final boolean DEBUG_SIMPLIFICATION = Boolean.valueOf(System.getProperty("despect.debug.simplification", "true"));
+
+    public static Condition simplifyCondition(Condition condition) {
+        // A brute force simplification of sum-of-products expressions
+        if (condition instanceof OrCondition) {
+            OrCondition or = (OrCondition) condition;
+            List<int[]> encodings = new ArrayList<>(or.getOperands().size());
+            Map<Condition, Integer> mapping = new HashMap<>();
+            for (int i = 0; i < or.getOperands().size(); i++) {
+                Condition c = or.getOperands().get(i);
+                if (c instanceof AndCondition) {
+                    encodings.add(encode((AndCondition) c, mapping));
+                } else {
+                    encodings.add(new int[] {getMapping(mapping, c)});
+                }
+            }
+            if (DEBUG_SIMPLIFICATION) {
+                for (Map.Entry<Condition, Integer> e : mapping.entrySet()) {
+                    System.out.println(e.getKey() + " : " + e.getValue());
+                }
+                System.out.print("Exp: ");
+                for (int[] e : encodings) {
+                    for (int i = 0; i < e.length; i++) {
+                        System.out.print(e[i]);
+                    }
+                    System.out.print(" | ");
+                }
+                System.out.println();
+            }
+            for (int j = 0; j < encodings.size(); j++) {
+                for (int k = 0; k < encodings.size(); k++) {
+                    int[] n = encodings.get(k);
+                    for (Iterator<int[]> it = encodings.iterator(); it.hasNext();) {
+                        int[] m = it.next();
+                        if (m == n || m.length < n.length) {
+                            continue;
+                        }
+                        if (contains(m, n)) {
+                            it.remove();
+                            if (DEBUG_SIMPLIFICATION) {
+                                System.out.println("Removed expression containing other expression");
+                                System.out.print("Exp: ");
+                                for (int[] e : encodings) {
+                                    for (int i = 0; i < e.length; i++) {
+                                        System.out.print(e[i]);
+                                    }
+                                    System.out.print(" | ");
+                                }
+                                System.out.println();
+                            }
+                        }
+                    }
+                    for (int l = 0; l < encodings.size(); l++) {
+                        if (l == k) {
+                            continue;
+                        }
+                        int[] m = encodings.get(l);
+                        if (m.length < n.length) {
+                            continue;
+                        }
+                        if (containsInverse(m, n)) {
+                            int[] new_m = new int[m.length - n.length];
+                            int d = 0;
+                            outer: for (int u = 0; u < m.length; u++) {
+                                for (int v = 0; v < n.length; v++) {
+                                    if (m[u] == -n[v]) {
+                                        continue outer;
+                                    }
+                                }
+                                new_m[d++] = m[u];
+                            }
+                            encodings.set(l, new_m);
+                            if (DEBUG_SIMPLIFICATION) {
+                                System.out.println("Removed inverse of other expression from expression");
+                                System.out.print("Exp: ");
+                                for (int[] e : encodings) {
+                                    for (int i = 0; i < e.length; i++) {
+                                        System.out.print(e[i]);
+                                    }
+                                    System.out.print(" | ");
+                                }
+                                System.out.println();
+                            }
+                        } else {
+                            Pair<int[], int[]> s = simplifyCommonSubparts(m, n, encodings);
+                            if (s != null) {
+                                if (s.getFirst() != null) {
+                                    encodings.set(l, s.getFirst());
+                                    if (DEBUG_SIMPLIFICATION) {
+                                        System.out.println("Applied inverse removal to common sub part");
+                                        System.out.print("Exp: ");
+                                        for (int[] e : encodings) {
+                                            for (int i = 0; i < e.length; i++) {
+                                                System.out.print(e[i]);
+                                            }
+                                            System.out.print(" | ");
+                                        }
+                                        System.out.println();
+                                    }
+                                } else {
+                                    encodings.set(k, s.getSecond());
+                                    encodings.remove(l);
+                                    if (DEBUG_SIMPLIFICATION) {
+                                        System.out.println("Applied De Morgans law to common sub part");
+                                        System.out.print("Exp: ");
+                                        for (int[] e : encodings) {
+                                            for (int i = 0; i < e.length; i++) {
+                                                System.out.print(e[i]);
+                                            }
+                                            System.out.print(" | ");
+                                        }
+                                        System.out.println();
+                                    }
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            List<Condition> reverse = reverseEncoding(encodings, mapping);
+            if (encodings.size() == 1) {
+                return reverse.get(0);
+            }
+            return new OrCondition(reverse);
+        }
+        return condition;
     }
 
     private AstUtil() {

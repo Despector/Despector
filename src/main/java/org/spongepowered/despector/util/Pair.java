@@ -22,52 +22,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.despector.ast.members.insn.branch.condition;
+package org.spongepowered.despector.util;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+public class Pair<A, B> {
 
-import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
+    private final A a;
+    private final B b;
 
-/**
- * A condition based off of a simple boolean value.
- */
-public class InverseCondition extends Condition {
-
-    private Condition value;
-
-    public InverseCondition(Condition value) {
-        this.value = checkNotNull(value, "value");
+    public Pair(A a, B b) {
+        this.a = a;
+        this.b = b;
     }
 
-    public Condition getConditionValue() {
-        return this.value;
+    public A getFirst() {
+        return a;
     }
 
-    public void setConditionValue(Condition val) {
-        this.value = checkNotNull(val, "value");
-    }
-
-    @Override
-    public void accept(InstructionVisitor visitor) {
-        visitor.visitInverseCondition(this);
-        this.value.accept(visitor);
-    }
-
-    @Override
-    public String toString() {
-        return "!" + this.value;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (o == this) {
-            return true;
-        }
-        if (!(o instanceof InverseCondition)) {
-            return false;
-        }
-        InverseCondition and = (InverseCondition) o;
-        return this.value.equals(and.value);
+    public B getSecond() {
+        return b;
     }
 
 }

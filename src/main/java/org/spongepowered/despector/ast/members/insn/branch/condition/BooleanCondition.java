@@ -69,4 +69,16 @@ public class BooleanCondition extends Condition {
         return (this.inverse ? "!" : "") + this.value;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (o == this) {
+            return true;
+        }
+        if (!(o instanceof BooleanCondition)) {
+            return false;
+        }
+        BooleanCondition and = (BooleanCondition) o;
+        return this.value.equals(and.value) && this.inverse == and.inverse;
+    }
+
 }

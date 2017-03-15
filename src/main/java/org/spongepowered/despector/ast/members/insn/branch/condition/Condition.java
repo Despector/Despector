@@ -36,4 +36,7 @@ public abstract class Condition {
     @Override
     public abstract String toString();
 
+    @Override
+    public abstract boolean equals(Object o);
+
 }

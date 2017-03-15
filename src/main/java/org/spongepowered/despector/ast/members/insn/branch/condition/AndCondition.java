@@ -42,8 +42,8 @@ public class AndCondition extends Condition {
         this.args = Lists.newArrayList(checkNotNull(args, "args"));
     }
 
-    public AndCondition(List<Condition> args) {
-        this.args = checkNotNull(args, "args");
+    public AndCondition(Iterable<Condition> args) {
+        this.args = Lists.newArrayList(checkNotNull(args, "args"));
     }
 
     public List<Condition> getOperands() {
@@ -68,6 +68,26 @@ public class AndCondition extends Condition {
             }
         }
         return sb.toString();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == this) {
+            return true;
+        }
+        if (!(o instanceof AndCondition)) {
+            return false;
+        }
+        AndCondition and = (AndCondition) o;
+        if (and.getOperands().size() != this.args.size()) {
+            return false;
+        }
+        for (int i = 0; i < this.args.size(); i++) {
+            if (!this.args.get(i).equals(and.getOperands().get(i))) {
+                return false;
+            }
+        }
+        return true;
     }
 
 }

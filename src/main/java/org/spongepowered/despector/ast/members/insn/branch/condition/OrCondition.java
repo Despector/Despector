@@ -70,4 +70,24 @@ public class OrCondition extends Condition {
         return sb.toString();
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (o == this) {
+            return true;
+        }
+        if (!(o instanceof OrCondition)) {
+            return false;
+        }
+        OrCondition and = (OrCondition) o;
+        if (and.getOperands().size() != this.args.size()) {
+            return false;
+        }
+        for (int i = 0; i < this.args.size(); i++) {
+            if (!this.args.get(i).equals(and.getOperands().get(i))) {
+                return false;
+            }
+        }
+        return true;
+    }
+
 }
