@@ -42,20 +42,33 @@ public class CastArg implements Instruction {
     public CastArg(String type, Instruction val) {
         this.type = checkNotNull(type, "type");
         this.val = checkNotNull(val, "val");
+        // TODO verify that types are compatible
     }
 
+    /**
+     * Gets the type which the valye is casted to.
+     */
     public String getType() {
         return this.type;
     }
 
+    /**
+     * Sets the type which the valye is casted to.
+     */
     public void setType(String type) {
         this.type = checkNotNull(type, "type");
     }
 
+    /**
+     * Gets the instruction for the type being cast.
+     */
     public Instruction getValue() {
         return this.val;
     }
 
+    /**
+     * Sets the instruction for the type being cast.
+     */
     public void setValue(Instruction val) {
         this.val = checkNotNull(val, "val");
     }

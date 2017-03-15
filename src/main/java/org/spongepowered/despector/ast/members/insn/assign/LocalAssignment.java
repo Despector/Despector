@@ -22,25 +22,21 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.despector.ast.members.insn.misc;
+package org.spongepowered.despector.ast.members.insn.assign;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.spongepowered.despector.ast.io.insn.Locals.LocalInstance;
 import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
-import org.spongepowered.despector.ast.members.insn.Statement;
+import org.spongepowered.despector.ast.members.insn.arg.Instruction;
 
-/**
- * An increment statement. Example {@code var += increment_value;}.
- */
-public class IncrementStatement implements Statement {
+public class LocalAssignment extends Assignment {
 
     private LocalInstance local;
-    private int val;
 
-    public IncrementStatement(LocalInstance local, int val) {
+    public LocalAssignment(LocalInstance local, Instruction val) {
+        super(val);
         this.local = checkNotNull(local, "local");
-        this.val = val;
     }
 
     public LocalInstance getLocal() {
@@ -51,22 +47,15 @@ public class IncrementStatement implements Statement {
         this.local = checkNotNull(local, "local");
     }
 
-    public int getIncrementValue() {
-        return this.val;
-    }
-
-    public void setIncrementValue(int val) {
-        this.val = val;
-    }
-
     @Override
     public void accept(InstructionVisitor visitor) {
-        visitor.visitIncrement(this);
+        visitor.visitLocalAssign(this);
+        this.val.accept(visitor);
     }
 
     @Override
     public String toString() {
-        return this.local + " += " + this.val + ";";
+        return this.local + " = " + this.val + ";";
     }
 
 }

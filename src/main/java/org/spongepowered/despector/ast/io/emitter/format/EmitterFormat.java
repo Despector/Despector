@@ -28,6 +28,9 @@ import com.google.common.collect.Lists;
 
 import java.util.List;
 
+/**
+ * Configuration for the formatting of a source emitter.
+ */
 public class EmitterFormat {
 
     public String source_compliance = "1.8";
@@ -127,7 +130,7 @@ public class EmitterFormat {
     // ========================================================================
     // ctor
     // ========================================================================
-    
+
     public boolean insert_space_before_comma_in_explicitconstructorcall_arguments = false;
     public boolean insert_space_after_comma_in_explicitconstructorcall_arguments = true;
     public boolean insert_space_before_opening_paren_in_constructor_declaration = false;
@@ -145,9 +148,9 @@ public class EmitterFormat {
     // ========================================================================
     // try
     // ========================================================================
-    
+
     public WrappingStyle alignment_for_union_type_in_multicatch = WrappingStyle.WRAP_WHEN_NEEDED;
-    
+
     // ========================================================================
     // loops
     // ========================================================================
@@ -174,6 +177,7 @@ public class EmitterFormat {
     public String disabling_tag = "@formatter:off";
     public String enabling_tag = "@formatter:on";
 
+    // TODO need to finish sorting these...
     public BracePosition brace_position_for_type_declaration = BracePosition.SAME_LINE;
     public boolean insert_space_before_opening_brace_in_method_declaration = true;
     public boolean insert_space_before_closing_paren_in_method_declaration = false;

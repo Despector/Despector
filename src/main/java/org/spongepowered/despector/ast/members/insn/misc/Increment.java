@@ -26,38 +26,47 @@ package org.spongepowered.despector.ast.members.insn.misc;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import org.spongepowered.despector.ast.io.insn.Locals.LocalInstance;
 import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
 import org.spongepowered.despector.ast.members.insn.Statement;
-import org.spongepowered.despector.ast.members.insn.arg.Instruction;
 
 /**
- * A statement throwing an exception type.
+ * An increment statement. Example {@code var += increment_value;}.
  */
-public class ThrowException implements Statement {
+public class Increment implements Statement {
 
-    private Instruction ex;
+    private LocalInstance local;
+    private int val;
 
-    public ThrowException(Instruction arg) {
-        this.ex = checkNotNull(arg, "exception");
+    public Increment(LocalInstance local, int val) {
+        this.local = checkNotNull(local, "local");
+        this.val = val;
     }
 
-    public Instruction getException() {
-        return this.ex;
+    public LocalInstance getLocal() {
+        return this.local;
     }
 
-    public void setException(Instruction ex) {
-        this.ex = checkNotNull(ex, "exception");
+    public void setLocal(LocalInstance local) {
+        this.local = checkNotNull(local, "local");
+    }
+
+    public int getIncrementValue() {
+        return this.val;
+    }
+
+    public void setIncrementValue(int val) {
+        this.val = val;
     }
 
     @Override
     public void accept(InstructionVisitor visitor) {
-        visitor.visitThrowException(this);
-        this.ex.accept(visitor);
+        visitor.visitIncrement(this);
     }
 
     @Override
     public String toString() {
-        return "throw " + this.ex + ";";
+        return this.local + " += " + this.val + ";";
     }
 
 }

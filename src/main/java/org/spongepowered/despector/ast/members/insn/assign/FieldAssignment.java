@@ -22,42 +22,52 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.despector.ast.members.insn.function;
+package org.spongepowered.despector.ast.members.insn.assign;
 
-import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import org.spongepowered.despector.ast.members.insn.arg.Instruction;
-import org.spongepowered.despector.ast.members.insn.arg.StaticFunctionArg;
 import org.spongepowered.despector.util.TypeHelper;
 
-/**
- * A statement calling a static method.
- */
-public class StaticMethodCall extends MethodCall {
+public abstract class FieldAssignment extends Assignment {
 
-    public StaticMethodCall(String name, String desc, String owner, Instruction[] args) {
-        super(name, desc, owner, args);
+    protected String field_name;
+    protected String type_desc;
+    protected String owner_type;
+
+    public FieldAssignment(String field, String type_desc, String owner, Instruction val) {
+        super(val);
+        this.field_name = checkNotNull(field, "field");
+        this.type_desc = checkNotNull(type_desc, "field_desc");
+        this.owner_type = checkNotNull(owner, "owner");
     }
 
-    public StaticMethodCall(StaticFunctionArg arg) {
-        super(arg.getMethodName(), arg.getMethodDescription(), arg.getOwner(), arg.getParams());
+    public String getFieldName() {
+        return this.field_name;
     }
 
-    @Override
-    public void accept(InstructionVisitor visitor) {
-        visitor.visitStaticMethodCall(this);
-        super.accept(visitor);
+    public void setFieldName(String name) {
+        this.field_name = checkNotNull(name, "name");
     }
 
-    @Override
-    public String toString() {
-        StringBuilder params = new StringBuilder();
-        for (int i = 0; i < this.params.length; i++) {
-            params.append(this.params[i]);
-            if (i < this.params.length - 1) {
-                params.append(", ");
-            }
-        }
-        return TypeHelper.descToType(this.method_owner) + "." + this.method_name + "(" + params + ");";
+    public String getFieldDescription() {
+        return this.type_desc;
+    }
+
+    public void setFieldDescription(String desc) {
+        this.type_desc = checkNotNull(desc, "desc");
+    }
+
+    public String getOwnerType() {
+        return this.owner_type;
+    }
+
+    public String getOwnerName() {
+        return TypeHelper.descToType(this.owner_type);
+    }
+
+    public void setOwner(String owner) {
+        this.owner_type = checkNotNull(owner, "owner");
     }
 
 }

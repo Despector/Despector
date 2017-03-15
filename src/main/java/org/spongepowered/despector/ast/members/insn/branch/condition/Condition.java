@@ -31,6 +31,9 @@ import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
  */
 public abstract class Condition {
 
+    /**
+     * Passes itself and any child nodes to the given visitor.
+     */
     public abstract void accept(InstructionVisitor visitor);
 
     @Override

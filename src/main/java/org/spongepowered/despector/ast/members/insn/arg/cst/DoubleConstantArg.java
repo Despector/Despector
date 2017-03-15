@@ -26,6 +26,9 @@ package org.spongepowered.despector.ast.members.insn.arg.cst;
 
 import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
 
+/**
+ * A constant double value.
+ */
 public class DoubleConstantArg extends ConstantArg {
 
     private double cst;
@@ -34,10 +37,16 @@ public class DoubleConstantArg extends ConstantArg {
         this.cst = val;
     }
 
+    /**
+     * Gets the constant value.
+     */
     public double getConstant() {
         return this.cst;
     }
 
+    /**
+     * Sets the constant value.
+     */
     public void setConstant(double cst) {
         this.cst = cst;
     }

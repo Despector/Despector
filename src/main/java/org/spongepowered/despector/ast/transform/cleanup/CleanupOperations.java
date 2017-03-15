@@ -29,6 +29,9 @@ import org.spongepowered.despector.ast.transform.TypeTransformer;
 
 import java.util.Map;
 
+/**
+ * Operations which may be applied to an AST to perform refactoring operations.
+ */
 public class CleanupOperations {
 
     private static final Map<String, TypeTransformer> operations = Maps.newHashMap();
@@ -37,6 +40,9 @@ public class CleanupOperations {
         operations.put("private_final_utility_classes", new UtilityClassNoInstance());
     }
 
+    /**
+     * Gets the operation corresponding to the given id, or null if not defined.
+     */
     public static TypeTransformer getOperation(String id) {
         return operations.get(id);
     }

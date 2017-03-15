@@ -31,17 +31,22 @@ import org.spongepowered.despector.ast.members.insn.Statement;
 import org.spongepowered.despector.ast.members.insn.StatementBlock;
 import org.spongepowered.despector.ast.members.insn.branch.condition.Condition;
 
+import javax.annotation.Nullable;
+
 /**
- * A while loop.
+ * An if block.
  */
-public class WhileLoop implements Statement {
+public class If implements Statement {
+
+    // TODO better elif support
 
     private Condition condition;
-    private StatementBlock body;
+    private StatementBlock block;
+    private Else else_block;
 
-    public WhileLoop(Condition condition, StatementBlock body) {
+    public If(Condition condition, StatementBlock insn) {
         this.condition = checkNotNull(condition, "condition");
-        this.body = checkNotNull(body, "body");
+        this.block = checkNotNull(insn, "block");
     }
 
     public Condition getCondition() {
@@ -52,34 +57,84 @@ public class WhileLoop implements Statement {
         this.condition = checkNotNull(condition, "condition");
     }
 
-    public StatementBlock getBody() {
-        return this.body;
+    public StatementBlock getIfBody() {
+        return this.block;
     }
 
     public void setBody(StatementBlock block) {
-        this.body = checkNotNull(block, "body");
+        this.block = checkNotNull(block, "block");
+    }
+
+    @Nullable
+    public Else getElseBlock() {
+        return this.else_block;
+    }
+
+    public void setElseBlock(@Nullable Else else_block) {
+        this.else_block = else_block;
     }
 
     @Override
     public void accept(InstructionVisitor visitor) {
-        visitor.visitWhileLoop(this);
+        visitor.visitIfBlock(this);
         this.condition.accept(visitor);
-        for (Statement stmt : this.body.getStatements()) {
+        for (Statement stmt : this.block.getStatements()) {
             stmt.accept(visitor);
+        }
+        if (this.else_block != null) {
+            this.else_block.accept(visitor);
         }
     }
 
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append("while (");
-        sb.append(this.condition);
-        sb.append(") {\n");
-        for (Statement insn : this.body.getStatements()) {
+        sb.append("if (");
+        sb.append(this.condition).append(") {\n");
+        for (Statement insn : this.block.getStatements()) {
             sb.append("    ").append(insn).append("\n");
         }
         sb.append("}");
+        if (this.else_block != null) {
+            sb.append(" ").append(this.else_block);
+        }
         return sb.toString();
+    }
+
+    public class Else {
+
+        private StatementBlock block;
+
+        public Else(StatementBlock block) {
+            this.block = checkNotNull(block, "block");
+        }
+
+        public StatementBlock getElseBody() {
+            return this.block;
+        }
+
+        public void setElseBody(StatementBlock block) {
+            this.block = checkNotNull(block, "block");
+        }
+
+        public void accept(InstructionVisitor visitor) {
+            visitor.visitElseBlock(this);
+            for (Statement stmt : this.block.getStatements()) {
+                stmt.accept(visitor);
+            }
+        }
+
+        @Override
+        public String toString() {
+            StringBuilder sb = new StringBuilder();
+            sb.append("else {\n");
+            for (Statement insn : this.block.getStatements()) {
+                sb.append("    ").append(insn).append("\n");
+            }
+            sb.append("}");
+            return sb.toString();
+        }
+
     }
 
 }

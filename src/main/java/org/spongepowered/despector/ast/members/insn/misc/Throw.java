@@ -22,40 +22,42 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.despector.ast.members.insn.assign;
+package org.spongepowered.despector.ast.members.insn.misc;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
+import org.spongepowered.despector.ast.members.insn.Statement;
 import org.spongepowered.despector.ast.members.insn.arg.Instruction;
 
-public class InstanceFieldAssign extends FieldAssign {
+/**
+ * A statement throwing an exception type.
+ */
+public class Throw implements Statement {
 
-    private Instruction owner;
+    private Instruction ex;
 
-    public InstanceFieldAssign(String field_name, String type_desc, String owner_type, Instruction owner, Instruction val) {
-        super(field_name, type_desc, owner_type, val);
-        this.owner = checkNotNull(owner, "owner");
+    public Throw(Instruction arg) {
+        this.ex = checkNotNull(arg, "exception");
     }
 
-    public Instruction getOwner() {
-        return this.owner;
+    public Instruction getException() {
+        return this.ex;
     }
 
-    public void setOwner(Instruction owner) {
-        this.owner = checkNotNull(owner, "owner");
+    public void setException(Instruction ex) {
+        this.ex = checkNotNull(ex, "exception");
     }
 
     @Override
     public void accept(InstructionVisitor visitor) {
-        visitor.visitInstanceFieldAssign(this);
-        this.owner.accept(visitor);
-        this.val.accept(visitor);
+        visitor.visitThrowException(this);
+        this.ex.accept(visitor);
     }
 
     @Override
     public String toString() {
-        return this.owner + "." + this.field_name + " = " + this.val + ";";
+        return "throw " + this.ex + ";";
     }
 
 }

@@ -22,56 +22,40 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.despector.ast.members.insn.function;
+package org.spongepowered.despector.ast.members.insn.assign;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
-import org.spongepowered.despector.ast.members.insn.arg.InstanceFunctionArg;
 import org.spongepowered.despector.ast.members.insn.arg.Instruction;
 
-/**
- * A statement calling an instance method.
- */
-public class InstanceMethodCall extends MethodCall {
+public class InstanceFieldAssignment extends FieldAssignment {
 
-    private Instruction callee;
+    private Instruction owner;
 
-    public InstanceMethodCall(String name, String desc, String owner, Instruction[] args, Instruction call) {
-        super(name, desc, owner, args);
-        this.callee = checkNotNull(call, "callee");
+    public InstanceFieldAssignment(String field_name, String type_desc, String owner_type, Instruction owner, Instruction val) {
+        super(field_name, type_desc, owner_type, val);
+        this.owner = checkNotNull(owner, "owner");
     }
 
-    public InstanceMethodCall(InstanceFunctionArg arg) {
-        super(arg.getMethodName(), arg.getMethodDescription(), arg.getOwner(), arg.getParams());
-        this.callee = arg.getCallee();
+    public Instruction getOwner() {
+        return this.owner;
     }
 
-    public Instruction getCallee() {
-        return this.callee;
-    }
-
-    public void setCallee(Instruction callee) {
-        this.callee = checkNotNull(callee, "callee");
+    public void setOwner(Instruction owner) {
+        this.owner = checkNotNull(owner, "owner");
     }
 
     @Override
     public void accept(InstructionVisitor visitor) {
-        visitor.visitInstanceMethodCall(this);
-        this.callee.accept(visitor);
-        super.accept(visitor);
+        visitor.visitInstanceFieldAssign(this);
+        this.owner.accept(visitor);
+        this.val.accept(visitor);
     }
 
     @Override
     public String toString() {
-        StringBuilder params = new StringBuilder();
-        for (int i = 0; i < this.params.length; i++) {
-            params.append(this.params[i]);
-            if (i < this.params.length - 1) {
-                params.append(", ");
-            }
-        }
-        return this.callee + "." + this.method_name + "(" + params + ");";
+        return this.owner + "." + this.field_name + " = " + this.val + ";";
     }
 
 }

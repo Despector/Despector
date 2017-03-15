@@ -40,20 +40,33 @@ public class BooleanCondition extends Condition {
     public BooleanCondition(Instruction value, boolean inverse) {
         this.value = checkNotNull(value, "value");
         this.inverse = inverse;
+        // TODO check infered type is boolean
     }
 
+    /**
+     * Gets the instruction for the value of this condition.
+     */
     public Instruction getConditionValue() {
         return this.value;
     }
 
+    /**
+     * Sets the instruction for the value of this condition.
+     */
     public void setConditionValue(Instruction insn) {
         this.value = checkNotNull(insn, "value");
     }
 
+    /**
+     * Gets if this condition is marked as inverted.
+     */
     public boolean isInverse() {
         return this.inverse;
     }
 
+    /**
+     * Sets if this condition is marked as inverted.
+     */
     public void setInverse(boolean state) {
         this.inverse = state;
     }

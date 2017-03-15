@@ -38,18 +38,30 @@ public class CompareArg implements Instruction {
         this.right = checkNotNull(right, "right");
     }
 
+    /**
+     * Gets the left operand of the comparison.
+     */
     public Instruction getLeftOperand() {
         return this.left;
     }
 
+    /**
+     * Sets the left operand of the comparison.
+     */
     public void setLeftOperand(Instruction left) {
         this.left = checkNotNull(left, "left");
     }
 
+    /**
+     * Gets the right operand of the comparison.
+     */
     public Instruction getRightOperand() {
         return this.right;
     }
 
+    /**
+     * Sets the right operand of the comparison.
+     */
     public void setRightOperand(Instruction right) {
         this.right = checkNotNull(right, "right");
     }

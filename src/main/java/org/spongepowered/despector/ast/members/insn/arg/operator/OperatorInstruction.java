@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.despector.ast.members.insn.assign;
+package org.spongepowered.despector.ast.members.insn.arg.operator;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -30,48 +30,50 @@ import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
 import org.spongepowered.despector.ast.members.insn.arg.Instruction;
 
 /**
- * An array assignment statement.
- * 
- * <p>Example: {@code var[i] = val;}</p>
+ * An abstract instruction arg for binary operator.
  */
-public class ArrayAssign extends Assignment {
+public abstract class OperatorInstruction implements Instruction {
 
-    private Instruction array;
-    private Instruction index;
+    protected Instruction left;
+    protected Instruction right;
 
-    public ArrayAssign(Instruction array, Instruction index, Instruction val) {
-        super(val);
-        this.index = checkNotNull(index, "index");
-        this.array = checkNotNull(array, "array");
+    public OperatorInstruction(Instruction left, Instruction right) {
+        this.left = checkNotNull(left, "left");
+        this.right = checkNotNull(right, "right");
     }
 
-    public Instruction getArray() {
-        return this.array;
+    public Instruction getLeftOperand() {
+        return this.left;
     }
 
-    public void setArray(Instruction array) {
-        this.array = checkNotNull(array, "array");
+    public void setLeftOperand(Instruction left) {
+        this.left = checkNotNull(left, "left");
     }
 
-    public Instruction getIndex() {
-        return this.index;
+    public Instruction getRightOperand() {
+        return this.right;
     }
 
-    public void setIndex(Instruction index) {
-        this.index = checkNotNull(index, "index");
+    public void setRightOperand(Instruction right) {
+        this.right = checkNotNull(right, "right");
     }
+
+    public abstract String getOperator();
 
     @Override
     public void accept(InstructionVisitor visitor) {
-        visitor.visitArrayAssign(this);
-        this.array.accept(visitor);
-        this.index.accept(visitor);
-        this.val.accept(visitor);
+        this.left.accept(visitor);
+        this.right.accept(visitor);
+    }
+
+    @Override
+    public String inferType() {
+        return this.left.inferType();
     }
 
     @Override
     public String toString() {
-        return this.array + "[" + this.index + "] = " + this.val + ";";
+        return this.left.toString() + " " + getOperator() + " " + this.right.toString();
     }
 
 }

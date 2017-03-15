@@ -32,6 +32,9 @@ import ninja.leaping.configurate.objectmapping.ObjectMapper;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
+/**
+ * The manager for all configuration.
+ */
 public class ConfigManager {
 
     private static final String HEADER = "Despector decompiler configuration:";
@@ -42,6 +45,9 @@ public class ConfigManager {
 
     private static ConfigBase config = null;
 
+    /**
+     * Gets the global configuration object.
+     */
     public static ConfigBase getConfig() {
         if (config == null) {
             config = new ConfigBase();
@@ -49,6 +55,9 @@ public class ConfigManager {
         return config;
     }
 
+    /**
+     * Loads the given configuration file.
+     */
     public static void load(Path path) {
         System.out.println("Loading config from " + path.toString());
         try {
@@ -69,6 +78,9 @@ public class ConfigManager {
         }
     }
 
+    /**
+     * Saves the config back to disk to persist and changes made.
+     */
     public static void update() {
         try {
             configMapper.serialize(node);

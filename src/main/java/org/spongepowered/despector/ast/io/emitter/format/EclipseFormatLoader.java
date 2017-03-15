@@ -41,6 +41,9 @@ import java.util.function.BiConsumer;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
+/**
+ * A loader for loading an eclipse formatter configuration.
+ */
 public class EclipseFormatLoader implements FormatLoader {
 
     public static final EclipseFormatLoader instance = new EclipseFormatLoader();

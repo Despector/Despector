@@ -45,7 +45,7 @@ public class ConditionSimplifier {
             return bval;
         } else if (val instanceof CompareCondition) {
             CompareCondition compare = (CompareCondition) val;
-            compare.setOp(compare.getOp().inverse());
+            compare.setOperator(compare.getOperator().inverse());
             return compare;
         } else if (val instanceof AndCondition) {
             AndCondition and = (AndCondition) val;
@@ -76,7 +76,7 @@ public class ConditionSimplifier {
                 return bval;
             } else if (val instanceof CompareCondition) {
                 CompareCondition compare = (CompareCondition) val;
-                compare.setOp(compare.getOp().inverse());
+                compare.setOperator(compare.getOperator().inverse());
                 return compare;
             } else if (val instanceof AndCondition) {
                 AndCondition and = (AndCondition) val;

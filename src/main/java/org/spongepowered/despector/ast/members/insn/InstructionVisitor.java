@@ -26,11 +26,8 @@ package org.spongepowered.despector.ast.members.insn;
 
 import org.spongepowered.despector.ast.members.insn.arg.CastArg;
 import org.spongepowered.despector.ast.members.insn.arg.CompareArg;
-import org.spongepowered.despector.ast.members.insn.arg.InstanceFunctionArg;
 import org.spongepowered.despector.ast.members.insn.arg.InstanceOfArg;
 import org.spongepowered.despector.ast.members.insn.arg.NewArrayArg;
-import org.spongepowered.despector.ast.members.insn.arg.NewRefArg;
-import org.spongepowered.despector.ast.members.insn.arg.StaticFunctionArg;
 import org.spongepowered.despector.ast.members.insn.arg.cst.DoubleConstantArg;
 import org.spongepowered.despector.ast.members.insn.arg.cst.FloatConstantArg;
 import org.spongepowered.despector.ast.members.insn.arg.cst.IntConstantArg;
@@ -46,85 +43,81 @@ import org.spongepowered.despector.ast.members.insn.arg.operator.AddArg;
 import org.spongepowered.despector.ast.members.insn.arg.operator.DivideArg;
 import org.spongepowered.despector.ast.members.insn.arg.operator.MultiplyArg;
 import org.spongepowered.despector.ast.members.insn.arg.operator.NegArg;
-import org.spongepowered.despector.ast.members.insn.arg.operator.RemainderArg;
+import org.spongepowered.despector.ast.members.insn.arg.operator.RemainderInstruction;
 import org.spongepowered.despector.ast.members.insn.arg.operator.ShiftLeftArg;
 import org.spongepowered.despector.ast.members.insn.arg.operator.ShiftRightArg;
 import org.spongepowered.despector.ast.members.insn.arg.operator.SubtractArg;
 import org.spongepowered.despector.ast.members.insn.arg.operator.UnsignedShiftRightArg;
-import org.spongepowered.despector.ast.members.insn.arg.operator.bitwise.AndArg;
+import org.spongepowered.despector.ast.members.insn.arg.operator.bitwise.AndInstruction;
 import org.spongepowered.despector.ast.members.insn.arg.operator.bitwise.OrArg;
 import org.spongepowered.despector.ast.members.insn.arg.operator.bitwise.XorArg;
-import org.spongepowered.despector.ast.members.insn.assign.ArrayAssign;
-import org.spongepowered.despector.ast.members.insn.assign.InstanceFieldAssign;
-import org.spongepowered.despector.ast.members.insn.assign.LocalAssign;
-import org.spongepowered.despector.ast.members.insn.assign.StaticFieldAssign;
-import org.spongepowered.despector.ast.members.insn.branch.CatchBlock;
-import org.spongepowered.despector.ast.members.insn.branch.DoWhileLoop;
-import org.spongepowered.despector.ast.members.insn.branch.ElseBlock;
-import org.spongepowered.despector.ast.members.insn.branch.ForLoop;
-import org.spongepowered.despector.ast.members.insn.branch.IfBlock;
-import org.spongepowered.despector.ast.members.insn.branch.TableSwitch;
+import org.spongepowered.despector.ast.members.insn.assign.ArrayAssignment;
+import org.spongepowered.despector.ast.members.insn.assign.InstanceFieldAssignment;
+import org.spongepowered.despector.ast.members.insn.assign.LocalAssignment;
+import org.spongepowered.despector.ast.members.insn.assign.StaticFieldAssignment;
+import org.spongepowered.despector.ast.members.insn.branch.DoWhile;
+import org.spongepowered.despector.ast.members.insn.branch.For;
+import org.spongepowered.despector.ast.members.insn.branch.If;
+import org.spongepowered.despector.ast.members.insn.branch.If.Else;
+import org.spongepowered.despector.ast.members.insn.branch.Switch;
 import org.spongepowered.despector.ast.members.insn.branch.Ternary;
-import org.spongepowered.despector.ast.members.insn.branch.TryBlock;
-import org.spongepowered.despector.ast.members.insn.branch.WhileLoop;
+import org.spongepowered.despector.ast.members.insn.branch.TryCatch;
+import org.spongepowered.despector.ast.members.insn.branch.TryCatch.CatchBlock;
+import org.spongepowered.despector.ast.members.insn.branch.While;
 import org.spongepowered.despector.ast.members.insn.branch.condition.AndCondition;
 import org.spongepowered.despector.ast.members.insn.branch.condition.BooleanCondition;
 import org.spongepowered.despector.ast.members.insn.branch.condition.CompareCondition;
 import org.spongepowered.despector.ast.members.insn.branch.condition.InverseCondition;
 import org.spongepowered.despector.ast.members.insn.branch.condition.OrCondition;
-import org.spongepowered.despector.ast.members.insn.function.InstanceMethodCall;
-import org.spongepowered.despector.ast.members.insn.function.NewInstance;
-import org.spongepowered.despector.ast.members.insn.function.StaticMethodCall;
-import org.spongepowered.despector.ast.members.insn.misc.IncrementStatement;
-import org.spongepowered.despector.ast.members.insn.misc.ReturnValue;
-import org.spongepowered.despector.ast.members.insn.misc.ReturnVoid;
-import org.spongepowered.despector.ast.members.insn.misc.ThrowException;
+import org.spongepowered.despector.ast.members.insn.function.InstanceMethodInvoke;
+import org.spongepowered.despector.ast.members.insn.function.New;
+import org.spongepowered.despector.ast.members.insn.function.StaticMethodInvoke;
+import org.spongepowered.despector.ast.members.insn.misc.Increment;
+import org.spongepowered.despector.ast.members.insn.misc.Return;
+import org.spongepowered.despector.ast.members.insn.misc.Throw;
 
 public abstract class InstructionVisitor {
 
-    public void visitThrowException(ThrowException throwException) {
+    public void visitThrowException(Throw throwException) {
     }
 
-    public void visitReturn(ReturnVoid returnVoid) {
+    public void visitValueReturn(Return returnValue) {
     }
 
-    public void visitValueReturn(ReturnValue returnValue) {
+    public void visitIncrement(Increment incrementStatement) {
     }
 
-    public void visitIncrement(IncrementStatement incrementStatement) {
+    public void visitStaticMethodCall(StaticMethodInvoke staticMethodCall) {
     }
 
-    public void visitStaticMethodCall(StaticMethodCall staticMethodCall) {
+    public void visitNewInstance(New newInstance) {
     }
 
-    public void visitNewInstance(NewInstance newInstance) {
+    public void visitInstanceMethodCall(InstanceMethodInvoke instanceMethodCall) {
     }
 
-    public void visitInstanceMethodCall(InstanceMethodCall instanceMethodCall) {
+    public void visitDoWhileLoop(DoWhile doWhileLoop) {
     }
 
-    public void visitDoWhileLoop(DoWhileLoop doWhileLoop) {
+    public void visitForLoop(For forLoop) {
     }
 
-    public void visitForLoop(ForLoop forLoop) {
+    public void visitIfBlock(If ifBlock) {
     }
 
-    public void visitIfBlock(IfBlock ifBlock) {
+    public void visitElseBlock(Else elseBlock) {
     }
 
-    public void visitElseBlock(ElseBlock elseBlock) {
+    public void visitSwitch(Switch tableSwitch) {
     }
 
-    public void visitSwitch(TableSwitch tableSwitch) {
-    }
-
-    public void visitSwitchCase(TableSwitch.Case case1) {
+    public void visitSwitchCase(Switch.Case case1) {
     }
 
     public void visitTernary(Ternary ternary) {
     }
 
-    public void visitWhileLoop(WhileLoop whileLoop) {
+    public void visitWhileLoop(While whileLoop) {
     }
 
     public void visitInverseCondition(InverseCondition inverseCondition) {
@@ -142,31 +135,22 @@ public abstract class InstructionVisitor {
     public void visitAndCondition(AndCondition andCondition) {
     }
 
-    public void visitArrayAssign(ArrayAssign arrayAssign) {
+    public void visitArrayAssign(ArrayAssignment arrayAssign) {
     }
 
-    public void visitInstanceFieldAssign(InstanceFieldAssign instanceFieldAssign) {
+    public void visitInstanceFieldAssign(InstanceFieldAssignment instanceFieldAssign) {
     }
 
-    public void visitLocalAssign(LocalAssign localAssign) {
+    public void visitLocalAssign(LocalAssignment localAssign) {
     }
 
-    public void visitStaticFieldAssign(StaticFieldAssign staticFieldAssign) {
-    }
-
-    public void visitStaticFunctionArg(StaticFunctionArg staticFunctionArg) {
-    }
-
-    public void visitNewRefArg(NewRefArg newRefArg) {
+    public void visitStaticFieldAssign(StaticFieldAssignment staticFieldAssign) {
     }
 
     public void visitNewArrayArg(NewArrayArg newArrayArg) {
     }
 
     public void visitInstanceOfArg(InstanceOfArg instanceOfArg) {
-    }
-
-    public void visitInstanceFunctionArg(InstanceFunctionArg instanceFunctionArg) {
     }
 
     public void visitNegArg(NegArg negArg) {
@@ -220,7 +204,7 @@ public abstract class InstructionVisitor {
     public void visitShiftLeftOperatorArg(ShiftLeftArg shiftLeftArg) {
     }
 
-    public void visitRemainderOperatorArg(RemainderArg remainerArg) {
+    public void visitRemainderOperatorArg(RemainderInstruction remainerArg) {
     }
 
     public void visitMultiplyOperatorArg(MultiplyArg multiplyArg) {
@@ -232,7 +216,7 @@ public abstract class InstructionVisitor {
     public void visitAddOperatorArg(AddArg addArg) {
     }
 
-    public void visitAndOperatorArg(AndArg andArg) {
+    public void visitAndOperatorArg(AndInstruction andArg) {
     }
 
     public void visitOrOperatorArg(OrArg orArg) {
@@ -241,7 +225,7 @@ public abstract class InstructionVisitor {
     public void visitXorOperatorArg(XorArg xorArg) {
     }
 
-    public void visitTryBlock(TryBlock tryBlock) {
+    public void visitTryBlock(TryCatch tryBlock) {
     }
 
     public void visitCatchBlock(CatchBlock catchBlock) {

@@ -43,13 +43,15 @@ public class ClassEntry extends TypeEntry {
     }
 
     /**
-     * Gets the super class of this type. May be null prior to the lock, but
-     * will never be null after.
+     * Gets the super class of this type.
      */
     public String getSuperclass() {
         return this.superclass.getType();
     }
 
+    /**
+     * Gets the name of the superclass of this type.
+     */
     public String getSuperclassName() {
         return TypeHelper.descToType(this.superclass.getType());
     }

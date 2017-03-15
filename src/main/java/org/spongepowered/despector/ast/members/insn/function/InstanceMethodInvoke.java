@@ -22,64 +22,50 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.despector.ast.members.insn.branch;
+package org.spongepowered.despector.ast.members.insn.function;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
-import org.spongepowered.despector.ast.members.insn.Statement;
-import org.spongepowered.despector.ast.members.insn.StatementBlock;
-import org.spongepowered.despector.ast.members.insn.branch.condition.Condition;
+import org.spongepowered.despector.ast.members.insn.arg.Instruction;
 
 /**
- * A do-while loop.
+ * A statement calling an instance method.
  */
-public class DoWhileLoop implements Statement {
+public class InstanceMethodInvoke extends MethodInvoke {
 
-    private Condition condition;
-    private StatementBlock body;
+    private Instruction callee;
 
-    public DoWhileLoop(Condition condition, StatementBlock body) {
-        this.condition = checkNotNull(condition, "condition");
-        this.body = checkNotNull(body, "body");
+    public InstanceMethodInvoke(String name, String desc, String owner, Instruction[] args, Instruction call) {
+        super(name, desc, owner, args);
+        this.callee = checkNotNull(call, "callee");
     }
 
-    public Condition getCondition() {
-        return this.condition;
+    public Instruction getCallee() {
+        return this.callee;
     }
 
-    public void setCondition(Condition condition) {
-        this.condition = checkNotNull(condition, "condition");
-    }
-
-    public StatementBlock getBody() {
-        return this.body;
-    }
-
-    public void setBody(StatementBlock block) {
-        this.body = checkNotNull(block, "block");
+    public void setCallee(Instruction callee) {
+        this.callee = checkNotNull(callee, "callee");
     }
 
     @Override
     public void accept(InstructionVisitor visitor) {
-        visitor.visitDoWhileLoop(this);
-        this.condition.accept(visitor);
-        for (Statement stmt : this.body.getStatements()) {
-            stmt.accept(visitor);
-        }
+        visitor.visitInstanceMethodCall(this);
+        this.callee.accept(visitor);
+        super.accept(visitor);
     }
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("do {\n");
-        for (Statement insn : this.body.getStatements()) {
-            sb.append("    ").append(insn).append("\n");
+        StringBuilder params = new StringBuilder();
+        for (int i = 0; i < this.params.length; i++) {
+            params.append(this.params[i]);
+            if (i < this.params.length - 1) {
+                params.append(", ");
+            }
         }
-        sb.append("} while (");
-        sb.append(this.condition);
-        sb.append(");");
-        return sb.toString();
+        return this.callee + "." + this.method_name + "(" + params + ");";
     }
 
 }

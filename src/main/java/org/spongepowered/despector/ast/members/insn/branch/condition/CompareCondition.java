@@ -38,28 +38,28 @@ public class CompareCondition extends Condition {
     /**
      * Gets the compare operator for the given conditional jump operator.
      */
-    public static CompareOp fromOpcode(int op) {
+    public static CompareOperator fromOpcode(int op) {
         switch (op) {
         case IFEQ:
         case IF_ACMPEQ:
         case IF_ICMPEQ:
-            return CompareOp.EQUAL;
+            return CompareOperator.EQUAL;
         case IFNE:
         case IF_ACMPNE:
         case IF_ICMPNE:
-            return CompareOp.NOT_EQUAL;
+            return CompareOperator.NOT_EQUAL;
         case IFGE:
         case IF_ICMPGE:
-            return CompareOp.GREATER_EQUAL;
+            return CompareOperator.GREATER_EQUAL;
         case IFGT:
         case IF_ICMPGT:
-            return CompareOp.GREATER;
+            return CompareOperator.GREATER;
         case IFLE:
         case IF_ICMPLE:
-            return CompareOp.LESS_EQUAL;
+            return CompareOperator.LESS_EQUAL;
         case IFLT:
         case IF_ICMPLT:
-            return CompareOp.LESS;
+            return CompareOperator.LESS;
         default:
             throw new UnsupportedOperationException("Not a conditional jump opcode: " + op);
         }
@@ -68,7 +68,7 @@ public class CompareCondition extends Condition {
     /**
      * Represents a specific comparison operator.
      */
-    public static enum CompareOp {
+    public static enum CompareOperator {
         EQUAL(" == "),
         NOT_EQUAL(" != "),
         LESS_EQUAL(" <= "),
@@ -86,52 +86,76 @@ public class CompareCondition extends Condition {
         }
 
         private final String str;
-        private CompareOp inverse;
+        private CompareOperator inverse;
 
-        CompareOp(String str) {
+        CompareOperator(String str) {
             this.str = checkNotNull(str, "str");
         }
 
+        /**
+         * Gets the operator as its string representation.
+         */
         public String asString() {
             return this.str;
         }
 
-        public CompareOp inverse() {
+        /**
+         * Gets the operator which is the inverse of this operator.
+         */
+        public CompareOperator inverse() {
             return this.inverse;
         }
     }
 
     private Instruction left;
     private Instruction right;
-    private CompareOp op;
+    private CompareOperator op;
 
-    public CompareCondition(Instruction left, Instruction right, CompareOp op) {
+    public CompareCondition(Instruction left, Instruction right, CompareOperator op) {
         this.left = checkNotNull(left, "left");
         this.right = checkNotNull(right, "right");
         this.op = checkNotNull(op, "op");
     }
 
+    /**
+     * Gets the left operand of the comparison.
+     */
     public Instruction getLeft() {
         return this.left;
     }
 
+    /**
+     * Sets the left operand of the comparison.
+     */
     public void setLeft(Instruction left) {
         this.left = checkNotNull(left, "left");
     }
 
+    /**
+     * Gets the right operand of the comparison.
+     */
     public Instruction getRight() {
         return this.right;
     }
 
+    /**
+     * Sets the right operand of the comparison.
+     */
     public void setRight(Instruction right) {
         this.right = checkNotNull(right, "right");
     }
 
-    public CompareOp getOp() {
+    /**
+     * Gets the comparison operator.
+     */
+    public CompareOperator getOperator() {
         return this.op;
     }
 
-    public void setOp(CompareOp op) {
+    /**
+     * Sets the comparison operator.
+     */
+    public void setOperator(CompareOperator op) {
         this.op = checkNotNull(op, "op");
     }
 

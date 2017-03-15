@@ -33,6 +33,10 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Path;
 
+/**
+ * A directory walker which walks a directory and visits all child files and
+ * directories.
+ */
 public class DirectoryWalker {
 
     private final Path directory;
@@ -41,6 +45,10 @@ public class DirectoryWalker {
         this.directory = dir;
     }
 
+    /**
+     * Walks this directory and visits all class files in it or any child
+     * directory and loads them into the given {@link SourceSet}.
+     */
     public void walk(SourceSet src) throws IOException {
         File dir = this.directory.toFile();
         visit(dir, src);

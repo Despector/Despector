@@ -24,12 +24,7 @@
  */
 package org.spongepowered.despector.ast.io;
 
-import static org.objectweb.asm.Opcodes.ACC_ABSTRACT;
-import static org.objectweb.asm.Opcodes.ACC_ENUM;
-import static org.objectweb.asm.Opcodes.ACC_FINAL;
-import static org.objectweb.asm.Opcodes.ACC_INTERFACE;
-import static org.objectweb.asm.Opcodes.ACC_STATIC;
-import static org.objectweb.asm.Opcodes.ACC_SYNTHETIC;
+import static org.objectweb.asm.Opcodes.*;
 
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.tree.AbstractInsnNode;
@@ -45,8 +40,8 @@ import org.spongepowered.despector.ast.members.FieldEntry;
 import org.spongepowered.despector.ast.members.MethodEntry;
 import org.spongepowered.despector.ast.members.insn.Statement;
 import org.spongepowered.despector.ast.members.insn.StatementBlock;
-import org.spongepowered.despector.ast.members.insn.arg.NewRefArg;
-import org.spongepowered.despector.ast.members.insn.assign.StaticFieldAssign;
+import org.spongepowered.despector.ast.members.insn.assign.StaticFieldAssignment;
+import org.spongepowered.despector.ast.members.insn.function.New;
 import org.spongepowered.despector.ast.type.ClassEntry;
 import org.spongepowered.despector.ast.type.EnumEntry;
 import org.spongepowered.despector.ast.type.InterfaceEntry;
@@ -155,11 +150,11 @@ public class SingularClassLoader {
                 Iterator<Statement> initializers = clinit.getInstructions().getStatements().iterator();
                 while (initializers.hasNext()) {
                     Statement next = initializers.next();
-                    if (!(next instanceof StaticFieldAssign)) {
+                    if (!(next instanceof StaticFieldAssignment)) {
                         break;
                     }
-                    StaticFieldAssign assign = (StaticFieldAssign) next;
-                    if (!TypeHelper.descToType(assign.getOwnerType()).equals(entry.getName()) || !(assign.getValue() instanceof NewRefArg)) {
+                    StaticFieldAssignment assign = (StaticFieldAssignment) next;
+                    if (!TypeHelper.descToType(assign.getOwnerType()).equals(entry.getName()) || !(assign.getValue() instanceof New)) {
                         break;
                     }
                     ((EnumEntry) entry).addEnumConstant(assign.getFieldName());

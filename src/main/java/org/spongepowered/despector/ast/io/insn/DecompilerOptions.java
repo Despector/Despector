@@ -24,6 +24,9 @@
  */
 package org.spongepowered.despector.ast.io.insn;
 
+/**
+ * A container for any options required for the decompiler. Currently unused.
+ */
 public class DecompilerOptions {
 
 }

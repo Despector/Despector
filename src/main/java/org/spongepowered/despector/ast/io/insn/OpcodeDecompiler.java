@@ -50,12 +50,9 @@ import org.spongepowered.despector.ast.io.insn.Locals.Local;
 import org.spongepowered.despector.ast.members.insn.StatementBlock;
 import org.spongepowered.despector.ast.members.insn.arg.CastArg;
 import org.spongepowered.despector.ast.members.insn.arg.CompareArg;
-import org.spongepowered.despector.ast.members.insn.arg.InstanceFunctionArg;
 import org.spongepowered.despector.ast.members.insn.arg.InstanceOfArg;
 import org.spongepowered.despector.ast.members.insn.arg.Instruction;
 import org.spongepowered.despector.ast.members.insn.arg.NewArrayArg;
-import org.spongepowered.despector.ast.members.insn.arg.NewRefArg;
-import org.spongepowered.despector.ast.members.insn.arg.StaticFunctionArg;
 import org.spongepowered.despector.ast.members.insn.arg.cst.DoubleConstantArg;
 import org.spongepowered.despector.ast.members.insn.arg.cst.FloatConstantArg;
 import org.spongepowered.despector.ast.members.insn.arg.cst.IntConstantArg;
@@ -72,32 +69,32 @@ import org.spongepowered.despector.ast.members.insn.arg.operator.AddArg;
 import org.spongepowered.despector.ast.members.insn.arg.operator.DivideArg;
 import org.spongepowered.despector.ast.members.insn.arg.operator.MultiplyArg;
 import org.spongepowered.despector.ast.members.insn.arg.operator.NegArg;
-import org.spongepowered.despector.ast.members.insn.arg.operator.RemainderArg;
+import org.spongepowered.despector.ast.members.insn.arg.operator.RemainderInstruction;
 import org.spongepowered.despector.ast.members.insn.arg.operator.ShiftLeftArg;
 import org.spongepowered.despector.ast.members.insn.arg.operator.ShiftRightArg;
 import org.spongepowered.despector.ast.members.insn.arg.operator.SubtractArg;
 import org.spongepowered.despector.ast.members.insn.arg.operator.UnsignedShiftRightArg;
-import org.spongepowered.despector.ast.members.insn.arg.operator.bitwise.AndArg;
+import org.spongepowered.despector.ast.members.insn.arg.operator.bitwise.AndInstruction;
 import org.spongepowered.despector.ast.members.insn.arg.operator.bitwise.OrArg;
 import org.spongepowered.despector.ast.members.insn.arg.operator.bitwise.XorArg;
-import org.spongepowered.despector.ast.members.insn.assign.ArrayAssign;
-import org.spongepowered.despector.ast.members.insn.assign.FieldAssign;
-import org.spongepowered.despector.ast.members.insn.assign.InstanceFieldAssign;
-import org.spongepowered.despector.ast.members.insn.assign.LocalAssign;
-import org.spongepowered.despector.ast.members.insn.assign.StaticFieldAssign;
-import org.spongepowered.despector.ast.members.insn.branch.IfBlock;
+import org.spongepowered.despector.ast.members.insn.assign.ArrayAssignment;
+import org.spongepowered.despector.ast.members.insn.assign.FieldAssignment;
+import org.spongepowered.despector.ast.members.insn.assign.InstanceFieldAssignment;
+import org.spongepowered.despector.ast.members.insn.assign.LocalAssignment;
+import org.spongepowered.despector.ast.members.insn.assign.StaticFieldAssignment;
+import org.spongepowered.despector.ast.members.insn.branch.If;
 import org.spongepowered.despector.ast.members.insn.branch.condition.AndCondition;
 import org.spongepowered.despector.ast.members.insn.branch.condition.BooleanCondition;
 import org.spongepowered.despector.ast.members.insn.branch.condition.CompareCondition;
 import org.spongepowered.despector.ast.members.insn.branch.condition.Condition;
 import org.spongepowered.despector.ast.members.insn.branch.condition.OrCondition;
-import org.spongepowered.despector.ast.members.insn.function.InstanceMethodCall;
-import org.spongepowered.despector.ast.members.insn.function.NewInstance;
-import org.spongepowered.despector.ast.members.insn.function.StaticMethodCall;
-import org.spongepowered.despector.ast.members.insn.misc.IncrementStatement;
-import org.spongepowered.despector.ast.members.insn.misc.ReturnValue;
-import org.spongepowered.despector.ast.members.insn.misc.ReturnVoid;
-import org.spongepowered.despector.ast.members.insn.misc.ThrowException;
+import org.spongepowered.despector.ast.members.insn.function.InstanceMethodInvoke;
+import org.spongepowered.despector.ast.members.insn.function.InvokeStatement;
+import org.spongepowered.despector.ast.members.insn.function.New;
+import org.spongepowered.despector.ast.members.insn.function.StaticMethodInvoke;
+import org.spongepowered.despector.ast.members.insn.misc.Increment;
+import org.spongepowered.despector.ast.members.insn.misc.Return;
+import org.spongepowered.despector.ast.members.insn.misc.Throw;
 import org.spongepowered.despector.util.AstUtil;
 import org.spongepowered.despector.util.TypeHelper;
 
@@ -112,6 +109,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * The opcode decompiler which takes as input a list of opcode instructions and
+ * produces a complete ast.
+ * 
+ * <p>The paper 'No More Gotos: Decompilation Using Pattern-Independent
+ * Control-Flow Structuring and Semantics-Preserving Transformations' by Yakdan,
+ * Eschweiler, Gerhards-Padilla, and Smith would be a helpful resource for
+ * anyone looking to understand the code here. While not implemented exactly
+ * word for word you will find many similar concepts used here. It can be found
+ * at http://www.internetsociety.org/sites/default/files/11_4_2.pdf.</p>
+ */
 public class OpcodeDecompiler {
 
     @SuppressWarnings("unchecked")
@@ -128,15 +136,25 @@ public class OpcodeDecompiler {
         }
         locals.bakeInstances(label_indices);
 
+        // Form a graph by breaking up the opcodes at every jump and every label
+        // targetted by another jump.
         List<OpcodeBlock> graph = makeGraph(ops, label_indices);
+        // Perform some cleanup on the graph like removing blocks containing
+        // only labels and splitting the opcodes associated with a jump away
+        // from opcodes for statements preceeding the control flow statement.
         cleanupGraph(graph);
 
+        // TODO: remove debug
         for (OpcodeBlock b : graph) {
             b.print();
         }
 
+        // Performs a sequence of transformations to conver the graph into a
+        // simple array of partially decompiled block sections.
         List<BlockSection> flat_graph = flattenGraph(graph, locals);
 
+        // Append all block sections to the output in order. This finalizes all
+        // decompilation of statements not already decompiled.
         for (BlockSection op : flat_graph) {
             appendBlock(op, block);
         }
@@ -147,10 +165,14 @@ public class OpcodeDecompiler {
     private static List<OpcodeBlock> makeGraph(List<AbstractInsnNode> instructions, Map<Label, Integer> label_indices) {
         Set<Integer> break_points = new HashSet<>();
 
+        // Loop through and mark all jumo and return opcodes as break points
         for (int i = 0; i < instructions.size(); i++) {
             AbstractInsnNode next = instructions.get(i);
             if (next instanceof JumpInsnNode) {
                 break_points.add(i);
+                // also break before labels targetted by jump opcodes to have a
+                // break between the body of an if block and the statements
+                // after it
                 break_points.add(label_indices.get(((JumpInsnNode) next).label.getLabel()));
                 continue;
             }
@@ -159,7 +181,7 @@ public class OpcodeDecompiler {
                 break_points.add(i);
             }
         }
-
+        // Sort the break points
         List<Integer> sorted_break_points = new ArrayList<>(break_points);
         sorted_break_points.sort(Comparator.naturalOrder());
         Map<Integer, OpcodeBlock> blocks = new HashMap<>();
@@ -167,6 +189,10 @@ public class OpcodeDecompiler {
 
         int last_brk = 0;
         for (int brk : sorted_break_points) {
+            // accumulate the opcodes beween the next breakpoint and the last
+            // breakpoint. Also split the last opcode off into a special field
+            // it it is a jump. We use this to more easily tell which blocks
+            // have a conditional outcome.
             OpcodeBlock block = new OpcodeBlock();
             block_list.add(block);
             block.break_point = brk;
@@ -180,6 +206,8 @@ public class OpcodeDecompiler {
         }
 
         for (Map.Entry<Integer, OpcodeBlock> e : blocks.entrySet()) {
+            // Now we go through and form an edge from any block and the block
+            // it flows (or jumps) into next.
             OpcodeBlock block = e.getValue();
             if (block.last instanceof LabelNode) {
                 OpcodeBlock next = blocks.get(sorted_break_points.get(sorted_break_points.indexOf(e.getKey()) + 1));
@@ -221,6 +249,8 @@ public class OpcodeDecompiler {
             }
         }
 
+        // Split the opcodes that form the condition away from the preceeding
+        // statements.
         List<OpcodeBlock> fblocks = new ArrayList<>();
         for (OpcodeBlock block : blocks) {
             if (block.isConditional()) {
@@ -231,11 +261,15 @@ public class OpcodeDecompiler {
                         header.opcodes.add(block.opcodes.get(i));
                     }
                     if (AstUtil.isEmptyOfLogic(header.opcodes)) {
+                        // If there are no useful opcodes left in the header
+                        // then we do not perform the split.
                         continue;
                     }
                     for (int i = cond_start - 1; i >= 0; i--) {
                         block.opcodes.remove(i);
                     }
+                    // Have to ensure that we remap any blocks that were
+                    // targeting this block to target the header.
                     for (OpcodeBlock other : blocks) {
                         if (other.target == block) {
                             other.target = header;
@@ -265,6 +299,8 @@ public class OpcodeDecompiler {
 
         // TODO identify ternary blocks (but no transformations yet)
 
+        // populate a field of blocks targetting a block. Currently unused but
+        // might be useful (Its from an older version of this code).
         for (int i = 0; i < blocks.size(); i++) {
             OpcodeBlock block = blocks.get(i);
             if (block.isConditional()) {
@@ -283,9 +319,24 @@ public class OpcodeDecompiler {
 
         List<OpcodeBlock> region = new ArrayList<>();
 
+        // here we're splitting a graph into regions by points that both
+        // dominate and post-dominate the rest of the graph (eg. points that all
+        // control points pass through).
+
+        // we can then process these regions and transform them into a single
+        // block representing the control flow statement of the region. Each
+        // region will always contain exactly one control flow statement (not
+        // counting nesting).
+
+        // We iterate the blocks in order to ensure that we always fine the
+        // earliest block of any control flow statement which makes sure that we
+        // don't miss any parts of the control flow statement.
+
         for (int i = 0; i < blocks.size(); i++) {
             OpcodeBlock region_start = blocks.get(i);
             if (!region_start.isConditional()) {
+                // If the next block isn't conditional then we simply append it
+                // to the output.
                 final_blocks.add(new InlineBlockSection(region_start));
                 continue;
             }
@@ -293,14 +344,16 @@ public class OpcodeDecompiler {
             int end = getRegionEnd(blocks, i);
 
             if (end == -1) {
-                throw new IllegalStateException();
+                // Any conditional block should always form the start of a
+                // region at this level.
+                throw new IllegalStateException("Conditional jump not part of control flow statement??");
             }
 
             region.clear();
             for (int o = i; o < end; o++) {
                 region.add(blocks.get(o));
             }
-
+            // process the region down to a single block
             final_blocks.add(processRegion(region, locals, blocks.get(end)));
             i = end;
         }
@@ -310,13 +363,25 @@ public class OpcodeDecompiler {
 
     private static BlockSection processRegion(List<OpcodeBlock> region, Locals locals, OpcodeBlock ret) {
 
-        // sub regions
+        // This is a recursive function which processes a region and determines
+        // which control flow statement is suitable for it.
+
+        // The first step is to find any points within the region that are sub
+        // regions (eg. both dominate and post-domintate the rest of the graph
+        // excluding the end point of the current region). These sub-regions are
+        // then processes ahead of time into their own control flow statements
+        // which are then nested inside of this region.
 
         for (int i = 1; i < region.size() - 1; i++) {
             OpcodeBlock next = region.get(i);
             if (!next.isConditional()) {
                 continue;
             }
+
+            // The end block is already not included in `region` so we can
+            // simply try and get the region end of any block in this region and
+            // if there is an end defined then we know that it forms a sub
+            // region.
 
             int end = getRegionEnd(region, i);
 
@@ -328,6 +393,9 @@ public class OpcodeDecompiler {
                 }
 
                 BlockSection s = processRegion(subregion, locals, region.get(end));
+
+                // the first block is set to the condensed subregion block and
+                // the rest if the blocks in the subregion are removed.
                 OpcodeBlock replacement = region.get(i);
                 replacement.internal = s;
                 replacement.target = region.get(end);
@@ -339,7 +407,9 @@ public class OpcodeDecompiler {
                 }
             }
         }
+        // TODO need to handle back edges here
 
+        // split the region into the condition and the body
         int body_start = 1;
         List<OpcodeBlock> condition_blocks = new ArrayList<>();
         OpcodeBlock next = region.get(body_start);
@@ -350,16 +420,20 @@ public class OpcodeDecompiler {
             next = region.get(body_start);
         }
 
+        // form the condition from the headder
         Condition cond = makeCondition(condition_blocks, locals, region.get(body_start), ret);
 
         IfBlockSection section = new IfBlockSection(cond);
 
+        // Append the body
         for (int i = body_start; i < region.size(); i++) {
             next = region.get(i);
             if (next.internal != null) {
                 section.body.add(next.internal);
             } else if (next.isConditional()) {
-                throw new IllegalStateException();
+                // If we encounter another conditional block then its an error
+                // as we should have already processed all sub regions
+                throw new IllegalStateException("Unexpected conditional when building statement body");
             } else {
                 section.body.add(new InlineBlockSection(next));
             }
@@ -369,6 +443,10 @@ public class OpcodeDecompiler {
     }
 
     private static int getRegionEnd(List<OpcodeBlock> blocks, int start) {
+
+        // This is a rather brute force search for the next node after the start
+        // node which post-dominates the preceeding nodes.
+
         OpcodeBlock region_start = blocks.get(start);
         int end_a = blocks.indexOf(region_start.target);
         if (end_a == -1 && region_start.target != null)
@@ -377,6 +455,7 @@ public class OpcodeDecompiler {
         if (end_b == -1 && region_start.else_target != null)
             end_b = blocks.size();
 
+        // Use the target of the start node as a starting point for our search
         int end = Math.max(end_a, end_b);
 
         check: while (true) {
@@ -389,6 +468,8 @@ public class OpcodeDecompiler {
                 if (end_b == -1 && next.else_target != null)
                     end_b = blocks.size();
                 if ((end_a > start && end_a < end) || (end_b > start && end_b < end)) {
+                    // If any block before the start points into the region then
+                    // our start node wasn't actually the start of a subregion.
                     return -1;
                 }
             }
@@ -404,6 +485,9 @@ public class OpcodeDecompiler {
                 int new_end = Math.max(end_a, end_b);
 
                 if (new_end > end) {
+                    // We've found a block inside the current region that points
+                    // to a block past the current end of the region. Resize the
+                    // region to include it and restart the search.
                     end = new_end;
                     continue check;
                 }
@@ -417,6 +501,7 @@ public class OpcodeDecompiler {
                 if (end_b == -1 && next.else_target != null)
                     end_b = blocks.size();
                 if ((end_a > start && end_a < end) || (end_b > start && end_b < end)) {
+                    // TODO back edges
                     return -1;
                 }
             }
@@ -429,10 +514,15 @@ public class OpcodeDecompiler {
     }
 
     private static Condition makeSimpleCondition(OpcodeBlock block, Locals locals) {
+
+        // This forms the condition representing the conditional jump of the
+        // given block
+
         StatementBlock dummy = new StatementBlock(StatementBlock.Type.IF, locals);
         Deque<Instruction> dummy_stack = new ArrayDeque<>();
         appendBlock(block, dummy, locals, dummy_stack);
 
+        // TOOD support remaining conditional jump opcodes
         switch (block.last.getOpcode()) {
         case IFEQ: {
             if (dummy_stack.size() != 1 || !dummy.getStatements().isEmpty()) {
@@ -461,23 +551,31 @@ public class OpcodeDecompiler {
                 throw new IllegalStateException();
             }
             Instruction val = dummy_stack.pop();
-            return new CompareCondition(val, new NullConstantArg(), CompareCondition.CompareOp.EQUAL);
+            return new CompareCondition(val, new NullConstantArg(), CompareCondition.CompareOperator.EQUAL);
         }
         case IFNONNULL: {
             if (dummy_stack.size() != 1 || !dummy.getStatements().isEmpty()) {
                 throw new IllegalStateException();
             }
             Instruction val = dummy_stack.pop();
-            return new CompareCondition(val, new NullConstantArg(), CompareCondition.CompareOp.NOT_EQUAL);
+            return new CompareCondition(val, new NullConstantArg(), CompareCondition.CompareOperator.NOT_EQUAL);
         }
         default:
-            throw new IllegalStateException();
+            throw new IllegalStateException("Unsupported conditional jump opcode " + block.last.getOpcode());
         }
     }
 
     private static void dfs(ConditionGraphNode next, Deque<Condition> stack) {
+
+        // performs a depth-first-search to populate each node in the graph's
+        // partial conditions
+
         if (!stack.isEmpty()) {
-            if(stack.size() == 1) {
+            // Add the condition up to this point to the partial conditions of
+            // this node. This represents a path from the root to this node and
+            // the condition of that path is the and of all simple conditions of
+            // the nodes along the path
+            if (stack.size() == 1) {
                 next.partial_conditions.add(stack.peek());
             } else {
                 Condition partial = new AndCondition(stack);
@@ -487,9 +585,13 @@ public class OpcodeDecompiler {
         if (next.condition == null) {
             return;
         }
+        // Push the simple condition of this node to the stack and recurse into
+        // the target branch
         stack.addLast(next.condition);
         dfs(next.target, stack);
         stack.pollLast();
+        // Same thing for the else_target except we push the inverse of this
+        // node's condition
         stack.addLast(inverse(next.condition));
         dfs(next.else_target, stack);
         stack.pollLast();
@@ -501,14 +603,23 @@ public class OpcodeDecompiler {
         ConditionGraphNode body_node = new ConditionGraphNode(null, null, null, body);
         ConditionGraphNode ret_node = new ConditionGraphNode(null, null, null, ret);
 
+        // Forms a condition from a set of conditional jumps. This is done by
+        // performing a depth first search of the nodes which form the
+        // condition. Each path through the graph from root to the start of the
+        // body is found and combined with OR to form a very much expanded
+        // version of the condition for this block. This is then simplified
+        // before being returned.
+
         for (int i = 0; i < blocks.size(); i++) {
             OpcodeBlock next = blocks.get(i);
+            // make the nodes and compute the simple condition for each node.
             nodes.add(new ConditionGraphNode(makeSimpleCondition(next, locals), null, null, next));
         }
 
         for (int i = 0; i < blocks.size(); i++) {
             OpcodeBlock next = blocks.get(i);
             ConditionGraphNode node = nodes.get(i);
+            // connect the nodes
             if (next.target == body) {
                 node.target = body_node;
             } else if (next.target == ret) {
@@ -529,6 +640,7 @@ public class OpcodeDecompiler {
 
         ConditionGraphNode start = nodes.get(0);
 
+        // perform the dfs
         Deque<Condition> stack = new ArrayDeque<>();
         dfs(start, stack);
 
@@ -539,13 +651,17 @@ public class OpcodeDecompiler {
     private static void appendBlock(BlockSection block_section, StatementBlock block) {
         Deque<Instruction> stack = Queues.newArrayDeque();
 
+        // Appends a block to the output, constructing the needed control flow
+        // statements and decompiling any opcodes that are not yet formed into
+        // statements.
+
         if (block_section instanceof IfBlockSection) {
             IfBlockSection ifblock = (IfBlockSection) block_section;
             StatementBlock body = new StatementBlock(StatementBlock.Type.IF, block.getLocals());
             for (BlockSection body_section : ifblock.body) {
                 appendBlock(body_section, body);
             }
-            IfBlock iff = new IfBlock(ifblock.condition, body);
+            If iff = new If(ifblock.condition, body);
             block.append(iff);
         } else if (block_section instanceof InlineBlockSection) {
             OpcodeBlock op = ((InlineBlockSection) block_section).block;
@@ -554,6 +670,9 @@ public class OpcodeDecompiler {
     }
 
     private static void appendBlock(OpcodeBlock op, StatementBlock block, Locals locals, Deque<Instruction> stack) {
+
+        // Decompiles a set of opcodes into statements.
+
         for (int index = 0; index < op.opcodes.size() + 1; index++) {
             int label_index = op.break_point - (op.opcodes.size() - index);
             AbstractInsnNode next;
@@ -679,7 +798,7 @@ public class OpcodeDecompiler {
                 VarInsnNode var = (VarInsnNode) next;
                 Instruction val = stack.pop();
                 Local local = locals.getLocal(var.var);
-                block.append(new LocalAssign(local.getInstance(label_index), val));
+                block.append(new LocalAssignment(local.getInstance(label_index), val));
                 break;
             }
             case IASTORE:
@@ -701,25 +820,21 @@ public class OpcodeDecompiler {
                     array.getInitializer()[((IntConstantArg) index_arg).getConstant()] = val;
                     break;
                 }
-                block.append(new ArrayAssign(var, index_arg, val));
+                block.append(new ArrayAssignment(var, index_arg, val));
                 break;
             }
             case POP: {
                 Instruction arg = stack.pop();
-                if (arg instanceof InstanceFunctionArg) {
-                    block.append(new InstanceMethodCall((InstanceFunctionArg) arg));
-                } else if (arg instanceof StaticFunctionArg) {
-                    block.append(new StaticMethodCall((StaticFunctionArg) arg));
+                if (arg instanceof InstanceMethodInvoke || arg instanceof StaticMethodInvoke) {
+                    block.append(new InvokeStatement(arg));
                 }
                 break;
             }
             case POP2: {
                 for (int i = 0; i < 2; i++) {
                     Instruction arg = stack.pop();
-                    if (arg instanceof InstanceFunctionArg) {
-                        block.append(new InstanceMethodCall((InstanceFunctionArg) arg));
-                    } else if (arg instanceof StaticFunctionArg) {
-                        block.append(new StaticMethodCall((StaticFunctionArg) arg));
+                    if (arg instanceof InstanceMethodInvoke || arg instanceof StaticMethodInvoke) {
+                        block.append(new InvokeStatement(arg));
                     }
                 }
                 break;
@@ -827,7 +942,7 @@ public class OpcodeDecompiler {
             case DREM: {
                 Instruction right = stack.pop();
                 Instruction left = stack.pop();
-                stack.push(new RemainderArg(left, right));
+                stack.push(new RemainderInstruction(left, right));
                 break;
             }
             case INEG:
@@ -863,7 +978,7 @@ public class OpcodeDecompiler {
             case LAND: {
                 Instruction right = stack.pop();
                 Instruction left = stack.pop();
-                stack.push(new AndArg(left, right));
+                stack.push(new AndInstruction(left, right));
                 break;
             }
             case IOR:
@@ -883,7 +998,7 @@ public class OpcodeDecompiler {
             case IINC: {
                 IincInsnNode inc = (IincInsnNode) next;
                 Local local = locals.getLocal(inc.var);
-                IncrementStatement insn = new IncrementStatement(local.getInstance(label_index), inc.incr);
+                Increment insn = new Increment(local.getInstance(label_index), inc.incr);
                 block.append(insn);
                 break;
             }
@@ -953,10 +1068,10 @@ public class OpcodeDecompiler {
             case FRETURN:
             case DRETURN:
             case ARETURN:
-                block.append(new ReturnValue(stack.pop()));
+                block.append(new Return(stack.pop()));
                 break;
             case RETURN:
-                block.append(new ReturnVoid());
+                block.append(new Return());
                 break;
             case GETSTATIC: {
                 FieldInsnNode field = (FieldInsnNode) next;
@@ -975,7 +1090,7 @@ public class OpcodeDecompiler {
                 if (!owner.startsWith("[")) {
                     owner = "L" + owner + ";";
                 }
-                FieldAssign assign = new StaticFieldAssign(field.name, field.desc, owner, val);
+                FieldAssignment assign = new StaticFieldAssignment(field.name, field.desc, owner, val);
                 block.append(assign);
                 break;
             }
@@ -997,7 +1112,7 @@ public class OpcodeDecompiler {
                 if (!owner_t.startsWith("[")) {
                     owner_t = "L" + owner_t + ";";
                 }
-                FieldAssign assign = new InstanceFieldAssign(field.name, field.desc, owner_t, owner, val);
+                FieldAssignment assign = new InstanceFieldAssignment(field.name, field.desc, owner_t, owner, val);
                 block.append(assign);
                 break;
             }
@@ -1008,9 +1123,9 @@ public class OpcodeDecompiler {
                     for (int i = 0; i < args.length; i++) {
                         args[i] = stack.pop();
                     }
-                    NewRefArg new_arg = (NewRefArg) stack.pop();
-                    if (stack.peek() instanceof NewRefArg) {
-                        NewRefArg new_arg2 = (NewRefArg) stack.pop();
+                    New new_arg = (New) stack.pop();
+                    if (stack.peek() instanceof New) {
+                        New new_arg2 = (New) stack.pop();
                         if (new_arg2 == new_arg) {
                             new_arg.setCtorDescription(ctor.desc);
                             new_arg.setParameters(args);
@@ -1019,8 +1134,8 @@ public class OpcodeDecompiler {
                         }
                         stack.push(new_arg2);
                     }
-                    NewInstance insn = new NewInstance(new_arg.getType(), ctor.desc, args);
-                    block.append(insn);
+                    New insn = new New(new_arg.getType(), ctor.desc, args);
+                    block.append(new InvokeStatement(insn));
                     break;
                 }
             }
@@ -1037,10 +1152,10 @@ public class OpcodeDecompiler {
                 if (!owner.startsWith("[")) {
                     owner = "L" + owner + ";";
                 }
+                InstanceMethodInvoke arg = new InstanceMethodInvoke(method.name, method.desc, owner, args, callee);
                 if (ret.equals("V")) {
-                    block.append(new InstanceMethodCall(method.name, method.desc, owner, args, callee));
+                    block.append(new InvokeStatement(arg));
                 } else {
-                    InstanceFunctionArg arg = new InstanceFunctionArg(method.name, method.desc, owner, args, callee);
                     stack.push(arg);
                 }
                 break;
@@ -1056,10 +1171,10 @@ public class OpcodeDecompiler {
                 if (!owner.startsWith("[")) {
                     owner = "L" + owner + ";";
                 }
+                StaticMethodInvoke arg = new StaticMethodInvoke(method.name, method.desc, owner, args);
                 if (ret.equals("V")) {
-                    block.append(new StaticMethodCall(method.name, method.desc, owner, args));
+                    block.append(new InvokeStatement(arg));
                 } else {
-                    StaticFunctionArg arg = new StaticFunctionArg(method.name, method.desc, owner, args);
                     stack.push(arg);
                 }
                 break;
@@ -1069,7 +1184,7 @@ public class OpcodeDecompiler {
                 break;
             case NEW: {
                 String type = ((TypeInsnNode) next).desc;
-                stack.push(new NewRefArg("L" + type + ";", null, null));
+                stack.push(new New("L" + type + ";", null, null));
                 break;
             }
             case NEWARRAY:
@@ -1090,7 +1205,7 @@ public class OpcodeDecompiler {
                 stack.push(new InstanceFieldArg("length", "I", "hidden-array-field", stack.pop()));
                 break;
             case ATHROW:
-                block.append(new ThrowException(stack.pop()));
+                block.append(new Throw(stack.pop()));
                 break;
             case CHECKCAST: {
                 TypeInsnNode cast = (TypeInsnNode) next;
@@ -1165,7 +1280,7 @@ public class OpcodeDecompiler {
 
     }
 
-    private static class ConditionGraphNode {
+    public static class ConditionGraphNode {
 
         public Condition condition;
         public ConditionGraphNode target;

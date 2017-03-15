@@ -26,6 +26,7 @@ package org.spongepowered.despector.util;
 
 import static org.objectweb.asm.Opcodes.*;
 
+import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.FrameNode;
 import org.objectweb.asm.tree.LabelNode;
@@ -49,13 +50,15 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import javax.sound.sampled.AudioFormat.Encoding;
-
 /**
  * Various utilities for working with AST elements.
  */
 public final class AstUtil {
 
+    /**
+     * Creates the inverse of the given condition. Where it can this is
+     * performed without resorting to wrapping in a {@link InverseCondition}.
+     */
     public static Condition inverse(Condition condition) {
         if (condition instanceof BooleanCondition) {
             BooleanCondition b = (BooleanCondition) condition;
@@ -76,11 +79,16 @@ public final class AstUtil {
             return new AndCondition(args);
         } else if (condition instanceof CompareCondition) {
             CompareCondition cmp = (CompareCondition) condition;
-            return new CompareCondition(cmp.getLeft(), cmp.getRight(), cmp.getOp().inverse());
+            return new CompareCondition(cmp.getLeft(), cmp.getRight(), cmp.getOperator().inverse());
         }
         return new InverseCondition(condition);
     }
 
+    /**
+     * Converts a type opcode to the string equivalent.
+     * 
+     * <p>eg. {@link Opcodes#T_INT} converts to 'I'.</p>
+     */
     public static String opcodeToType(int op) {
         switch (op) {
         case T_BOOLEAN:
@@ -104,7 +112,12 @@ public final class AstUtil {
         throw new IllegalArgumentException("Unknown primative array type: " + op);
     }
 
-    public static int opcodeToStore(int op) {
+    /**
+     * Converts a type opcode to the equivalent store opcode.
+     * 
+     * <p>eg. {@link Opcodes#T_DOUBLE} converts to {@link Opcodes#DASTORE}.</p>
+     */
+    public static int opcodeToArrayStore(int op) {
         switch (op) {
         case T_BOOLEAN:
             return BASTORE;
@@ -129,6 +142,10 @@ public final class AstUtil {
 
     /**
      * Converts an asm {@link AbstractInsnNode} to a string for debugging.
+     * 
+     * <p>This uses a static {@link Textifier} which means that all label
+     * numbers will be constantly incrementing as the program continues. Call
+     * {@link #_resetTextifier()} to reset label indices.</p>
      */
     public static String insnToString(AbstractInsnNode insn) {
         insn.accept(mp);
@@ -142,9 +159,21 @@ public final class AstUtil {
         return s;
     }
 
+    /**
+     * Resets the {@link Textifier} instance used by
+     * {@link #insnToString(AbstractInsnNode)} to reset the label names.
+     */
+    public static void _resetTextifier() {
+        printer = new Textifier();
+    }
+
     private static Printer printer = new Textifier();
     private static TraceMethodVisitor mp = new TraceMethodVisitor(printer);
 
+    /**
+     * Gets the change in the stack size caused by the given
+     * {@link AbstractInsnNode}.
+     */
     public static int getStackDelta(AbstractInsnNode next) {
         switch (next.getOpcode()) {
         case DUP2:
@@ -331,10 +360,18 @@ public final class AstUtil {
         }
     }
 
+    /**
+     * Returns the index of the opcode that is the start of the last statement
+     * in the given list of opcodes.
+     */
     public static int findStartLastStatement(List<AbstractInsnNode> opcodes) {
         return findStartLastStatement(opcodes, opcodes.size() - 1, opcodes.get(opcodes.size() - 1));
     }
 
+    /**
+     * Returns the index of the opcode that is the start of the last statement
+     * in the given list of opcodes.
+     */
     public static int findStartLastStatement(List<AbstractInsnNode> opcodes, AbstractInsnNode last) {
         return findStartLastStatement(opcodes, opcodes.size(), last);
     }
@@ -361,6 +398,11 @@ public final class AstUtil {
         throw new IllegalStateException();
     }
 
+    /**
+     * Gets if a given list of opcodes contains purely supporting types and no
+     * actual opcodes. (eg. if the list contains only nodes that are one of
+     * {@link FrameNode}, {@link LabelNode}, or {@link LineNumberNode}).
+     */
     public static boolean isEmptyOfLogic(List<AbstractInsnNode> opcodes) {
         for (int i = 0; i < opcodes.size(); i++) {
             AbstractInsnNode next = opcodes.get(i);
@@ -381,7 +423,7 @@ public final class AstUtil {
         if (other instanceof CompareCondition && a instanceof CompareCondition) {
             CompareCondition ab = (CompareCondition) a;
             CompareCondition ob = (CompareCondition) other;
-            return ab.getLeft().equals(ob.getLeft()) && ab.getRight().equals(ob.getRight()) && ab.getOp() == ob.getOp().inverse();
+            return ab.getLeft().equals(ob.getLeft()) && ab.getRight().equals(ob.getRight()) && ab.getOperator() == ob.getOperator().inverse();
         }
         return false;
     }
@@ -497,7 +539,7 @@ public final class AstUtil {
                 for (int i = 0; i < common_length; i++) {
                     m[i] = common[i];
                 }
-                return new Pair(m, null);
+                return new Pair<>(m, null);
             }
             int[] new_m = new int[a.length - b_a.length];
             int d = 0;
@@ -509,7 +551,7 @@ public final class AstUtil {
                 }
                 new_m[d++] = a[j];
             }
-            return new Pair(new_m, null);
+            return new Pair<>(new_m, null);
         } else if (a_b.length == b_a.length && a_b.length == 1) {
             int[] new_m = new int[common_length];
             for (int i = 0; i < common_length; i++) {
@@ -524,7 +566,7 @@ public final class AstUtil {
                     continue;
                 }
                 if (n.length == 2 && contains(n, dm)) {
-                    return new Pair(null, new_m);
+                    return new Pair<>(null, new_m);
                 }
             }
 
@@ -568,12 +610,23 @@ public final class AstUtil {
 
     private static final boolean DEBUG_SIMPLIFICATION = Boolean.valueOf(System.getProperty("despect.debug.simplification", "true"));
 
+    /**
+     * Attempts to simplify the given condition.
+     */
     public static Condition simplifyCondition(Condition condition) {
         // A brute force simplification of sum-of-products expressions
         if (condition instanceof OrCondition) {
             OrCondition or = (OrCondition) condition;
             List<int[]> encodings = new ArrayList<>(or.getOperands().size());
             Map<Condition, Integer> mapping = new HashMap<>();
+            // Each of the conditions is encoded into an integer array, every
+            // condition is inserted into a map to track an integer value for
+            // each condition. Conditions that are equivalent are given the same
+            // number and conditions that are inverses of each other are given
+            // numbers which are the negative of each other.
+
+            // This encoding allows very quick and easy comparisons of
+            // whether conditions are equal or inverses of each other.
             for (int i = 0; i < or.getOperands().size(); i++) {
                 Condition c = or.getOperands().get(i);
                 if (c instanceof AndCondition) {
@@ -603,6 +656,8 @@ public final class AstUtil {
                         if (m == n || m.length < n.length) {
                             continue;
                         }
+                        // if m contains n either in whole or part then it can
+                        // be removed as any time n is true, m will also be true
                         if (contains(m, n)) {
                             it.remove();
                             if (DEBUG_SIMPLIFICATION) {
@@ -626,6 +681,8 @@ public final class AstUtil {
                         if (m.length < n.length) {
                             continue;
                         }
+                        // if m contains the inverse of n then those parts
+                        // corresponding to n can be removed from m
                         if (containsInverse(m, n)) {
                             int[] new_m = new int[m.length - n.length];
                             int d = 0;
@@ -650,6 +707,7 @@ public final class AstUtil {
                                 System.out.println();
                             }
                         } else {
+                            // this extracts common subparts from m and n and then performs a few simplifications ont he remaining pieces.
                             Pair<int[], int[]> s = simplifyCommonSubparts(m, n, encodings);
                             if (s != null) {
                                 if (s.getFirst() != null) {

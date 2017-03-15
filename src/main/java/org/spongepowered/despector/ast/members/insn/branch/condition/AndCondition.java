@@ -24,6 +24,7 @@
  */
 package org.spongepowered.despector.ast.members.insn.branch.condition;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.Lists;
@@ -40,12 +41,17 @@ public class AndCondition extends Condition {
 
     public AndCondition(Condition... args) {
         this.args = Lists.newArrayList(checkNotNull(args, "args"));
+        checkArgument(this.args.size() >= 2, "Not enough operands");
     }
 
     public AndCondition(Iterable<Condition> args) {
         this.args = Lists.newArrayList(checkNotNull(args, "args"));
+        checkArgument(this.args.size() >= 2, "Not enough operands");
     }
 
+    /**
+     * Gets the operands of this condition.
+     */
     public List<Condition> getOperands() {
         return this.args;
     }

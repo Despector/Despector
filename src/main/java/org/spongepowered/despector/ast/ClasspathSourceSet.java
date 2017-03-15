@@ -29,24 +29,57 @@ import org.spongepowered.despector.ast.type.TypeEntry;
 /**
  * A sourceset for types which are part of libraries or core java types.
  */
-public final class ClasspathSourceSet /*implements SourceSet*/ {
+public final class ClasspathSourceSet /* implements SourceSet */ {
 
 //    public static final SourceSet classpath = new ClasspathSourceSet();
-    
+
+    /**
+     * The void type.
+     */
     public static final TypeEntry void_t = createPrimative("void");
+    /**
+     * The object type java/lang/Object.
+     */
     public static final TypeEntry object_t = createPrimative("java/lang/Object");
 
+    /**
+     * The primitive boolean type.
+     */
     public static final TypeEntry boolean_t = createPrimative("boolean");
+    /**
+     * The primitive byte type.
+     */
     public static final TypeEntry byte_t = createPrimative("byte");
+    /**
+     * The primitive char type.
+     */
     public static final TypeEntry char_t = createPrimative("char");
+    /**
+     * The primitive short type.
+     */
     public static final TypeEntry short_t = createPrimative("short");
+    /**
+     * The primitive int type.
+     */
     public static final TypeEntry int_t = createPrimative("int");
+    /**
+     * The primitive long type.
+     */
     public static final TypeEntry long_t = createPrimative("long");
+    /**
+     * The primitive float type.
+     */
     public static final TypeEntry float_t = createPrimative("float");
+    /**
+     * The primitive double type.
+     */
     public static final TypeEntry double_t = createPrimative("double");
 
+    /**
+     * The string type java/lang/String.
+     */
     public static final TypeEntry String = createPrimative("java/lang/String");
-    
+
     private static TypeEntry createPrimative(String name) {
         return null;
     }

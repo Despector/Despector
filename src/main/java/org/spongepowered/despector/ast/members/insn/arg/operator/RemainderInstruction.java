@@ -22,52 +22,29 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.despector.ast.members.insn.assign;
+package org.spongepowered.despector.ast.members.insn.arg.operator;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
+import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
 import org.spongepowered.despector.ast.members.insn.arg.Instruction;
-import org.spongepowered.despector.util.TypeHelper;
 
-public abstract class FieldAssign extends Assignment {
+/**
+ * The integer remainder operator.
+ */
+public class RemainderInstruction extends OperatorInstruction {
 
-    protected String field_name;
-    protected String type_desc;
-    protected String owner_type;
-
-    public FieldAssign(String field, String type_desc, String owner, Instruction val) {
-        super(val);
-        this.field_name = checkNotNull(field, "field");
-        this.type_desc = checkNotNull(type_desc, "field_desc");
-        this.owner_type = checkNotNull(owner, "owner");
+    public RemainderInstruction(Instruction left, Instruction right) {
+        super(left, right);
     }
 
-    public String getFieldName() {
-        return this.field_name;
+    @Override
+    public String getOperator() {
+        return "%";
     }
 
-    public void setFieldName(String name) {
-        this.field_name = checkNotNull(name, "name");
-    }
-
-    public String getFieldDescription() {
-        return this.type_desc;
-    }
-
-    public void setFieldDescription(String desc) {
-        this.type_desc = checkNotNull(desc, "desc");
-    }
-
-    public String getOwnerType() {
-        return this.owner_type;
-    }
-
-    public String getOwnerName() {
-        return TypeHelper.descToType(this.owner_type);
-    }
-
-    public void setOwner(String owner) {
-        this.owner_type = checkNotNull(owner, "owner");
+    @Override
+    public void accept(InstructionVisitor visitor) {
+        visitor.visitRemainderOperatorArg(this);
+        super.accept(visitor);
     }
 
 }

@@ -26,9 +26,9 @@ package org.spongepowered.despector.ast.members.insn.arg.operator.bitwise;
 
 import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
 import org.spongepowered.despector.ast.members.insn.arg.Instruction;
-import org.spongepowered.despector.ast.members.insn.arg.operator.OperatorArg;
+import org.spongepowered.despector.ast.members.insn.arg.operator.OperatorInstruction;
 
-public class OrArg extends OperatorArg {
+public class OrArg extends OperatorInstruction {
 
     public OrArg(Instruction left, Instruction right) {
         super(left, right);

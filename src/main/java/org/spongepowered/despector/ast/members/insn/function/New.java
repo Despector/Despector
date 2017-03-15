@@ -22,23 +22,27 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.despector.ast.members.insn.arg;
+package org.spongepowered.despector.ast.members.insn.function;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
+import org.spongepowered.despector.ast.members.insn.arg.Instruction;
 import org.spongepowered.despector.util.TypeHelper;
 
-public class NewRefArg implements Instruction {
+/**
+ * A statement instantiating a new instance of a type.
+ */
+public class New implements Instruction {
 
     private String type;
     private String ctor;
     private Instruction[] params;
 
-    public NewRefArg(String type, String ctor_desc, Instruction[] args) {
+    public New(String type, String ctor_desc, Instruction[] args) {
         this.type = checkNotNull(type, "type");
-        this.ctor = ctor_desc;
-        this.params = args;
+        this.ctor = checkNotNull(ctor_desc, "ctor_desc");
+        this.params = checkNotNull(args, "args");
     }
 
     public String getCtorDescription() {
@@ -46,15 +50,11 @@ public class NewRefArg implements Instruction {
     }
 
     public void setCtorDescription(String desc) {
-        this.ctor = checkNotNull(desc, "desc");
+        this.ctor = checkNotNull(desc, "ctor_desc");
     }
 
     public String getType() {
         return this.type;
-    }
-
-    public String getTypeName() {
-        return TypeHelper.descToType(this.type);
     }
 
     public void setType(String type) {
@@ -65,8 +65,8 @@ public class NewRefArg implements Instruction {
         return this.params;
     }
 
-    public void setParameters(Instruction... params) {
-        this.params = checkNotNull(params, "params");
+    public void setParameters(Instruction... args) {
+        this.params = checkNotNull(args, "args");
     }
 
     @Override
@@ -76,9 +76,9 @@ public class NewRefArg implements Instruction {
 
     @Override
     public void accept(InstructionVisitor visitor) {
-        visitor.visitNewRefArg(this);
-        for (Instruction p : this.params) {
-            p.accept(visitor);
+        visitor.visitNewInstance(this);
+        for (Instruction insn : this.params) {
+            insn.accept(visitor);
         }
     }
 
@@ -91,7 +91,7 @@ public class NewRefArg implements Instruction {
                 params.append(", ");
             }
         }
-        return "new " + TypeHelper.descToType(this.type) + "(" + params + ")";
+        return "new " + TypeHelper.descToType(this.type) + "(" + params + ");";
     }
 
 }

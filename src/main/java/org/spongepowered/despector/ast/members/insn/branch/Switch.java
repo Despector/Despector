@@ -34,12 +34,12 @@ import org.spongepowered.despector.ast.members.insn.arg.Instruction;
 
 import java.util.List;
 
-public class TableSwitch implements Statement {
+public class Switch implements Statement {
 
     private Instruction variable;
     private final List<Case> cases = Lists.newArrayList();
 
-    public TableSwitch(Instruction var) {
+    public Switch(Instruction var) {
         this.variable = checkNotNull(var, "var");
     }
 

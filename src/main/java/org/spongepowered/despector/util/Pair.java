@@ -35,11 +35,42 @@ public class Pair<A, B> {
     }
 
     public A getFirst() {
-        return a;
+        return this.a;
     }
 
     public B getSecond() {
-        return b;
+        return this.b;
+    }
+
+    @Override
+    public String toString() {
+        return "Pair[" + this.a + ", " + this.b + "]";
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == this) {
+            return true;
+        }
+        if (!(o instanceof Pair)) {
+            return false;
+        }
+        Pair<?, ?> p = (Pair<?, ?>) o;
+        if (this.a == null) {
+            return p.a == null;
+        }
+        if (this.b == null) {
+            return p.b == null;
+        }
+        return this.a.equals(p.a) && this.b.equals(p.b);
+    }
+
+    @Override
+    public int hashCode() {
+        int h = 1;
+        h = h * 31 + (this.a == null ? 0 : this.a.hashCode());
+        h = h * 31 + (this.b == null ? 0 : this.b.hashCode());
+        return h;
     }
 
 }

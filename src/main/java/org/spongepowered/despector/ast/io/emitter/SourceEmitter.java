@@ -37,12 +37,9 @@ import org.spongepowered.despector.ast.members.insn.Statement;
 import org.spongepowered.despector.ast.members.insn.StatementBlock;
 import org.spongepowered.despector.ast.members.insn.arg.CastArg;
 import org.spongepowered.despector.ast.members.insn.arg.CompareArg;
-import org.spongepowered.despector.ast.members.insn.arg.InstanceFunctionArg;
 import org.spongepowered.despector.ast.members.insn.arg.InstanceOfArg;
 import org.spongepowered.despector.ast.members.insn.arg.Instruction;
 import org.spongepowered.despector.ast.members.insn.arg.NewArrayArg;
-import org.spongepowered.despector.ast.members.insn.arg.NewRefArg;
-import org.spongepowered.despector.ast.members.insn.arg.StaticFunctionArg;
 import org.spongepowered.despector.ast.members.insn.arg.cst.DoubleConstantArg;
 import org.spongepowered.despector.ast.members.insn.arg.cst.FloatConstantArg;
 import org.spongepowered.despector.ast.members.insn.arg.cst.IntConstantArg;
@@ -57,36 +54,36 @@ import org.spongepowered.despector.ast.members.insn.arg.field.LocalArg;
 import org.spongepowered.despector.ast.members.insn.arg.field.StaticFieldArg;
 import org.spongepowered.despector.ast.members.insn.arg.operator.AddArg;
 import org.spongepowered.despector.ast.members.insn.arg.operator.NegArg;
-import org.spongepowered.despector.ast.members.insn.arg.operator.OperatorArg;
+import org.spongepowered.despector.ast.members.insn.arg.operator.OperatorInstruction;
 import org.spongepowered.despector.ast.members.insn.arg.operator.SubtractArg;
-import org.spongepowered.despector.ast.members.insn.assign.ArrayAssign;
-import org.spongepowered.despector.ast.members.insn.assign.FieldAssign;
-import org.spongepowered.despector.ast.members.insn.assign.InstanceFieldAssign;
-import org.spongepowered.despector.ast.members.insn.assign.LocalAssign;
-import org.spongepowered.despector.ast.members.insn.assign.StaticFieldAssign;
-import org.spongepowered.despector.ast.members.insn.branch.CatchBlock;
-import org.spongepowered.despector.ast.members.insn.branch.DoWhileLoop;
-import org.spongepowered.despector.ast.members.insn.branch.ElseBlock;
-import org.spongepowered.despector.ast.members.insn.branch.ForLoop;
-import org.spongepowered.despector.ast.members.insn.branch.IfBlock;
-import org.spongepowered.despector.ast.members.insn.branch.TableSwitch;
-import org.spongepowered.despector.ast.members.insn.branch.TableSwitch.Case;
+import org.spongepowered.despector.ast.members.insn.assign.ArrayAssignment;
+import org.spongepowered.despector.ast.members.insn.assign.FieldAssignment;
+import org.spongepowered.despector.ast.members.insn.assign.InstanceFieldAssignment;
+import org.spongepowered.despector.ast.members.insn.assign.LocalAssignment;
+import org.spongepowered.despector.ast.members.insn.assign.StaticFieldAssignment;
+import org.spongepowered.despector.ast.members.insn.branch.DoWhile;
+import org.spongepowered.despector.ast.members.insn.branch.For;
+import org.spongepowered.despector.ast.members.insn.branch.If;
+import org.spongepowered.despector.ast.members.insn.branch.If.Else;
+import org.spongepowered.despector.ast.members.insn.branch.Switch;
+import org.spongepowered.despector.ast.members.insn.branch.Switch.Case;
 import org.spongepowered.despector.ast.members.insn.branch.Ternary;
-import org.spongepowered.despector.ast.members.insn.branch.TryBlock;
-import org.spongepowered.despector.ast.members.insn.branch.WhileLoop;
+import org.spongepowered.despector.ast.members.insn.branch.TryCatch;
+import org.spongepowered.despector.ast.members.insn.branch.TryCatch.CatchBlock;
+import org.spongepowered.despector.ast.members.insn.branch.While;
 import org.spongepowered.despector.ast.members.insn.branch.condition.AndCondition;
 import org.spongepowered.despector.ast.members.insn.branch.condition.BooleanCondition;
 import org.spongepowered.despector.ast.members.insn.branch.condition.CompareCondition;
 import org.spongepowered.despector.ast.members.insn.branch.condition.Condition;
 import org.spongepowered.despector.ast.members.insn.branch.condition.InverseCondition;
 import org.spongepowered.despector.ast.members.insn.branch.condition.OrCondition;
-import org.spongepowered.despector.ast.members.insn.function.InstanceMethodCall;
-import org.spongepowered.despector.ast.members.insn.function.NewInstance;
-import org.spongepowered.despector.ast.members.insn.function.StaticMethodCall;
-import org.spongepowered.despector.ast.members.insn.misc.IncrementStatement;
-import org.spongepowered.despector.ast.members.insn.misc.ReturnValue;
-import org.spongepowered.despector.ast.members.insn.misc.ReturnVoid;
-import org.spongepowered.despector.ast.members.insn.misc.ThrowException;
+import org.spongepowered.despector.ast.members.insn.function.InstanceMethodInvoke;
+import org.spongepowered.despector.ast.members.insn.function.InvokeStatement;
+import org.spongepowered.despector.ast.members.insn.function.New;
+import org.spongepowered.despector.ast.members.insn.function.StaticMethodInvoke;
+import org.spongepowered.despector.ast.members.insn.misc.Increment;
+import org.spongepowered.despector.ast.members.insn.misc.Return;
+import org.spongepowered.despector.ast.members.insn.misc.Throw;
 import org.spongepowered.despector.ast.type.ClassEntry;
 import org.spongepowered.despector.ast.type.EnumEntry;
 import org.spongepowered.despector.ast.type.InterfaceEntry;
@@ -213,7 +210,7 @@ public class SourceEmitter implements ClassEmitter {
     }
 
     protected void emitClass(ClassEntry type) {
-        printString(type.getAccessModifier().identifier());
+        printString(type.getAccessModifier().asString());
         if (type.getAccessModifier() != AccessModifier.PACKAGE_PRIVATE) {
             printString(" ");
         }
@@ -252,11 +249,11 @@ public class SourceEmitter implements ClassEmitter {
                 }
             }
         }
-        if(this.format.insert_space_before_opening_brace_in_type_declaration) {
+        if (this.format.insert_space_before_opening_brace_in_type_declaration) {
             printString(" ");
         }
         printString("{\n");
-        for(int i = 0; i < this.format.blank_lines_before_first_class_body_declaration; i++) {
+        for (int i = 0; i < this.format.blank_lines_before_first_class_body_declaration; i++) {
             printString("\n");
         }
 
@@ -320,7 +317,7 @@ public class SourceEmitter implements ClassEmitter {
     }
 
     protected void emitField(FieldEntry field) {
-        printString(field.getAccessModifier().identifier());
+        printString(field.getAccessModifier().asString());
         printString(" ");
         if (field.isStatic()) {
             printString("static ");
@@ -334,7 +331,7 @@ public class SourceEmitter implements ClassEmitter {
     }
 
     protected void emitEnum(EnumEntry type) {
-        printString(type.getAccessModifier().identifier());
+        printString(type.getAccessModifier().asString());
         if (type.getAccessModifier() != AccessModifier.PACKAGE_PRIVATE) {
             printString(" ");
         }
@@ -366,7 +363,7 @@ public class SourceEmitter implements ClassEmitter {
                 }
             }
         }
-        if(this.format.insert_space_before_opening_brace_in_type_declaration) {
+        if (this.format.insert_space_before_opening_brace_in_type_declaration) {
             printString(" ");
         }
         printString("{\n\n");
@@ -385,18 +382,18 @@ public class SourceEmitter implements ClassEmitter {
             boolean first = true;
             while (initializers.hasNext()) {
                 Statement next = initializers.next();
-                if (!(next instanceof StaticFieldAssign)) {
+                if (!(next instanceof StaticFieldAssignment)) {
                     break;
                 }
-                StaticFieldAssign assign = (StaticFieldAssign) next;
-                if (!TypeHelper.descToType(assign.getOwnerType()).equals(type.getName()) || !(assign.getValue() instanceof NewRefArg)) {
+                StaticFieldAssignment assign = (StaticFieldAssignment) next;
+                if (!TypeHelper.descToType(assign.getOwnerType()).equals(type.getName()) || !(assign.getValue() instanceof New)) {
                     remaining.add(assign);
                     break;
                 }
                 if (!first) {
                     printString(",\n");
                 }
-                NewRefArg val = (NewRefArg) assign.getValue();
+                New val = (New) assign.getValue();
                 printIndentation();
                 printString(assign.getFieldName());
                 found.add(assign.getFieldName());
@@ -514,7 +511,7 @@ public class SourceEmitter implements ClassEmitter {
         }
         name = name.replace('$', '.');
         if (!(name.contains(".") && type.getAccessModifier() == AccessModifier.PUBLIC)) {
-            printString(type.getAccessModifier().identifier());
+            printString(type.getAccessModifier().asString());
             if (type.getAccessModifier() != AccessModifier.PACKAGE_PRIVATE) {
                 printString(" ");
             }
@@ -536,7 +533,7 @@ public class SourceEmitter implements ClassEmitter {
                 }
             }
         }
-        if(this.format.insert_space_before_opening_brace_in_type_declaration) {
+        if (this.format.insert_space_before_opening_brace_in_type_declaration) {
             printString(" ");
         }
         printString("{\n\n");
@@ -617,7 +614,7 @@ public class SourceEmitter implements ClassEmitter {
         }
         printIndentation();
         if (!(this.this$ instanceof InterfaceEntry) && !(this.this$ instanceof EnumEntry && method.getName().equals("<init>"))) {
-            printString(method.getAccessModifier().identifier());
+            printString(method.getAccessModifier().asString());
             if (method.getAccessModifier() != AccessModifier.PACKAGE_PRIVATE) {
                 printString(" ");
             }
@@ -701,7 +698,8 @@ public class SourceEmitter implements ClassEmitter {
         boolean last_success = false;
         for (int i = 0; i < instructions.getStatements().size(); i++) {
             Statement insn = instructions.getStatements().get(i);
-            if (insn instanceof ReturnVoid && instructions.getType() == StatementBlock.Type.METHOD && i == instructions.getStatements().size() - 1) {
+            if (insn instanceof Return && !((Return) insn).getValue().isPresent()
+                    && instructions.getType() == StatementBlock.Type.METHOD && i == instructions.getStatements().size() - 1) {
                 break;
             }
             if (last_success) {
@@ -714,49 +712,45 @@ public class SourceEmitter implements ClassEmitter {
 
     protected boolean emitInstruction(Statement insn, boolean withSemicolon) {
         boolean success = true;
-        if (insn instanceof LocalAssign) {
-            emitLocalAssign((LocalAssign) insn);
-        } else if (insn instanceof StaticMethodCall) {
-            emitStaticFunction((StaticMethodCall) insn);
-        } else if (insn instanceof InstanceMethodCall) {
-            success = emitInstanceFunction((InstanceMethodCall) insn);
-        } else if (insn instanceof NewInstance) {
-            emitNew((NewInstance) insn);
-        } else if (insn instanceof IncrementStatement) {
-            emitIinc((IncrementStatement) insn);
-        } else if (insn instanceof IfBlock) {
-            emitIfBlock((IfBlock) insn);
-        } else if (insn instanceof ReturnVoid) {
-            emitReturn((ReturnVoid) insn);
-        } else if (insn instanceof ArrayAssign) {
-            emitArrayAssign((ArrayAssign) insn);
-        } else if (insn instanceof ReturnValue) {
-            emitValueReturn((ReturnValue) insn);
-        } else if (insn instanceof ThrowException) {
-            emitThrow((ThrowException) insn);
-        } else if (insn instanceof ForLoop) {
-            emitForLoop((ForLoop) insn);
-        } else if (insn instanceof WhileLoop) {
-            emitWhileLoop((WhileLoop) insn);
-        } else if (insn instanceof DoWhileLoop) {
-            emitDoWhileLoop((DoWhileLoop) insn);
-        } else if (insn instanceof FieldAssign) {
-            emitFieldAssign((FieldAssign) insn);
-        } else if (insn instanceof TableSwitch) {
-            emitTableSwitch((TableSwitch) insn);
-        } else if (insn instanceof TryBlock) {
-            emitTryBlock((TryBlock) insn);
+        if (insn instanceof LocalAssignment) {
+            emitLocalAssign((LocalAssignment) insn);
+        } else if (insn instanceof InvokeStatement) {
+            emitInvoke((InvokeStatement) insn);
+        } else if (insn instanceof New) {
+            emitNew((New) insn);
+        } else if (insn instanceof Increment) {
+            emitIinc((Increment) insn);
+        } else if (insn instanceof If) {
+            emitIfBlock((If) insn);
+        } else if (insn instanceof ArrayAssignment) {
+            emitArrayAssign((ArrayAssignment) insn);
+        } else if (insn instanceof Return) {
+            emitValueReturn((Return) insn);
+        } else if (insn instanceof Throw) {
+            emitThrow((Throw) insn);
+        } else if (insn instanceof For) {
+            emitForLoop((For) insn);
+        } else if (insn instanceof While) {
+            emitWhileLoop((While) insn);
+        } else if (insn instanceof DoWhile) {
+            emitDoWhileLoop((DoWhile) insn);
+        } else if (insn instanceof FieldAssignment) {
+            emitFieldAssign((FieldAssignment) insn);
+        } else if (insn instanceof Switch) {
+            emitTableSwitch((Switch) insn);
+        } else if (insn instanceof TryCatch) {
+            emitTryBlock((TryCatch) insn);
         } else {
             throw new IllegalStateException("Unknown statement: " + insn);
         }
-        if (success && withSemicolon && !(insn instanceof ForLoop) && !(insn instanceof IfBlock) && !(insn instanceof WhileLoop)
-                && !(insn instanceof TryBlock) && !(insn instanceof TableSwitch)) {
+        if (success && withSemicolon && !(insn instanceof For) && !(insn instanceof If) && !(insn instanceof While)
+                && !(insn instanceof TryCatch) && !(insn instanceof Switch)) {
             printString(";");
         }
         return success;
     }
 
-    protected void emitLocalAssign(LocalAssign insn) {
+    protected void emitLocalAssign(LocalAssignment insn) {
         if (!insn.getLocal().getLocal().isParameter() && !this.defined_locals.contains(insn.getLocal())) {
             LocalInstance local = insn.getLocal();
             emitTypeName(local.getTypeName());
@@ -826,23 +820,23 @@ public class SourceEmitter implements ClassEmitter {
         emitArg(insn.getValue(), insn.getLocal().getType());
     }
 
-    protected void emitFieldAssign(FieldAssign insn) {
-        if (insn instanceof StaticFieldAssign) {
-            if (!((StaticFieldAssign) insn).getOwnerType().equals(this.this$.getDescriptor())) {
-                emitTypeName(((StaticFieldAssign) insn).getOwnerName());
+    protected void emitFieldAssign(FieldAssignment insn) {
+        if (insn instanceof StaticFieldAssignment) {
+            if (!((StaticFieldAssignment) insn).getOwnerType().equals(this.this$.getDescriptor())) {
+                emitTypeName(((StaticFieldAssignment) insn).getOwnerName());
                 printString(".");
             }
-        } else if (insn instanceof InstanceFieldAssign) {
-            emitArg(((InstanceFieldAssign) insn).getOwner(), insn.getOwnerType());
+        } else if (insn instanceof InstanceFieldAssignment) {
+            emitArg(((InstanceFieldAssignment) insn).getOwner(), insn.getOwnerType());
             printString(".");
         }
 
         printString(insn.getFieldName());
         Instruction val = insn.getValue();
-        if (val instanceof OperatorArg) {
-            Instruction left = ((OperatorArg) val).getLeftOperand();
-            Instruction right = ((OperatorArg) val).getRightOperand();
-            String op = " " + ((OperatorArg) val).getOperator() + "= ";
+        if (val instanceof OperatorInstruction) {
+            Instruction left = ((OperatorInstruction) val).getLeftOperand();
+            Instruction right = ((OperatorInstruction) val).getRightOperand();
+            String op = " " + ((OperatorInstruction) val).getOperator() + "= ";
             if (left instanceof InstanceFieldArg) {
                 InstanceFieldArg left_field = (InstanceFieldArg) left;
                 Instruction owner = left_field.getFieldOwner();
@@ -873,69 +867,18 @@ public class SourceEmitter implements ClassEmitter {
         emitArg(val, insn.getFieldDescription());
     }
 
-    protected void emitStaticFunction(StaticMethodCall insn) {
-        emitType(insn.getOwner());
-        printString(".");
-        printString(insn.getMethodName());
-        printString("(");
-        // TODO param types from ast
-        for (int i = 0; i < insn.getParams().length; i++) {
-            Instruction param = insn.getParams()[i];
-            emitArg(param, null);
-            if (i < insn.getParams().length - 1) {
-                printString(", ");
-            }
+    protected void emitInvoke(InvokeStatement insn) {
+        Instruction i = insn.getInstruction();
+        if (i instanceof New) {
+            emitNew((New) i);
+        } else if (i instanceof InstanceMethodInvoke) {
+            emitInstanceMethodInvoke((InstanceMethodInvoke) i);
+        } else if (i instanceof StaticMethodInvoke) {
+            emitStaticMethodInvoke((StaticMethodInvoke) i);
         }
-        printString(")");
     }
 
-    protected boolean emitInstanceFunction(InstanceMethodCall insn) {
-        if (insn.getMethodName().equals("<init>")) {
-            if (insn.getOwner().equals(this.this$.getDescriptor())) {
-                printString("this(");
-            } else {
-                if (insn.getParams().length == 0 || this.this$ instanceof EnumEntry) {
-                    // if we're calling a no-args constructor or this is an enum
-                    // type then we omit the super function call as it is
-                    // implicit.
-                    return false;
-                }
-                printString("super(");
-            }
-        } else {
-            emitArg(insn.getCallee(), insn.getOwner());
-            printString(".");
-            printString(insn.getMethodName());
-            printString("(");
-        }
-        // TODO param types from ast
-        for (int i = 0; i < insn.getParams().length; i++) {
-            Instruction param = insn.getParams()[i];
-            emitArg(param, null);
-            if (i < insn.getParams().length - 1) {
-                printString(", ");
-            }
-        }
-        printString(")");
-        return true;
-    }
-
-    protected void emitNew(NewInstance insn) {
-        printString("new ");
-        emitType(insn.getType());
-        printString("(");
-        // TODO param types from ast
-        for (int i = 0; i < insn.getParams().length; i++) {
-            Instruction param = insn.getParams()[i];
-            emitArg(param, null);
-            if (i < insn.getParams().length - 1) {
-                printString(", ");
-            }
-        }
-        printString(")");
-    }
-
-    protected void emitIinc(IncrementStatement insn) {
+    protected void emitIinc(Increment insn) {
         printString(insn.getLocal().getName());
         if (insn.getIncrementValue() == 1) {
             printString("++");
@@ -948,7 +891,7 @@ public class SourceEmitter implements ClassEmitter {
         printString(String.valueOf(insn.getIncrementValue()));
     }
 
-    protected void emitIfBlock(IfBlock insn) {
+    protected void emitIfBlock(If insn) {
         printString("if (");
         emitCondition(insn.getCondition());
         printString(") {\n");
@@ -959,17 +902,17 @@ public class SourceEmitter implements ClassEmitter {
             printString("\n");
         }
         printIndentation();
-        ElseBlock else_ = insn.getElseBlock();
+        Else else_ = insn.getElseBlock();
         if (else_ == null) {
             printString("}");
         } else {
             StatementBlock else_block = else_.getElseBody();
-            if (else_block.getStatements().size() == 1 && else_block.getStatements().get(0) instanceof IfBlock) {
+            if (else_block.getStatements().size() == 1 && else_block.getStatements().get(0) instanceof If) {
                 // if the only statement in the else block is another if
                 // statement then we have one of our bastardized elif statements
                 // until I bother to add better elif support in the ast.
                 printString("} else ");
-                emitIfBlock((IfBlock) else_block.getStatements().get(0));
+                emitIfBlock((If) else_block.getStatements().get(0));
                 return;
             }
             printString("} else {\n");
@@ -984,7 +927,7 @@ public class SourceEmitter implements ClassEmitter {
         }
     }
 
-    protected void emitForLoop(ForLoop loop) {
+    protected void emitForLoop(For loop) {
         printString("for (");
         if (loop.getInit() != null) {
             emitInstruction(loop.getInit(), false);
@@ -1006,7 +949,7 @@ public class SourceEmitter implements ClassEmitter {
         printString("}");
     }
 
-    protected void emitWhileLoop(WhileLoop loop) {
+    protected void emitWhileLoop(While loop) {
         printString("while (");
         emitCondition(loop.getCondition());
         printString(") {\n");
@@ -1020,7 +963,7 @@ public class SourceEmitter implements ClassEmitter {
         printString("}");
     }
 
-    protected void emitDoWhileLoop(DoWhileLoop loop) {
+    protected void emitDoWhileLoop(DoWhile loop) {
         printString("do {\n");
         if (!loop.getBody().getStatements().isEmpty()) {
             this.indentation++;
@@ -1038,11 +981,11 @@ public class SourceEmitter implements ClassEmitter {
         Map<Integer, String> table = Maps.newHashMap();
 
         for (Statement stmt : mth.getInstructions().getStatements()) {
-            if (stmt instanceof TryBlock) {
-                TryBlock next = (TryBlock) stmt;
-                ArrayAssign assign = (ArrayAssign) next.getTryBlock().getStatements().get(0);
+            if (stmt instanceof TryCatch) {
+                TryCatch next = (TryCatch) stmt;
+                ArrayAssignment assign = (ArrayAssignment) next.getTryBlock().getStatements().get(0);
                 int jump_index = ((IntConstantArg) assign.getValue()).getConstant();
-                InstanceFunctionArg ordinal = (InstanceFunctionArg) assign.getIndex();
+                InstanceMethodInvoke ordinal = (InstanceMethodInvoke) assign.getIndex();
                 StaticFieldArg callee = (StaticFieldArg) ordinal.getCallee();
                 table.put(jump_index, callee.getFieldName());
             }
@@ -1051,19 +994,19 @@ public class SourceEmitter implements ClassEmitter {
         return table;
     }
 
-    protected void emitTableSwitch(TableSwitch tswitch) {
+    protected void emitTableSwitch(Switch tswitch) {
         Map<Integer, String> table = null;
         printString("switch (");
         boolean synthetic = false;
         if (tswitch.getSwitchVar() instanceof ArrayLoadArg) {
             ArrayLoadArg var = (ArrayLoadArg) tswitch.getSwitchVar();
-            if (var.getArrayVar() instanceof StaticFunctionArg) {
-                StaticFunctionArg arg = (StaticFunctionArg) var.getArrayVar();
+            if (var.getArrayVar() instanceof StaticMethodInvoke) {
+                StaticMethodInvoke arg = (StaticMethodInvoke) var.getArrayVar();
                 if (arg.getMethodName().contains("$SWITCH_TABLE$") && this.this$ != null) {
                     MethodEntry mth = this.this$.getStaticMethod(arg.getMethodName(), arg.getMethodDescription());
                     table = buildSwitchTable(mth);
                     String enum_type = arg.getMethodName().substring("$SWITCH_TABLE$".length()).replace('$', '/');
-                    emitArg(((InstanceFunctionArg) var.getIndex()).getCallee(), "L" + enum_type + ";");
+                    emitArg(((InstanceMethodInvoke) var.getIndex()).getCallee(), "L" + enum_type + ";");
                     synthetic = true;
                 }
             }
@@ -1109,11 +1052,7 @@ public class SourceEmitter implements ClassEmitter {
         printString("}");
     }
 
-    protected void emitReturn(ReturnVoid insn) {
-        printString("return");
-    }
-
-    protected void emitArrayAssign(ArrayAssign insn) {
+    protected void emitArrayAssign(ArrayAssignment insn) {
         // TODO need equality methods for all ast elements to do this
         // optimization
 //        InsnArg val = insn.getValue();
@@ -1153,21 +1092,24 @@ public class SourceEmitter implements ClassEmitter {
         emitArg(insn.getValue(), null);
     }
 
-    protected void emitValueReturn(ReturnValue insn) {
-        printString("return ");
-        String type = null;
-        if (this.this$method != null) {
-            type = TypeHelper.getRet(this.this$method.getSignature());
+    protected void emitValueReturn(Return insn) {
+        printString("return");
+        if (insn.getValue().isPresent()) {
+            String type = null;
+            if (this.this$method != null) {
+                type = TypeHelper.getRet(this.this$method.getSignature());
+            }
+            printString(" ");
+            emitArg(insn.getValue().get(), type);
         }
-        emitArg(insn.getValue(), type);
     }
 
-    protected void emitThrow(ThrowException insn) {
+    protected void emitThrow(Throw insn) {
         printString("throw ");
         emitArg(insn.getException(), null);
     }
 
-    protected void emitTryBlock(TryBlock try_block) {
+    protected void emitTryBlock(TryCatch try_block) {
         printString("try {\n");
         this.indentation++;
         emitBody(try_block.getTryBlock());
@@ -1206,16 +1148,16 @@ public class SourceEmitter implements ClassEmitter {
             printString("\"");
         } else if (arg instanceof FieldArg) {
             emitFieldArg((FieldArg) arg);
-        } else if (arg instanceof InstanceFunctionArg) {
-            emitInstanceFunctionArg((InstanceFunctionArg) arg);
+        } else if (arg instanceof InstanceMethodInvoke) {
+            emitInstanceMethodInvoke((InstanceMethodInvoke) arg);
         } else if (arg instanceof LocalArg) {
             emitLocalArg((LocalArg) arg);
-        } else if (arg instanceof NewRefArg) {
-            emitNewRefArg((NewRefArg) arg);
-        } else if (arg instanceof StaticFunctionArg) {
-            emitStaticFunctionArg((StaticFunctionArg) arg);
-        } else if (arg instanceof OperatorArg) {
-            emitOperator((OperatorArg) arg);
+        } else if (arg instanceof New) {
+            emitNew((New) arg);
+        } else if (arg instanceof StaticMethodInvoke) {
+            emitStaticMethodInvoke((StaticMethodInvoke) arg);
+        } else if (arg instanceof OperatorInstruction) {
+            emitOperator((OperatorInstruction) arg);
         } else if (arg instanceof CastArg) {
             emitCastArg((CastArg) arg);
         } else if (arg instanceof NegArg) {
@@ -1326,7 +1268,7 @@ public class SourceEmitter implements ClassEmitter {
         }
     }
 
-    protected void emitInstanceFunctionArg(InstanceFunctionArg arg) {
+    protected void emitInstanceMethodInvoke(InstanceMethodInvoke arg) {
         if (arg.getOwner().equals("Ljava/lang/StringBuilder;") && arg.getMethodName().equals("toString")) {
             // We detect and collapse string builder chains used to perform
             // string concatentation into simple "foo" + "bar" form
@@ -1337,20 +1279,20 @@ public class SourceEmitter implements ClassEmitter {
             // replay them in the reverse of the ordering that we will encounter
             // them in
             while (callee != null) {
-                if (callee instanceof InstanceFunctionArg) {
-                    InstanceFunctionArg call = (InstanceFunctionArg) callee;
+                if (callee instanceof InstanceMethodInvoke) {
+                    InstanceMethodInvoke call = (InstanceMethodInvoke) callee;
                     if (call.getParams().length == 1) {
                         constants.add(0, call.getParams()[0]);
                         callee = call.getCallee();
                         continue;
                     }
-                } else if (callee instanceof NewRefArg) {
-                    NewRefArg ref = (NewRefArg) callee;
+                } else if (callee instanceof New) {
+                    New ref = (New) callee;
                     if ("Ljava/lang/StringBuilder;".equals(ref.getType())) {
                         if (ref.getParameters().length == 1) {
                             Instruction initial = ref.getParameters()[0];
-                            if (initial instanceof StaticFunctionArg) {
-                                StaticFunctionArg valueof = (StaticFunctionArg) initial;
+                            if (initial instanceof StaticMethodInvoke) {
+                                StaticMethodInvoke valueof = (StaticMethodInvoke) initial;
                                 if (valueof.getMethodName().equals("valueOf") && valueof.getOwner().equals("Ljava/lang/String;")) {
                                     Instruction internal = valueof.getParams()[0];
                                     if (internal instanceof StringConstantArg) {
@@ -1401,7 +1343,7 @@ public class SourceEmitter implements ClassEmitter {
         printString(arg.getLocal().getName());
     }
 
-    protected void emitNewRefArg(NewRefArg arg) {
+    protected void emitNew(New arg) {
         printString("new ");
         emitType(arg.getType());
         printString("(");
@@ -1416,7 +1358,7 @@ public class SourceEmitter implements ClassEmitter {
         printString(")");
     }
 
-    protected void emitStaticFunctionArg(StaticFunctionArg arg) {
+    protected void emitStaticMethodInvoke(StaticMethodInvoke arg) {
         String owner = TypeHelper.descToType(arg.getOwner());
         if (arg.getMethodName().startsWith("access$") && this.this$ != null) {
             // synthetic accessor
@@ -1426,21 +1368,21 @@ public class SourceEmitter implements ClassEmitter {
                 MethodEntry accessor = owner_type.getStaticMethod(arg.getMethodName());
                 if (accessor.getReturnType().equals("V")) {
                     // setter
-                    FieldAssign assign = (FieldAssign) accessor.getInstructions().getStatements().get(0);
-                    FieldAssign replacement = null;
+                    FieldAssignment assign = (FieldAssignment) accessor.getInstructions().getStatements().get(0);
+                    FieldAssignment replacement = null;
                     if (arg.getParams().length == 2) {
-                        replacement = new InstanceFieldAssign(assign.getFieldName(), assign.getFieldDescription(), assign.getOwnerType(),
+                        replacement = new InstanceFieldAssignment(assign.getFieldName(), assign.getFieldDescription(), assign.getOwnerType(),
                                 arg.getParams()[0], arg.getParams()[1]);
                     } else {
-                        replacement = new StaticFieldAssign(assign.getFieldName(), assign.getFieldDescription(), assign.getOwnerType(),
+                        replacement = new StaticFieldAssignment(assign.getFieldName(), assign.getFieldDescription(), assign.getOwnerType(),
                                 arg.getParams()[0]);
                     }
                     emitFieldAssign(replacement);
                     return;
                 }
                 // getter
-                ReturnValue ret = (ReturnValue) accessor.getInstructions().getStatements().get(0);
-                FieldArg getter = (FieldArg) ret.getValue();
+                Return ret = (Return) accessor.getInstructions().getStatements().get(0);
+                FieldArg getter = (FieldArg) ret.getValue().get();
                 FieldArg replacement = null;
                 if (arg.getParams().length == 1) {
                     replacement = new InstanceFieldArg(getter.getFieldName(), getter.getTypeDescriptor(), getter.getOwner(), arg.getParams()[0]);
@@ -1466,7 +1408,7 @@ public class SourceEmitter implements ClassEmitter {
         printString(")");
     }
 
-    protected void emitOperator(OperatorArg arg) {
+    protected void emitOperator(OperatorInstruction arg) {
         emitArg(arg.getLeftOperand(), null);
         printString(" " + arg.getOperator() + " ");
         emitArg(arg.getRightOperand(), null);
@@ -1482,7 +1424,7 @@ public class SourceEmitter implements ClassEmitter {
 
     protected void emitNegArg(NegArg arg) {
         printString("-");
-        if (arg.getOperand() instanceof OperatorArg) {
+        if (arg.getOperand() instanceof OperatorInstruction) {
             printString("(");
             emitArg(arg.getOperand(), null);
             printString(")");
@@ -1546,7 +1488,7 @@ public class SourceEmitter implements ClassEmitter {
             } else if (cond instanceof CompareCondition) {
                 CompareCondition compare = (CompareCondition) cond;
                 emitArg(compare.getLeft(), null);
-                printString(compare.getOp().inverse().asString());
+                printString(compare.getOperator().inverse().asString());
                 emitArg(compare.getRight(), null);
                 return;
             }
@@ -1557,7 +1499,7 @@ public class SourceEmitter implements ClassEmitter {
         } else if (condition instanceof CompareCondition) {
             CompareCondition compare = (CompareCondition) condition;
             emitArg(compare.getLeft(), null);
-            printString(compare.getOp().asString());
+            printString(compare.getOperator().asString());
             emitArg(compare.getRight(), null);
         } else if (condition instanceof AndCondition) {
             AndCondition and = (AndCondition) condition;

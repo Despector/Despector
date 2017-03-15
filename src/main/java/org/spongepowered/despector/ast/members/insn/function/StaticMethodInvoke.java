@@ -22,29 +22,37 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.despector.ast.members.insn.arg.operator;
+package org.spongepowered.despector.ast.members.insn.function;
 
 import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
 import org.spongepowered.despector.ast.members.insn.arg.Instruction;
+import org.spongepowered.despector.util.TypeHelper;
 
 /**
- * The integer remainder operator.
+ * A statement calling a static method.
  */
-public class RemainderArg extends OperatorArg {
+public class StaticMethodInvoke extends MethodInvoke {
 
-    public RemainderArg(Instruction left, Instruction right) {
-        super(left, right);
-    }
-
-    @Override
-    public String getOperator() {
-        return "%";
+    public StaticMethodInvoke(String name, String desc, String owner, Instruction[] args) {
+        super(name, desc, owner, args);
     }
 
     @Override
     public void accept(InstructionVisitor visitor) {
-        visitor.visitRemainderOperatorArg(this);
+        visitor.visitStaticMethodCall(this);
         super.accept(visitor);
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder params = new StringBuilder();
+        for (int i = 0; i < this.params.length; i++) {
+            params.append(this.params[i]);
+            if (i < this.params.length - 1) {
+                params.append(", ");
+            }
+        }
+        return TypeHelper.descToType(this.method_owner) + "." + this.method_name + "(" + params + ");";
     }
 
 }

@@ -34,19 +34,29 @@ import org.spongepowered.despector.ast.members.insn.branch.condition.Condition;
 import javax.annotation.Nullable;
 
 /**
- * An if block.
+ * A for loop.
  */
-public class IfBlock implements Statement {
+public class For implements Statement {
 
-    // TODO better elif support
-
+    private Statement init;
     private Condition condition;
-    private StatementBlock block;
-    private ElseBlock else_block;
+    private Statement incr;
+    private StatementBlock body;
 
-    public IfBlock(Condition condition, StatementBlock insn) {
+    public For(@Nullable Statement init, Condition condition, @Nullable Statement incr, StatementBlock body) {
+        this.init = init;
         this.condition = checkNotNull(condition, "condition");
-        this.block = checkNotNull(insn, "block");
+        this.incr = incr;
+        this.body = checkNotNull(body, "body");
+    }
+
+    @Nullable
+    public Statement getInit() {
+        return this.init;
+    }
+
+    public void setInit(@Nullable Statement init) {
+        this.init = init;
     }
 
     public Condition getCondition() {
@@ -57,47 +67,52 @@ public class IfBlock implements Statement {
         this.condition = checkNotNull(condition, "condition");
     }
 
-    public StatementBlock getIfBody() {
-        return this.block;
+    @Nullable
+    public Statement getIncr() {
+        return this.incr;
+    }
+
+    public void setIncr(@Nullable Statement incr) {
+        this.incr = incr;
+    }
+
+    public StatementBlock getBody() {
+        return this.body;
     }
 
     public void setBody(StatementBlock block) {
-        this.block = checkNotNull(block, "block");
-    }
-
-    @Nullable
-    public ElseBlock getElseBlock() {
-        return this.else_block;
-    }
-
-    public void setElseBlock(@Nullable ElseBlock else_block) {
-        this.else_block = else_block;
+        this.body = checkNotNull(block, "block");
     }
 
     @Override
     public void accept(InstructionVisitor visitor) {
-        visitor.visitIfBlock(this);
+        visitor.visitForLoop(this);
+        this.init.accept(visitor);
         this.condition.accept(visitor);
-        for (Statement stmt : this.block.getStatements()) {
+        this.incr.accept(visitor);
+        for (Statement stmt : this.body.getStatements()) {
             stmt.accept(visitor);
-        }
-        if (this.else_block != null) {
-            this.else_block.accept(visitor);
         }
     }
 
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append("if (");
-        sb.append(this.condition).append(") {\n");
-        for (Statement insn : this.block.getStatements()) {
+        sb.append("for (");
+        if (this.init != null) {
+            sb.append(this.init);
+        }
+        sb.append(";");
+        sb.append(this.condition);
+        sb.append(";");
+        if (this.incr != null) {
+            sb.append(this.incr);
+        }
+        sb.append(") {\n");
+        for (Statement insn : this.body.getStatements()) {
             sb.append("    ").append(insn).append("\n");
         }
         sb.append("}");
-        if (this.else_block != null) {
-            sb.append(" ").append(this.else_block);
-        }
         return sb.toString();
     }
 

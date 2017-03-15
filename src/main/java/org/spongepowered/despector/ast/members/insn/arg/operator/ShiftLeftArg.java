@@ -30,7 +30,7 @@ import org.spongepowered.despector.ast.members.insn.arg.Instruction;
 /**
  * The left bitshift operator.
  */
-public class ShiftLeftArg extends OperatorArg {
+public class ShiftLeftArg extends OperatorInstruction {
 
     public ShiftLeftArg(Instruction left, Instruction right) {
         super(left, right);

@@ -40,10 +40,16 @@ public abstract class Assignment implements Statement {
         this.val = checkNotNull(val, "val");
     }
 
+    /**
+     * Gets the value being assigned.
+     */
     public Instruction getValue() {
         return this.val;
     }
 
+    /**
+     * Sets the value being assigned.
+     */
     public void setValue(Instruction insn) {
         this.val = checkNotNull(insn, "insn");
     }

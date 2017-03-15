@@ -27,21 +27,20 @@ package org.spongepowered.despector.ast.members.insn.function;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
-import org.spongepowered.despector.ast.members.insn.Statement;
 import org.spongepowered.despector.ast.members.insn.arg.Instruction;
 import org.spongepowered.despector.util.TypeHelper;
 
 /**
  * An abstract statement for making method invocations.
  */
-public abstract class MethodCall implements Statement {
+public abstract class MethodInvoke implements Instruction {
 
     protected String method_name;
     protected String method_desc;
     protected String method_owner;
     protected Instruction[] params;
 
-    public MethodCall(String name, String desc, String owner, Instruction[] args) {
+    public MethodInvoke(String name, String desc, String owner, Instruction[] args) {
         this.method_name = checkNotNull(name, "name");
         this.method_desc = checkNotNull(desc, "desc");
         this.method_owner = checkNotNull(owner, "owner");
@@ -82,6 +81,11 @@ public abstract class MethodCall implements Statement {
 
     public void setParameters(Instruction... args) {
         this.params = checkNotNull(args, "args");
+    }
+
+    @Override
+    public String inferType() {
+        return getReturnType();
     }
 
     @Override

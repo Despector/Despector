@@ -24,7 +24,6 @@
  */
 package org.spongepowered.test.ast;
 
-import static org.mockito.Mockito.mock;
 import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
@@ -132,7 +131,7 @@ public class ConditionSimplificationTest {
 
         @Override
         public String toString() {
-            return c + "";
+            return this.c + "";
         }
 
     }

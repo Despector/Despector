@@ -30,7 +30,7 @@ import org.spongepowered.despector.ast.members.insn.arg.Instruction;
 /**
  * The subtraction operator.
  */
-public class SubtractArg extends OperatorArg {
+public class SubtractArg extends OperatorInstruction {
 
     public SubtractArg(Instruction left, Instruction right) {
         super(left, right);

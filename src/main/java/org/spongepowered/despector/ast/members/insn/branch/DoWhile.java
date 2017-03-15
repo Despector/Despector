@@ -29,31 +29,54 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
 import org.spongepowered.despector.ast.members.insn.Statement;
 import org.spongepowered.despector.ast.members.insn.StatementBlock;
+import org.spongepowered.despector.ast.members.insn.branch.condition.Condition;
 
 /**
- * An else block which may be attached to an {@link IfBlock}.
- * 
- * @see IfBlock
+ * A do-while loop.
  */
-public class ElseBlock {
+public class DoWhile implements Statement {
 
-    private StatementBlock block;
+    private Condition condition;
+    private StatementBlock body;
 
-    public ElseBlock(StatementBlock block) {
-        this.block = checkNotNull(block, "block");
+    public DoWhile(Condition condition, StatementBlock body) {
+        this.condition = checkNotNull(condition, "condition");
+        this.body = checkNotNull(body, "body");
     }
 
-    public StatementBlock getElseBody() {
-        return this.block;
+    /**
+     * Gets the loop condition.
+     */
+    public Condition getCondition() {
+        return this.condition;
     }
 
-    public void setElseBody(StatementBlock block) {
-        this.block = checkNotNull(block, "block");
+    /**
+     * Sets the loop condition.
+     */
+    public void setCondition(Condition condition) {
+        this.condition = checkNotNull(condition, "condition");
     }
 
+    /**
+     * Gets the loop body.
+     */
+    public StatementBlock getBody() {
+        return this.body;
+    }
+
+    /**
+     * Sets the loop body.
+     */
+    public void setBody(StatementBlock block) {
+        this.body = checkNotNull(block, "block");
+    }
+
+    @Override
     public void accept(InstructionVisitor visitor) {
-        visitor.visitElseBlock(this);
-        for (Statement stmt : this.block.getStatements()) {
+        visitor.visitDoWhileLoop(this);
+        this.condition.accept(visitor);
+        for (Statement stmt : this.body.getStatements()) {
             stmt.accept(visitor);
         }
     }
@@ -61,11 +84,13 @@ public class ElseBlock {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append("else {\n");
-        for (Statement insn : this.block.getStatements()) {
+        sb.append("do {\n");
+        for (Statement insn : this.body.getStatements()) {
             sb.append("    ").append(insn).append("\n");
         }
-        sb.append("}");
+        sb.append("} while (");
+        sb.append(this.condition);
+        sb.append(");");
         return sb.toString();
     }
 

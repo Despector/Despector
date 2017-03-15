@@ -30,7 +30,7 @@ import org.spongepowered.despector.ast.members.insn.arg.Instruction;
 /**
  * The division operator.
  */
-public class DivideArg extends OperatorArg {
+public class DivideArg extends OperatorInstruction {
 
     public DivideArg(Instruction left, Instruction right) {
         super(left, right);

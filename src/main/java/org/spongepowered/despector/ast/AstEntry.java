@@ -35,6 +35,9 @@ public abstract class AstEntry {
         this.source = source;
     }
 
+    /**
+     * Gets the source set that this ast entry belongs to.
+     */
     public SourceSet getSource() {
         return this.source;
     }

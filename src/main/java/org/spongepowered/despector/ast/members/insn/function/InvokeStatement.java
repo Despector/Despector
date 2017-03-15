@@ -1,5 +1,5 @@
 /*
- * The MIT License (MIT)
+ * This file is part of SpongeAPI, licensed under the MIT License (MIT).
  *
  * Copyright (c) SpongePowered <https://www.spongepowered.org>
  * Copyright (c) contributors
@@ -22,30 +22,40 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.despector.ast.members.insn.arg.operator.bitwise;
+package org.spongepowered.despector.ast.members.insn.function;
+
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
+import org.spongepowered.despector.ast.members.insn.Statement;
 import org.spongepowered.despector.ast.members.insn.arg.Instruction;
-import org.spongepowered.despector.ast.members.insn.arg.operator.OperatorArg;
 
-/**
- * The bitwise and operator.
- */
-public class AndArg extends OperatorArg {
+public class InvokeStatement implements Statement {
 
-    public AndArg(Instruction left, Instruction right) {
-        super(left, right);
+    private Instruction inner;
+
+    public InvokeStatement(Instruction inner) {
+        checkArgument(inner instanceof MethodInvoke || inner instanceof New);
+        this.inner = checkNotNull(inner, "instruction");
     }
 
-    @Override
-    public String getOperator() {
-        return "&";
+    public Instruction getInstruction() {
+        return this.inner;
+    }
+
+    public void setInstruction(Instruction insn) {
+        this.inner = checkNotNull(insn, "instruction");
     }
 
     @Override
     public void accept(InstructionVisitor visitor) {
-        visitor.visitAndOperatorArg(this);
-        super.accept(visitor);
+        this.inner.accept(visitor);
+    }
+
+    @Override
+    public String toString() {
+        return this.inner.toString();
     }
 
 }

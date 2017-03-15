@@ -30,6 +30,9 @@ import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
 
 import java.util.List;
 
+/**
+ * The global configuration.
+ */
 public class ConfigBase {
 
     @Setting(comment = "Emitter configuration")
@@ -42,6 +45,9 @@ public class ConfigBase {
     @Setting(value = "print-opcodes-on-error", comment = "Prints out opcodes of a method when it fails to decompile.")
     public boolean print_opcodes_on_error = Boolean.valueOf(System.getProperty("despector.debug.printerrors", "false"));
 
+    /**
+     * Configuration for the emitter settings.
+     */
     @ConfigSerializable
     public static class EmitterConfig {
 
@@ -54,6 +60,9 @@ public class ConfigBase {
 
     }
 
+    /**
+     * Configuration for the cleanup operations.
+     */
     @ConfigSerializable
     public static class CleanupConfig {
 

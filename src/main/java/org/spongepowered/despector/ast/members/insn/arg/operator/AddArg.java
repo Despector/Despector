@@ -30,8 +30,11 @@ import org.spongepowered.despector.ast.members.insn.arg.Instruction;
 /**
  * The addition operator.
  */
-public class AddArg extends OperatorArg {
+public class AddArg extends OperatorInstruction {
 
+    /**
+     * Creates an instruction for {@code left + right}.
+     */
     public AddArg(Instruction left, Instruction right) {
         super(left, right);
     }

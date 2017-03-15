@@ -26,36 +26,67 @@ package org.spongepowered.despector.ast.members.insn.assign;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import org.spongepowered.despector.ast.io.insn.Locals.LocalInstance;
 import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
 import org.spongepowered.despector.ast.members.insn.arg.Instruction;
 
-public class LocalAssign extends Assignment {
+/**
+ * An array assignment statement.
+ * 
+ * <p>Example: {@code var[i] = val;}</p>
+ */
+public class ArrayAssignment extends Assignment {
 
-    private LocalInstance local;
+    private Instruction array;
+    private Instruction index;
 
-    public LocalAssign(LocalInstance local, Instruction val) {
+    public ArrayAssignment(Instruction array, Instruction index, Instruction val) {
         super(val);
-        this.local = checkNotNull(local, "local");
+        this.index = checkNotNull(index, "index");
+        this.array = checkNotNull(array, "array");
+        // TODO check infer types are correct
     }
 
-    public LocalInstance getLocal() {
-        return this.local;
+    /**
+     * Gets the instruction providing the array object.
+     */
+    public Instruction getArray() {
+        return this.array;
     }
 
-    public void setLocal(LocalInstance local) {
-        this.local = checkNotNull(local, "local");
+    /**
+     * Sets the instruction providing the array object.
+     */
+    public void setArray(Instruction array) {
+        this.array = checkNotNull(array, "array");
+        // TODO check infer type is array
+    }
+
+    /**
+     * Gets the instruction providing the array index.
+     */
+    public Instruction getIndex() {
+        return this.index;
+    }
+
+    /**
+     * Sets the instruction providing the array index.
+     */
+    public void setIndex(Instruction index) {
+        this.index = checkNotNull(index, "index");
+        // TODO check infer type is int
     }
 
     @Override
     public void accept(InstructionVisitor visitor) {
-        visitor.visitLocalAssign(this);
+        visitor.visitArrayAssign(this);
+        this.array.accept(visitor);
+        this.index.accept(visitor);
         this.val.accept(visitor);
     }
 
     @Override
     public String toString() {
-        return this.local + " = " + this.val + ";";
+        return this.array + "[" + this.index + "] = " + this.val + ";";
     }
 
 }

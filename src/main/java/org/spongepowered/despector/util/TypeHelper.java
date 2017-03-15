@@ -294,7 +294,7 @@ public final class TypeHelper {
                     }
                 }
             }
-            String type_params = signature.substring(1, i);
+            //String type_params = signature.substring(1, i);
             // TODO
         }
         return Collections.emptyList();

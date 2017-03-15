@@ -37,9 +37,6 @@ public class BranchTest {
         if (a) {
             System.out.println(a);
         }
-        if (b) {
-            System.out.println(a);
-        }
     }
 
     @Test

@@ -22,27 +22,30 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.despector.ast.members.insn.misc;
+package org.spongepowered.despector.ast.members.insn.arg.operator.bitwise;
 
 import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
-import org.spongepowered.despector.ast.members.insn.Statement;
+import org.spongepowered.despector.ast.members.insn.arg.Instruction;
+import org.spongepowered.despector.ast.members.insn.arg.operator.OperatorInstruction;
 
 /**
- * A void return statement.
+ * The bitwise and operator.
  */
-public class ReturnVoid implements Statement {
+public class AndInstruction extends OperatorInstruction {
 
-    public ReturnVoid() {
+    public AndInstruction(Instruction left, Instruction right) {
+        super(left, right);
+    }
+
+    @Override
+    public String getOperator() {
+        return "&";
     }
 
     @Override
     public void accept(InstructionVisitor visitor) {
-        visitor.visitReturn(this);
-    }
-
-    @Override
-    public String toString() {
-        return "return;";
+        visitor.visitAndOperatorArg(this);
+        super.accept(visitor);
     }
 
 }

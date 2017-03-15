@@ -28,6 +28,11 @@ import static org.objectweb.asm.Opcodes.ACC_PRIVATE;
 import static org.objectweb.asm.Opcodes.ACC_PROTECTED;
 import static org.objectweb.asm.Opcodes.ACC_PUBLIC;
 
+import org.objectweb.asm.Opcodes;
+
+/**
+ * Represents the access modifier of a class member.
+ */
 public enum AccessModifier {
 
     PUBLIC("public"),
@@ -41,10 +46,19 @@ public enum AccessModifier {
         this.ident = ident;
     }
 
-    public String identifier() {
+    /**
+     * Gets the string representation of this access modifier.
+     */
+    public String asString() {
         return this.ident;
     }
 
+    /**
+     * Gets the access modifier from the given flags. See
+     * {@link Opcodes#ACC_PUBLIC}, {@link Opcodes#ACC_PROTECTED},
+     * {@link Opcodes#ACC_PRIVATE}. A flag with none of these set will be marked
+     * as {@link #PACKAGE_PRIVATE}.
+     */
     public static AccessModifier fromModifiers(int access) {
         if ((access & ACC_PUBLIC) != 0) {
             return PUBLIC;

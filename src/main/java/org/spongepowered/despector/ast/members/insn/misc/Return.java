@@ -22,47 +22,48 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.despector.ast.members.insn.branch;
+package org.spongepowered.despector.ast.members.insn.misc;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.collect.Lists;
 import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
 import org.spongepowered.despector.ast.members.insn.Statement;
-import org.spongepowered.despector.ast.members.insn.StatementBlock;
+import org.spongepowered.despector.ast.members.insn.arg.Instruction;
 
-import java.util.List;
+import java.util.Optional;
 
-public class TryBlock implements Statement {
+/**
+ * A return statement which returns a value.
+ */
+public class Return implements Statement {
 
-    private StatementBlock block;
-    private final List<CatchBlock> catch_blocks = Lists.newArrayList();
+    private Instruction value;
 
-    public TryBlock(StatementBlock block) {
-        this.block = checkNotNull(block, "block");
+    public Return() {
+        this.value = null;
     }
 
-    public StatementBlock getTryBlock() {
-        return this.block;
+    public Return(Instruction val) {
+        this.value = checkNotNull(val, "value");
     }
 
-    public void setBlock(StatementBlock block) {
-        this.block = checkNotNull(block, "block");
+    public Optional<Instruction> getValue() {
+        return Optional.ofNullable(this.value);
     }
 
-    public List<CatchBlock> getCatchBlocks() {
-        return this.catch_blocks;
+    public void setValue(Instruction insn) {
+        this.value = insn;
     }
 
     @Override
     public void accept(InstructionVisitor visitor) {
-        visitor.visitTryBlock(this);
-        for (Statement stmt : this.block.getStatements()) {
-            stmt.accept(visitor);
-        }
-        for (CatchBlock catch_block : this.catch_blocks) {
-            catch_block.accept(visitor);
-        }
+        visitor.visitValueReturn(this);
+        this.value.accept(visitor);
+    }
+
+    @Override
+    public String toString() {
+        return "return " + this.value + ";";
     }
 
 }

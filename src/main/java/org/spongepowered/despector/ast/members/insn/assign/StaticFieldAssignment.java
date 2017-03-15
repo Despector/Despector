@@ -27,9 +27,9 @@ package org.spongepowered.despector.ast.members.insn.assign;
 import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
 import org.spongepowered.despector.ast.members.insn.arg.Instruction;
 
-public class StaticFieldAssign extends FieldAssign {
+public class StaticFieldAssignment extends FieldAssignment {
 
-    public StaticFieldAssign(String field, String type_desc, String owner, Instruction val) {
+    public StaticFieldAssignment(String field, String type_desc, String owner, Instruction val) {
         super(field, type_desc, owner, val);
     }
 

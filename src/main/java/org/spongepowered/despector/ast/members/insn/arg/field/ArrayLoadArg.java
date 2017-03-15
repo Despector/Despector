@@ -41,22 +41,37 @@ public class ArrayLoadArg implements Instruction {
     public ArrayLoadArg(Instruction array, Instruction index) {
         this.array = checkNotNull(array, "array");
         this.index = checkNotNull(index, "index");
+        // TODO check infer types are correct
     }
 
+    /**
+     * Gets the instruction providing the array object.
+     */
     public Instruction getArrayVar() {
         return this.array;
     }
 
+    /**
+     * Sets the instruction providing the array object.
+     */
     public void setArrayVar(Instruction array) {
         this.array = checkNotNull(array, "array");
+        // TODO check infer types are correct
     }
 
+    /**
+     * Gets the instruction providing the array index.
+     */
     public Instruction getIndex() {
         return this.index;
     }
 
+    /**
+     * Sets the instruction providing the array index.
+     */
     public void setIndex(Instruction index) {
         this.index = checkNotNull(index, "index");
+        // TODO check infer types are correct
     }
 
     @Override

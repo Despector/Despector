@@ -30,7 +30,7 @@ import org.spongepowered.despector.ast.members.insn.arg.Instruction;
 /**
  * The multiplication operator.
  */
-public class MultiplyArg extends OperatorArg {
+public class MultiplyArg extends OperatorInstruction {
 
     public MultiplyArg(Instruction left, Instruction right) {
         super(left, right);
