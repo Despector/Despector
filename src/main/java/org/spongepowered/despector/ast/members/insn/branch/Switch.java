@@ -37,7 +37,7 @@ import java.util.List;
 public class Switch implements Statement {
 
     private Instruction variable;
-    private final List<Case> cases = Lists.newArrayList();
+    final List<Case> cases = Lists.newArrayList();
 
     public Switch(Instruction var) {
         this.variable = checkNotNull(var, "var");
@@ -55,10 +55,6 @@ public class Switch implements Statement {
         return this.cases;
     }
 
-    public void addCase(Case cs) {
-        this.cases.add(cs);
-    }
-
     @Override
     public void accept(InstructionVisitor visitor) {
         visitor.visitSwitch(this);
@@ -68,7 +64,7 @@ public class Switch implements Statement {
         }
     }
 
-    public static class Case {
+    public class Case {
 
         private StatementBlock body;
         private boolean breaks;
@@ -80,6 +76,7 @@ public class Switch implements Statement {
             this.breaks = br;
             this.is_default = def;
             this.indices = indices == null ? Lists.newArrayList() : indices;
+            Switch.this.cases.add(this);
         }
 
         public StatementBlock getBody() {

@@ -174,14 +174,6 @@ public final class AstUtil {
         case FLOAD:
         case DLOAD:
         case ALOAD:
-        case IALOAD:
-        case LALOAD:
-        case FALOAD:
-        case DALOAD:
-        case AALOAD:
-        case BALOAD:
-        case CALOAD:
-        case SALOAD:
         case DUP:
         case DUP_X1:
         case DUP_X2:
@@ -221,6 +213,14 @@ public final class AstUtil {
         case CHECKCAST:
         case INSTANCEOF:
             return 0;
+        case IALOAD:
+        case LALOAD:
+        case FALOAD:
+        case DALOAD:
+        case AALOAD:
+        case BALOAD:
+        case CALOAD:
+        case SALOAD:
         case ISTORE:
         case LSTORE:
         case FSTORE:
@@ -279,6 +279,8 @@ public final class AstUtil {
         case ARETURN:
         case PUTSTATIC:
         case ATHROW:
+        case TABLESWITCH:
+        case LOOKUPSWITCH:
             return -1;
         case POP2:
         case IF_ICMPEQ:
@@ -304,18 +306,18 @@ public final class AstUtil {
         case INVOKEVIRTUAL:
         case INVOKEINTERFACE: {
             MethodInsnNode method = (MethodInsnNode) next;
-            int count = TypeHelper.paramCount(method.desc);
-            count++; // the object ref
+            int count = -TypeHelper.paramCount(method.desc);
+            count--; // the object ref
             if (!TypeHelper.getRet(method.desc).equals("V")) {
-                count--;
+                count++;
             }
             return count;
         }
         case INVOKESTATIC: {
             MethodInsnNode method = (MethodInsnNode) next;
-            int count = TypeHelper.paramCount(method.desc);
+            int count = -TypeHelper.paramCount(method.desc);
             if (!TypeHelper.getRet(method.desc).equals("V")) {
-                count--;
+                count++;
             }
             return count;
         }

@@ -43,6 +43,7 @@ import org.objectweb.asm.tree.LabelNode;
 import org.objectweb.asm.tree.LdcInsnNode;
 import org.objectweb.asm.tree.LineNumberNode;
 import org.objectweb.asm.tree.MethodInsnNode;
+import org.objectweb.asm.tree.TableSwitchInsnNode;
 import org.objectweb.asm.tree.TryCatchBlockNode;
 import org.objectweb.asm.tree.TypeInsnNode;
 import org.objectweb.asm.tree.VarInsnNode;
@@ -87,6 +88,8 @@ import org.spongepowered.despector.ast.members.insn.assign.StaticFieldAssignment
 import org.spongepowered.despector.ast.members.insn.branch.DoWhile;
 import org.spongepowered.despector.ast.members.insn.branch.For;
 import org.spongepowered.despector.ast.members.insn.branch.If;
+import org.spongepowered.despector.ast.members.insn.branch.Switch;
+import org.spongepowered.despector.ast.members.insn.branch.Switch.Case;
 import org.spongepowered.despector.ast.members.insn.branch.While;
 import org.spongepowered.despector.ast.members.insn.branch.condition.AndCondition;
 import org.spongepowered.despector.ast.members.insn.branch.condition.BooleanCondition;
@@ -168,6 +171,7 @@ public class OpcodeDecompiler {
         return block;
     }
 
+    @SuppressWarnings("unchecked")
     private static List<OpcodeBlock> makeGraph(List<AbstractInsnNode> instructions, Map<Label, Integer> label_indices) {
         Set<Integer> break_points = new HashSet<>();
 
@@ -181,6 +185,14 @@ public class OpcodeDecompiler {
                 // after it
                 break_points.add(label_indices.get(((JumpInsnNode) next).label.getLabel()));
                 continue;
+            }
+            if (next instanceof TableSwitchInsnNode) {
+                break_points.add(i);
+                TableSwitchInsnNode ts = (TableSwitchInsnNode) next;
+                for (LabelNode l : (List<LabelNode>) ts.labels) {
+                    break_points.add(label_indices.get(l.getLabel()));
+                }
+                break_points.add(label_indices.get(ts.dflt.getLabel()));
             }
             int op = next.getOpcode();
             if (op <= RETURN && op >= IRETURN) {
@@ -226,10 +238,36 @@ public class OpcodeDecompiler {
                     OpcodeBlock next = blocks.get(sorted_break_points.get(sorted_break_points.indexOf(e.getKey()) + 1));
                     block.else_target = next;
                 }
+            } else if (block.last instanceof TableSwitchInsnNode) {
+                TableSwitchInsnNode ts = (TableSwitchInsnNode) block.last;
+                for (LabelNode l : (List<LabelNode>) ts.labels) {
+                    Label label = l.getLabel();
+                    block.additional_targets.put(label,
+                            blocks.get(sorted_break_points.get(sorted_break_points.indexOf(label_indices.get(label)) + 1)));
+                }
+                Label label = ts.dflt.getLabel();
+                block.additional_targets.put(label, blocks.get(sorted_break_points.get(sorted_break_points.indexOf(label_indices.get(label)) + 1)));
             }
         }
 
         return block_list;
+    }
+
+    private static void remap(List<OpcodeBlock> blocks, OpcodeBlock from, OpcodeBlock to) {
+        for (OpcodeBlock other : blocks) {
+            if (other.target == from) {
+                other.target = to;
+            }
+            if (other.else_target == from) {
+                other.else_target = to;
+            }
+            for (Label key : other.additional_targets.keySet()) {
+                OpcodeBlock t = other.additional_targets.get(key);
+                if (t == from) {
+                    other.additional_targets.put(key, to);
+                }
+            }
+        }
     }
 
     private static void cleanupGraph(List<OpcodeBlock> blocks) {
@@ -255,7 +293,7 @@ public class OpcodeDecompiler {
             }
         }
 
-        // Split the opcodes that form the condition away from the preceeding
+        // Split the opcodes that form the condition away from the preceding
         // statements.
         List<OpcodeBlock> fblocks = new ArrayList<>();
         for (OpcodeBlock block : blocks) {
@@ -270,26 +308,12 @@ public class OpcodeDecompiler {
                 block.opcodes.clear();
                 // Have to ensure that we remap any blocks that were
                 // targeting this block to target the header.
-                for (OpcodeBlock other : blocks) {
-                    if (other.target == block) {
-                        other.target = header;
-                    }
-                    if (other.else_target == block) {
-                        other.else_target = header;
-                    }
-                }
-                for (OpcodeBlock other : fblocks) {
-                    if (other.target == block) {
-                        other.target = header;
-                    }
-                    if (other.else_target == block) {
-                        other.else_target = header;
-                    }
-                }
+                remap(blocks, block, header);
+                remap(fblocks, block, header);
                 header.target = block;
                 fblocks.add(header);
                 fblocks.add(block);
-            } else if (block.isConditional()) {
+            } else if (block.isConditional() || block.isSwitch()) {
                 int cond_start = AstUtil.findStartLastStatement(block.opcodes, block.last);
                 if (cond_start > 0) {
                     OpcodeBlock header = new OpcodeBlock();
@@ -308,22 +332,8 @@ public class OpcodeDecompiler {
                     }
                     // Have to ensure that we remap any blocks that were
                     // targeting this block to target the header.
-                    for (OpcodeBlock other : blocks) {
-                        if (other.target == block) {
-                            other.target = header;
-                        }
-                        if (other.else_target == block) {
-                            other.else_target = header;
-                        }
-                    }
-                    for (OpcodeBlock other : fblocks) {
-                        if (other.target == block) {
-                            other.target = header;
-                        }
-                        if (other.else_target == block) {
-                            other.else_target = header;
-                        }
-                    }
+                    remap(blocks, block, header);
+                    remap(fblocks, block, header);
                     header.target = block;
                     fblocks.add(header);
                     fblocks.add(block);
@@ -355,6 +365,7 @@ public class OpcodeDecompiler {
         }
     }
 
+    @SuppressWarnings("unchecked")
     private static List<BlockSection> flattenGraph(List<OpcodeBlock> blocks, Locals locals) {
         List<BlockSection> final_blocks = new ArrayList<>();
 
@@ -375,6 +386,72 @@ public class OpcodeDecompiler {
 
         for (int i = 0; i < blocks.size(); i++) {
             OpcodeBlock region_start = blocks.get(i);
+            if (region_start.isSwitch()) {
+                if (region_start.last instanceof TableSwitchInsnNode) {
+                    TableSwitchInsnNode ts = (TableSwitchInsnNode) region_start.last;
+                    SwitchBlockSection sswitch = new SwitchBlockSection(region_start);
+                    final_blocks.add(sswitch);
+                    Map<Label, SwitchCaseBlockSection> cases = new HashMap<>();
+                    int index = 0;
+                    OpcodeBlock end = null;
+                    for (LabelNode l : (List<LabelNode>) ts.labels) {
+                        SwitchCaseBlockSection cs = cases.get(l.getLabel());
+                        if (cs != null) {
+                            cs.targets.add(index);
+                            continue;
+                        }
+                        cs = new SwitchCaseBlockSection();
+                        cs.targets.add(index);
+                        sswitch.cases.add(cs);
+                        cases.put(l.getLabel(), cs);
+                        index++;
+                        List<OpcodeBlock> case_region = new ArrayList<>();
+                        OpcodeBlock block = region_start.additional_targets.get(l.getLabel());
+                        case_region.add(block);
+                        int start = blocks.indexOf(block) + 1;
+                        block = blocks.get(start);
+                        while (!region_start.additional_targets.containsValue(block) && block != end) {
+                            case_region.add(block);
+                            start++;
+                            block = blocks.get(start);
+                        }
+
+                        OpcodeBlock last = case_region.get(case_region.size() - 1);
+                        if (last.isGoto()) {
+                            end = last.target;
+                            case_region.remove(last);
+                            cs.breaks = true;
+                        }
+
+                        cs.body.addAll(flattenGraph(case_region, locals));
+                    }
+                    {
+                        SwitchCaseBlockSection cs = cases.get(ts.dflt.getLabel());
+                        if (cs != null) {
+                            cs.isDefault = true;
+                            cs.targets.add(index);
+                            continue;
+                        }
+                        cs = new SwitchCaseBlockSection();
+                        cases.put(ts.dflt.getLabel(), cs);
+                        sswitch.cases.add(cs);
+                        List<OpcodeBlock> case_region = new ArrayList<>();
+                        OpcodeBlock block = region_start.additional_targets.get(ts.dflt.getLabel());
+                        case_region.add(block);
+                        int start = blocks.indexOf(block) + 1;
+                        block = blocks.get(start);
+                        while (!region_start.additional_targets.containsValue(block) && block != end) {
+                            case_region.add(block);
+                            start++;
+                            block = blocks.get(start);
+                        }
+                        cs.isDefault = true;
+                        cs.body.addAll(flattenGraph(case_region, locals));
+                    }
+                    i = blocks.indexOf(end) - 1;
+                }
+                continue;
+            }
             int end = -1;
             boolean targeted_in_future = false;
             if (!region_start.isJump()) {
@@ -955,6 +1032,18 @@ public class OpcodeDecompiler {
             }
             DoWhile dowhile = new DoWhile(dowhileblock.condition, body);
             block.append(dowhile);
+        } else if (block_section instanceof SwitchBlockSection) {
+            SwitchBlockSection ts = (SwitchBlockSection) block_section;
+            appendBlock(ts.switchblock, block, block.getLocals(), stack);
+            Switch sswitch = new Switch(stack.pop());
+            for(SwitchCaseBlockSection cs: ts.cases) {
+                StatementBlock body = new StatementBlock(StatementBlock.Type.SWITCH, block.getLocals());
+                for (BlockSection body_section : cs.body) {
+                    appendBlock(body_section, body);
+                }
+                sswitch.new Case(body, cs.breaks, cs.isDefault, cs.targets);
+            }
+            block.append(sswitch);
         } else {
             throw new IllegalStateException("Unknown block section " + block_section);
         }
@@ -969,7 +1058,7 @@ public class OpcodeDecompiler {
             AbstractInsnNode next;
             if (index < op.opcodes.size()) {
                 next = op.opcodes.get(index);
-            } else if (op.isReturn()) {
+            } else if (op.isReturn() && op.last != null) {
                 next = op.last;
             } else {
                 break;
@@ -1534,11 +1623,14 @@ public class OpcodeDecompiler {
 
     private static class OpcodeBlock {
 
+        // TODO split this up into a few types for jumps, switches, decompiled,
+        // and normal blocks
         public int break_point;
         public final List<AbstractInsnNode> opcodes = new ArrayList<>();
         public AbstractInsnNode last;
         public OpcodeBlock target;
         public OpcodeBlock else_target;
+        public final Map<Label, OpcodeBlock> additional_targets = new HashMap<>();
 
         public Set<OpcodeBlock> targetted_by = new HashSet<>();
         public BlockSection internal = null;
@@ -1561,6 +1653,10 @@ public class OpcodeDecompiler {
 
         public boolean isConditional() {
             return this.else_target != null;
+        }
+
+        public boolean isSwitch() {
+            return this.last != null && (this.last.getOpcode() == TABLESWITCH || this.last.getOpcode() == LOOKUPSWITCH);
         }
 
         public void print() {
@@ -1611,7 +1707,7 @@ public class OpcodeDecompiler {
     private static class IfBlockSection extends BlockSection {
 
         public Condition condition;
-        public List<BlockSection> body = new ArrayList<>();
+        public final List<BlockSection> body = new ArrayList<>();
         public List<BlockSection> else_ = new ArrayList<>();
         public List<ElifBlockSection> elif = new ArrayList<>();
 
@@ -1623,7 +1719,7 @@ public class OpcodeDecompiler {
     private static class ElifBlockSection {
 
         public Condition condition;
-        public List<BlockSection> body = new ArrayList<>();
+        public final List<BlockSection> body = new ArrayList<>();
 
         public ElifBlockSection(Condition cond) {
             this.condition = cond;
@@ -1634,7 +1730,7 @@ public class OpcodeDecompiler {
     private static class WhileBlockSection extends BlockSection {
 
         public Condition condition;
-        public List<BlockSection> body = new ArrayList<>();
+        public final List<BlockSection> body = new ArrayList<>();
 
         public WhileBlockSection(Condition cond) {
             this.condition = cond;
@@ -1644,11 +1740,34 @@ public class OpcodeDecompiler {
     private static class DoWhileBlockSection extends BlockSection {
 
         public Condition condition;
-        public List<BlockSection> body = new ArrayList<>();
+        public final List<BlockSection> body = new ArrayList<>();
 
         public DoWhileBlockSection(Condition cond) {
             this.condition = cond;
         }
+    }
+
+    private static class SwitchBlockSection extends BlockSection {
+
+        public OpcodeBlock switchblock;
+        public final List<SwitchCaseBlockSection> cases = new ArrayList<>();
+
+        public SwitchBlockSection(OpcodeBlock s) {
+            this.switchblock = s;
+        }
+    }
+
+    private static class SwitchCaseBlockSection {
+
+        public final List<BlockSection> body = new ArrayList<>();
+        public final List<Integer> targets = new ArrayList<>();
+        public boolean breaks;
+        public boolean isDefault;
+
+        public SwitchCaseBlockSection() {
+
+        }
+
     }
 
 }

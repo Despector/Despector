@@ -401,16 +401,20 @@ public class BranchTest {
     @Test
     public void testTableSwitch() throws IOException {
         String insn = TestHelper.getAsString(getClass(), "mth_tableswitch");
-        String good = "switch (ie) {\n"
-                + "case ONE:\n"
-                + "    System.out.println(a);\n"
-                + "    break;\n"
-                + "case TWO:\n"
-                + "    System.out.println(c);\n"
-                + "    break;\n"
-                + "default:\n"
-                + "    System.out.println(d);\n"
-                + "}";
+        // this test produces the raw switch because the test helper decompiles
+        // single methods and therefore the emitter lacks the information to
+        // cleanup the switch condition and cases.
+        String good =
+                "switch (org.spongepowered.test.ast.BranchTest.$SWITCH_TABLE$org$spongepowered$test$ast$BranchTest$TestEnum()[ie.ordinal()]) {\n"
+                        + "case 0:\n"
+                        + "    System.out.println(a);\n"
+                        + "    break;\n"
+                        + "case 1:\n"
+                        + "    System.out.println(c);\n"
+                        + "    break;\n"
+                        + "default:\n"
+                        + "    System.out.println(d);\n"
+                        + "}";
         assertEquals(good, insn);
     }
 

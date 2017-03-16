@@ -48,7 +48,7 @@ public class OperatorsTest {
     }
 
     @Test
-    public void testmth_neg() throws IOException {
+    public void testUnaryNegative() throws IOException {
         String mth = TestHelper.getAsString(getClass(), "mth_neg");
         assertEquals("int i = -(a + b);", mth);
     }
