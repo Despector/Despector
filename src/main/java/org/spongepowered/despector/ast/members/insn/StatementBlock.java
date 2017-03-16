@@ -50,7 +50,7 @@ public class StatementBlock {
         FINALLY
     }
 
-    private final Type type;
+    private Type type;
     private final Locals locals;
     private final List<Statement> statements;
 
@@ -68,6 +68,10 @@ public class StatementBlock {
 
     public Type getType() {
         return this.type;
+    }
+
+    public void setType(Type t) {
+        this.type = checkNotNull(t, "type");
     }
 
     public Locals getLocals() {

@@ -53,6 +53,7 @@ public class LocalArg implements Instruction {
 
     @Override
     public void accept(InstructionVisitor visitor) {
+        visitor.visitLocal(this.local);
         visitor.visitLocalArg(this);
     }
 

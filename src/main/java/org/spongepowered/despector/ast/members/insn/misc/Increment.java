@@ -61,6 +61,7 @@ public class Increment implements Statement {
 
     @Override
     public void accept(InstructionVisitor visitor) {
+        visitor.visitLocal(this.local);
         visitor.visitIncrement(this);
     }
 

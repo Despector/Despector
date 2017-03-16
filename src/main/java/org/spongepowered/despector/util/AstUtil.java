@@ -35,6 +35,16 @@ import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.util.Printer;
 import org.objectweb.asm.util.Textifier;
 import org.objectweb.asm.util.TraceMethodVisitor;
+import org.spongepowered.despector.ast.io.insn.Locals.LocalInstance;
+import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
+import org.spongepowered.despector.ast.members.insn.arg.CastArg;
+import org.spongepowered.despector.ast.members.insn.arg.Instruction;
+import org.spongepowered.despector.ast.members.insn.arg.field.LocalArg;
+import org.spongepowered.despector.ast.members.insn.arg.operator.OperatorInstruction;
+import org.spongepowered.despector.ast.members.insn.assign.LocalAssignment;
+import org.spongepowered.despector.ast.members.insn.branch.condition.BooleanCondition;
+import org.spongepowered.despector.ast.members.insn.branch.condition.Condition;
+import org.spongepowered.despector.ast.members.insn.misc.Increment;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -373,6 +383,40 @@ public final class AstUtil {
             return false;
         }
         return true;
+    }
+
+    public static boolean references(Instruction insn, LocalInstance local) {
+        LocalFinder visitor = new LocalFinder(local);
+        insn.accept(visitor);
+        return visitor.isFound();
+    }
+
+    public static boolean references(Condition condition, LocalInstance local) {
+        LocalFinder visitor = new LocalFinder(local);
+        condition.accept(visitor);
+        return visitor.isFound();
+    }
+
+    private static class LocalFinder extends InstructionVisitor {
+
+        private final LocalInstance local;
+        private boolean found = false;
+
+        public LocalFinder(LocalInstance l) {
+            this.local = l;
+        }
+
+        public boolean isFound() {
+            return this.found;
+        }
+
+        @Override
+        public void visitLocal(LocalInstance local) {
+            if (this.local == local) {
+                this.found = true;
+            }
+        }
+
     }
 
     private AstUtil() {
