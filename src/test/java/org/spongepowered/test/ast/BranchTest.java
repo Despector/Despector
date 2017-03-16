@@ -53,25 +53,10 @@ public class BranchTest {
     }
 
     @Test
-    public void testmth_if1() throws IOException {
+    public void testIfWithComparisonAndNullCheck() throws IOException {
         String insn = TestHelper.getAsString(getClass(), "mth_if1");
         String good = "if (i < 3 || o != null) {\n"
                 + "    i++;\n"
-                + "}";
-        assertEquals(good, insn);
-    }
-
-    public void mth_if2(int i, boolean a) {
-        if (a) {
-            i += 5;
-        }
-    }
-
-    @Test
-    public void testmth_if2() throws IOException {
-        String insn = TestHelper.getAsString(getClass(), "mth_if2");
-        String good = "if (a) {\n"
-                + "    i += 5;\n"
                 + "}";
         assertEquals(good, insn);
     }
@@ -83,7 +68,7 @@ public class BranchTest {
     }
 
     @Test
-    public void testmth_if3() throws IOException {
+    public void testIfWithOr() throws IOException {
         String insn = TestHelper.getAsString(getClass(), "mth_if3");
         String good = "if (a || b) {\n"
                 + "    i += 5;\n"
@@ -98,7 +83,7 @@ public class BranchTest {
     }
 
     @Test
-    public void testmth_if4() throws IOException {
+    public void testIfWithAnd() throws IOException {
         String insn = TestHelper.getAsString(getClass(), "mth_if4");
         String good = "if (a && b) {\n"
                 + "    i += 5;\n"
@@ -113,7 +98,7 @@ public class BranchTest {
     }
 
     @Test
-    public void testmth_if5() throws IOException {
+    public void testIfWithMultipleAnd() throws IOException {
         String insn = TestHelper.getAsString(getClass(), "mth_if5");
         String good = "if (a && b && c) {\n"
                 + "    i += 5;\n"
@@ -128,7 +113,7 @@ public class BranchTest {
     }
 
     @Test
-    public void testmth_if6() throws IOException {
+    public void testIfWithMultipleOr() throws IOException {
         String insn = TestHelper.getAsString(getClass(), "mth_if6");
         String good = "if (a || b || c) {\n"
                 + "    i += 5;\n"
@@ -143,7 +128,7 @@ public class BranchTest {
     }
 
     @Test
-    public void testmth_if7() throws IOException {
+    public void testIfWithOrandAnd() throws IOException {
         String insn = TestHelper.getAsString(getClass(), "mth_if7");
         String good = "if (a || b && c) {\n"
                 + "    i += 5;\n"
@@ -158,7 +143,7 @@ public class BranchTest {
     }
 
     @Test
-    public void testmth_if8() throws IOException {
+    public void testIfWithAndandOr() throws IOException {
         String insn = TestHelper.getAsString(getClass(), "mth_if8");
         String good = "if (a && b || c) {\n"
                 + "    i += 5;\n"
@@ -173,7 +158,7 @@ public class BranchTest {
     }
 
     @Test
-    public void testmth_if9() throws IOException {
+    public void testIfWithPoS() throws IOException {
         String insn = TestHelper.getAsString(getClass(), "mth_if9");
         String good = "if ((a || d) && (b || c)) {\n"
                 + "    i += 5;\n"
@@ -188,7 +173,7 @@ public class BranchTest {
     }
 
     @Test
-    public void testmth_if10() throws IOException {
+    public void testIfWithSoP() throws IOException {
         String insn = TestHelper.getAsString(getClass(), "mth_if10");
         String good = "if (a && d || b && c) {\n"
                 + "    i += 5;\n"
@@ -203,7 +188,7 @@ public class BranchTest {
     }
 
     @Test
-    public void testmth_if11() throws IOException {
+    public void testIfWithCommonFactor() throws IOException {
         String insn = TestHelper.getAsString(getClass(), "mth_if11");
         String good = "if ((a || e) && d || b && c) {\n"
                 + "    i += 5;\n"
@@ -218,10 +203,29 @@ public class BranchTest {
     }
 
     @Test
-    public void testmth_if12() throws IOException {
+    public void testIfThatsKindOfFucked() throws IOException {
         String insn = TestHelper.getAsString(getClass(), "mth_if12");
         String good = "if (a && (c || e) || b || d && f) {\n"
                 + "    i += 5;\n"
+                + "}";
+        assertEquals(good, insn);
+    }
+
+    public void mth_ifelse(int i, boolean a, boolean b, boolean c, boolean d, boolean e, boolean f) {
+        if (a) {
+            System.out.println(c);
+        } else {
+            System.out.println(d);
+        }
+    }
+
+    @Test
+    public void testIfWithElse() throws IOException {
+        String insn = TestHelper.getAsString(getClass(), "mth_ifelse");
+        String good = "if (a) {\n"
+                + "    System.out.println(c);\n"
+                + "} else {\n"
+                + "    System.out.println(d);\n"
                 + "}";
         assertEquals(good, insn);
     }
@@ -240,7 +244,7 @@ public class BranchTest {
     }
 
     @Test
-    public void testmth_if13() throws IOException {
+    public void testIfWithNestingAndElse() throws IOException {
         String insn = TestHelper.getAsString(getClass(), "mth_if13");
         String good = "if (a && (c || e)) {\n"
                 + "    if (b || d && f) {\n"
@@ -256,26 +260,22 @@ public class BranchTest {
     }
 
     public void mth_if15(int i, boolean a, boolean b, boolean c, boolean d, boolean e, boolean f) {
-        if (a && b) {
+        if (a) {
             System.out.println(a);
-        } else if (c && d) {
+        } else if (b) {
             System.out.println(b);
-        } else if (e ^ f) {
-            System.out.println(c);
         } else {
             System.out.println(f);
         }
     }
 
     @Test
-    public void testmth_if15() throws IOException {
+    public void testIfWithElif() throws IOException {
         String insn = TestHelper.getAsString(getClass(), "mth_if15");
-        String good = "if (a && b) {\n"
+        String good = "if (a) {\n"
                 + "    System.out.println(a);\n"
-                + "} else if (c && d) {\n"
+                + "} else if (b) {\n"
                 + "    System.out.println(b);\n"
-                + "} else if (e ^ f) {\n"
-                + "    System.out.println(c);\n"
                 + "} else {\n"
                 + "    System.out.println(f);\n"
                 + "}";
@@ -289,7 +289,7 @@ public class BranchTest {
     }
 
     @Test
-    public void testmth_for() throws IOException {
+    public void testBasicFor() throws IOException {
         String insn = TestHelper.getAsString(getClass(), "mth_for");
         String good = "for (i = 0; i < 5; i++) {\n"
                 + "    System.out.println(c);\n"
@@ -304,7 +304,7 @@ public class BranchTest {
     }
 
     @Test
-    public void testmth_for2() throws IOException {
+    public void testForThatLooksLikeAWhile() throws IOException {
         String insn = TestHelper.getAsString(getClass(), "mth_for2");
         String good = "while (e && d) {\n"
                 + "    System.out.println(f);\n"
@@ -319,7 +319,7 @@ public class BranchTest {
     }
 
     @Test
-    public void testmth_while() throws IOException {
+    public void testBasicWhile() throws IOException {
         String insn = TestHelper.getAsString(getClass(), "mth_while");
         String good = "while (a ^ d) {\n"
                 + "    System.out.println(e);\n"
@@ -334,7 +334,7 @@ public class BranchTest {
     }
 
     @Test
-    public void testmth_dowhile() throws IOException {
+    public void testDoWhile() throws IOException {
         String insn = TestHelper.getAsString(getClass(), "mth_dowhile");
         String good = "do {\n"
                 + "    System.out.println(d);\n"
@@ -369,7 +369,7 @@ public class BranchTest {
     }
 
     @Test
-    public void testmth_lookupswitch() throws IOException {
+    public void testLookupSwitch() throws IOException {
         String insn = TestHelper.getAsString(getClass(), "mth_lookupswitch");
         String good = "switch (ie) {\n"
                 + "case ONE:\n"
@@ -399,7 +399,7 @@ public class BranchTest {
     }
 
     @Test
-    public void testmth_tableswitch() throws IOException {
+    public void testTableSwitch() throws IOException {
         String insn = TestHelper.getAsString(getClass(), "mth_tableswitch");
         String good = "switch (ie) {\n"
                 + "case ONE:\n"

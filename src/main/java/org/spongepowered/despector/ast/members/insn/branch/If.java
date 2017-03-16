@@ -31,17 +31,19 @@ import org.spongepowered.despector.ast.members.insn.Statement;
 import org.spongepowered.despector.ast.members.insn.StatementBlock;
 import org.spongepowered.despector.ast.members.insn.branch.condition.Condition;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.annotation.Nullable;
 
 /**
- * An if block.
+ * An if block, possibly with attached else if and else blocks.
  */
 public class If implements Statement {
 
-    // TODO better elif support
-
     private Condition condition;
     private StatementBlock block;
+    private final List<Elif> elif_blocks = new ArrayList<>();
     private Else else_block;
 
     public If(Condition condition, StatementBlock insn) {
@@ -63,6 +65,14 @@ public class If implements Statement {
 
     public void setBody(StatementBlock block) {
         this.block = checkNotNull(block, "block");
+    }
+
+    public List<Elif> getElifBlocks() {
+        return this.elif_blocks;
+    }
+
+    public void addElifBlock(Elif e) {
+        this.elif_blocks.add(checkNotNull(e, "elif"));
     }
 
     @Nullable
@@ -101,12 +111,61 @@ public class If implements Statement {
         return sb.toString();
     }
 
+    public class Elif {
+
+        private StatementBlock block;
+        private Condition condition;
+
+        public Elif(Condition cond, StatementBlock block) {
+            this.condition = checkNotNull(cond, "condition");
+            this.block = checkNotNull(block, "block");
+            If.this.addElifBlock(this);
+        }
+
+        public Condition getCondition() {
+            return this.condition;
+        }
+
+        public void setCondition(Condition cond) {
+            this.condition = checkNotNull(cond, "condition");
+        }
+
+        public StatementBlock getBody() {
+            return this.block;
+        }
+
+        public void setBody(StatementBlock block) {
+            this.block = checkNotNull(block, "block");
+        }
+
+        public void accept(InstructionVisitor visitor) {
+            visitor.visitElifBlock(this);
+            for (Statement stmt : this.block.getStatements()) {
+                stmt.accept(visitor);
+            }
+        }
+
+        @Override
+        public String toString() {
+            StringBuilder sb = new StringBuilder();
+            sb.append("else if(");
+            sb.append(this.condition.toString());
+            sb.append(") {\n");
+            for (Statement insn : this.block.getStatements()) {
+                sb.append("    ").append(insn).append("\n");
+            }
+            sb.append("}");
+            return sb.toString();
+        }
+    }
+
     public class Else {
 
         private StatementBlock block;
 
         public Else(StatementBlock block) {
             this.block = checkNotNull(block, "block");
+            If.this.setElseBlock(this);
         }
 
         public StatementBlock getElseBody() {

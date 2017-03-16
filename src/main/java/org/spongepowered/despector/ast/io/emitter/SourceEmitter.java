@@ -64,6 +64,7 @@ import org.spongepowered.despector.ast.members.insn.assign.StaticFieldAssignment
 import org.spongepowered.despector.ast.members.insn.branch.DoWhile;
 import org.spongepowered.despector.ast.members.insn.branch.For;
 import org.spongepowered.despector.ast.members.insn.branch.If;
+import org.spongepowered.despector.ast.members.insn.branch.If.Elif;
 import org.spongepowered.despector.ast.members.insn.branch.If.Else;
 import org.spongepowered.despector.ast.members.insn.branch.Switch;
 import org.spongepowered.despector.ast.members.insn.branch.Switch.Case;
@@ -904,22 +905,25 @@ public class SourceEmitter implements ClassEmitter {
         }
         printIndentation();
         Else else_ = insn.getElseBlock();
+        for (int i = 0; i < insn.getElifBlocks().size(); i++) {
+            Elif elif = insn.getElifBlocks().get(i);
+            printString("} else if (");
+            emitCondition(elif.getCondition());
+            printString(") {\n");
+            this.indentation++;
+            emitBody(elif.getBody());
+            this.indentation--;
+            printString("\n");
+            printIndentation();
+        }
         if (else_ == null) {
             printString("}");
         } else {
             StatementBlock else_block = else_.getElseBody();
-            if (else_block.getStatements().size() == 1 && else_block.getStatements().get(0) instanceof If) {
-                // if the only statement in the else block is another if
-                // statement then we have one of our bastardized elif statements
-                // until I bother to add better elif support in the ast.
-                printString("} else ");
-                emitIfBlock((If) else_block.getStatements().get(0));
-                return;
-            }
             printString("} else {\n");
-            if (!else_.getElseBody().getStatements().isEmpty()) {
+            if (!else_block.getStatements().isEmpty()) {
                 this.indentation++;
-                emitBody(else_.getElseBody());
+                emitBody(else_block);
                 this.indentation--;
                 printString("\n");
             }

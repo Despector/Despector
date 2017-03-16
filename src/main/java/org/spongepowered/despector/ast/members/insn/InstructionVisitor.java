@@ -58,6 +58,7 @@ import org.spongepowered.despector.ast.members.insn.assign.StaticFieldAssignment
 import org.spongepowered.despector.ast.members.insn.branch.DoWhile;
 import org.spongepowered.despector.ast.members.insn.branch.For;
 import org.spongepowered.despector.ast.members.insn.branch.If;
+import org.spongepowered.despector.ast.members.insn.branch.If.Elif;
 import org.spongepowered.despector.ast.members.insn.branch.If.Else;
 import org.spongepowered.despector.ast.members.insn.branch.Switch;
 import org.spongepowered.despector.ast.members.insn.branch.Ternary;
@@ -103,6 +104,9 @@ public abstract class InstructionVisitor {
     }
 
     public void visitIfBlock(If ifBlock) {
+    }
+
+    public void visitElifBlock(Elif elseBlock) {
     }
 
     public void visitElseBlock(Else elseBlock) {

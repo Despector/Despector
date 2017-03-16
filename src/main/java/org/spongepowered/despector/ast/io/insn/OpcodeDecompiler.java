@@ -114,12 +114,12 @@ import java.util.Set;
  * The opcode decompiler which takes as input a list of opcode instructions and
  * produces a complete ast.
  * 
- * <p>The paper 'No More Gotos: Decompilation Using Pattern-Independent
+ * <p> The paper 'No More Gotos: Decompilation Using Pattern-Independent
  * Control-Flow Structuring and Semantics-Preserving Transformations' by Yakdan,
  * Eschweiler, Gerhards-Padilla, and Smith would be a helpful resource for
  * anyone looking to understand the code here. While not implemented exactly
  * word for word you will find many similar concepts used here. It can be found
- * at http://www.internetsociety.org/sites/default/files/11_4_2.pdf.</p>
+ * at http://www.internetsociety.org/sites/default/files/11_4_2.pdf. </p>
  */
 public class OpcodeDecompiler {
 
@@ -146,9 +146,9 @@ public class OpcodeDecompiler {
         cleanupGraph(graph);
 
         // TODO: remove debug
-//        for (OpcodeBlock b : graph) {
-//            b.print();
-//        }
+        for (OpcodeBlock b : graph) {
+            b.print();
+        }
 
         // Performs a sequence of transformations to conver the graph into a
         // simple array of partially decompiled block sections.
@@ -420,23 +420,92 @@ public class OpcodeDecompiler {
             body_start++;
             next = region.get(body_start);
         }
+        OpcodeBlock body = region.get(body_start);
+        OpcodeBlock cond_ret = ret;
+        for (OpcodeBlock c : condition_blocks) {
+            if (c.target != body && !condition_blocks.contains(c.target)) {
+                cond_ret = c.target;
+                break;
+            }
+        }
 
-        // form the condition from the headder
-        Condition cond = makeCondition(condition_blocks, locals, region.get(body_start), ret);
-
+        // form the condition from the header
+        Condition cond = makeCondition(condition_blocks, locals, body, cond_ret);
         IfBlockSection section = new IfBlockSection(cond);
-
+        int else_start = region.size();
+        if (cond_ret != ret) {
+            else_start = region.indexOf(cond_ret);
+        }
         // Append the body
-        for (int i = body_start; i < region.size(); i++) {
+        for (int i = body_start; i < else_start; i++) {
             next = region.get(i);
             if (next.internal != null) {
                 section.body.add(next.internal);
             } else if (next.isConditional()) {
                 // If we encounter another conditional block then its an error
                 // as we should have already processed all sub regions
-                throw new IllegalStateException("Unexpected conditional when building statement body");
+                throw new IllegalStateException("Unexpected conditional when building if body");
             } else {
                 section.body.add(new InlineBlockSection(next));
+            }
+        }
+
+        while (cond_ret != ret) {
+            if (cond_ret.isConditional()) {
+                List<OpcodeBlock> elif_condition = new ArrayList<>();
+                next = region.get(body_start);
+                elif_condition.add(cond_ret);
+                body_start = region.indexOf(cond_ret) + 1;
+                while (next.isConditional()) {
+                    elif_condition.add(next);
+                    body_start++;
+                    next = region.get(body_start);
+                }
+                OpcodeBlock elif_body = region.get(body_start);
+                cond_ret = ret;
+                for (OpcodeBlock c : elif_condition) {
+                    if (c.target != elif_body && !elif_condition.contains(c.target)) {
+                        cond_ret = c.target;
+                        break;
+                    }
+                }
+                Condition elif_cond = makeCondition(elif_condition, locals, elif_body, cond_ret);
+                ElifBlockSection elif = new ElifBlockSection(elif_cond);
+                section.elif.add(elif);
+                int elif_end = region.size();
+                if (cond_ret != ret) {
+                    elif_end = region.indexOf(cond_ret);
+                }
+                // Append the body
+                for (int i = body_start; i < elif_end; i++) {
+                    next = region.get(i);
+                    if (next.internal != null) {
+                        elif.body.add(next.internal);
+                    } else if (next.isConditional()) {
+                        // If we encounter another conditional block then its an
+                        // error
+                        // as we should have already processed all sub regions
+                        throw new IllegalStateException("Unexpected conditional when building elif body");
+                    } else {
+                        elif.body.add(new InlineBlockSection(next));
+                    }
+                }
+            } else {
+                else_start = region.indexOf(cond_ret);
+                for (int i = else_start; i < region.size(); i++) {
+                    next = region.get(i);
+                    if (next.internal != null) {
+                        section.else_.add(next.internal);
+                    } else if (next.isConditional()) {
+                        // If we encounter another conditional block then its an
+                        // error
+                        // as we should have already processed all sub regions
+                        throw new IllegalStateException("Unexpected conditional when building else body");
+                    } else {
+                        section.else_.add(new InlineBlockSection(next));
+                    }
+                }
+                break;
             }
         }
 
@@ -525,44 +594,44 @@ public class OpcodeDecompiler {
 
         // TOOD support remaining conditional jump opcodes
         switch (block.last.getOpcode()) {
-        case IFEQ: {
-            if (dummy_stack.size() != 1 || !dummy.getStatements().isEmpty()) {
-                throw new IllegalStateException();
+            case IFEQ: {
+                if (dummy_stack.size() != 1 || !dummy.getStatements().isEmpty()) {
+                    throw new IllegalStateException();
+                }
+                Instruction val = dummy_stack.pop();
+                return new BooleanCondition(val, true);
             }
-            Instruction val = dummy_stack.pop();
-            return new BooleanCondition(val, true);
-        }
-        case IFNE: {
-            if (dummy_stack.size() != 1 || !dummy.getStatements().isEmpty()) {
-                throw new IllegalStateException();
+            case IFNE: {
+                if (dummy_stack.size() != 1 || !dummy.getStatements().isEmpty()) {
+                    throw new IllegalStateException();
+                }
+                Instruction val = dummy_stack.pop();
+                return new BooleanCondition(val, false);
             }
-            Instruction val = dummy_stack.pop();
-            return new BooleanCondition(val, false);
-        }
-        case IF_ICMPLT: {
-            if (dummy_stack.size() != 2 || !dummy.getStatements().isEmpty()) {
-                throw new IllegalStateException();
+            case IF_ICMPLT: {
+                if (dummy_stack.size() != 2 || !dummy.getStatements().isEmpty()) {
+                    throw new IllegalStateException();
+                }
+                Instruction b = dummy_stack.pop();
+                Instruction a = dummy_stack.pop();
+                return new CompareCondition(a, b, CompareCondition.fromOpcode(block.last.getOpcode()));
             }
-            Instruction b = dummy_stack.pop();
-            Instruction a = dummy_stack.pop();
-            return new CompareCondition(a, b, CompareCondition.fromOpcode(block.last.getOpcode()));
-        }
-        case IFNULL: {
-            if (dummy_stack.size() != 1 || !dummy.getStatements().isEmpty()) {
-                throw new IllegalStateException();
+            case IFNULL: {
+                if (dummy_stack.size() != 1 || !dummy.getStatements().isEmpty()) {
+                    throw new IllegalStateException();
+                }
+                Instruction val = dummy_stack.pop();
+                return new CompareCondition(val, new NullConstantArg(), CompareCondition.CompareOperator.EQUAL);
             }
-            Instruction val = dummy_stack.pop();
-            return new CompareCondition(val, new NullConstantArg(), CompareCondition.CompareOperator.EQUAL);
-        }
-        case IFNONNULL: {
-            if (dummy_stack.size() != 1 || !dummy.getStatements().isEmpty()) {
-                throw new IllegalStateException();
+            case IFNONNULL: {
+                if (dummy_stack.size() != 1 || !dummy.getStatements().isEmpty()) {
+                    throw new IllegalStateException();
+                }
+                Instruction val = dummy_stack.pop();
+                return new CompareCondition(val, new NullConstantArg(), CompareCondition.CompareOperator.NOT_EQUAL);
             }
-            Instruction val = dummy_stack.pop();
-            return new CompareCondition(val, new NullConstantArg(), CompareCondition.CompareOperator.NOT_EQUAL);
-        }
-        default:
-            throw new IllegalStateException("Unsupported conditional jump opcode " + block.last.getOpcode());
+            default:
+                throw new IllegalStateException("Unsupported conditional jump opcode " + block.last.getOpcode());
         }
     }
 
@@ -663,6 +732,20 @@ public class OpcodeDecompiler {
                 appendBlock(body_section, body);
             }
             If iff = new If(ifblock.condition, body);
+            for (ElifBlockSection elif : ifblock.elif) {
+                StatementBlock elif_body = new StatementBlock(StatementBlock.Type.IF, block.getLocals());
+                for (BlockSection body_section : elif.body) {
+                    appendBlock(body_section, elif_body);
+                }
+                iff.new Elif(elif.condition, elif_body);
+            }
+            if (!ifblock.else_.isEmpty()) {
+                StatementBlock else_body = new StatementBlock(StatementBlock.Type.IF, block.getLocals());
+                for (BlockSection body_section : ifblock.else_) {
+                    appendBlock(body_section, else_body);
+                }
+                iff.new Else(else_body);
+            }
             block.append(iff);
         } else if (block_section instanceof InlineBlockSection) {
             OpcodeBlock op = ((InlineBlockSection) block_section).block;
@@ -693,551 +776,551 @@ public class OpcodeDecompiler {
             }
 
             switch (next.getOpcode()) {
-            case NOP:
-                break;
-            case ACONST_NULL:
-                stack.push(new NullConstantArg());
-                break;
-            case ICONST_M1:
-                stack.push(new IntConstantArg(-1));
-                break;
-            case ICONST_0:
-                stack.push(new IntConstantArg(0));
-                break;
-            case ICONST_1:
-                stack.push(new IntConstantArg(1));
-                break;
-            case ICONST_2:
-                stack.push(new IntConstantArg(2));
-                break;
-            case ICONST_3:
-                stack.push(new IntConstantArg(3));
-                break;
-            case ICONST_4:
-                stack.push(new IntConstantArg(4));
-                break;
-            case ICONST_5:
-                stack.push(new IntConstantArg(5));
-                break;
-            case LCONST_0:
-                stack.push(new LongConstantArg(0));
-                break;
-            case LCONST_1:
-                stack.push(new LongConstantArg(1));
-                break;
-            case FCONST_0:
-                stack.push(new FloatConstantArg(0));
-                break;
-            case FCONST_1:
-                stack.push(new FloatConstantArg(1));
-                break;
-            case FCONST_2:
-                stack.push(new FloatConstantArg(2));
-                break;
-            case DCONST_0:
-                stack.push(new DoubleConstantArg(0));
-                break;
-            case DCONST_1:
-                stack.push(new DoubleConstantArg(1));
-                break;
-            case BIPUSH:
-            case SIPUSH: {
-                IntInsnNode insn = (IntInsnNode) next;
-                stack.push(new IntConstantArg(insn.operand));
-                break;
-            }
-            case LDC: {
-                LdcInsnNode ldc = (LdcInsnNode) next;
-                if (ldc.cst instanceof String) {
-                    stack.push(new StringConstantArg((String) ldc.cst));
-                } else if (ldc.cst instanceof Integer) {
-                    stack.push(new IntConstantArg((Integer) ldc.cst));
-                } else if (ldc.cst instanceof Float) {
-                    stack.push(new FloatConstantArg((Float) ldc.cst));
-                } else if (ldc.cst instanceof Long) {
-                    // LDC_W appears to be merged with this opcode by asm so
-                    // long
-                    // and double constants will also be here
-                    stack.push(new LongConstantArg((Long) ldc.cst));
-                } else if (ldc.cst instanceof Double) {
-                    stack.push(new DoubleConstantArg((Double) ldc.cst));
-                } else if (ldc.cst instanceof Type) {
-                    stack.push(new TypeConstantArg((Type) ldc.cst));
-                } else {
-                    throw new IllegalStateException("Unsupported ldc constant: " + ldc.cst);
-                }
-                break;
-            }
-            case ILOAD:
-            case LLOAD:
-            case FLOAD:
-            case DLOAD:
-            case ALOAD: {
-                VarInsnNode var = (VarInsnNode) next;
-                Local local = locals.getLocal(var.var);
-                stack.push(new LocalArg(local.getInstance(label_index)));
-                break;
-            }
-            case IALOAD:
-            case LALOAD:
-            case FALOAD:
-            case DALOAD:
-            case AALOAD:
-            case BALOAD:
-            case CALOAD:
-            case SALOAD: {
-                Instruction index_arg = stack.pop();
-                Instruction var = stack.pop();
-                stack.push(new ArrayLoadArg(var, index_arg));
-                break;
-            }
-            case ISTORE:
-            case LSTORE:
-            case FSTORE:
-            case DSTORE:
-            case ASTORE: {
-                VarInsnNode var = (VarInsnNode) next;
-                Instruction val = stack.pop();
-                Local local = locals.getLocal(var.var);
-                block.append(new LocalAssignment(local.getInstance(label_index), val));
-                break;
-            }
-            case IASTORE:
-            case LASTORE:
-            case FASTORE:
-            case DASTORE:
-            case AASTORE:
-            case BASTORE:
-            case CASTORE:
-            case SASTORE: {
-                Instruction val = stack.pop();
-                Instruction index_arg = stack.pop();
-                Instruction var = stack.pop();
-                if (var instanceof NewArrayArg) {
-                    NewArrayArg array = (NewArrayArg) var;
-                    if (array.getInitializer() == null) {
-                        array.setInitialValues(new Instruction[((IntConstantArg) array.getSize()).getConstant()]);
-                    }
-                    array.getInitializer()[((IntConstantArg) index_arg).getConstant()] = val;
+                case NOP:
+                    break;
+                case ACONST_NULL:
+                    stack.push(new NullConstantArg());
+                    break;
+                case ICONST_M1:
+                    stack.push(new IntConstantArg(-1));
+                    break;
+                case ICONST_0:
+                    stack.push(new IntConstantArg(0));
+                    break;
+                case ICONST_1:
+                    stack.push(new IntConstantArg(1));
+                    break;
+                case ICONST_2:
+                    stack.push(new IntConstantArg(2));
+                    break;
+                case ICONST_3:
+                    stack.push(new IntConstantArg(3));
+                    break;
+                case ICONST_4:
+                    stack.push(new IntConstantArg(4));
+                    break;
+                case ICONST_5:
+                    stack.push(new IntConstantArg(5));
+                    break;
+                case LCONST_0:
+                    stack.push(new LongConstantArg(0));
+                    break;
+                case LCONST_1:
+                    stack.push(new LongConstantArg(1));
+                    break;
+                case FCONST_0:
+                    stack.push(new FloatConstantArg(0));
+                    break;
+                case FCONST_1:
+                    stack.push(new FloatConstantArg(1));
+                    break;
+                case FCONST_2:
+                    stack.push(new FloatConstantArg(2));
+                    break;
+                case DCONST_0:
+                    stack.push(new DoubleConstantArg(0));
+                    break;
+                case DCONST_1:
+                    stack.push(new DoubleConstantArg(1));
+                    break;
+                case BIPUSH:
+                case SIPUSH: {
+                    IntInsnNode insn = (IntInsnNode) next;
+                    stack.push(new IntConstantArg(insn.operand));
                     break;
                 }
-                block.append(new ArrayAssignment(var, index_arg, val));
-                break;
-            }
-            case POP: {
-                Instruction arg = stack.pop();
-                if (arg instanceof InstanceMethodInvoke || arg instanceof StaticMethodInvoke) {
-                    block.append(new InvokeStatement(arg));
+                case LDC: {
+                    LdcInsnNode ldc = (LdcInsnNode) next;
+                    if (ldc.cst instanceof String) {
+                        stack.push(new StringConstantArg((String) ldc.cst));
+                    } else if (ldc.cst instanceof Integer) {
+                        stack.push(new IntConstantArg((Integer) ldc.cst));
+                    } else if (ldc.cst instanceof Float) {
+                        stack.push(new FloatConstantArg((Float) ldc.cst));
+                    } else if (ldc.cst instanceof Long) {
+                        // LDC_W appears to be merged with this opcode by asm so
+                        // long
+                        // and double constants will also be here
+                        stack.push(new LongConstantArg((Long) ldc.cst));
+                    } else if (ldc.cst instanceof Double) {
+                        stack.push(new DoubleConstantArg((Double) ldc.cst));
+                    } else if (ldc.cst instanceof Type) {
+                        stack.push(new TypeConstantArg((Type) ldc.cst));
+                    } else {
+                        throw new IllegalStateException("Unsupported ldc constant: " + ldc.cst);
+                    }
+                    break;
                 }
-                break;
-            }
-            case POP2: {
-                for (int i = 0; i < 2; i++) {
+                case ILOAD:
+                case LLOAD:
+                case FLOAD:
+                case DLOAD:
+                case ALOAD: {
+                    VarInsnNode var = (VarInsnNode) next;
+                    Local local = locals.getLocal(var.var);
+                    stack.push(new LocalArg(local.getInstance(label_index)));
+                    break;
+                }
+                case IALOAD:
+                case LALOAD:
+                case FALOAD:
+                case DALOAD:
+                case AALOAD:
+                case BALOAD:
+                case CALOAD:
+                case SALOAD: {
+                    Instruction index_arg = stack.pop();
+                    Instruction var = stack.pop();
+                    stack.push(new ArrayLoadArg(var, index_arg));
+                    break;
+                }
+                case ISTORE:
+                case LSTORE:
+                case FSTORE:
+                case DSTORE:
+                case ASTORE: {
+                    VarInsnNode var = (VarInsnNode) next;
+                    Instruction val = stack.pop();
+                    Local local = locals.getLocal(var.var);
+                    block.append(new LocalAssignment(local.getInstance(label_index), val));
+                    break;
+                }
+                case IASTORE:
+                case LASTORE:
+                case FASTORE:
+                case DASTORE:
+                case AASTORE:
+                case BASTORE:
+                case CASTORE:
+                case SASTORE: {
+                    Instruction val = stack.pop();
+                    Instruction index_arg = stack.pop();
+                    Instruction var = stack.pop();
+                    if (var instanceof NewArrayArg) {
+                        NewArrayArg array = (NewArrayArg) var;
+                        if (array.getInitializer() == null) {
+                            array.setInitialValues(new Instruction[((IntConstantArg) array.getSize()).getConstant()]);
+                        }
+                        array.getInitializer()[((IntConstantArg) index_arg).getConstant()] = val;
+                        break;
+                    }
+                    block.append(new ArrayAssignment(var, index_arg, val));
+                    break;
+                }
+                case POP: {
                     Instruction arg = stack.pop();
                     if (arg instanceof InstanceMethodInvoke || arg instanceof StaticMethodInvoke) {
                         block.append(new InvokeStatement(arg));
                     }
-                }
-                break;
-            }
-            case DUP: {
-                stack.push(stack.peek());
-                break;
-            }
-            case DUP_X1: {
-                Instruction val = stack.pop();
-                Instruction val2 = stack.pop();
-                stack.push(val);
-                stack.push(val2);
-                stack.push(val);
-                break;
-            }
-            case DUP_X2: {
-                Instruction val = stack.pop();
-                Instruction val2 = stack.pop();
-                Instruction val3 = stack.pop();
-                stack.push(val);
-                stack.push(val3);
-                stack.push(val2);
-                stack.push(val);
-                break;
-            }
-            case DUP2: {
-                Instruction val = stack.pop();
-                Instruction val2 = stack.peek();
-                stack.push(val);
-                stack.push(val2);
-                stack.push(val);
-                break;
-            }
-            case DUP2_X1: {
-                Instruction val = stack.pop();
-                Instruction val2 = stack.pop();
-                Instruction val3 = stack.pop();
-                stack.push(val2);
-                stack.push(val);
-                stack.push(val3);
-                stack.push(val2);
-                stack.push(val);
-                break;
-            }
-            case DUP2_X2: {
-                Instruction val = stack.pop();
-                Instruction val2 = stack.pop();
-                Instruction val3 = stack.pop();
-                Instruction val4 = stack.pop();
-                stack.push(val2);
-                stack.push(val);
-                stack.push(val4);
-                stack.push(val3);
-                stack.push(val2);
-                stack.push(val);
-                break;
-            }
-            case SWAP: {
-                Instruction val = stack.pop();
-                Instruction val2 = stack.pop();
-                stack.push(val);
-                stack.push(val2);
-                break;
-            }
-            case IADD:
-            case LADD:
-            case FADD:
-            case DADD: {
-                Instruction right = stack.pop();
-                Instruction left = stack.pop();
-                stack.push(new AddArg(left, right));
-                break;
-            }
-            case ISUB:
-            case LSUB:
-            case FSUB:
-            case DSUB: {
-                Instruction right = stack.pop();
-                Instruction left = stack.pop();
-                stack.push(new SubtractArg(left, right));
-                break;
-            }
-            case IMUL:
-            case LMUL:
-            case FMUL:
-            case DMUL: {
-                Instruction right = stack.pop();
-                Instruction left = stack.pop();
-                stack.push(new MultiplyArg(left, right));
-                break;
-            }
-            case IDIV:
-            case LDIV:
-            case FDIV:
-            case DDIV: {
-                Instruction right = stack.pop();
-                Instruction left = stack.pop();
-                stack.push(new DivideArg(left, right));
-                break;
-            }
-            case IREM:
-            case LREM:
-            case FREM:
-            case DREM: {
-                Instruction right = stack.pop();
-                Instruction left = stack.pop();
-                stack.push(new RemainderInstruction(left, right));
-                break;
-            }
-            case INEG:
-            case LNEG:
-            case FNEG:
-            case DNEG: {
-                Instruction right = stack.pop();
-                stack.push(new NegArg(right));
-                break;
-            }
-            case ISHL:
-            case LSHL: {
-                Instruction right = stack.pop();
-                Instruction left = stack.pop();
-                stack.push(new ShiftLeftArg(left, right));
-                break;
-            }
-            case ISHR:
-            case LSHR: {
-                Instruction right = stack.pop();
-                Instruction left = stack.pop();
-                stack.push(new ShiftRightArg(left, right));
-                break;
-            }
-            case IUSHR:
-            case LUSHR: {
-                Instruction right = stack.pop();
-                Instruction left = stack.pop();
-                stack.push(new UnsignedShiftRightArg(left, right));
-                break;
-            }
-            case IAND:
-            case LAND: {
-                Instruction right = stack.pop();
-                Instruction left = stack.pop();
-                stack.push(new AndInstruction(left, right));
-                break;
-            }
-            case IOR:
-            case LOR: {
-                Instruction right = stack.pop();
-                Instruction left = stack.pop();
-                stack.push(new OrArg(left, right));
-                break;
-            }
-            case IXOR:
-            case LXOR: {
-                Instruction right = stack.pop();
-                Instruction left = stack.pop();
-                stack.push(new XorArg(left, right));
-                break;
-            }
-            case IINC: {
-                IincInsnNode inc = (IincInsnNode) next;
-                Local local = locals.getLocal(inc.var);
-                Increment insn = new Increment(local.getInstance(label_index), inc.incr);
-                block.append(insn);
-                break;
-            }
-            case L2I:
-            case F2I:
-            case D2I:
-                stack.push(new CastArg("I", stack.pop()));
-                break;
-            case I2L:
-            case F2L:
-            case D2L:
-                stack.push(new CastArg("J", stack.pop()));
-                break;
-            case I2F:
-            case L2F:
-            case D2F:
-                stack.push(new CastArg("F", stack.pop()));
-                break;
-            case I2D:
-            case F2D:
-            case L2D:
-                stack.push(new CastArg("D", stack.pop()));
-                break;
-            case I2B:
-                stack.push(new CastArg("B", stack.pop()));
-                break;
-            case I2C:
-                stack.push(new CastArg("C", stack.pop()));
-                break;
-            case I2S:
-                stack.push(new CastArg("S", stack.pop()));
-                break;
-            case LCMP:
-            case FCMPL:
-            case FCMPG:
-            case DCMPL:
-            case DCMPG: {
-                Instruction right = stack.pop();
-                Instruction left = stack.pop();
-                stack.push(new CompareArg(left, right));
-                break;
-            }
-            case IFEQ:
-            case IFNE:
-            case IFLT:
-            case IFGE:
-            case IFGT:
-            case IFLE:
-            case IF_ICMPEQ:
-            case IF_ICMPNE:
-            case IF_ICMPLT:
-            case IF_ICMPGE:
-            case IF_ICMPGT:
-            case IF_ICMPLE:
-            case IF_ACMPEQ:
-            case IF_ACMPNE:
-            case GOTO:
-            case JSR:
-            case RET:
-            case IFNULL:
-            case IFNONNULL:
-                // All jumps are handled by the implicit structure of the
-                // graph
-                break;
-            case IRETURN:
-            case LRETURN:
-            case FRETURN:
-            case DRETURN:
-            case ARETURN:
-                block.append(new Return(stack.pop()));
-                break;
-            case RETURN:
-                block.append(new Return());
-                break;
-            case GETSTATIC: {
-                FieldInsnNode field = (FieldInsnNode) next;
-                String owner = field.owner;
-                if (!owner.startsWith("[")) {
-                    owner = "L" + owner + ";";
-                }
-                FieldArg arg = new StaticFieldArg(field.name, field.desc, owner);
-                stack.push(arg);
-                break;
-            }
-            case PUTSTATIC: {
-                FieldInsnNode field = (FieldInsnNode) next;
-                Instruction val = stack.pop();
-                String owner = field.owner;
-                if (!owner.startsWith("[")) {
-                    owner = "L" + owner + ";";
-                }
-                FieldAssignment assign = new StaticFieldAssignment(field.name, field.desc, owner, val);
-                block.append(assign);
-                break;
-            }
-            case GETFIELD: {
-                FieldInsnNode field = (FieldInsnNode) next;
-                String owner = field.owner;
-                if (!owner.startsWith("[")) {
-                    owner = "L" + owner + ";";
-                }
-                FieldArg arg = new InstanceFieldArg(field.name, field.desc, owner, stack.pop());
-                stack.push(arg);
-                break;
-            }
-            case PUTFIELD: {
-                FieldInsnNode field = (FieldInsnNode) next;
-                Instruction val = stack.pop();
-                Instruction owner = stack.pop();
-                String owner_t = field.owner;
-                if (!owner_t.startsWith("[")) {
-                    owner_t = "L" + owner_t + ";";
-                }
-                FieldAssignment assign = new InstanceFieldAssignment(field.name, field.desc, owner_t, owner, val);
-                block.append(assign);
-                break;
-            }
-            case INVOKESPECIAL: {
-                MethodInsnNode ctor = (MethodInsnNode) next;
-                if (ctor.name.equals("<init>")) {
-                    Instruction[] args = new Instruction[TypeHelper.paramCount(ctor.desc)];
-                    for (int i = 0; i < args.length; i++) {
-                        args[i] = stack.pop();
-                    }
-                    New new_arg = (New) stack.pop();
-                    if (stack.peek() instanceof New) {
-                        New new_arg2 = (New) stack.pop();
-                        if (new_arg2 == new_arg) {
-                            new_arg.setCtorDescription(ctor.desc);
-                            new_arg.setParameters(args);
-                            stack.push(new_arg);
-                            break;
-                        }
-                        stack.push(new_arg2);
-                    }
-                    New insn = new New(new_arg.getType(), ctor.desc, args);
-                    block.append(new InvokeStatement(insn));
                     break;
                 }
-            }
-            case INVOKEVIRTUAL:
-            case INVOKEINTERFACE: {
-                MethodInsnNode method = (MethodInsnNode) next;
-                String ret = TypeHelper.getRet(method.desc);
-                Instruction[] args = new Instruction[TypeHelper.paramCount(method.desc)];
-                for (int i = args.length - 1; i >= 0; i--) {
-                    args[i] = stack.pop();
+                case POP2: {
+                    for (int i = 0; i < 2; i++) {
+                        Instruction arg = stack.pop();
+                        if (arg instanceof InstanceMethodInvoke || arg instanceof StaticMethodInvoke) {
+                            block.append(new InvokeStatement(arg));
+                        }
+                    }
+                    break;
                 }
-                Instruction callee = stack.pop();
-                String owner = method.owner;
-                if (!owner.startsWith("[")) {
-                    owner = "L" + owner + ";";
+                case DUP: {
+                    stack.push(stack.peek());
+                    break;
                 }
-                InstanceMethodInvoke arg = new InstanceMethodInvoke(method.name, method.desc, owner, args, callee);
-                if (ret.equals("V")) {
-                    block.append(new InvokeStatement(arg));
-                } else {
+                case DUP_X1: {
+                    Instruction val = stack.pop();
+                    Instruction val2 = stack.pop();
+                    stack.push(val);
+                    stack.push(val2);
+                    stack.push(val);
+                    break;
+                }
+                case DUP_X2: {
+                    Instruction val = stack.pop();
+                    Instruction val2 = stack.pop();
+                    Instruction val3 = stack.pop();
+                    stack.push(val);
+                    stack.push(val3);
+                    stack.push(val2);
+                    stack.push(val);
+                    break;
+                }
+                case DUP2: {
+                    Instruction val = stack.pop();
+                    Instruction val2 = stack.peek();
+                    stack.push(val);
+                    stack.push(val2);
+                    stack.push(val);
+                    break;
+                }
+                case DUP2_X1: {
+                    Instruction val = stack.pop();
+                    Instruction val2 = stack.pop();
+                    Instruction val3 = stack.pop();
+                    stack.push(val2);
+                    stack.push(val);
+                    stack.push(val3);
+                    stack.push(val2);
+                    stack.push(val);
+                    break;
+                }
+                case DUP2_X2: {
+                    Instruction val = stack.pop();
+                    Instruction val2 = stack.pop();
+                    Instruction val3 = stack.pop();
+                    Instruction val4 = stack.pop();
+                    stack.push(val2);
+                    stack.push(val);
+                    stack.push(val4);
+                    stack.push(val3);
+                    stack.push(val2);
+                    stack.push(val);
+                    break;
+                }
+                case SWAP: {
+                    Instruction val = stack.pop();
+                    Instruction val2 = stack.pop();
+                    stack.push(val);
+                    stack.push(val2);
+                    break;
+                }
+                case IADD:
+                case LADD:
+                case FADD:
+                case DADD: {
+                    Instruction right = stack.pop();
+                    Instruction left = stack.pop();
+                    stack.push(new AddArg(left, right));
+                    break;
+                }
+                case ISUB:
+                case LSUB:
+                case FSUB:
+                case DSUB: {
+                    Instruction right = stack.pop();
+                    Instruction left = stack.pop();
+                    stack.push(new SubtractArg(left, right));
+                    break;
+                }
+                case IMUL:
+                case LMUL:
+                case FMUL:
+                case DMUL: {
+                    Instruction right = stack.pop();
+                    Instruction left = stack.pop();
+                    stack.push(new MultiplyArg(left, right));
+                    break;
+                }
+                case IDIV:
+                case LDIV:
+                case FDIV:
+                case DDIV: {
+                    Instruction right = stack.pop();
+                    Instruction left = stack.pop();
+                    stack.push(new DivideArg(left, right));
+                    break;
+                }
+                case IREM:
+                case LREM:
+                case FREM:
+                case DREM: {
+                    Instruction right = stack.pop();
+                    Instruction left = stack.pop();
+                    stack.push(new RemainderInstruction(left, right));
+                    break;
+                }
+                case INEG:
+                case LNEG:
+                case FNEG:
+                case DNEG: {
+                    Instruction right = stack.pop();
+                    stack.push(new NegArg(right));
+                    break;
+                }
+                case ISHL:
+                case LSHL: {
+                    Instruction right = stack.pop();
+                    Instruction left = stack.pop();
+                    stack.push(new ShiftLeftArg(left, right));
+                    break;
+                }
+                case ISHR:
+                case LSHR: {
+                    Instruction right = stack.pop();
+                    Instruction left = stack.pop();
+                    stack.push(new ShiftRightArg(left, right));
+                    break;
+                }
+                case IUSHR:
+                case LUSHR: {
+                    Instruction right = stack.pop();
+                    Instruction left = stack.pop();
+                    stack.push(new UnsignedShiftRightArg(left, right));
+                    break;
+                }
+                case IAND:
+                case LAND: {
+                    Instruction right = stack.pop();
+                    Instruction left = stack.pop();
+                    stack.push(new AndInstruction(left, right));
+                    break;
+                }
+                case IOR:
+                case LOR: {
+                    Instruction right = stack.pop();
+                    Instruction left = stack.pop();
+                    stack.push(new OrArg(left, right));
+                    break;
+                }
+                case IXOR:
+                case LXOR: {
+                    Instruction right = stack.pop();
+                    Instruction left = stack.pop();
+                    stack.push(new XorArg(left, right));
+                    break;
+                }
+                case IINC: {
+                    IincInsnNode inc = (IincInsnNode) next;
+                    Local local = locals.getLocal(inc.var);
+                    Increment insn = new Increment(local.getInstance(label_index), inc.incr);
+                    block.append(insn);
+                    break;
+                }
+                case L2I:
+                case F2I:
+                case D2I:
+                    stack.push(new CastArg("I", stack.pop()));
+                    break;
+                case I2L:
+                case F2L:
+                case D2L:
+                    stack.push(new CastArg("J", stack.pop()));
+                    break;
+                case I2F:
+                case L2F:
+                case D2F:
+                    stack.push(new CastArg("F", stack.pop()));
+                    break;
+                case I2D:
+                case F2D:
+                case L2D:
+                    stack.push(new CastArg("D", stack.pop()));
+                    break;
+                case I2B:
+                    stack.push(new CastArg("B", stack.pop()));
+                    break;
+                case I2C:
+                    stack.push(new CastArg("C", stack.pop()));
+                    break;
+                case I2S:
+                    stack.push(new CastArg("S", stack.pop()));
+                    break;
+                case LCMP:
+                case FCMPL:
+                case FCMPG:
+                case DCMPL:
+                case DCMPG: {
+                    Instruction right = stack.pop();
+                    Instruction left = stack.pop();
+                    stack.push(new CompareArg(left, right));
+                    break;
+                }
+                case IFEQ:
+                case IFNE:
+                case IFLT:
+                case IFGE:
+                case IFGT:
+                case IFLE:
+                case IF_ICMPEQ:
+                case IF_ICMPNE:
+                case IF_ICMPLT:
+                case IF_ICMPGE:
+                case IF_ICMPGT:
+                case IF_ICMPLE:
+                case IF_ACMPEQ:
+                case IF_ACMPNE:
+                case GOTO:
+                case JSR:
+                case RET:
+                case IFNULL:
+                case IFNONNULL:
+                    // All jumps are handled by the implicit structure of the
+                    // graph
+                    break;
+                case IRETURN:
+                case LRETURN:
+                case FRETURN:
+                case DRETURN:
+                case ARETURN:
+                    block.append(new Return(stack.pop()));
+                    break;
+                case RETURN:
+                    block.append(new Return());
+                    break;
+                case GETSTATIC: {
+                    FieldInsnNode field = (FieldInsnNode) next;
+                    String owner = field.owner;
+                    if (!owner.startsWith("[")) {
+                        owner = "L" + owner + ";";
+                    }
+                    FieldArg arg = new StaticFieldArg(field.name, field.desc, owner);
                     stack.push(arg);
+                    break;
                 }
-                break;
-            }
-            case INVOKESTATIC: {
-                MethodInsnNode method = (MethodInsnNode) next;
-                String ret = TypeHelper.getRet(method.desc);
-                Instruction[] args = new Instruction[TypeHelper.paramCount(method.desc)];
-                for (int i = args.length - 1; i >= 0; i--) {
-                    args[i] = stack.pop();
+                case PUTSTATIC: {
+                    FieldInsnNode field = (FieldInsnNode) next;
+                    Instruction val = stack.pop();
+                    String owner = field.owner;
+                    if (!owner.startsWith("[")) {
+                        owner = "L" + owner + ";";
+                    }
+                    FieldAssignment assign = new StaticFieldAssignment(field.name, field.desc, owner, val);
+                    block.append(assign);
+                    break;
                 }
-                String owner = method.owner;
-                if (!owner.startsWith("[")) {
-                    owner = "L" + owner + ";";
-                }
-                StaticMethodInvoke arg = new StaticMethodInvoke(method.name, method.desc, owner, args);
-                if (ret.equals("V")) {
-                    block.append(new InvokeStatement(arg));
-                } else {
+                case GETFIELD: {
+                    FieldInsnNode field = (FieldInsnNode) next;
+                    String owner = field.owner;
+                    if (!owner.startsWith("[")) {
+                        owner = "L" + owner + ";";
+                    }
+                    FieldArg arg = new InstanceFieldArg(field.name, field.desc, owner, stack.pop());
                     stack.push(arg);
+                    break;
                 }
-                break;
-            }
-            case INVOKEDYNAMIC:
-                // TODO
-                break;
-            case NEW: {
-                String type = ((TypeInsnNode) next).desc;
-                stack.push(new New("L" + type + ";", null, null));
-                break;
-            }
-            case NEWARRAY:
-            case ANEWARRAY: {
-                Instruction size = stack.pop();
-                String array_type = null;
-                if (next instanceof IntInsnNode) {
-                    IntInsnNode array = (IntInsnNode) next;
-                    array_type = AstUtil.opcodeToType(array.operand);
-                } else if (next instanceof TypeInsnNode) {
-                    TypeInsnNode array = (TypeInsnNode) next;
-                    array_type = array.desc;
+                case PUTFIELD: {
+                    FieldInsnNode field = (FieldInsnNode) next;
+                    Instruction val = stack.pop();
+                    Instruction owner = stack.pop();
+                    String owner_t = field.owner;
+                    if (!owner_t.startsWith("[")) {
+                        owner_t = "L" + owner_t + ";";
+                    }
+                    FieldAssignment assign = new InstanceFieldAssignment(field.name, field.desc, owner_t, owner, val);
+                    block.append(assign);
+                    break;
                 }
-                stack.push(new NewArrayArg(array_type, size, null));
-                break;
-            }
-            case ARRAYLENGTH:
-                stack.push(new InstanceFieldArg("length", "I", "hidden-array-field", stack.pop()));
-                break;
-            case ATHROW:
-                block.append(new Throw(stack.pop()));
-                break;
-            case CHECKCAST: {
-                TypeInsnNode cast = (TypeInsnNode) next;
-                String desc = cast.desc;
-                if (!desc.startsWith("[")) {
-                    desc = "L" + desc + ";";
+                case INVOKESPECIAL: {
+                    MethodInsnNode ctor = (MethodInsnNode) next;
+                    if (ctor.name.equals("<init>")) {
+                        Instruction[] args = new Instruction[TypeHelper.paramCount(ctor.desc)];
+                        for (int i = 0; i < args.length; i++) {
+                            args[i] = stack.pop();
+                        }
+                        New new_arg = (New) stack.pop();
+                        if (stack.peek() instanceof New) {
+                            New new_arg2 = (New) stack.pop();
+                            if (new_arg2 == new_arg) {
+                                new_arg.setCtorDescription(ctor.desc);
+                                new_arg.setParameters(args);
+                                stack.push(new_arg);
+                                break;
+                            }
+                            stack.push(new_arg2);
+                        }
+                        New insn = new New(new_arg.getType(), ctor.desc, args);
+                        block.append(new InvokeStatement(insn));
+                        break;
+                    }
                 }
-                stack.push(new CastArg(desc, stack.pop()));
-                break;
-            }
-            case INSTANCEOF: {
-                TypeInsnNode insn = (TypeInsnNode) next;
-                Instruction val = stack.pop();
-                String type = insn.desc;
-                if (!type.startsWith("[")) {
-                    type = "L" + insn.desc + ";";
+                case INVOKEVIRTUAL:
+                case INVOKEINTERFACE: {
+                    MethodInsnNode method = (MethodInsnNode) next;
+                    String ret = TypeHelper.getRet(method.desc);
+                    Instruction[] args = new Instruction[TypeHelper.paramCount(method.desc)];
+                    for (int i = args.length - 1; i >= 0; i--) {
+                        args[i] = stack.pop();
+                    }
+                    Instruction callee = stack.pop();
+                    String owner = method.owner;
+                    if (!owner.startsWith("[")) {
+                        owner = "L" + owner + ";";
+                    }
+                    InstanceMethodInvoke arg = new InstanceMethodInvoke(method.name, method.desc, owner, args, callee);
+                    if (ret.equals("V")) {
+                        block.append(new InvokeStatement(arg));
+                    } else {
+                        stack.push(arg);
+                    }
+                    break;
                 }
-                stack.push(new InstanceOfArg(val, type));
-                break;
-            }
-            case MONITORENTER:
-            case MONITOREXIT:
-                // TODO synchronized
-                throw new IllegalStateException();
-                // break;
-            case MULTIANEWARRAY:
-                // TODO
-                throw new IllegalStateException();
-            default:
-                System.err.println("Unsupported opcode: " + next.getOpcode());
-                throw new IllegalStateException();
+                case INVOKESTATIC: {
+                    MethodInsnNode method = (MethodInsnNode) next;
+                    String ret = TypeHelper.getRet(method.desc);
+                    Instruction[] args = new Instruction[TypeHelper.paramCount(method.desc)];
+                    for (int i = args.length - 1; i >= 0; i--) {
+                        args[i] = stack.pop();
+                    }
+                    String owner = method.owner;
+                    if (!owner.startsWith("[")) {
+                        owner = "L" + owner + ";";
+                    }
+                    StaticMethodInvoke arg = new StaticMethodInvoke(method.name, method.desc, owner, args);
+                    if (ret.equals("V")) {
+                        block.append(new InvokeStatement(arg));
+                    } else {
+                        stack.push(arg);
+                    }
+                    break;
+                }
+                case INVOKEDYNAMIC:
+                    // TODO
+                    break;
+                case NEW: {
+                    String type = ((TypeInsnNode) next).desc;
+                    stack.push(new New("L" + type + ";", null, null));
+                    break;
+                }
+                case NEWARRAY:
+                case ANEWARRAY: {
+                    Instruction size = stack.pop();
+                    String array_type = null;
+                    if (next instanceof IntInsnNode) {
+                        IntInsnNode array = (IntInsnNode) next;
+                        array_type = AstUtil.opcodeToType(array.operand);
+                    } else if (next instanceof TypeInsnNode) {
+                        TypeInsnNode array = (TypeInsnNode) next;
+                        array_type = array.desc;
+                    }
+                    stack.push(new NewArrayArg(array_type, size, null));
+                    break;
+                }
+                case ARRAYLENGTH:
+                    stack.push(new InstanceFieldArg("length", "I", "hidden-array-field", stack.pop()));
+                    break;
+                case ATHROW:
+                    block.append(new Throw(stack.pop()));
+                    break;
+                case CHECKCAST: {
+                    TypeInsnNode cast = (TypeInsnNode) next;
+                    String desc = cast.desc;
+                    if (!desc.startsWith("[")) {
+                        desc = "L" + desc + ";";
+                    }
+                    stack.push(new CastArg(desc, stack.pop()));
+                    break;
+                }
+                case INSTANCEOF: {
+                    TypeInsnNode insn = (TypeInsnNode) next;
+                    Instruction val = stack.pop();
+                    String type = insn.desc;
+                    if (!type.startsWith("[")) {
+                        type = "L" + insn.desc + ";";
+                    }
+                    stack.push(new InstanceOfArg(val, type));
+                    break;
+                }
+                case MONITORENTER:
+                case MONITOREXIT:
+                    // TODO synchronized
+                    throw new IllegalStateException();
+                    // break;
+                case MULTIANEWARRAY:
+                    // TODO
+                    throw new IllegalStateException();
+                default:
+                    System.err.println("Unsupported opcode: " + next.getOpcode());
+                    throw new IllegalStateException();
             }
         }
     }
@@ -1318,10 +1401,23 @@ public class OpcodeDecompiler {
 
         public Condition condition;
         public List<BlockSection> body = new ArrayList<>();
+        public List<BlockSection> else_ = new ArrayList<>();
+        public List<ElifBlockSection> elif = new ArrayList<>();
 
         public IfBlockSection(Condition cond) {
             this.condition = cond;
         }
+    }
+
+    private static class ElifBlockSection {
+
+        public Condition condition;
+        public List<BlockSection> body = new ArrayList<>();
+
+        public ElifBlockSection(Condition cond) {
+            this.condition = cond;
+        }
+
     }
 
 }
