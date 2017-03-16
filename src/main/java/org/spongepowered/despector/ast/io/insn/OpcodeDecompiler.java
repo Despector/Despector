@@ -25,7 +25,7 @@
 package org.spongepowered.despector.ast.io.insn;
 
 import static org.objectweb.asm.Opcodes.*;
-import static org.spongepowered.despector.util.AstUtil.inverse;
+import static org.spongepowered.despector.util.ConditionUtil.inverse;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -96,6 +96,7 @@ import org.spongepowered.despector.ast.members.insn.misc.Increment;
 import org.spongepowered.despector.ast.members.insn.misc.Return;
 import org.spongepowered.despector.ast.members.insn.misc.Throw;
 import org.spongepowered.despector.util.AstUtil;
+import org.spongepowered.despector.util.ConditionUtil;
 import org.spongepowered.despector.util.TypeHelper;
 
 import java.util.ArrayDeque;
@@ -145,9 +146,9 @@ public class OpcodeDecompiler {
         cleanupGraph(graph);
 
         // TODO: remove debug
-        for (OpcodeBlock b : graph) {
-            b.print();
-        }
+//        for (OpcodeBlock b : graph) {
+//            b.print();
+//        }
 
         // Performs a sequence of transformations to conver the graph into a
         // simple array of partially decompiled block sections.
@@ -645,7 +646,7 @@ public class OpcodeDecompiler {
         dfs(start, stack);
 
         OrCondition condition = new OrCondition(body_node.partial_conditions);
-        return AstUtil.simplifyCondition(condition);
+        return ConditionUtil.simplifyCondition(condition);
     }
 
     private static void appendBlock(BlockSection block_section, StatementBlock block) {

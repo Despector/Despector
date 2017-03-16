@@ -33,7 +33,7 @@ import org.spongepowered.despector.ast.members.insn.branch.condition.AndConditio
 import org.spongepowered.despector.ast.members.insn.branch.condition.BooleanCondition;
 import org.spongepowered.despector.ast.members.insn.branch.condition.Condition;
 import org.spongepowered.despector.ast.members.insn.branch.condition.OrCondition;
-import org.spongepowered.despector.util.AstUtil;
+import org.spongepowered.despector.util.ConditionUtil;
 
 public class ConditionSimplificationTest {
 
@@ -42,11 +42,8 @@ public class ConditionSimplificationTest {
     private static final BooleanCondition b = new BooleanCondition(new MockInsn('b'), false);
     private static final BooleanCondition bnot = new BooleanCondition(b.getConditionValue(), true);
     private static final BooleanCondition c = new BooleanCondition(new MockInsn('c'), false);
-    private static final BooleanCondition cnot = new BooleanCondition(c.getConditionValue(), true);
     private static final BooleanCondition d = new BooleanCondition(new MockInsn('d'), false);
-    private static final BooleanCondition dnot = new BooleanCondition(d.getConditionValue(), true);
     private static final BooleanCondition e = new BooleanCondition(new MockInsn('e'), false);
-    private static final BooleanCondition enot = new BooleanCondition(e.getConditionValue(), true);
 
     private static OrCondition or(Condition... c) {
         return new OrCondition(c);
@@ -60,7 +57,7 @@ public class ConditionSimplificationTest {
     public void testTrivial() {
         Condition complex = a;
         Condition simple = a;
-        Condition simplified = AstUtil.simplifyCondition(complex);
+        Condition simplified = ConditionUtil.simplifyCondition(complex);
         assertEquals(simple, simplified);
     }
 
@@ -68,7 +65,7 @@ public class ConditionSimplificationTest {
     public void testTrivial2() {
         Condition complex = or(a, a);
         Condition simple = a;
-        Condition simplified = AstUtil.simplifyCondition(complex);
+        Condition simplified = ConditionUtil.simplifyCondition(complex);
         assertEquals(simple, simplified);
     }
 
@@ -76,7 +73,7 @@ public class ConditionSimplificationTest {
     public void testTrivial3() {
         Condition complex = or(a, and(a, b));
         Condition simple = a;
-        Condition simplified = AstUtil.simplifyCondition(complex);
+        Condition simplified = ConditionUtil.simplifyCondition(complex);
         assertEquals(simple, simplified);
     }
 
@@ -84,7 +81,7 @@ public class ConditionSimplificationTest {
     public void testTrivial4() {
         Condition complex = or(a, and(anot, b));
         Condition simple = or(a, b);
-        Condition simplified = AstUtil.simplifyCondition(complex);
+        Condition simplified = ConditionUtil.simplifyCondition(complex);
         assertEquals(simple, simplified);
     }
 
@@ -92,15 +89,15 @@ public class ConditionSimplificationTest {
     public void testTrivial5() {
         Condition complex = or(a, and(anot, b), and(b, c));
         Condition simple = or(a, b);
-        Condition simplified = AstUtil.simplifyCondition(complex);
+        Condition simplified = ConditionUtil.simplifyCondition(complex);
         assertEquals(simple, simplified);
     }
 
     @Test
     public void testTrivial6() {
         Condition complex = or(and(a, b), and(a, bnot, c));
-        Condition simple = or(and(a, b), and(a, c));
-        Condition simplified = AstUtil.simplifyCondition(complex);
+        Condition simple = and(a, or(b, c));
+        Condition simplified = ConditionUtil.simplifyCondition(complex);
         assertEquals(simple, simplified);
     }
 
@@ -108,7 +105,39 @@ public class ConditionSimplificationTest {
     public void testTrivial7() {
         Condition complex = or(and(a, b), and(a, bnot));
         Condition simple = a;
-        Condition simplified = AstUtil.simplifyCondition(complex);
+        Condition simplified = ConditionUtil.simplifyCondition(complex);
+        assertEquals(simple, simplified);
+    }
+
+    @Test
+    public void testTrivial8() {
+        Condition complex = or(and(a, b), and(a, c), and(d, b), and(d, c));
+        Condition simple = and(or(a, d), or(b, c));
+        Condition simplified = ConditionUtil.simplifyCondition(complex);
+        assertEquals(simple, simplified);
+    }
+
+    @Test
+    public void testTrivial9() {
+        Condition complex = or(and(a, b), and(a, c), and(d, a), and(d, c));
+        Condition simple = or(and(a, or(b, c, d)), and(d, c));
+        Condition simplified = ConditionUtil.simplifyCondition(complex);
+        assertEquals(simple, simplified);
+    }
+
+    @Test
+    public void testTrivial10() {
+        Condition complex = or(and(a, b), and(a, c), and(d, c), and(d, e));
+        Condition simple = or(and(a, or(b, c)), and(d, or(c, e)));
+        Condition simplified = ConditionUtil.simplifyCondition(complex);
+        assertEquals(simple, simplified);
+    }
+
+    @Test
+    public void testTrivial11() {
+        Condition complex = or(and(a, d), and(e, d), and(b, c));
+        Condition simple = or(and(or(a, e), d), and(b, c));
+        Condition simplified = ConditionUtil.simplifyCondition(complex);
         assertEquals(simple, simplified);
     }
 

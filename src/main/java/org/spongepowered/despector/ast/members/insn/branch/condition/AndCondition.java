@@ -68,7 +68,14 @@ public class AndCondition extends Condition {
     public String toString() {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < this.args.size(); i++) {
-            sb.append(this.args.get(i));
+            Condition arg = this.args.get(i);
+            if(arg instanceof OrCondition) {
+                sb.append("(");
+                sb.append(this.args.get(i));
+                sb.append(')');
+            } else {
+                sb.append(this.args.get(i));
+            }
             if (i < this.args.size() - 1) {
                 sb.append(" && ");
             }
