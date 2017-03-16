@@ -88,6 +88,7 @@ import org.spongepowered.despector.ast.type.ClassEntry;
 import org.spongepowered.despector.ast.type.EnumEntry;
 import org.spongepowered.despector.ast.type.InterfaceEntry;
 import org.spongepowered.despector.ast.type.TypeEntry;
+import org.spongepowered.despector.util.ConditionUtil;
 import org.spongepowered.despector.util.TypeHelper;
 
 import java.io.IOException;
@@ -1539,7 +1540,7 @@ public class SourceEmitter implements ClassEmitter {
                 emitCondition(ternary.getCondition());
                 return;
             } else if (true_value.getConstant() == 0 && false_value.getConstant() == 1) {
-                emitCondition(ConditionSimplifier.invert(ternary.getCondition()));
+                emitCondition(ConditionUtil.inverse(ternary.getCondition()));
                 return;
             }
         }
