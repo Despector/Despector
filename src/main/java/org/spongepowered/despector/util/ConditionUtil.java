@@ -297,7 +297,7 @@ public class ConditionUtil {
         return count;
     }
 
-    private static Pair<Pair<int[], int[]>, Pair<List<int[]>, List<int[]>>> findBiscection(List<int[]> encodings) {
+    private static BisectionResult findBiscection(List<int[]> encodings) {
 
         // This attempts to find a bisection of the terms. A bisection here
         // being a pair of values such that every term in the encoding contains
@@ -326,7 +326,7 @@ public class ConditionUtil {
                                 r2 = e;
                             }
                         }
-                        return new Pair<>(new Pair<>(p, r2), new Pair<>(r, null));
+                        return new BisectionResult(p, r2, r, null);
                     }
                     return null;
                 }
@@ -336,7 +336,7 @@ public class ConditionUtil {
                         r.add(remove(e, c));
                     }
                 }
-                return new Pair<>(new Pair<>(c, null), new Pair<>(r, null));
+                return new BisectionResult(c, null, r, null);
             }
             return null;
         }
@@ -409,9 +409,9 @@ public class ConditionUtil {
         }
 
         if (untouched.size() == 0) {
-            return new Pair<>(new Pair<>(min_a, null), new Pair<>(group1, null));
+            return new BisectionResult(min_a, null, group1, null);
         } else if (untouched.size() == 1) {
-            return new Pair<>(new Pair<>(min_a, untouched.get(0)), new Pair<>(group1, null));
+            return new BisectionResult(min_a, untouched.get(0), group1, null);
         }
 
         int[] b = findCommonSubpart(untouched.get(0), untouched.get(1));
@@ -422,7 +422,7 @@ public class ConditionUtil {
             b = findCommonSubpart(b, encodings.get(i));
         }
         if (b == null) {
-            return new Pair<>(new Pair<>(min_a, null), new Pair<>(group1, untouched));
+            return new BisectionResult(min_a, null, group1, untouched);
         }
 
         List<int[]> remaining2 = new ArrayList<>();
@@ -435,45 +435,44 @@ public class ConditionUtil {
             }
             remaining2.add(r);
         }
-        return new Pair<>(new Pair<>(min_a, b), new Pair<>(group1, remaining2));
+        return new BisectionResult(min_a, b, group1, remaining2);
     }
 
     private static Condition postsimplify(List<int[]> encodings, Map<Condition, Integer> mapping) {
-        Pair<Pair<int[], int[]>, Pair<List<int[]>, List<int[]>>> bisection = findBiscection(encodings);
+        BisectionResult bisection = findBiscection(encodings);
         if (bisection != null) {
-            Pair<int[], int[]> terms = bisection.getFirst();
-            if (terms.getSecond() == null) {
-                Condition common_condition = decode(terms.getFirst(), mapping);
-                List<Condition> operands = decode(bisection.getSecond().getFirst(), mapping);
-                if (bisection.getSecond().getSecond() != null) {
-                    List<Condition> operands2 = decode(bisection.getSecond().getSecond(), mapping);
+            if (bisection.second == null) {
+                Condition common_condition = decode(bisection.first, mapping);
+                List<Condition> operands = decode(bisection.first_remaining, mapping);
+                if (bisection.second_remaining != null) {
+                    List<Condition> operands2 = decode(bisection.second_remaining, mapping);
                     return new OrCondition(new AndCondition(common_condition, new OrCondition(operands)), new OrCondition(operands2));
                 }
                 return new AndCondition(common_condition, new OrCondition(operands));
             }
-            List<int[]> a = bisection.getSecond().getFirst();
-            List<int[]> b = bisection.getSecond().getSecond();
-            Condition first = decode(terms.getFirst(), mapping);
-            Condition second = decode(terms.getSecond(), mapping);
+            List<int[]> a = bisection.first_remaining;
+            List<int[]> b = bisection.second_remaining;
+            Condition first = decode(bisection.first, mapping);
+            Condition second = decode(bisection.second, mapping);
 
             if (b == null) {
                 List<Condition> operands = decode(a, mapping);
                 int[] t = null;
                 for (int i = 0; i < encodings.size(); i++) {
                     t = encodings.get(i);
-                    if (contains(t, terms.getFirst())) {
+                    if (contains(t, bisection.first)) {
                         break;
                     }
                     t = null;
                 }
-                if(t != null) {
+                if (t != null) {
                     int i = 0;
-                    for(; i < t.length; i++) {
-                        if(t[i] == terms.getFirst()[0]) {
+                    for (; i < t.length; i++) {
+                        if (t[i] == bisection.first[0]) {
                             break;
                         }
                     }
-                    if(i < t.length / 2) {
+                    if (i < t.length / 2) {
                         return new OrCondition(new AndCondition(first, new OrCondition(operands)), second);
                     } else {
                         return new OrCondition(new AndCondition(new OrCondition(operands), first), second);
@@ -506,8 +505,8 @@ public class ConditionUtil {
                     return new AndCondition(new OrCondition(first, second), new OrCondition(group));
                 }
             }
-            List<Condition> group = decode(bisection.getSecond().getFirst(), mapping);
-            List<Condition> group2 = decode(bisection.getSecond().getSecond(), mapping);
+            List<Condition> group = decode(bisection.first_remaining, mapping);
+            List<Condition> group2 = decode(bisection.second_remaining, mapping);
             return new OrCondition(new AndCondition(first, new OrCondition(group)), new AndCondition(second, new OrCondition(group2)));
         }
         return null;
@@ -673,6 +672,22 @@ public class ConditionUtil {
             return new OrCondition(reverse);
         }
         return condition;
+    }
+
+    private static class BisectionResult {
+
+        public int[] first;
+        public int[] second;
+        public List<int[]> first_remaining;
+        public List<int[]> second_remaining;
+
+        public BisectionResult(int[] f, int[] s, List<int[]> fr, List<int[]> sr) {
+            this.first = f;
+            this.second = s;
+            this.first_remaining = fr;
+            this.second_remaining = sr;
+        }
+
     }
 
     private ConditionUtil() {
