@@ -84,6 +84,7 @@ import org.spongepowered.despector.ast.members.insn.assign.FieldAssignment;
 import org.spongepowered.despector.ast.members.insn.assign.InstanceFieldAssignment;
 import org.spongepowered.despector.ast.members.insn.assign.LocalAssignment;
 import org.spongepowered.despector.ast.members.insn.assign.StaticFieldAssignment;
+import org.spongepowered.despector.ast.members.insn.branch.DoWhile;
 import org.spongepowered.despector.ast.members.insn.branch.For;
 import org.spongepowered.despector.ast.members.insn.branch.If;
 import org.spongepowered.despector.ast.members.insn.branch.While;
@@ -264,6 +265,7 @@ public class OpcodeDecompiler {
                     continue;
                 }
                 OpcodeBlock header = new OpcodeBlock();
+                header.break_point = block.break_point;
                 header.opcodes.addAll(block.opcodes);
                 block.opcodes.clear();
                 // Have to ensure that we remap any blocks that were
@@ -291,6 +293,7 @@ public class OpcodeDecompiler {
                 int cond_start = AstUtil.findStartLastStatement(block.opcodes, block.last);
                 if (cond_start > 0) {
                     OpcodeBlock header = new OpcodeBlock();
+                    header.break_point = block.break_point;
                     for (int i = 0; i < cond_start; i++) {
                         header.opcodes.add(block.opcodes.get(i));
                     }
@@ -372,14 +375,33 @@ public class OpcodeDecompiler {
 
         for (int i = 0; i < blocks.size(); i++) {
             OpcodeBlock region_start = blocks.get(i);
+            int end = -1;
+            boolean targeted_in_future = false;
             if (!region_start.isJump()) {
-                // If the next block isn't conditional then we simply append it
-                // to the output.
-                final_blocks.add(new InlineBlockSection(region_start));
-                continue;
+                for (OpcodeBlock t : region_start.targetted_by) {
+                    int index = blocks.indexOf(t);
+                    if (index > i) {
+                        targeted_in_future = true;
+                        if (index > end) {
+                            end = index;
+                        }
+                    }
+                }
+                // if the block is targeted by a block farther in the code then
+                // this block is the first block in a do_while loop
+                if (!targeted_in_future) {
+                    // If the next block isn't conditional then we simply append
+                    // it
+                    // to the output.
+                    final_blocks.add(new InlineBlockSection(region_start));
+                    continue;
+                }
             }
-
-            int end = getRegionEnd(blocks, i);
+            if (end == -1) {
+                end = getRegionEnd(blocks, i);
+            } else {
+                end++;
+            }
 
             if (end == -1) {
                 // Any conditional block should always form the start of a
@@ -392,14 +414,14 @@ public class OpcodeDecompiler {
                 region.add(blocks.get(o));
             }
             // process the region down to a single block
-            final_blocks.add(processRegion(region, locals, blocks.get(end)));
+            final_blocks.add(processRegion(region, locals, blocks.get(end), targeted_in_future ? 0 : 1));
             i = end - 1;
         }
 
         return final_blocks;
     }
 
-    private static BlockSection processRegion(List<OpcodeBlock> region, Locals locals, OpcodeBlock ret) {
+    private static BlockSection processRegion(List<OpcodeBlock> region, Locals locals, OpcodeBlock ret, int body_start) {
 
         // This is a recursive function which processes a region and determines
         // which control flow statement is suitable for it.
@@ -410,7 +432,7 @@ public class OpcodeDecompiler {
         // then processes ahead of time into their own control flow statements
         // which are then nested inside of this region.
 
-        for (int i = 1; i < region.size() - 1; i++) {
+        for (int i = body_start; i < region.size() - 1; i++) {
             OpcodeBlock next = region.get(i);
             if (!next.isJump()) {
                 continue;
@@ -430,7 +452,7 @@ public class OpcodeDecompiler {
                     subregion.add(region.get(o));
                 }
 
-                BlockSection s = processRegion(subregion, locals, region.get(end));
+                BlockSection s = processRegion(subregion, locals, region.get(end), i + 1);
 
                 // the first block is set to the condensed subregion block and
                 // the rest if the blocks in the subregion are removed.
@@ -445,8 +467,36 @@ public class OpcodeDecompiler {
                 }
             }
         }
-
         OpcodeBlock start = region.get(0);
+        if (body_start == 0) {
+            List<OpcodeBlock> condition_blocks = new ArrayList<>();
+            int cond_start = region.size() - 1;
+            OpcodeBlock next = region.get(cond_start);
+            while (next.isConditional()) {
+                condition_blocks.add(0, next);
+                cond_start--;
+                next = region.get(cond_start);
+            }
+            cond_start++;
+            Condition cond = makeCondition(condition_blocks, locals, start, ret);
+
+            DoWhileBlockSection section = new DoWhileBlockSection(cond);
+
+            for (int i = 0; i < cond_start; i++) {
+                next = region.get(i);
+                if (next.internal != null) {
+                    section.body.add(next.internal);
+                } else if (next.isConditional()) {
+                    // If we encounter another conditional block then its an
+                    // error
+                    // as we should have already processed all sub regions
+                    throw new IllegalStateException("Unexpected conditional when building if body");
+                } else {
+                    section.body.add(new InlineBlockSection(next));
+                }
+            }
+            return section;
+        }
         if (start.isGoto()) {
             List<OpcodeBlock> condition_blocks = new ArrayList<>();
             OpcodeBlock next = start.target;
@@ -483,7 +533,7 @@ public class OpcodeDecompiler {
             return section;
         }
         // split the region into the condition and the body
-        int body_start = 1;
+        body_start = 1;
         List<OpcodeBlock> condition_blocks = new ArrayList<>();
         OpcodeBlock next = region.get(body_start);
         condition_blocks.add(start);
@@ -590,25 +640,45 @@ public class OpcodeDecompiler {
     }
 
     private static int getRegionEnd(List<OpcodeBlock> blocks, int start) {
+        OpcodeBlock region_start = blocks.get(start);
+        // if the target is behind the start then we break as this is likely the
+        // condition of a do-while
+
+        // the check is less or equal because when a header is split from a
+        // condition its break point is set to the same as the condition, in a
+        // simple do-while the condition targets the body which was originally
+        // split from the condition and therefore has the same break_point so we
+        // do this check to catch that. There are no conditions where two
+        // conditions may have the same break point that could break this (ie.
+        // the case where a condition was targeting a condition after it that
+        // has the same break_point is impossible).
+        if (region_start.target.break_point <= region_start.break_point) {
+            return -1;
+        }
+        int end_a = blocks.indexOf(region_start.target);
+        if (end_a == -1 && region_start.target != null) {
+            end_a = blocks.size();
+        }
+        int end_b = blocks.indexOf(region_start.else_target);
+        if (end_b == -1 && region_start.else_target != null) {
+            end_b = blocks.size();
+        }
+
+        // Use the target of the start node as a starting point for our search
+        int end = Math.max(end_a, end_b);
+        boolean isGoto = region_start.isGoto();
+        return getRegionEnd(blocks, start, end, isGoto);
+    }
+
+    private static int getRegionEnd(List<OpcodeBlock> blocks, int start, int end, boolean isGoto) {
 
         // TODO: break and continue targeting labels on outer loops will break
         // this completely
 
         // This is a rather brute force search for the next node after the start
         // node which post-dominates the preceding nodes.
-
-        OpcodeBlock region_start = blocks.get(start);
-        int end_a = blocks.indexOf(region_start.target);
-        if (end_a == -1 && region_start.target != null)
-            end_a = blocks.size();
-        int end_b = blocks.indexOf(region_start.else_target);
-        if (end_b == -1 && region_start.else_target != null)
-            end_b = blocks.size();
-
-        // Use the target of the start node as a starting point for our search
-        int end = Math.max(end_a, end_b);
-        boolean isGoto = region_start.isGoto();
         int end_extension = 0;
+        int end_a, end_b;
 
         check: while (true) {
             for (int o = 0; o < start; o++) {
@@ -877,6 +947,16 @@ public class OpcodeDecompiler {
             }
             While wwhile = new While(whileblock.condition, body);
             block.append(wwhile);
+        } else if (block_section instanceof DoWhileBlockSection) {
+            DoWhileBlockSection dowhileblock = (DoWhileBlockSection) block_section;
+            StatementBlock body = new StatementBlock(StatementBlock.Type.WHILE, block.getLocals());
+            for (BlockSection body_section : dowhileblock.body) {
+                appendBlock(body_section, body);
+            }
+            DoWhile dowhile = new DoWhile(dowhileblock.condition, body);
+            block.append(dowhile);
+        } else {
+            throw new IllegalStateException("Unknown block section " + block_section);
         }
     }
 
@@ -1557,6 +1637,16 @@ public class OpcodeDecompiler {
         public List<BlockSection> body = new ArrayList<>();
 
         public WhileBlockSection(Condition cond) {
+            this.condition = cond;
+        }
+    }
+
+    private static class DoWhileBlockSection extends BlockSection {
+
+        public Condition condition;
+        public List<BlockSection> body = new ArrayList<>();
+
+        public DoWhileBlockSection(Condition cond) {
             this.condition = cond;
         }
     }

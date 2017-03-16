@@ -231,8 +231,8 @@ public class BranchTest {
     }
 
     public void mth_if13(int i, boolean a, boolean b, boolean c, boolean d, boolean e, boolean f) {
-        if ((a && (c || e))) {
-            if (b || (d && f)) {
+        if (a) {
+            if (b) {
                 System.out.println(e);
             } else {
                 System.out.println(a);
@@ -246,8 +246,8 @@ public class BranchTest {
     @Test
     public void testIfWithNestingAndElse() throws IOException {
         String insn = TestHelper.getAsString(getClass(), "mth_if13");
-        String good = "if (a && (c || e)) {\n"
-                + "    if (b || d && f) {\n"
+        String good = "if (a) {\n"
+                + "    if (b) {\n"
                 + "        System.out.println(e);\n"
                 + "    } else {\n"
                 + "        System.out.println(a);\n"
