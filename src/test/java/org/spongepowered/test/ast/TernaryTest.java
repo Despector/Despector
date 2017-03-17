@@ -56,7 +56,7 @@ public class TernaryTest {
     }
 
     private int field;
-    
+
     public void mth_basicTernaryToField(boolean a) {
         this.field = a ? 255 : 0;
     }
@@ -65,6 +65,17 @@ public class TernaryTest {
     public void testBasicTernaryToField() throws IOException {
         String insn = TestHelper.getAsString(getClass(), "mth_basicTernaryToField");
         String good = "this.field = a ? 255 : 0;";
+        assertEquals(good, insn);
+    }
+
+    public void mth_nestedTernary(boolean a, boolean b) {
+        int r = a ? b ? 4 : 5 : 3;
+    }
+
+    @Test
+    public void testNestedTernary() throws IOException {
+        String insn = TestHelper.getAsString(getClass(), "mth_nestedTernary");
+        String good = "int r = a ? b ? 4 : 5 : 3;";
         assertEquals(good, insn);
     }
 

@@ -24,12 +24,12 @@
  */
 package org.spongepowered.despector.ast.io.insn;
 
+import static com.google.common.base.Preconditions.checkState;
 import static org.objectweb.asm.Opcodes.*;
 import static org.spongepowered.despector.util.ConditionUtil.inverse;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Queues;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.AbstractInsnNode;
@@ -90,7 +90,7 @@ import org.spongepowered.despector.ast.members.insn.branch.DoWhile;
 import org.spongepowered.despector.ast.members.insn.branch.For;
 import org.spongepowered.despector.ast.members.insn.branch.If;
 import org.spongepowered.despector.ast.members.insn.branch.Switch;
-import org.spongepowered.despector.ast.members.insn.branch.Switch.Case;
+import org.spongepowered.despector.ast.members.insn.branch.Ternary;
 import org.spongepowered.despector.ast.members.insn.branch.While;
 import org.spongepowered.despector.ast.members.insn.branch.condition.AndCondition;
 import org.spongepowered.despector.ast.members.insn.branch.condition.BooleanCondition;
@@ -152,7 +152,7 @@ public class OpcodeDecompiler {
         // Perform some cleanup on the graph like removing blocks containing
         // only labels and splitting the opcodes associated with a jump away
         // from opcodes for statements preceeding the control flow statement.
-        cleanupGraph(graph);
+        cleanupGraph(graph, locals);
 
         // TODO: remove debug
         for (OpcodeBlock b : graph) {
@@ -165,8 +165,9 @@ public class OpcodeDecompiler {
 
         // Append all block sections to the output in order. This finalizes all
         // decompilation of statements not already decompiled.
+        Deque<Instruction> stack = new ArrayDeque<>();
         for (BlockSection op : flat_graph) {
-            appendBlock(op, block);
+            appendBlock(op, block, stack);
         }
 
         return block;
@@ -286,7 +287,7 @@ public class OpcodeDecompiler {
         }
     }
 
-    private static void cleanupGraph(List<OpcodeBlock> blocks) {
+    private static void cleanupGraph(List<OpcodeBlock> blocks, Locals locals) {
         for (Iterator<OpcodeBlock> it = blocks.iterator(); it.hasNext();) {
             OpcodeBlock block = it.next();
             if (AstUtil.isEmptyOfLogic(block.opcodes) && block.last == null) {
@@ -364,8 +365,6 @@ public class OpcodeDecompiler {
         blocks.clear();
         blocks.addAll(fblocks);
 
-        // TODO identify ternary blocks (but no transformations yet)
-
         // populate a field of blocks targetting a block. Currently unused but
         // might be useful (Its from an older version of this code).
         for (int i = 0; i < blocks.size(); i++) {
@@ -378,6 +377,85 @@ public class OpcodeDecompiler {
             } else if (block.target != null && blocks.indexOf(block.target) != i + 1) {
                 block.target.targetted_by.add(block);
             }
+        }
+    }
+
+    private static void compileTernary(List<OpcodeBlock> blocks, int end, Locals locals) {
+        if (end < 4) {
+            throw new IllegalStateException();
+        }
+        TernaryBlockSection ternary = new TernaryBlockSection();
+        OpcodeBlock consumer = blocks.get(end);
+        int start = end - 1;
+        List<OpcodeBlock> true_blocks = new ArrayList<>();
+        OpcodeBlock tr = blocks.get(start--);
+        true_blocks.add(0, tr);
+        OpcodeBlock go = blocks.get(start--);
+        while (!go.isGoto() || go.target != consumer) {
+            true_blocks.add(0, go);
+            go = blocks.get(start--);
+        }
+        List<OpcodeBlock> false_blocks = new ArrayList<>();
+        OpcodeBlock fl = blocks.get(start--);
+        OpcodeBlock first_true = true_blocks.get(0);
+        while (!fl.isConditional() || fl.target != first_true) {
+            false_blocks.add(0, fl);
+            fl = blocks.get(start--);
+        }
+        checkState(!false_blocks.isEmpty());
+        OpcodeBlock first_false = false_blocks.get(0);
+        Set<OpcodeBlock> seen = new HashSet<>();
+        seen.add(first_true);
+        seen.add(first_false);
+        seen.add(fl);
+        seen.add(go);
+        List<OpcodeBlock> condition_blocks = new ArrayList<>();
+        condition_blocks.add(fl);
+        for (; start >= 0; start--) {
+            OpcodeBlock next = blocks.get(start);
+            if (!next.isConditional()) {
+                break;
+            }
+            if (!seen.contains(next.target)) {
+                break;
+            }
+            seen.add(next);
+            condition_blocks.add(0, next);
+        }
+        Condition cond = makeCondition(condition_blocks, locals, first_false, first_true);
+        ternary.condition = cond;
+        if (true_blocks.size() > 1) {
+            true_blocks.add(consumer);
+            compileTernary(true_blocks, true_blocks.size() - 1, locals);
+            true_blocks.remove(consumer);
+        }
+        for (OpcodeBlock t : true_blocks) {
+            if (t.internal != null) {
+                ternary.false_body.add(t.internal);
+            } else {
+                checkState(!t.isConditional());
+                ternary.false_body.add(new InlineBlockSection(t));
+            }
+        }
+        if (false_blocks.size() > 1) {
+            false_blocks.add(consumer);
+            compileTernary(false_blocks, false_blocks.size() - 1, locals);
+            false_blocks.remove(consumer);
+        }
+        for (OpcodeBlock t : false_blocks) {
+            if (t.internal != null) {
+                ternary.true_body.add(t.internal);
+            } else {
+                checkState(!t.isConditional());
+                ternary.true_body.add(new InlineBlockSection(t));
+            }
+        }
+        OpcodeBlock first = condition_blocks.get(0);
+        first.last = null;
+        first.internal = ternary;
+        start = blocks.indexOf(first);
+        for (int i = end - 1; i >= start + 1; i--) {
+            blocks.remove(i);
         }
     }
 
@@ -400,9 +478,20 @@ public class OpcodeDecompiler {
         // earliest block of any control flow statement which makes sure that we
         // don't miss any parts of the control flow statement.
 
+        // start by pre-decompiling ternaries
+        for (int i = 0; i < blocks.size(); i++) {
+            OpcodeBlock block = blocks.get(i);
+            if (AstUtil.hasStartingRequirement(block.opcodes)) {
+                compileTernary(blocks, i, locals);
+            }
+        }
+
         for (int i = 0; i < blocks.size(); i++) {
             OpcodeBlock region_start = blocks.get(i);
-            if (region_start.isSwitch()) {
+            if (region_start.internal != null) {
+                final_blocks.add(region_start.internal);
+                continue;
+            } else if (region_start.isSwitch()) {
                 if (region_start.last instanceof TableSwitchInsnNode || region_start.last instanceof LookupSwitchInsnNode) {
                     List<LabelNode> labels = null;
                     List<Integer> keys = null;
@@ -517,12 +606,14 @@ public class OpcodeDecompiler {
                 throw new IllegalStateException("Conditional jump not part of control flow statement??");
             }
 
+            OpcodeBlock last = blocks.get(end);
+
             region.clear();
             for (int o = i; o < end; o++) {
                 region.add(blocks.get(o));
             }
             // process the region down to a single block
-            final_blocks.add(processRegion(region, locals, blocks.get(end), targeted_in_future ? 0 : 1));
+            final_blocks.add(processRegion(region, locals, last, targeted_in_future ? 0 : 1));
             i = end - 1;
         }
 
@@ -992,8 +1083,7 @@ public class OpcodeDecompiler {
         return ConditionUtil.simplifyCondition(condition);
     }
 
-    private static void appendBlock(BlockSection block_section, StatementBlock block) {
-        Deque<Instruction> stack = Queues.newArrayDeque();
+    private static void appendBlock(BlockSection block_section, StatementBlock block, Deque<Instruction> stack) {
 
         // Appends a block to the output, constructing the needed control flow
         // statements and decompiling any opcodes that are not yet formed into
@@ -1002,22 +1092,28 @@ public class OpcodeDecompiler {
         if (block_section instanceof IfBlockSection) {
             IfBlockSection ifblock = (IfBlockSection) block_section;
             StatementBlock body = new StatementBlock(StatementBlock.Type.IF, block.getLocals());
+            Deque<Instruction> body_stack = new ArrayDeque<>();
             for (BlockSection body_section : ifblock.body) {
-                appendBlock(body_section, body);
+                appendBlock(body_section, body, body_stack);
             }
+            checkState(body_stack.isEmpty());
             If iff = new If(ifblock.condition, body);
             for (ElifBlockSection elif : ifblock.elif) {
                 StatementBlock elif_body = new StatementBlock(StatementBlock.Type.IF, block.getLocals());
+                Deque<Instruction> elif_stack = new ArrayDeque<>();
                 for (BlockSection body_section : elif.body) {
-                    appendBlock(body_section, elif_body);
+                    appendBlock(body_section, elif_body, elif_stack);
                 }
+                checkState(elif_stack.isEmpty());
                 iff.new Elif(elif.condition, elif_body);
             }
             if (!ifblock.else_.isEmpty()) {
                 StatementBlock else_body = new StatementBlock(StatementBlock.Type.IF, block.getLocals());
+                Deque<Instruction> else_stack = new ArrayDeque<>();
                 for (BlockSection body_section : ifblock.else_) {
-                    appendBlock(body_section, else_body);
+                    appendBlock(body_section, else_body, else_stack);
                 }
+                checkState(else_stack.isEmpty());
                 iff.new Else(else_body);
             }
             block.append(iff);
@@ -1027,9 +1123,11 @@ public class OpcodeDecompiler {
         } else if (block_section instanceof WhileBlockSection) {
             WhileBlockSection whileblock = (WhileBlockSection) block_section;
             StatementBlock body = new StatementBlock(StatementBlock.Type.WHILE, block.getLocals());
+            Deque<Instruction> body_stack = new ArrayDeque<>();
             for (BlockSection body_section : whileblock.body) {
-                appendBlock(body_section, body);
+                appendBlock(body_section, body, body_stack);
             }
+            checkState(body_stack.isEmpty());
             if (!block.getStatements().isEmpty()) {
                 Statement last = block.getStatements().get(block.getStatements().size() - 1);
                 if (last instanceof LocalAssignment) {
@@ -1058,9 +1156,11 @@ public class OpcodeDecompiler {
         } else if (block_section instanceof DoWhileBlockSection) {
             DoWhileBlockSection dowhileblock = (DoWhileBlockSection) block_section;
             StatementBlock body = new StatementBlock(StatementBlock.Type.WHILE, block.getLocals());
+            Deque<Instruction> body_stack = new ArrayDeque<>();
             for (BlockSection body_section : dowhileblock.body) {
-                appendBlock(body_section, body);
+                appendBlock(body_section, body, body_stack);
             }
+            checkState(body_stack.isEmpty());
             DoWhile dowhile = new DoWhile(dowhileblock.condition, body);
             block.append(dowhile);
         } else if (block_section instanceof SwitchBlockSection) {
@@ -1069,12 +1169,30 @@ public class OpcodeDecompiler {
             Switch sswitch = new Switch(stack.pop());
             for (SwitchCaseBlockSection cs : ts.cases) {
                 StatementBlock body = new StatementBlock(StatementBlock.Type.SWITCH, block.getLocals());
+                Deque<Instruction> body_stack = new ArrayDeque<>();
                 for (BlockSection body_section : cs.body) {
-                    appendBlock(body_section, body);
+                    appendBlock(body_section, body, body_stack);
                 }
+                checkState(body_stack.isEmpty());
                 sswitch.new Case(body, cs.breaks, cs.isDefault, cs.targets);
             }
             block.append(sswitch);
+        } else if (block_section instanceof TernaryBlockSection) {
+            TernaryBlockSection ts = (TernaryBlockSection) block_section;
+            StatementBlock dummy = new StatementBlock(StatementBlock.Type.IF, block.getLocals());
+            Deque<Instruction> dummy_stack = new ArrayDeque<>();
+            for (BlockSection sec : ts.true_body) {
+                appendBlock(sec, dummy, dummy_stack);
+            }
+            checkState(dummy_stack.size() == 1);
+            Instruction true_val = dummy_stack.pop();
+            for (BlockSection sec : ts.false_body) {
+                appendBlock(sec, dummy, dummy_stack);
+            }
+            checkState(dummy_stack.size() == 1);
+            Instruction false_val = dummy_stack.pop();
+            Ternary ternary = new Ternary(ts.condition, true_val, false_val);
+            stack.push(ternary);
         } else {
             throw new IllegalStateException("Unknown block section " + block_section);
         }
@@ -1796,9 +1914,18 @@ public class OpcodeDecompiler {
         public boolean isDefault;
 
         public SwitchCaseBlockSection() {
-
         }
 
+    }
+
+    private static class TernaryBlockSection extends BlockSection {
+
+        public final List<BlockSection> true_body = new ArrayList<>();
+        public final List<BlockSection> false_body = new ArrayList<>();
+        public Condition condition;
+
+        public TernaryBlockSection() {
+        }
     }
 
 }

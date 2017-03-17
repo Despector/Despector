@@ -333,6 +333,21 @@ public final class AstUtil {
         }
     }
 
+    public static boolean hasStartingRequirement(List<AbstractInsnNode> opcodes) {
+        for (int index = 0; index < opcodes.size(); index++) {
+            AbstractInsnNode next = opcodes.get(index);
+            if (next instanceof LabelNode) {
+                continue;
+            } else if (next instanceof FrameNode) {
+                continue;
+            } else if (next instanceof LineNumberNode) {
+                continue;
+            }
+            return getStackDelta(next) < 0;
+        }
+        return false;
+    }
+
     /**
      * Returns the index of the opcode that is the start of the last statement
      * in the given list of opcodes.
