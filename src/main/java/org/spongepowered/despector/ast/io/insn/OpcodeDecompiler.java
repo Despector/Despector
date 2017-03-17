@@ -973,7 +973,24 @@ public class OpcodeDecompiler {
             Instruction val = dummy_stack.pop();
             return new BooleanCondition(val, false);
         }
-        case IF_ICMPLT: {
+        case IFLT:
+        case IFLE:
+        case IFGT:
+        case IFGE: {
+            if (dummy_stack.size() != 1 || !dummy.getStatements().isEmpty()) {
+                throw new IllegalStateException();
+            }
+            Instruction val = dummy_stack.pop();
+            return new CompareCondition(val, new IntConstantArg(0), CompareCondition.fromOpcode(block.last.getOpcode()));
+        }
+        case IF_ICMPEQ:
+        case IF_ICMPNE:
+        case IF_ICMPLT:
+        case IF_ICMPLE:
+        case IF_ICMPGT:
+        case IF_ICMPGE:
+        case IF_ACMPEQ:
+        case IF_ACMPNE: {
             if (dummy_stack.size() != 2 || !dummy.getStatements().isEmpty()) {
                 throw new IllegalStateException();
             }
