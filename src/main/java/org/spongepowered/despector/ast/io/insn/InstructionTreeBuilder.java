@@ -57,13 +57,13 @@ public final class InstructionTreeBuilder {
             local.setAsParameter();
             if (local.getLVT().isEmpty()) {
                 if (i < offs) {
-                    local.setParameterInstance(new LocalInstance(local, "this", entry.getOwner(), -1, -1));
+                    local.setParameterInstance(new LocalInstance(local, null, "this", entry.getOwner(), -1, -1));
                 } else {
-                    local.setParameterInstance(new LocalInstance(local, "param" + i, param_types.get(i - offs), -1, -1));
+                    local.setParameterInstance(new LocalInstance(local, null, "param" + i, param_types.get(i - offs), -1, -1));
                 }
             } else {
                 LocalVariableNode lvt = local.getLVT().get(0);
-                local.setParameterInstance(new LocalInstance(local, lvt.name, lvt.desc, -1, -1));
+                local.setParameterInstance(new LocalInstance(local, lvt, lvt.name, lvt.desc, -1, -1));
             }
         }
         DecompilerOptions options = new DecompilerOptions();
@@ -87,13 +87,13 @@ public final class InstructionTreeBuilder {
             local.setAsParameter();
             if (local.getLVT().isEmpty()) {
                 if (i < offs) {
-                    local.setParameterInstance(new LocalInstance(local, "this", "Ljava/lang/Object;", -1, -1));
+                    local.setParameterInstance(new LocalInstance(local, null, "this", "Ljava/lang/Object;", -1, -1));
                 } else {
-                    local.setParameterInstance(new LocalInstance(local, "param" + i, param_types.get(i - offs), -1, -1));
+                    local.setParameterInstance(new LocalInstance(local, null, "param" + i, param_types.get(i - offs), -1, -1));
                 }
             } else {
                 LocalVariableNode lvt = local.getLVT().get(0);
-                local.setParameterInstance(new LocalInstance(local, lvt.name, lvt.desc, -1, -1));
+                local.setParameterInstance(new LocalInstance(local, lvt, lvt.name, lvt.desc, -1, -1));
             }
         }
         DecompilerOptions options = new DecompilerOptions();

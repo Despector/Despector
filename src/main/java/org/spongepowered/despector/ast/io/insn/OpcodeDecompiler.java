@@ -91,6 +91,8 @@ import org.spongepowered.despector.ast.members.insn.branch.For;
 import org.spongepowered.despector.ast.members.insn.branch.If;
 import org.spongepowered.despector.ast.members.insn.branch.Switch;
 import org.spongepowered.despector.ast.members.insn.branch.Ternary;
+import org.spongepowered.despector.ast.members.insn.branch.TryCatch;
+import org.spongepowered.despector.ast.members.insn.branch.TryCatch.CatchBlock;
 import org.spongepowered.despector.ast.members.insn.branch.While;
 import org.spongepowered.despector.ast.members.insn.branch.condition.AndCondition;
 import org.spongepowered.despector.ast.members.insn.branch.condition.BooleanCondition;
@@ -110,6 +112,7 @@ import org.spongepowered.despector.util.TypeHelper;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Deque;
 import java.util.HashMap;
@@ -148,13 +151,12 @@ public class OpcodeDecompiler {
 
         // Form a graph by breaking up the opcodes at every jump and every label
         // targetted by another jump.
-        List<OpcodeBlock> graph = makeGraph(ops, label_indices);
+        List<OpcodeBlock> graph = makeGraph(ops, label_indices, tryCatchBlocks, locals);
         // Perform some cleanup on the graph like removing blocks containing
         // only labels and splitting the opcodes associated with a jump away
         // from opcodes for statements preceeding the control flow statement.
         cleanupGraph(graph, locals);
 
-        // TODO: remove debug
         for (OpcodeBlock b : graph) {
             b.print();
         }
@@ -174,7 +176,8 @@ public class OpcodeDecompiler {
     }
 
     @SuppressWarnings("unchecked")
-    private static List<OpcodeBlock> makeGraph(List<AbstractInsnNode> instructions, Map<Label, Integer> label_indices) {
+    private static List<OpcodeBlock> makeGraph(List<AbstractInsnNode> instructions, Map<Label, Integer> label_indices,
+            List<TryCatchBlockNode> tryCatchBlocks, Locals locals) {
         Set<Integer> break_points = new HashSet<>();
 
         // Loop through and mark all jumo and return opcodes as break points
@@ -207,6 +210,31 @@ public class OpcodeDecompiler {
                 break_points.add(i);
             }
         }
+
+        for (TryCatchBlockNode tc : tryCatchBlocks) {
+            break_points.add(label_indices.get(tc.start.getLabel()));
+            break_points.add(label_indices.get(tc.end.getLabel()));
+            break_points.add(label_indices.get(tc.handler.getLabel()));
+
+            LocalInstance local = null;
+            for (int i = label_indices.get(tc.handler.getLabel()) + 1; i < instructions.size(); i++) {
+                AbstractInsnNode next = instructions.get(i);
+                if (next instanceof LabelNode) {
+                    local = locals.findLocal(((LabelNode) next).getLabel(), "L" + tc.type + ";");
+                    if (local == null) {
+                        local = locals.findLocal(((LabelNode) next).getLabel(), "Ljava/lang/RuntimeException;");
+                        if (local == null) {
+                            local = locals.findLocal(((LabelNode) next).getLabel(), "Ljava/lang/Exception;");
+                        }
+                    }
+                    break;
+                }
+            }
+            if (local.getEnd() < instructions.size() - 1) {
+                break_points.add(local.getEnd());
+            }
+        }
+
         // Sort the break points
         List<Integer> sorted_break_points = new ArrayList<>(break_points);
         sorted_break_points.sort(Comparator.naturalOrder());
@@ -266,7 +294,31 @@ public class OpcodeDecompiler {
                 block.additional_targets.put(label, blocks.get(sorted_break_points.get(sorted_break_points.indexOf(label_indices.get(label)) + 1)));
             }
         }
+        if (!tryCatchBlocks.isEmpty()) {
+            List<OpcodeBlock> fblocks = new ArrayList<>();
+            fblocks.addAll(block_list);
 
+            for (int i = tryCatchBlocks.size() - 1; i >= 0; i--) {
+                TryCatchBlockNode tc = tryCatchBlocks.get(i);
+                OpcodeBlock start = blocks.get(sorted_break_points.get(sorted_break_points.indexOf(label_indices.get(tc.start.getLabel())) + 1));
+                OpcodeBlock end = blocks.get(sorted_break_points.get(sorted_break_points.indexOf(label_indices.get(tc.end.getLabel())) + 1));
+                OpcodeBlock handler = blocks.get(sorted_break_points.get(sorted_break_points.indexOf(label_indices.get(tc.handler.getLabel())) + 1));
+                TryCatchMarkerOpcodeBlock start_marker = new TryCatchMarkerOpcodeBlock(TryCatchMarkerType.START, tc);
+                TryCatchMarkerOpcodeBlock end_marker = new TryCatchMarkerOpcodeBlock(TryCatchMarkerType.END, tc);
+                TryCatchMarkerOpcodeBlock handler_marker = new TryCatchMarkerOpcodeBlock(TryCatchMarkerType.CATCH, tc);
+                start_marker.end = end_marker;
+                start_marker.handler = handler_marker;
+                end_marker.start = start_marker;
+                end_marker.handler = handler_marker;
+                handler_marker.start = start_marker;
+                handler_marker.end = end_marker;
+                fblocks.add(fblocks.indexOf(start), start_marker);
+                fblocks.add(fblocks.indexOf(end), end_marker);
+                fblocks.add(fblocks.indexOf(handler), handler_marker);
+            }
+
+            return fblocks;
+        }
         return block_list;
     }
 
@@ -290,6 +342,9 @@ public class OpcodeDecompiler {
     private static void cleanupGraph(List<OpcodeBlock> blocks, Locals locals) {
         for (Iterator<OpcodeBlock> it = blocks.iterator(); it.hasNext();) {
             OpcodeBlock block = it.next();
+            if (block instanceof TryCatchMarkerOpcodeBlock) {
+                continue;
+            }
             if (AstUtil.isEmptyOfLogic(block.opcodes) && block.last == null) {
                 // some conditions can create an empty block as a breakpoint
                 // gets inserted on either side of a label immediately following
@@ -479,16 +534,139 @@ public class OpcodeDecompiler {
         // don't miss any parts of the control flow statement.
 
         // start by pre-decompiling ternaries
+        int skip = 0;
         for (int i = 0; i < blocks.size(); i++) {
             OpcodeBlock block = blocks.get(i);
+            if (block instanceof TryCatchMarkerOpcodeBlock) {
+                TryCatchMarkerOpcodeBlock t = (TryCatchMarkerOpcodeBlock) block;
+                if (t.marker_type == TryCatchMarkerType.CATCH) {
+                    skip = 1;
+                }
+            }
             if (AstUtil.hasStartingRequirement(block.opcodes)) {
-                compileTernary(blocks, i, locals);
+                if (skip == 0) {
+                    compileTernary(blocks, i, locals);
+                } else {
+                    skip = 0;
+                }
             }
         }
 
         for (int i = 0; i < blocks.size(); i++) {
             OpcodeBlock region_start = blocks.get(i);
-            if (region_start.internal != null) {
+            if (region_start instanceof TryCatchMarkerOpcodeBlock) {
+                TryCatchMarkerOpcodeBlock marker = (TryCatchMarkerOpcodeBlock) region_start;
+                checkState(marker.marker_type == TryCatchMarkerType.START);
+                List<OpcodeBlock> body = new ArrayList<>();
+                List<TryCatchMarkerOpcodeBlock> allEnds = new ArrayList<>();
+
+                for (int l = blocks.indexOf(marker.end); l < blocks.size(); l++) {
+                    OpcodeBlock next_end = blocks.get(l);
+                    if (!(next_end instanceof TryCatchMarkerOpcodeBlock)) {
+                        break;
+                    }
+                    TryCatchMarkerOpcodeBlock next_marker = (TryCatchMarkerOpcodeBlock) next_end;
+                    checkState(next_marker.marker_type == TryCatchMarkerType.END);
+                    allEnds.add(next_marker);
+                }
+                TryCatchMarkerOpcodeBlock last_start = allEnds.get(allEnds.size() - 1).start;
+                TryCatchMarkerOpcodeBlock first_end = allEnds.get(0);
+                for (int end = blocks.indexOf(last_start) + 1; end < blocks.indexOf(first_end); end++) {
+                    OpcodeBlock next = blocks.get(end);
+                    body.add(next);
+                }
+                int end = blocks.indexOf(allEnds.get(allEnds.size() - 1)) + 1;
+                OpcodeBlock next = blocks.get(end);
+                OpcodeBlock end_of_catch = null;
+                int last_block = -1;
+                if (next.isGoto()) {
+                    end_of_catch = next.target;
+                    last_block = blocks.indexOf(end_of_catch);
+                } else {
+                    body.add(next);
+                }
+                TryCatchBlockSection try_section = new TryCatchBlockSection();
+                try_section.body.addAll(flattenGraph(body, locals));
+                catch_search: while (!allEnds.isEmpty()) {
+                    end++;
+                    next = blocks.get(end);
+                    if (next instanceof TryCatchMarkerOpcodeBlock) {
+                        TryCatchMarkerOpcodeBlock next_marker = (TryCatchMarkerOpcodeBlock) next;
+                        checkState(next_marker.marker_type == TryCatchMarkerType.CATCH);
+                        List<String> extra_exceptions = new ArrayList<>();
+                        for (; end < blocks.size();) {
+                            OpcodeBlock cnext = blocks.get(end++);
+                            if (cnext instanceof TryCatchMarkerOpcodeBlock) {
+                                TryCatchMarkerOpcodeBlock cnext_marker = (TryCatchMarkerOpcodeBlock) cnext;
+                                boolean found = false;
+                                for (Iterator<TryCatchMarkerOpcodeBlock> it = allEnds.iterator(); it.hasNext();) {
+                                    TryCatchMarkerOpcodeBlock t = it.next();
+                                    if (cnext_marker.tc_node == t.tc_node) {
+                                        found = true;
+                                        it.remove();
+                                        break;
+                                    }
+                                }
+                                checkState(found);
+                                extra_exceptions.add(cnext_marker.tc_node.type);
+                            } else {
+                                end--;
+                                break;
+                            }
+                        }
+                        Collections.reverse(extra_exceptions);
+                        int label_index = -1;
+                        int local_num = -1;
+                        OpcodeBlock catch_start = blocks.get(end++);
+                        int k = 0;
+                        for (Iterator<AbstractInsnNode> it = catch_start.opcodes.iterator(); it.hasNext();) {
+                            AbstractInsnNode op = it.next();
+                            if (op.getOpcode() == ASTORE) {
+                                local_num = ((VarInsnNode) op).var;
+                                label_index = catch_start.break_point - (catch_start.opcodes.size() - k);
+                                it.remove();
+                                break;
+                            }
+                            k++;
+                        }
+                        checkState(local_num != -1);
+                        Locals.LocalInstance local = locals.getLocal(local_num).getInstance(label_index);
+                        List<OpcodeBlock> catch_body = new ArrayList<>();
+                        catch_body.add(catch_start);
+                        if (end_of_catch != null && last_block != -1) {
+                            for (int j = end; j < blocks.size(); j++) {
+                                OpcodeBlock cnext = blocks.get(j);
+                                if (cnext.isGoto() && cnext.target == end_of_catch) {
+                                    break;
+                                } else if (cnext == end_of_catch) {
+                                    allEnds.clear();
+                                    break;
+                                }
+                                catch_body.add(cnext);
+                            }
+                        } else {
+                            // TODO: if we have no lvt I'll need to do some
+                            // backup check of checking where the catch var is
+                            // last used and stopping there
+                            for (int j = end; j < blocks.size(); j++) {
+                                OpcodeBlock cnext = blocks.get(j);
+                                if (cnext.break_point > local.getEnd()) {
+                                    break;
+                                }
+                                catch_body.add(cnext);
+                            }
+
+                            last_block = blocks.indexOf(catch_body.get(catch_body.size() - 1));
+                        }
+                        CatchBlockSection cblock = new CatchBlockSection(extra_exceptions, local);
+                        cblock.body.addAll(flattenGraph(catch_body, locals));
+                        try_section.catches.add(cblock);
+                    }
+                }
+                final_blocks.add(try_section);
+                i = last_block;
+                continue;
+            } else if (region_start.internal != null) {
                 final_blocks.add(region_start.internal);
                 continue;
             } else if (region_start.isSwitch()) {
@@ -1210,6 +1388,25 @@ public class OpcodeDecompiler {
             Instruction false_val = dummy_stack.pop();
             Ternary ternary = new Ternary(ts.condition, true_val, false_val);
             stack.push(ternary);
+        } else if (block_section instanceof TryCatchBlockSection) {
+            TryCatchBlockSection tc = (TryCatchBlockSection) block_section;
+            StatementBlock body = new StatementBlock(StatementBlock.Type.TRY, block.getLocals());
+            Deque<Instruction> body_stack = new ArrayDeque<>();
+            for (BlockSection body_section : tc.body) {
+                appendBlock(body_section, body, body_stack);
+            }
+            checkState(body_stack.isEmpty());
+            TryCatch ttry = new TryCatch(body);
+            block.append(ttry);
+            for (CatchBlockSection c : tc.catches) {
+                StatementBlock cbody = new StatementBlock(StatementBlock.Type.WHILE, block.getLocals());
+                Deque<Instruction> cbody_stack = new ArrayDeque<>();
+                for (BlockSection body_section : c.body) {
+                    appendBlock(body_section, cbody, cbody_stack);
+                }
+                checkState(cbody_stack.isEmpty());
+                ttry.new CatchBlock(c.exlocal, c.exception, cbody);
+            }
         } else {
             throw new IllegalStateException("Unknown block section " + block_section);
         }
@@ -1837,6 +2034,33 @@ public class OpcodeDecompiler {
 
     }
 
+    private static enum TryCatchMarkerType {
+        START,
+        END,
+        CATCH
+    }
+
+    private static class TryCatchMarkerOpcodeBlock extends OpcodeBlock {
+
+        public TryCatchMarkerType marker_type;
+        public TryCatchBlockNode tc_node;
+
+        public TryCatchMarkerOpcodeBlock start;
+        public TryCatchMarkerOpcodeBlock end;
+        public TryCatchMarkerOpcodeBlock handler;
+
+        public TryCatchMarkerOpcodeBlock(TryCatchMarkerType marker, TryCatchBlockNode tc) {
+            this.marker_type = marker;
+            this.tc_node = tc;
+        }
+
+        @Override
+        public void print() {
+            System.out.println("TryCatch marker: " + this.marker_type.name());
+            System.out.println("    part of " + this.tc_node);
+        }
+    }
+
     public static class ConditionGraphNode {
 
         public Condition condition;
@@ -1942,6 +2166,27 @@ public class OpcodeDecompiler {
         public Condition condition;
 
         public TernaryBlockSection() {
+        }
+    }
+
+    private static class TryCatchBlockSection extends BlockSection {
+
+        public final List<BlockSection> body = new ArrayList<>();
+        public final List<CatchBlockSection> catches = new ArrayList<>();
+
+        public TryCatchBlockSection() {
+        }
+    }
+
+    public static class CatchBlockSection {
+
+        public Locals.LocalInstance exlocal;
+        public final List<String> exception = new ArrayList<>();
+        public final List<BlockSection> body = new ArrayList<>();
+
+        public CatchBlockSection(List<String> ex, Locals.LocalInstance local) {
+            this.exception.addAll(ex);
+            this.exlocal = local;
         }
     }
 

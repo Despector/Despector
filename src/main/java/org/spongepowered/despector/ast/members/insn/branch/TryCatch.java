@@ -39,7 +39,7 @@ import javax.annotation.Nullable;
 public class TryCatch implements Statement {
 
     private StatementBlock block;
-    private final List<CatchBlock> catch_blocks = Lists.newArrayList();
+    final List<CatchBlock> catch_blocks = Lists.newArrayList();
 
     public TryCatch(StatementBlock block) {
         this.block = checkNotNull(block, "block");
@@ -80,6 +80,7 @@ public class TryCatch implements Statement {
             this.dummy_name = null;
             this.exceptions = ex;
             this.block = block;
+            TryCatch.this.catch_blocks.add(this);
         }
 
         public CatchBlock(String dummy_name, List<String> ex, StatementBlock block) {
@@ -87,6 +88,7 @@ public class TryCatch implements Statement {
             this.dummy_name = checkNotNull(dummy_name, "name");
             this.exceptions = ex;
             this.block = block;
+            TryCatch.this.catch_blocks.add(this);
         }
 
         @Nullable

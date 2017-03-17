@@ -356,16 +356,17 @@ public class BranchTest {
     @Test
     public void testLookupSwitch() throws IOException {
         String insn = TestHelper.getAsString(getClass(), "mth_lookupswitch");
-        String good = "switch (org.spongepowered.test.ast.BranchTest.$SWITCH_TABLE$org$spongepowered$test$ast$BranchTest$TestEnum()[ie.ordinal()]) {\n"
-                + "case 1:\n"
-                + "    System.out.println(a);\n"
-                + "    break;\n"
-                + "case 8:\n"
-                + "    System.out.println(c);\n"
-                + "    break;\n"
-                + "default:\n"
-                + "    System.out.println(d);\n"
-                + "}";
+        String good =
+                "switch (org.spongepowered.test.ast.BranchTest.$SWITCH_TABLE$org$spongepowered$test$ast$BranchTest$TestEnum()[ie.ordinal()]) {\n"
+                        + "case 1:\n"
+                        + "    System.out.println(a);\n"
+                        + "    break;\n"
+                        + "case 8:\n"
+                        + "    System.out.println(c);\n"
+                        + "    break;\n"
+                        + "default:\n"
+                        + "    System.out.println(d);\n"
+                        + "}";
         assertEquals(good, insn);
     }
 

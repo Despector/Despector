@@ -98,6 +98,16 @@ public class Locals {
         return name;
     }
 
+    public LocalInstance findLocal(Label start, String type) {
+        for (Local local : this.locals) {
+            LocalInstance i = local.find(start, type);
+            if (i != null) {
+                return i;
+            }
+        }
+        return null;
+    }
+
     /**
      * A helper object for a specific local.
      */
@@ -136,13 +146,13 @@ public class Locals {
         public void bakeInstances(Map<Label, Integer> label_indices) {
             if (this.lvt.isEmpty()) {
                 if (this.index == 0) {
-                    this.instances.add(new LocalInstance(this, "this", "", -1, Short.MAX_VALUE));
+                    this.instances.add(new LocalInstance(this, null, "this", "", -1, Short.MAX_VALUE));
                 }
             }
             for (LocalVariableNode l : this.lvt) {
                 int start = label_indices.get(l.start.getLabel());
                 int end = label_indices.get(l.end.getLabel());
-                LocalInstance insn = new LocalInstance(this, l.name, l.desc, start - 1, end);
+                LocalInstance insn = new LocalInstance(this, l, l.name, l.desc, start - 1, end);
                 if (l.signature != null) {
                     String[] generics = TypeHelper.getGenericContents(l.signature);
                     insn.setGenericTypes(generics);
@@ -171,6 +181,20 @@ public class Locals {
             this.parameter_instance = insn;
         }
 
+        public LocalInstance find(Label start, String type) {
+            for (LocalVariableNode lvn : this.lvt) {
+                if (lvn.start.getLabel() == start && lvn.desc.equals(type)) {
+                    for (LocalInstance i : this.instances) {
+                        if (lvn == i.getLVN()) {
+                            return i;
+                        }
+                    }
+                    throw new IllegalStateException();
+                }
+            }
+            return null;
+        }
+
         @Override
         public String toString() {
             return "Local" + this.index;
@@ -186,17 +210,23 @@ public class Locals {
         private int start;
         private int end;
         private String[] generics = null;
+        private LocalVariableNode lvn;
 
-        public LocalInstance(Local l, String n, String t, int start, int end) {
+        public LocalInstance(Local l, LocalVariableNode lvn, String n, String t, int start, int end) {
             this.local = l;
             this.name = n;
             this.type = t;
             this.start = start;
             this.end = end;
+            this.lvn = lvn;
         }
 
         public Local getLocal() {
             return this.local;
+        }
+
+        public LocalVariableNode getLVN() {
+            return this.lvn;
         }
 
         public int getIndex() {

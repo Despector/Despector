@@ -139,4 +139,31 @@ public class TryCatchTest {
         assertEquals(good, insn);
     }
 
+    public void mth_nestedtrycatch(int i, Object o) {
+        try {
+            try {
+                i = o.hashCode();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        } catch (NullPointerException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Test
+    public void testmth_nestedtrycatch() throws IOException {
+        String insn = TestHelper.getAsString(getClass(), "mth_nestedtrycatch");
+        String good = "try {\n"
+                + "    try {\n"
+                + "        i = o.hashCode();\n"
+                + "    } catch (Exception e) {\n"
+                + "        e.printStackTrace();\n"
+                + "    }\n"
+                + "} catch (NullPointerException e) {\n"
+                + "    e.printStackTrace();\n"
+                + "}";
+        assertEquals(good, insn);
+    }
+
 }
