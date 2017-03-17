@@ -42,6 +42,7 @@ import org.objectweb.asm.tree.JumpInsnNode;
 import org.objectweb.asm.tree.LabelNode;
 import org.objectweb.asm.tree.LdcInsnNode;
 import org.objectweb.asm.tree.LineNumberNode;
+import org.objectweb.asm.tree.LookupSwitchInsnNode;
 import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.TableSwitchInsnNode;
 import org.objectweb.asm.tree.TryCatchBlockNode;
@@ -185,10 +186,16 @@ public class OpcodeDecompiler {
                 // after it
                 break_points.add(label_indices.get(((JumpInsnNode) next).label.getLabel()));
                 continue;
-            }
-            if (next instanceof TableSwitchInsnNode) {
+            } else if (next instanceof TableSwitchInsnNode) {
                 break_points.add(i);
                 TableSwitchInsnNode ts = (TableSwitchInsnNode) next;
+                for (LabelNode l : (List<LabelNode>) ts.labels) {
+                    break_points.add(label_indices.get(l.getLabel()));
+                }
+                break_points.add(label_indices.get(ts.dflt.getLabel()));
+            } else if (next instanceof LookupSwitchInsnNode) {
+                break_points.add(i);
+                LookupSwitchInsnNode ts = (LookupSwitchInsnNode) next;
                 for (LabelNode l : (List<LabelNode>) ts.labels) {
                     break_points.add(label_indices.get(l.getLabel()));
                 }
@@ -240,6 +247,15 @@ public class OpcodeDecompiler {
                 }
             } else if (block.last instanceof TableSwitchInsnNode) {
                 TableSwitchInsnNode ts = (TableSwitchInsnNode) block.last;
+                for (LabelNode l : (List<LabelNode>) ts.labels) {
+                    Label label = l.getLabel();
+                    block.additional_targets.put(label,
+                            blocks.get(sorted_break_points.get(sorted_break_points.indexOf(label_indices.get(label)) + 1)));
+                }
+                Label label = ts.dflt.getLabel();
+                block.additional_targets.put(label, blocks.get(sorted_break_points.get(sorted_break_points.indexOf(label_indices.get(label)) + 1)));
+            } else if (block.last instanceof LookupSwitchInsnNode) {
+                LookupSwitchInsnNode ts = (LookupSwitchInsnNode) block.last;
                 for (LabelNode l : (List<LabelNode>) ts.labels) {
                     Label label = l.getLabel();
                     block.additional_targets.put(label,
@@ -387,24 +403,39 @@ public class OpcodeDecompiler {
         for (int i = 0; i < blocks.size(); i++) {
             OpcodeBlock region_start = blocks.get(i);
             if (region_start.isSwitch()) {
-                if (region_start.last instanceof TableSwitchInsnNode) {
-                    TableSwitchInsnNode ts = (TableSwitchInsnNode) region_start.last;
+                if (region_start.last instanceof TableSwitchInsnNode || region_start.last instanceof LookupSwitchInsnNode) {
+                    List<LabelNode> labels = null;
+                    List<Integer> keys = null;
+                    LabelNode dflt = null;
+                    if (region_start.last instanceof TableSwitchInsnNode) {
+                        TableSwitchInsnNode ts = (TableSwitchInsnNode) region_start.last;
+                        labels = ts.labels;
+                        dflt = ts.dflt;
+                        keys = new ArrayList<>();
+                        for (int k = ts.min; k <= ts.max; k++) {
+                            keys.add(k);
+                        }
+                    } else if (region_start.last instanceof LookupSwitchInsnNode) {
+                        LookupSwitchInsnNode ts = (LookupSwitchInsnNode) region_start.last;
+                        labels = ts.labels;
+                        dflt = ts.dflt;
+                        keys = ts.keys;
+                    }
                     SwitchBlockSection sswitch = new SwitchBlockSection(region_start);
                     final_blocks.add(sswitch);
                     Map<Label, SwitchCaseBlockSection> cases = new HashMap<>();
                     int index = 0;
                     OpcodeBlock end = null;
-                    for (LabelNode l : (List<LabelNode>) ts.labels) {
+                    for (LabelNode l : labels) {
                         SwitchCaseBlockSection cs = cases.get(l.getLabel());
                         if (cs != null) {
-                            cs.targets.add(index);
+                            cs.targets.add(keys.get(index++));
                             continue;
                         }
                         cs = new SwitchCaseBlockSection();
-                        cs.targets.add(index);
                         sswitch.cases.add(cs);
                         cases.put(l.getLabel(), cs);
-                        index++;
+                        cs.targets.add(keys.get(index++));
                         List<OpcodeBlock> case_region = new ArrayList<>();
                         OpcodeBlock block = region_start.additional_targets.get(l.getLabel());
                         case_region.add(block);
@@ -426,17 +457,17 @@ public class OpcodeDecompiler {
                         cs.body.addAll(flattenGraph(case_region, locals));
                     }
                     {
-                        SwitchCaseBlockSection cs = cases.get(ts.dflt.getLabel());
+                        SwitchCaseBlockSection cs = cases.get(dflt.getLabel());
                         if (cs != null) {
                             cs.isDefault = true;
                             cs.targets.add(index);
                             continue;
                         }
                         cs = new SwitchCaseBlockSection();
-                        cases.put(ts.dflt.getLabel(), cs);
+                        cases.put(dflt.getLabel(), cs);
                         sswitch.cases.add(cs);
                         List<OpcodeBlock> case_region = new ArrayList<>();
-                        OpcodeBlock block = region_start.additional_targets.get(ts.dflt.getLabel());
+                        OpcodeBlock block = region_start.additional_targets.get(dflt.getLabel());
                         case_region.add(block);
                         int start = blocks.indexOf(block) + 1;
                         block = blocks.get(start);
@@ -1036,7 +1067,7 @@ public class OpcodeDecompiler {
             SwitchBlockSection ts = (SwitchBlockSection) block_section;
             appendBlock(ts.switchblock, block, block.getLocals(), stack);
             Switch sswitch = new Switch(stack.pop());
-            for(SwitchCaseBlockSection cs: ts.cases) {
+            for (SwitchCaseBlockSection cs : ts.cases) {
                 StatementBlock body = new StatementBlock(StatementBlock.Type.SWITCH, block.getLocals());
                 for (BlockSection body_section : cs.body) {
                     appendBlock(body_section, body);

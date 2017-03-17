@@ -196,21 +196,6 @@ public class BranchTest {
         assertEquals(good, insn);
     }
 
-    public void mth_if12(int i, boolean a, boolean b, boolean c, boolean d, boolean e, boolean f) {
-        if ((a && (c || e)) || (b || (d && f))) {
-            i += 5;
-        }
-    }
-
-    @Test
-    public void testIfThatsKindOfFucked() throws IOException {
-        String insn = TestHelper.getAsString(getClass(), "mth_if12");
-        String good = "if (a && (c || e) || b || d && f) {\n"
-                + "    i += 5;\n"
-                + "}";
-        assertEquals(good, insn);
-    }
-
     public void mth_ifelse(int i, boolean a, boolean b, boolean c, boolean d, boolean e, boolean f) {
         if (a) {
             System.out.println(c);
@@ -371,11 +356,11 @@ public class BranchTest {
     @Test
     public void testLookupSwitch() throws IOException {
         String insn = TestHelper.getAsString(getClass(), "mth_lookupswitch");
-        String good = "switch (ie) {\n"
-                + "case ONE:\n"
+        String good = "switch (org.spongepowered.test.ast.BranchTest.$SWITCH_TABLE$org$spongepowered$test$ast$BranchTest$TestEnum()[ie.ordinal()]) {\n"
+                + "case 1:\n"
                 + "    System.out.println(a);\n"
                 + "    break;\n"
-                + "case EIGHT:\n"
+                + "case 8:\n"
                 + "    System.out.println(c);\n"
                 + "    break;\n"
                 + "default:\n"
@@ -406,10 +391,10 @@ public class BranchTest {
         // cleanup the switch condition and cases.
         String good =
                 "switch (org.spongepowered.test.ast.BranchTest.$SWITCH_TABLE$org$spongepowered$test$ast$BranchTest$TestEnum()[ie.ordinal()]) {\n"
-                        + "case 0:\n"
+                        + "case 1:\n"
                         + "    System.out.println(a);\n"
                         + "    break;\n"
-                        + "case 1:\n"
+                        + "case 2:\n"
                         + "    System.out.println(c);\n"
                         + "    break;\n"
                         + "default:\n"
