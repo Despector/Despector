@@ -24,7 +24,12 @@
  */
 package org.spongepowered.despector.decompiler;
 
-import static org.objectweb.asm.Opcodes.*;
+import static org.objectweb.asm.Opcodes.ACC_ABSTRACT;
+import static org.objectweb.asm.Opcodes.ACC_ENUM;
+import static org.objectweb.asm.Opcodes.ACC_FINAL;
+import static org.objectweb.asm.Opcodes.ACC_INTERFACE;
+import static org.objectweb.asm.Opcodes.ACC_STATIC;
+import static org.objectweb.asm.Opcodes.ACC_SYNTHETIC;
 
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.tree.AbstractInsnNode;
@@ -44,7 +49,8 @@ import org.spongepowered.despector.ast.type.EnumEntry;
 import org.spongepowered.despector.ast.type.InterfaceEntry;
 import org.spongepowered.despector.ast.type.TypeEntry;
 import org.spongepowered.despector.config.ConfigManager;
-import org.spongepowered.despector.emitter.SourceEmitter;
+import org.spongepowered.despector.emitter.EmitterContext;
+import org.spongepowered.despector.emitter.Emitters;
 import org.spongepowered.despector.emitter.format.EmitterFormat;
 import org.spongepowered.despector.util.AstUtil;
 import org.spongepowered.despector.util.TypeHelper;
@@ -166,8 +172,10 @@ public class SingularClassLoader {
         }
         if (ConfigManager.getConfig().emit_source_on_load) {
             PrintWriter out = new PrintWriter(System.out);
-            SourceEmitter emitter = new SourceEmitter(out, EmitterFormat.defaults());
-            emitter.emitType(entry);
+            EmitterContext emitter = new EmitterContext(Emitters.JAVA, out, EmitterFormat.defaults());
+            emitter.enableBuffer();
+            emitter.emit(entry);
+            emitter.outputBuffer();
             out.flush();
         }
         return entry;

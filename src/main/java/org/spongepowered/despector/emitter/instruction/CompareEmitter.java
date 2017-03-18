@@ -22,26 +22,21 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.despector.emitter;
+package org.spongepowered.despector.emitter.instruction;
 
-import org.spongepowered.despector.ast.members.MethodEntry;
-import org.spongepowered.despector.ast.type.TypeEntry;
+import org.spongepowered.despector.ast.members.insn.arg.CompareArg;
+import org.spongepowered.despector.emitter.EmitterContext;
+import org.spongepowered.despector.emitter.InstructionEmitter;
 
-/**
- * An emitter which converts an AST to some more common format, usually source
- * code.
- */
-public interface ClassEmitter {
+public class CompareEmitter implements InstructionEmitter<CompareArg>{
 
-    /**
-     * Emits the given type.
-     */
-    void emitType(TypeEntry type);
-
-    /**
-     * Emits the given method. This returns whether anything was emitted.
-     * Methods which are synthetic may not be emitted.
-     */
-    boolean emitMethod(MethodEntry method);
+    @Override
+    public void emit(EmitterContext ctx, CompareArg arg, String type) {
+        ctx.printString("Integer.signum(");
+        ctx.emit(arg.getRightOperand(), arg.inferType());
+        ctx.printString(" - ");
+        ctx.emit(arg.getLeftOperand(), arg.inferType());
+        ctx.printString(")");
+    }
 
 }

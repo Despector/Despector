@@ -397,7 +397,7 @@ public class BranchTest {
     public void testLookupSwitch() throws IOException {
         String insn = TestHelper.getAsString(getClass(), "mth_lookupswitch");
         String good =
-                "switch (org.spongepowered.test.ast.BranchTest.$SWITCH_TABLE$org$spongepowered$test$ast$BranchTest$TestEnum()[ie.ordinal()]) {\n"
+                "switch (BranchTest.$SWITCH_TABLE$org$spongepowered$test$ast$BranchTest$TestEnum()[ie.ordinal()]) {\n"
                         + "case 1:\n"
                         + "    System.out.println(a);\n"
                         + "    break;\n"
@@ -431,7 +431,7 @@ public class BranchTest {
         // single methods and therefore the emitter lacks the information to
         // cleanup the switch condition and cases.
         String good =
-                "switch (org.spongepowered.test.ast.BranchTest.$SWITCH_TABLE$org$spongepowered$test$ast$BranchTest$TestEnum()[ie.ordinal()]) {\n"
+                "switch (BranchTest.$SWITCH_TABLE$org$spongepowered$test$ast$BranchTest$TestEnum()[ie.ordinal()]) {\n"
                         + "case 1:\n"
                         + "    System.out.println(a);\n"
                         + "    break;\n"

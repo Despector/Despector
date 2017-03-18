@@ -32,7 +32,8 @@ import org.spongepowered.despector.config.ConfigManager;
 import org.spongepowered.despector.decompiler.DirectoryWalker;
 import org.spongepowered.despector.decompiler.JarWalker;
 import org.spongepowered.despector.decompiler.SingularClassLoader;
-import org.spongepowered.despector.emitter.SourceEmitter;
+import org.spongepowered.despector.emitter.EmitterContext;
+import org.spongepowered.despector.emitter.Emitters;
 import org.spongepowered.despector.emitter.format.EmitterFormat;
 import org.spongepowered.despector.emitter.format.FormatLoader;
 import org.spongepowered.despector.transform.TypeTransformer;
@@ -64,6 +65,7 @@ public class Main {
             System.out.println("Usage: java -jar Despector.jar [sources...] [destination]");
             return;
         }
+
         List<String> sources = Lists.newArrayList();
         outer: for (int i = 0; i < args.length - 1; i++) {
             if (args[i].startsWith("-")) {
@@ -146,8 +148,10 @@ public class Main {
                 Files.createDirectories(out.getParent());
             }
             try (FileWriter writer = new FileWriter(out.toFile())) {
-                SourceEmitter emitter = new SourceEmitter(writer, formatter);
-                emitter.emitType(type);
+                EmitterContext emitter = new EmitterContext(Emitters.JAVA, writer, formatter);
+                emitter.enableBuffer();
+                emitter.emit(type);
+                emitter.outputBuffer();
             }
         }
 

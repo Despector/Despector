@@ -31,7 +31,8 @@ import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.MethodNode;
 import org.spongepowered.despector.ast.members.insn.StatementBlock;
 import org.spongepowered.despector.decompiler.InstructionTreeBuilder;
-import org.spongepowered.despector.emitter.SourceEmitter;
+import org.spongepowered.despector.emitter.EmitterContext;
+import org.spongepowered.despector.emitter.Emitters;
 import org.spongepowered.despector.emitter.format.EmitterFormat;
 import org.spongepowered.despector.util.AstUtil;
 
@@ -44,7 +45,7 @@ import java.util.List;
 import java.util.Map;
 
 public class TestHelper {
-
+    
     private static final Map<Class<?>, ClassNode> cached_types = Maps.newHashMap();
 
     @SuppressWarnings("unchecked")
@@ -121,7 +122,7 @@ public class TestHelper {
             return "";
         }
         StringWriter writer = new StringWriter();
-        SourceEmitter emitter = new SourceEmitter(writer, EmitterFormat.defaults());
+        EmitterContext emitter = new EmitterContext(Emitters.JAVA, writer, EmitterFormat.defaults());
         emitter.emitBody(insns);
         return writer.toString();
     }
