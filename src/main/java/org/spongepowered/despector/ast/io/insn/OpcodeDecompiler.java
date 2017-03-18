@@ -123,15 +123,15 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * The opcode decompiler which takes as input a list of opcode instructions and produces a complete ast.
+ * The opcode decompiler which takes as input a list of opcode instructions and
+ * produces a complete ast.
  * 
- * <p>
- * The paper 'No More Gotos: Decompilation Using Pattern-Independent Control-Flow Structuring and
- * Semantics-Preserving Transformations' by Yakdan, Eschweiler, Gerhards-Padilla, and Smith would be a helpful
- * resource for anyone looking to understand the code here. While not implemented exactly word for word you
- * will find many similar concepts used here. It can be found at
- * http://www.internetsociety.org/sites/default/files/11_4_2.pdf.
- * </p>
+ * <p> The paper 'No More Gotos: Decompilation Using Pattern-Independent
+ * Control-Flow Structuring and Semantics-Preserving Transformations' by Yakdan,
+ * Eschweiler, Gerhards-Padilla, and Smith would be a helpful resource for
+ * anyone looking to understand the code here. While not implemented exactly
+ * word for word you will find many similar concepts used here. It can be found
+ * at http://www.internetsociety.org/sites/default/files/11_4_2.pdf. </p>
  */
 public class OpcodeDecompiler {
 
@@ -539,21 +539,20 @@ public class OpcodeDecompiler {
         // don't miss any parts of the control flow statement.
 
         // start by pre-decompiling ternaries
-        int skip = 0;
-        for (int i = 0; i < blocks.size() - stop_offs; i++) {
+        for (int i = 0; i < blocks.size(); i++) {
             OpcodeBlock block = blocks.get(i);
             if (block instanceof TryCatchMarkerOpcodeBlock) {
-                TryCatchMarkerOpcodeBlock t = (TryCatchMarkerOpcodeBlock) block;
-                if (t.marker_type == TryCatchMarkerType.CATCH) {
-                    skip = 1;
+                TryCatchMarkerOpcodeBlock tc = (TryCatchMarkerOpcodeBlock) block;
+                if (tc.marker_type != TryCatchMarkerType.START) {
+                    blocks.get(i + 1).exclude_from_ternary_check = true;
                 }
             }
-            if (AstUtil.hasStartingRequirement(block.opcodes)) {
-                if (skip == 0) {
-                    compileTernary(blocks, i, locals);
-                } else {
-                    skip = 0;
-                }
+        }
+        for (int i = 0; i < blocks.size() - stop_offs; i++) {
+            OpcodeBlock block = blocks.get(i);
+            if (!block.exclude_from_ternary_check && (AstUtil.hasStartingRequirement(block.opcodes)
+                    || (block.last != null && AstUtil.isEmptyOfLogic(block.opcodes) && AstUtil.getStackDelta(block.last) < 0))) {
+                compileTernary(blocks, i, locals);
             }
         }
 
@@ -819,7 +818,7 @@ public class OpcodeDecompiler {
         int subregion_search_end = 1;
         boolean is_first_condition = true;
         OpcodeBlock sstart = region.get(0);
-        if(sstart.isGoto()) {
+        if (sstart.isGoto()) {
             subregion_search_end = region.size() - region.indexOf(sstart.target);
         }
         for (int i = body_start; i < region.size() - subregion_search_end; i++) {
@@ -2029,15 +2028,16 @@ public class OpcodeDecompiler {
 
         // TODO split this up into a few types for jumps, switches, decompiled,
         // and normal blocks
-        public int                           break_point;
-        public final List<AbstractInsnNode>  opcodes            = new ArrayList<>();
-        public AbstractInsnNode              last;
-        public OpcodeBlock                   target;
-        public OpcodeBlock                   else_target;
+        public int break_point;
+        public final List<AbstractInsnNode> opcodes = new ArrayList<>();
+        public AbstractInsnNode last;
+        public OpcodeBlock target;
+        public OpcodeBlock else_target;
         public final Map<Label, OpcodeBlock> additional_targets = new HashMap<>();
 
-        public Set<OpcodeBlock>              targetted_by       = new HashSet<>();
-        public BlockSection                  internal           = null;
+        public Set<OpcodeBlock> targetted_by = new HashSet<>();
+        public BlockSection internal = null;
+        public boolean exclude_from_ternary_check = false;
 
         public OpcodeBlock() {
 
@@ -2083,8 +2083,8 @@ public class OpcodeDecompiler {
 
     private static class TryCatchMarkerOpcodeBlock extends OpcodeBlock {
 
-        public TryCatchMarkerType        marker_type;
-        public TryCatchBlockNode         tc_node;
+        public TryCatchMarkerType marker_type;
+        public TryCatchBlockNode tc_node;
 
         public TryCatchMarkerOpcodeBlock start;
         public TryCatchMarkerOpcodeBlock end;
@@ -2104,12 +2104,12 @@ public class OpcodeDecompiler {
 
     public static class ConditionGraphNode {
 
-        public Condition          condition;
+        public Condition condition;
         public ConditionGraphNode target;
         public ConditionGraphNode else_target;
-        public OpcodeBlock        source;
+        public OpcodeBlock source;
 
-        public List<Condition>    partial_conditions = new ArrayList<>();
+        public List<Condition> partial_conditions = new ArrayList<>();
 
         public ConditionGraphNode(Condition c, ConditionGraphNode t, ConditionGraphNode e, OpcodeBlock s) {
             this.condition = c;
@@ -2137,10 +2137,10 @@ public class OpcodeDecompiler {
 
     private static class IfBlockSection extends BlockSection {
 
-        public Condition                condition;
-        public final List<BlockSection> body  = new ArrayList<>();
-        public List<BlockSection>       else_ = new ArrayList<>();
-        public List<ElifBlockSection>   elif  = new ArrayList<>();
+        public Condition condition;
+        public final List<BlockSection> body = new ArrayList<>();
+        public List<BlockSection> else_ = new ArrayList<>();
+        public List<ElifBlockSection> elif = new ArrayList<>();
 
         public IfBlockSection(Condition cond) {
             this.condition = cond;
@@ -2149,7 +2149,7 @@ public class OpcodeDecompiler {
 
     private static class ElifBlockSection {
 
-        public Condition                condition;
+        public Condition condition;
         public final List<BlockSection> body = new ArrayList<>();
 
         public ElifBlockSection(Condition cond) {
@@ -2160,7 +2160,7 @@ public class OpcodeDecompiler {
 
     private static class WhileBlockSection extends BlockSection {
 
-        public Condition                condition;
+        public Condition condition;
         public final List<BlockSection> body = new ArrayList<>();
 
         public WhileBlockSection(Condition cond) {
@@ -2170,7 +2170,7 @@ public class OpcodeDecompiler {
 
     private static class DoWhileBlockSection extends BlockSection {
 
-        public Condition                condition;
+        public Condition condition;
         public final List<BlockSection> body = new ArrayList<>();
 
         public DoWhileBlockSection(Condition cond) {
@@ -2180,7 +2180,7 @@ public class OpcodeDecompiler {
 
     private static class SwitchBlockSection extends BlockSection {
 
-        public OpcodeBlock                        switchblock;
+        public OpcodeBlock switchblock;
         public final List<SwitchCaseBlockSection> cases = new ArrayList<>();
 
         public SwitchBlockSection(OpcodeBlock s) {
@@ -2190,10 +2190,10 @@ public class OpcodeDecompiler {
 
     private static class SwitchCaseBlockSection {
 
-        public final List<BlockSection> body    = new ArrayList<>();
-        public final List<Integer>      targets = new ArrayList<>();
-        public boolean                  breaks;
-        public boolean                  isDefault;
+        public final List<BlockSection> body = new ArrayList<>();
+        public final List<Integer> targets = new ArrayList<>();
+        public boolean breaks;
+        public boolean isDefault;
 
         public SwitchCaseBlockSection() {
         }
@@ -2202,9 +2202,9 @@ public class OpcodeDecompiler {
 
     private static class TernaryBlockSection extends BlockSection {
 
-        public final List<BlockSection> true_body  = new ArrayList<>();
+        public final List<BlockSection> true_body = new ArrayList<>();
         public final List<BlockSection> false_body = new ArrayList<>();
-        public Condition                condition;
+        public Condition condition;
 
         public TernaryBlockSection() {
         }
@@ -2212,7 +2212,7 @@ public class OpcodeDecompiler {
 
     private static class TryCatchBlockSection extends BlockSection {
 
-        public final List<BlockSection>      body    = new ArrayList<>();
+        public final List<BlockSection> body = new ArrayList<>();
         public final List<CatchBlockSection> catches = new ArrayList<>();
 
         public TryCatchBlockSection() {
@@ -2221,9 +2221,9 @@ public class OpcodeDecompiler {
 
     public static class CatchBlockSection {
 
-        public Locals.LocalInstance     exlocal;
-        public final List<String>       exception = new ArrayList<>();
-        public final List<BlockSection> body      = new ArrayList<>();
+        public Locals.LocalInstance exlocal;
+        public final List<String> exception = new ArrayList<>();
+        public final List<BlockSection> body = new ArrayList<>();
 
         public CatchBlockSection(List<String> ex, Locals.LocalInstance local) {
             this.exception.addAll(ex);
