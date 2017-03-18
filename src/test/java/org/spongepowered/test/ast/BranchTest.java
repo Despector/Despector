@@ -334,6 +334,25 @@ public class BranchTest {
         assertEquals(good, insn);
     }
 
+    public void mth_while2(int i, boolean a, boolean d, boolean e) {
+        while (a ^ d) {
+            if (e) {
+                System.out.println(e);
+            }
+        }
+    }
+
+    @Test
+    public void testBasicWhileWithNesting() throws IOException {
+        String insn = TestHelper.getAsString(getClass(), "mth_while2");
+        String good = "while (a ^ d) {\n"
+                + "    if (e) {\n"
+                + "        System.out.println(e);\n"
+                + "    }\n"
+                + "}";
+        assertEquals(good, insn);
+    }
+
     public void mth_dowhile(int i, boolean d, boolean e, boolean f) {
         do {
             System.out.println(d);

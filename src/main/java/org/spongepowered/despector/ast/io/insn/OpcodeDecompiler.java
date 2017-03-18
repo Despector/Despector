@@ -830,6 +830,7 @@ public class OpcodeDecompiler {
         OpcodeBlock sstart = region.get(0);
         if (sstart.isGoto()) {
             subregion_search_end = region.size() - region.indexOf(sstart.target);
+            is_first_condition = false;
         }
         for (int i = body_start; i < region.size() - subregion_search_end; i++) {
             OpcodeBlock next = region.get(i);
