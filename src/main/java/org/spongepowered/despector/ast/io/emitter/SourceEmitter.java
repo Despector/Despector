@@ -1329,9 +1329,21 @@ public class SourceEmitter implements ClassEmitter {
                 return;
             }
         }
-        emitArg(arg.getCallee(), arg.getOwner());
-        printString(".");
-        printString(arg.getMethodName());
+        if(arg.getMethodName().equals("<init>")) {
+            if(this.this$ != null) {
+                if(arg.getOwner().equals(this.this$.getName())) {
+                    printString("this");
+                } else {
+                    printString("super");
+                }
+            } else {
+                printString("super");
+            }
+        } else {
+            emitArg(arg.getCallee(), arg.getOwner());
+            printString(".");
+            printString(arg.getMethodName());
+        }
         printString("(");
         // TODO get param types if we have the ast
         for (int i = 0; i < arg.getParams().length; i++) {

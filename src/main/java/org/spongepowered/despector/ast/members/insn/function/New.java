@@ -41,8 +41,8 @@ public class New implements Instruction {
 
     public New(String type, String ctor_desc, Instruction[] args) {
         this.type = checkNotNull(type, "type");
-        this.ctor = checkNotNull(ctor_desc, "ctor_desc");
-        this.params = checkNotNull(args, "args");
+        this.ctor = ctor_desc;
+        this.params = args;
     }
 
     public String getCtorDescription() {

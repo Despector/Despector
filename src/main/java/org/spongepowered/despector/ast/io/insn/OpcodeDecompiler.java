@@ -157,9 +157,9 @@ public class OpcodeDecompiler {
         // from opcodes for statements preceeding the control flow statement.
         cleanupGraph(graph, locals);
 
-        for (OpcodeBlock b : graph) {
-            b.print();
-        }
+//        for (OpcodeBlock b : graph) {
+//            b.print();
+//        }
 
         // Performs a sequence of transformations to conver the graph into a
         // simple array of partially decompiled block sections.
@@ -1866,20 +1866,32 @@ public class OpcodeDecompiler {
                     for (int i = 0; i < args.length; i++) {
                         args[i] = stack.pop();
                     }
-                    New new_arg = (New) stack.pop();
-                    if (stack.peek() instanceof New) {
-                        New new_arg2 = (New) stack.pop();
-                        if (new_arg2 == new_arg) {
-                            new_arg.setCtorDescription(ctor.desc);
-                            new_arg.setParameters(args);
-                            stack.push(new_arg);
-                            break;
+                    if(stack.peek() instanceof New) {
+                        New new_arg = (New) stack.pop();
+                        if (stack.peek() instanceof New) {
+                            New new_arg2 = (New) stack.pop();
+                            if (new_arg2 == new_arg) {
+                                new_arg.setCtorDescription(ctor.desc);
+                                new_arg.setParameters(args);
+                                stack.push(new_arg);
+                                break;
+                            }
+                            stack.push(new_arg2);
                         }
-                        stack.push(new_arg2);
+                        New insn = new New(new_arg.getType(), ctor.desc, args);
+                        block.append(new InvokeStatement(insn));
+                        break;
+                    } else if(stack.peek() instanceof LocalArg) {
+                        LocalArg callee = (LocalArg) stack.pop();
+                        String owner = ctor.owner;
+                        if (!owner.startsWith("[")) {
+                            owner = "L" + owner + ";";
+                        }
+                        InstanceMethodInvoke arg = new InstanceMethodInvoke(ctor.name, ctor.desc, owner, args, callee);
+                        block.append(new InvokeStatement(arg));
+                        break;
                     }
-                    New insn = new New(new_arg.getType(), ctor.desc, args);
-                    block.append(new InvokeStatement(insn));
-                    break;
+                    throw new IllegalStateException("Callee of call to <init> was " + stack.pop());
                 }
             }
             case INVOKEVIRTUAL:
