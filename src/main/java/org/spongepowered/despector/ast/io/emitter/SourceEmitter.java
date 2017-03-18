@@ -1261,8 +1261,10 @@ public class SourceEmitter implements ClassEmitter {
 
     protected void emitFieldArg(FieldArg arg) {
         if (arg instanceof StaticFieldArg) {
-            emitTypeName(((StaticFieldArg) arg).getOwnerName());
-            printString(".");
+            if (this.this$ == null || !((StaticFieldArg) arg).getOwnerName().equals(this.this$.getName())) {
+                emitTypeName(((StaticFieldArg) arg).getOwnerName());
+                printString(".");
+            }
             printString(arg.getFieldName());
         } else if (arg instanceof InstanceFieldArg) {
             emitArg(((InstanceFieldArg) arg).getFieldOwner(), arg.getOwner());
@@ -1329,9 +1331,9 @@ public class SourceEmitter implements ClassEmitter {
                 return;
             }
         }
-        if(arg.getMethodName().equals("<init>")) {
-            if(this.this$ != null) {
-                if(arg.getOwner().equals(this.this$.getName())) {
+        if (arg.getMethodName().equals("<init>")) {
+            if (this.this$ != null) {
+                if (arg.getOwner().equals(this.this$.getName())) {
                     printString("this");
                 } else {
                     printString("super");
@@ -1340,9 +1342,9 @@ public class SourceEmitter implements ClassEmitter {
                 printString("super");
             }
         } else {
-            if(arg.getCallee() instanceof LocalArg) {
+            if (arg.getCallee() instanceof LocalArg) {
                 LocalArg local = (LocalArg) arg.getCallee();
-                if(local.getLocal().getIndex() == 0 && !arg.getOwner().equals(this.this$.getName())) {
+                if (local.getLocal().getIndex() == 0 && !arg.getOwner().equals(this.this$.getName())) {
                     printString("super");
                 } else {
                     emitLocalArg(local);
@@ -1420,8 +1422,10 @@ public class SourceEmitter implements ClassEmitter {
                 return;
             }
         }
-        emitTypeName(owner);
-        printString(".");
+        if (this.this$ == null || !owner.equals(this.this$.getName())) {
+            emitTypeName(owner);
+            printString(".");
+        }
         printString(arg.getMethodName());
         printString("(");
         // TODO get param types if we have the ast
