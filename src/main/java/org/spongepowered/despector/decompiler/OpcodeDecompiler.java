@@ -857,7 +857,7 @@ public class OpcodeDecompiler {
                     subregion.add(region.get(o));
                 }
                 OpcodeBlock sub_ret = end >= region.size() ? ret : region.get(end);
-                BlockSection s = processRegion(subregion, locals, sub_ret, i + 1);
+                BlockSection s = processRegion(subregion, locals, sub_ret, 1);
 
                 // the first block is set to the condensed subregion block and
                 // the rest if the blocks in the subregion are removed.
@@ -867,8 +867,8 @@ public class OpcodeDecompiler {
                 replacement.else_target = null;
                 replacement.opcodes.clear();
 
-                for (int o = 1; o < subregion.size(); o++) {
-                    region.remove(subregion.get(o));
+                for (int o = end - 1; o > i; o--) {
+                    region.remove(o);
                 }
             }
         }
