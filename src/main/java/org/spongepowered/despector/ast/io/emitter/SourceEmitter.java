@@ -1340,7 +1340,16 @@ public class SourceEmitter implements ClassEmitter {
                 printString("super");
             }
         } else {
-            emitArg(arg.getCallee(), arg.getOwner());
+            if(arg.getCallee() instanceof LocalArg) {
+                LocalArg local = (LocalArg) arg.getCallee();
+                if(local.getLocal().getIndex() == 0 && !arg.getOwner().equals(this.this$.getName())) {
+                    printString("super");
+                } else {
+                    emitLocalArg(local);
+                }
+            } else {
+                emitArg(arg.getCallee(), arg.getOwner());
+            }
             printString(".");
             printString(arg.getMethodName());
         }
@@ -1453,7 +1462,7 @@ public class SourceEmitter implements ClassEmitter {
     protected void emitNewArray(NewArrayArg arg) {
         printString("new ");
         emitType(arg.getType());
-        if (arg.getInitializer().length == 0) {
+        if (arg.getInitializer() == null || arg.getInitializer().length == 0) {
             printString("[");
             emitArg(arg.getSize(), "I");
             printString("]");

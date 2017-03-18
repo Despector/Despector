@@ -229,6 +229,9 @@ public class Locals {
             return this.lvn;
         }
 
+        /**
+         * Gets the local index of this instance.
+         */
         public int getIndex() {
             return this.local.getIndex();
         }

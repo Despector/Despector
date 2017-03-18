@@ -512,7 +512,7 @@ public class ConditionUtil {
         return null;
     }
 
-    private static final boolean DEBUG_SIMPLIFICATION = Boolean.valueOf(System.getProperty("despect.debug.simplification", "true"));
+    private static final boolean DEBUG_SIMPLIFICATION = Boolean.getBoolean("despect.debug.simplification");
 
     /**
      * Attempts to simplify the given condition.

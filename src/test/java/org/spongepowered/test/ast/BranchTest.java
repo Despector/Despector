@@ -404,6 +404,27 @@ public class BranchTest {
         assertEquals(good, insn);
     }
 
+    private void mth_ifnestedinstanceof(boolean a, Object b) {
+        if (!a) {
+            System.out.println(a);
+            if (b instanceof String) {
+                System.out.println(b);
+            }
+        }
+    }
+
+    @Test
+    public void testIfWithNestedInstanceof() throws IOException {
+        String insn = TestHelper.getAsString(getClass(), "mth_ifnestedinstanceof");
+        String good = "if (!a) {\n"
+                + "    System.out.println(a);\n"
+                + "    if (b instanceof String) {\n"
+                + "        System.out.println(b);\n"
+                + "    }\n"
+                + "}";
+        assertEquals(good, insn);
+    }
+
     // TODO need test rig for creating methods directly from bytecode for
     // patterns that a local compiler may not normally make (like inverted while
     // loops)

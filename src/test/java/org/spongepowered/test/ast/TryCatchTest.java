@@ -166,4 +166,27 @@ public class TryCatchTest {
         assertEquals(good, insn);
     }
 
+    public void mth_trycatchWithControlFlow(int i, Object o) {
+        try {
+            i = o.hashCode();
+        } catch (NullPointerException e) {
+            if(e != null) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    @Test
+    public void testTryCatchWithControlFlow() throws IOException {
+        String insn = TestHelper.getAsString(getClass(), "mth_trycatchWithControlFlow");
+        String good = "try {\n"
+                    + "    i = o.hashCode();\n"
+                    + "} catch (NullPointerException e) {\n"
+                    + "    if (e != null) {\n"
+                    + "        e.printStackTrace();\n"
+                    + "    }\n"
+                    + "}";
+        assertEquals(good, insn);
+    }
+
 }
