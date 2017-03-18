@@ -33,7 +33,7 @@ import org.spongepowered.despector.ast.type.InterfaceEntry;
 import org.spongepowered.despector.emitter.AstEmitter;
 import org.spongepowered.despector.emitter.EmitterContext;
 
-public class MethodEntryEmitter implements AstEmitter<MethodEntry>{
+public class MethodEntryEmitter implements AstEmitter<MethodEntry> {
 
     @Override
     public boolean emit(EmitterContext ctx, MethodEntry method) {
@@ -106,7 +106,13 @@ public class MethodEntryEmitter implements AstEmitter<MethodEntry>{
         if (!method.isAbstract()) {
             ctx.printString(" {\n");
             ctx.indent();
-            ctx.emitBody(block);
+            if (block == null) {
+                ctx.printIndentation();
+                ctx.printString("// Error decompiling block");
+                printReturn(ctx, method.getReturnType());
+            } else {
+                ctx.emitBody(block);
+            }
             ctx.printString("\n");
             ctx.dedent();
             ctx.printIndentation();
@@ -116,6 +122,40 @@ public class MethodEntryEmitter implements AstEmitter<MethodEntry>{
         }
         ctx.setMethod(null);
         return true;
+    }
+
+    private static void printReturn(EmitterContext ctx, String type) {
+        char f = type.charAt(0);
+        if(f == 'V') {
+            return;
+        }
+        ctx.printString("\n");
+        ctx.printIndentation();
+        switch (f) {
+        case 'I':
+        case 'S':
+        case 'B':
+        case 'C':
+            ctx.printString("return 0;");
+            break;
+        case 'J':
+            ctx.printString("return 0L;");
+            break;
+        case 'F':
+            ctx.printString("return 0.0f;");
+            break;
+        case 'D':
+            ctx.printString("return 0.0;");
+            break;
+        case 'Z':
+            ctx.printString("return false;");
+            break;
+        case 'L':
+            ctx.printString("return null;");
+            break;
+        default:
+            throw new IllegalStateException("Malformed return type " + type);
+        }
     }
 
 }

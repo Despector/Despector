@@ -101,6 +101,9 @@ public class EmitterContext {
 
     @SuppressWarnings("unchecked")
     public <T extends AstEntry> boolean emit(T obj) {
+        if(obj instanceof TypeEntry) {
+            this.type = (TypeEntry) obj;
+        }
         AstEmitter<T> emitter = (AstEmitter<T>) this.set.getAstEmitter(obj.getClass());
         if (emitter == null) {
             throw new IllegalArgumentException("No emitter for ast entry " + obj.getClass().getName());
@@ -109,11 +112,6 @@ public class EmitterContext {
     }
 
     public void emitBody(StatementBlock instructions) {
-        if (instructions == null) {
-            printIndentation();
-            printString("// Error decompiling block");
-            return;
-        }
         this.defined_locals.clear();
         boolean last_success = false;
         for (int i = 0; i < instructions.getStatements().size(); i++) {

@@ -109,7 +109,7 @@ public class InstanceMethodInvokeEmitter implements InstructionEmitter<InstanceM
         } else {
             if (arg.getCallee() instanceof LocalArg) {
                 LocalArg local = (LocalArg) arg.getCallee();
-                if (local.getLocal().getIndex() == 0 && !arg.getOwner().equals(ctx.getType().getName())) {
+                if (local.getLocal().getIndex() == 0 && ctx.getType() != null && !arg.getOwner().equals(ctx.getType().getName())) {
                     ctx.printString("super");
                 } else {
                     ctx.emit(local, null);

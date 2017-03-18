@@ -40,7 +40,7 @@ public class FieldAssignmentEmitter implements StatementEmitter<FieldAssignment>
     @Override
     public void emit(EmitterContext ctx, FieldAssignment insn, boolean semicolon) {
         if (insn instanceof StaticFieldAssignment) {
-            if (!((StaticFieldAssignment) insn).getOwnerType().equals(ctx.getType().getDescriptor())) {
+            if (ctx.getType() != null && !((StaticFieldAssignment) insn).getOwnerType().equals(ctx.getType().getDescriptor())) {
                 ctx.emitTypeName(((StaticFieldAssignment) insn).getOwnerName());
                 ctx.printString(".");
             }
@@ -72,12 +72,14 @@ public class FieldAssignmentEmitter implements StatementEmitter<FieldAssignment>
                                 } else {
                                     ctx.printString("false");
                                 }
-                                if(semicolon) ctx.printString(";");
+                                if (semicolon)
+                                    ctx.printString(";");
                                 return;
                             }
                         }
                         ctx.emit(right, insn.getFieldDescription());
-                        if(semicolon) ctx.printString(";");
+                        if (semicolon)
+                            ctx.printString(";");
                         return;
                     }
                 }
@@ -85,7 +87,8 @@ public class FieldAssignmentEmitter implements StatementEmitter<FieldAssignment>
         }
         ctx.printString(" = ");
         ctx.emit(val, insn.getFieldDescription());
-        if(semicolon) ctx.printString(";");
+        if (semicolon)
+            ctx.printString(";");
     }
 
 }
