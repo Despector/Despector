@@ -215,6 +215,28 @@ public class BranchTest {
         assertEquals(good, insn);
     }
 
+    public boolean mth_ifelseret(int i, boolean a, boolean b, boolean c, boolean d, boolean e, boolean f) {
+        if (a) {
+            System.out.println(c);
+            return c;
+        } else {
+            System.out.println(d);
+            return d;
+        }
+    }
+
+    @Test
+    public void testIfWithElseReturn() throws IOException {
+        String insn = TestHelper.getAsString(getClass(), "mth_ifelseret");
+        String good = "if (a) {\n"
+                + "    System.out.println(c);\n"
+                + "    return c;\n"
+                + "}\n"
+                + "System.out.println(d);\n"
+                + "return d;";
+        assertEquals(good, insn);
+    }
+
     public void mth_if13(int i, boolean a, boolean b, boolean c, boolean d, boolean e, boolean f) {
         if (a) {
             if (b) {

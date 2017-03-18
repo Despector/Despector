@@ -439,7 +439,7 @@ public class OpcodeDecompiler {
         }
     }
 
-    private static void compileTernary(List<OpcodeBlock> blocks, int end, Locals locals) {
+    private static int compileTernary(List<OpcodeBlock> blocks, int end, Locals locals) {
         if (end < 4) {
             throw new IllegalStateException();
         }
@@ -470,8 +470,12 @@ public class OpcodeDecompiler {
         seen.add(go);
         List<OpcodeBlock> condition_blocks = new ArrayList<>();
         condition_blocks.add(fl);
+        boolean has_more = false;
         for (; start >= 0; start--) {
             OpcodeBlock next = blocks.get(start);
+            if (next.isGoto() && next.target == consumer) {
+                has_more = true;
+            }
             if (!next.isConditional()) {
                 break;
             }
@@ -513,9 +517,12 @@ public class OpcodeDecompiler {
         first.last = null;
         first.internal = ternary;
         start = blocks.indexOf(first);
+        int removed = has_more ? 1 : 0;
         for (int i = end - 1; i >= start + 1; i--) {
             blocks.remove(i);
+            removed++;
         }
+        return removed;
     }
 
     @SuppressWarnings("unchecked")
@@ -552,7 +559,7 @@ public class OpcodeDecompiler {
             OpcodeBlock block = blocks.get(i);
             if (!block.exclude_from_ternary_check && (AstUtil.hasStartingRequirement(block.opcodes)
                     || (block.last != null && AstUtil.isEmptyOfLogic(block.opcodes) && AstUtil.getStackDelta(block.last) < 0))) {
-                compileTernary(blocks, i, locals);
+                i -= compileTernary(blocks, i, locals);
             }
         }
 
@@ -792,6 +799,9 @@ public class OpcodeDecompiler {
             }
 
             OpcodeBlock last = blocks.get(end);
+            if (blocks.get(end - 1) instanceof TryCatchMarkerOpcodeBlock) {
+                end--;
+            }
 
             region.clear();
             for (int o = i; o < end; o++) {

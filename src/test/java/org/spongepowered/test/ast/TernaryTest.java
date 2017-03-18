@@ -79,4 +79,26 @@ public class TernaryTest {
         assertEquals(good, insn);
     }
 
+    public void mth_nestedTernary2(boolean a, boolean b) {
+        int r = a ? 5 : b ? 4 : 3;
+    }
+
+    @Test
+    public void testNestedTernary2() throws IOException {
+        String insn = TestHelper.getAsString(getClass(), "mth_nestedTernary2");
+        String good = "int r = a ? 5 : b ? 4 : 3;";
+        assertEquals(good, insn);
+    }
+
+    public int mth_returnTernary(boolean a) {
+        return a ? 6 : 3;
+    }
+
+    @Test
+    public void testReturnedTernary() throws IOException {
+        String insn = TestHelper.getAsString(getClass(), "mth_returnTernary");
+        String good = "return a ? 6 : 3;";
+        assertEquals(good, insn);
+    }
+
 }
