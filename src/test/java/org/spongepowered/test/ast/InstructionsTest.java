@@ -27,6 +27,7 @@ package org.spongepowered.test.ast;
 import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
+import org.spongepowered.test.util.TestHelper;
 
 import java.io.IOException;
 

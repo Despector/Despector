@@ -64,6 +64,8 @@ import java.util.List;
 
 public class SingularClassLoader {
 
+    private static final boolean SET_SINGLE_GRAPH_DEBUG = Boolean.getBoolean("despect.debug.single_graph");
+
     public static final SingularClassLoader instance = new SingularClassLoader();
 
     private SingularClassLoader() {
@@ -128,23 +130,33 @@ public class SingularClassLoader {
             m.setSignature(mn.desc);
             m.setStatic((mn.access & ACC_STATIC) != 0);
             m.setSynthetic((mn.access & ACC_SYNTHETIC) != 0);
-//            if (cn.name.endsWith("Block") && mn.name.equals("registerBlocks")) {
-//                System.out.println();
-//            }
+            if (SET_SINGLE_GRAPH_DEBUG) {
+                OpcodeDecompiler.PRINT_BLOCKS = false;
+                ConfigManager.getConfig().print_opcodes_on_error = false;
+                if (cn.name.endsWith("Block") && mn.name.equals("dropBlockAsItemWithChance")) {
+                    OpcodeDecompiler.PRINT_BLOCKS = true;
+                    ConfigManager.getConfig().print_opcodes_on_error = true;
+                }
+            }
+
             try {
                 System.out.println("Decompiling method " + mn.name);
                 StatementBlock insns = InstructionTreeBuilder.build(m, mn);
                 m.setInstructions(insns);
             } catch (Exception ex) {
                 System.err.println("Error decompiling method body for " + cn.name + " " + m.toString());
-                ex.printStackTrace();
                 if (ConfigManager.getConfig().print_opcodes_on_error) {
+                    ex.printStackTrace();
                     System.err.println("Offending method bytecode:");
                     Iterator<AbstractInsnNode> it = mn.instructions.iterator();
                     while (it.hasNext()) {
                         System.err.println(AstUtil.insnToString(it.next()));
                     }
                 }
+            }
+            if (SET_SINGLE_GRAPH_DEBUG) {
+                OpcodeDecompiler.PRINT_BLOCKS = false;
+                ConfigManager.getConfig().print_opcodes_on_error = false;
             }
             entry.addMethod(m);
         }

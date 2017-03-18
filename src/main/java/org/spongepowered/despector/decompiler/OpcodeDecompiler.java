@@ -135,7 +135,7 @@ import java.util.Set;
  */
 public class OpcodeDecompiler {
 
-    private static final boolean PRINT_BLOCKS = Boolean.getBoolean("despect.opcode.print_blocks");
+    public static boolean PRINT_BLOCKS = Boolean.getBoolean("despect.opcode.print_blocks");
 
     @SuppressWarnings("unchecked")
     public static StatementBlock decompile(InsnList instructions, Locals locals, List<TryCatchBlockNode> tryCatchBlocks, DecompilerOptions options) {
@@ -958,11 +958,32 @@ public class OpcodeDecompiler {
 
         // form the condition from the header
         Condition cond = makeCondition(condition_blocks, locals, body, cond_ret);
-        IfBlockSection section = new IfBlockSection(cond);
         int else_start = region.size();
         if (cond_ret != ret) {
             else_start = region.indexOf(cond_ret);
         }
+        
+        OpcodeBlock body_end = region.get(else_start - 1);
+        if(body_end.isGoto() && body_end.target == start) {
+            // we've got ourselves an inverse while/for loop
+            WhileBlockSection section = new WhileBlockSection(cond);
+            for (int i = body_start; i < else_start - 1; i++) {
+                next = region.get(i);
+                if (next.internal != null) {
+                    section.body.add(next.internal);
+                } else if (next.isConditional()) {
+                    // If we encounter another conditional block then its an
+                    // error
+                    // as we should have already processed all sub regions
+                    throw new IllegalStateException("Unexpected conditional when building if body");
+                } else {
+                    section.body.add(new InlineBlockSection(next));
+                }
+            }
+            return section;
+        }
+        
+        IfBlockSection section = new IfBlockSection(cond);
         // Append the body
         for (int i = body_start; i < else_start; i++) {
             next = region.get(i);

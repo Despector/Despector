@@ -25,10 +25,20 @@
 package org.spongepowered.test.ast;
 
 import static org.junit.Assert.assertEquals;
+import static org.objectweb.asm.Opcodes.*;
 
 import org.junit.Test;
+import org.objectweb.asm.Label;
+import org.objectweb.asm.MethodVisitor;
+import org.objectweb.asm.Opcodes;
+import org.objectweb.asm.Type;
+import org.objectweb.asm.commons.GeneratorAdapter;
+import org.objectweb.asm.commons.Method;
+import org.spongepowered.test.util.TestHelper;
+import org.spongepowered.test.util.TestMethodBuilder;
 
 import java.io.IOException;
+import java.io.PrintStream;
 
 @SuppressWarnings("unused")
 public class BranchTest {
@@ -465,8 +475,39 @@ public class BranchTest {
         assertEquals(good, insn);
     }
 
-    // TODO need test rig for creating methods directly from bytecode for
-    // patterns that a local compiler may not normally make (like inverted while
-    // loops)
+    @Test
+    public void testInverseFor() throws IOException {
+        TestMethodBuilder builder = new TestMethodBuilder("mth_inversefor", "(ILjava/lang/String;)V");
+        MethodVisitor mv = builder.getGenerator();
+        Label start_label = new Label();
+        mv.visitLabel(start_label);
+        mv.visitInsn(ICONST_0);
+        mv.visitVarInsn(ISTORE, 1);
+        Label loop_condition = new Label();
+        Label loop_body_start = new Label();
+        mv.visitLabel(loop_body_start);
+        mv.visitVarInsn(ILOAD, 1);
+        mv.visitInsn(ICONST_5);
+        mv.visitJumpInsn(IF_ICMPGE, loop_condition);
+        mv.visitFrame(Opcodes.F_SAME, 0, null, 0, null);
+        mv.visitFieldInsn(GETSTATIC, "java/lang/System", "out", "Ljava/io/PrintStream;");
+        mv.visitVarInsn(ILOAD, 2);
+        mv.visitMethodInsn(INVOKEVIRTUAL, "java/io/PrintStream", "println", "(Z)V", false);
+        mv.visitIincInsn(1, 1);
+        mv.visitJumpInsn(GOTO, loop_body_start);
+        mv.visitLabel(loop_condition);
+        mv.visitFrame(Opcodes.F_SAME, 0, null, 0, null);
+        mv.visitInsn(RETURN);
+        Label end_label = new Label();
+        mv.visitLabel(end_label);
+        mv.visitLocalVariable("i", "I", null, start_label, end_label, 1);
+        mv.visitLocalVariable("c", "Z", null, start_label, end_label, 2);
+
+        String insn = TestHelper.getAsString(builder.finish(), "mth_inversefor");
+        String good = "for (i = 0; i < 5; i++) {\n"
+                + "    System.out.println(c);\n"
+                + "}";
+        assertEquals(good, insn);
+    }
 
 }

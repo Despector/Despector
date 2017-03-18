@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.test.ast;
+package org.spongepowered.test.util;
 
 import com.google.common.collect.Maps;
 import org.objectweb.asm.ClassReader;
@@ -36,6 +36,7 @@ import org.spongepowered.despector.emitter.Emitters;
 import org.spongepowered.despector.emitter.format.EmitterFormat;
 import org.spongepowered.despector.util.AstUtil;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -45,7 +46,7 @@ import java.util.List;
 import java.util.Map;
 
 public class TestHelper {
-    
+
     private static final Map<Class<?>, ClassNode> cached_types = Maps.newHashMap();
 
     @SuppressWarnings("unchecked")
@@ -86,7 +87,6 @@ public class TestHelper {
         return insns;
     }
 
-    @SuppressWarnings("unchecked")
     public static String getAsString(Class<?> cls, String method_name) throws IOException {
         ClassNode type = cached_types.get(cls);
         if (type == null) {
@@ -97,6 +97,18 @@ public class TestHelper {
             cr.accept(type, 0);
             cached_types.put(cls, type);
         }
+        return getAsString(type, method_name);
+    }
+
+    public static String getAsString(byte[] cls, String method_name) throws IOException {
+        ClassReader cr = new ClassReader(new ByteArrayInputStream(cls));
+        ClassNode type = new ClassNode();
+        cr.accept(type, 0);
+        return getAsString(type, method_name);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static String getAsString(ClassNode type, String method_name) {
         MethodNode mn = null;
         for (MethodNode m : ((List<MethodNode>) type.methods)) {
             if (m.name.equals(method_name)) {
