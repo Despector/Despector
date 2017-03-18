@@ -219,10 +219,9 @@ public class BranchTest {
         if (a) {
             System.out.println(c);
             return c;
-        } else {
-            System.out.println(d);
-            return d;
         }
+        System.out.println(d);
+        return d;
     }
 
     @Test

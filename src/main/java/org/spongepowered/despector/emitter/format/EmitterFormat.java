@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.despector.ast.io.emitter.format;
+package org.spongepowered.despector.emitter.format;
 
 import com.google.common.collect.Lists;
 

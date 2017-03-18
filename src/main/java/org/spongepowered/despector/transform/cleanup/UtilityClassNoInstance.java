@@ -22,26 +22,37 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.despector.ast.io.emitter;
+package org.spongepowered.despector.transform.cleanup;
 
+import org.spongepowered.despector.ast.AccessModifier;
 import org.spongepowered.despector.ast.members.MethodEntry;
+import org.spongepowered.despector.ast.type.ClassEntry;
 import org.spongepowered.despector.ast.type.TypeEntry;
+import org.spongepowered.despector.transform.TypeTransformer;
 
 /**
- * An emitter which converts an AST to some more common format, usually source
- * code.
+ * Ensures utility classes (no instance fields or methods) are declared as final
+ * with a private constructor.
  */
-public interface ClassEmitter {
+public class UtilityClassNoInstance implements TypeTransformer {
 
-    /**
-     * Emits the given type.
-     */
-    void emitType(TypeEntry type);
-
-    /**
-     * Emits the given method. This returns whether anything was emitted.
-     * Methods which are synthetic may not be emitted.
-     */
-    boolean emitMethod(MethodEntry method);
+    @Override
+    public void transform(TypeEntry type) {
+        if (!(type instanceof ClassEntry)) {
+            return;
+        }
+        if (type.getFieldCount() != 0) {
+            return;
+        }
+        if (type.getMethodCount() != 1) {
+            return;
+        }
+        MethodEntry ctor = type.getMethod("<init>");
+        if (!ctor.getParamTypes().isEmpty() || ctor.getInstructions().getStatements().size() != 2) {
+            return;
+        }
+        ctor.setAccessModifier(AccessModifier.PRIVATE);
+        type.setFinal(true);
+    }
 
 }

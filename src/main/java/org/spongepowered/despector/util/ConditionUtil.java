@@ -474,9 +474,8 @@ public class ConditionUtil {
                     }
                     if (i < t.length / 2) {
                         return new OrCondition(new AndCondition(first, new OrCondition(operands)), second);
-                    } else {
-                        return new OrCondition(new AndCondition(new OrCondition(operands), first), second);
                     }
+                    return new OrCondition(new AndCondition(new OrCondition(operands), first), second);
                 }
                 return new OrCondition(new AndCondition(first, new OrCondition(operands)), second);
             }

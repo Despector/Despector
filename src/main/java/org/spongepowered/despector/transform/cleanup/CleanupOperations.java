@@ -22,11 +22,29 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.despector.ast.io.insn;
+package org.spongepowered.despector.transform.cleanup;
+
+import com.google.common.collect.Maps;
+import org.spongepowered.despector.transform.TypeTransformer;
+
+import java.util.Map;
 
 /**
- * A container for any options required for the decompiler. Currently unused.
+ * Operations which may be applied to an AST to perform refactoring operations.
  */
-public class DecompilerOptions {
+public class CleanupOperations {
+
+    private static final Map<String, TypeTransformer> operations = Maps.newHashMap();
+
+    static {
+        operations.put("private_final_utility_classes", new UtilityClassNoInstance());
+    }
+
+    /**
+     * Gets the operation corresponding to the given id, or null if not defined.
+     */
+    public static TypeTransformer getOperation(String id) {
+        return operations.get(id);
+    }
 
 }

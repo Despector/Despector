@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.despector.ast.io.insn;
+package org.spongepowered.despector.decompiler;
 
 import static com.google.common.base.Preconditions.checkState;
 import static org.objectweb.asm.Opcodes.*;
@@ -48,8 +48,9 @@ import org.objectweb.asm.tree.TableSwitchInsnNode;
 import org.objectweb.asm.tree.TryCatchBlockNode;
 import org.objectweb.asm.tree.TypeInsnNode;
 import org.objectweb.asm.tree.VarInsnNode;
-import org.spongepowered.despector.ast.io.insn.Locals.Local;
-import org.spongepowered.despector.ast.io.insn.Locals.LocalInstance;
+import org.spongepowered.despector.ast.Locals;
+import org.spongepowered.despector.ast.Locals.Local;
+import org.spongepowered.despector.ast.Locals.LocalInstance;
 import org.spongepowered.despector.ast.members.insn.Statement;
 import org.spongepowered.despector.ast.members.insn.StatementBlock;
 import org.spongepowered.despector.ast.members.insn.arg.CastArg;
@@ -92,7 +93,6 @@ import org.spongepowered.despector.ast.members.insn.branch.If;
 import org.spongepowered.despector.ast.members.insn.branch.Switch;
 import org.spongepowered.despector.ast.members.insn.branch.Ternary;
 import org.spongepowered.despector.ast.members.insn.branch.TryCatch;
-import org.spongepowered.despector.ast.members.insn.branch.TryCatch.CatchBlock;
 import org.spongepowered.despector.ast.members.insn.branch.While;
 import org.spongepowered.despector.ast.members.insn.branch.condition.AndCondition;
 import org.spongepowered.despector.ast.members.insn.branch.condition.BooleanCondition;
@@ -311,9 +311,7 @@ public class OpcodeDecompiler {
                 TryCatchMarkerOpcodeBlock end_marker = new TryCatchMarkerOpcodeBlock(TryCatchMarkerType.END, tc);
                 TryCatchMarkerOpcodeBlock handler_marker = new TryCatchMarkerOpcodeBlock(TryCatchMarkerType.CATCH, tc);
                 start_marker.end = end_marker;
-                start_marker.handler = handler_marker;
                 end_marker.start = start_marker;
-                end_marker.handler = handler_marker;
                 handler_marker.start = start_marker;
                 handler_marker.end = end_marker;
                 fblocks.add(fblocks.indexOf(start), start_marker);
@@ -598,7 +596,7 @@ public class OpcodeDecompiler {
                 }
                 TryCatchBlockSection try_section = new TryCatchBlockSection();
                 try_section.body.addAll(flattenGraph(body, locals, body.size()));
-                catch_search: while (!allEnds.isEmpty()) {
+                while (!allEnds.isEmpty()) {
                     end++;
                     next = blocks.get(end);
                     if (next instanceof TryCatchMarkerOpcodeBlock) {
@@ -2099,7 +2097,6 @@ public class OpcodeDecompiler {
 
         public TryCatchMarkerOpcodeBlock start;
         public TryCatchMarkerOpcodeBlock end;
-        public TryCatchMarkerOpcodeBlock handler;
 
         public TryCatchMarkerOpcodeBlock(TryCatchMarkerType marker, TryCatchBlockNode tc) {
             this.marker_type = marker;

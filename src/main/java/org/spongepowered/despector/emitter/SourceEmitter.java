@@ -22,15 +22,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.despector.ast.io.emitter;
+package org.spongepowered.despector.emitter;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import org.spongepowered.despector.ast.AccessModifier;
-import org.spongepowered.despector.ast.io.emitter.format.EmitterFormat;
-import org.spongepowered.despector.ast.io.insn.Locals.Local;
-import org.spongepowered.despector.ast.io.insn.Locals.LocalInstance;
+import org.spongepowered.despector.ast.Locals.Local;
+import org.spongepowered.despector.ast.Locals.LocalInstance;
 import org.spongepowered.despector.ast.members.FieldEntry;
 import org.spongepowered.despector.ast.members.MethodEntry;
 import org.spongepowered.despector.ast.members.insn.Statement;
@@ -89,6 +88,7 @@ import org.spongepowered.despector.ast.type.ClassEntry;
 import org.spongepowered.despector.ast.type.EnumEntry;
 import org.spongepowered.despector.ast.type.InterfaceEntry;
 import org.spongepowered.despector.ast.type.TypeEntry;
+import org.spongepowered.despector.emitter.format.EmitterFormat;
 import org.spongepowered.despector.util.ConditionUtil;
 import org.spongepowered.despector.util.TypeHelper;
 

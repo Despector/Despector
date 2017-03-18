@@ -22,51 +22,19 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.despector.ast.io;
+package org.spongepowered.despector.emitter.format;
 
-import org.objectweb.asm.ClassReader;
-import org.objectweb.asm.tree.ClassNode;
-import org.spongepowered.despector.ast.SourceSet;
-
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Path;
 
-/**
- * A directory walker which walks a directory and visits all child files and
- * directories.
- */
-public class DirectoryWalker {
+public interface FormatLoader {
 
-    private final Path directory;
-
-    public DirectoryWalker(Path dir) {
-        this.directory = dir;
-    }
-
-    /**
-     * Walks this directory and visits all class files in it or any child
-     * directory and loads them into the given {@link SourceSet}.
-     */
-    public void walk(SourceSet src) throws IOException {
-        File dir = this.directory.toFile();
-        visit(dir, src);
-    }
-
-    private void visit(File file, SourceSet src) throws IOException {
-        if (file.isDirectory()) {
-            for (File f : file.listFiles()) {
-                visit(f, src);
-            }
-        } else {
-            if (file.getName().endsWith(".class")) {
-                ClassReader reader = new ClassReader(new FileInputStream(file));
-                ClassNode cn = new ClassNode();
-                reader.accept(cn, 0);
-                SingularClassLoader.instance.load(cn, src);
-            }
+    public static FormatLoader getLoader(String name) {
+        if ("eclipse".equalsIgnoreCase(name)) {
+            return EclipseFormatLoader.instance;
         }
+        throw new IllegalArgumentException("Unknown formatter type: " + name);
     }
 
+    EmitterFormat load(Path formatter, Path import_order) throws IOException;
 }

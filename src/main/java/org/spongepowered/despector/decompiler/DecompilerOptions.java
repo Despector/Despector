@@ -22,37 +22,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.despector.ast.transform.cleanup;
-
-import org.spongepowered.despector.ast.AccessModifier;
-import org.spongepowered.despector.ast.members.MethodEntry;
-import org.spongepowered.despector.ast.transform.TypeTransformer;
-import org.spongepowered.despector.ast.type.ClassEntry;
-import org.spongepowered.despector.ast.type.TypeEntry;
+package org.spongepowered.despector.decompiler;
 
 /**
- * Ensures utility classes (no instance fields or methods) are declared as final
- * with a private constructor.
+ * A container for any options required for the decompiler. Currently unused.
  */
-public class UtilityClassNoInstance implements TypeTransformer {
-
-    @Override
-    public void transform(TypeEntry type) {
-        if (!(type instanceof ClassEntry)) {
-            return;
-        }
-        if (type.getFieldCount() != 0) {
-            return;
-        }
-        if (type.getMethodCount() != 1) {
-            return;
-        }
-        MethodEntry ctor = type.getMethod("<init>");
-        if (!ctor.getParamTypes().isEmpty() || ctor.getInstructions().getStatements().size() != 2) {
-            return;
-        }
-        ctor.setAccessModifier(AccessModifier.PRIVATE);
-        type.setFinal(true);
-    }
+public class DecompilerOptions {
 
 }

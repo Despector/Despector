@@ -27,7 +27,7 @@ package org.spongepowered.despector.ast.members.insn;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.Lists;
-import org.spongepowered.despector.ast.io.insn.Locals;
+import org.spongepowered.despector.ast.Locals;
 
 import java.util.List;
 

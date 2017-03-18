@@ -22,29 +22,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.despector.ast.transform.cleanup;
+package org.spongepowered.despector.transform;
 
-import com.google.common.collect.Maps;
-import org.spongepowered.despector.ast.transform.TypeTransformer;
+import org.spongepowered.despector.ast.type.TypeEntry;
 
-import java.util.Map;
+public interface TypeTransformer {
 
-/**
- * Operations which may be applied to an AST to perform refactoring operations.
- */
-public class CleanupOperations {
-
-    private static final Map<String, TypeTransformer> operations = Maps.newHashMap();
-
-    static {
-        operations.put("private_final_utility_classes", new UtilityClassNoInstance());
-    }
-
-    /**
-     * Gets the operation corresponding to the given id, or null if not defined.
-     */
-    public static TypeTransformer getOperation(String id) {
-        return operations.get(id);
-    }
+    void transform(TypeEntry type);
 
 }

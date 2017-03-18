@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.despector.ast.io;
+package org.spongepowered.despector.decompiler;
 
 import com.google.common.collect.Sets;
 import org.objectweb.asm.ClassReader;

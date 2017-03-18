@@ -26,7 +26,7 @@ package org.spongepowered.despector.ast.members.insn.misc;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import org.spongepowered.despector.ast.io.insn.Locals.LocalInstance;
+import org.spongepowered.despector.ast.Locals.LocalInstance;
 import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
 import org.spongepowered.despector.ast.members.insn.Statement;
 

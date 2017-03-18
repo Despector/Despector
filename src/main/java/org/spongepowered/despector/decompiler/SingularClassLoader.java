@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.despector.ast.io;
+package org.spongepowered.despector.decompiler;
 
 import static org.objectweb.asm.Opcodes.*;
 
@@ -33,9 +33,6 @@ import org.objectweb.asm.tree.FieldNode;
 import org.objectweb.asm.tree.MethodNode;
 import org.spongepowered.despector.ast.AccessModifier;
 import org.spongepowered.despector.ast.SourceSet;
-import org.spongepowered.despector.ast.io.emitter.SourceEmitter;
-import org.spongepowered.despector.ast.io.emitter.format.EmitterFormat;
-import org.spongepowered.despector.ast.io.insn.InstructionTreeBuilder;
 import org.spongepowered.despector.ast.members.FieldEntry;
 import org.spongepowered.despector.ast.members.MethodEntry;
 import org.spongepowered.despector.ast.members.insn.Statement;
@@ -47,6 +44,8 @@ import org.spongepowered.despector.ast.type.EnumEntry;
 import org.spongepowered.despector.ast.type.InterfaceEntry;
 import org.spongepowered.despector.ast.type.TypeEntry;
 import org.spongepowered.despector.config.ConfigManager;
+import org.spongepowered.despector.emitter.SourceEmitter;
+import org.spongepowered.despector.emitter.format.EmitterFormat;
 import org.spongepowered.despector.util.AstUtil;
 import org.spongepowered.despector.util.TypeHelper;
 

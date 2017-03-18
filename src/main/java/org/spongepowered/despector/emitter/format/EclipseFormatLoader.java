@@ -22,11 +22,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.despector.ast.io.emitter.format;
+package org.spongepowered.despector.emitter.format;
 
 import com.google.common.collect.Maps;
-import org.spongepowered.despector.ast.io.emitter.format.EmitterFormat.BracePosition;
-import org.spongepowered.despector.ast.io.emitter.format.EmitterFormat.WrappingStyle;
+import org.spongepowered.despector.emitter.format.EmitterFormat.BracePosition;
+import org.spongepowered.despector.emitter.format.EmitterFormat.WrappingStyle;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;

@@ -24,7 +24,7 @@
  */
 package org.spongepowered.despector.ast.members.insn;
 
-import org.spongepowered.despector.ast.io.insn.Locals.LocalInstance;
+import org.spongepowered.despector.ast.Locals.LocalInstance;
 import org.spongepowered.despector.ast.members.insn.arg.CastArg;
 import org.spongepowered.despector.ast.members.insn.arg.CompareArg;
 import org.spongepowered.despector.ast.members.insn.arg.InstanceOfArg;

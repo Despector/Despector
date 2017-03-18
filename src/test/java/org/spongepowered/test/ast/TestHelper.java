@@ -29,10 +29,10 @@ import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.MethodNode;
-import org.spongepowered.despector.ast.io.emitter.SourceEmitter;
-import org.spongepowered.despector.ast.io.emitter.format.EmitterFormat;
-import org.spongepowered.despector.ast.io.insn.InstructionTreeBuilder;
 import org.spongepowered.despector.ast.members.insn.StatementBlock;
+import org.spongepowered.despector.decompiler.InstructionTreeBuilder;
+import org.spongepowered.despector.emitter.SourceEmitter;
+import org.spongepowered.despector.emitter.format.EmitterFormat;
 import org.spongepowered.despector.util.AstUtil;
 
 import java.io.File;

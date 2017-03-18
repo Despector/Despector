@@ -22,12 +22,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.despector.ast.transform;
+package org.spongepowered.despector.emitter;
 
+import org.spongepowered.despector.ast.members.MethodEntry;
 import org.spongepowered.despector.ast.type.TypeEntry;
 
-public interface TypeTransformer {
+/**
+ * An emitter which converts an AST to some more common format, usually source
+ * code.
+ */
+public interface ClassEmitter {
 
-    void transform(TypeEntry type);
+    /**
+     * Emits the given type.
+     */
+    void emitType(TypeEntry type);
+
+    /**
+     * Emits the given method. This returns whether anything was emitted.
+     * Methods which are synthetic may not be emitted.
+     */
+    boolean emitMethod(MethodEntry method);
 
 }
