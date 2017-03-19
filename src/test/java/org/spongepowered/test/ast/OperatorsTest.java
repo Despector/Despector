@@ -53,5 +53,15 @@ public class OperatorsTest {
         String mth = TestHelper.getAsString(getClass(), "mth_neg");
         assertEquals("int i = -(a + b);", mth);
     }
+    
+    private void mth_floatcmp(float a, float b) {
+        boolean z = a <= b;
+    }
+
+    @Test
+    public void testFloatCompare() throws IOException {
+        String mth = TestHelper.getAsString(getClass(), "mth_floatcmp");
+        assertEquals("boolean z = a <= b;", mth);
+    }
 
 }
