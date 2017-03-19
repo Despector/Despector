@@ -71,6 +71,10 @@ public abstract class MethodInvoke implements Instruction {
         return this.method_owner;
     }
 
+    public String getOwnerType() {
+        return TypeHelper.descToType(this.method_owner);
+    }
+
     public void setOwner(String type) {
         this.method_owner = checkNotNull(type, "owner");
     }
