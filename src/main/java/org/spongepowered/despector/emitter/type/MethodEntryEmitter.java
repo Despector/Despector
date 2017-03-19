@@ -50,24 +50,32 @@ public class MethodEntryEmitter implements AstEmitter<MethodEntry> {
         ctx.setMethod(method);
         if (method.getName().equals("<clinit>")) {
             int start = 0;
-            for (Statement stmt : method.getInstructions().getStatements()) {
-                if (!(stmt instanceof StaticFieldAssignment)) {
-                    break;
+            if (method.getInstructions() != null) {
+                for (Statement stmt : method.getInstructions().getStatements()) {
+                    if (!(stmt instanceof StaticFieldAssignment)) {
+                        break;
+                    }
+                    StaticFieldAssignment assign = (StaticFieldAssignment) stmt;
+                    if (!assign.getOwnerName().equals(method.getOwner())) {
+                        break;
+                    }
+                    start++;
                 }
-                StaticFieldAssignment assign = (StaticFieldAssignment) stmt;
-                if (!assign.getOwnerName().equals(method.getOwner())) {
-                    break;
+                // only need one less as we can ignore the return at the end
+                if (start == method.getInstructions().getStatements().size() - 1) {
+                    return false;
                 }
-                start++;
-            }
-            // only need one less as we can ignore the return at the end
-            if (start == method.getInstructions().getStatements().size() - 1) {
-                return false;
             }
             ctx.printIndentation();
             ctx.printString("static {\n");
             ctx.indent();
-            ctx.emitBody(method.getInstructions(), start);
+            if (method.getInstructions() == null) {
+                ctx.printIndentation();
+                ctx.printString("// Error decompiling block");
+                printReturn(ctx, method.getReturnType());
+            } else {
+                ctx.emitBody(method.getInstructions(), start);
+            }
             ctx.printString("\n");
             ctx.dedent();
             ctx.printIndentation();

@@ -29,8 +29,12 @@ import org.spongepowered.despector.ast.Annotation;
 import org.spongepowered.despector.ast.members.FieldEntry;
 import org.spongepowered.despector.ast.members.MethodEntry;
 import org.spongepowered.despector.ast.type.InterfaceEntry;
+import org.spongepowered.despector.ast.type.TypeEntry;
+import org.spongepowered.despector.ast.type.TypeEntry.InnerClassInfo;
 import org.spongepowered.despector.emitter.AstEmitter;
 import org.spongepowered.despector.emitter.EmitterContext;
+
+import java.util.Collection;
 
 public class InterfaceEntryEmitter implements AstEmitter<InterfaceEntry> {
 
@@ -42,7 +46,7 @@ public class InterfaceEntryEmitter implements AstEmitter<InterfaceEntry> {
             ctx.emit(anno);
             ctx.printString("\n");
         }
-
+        ctx.printIndentation();
         String name = type.getName().replace('/', '.');
         if (name.indexOf('.') != -1) {
             name = name.substring(name.lastIndexOf('.') + 1, name.length());
@@ -111,7 +115,21 @@ public class InterfaceEntryEmitter implements AstEmitter<InterfaceEntry> {
                 ctx.printString("\n\n");
             }
         }
+
+        Collection<InnerClassInfo> inners = type.getInnerClasses();
+        for (InnerClassInfo inner : inners) {
+            if (inner.getOuterName() == null || !inner.getOuterName().equals(type.getName())) {
+                continue;
+            }
+            ctx.setOuterType(type);
+            TypeEntry inner_type = type.getSource().get(inner.getName());
+            ctx.printString("\n");
+            ctx.emit(inner_type);
+            ctx.setType(type);
+            ctx.setOuterType(null);
+        }
         ctx.dedent();
+        ctx.printIndentation();
         ctx.printString("}\n");
         return true;
     }

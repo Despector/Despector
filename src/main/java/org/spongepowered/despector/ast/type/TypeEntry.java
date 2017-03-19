@@ -25,6 +25,7 @@
 package org.spongepowered.despector.ast.type;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static org.objectweb.asm.Opcodes.*;
 
 import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Multimap;
@@ -52,6 +53,7 @@ public abstract class TypeEntry extends AstEntry {
 
     protected boolean is_synthetic;
     protected boolean is_final;
+    protected boolean inner_class;
 
     protected final String name;
 
@@ -66,10 +68,12 @@ public abstract class TypeEntry extends AstEntry {
 
     protected final List<GenericArgument> generic_args = new ArrayList<>();
     protected final Map<AnnotationType, Annotation> annotations = new LinkedHashMap<>();
+    protected final Map<String, InnerClassInfo> inner_classes = new LinkedHashMap<>();
 
     public TypeEntry(SourceSet source, String name) {
         super(source);
         this.name = checkNotNull(name, "name");
+        this.inner_class = name.contains("$");
     }
 
     public AccessModifier getAccessModifier() {
@@ -94,6 +98,10 @@ public abstract class TypeEntry extends AstEntry {
 
     public void setSynthetic(boolean state) {
         this.is_synthetic = state;
+    }
+
+    public boolean isInnerClass() {
+        return this.inner_class;
     }
 
     /**
@@ -477,9 +485,76 @@ public abstract class TypeEntry extends AstEntry {
         this.annotations.put(anno.getType(), anno);
     }
 
+    public InnerClassInfo getInnerClassInfo(String name) {
+        return this.inner_classes.get(name);
+    }
+
+    public Collection<InnerClassInfo> getInnerClasses() {
+        return this.inner_classes.values();
+    }
+
+    public void addInnerClass(String name, String simple, String outer, int acc) {
+        this.inner_classes.put(name, new InnerClassInfo(name, simple, outer, acc));
+    }
+
     @Override
     public String toString() {
         return "Class " + this.name;
+    }
+
+    public static class InnerClassInfo {
+
+        private String name;
+        private String simple_name;
+        private String outer_name;
+        private boolean is_static;
+        private AccessModifier access;
+        private boolean is_final;
+        private boolean is_abstract;
+        private boolean is_synthetic;
+
+        public InnerClassInfo(String name, String simple, String outer, int acc) {
+            this.name = name;
+            this.simple_name = simple;
+            this.outer_name = outer;
+            this.is_static = (acc & ACC_STATIC) != 0;
+            this.is_final = (acc & ACC_FINAL) != 0;
+            this.is_abstract = (acc & ACC_ABSTRACT) != 0;
+            this.is_synthetic = (acc & ACC_SYNTHETIC) != 0;
+            this.access = AccessModifier.fromModifiers(acc);
+        }
+
+        public String getName() {
+            return this.name;
+        }
+
+        public String getSimpleName() {
+            return this.simple_name;
+        }
+
+        public String getOuterName() {
+            return this.outer_name;
+        }
+
+        public AccessModifier getAccessModifier() {
+            return this.access;
+        }
+
+        public boolean isStatic() {
+            return this.is_static;
+        }
+
+        public boolean isFinal() {
+            return this.is_final;
+        }
+
+        public boolean isAbstract() {
+            return this.is_abstract;
+        }
+
+        public boolean isSynthetic() {
+            return this.is_synthetic;
+        }
     }
 
 }

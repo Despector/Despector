@@ -143,6 +143,9 @@ public class Main {
         }
 
         for (TypeEntry type : source.getAllClasses()) {
+            if (type.isInnerClass()) {
+                continue;
+            }
             Path out = output.resolve(type.getName() + ".java");
             if (!Files.exists(out.getParent())) {
                 Files.createDirectories(out.getParent());

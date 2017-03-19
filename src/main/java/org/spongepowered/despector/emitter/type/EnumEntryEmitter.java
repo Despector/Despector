@@ -34,10 +34,13 @@ import org.spongepowered.despector.ast.members.insn.Statement;
 import org.spongepowered.despector.ast.members.insn.assign.StaticFieldAssignment;
 import org.spongepowered.despector.ast.members.insn.function.New;
 import org.spongepowered.despector.ast.type.EnumEntry;
+import org.spongepowered.despector.ast.type.TypeEntry;
+import org.spongepowered.despector.ast.type.TypeEntry.InnerClassInfo;
 import org.spongepowered.despector.emitter.AstEmitter;
 import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.util.TypeHelper;
 
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -52,7 +55,7 @@ public class EnumEntryEmitter implements AstEmitter<EnumEntry> {
             ctx.emit(anno);
             ctx.printString("\n");
         }
-
+        ctx.printIndentation();
         ctx.printString(type.getAccessModifier().asString());
         if (type.getAccessModifier() != AccessModifier.PACKAGE_PRIVATE) {
             ctx.printString(" ");
@@ -219,7 +222,22 @@ public class EnumEntryEmitter implements AstEmitter<EnumEntry> {
                 ctx.printString("\n\n");
             }
         }
+
+        Collection<InnerClassInfo> inners = type.getInnerClasses();
+        for (InnerClassInfo inner : inners) {
+            if (inner.getOuterName() == null || !inner.getOuterName().equals(type.getName())) {
+                continue;
+            }
+            ctx.setOuterType(type);
+            TypeEntry inner_type = type.getSource().get(inner.getName());
+            ctx.printString("\n");
+            ctx.emit(inner_type);
+            ctx.setType(type);
+            ctx.setOuterType(null);
+        }
+
         ctx.dedent();
+        ctx.printIndentation();
         ctx.printString("}\n");
         return true;
     }

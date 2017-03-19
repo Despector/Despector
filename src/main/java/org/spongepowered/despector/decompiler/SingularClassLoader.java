@@ -36,6 +36,7 @@ import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.AnnotationNode;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.FieldNode;
+import org.objectweb.asm.tree.InnerClassNode;
 import org.objectweb.asm.tree.MethodNode;
 import org.spongepowered.despector.ast.AccessModifier;
 import org.spongepowered.despector.ast.Annotation;
@@ -120,6 +121,12 @@ public class SingularClassLoader {
         entry.setFinal((cn.access & ACC_FINAL) != 0);
         entry.setSynthetic((cn.access & ACC_SYNTHETIC) != 0);
         entry.getGenericArgs().addAll(TypeHelper.getGenericArgs(cn.signature));
+
+        if (cn.innerClasses != null) {
+            for (InnerClassNode in : (List<InnerClassNode>) cn.innerClasses) {
+                entry.addInnerClass(in.name, in.innerName, in.outerName, in.access);
+            }
+        }
 
         if (cn.visibleAnnotations != null) {
             for (AnnotationNode an : (List<AnnotationNode>) cn.visibleAnnotations) {

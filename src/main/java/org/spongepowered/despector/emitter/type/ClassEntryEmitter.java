@@ -32,9 +32,12 @@ import org.spongepowered.despector.ast.members.insn.Statement;
 import org.spongepowered.despector.ast.members.insn.arg.Instruction;
 import org.spongepowered.despector.ast.members.insn.assign.StaticFieldAssignment;
 import org.spongepowered.despector.ast.type.ClassEntry;
+import org.spongepowered.despector.ast.type.TypeEntry;
+import org.spongepowered.despector.ast.type.TypeEntry.InnerClassInfo;
 import org.spongepowered.despector.emitter.AstEmitter;
 import org.spongepowered.despector.emitter.EmitterContext;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -48,27 +51,35 @@ public class ClassEntryEmitter implements AstEmitter<ClassEntry> {
             ctx.emit(anno);
             ctx.printString("\n");
         }
-
+        ctx.printIndentation();
+        InnerClassInfo inner_info = null;
+        if (type.isInnerClass() && ctx.getOuterType() != null) {
+            inner_info = ctx.getOuterType().getInnerClassInfo(type.getName());
+        }
         ctx.printString(type.getAccessModifier().asString());
         if (type.getAccessModifier() != AccessModifier.PACKAGE_PRIVATE) {
             ctx.printString(" ");
         }
-//        if (type.isStatic()) {
-//            printString("static ");
-//        }
-        if (type.isFinal()) {
+        if (inner_info != null && inner_info.isStatic()) {
+            ctx.printString("static ");
+        }
+        if ((inner_info != null && inner_info.isFinal()) || type.isFinal()) {
             ctx.printString("final ");
         }
-//        if (type.isAbstract()) {
-//            printString("abstract ");
-//        }
-        ctx.printString("class ");
-        String name = type.getName().replace('/', '.');
-        if (name.indexOf('.') != -1) {
-            name = name.substring(name.lastIndexOf('.') + 1, name.length());
+        if (inner_info != null && inner_info.isAbstract()) {
+            ctx.printString("abstract ");
         }
-        name = name.replace('$', '.');
-        ctx.printString(name);
+        ctx.printString("class ");
+        if (inner_info != null) {
+            ctx.printString(inner_info.getSimpleName());
+        } else {
+            String name = type.getName().replace('/', '.');
+            if (name.indexOf('.') != -1) {
+                name = name.substring(name.lastIndexOf('.') + 1, name.length());
+            }
+            name = name.replace('$', '.');
+            ctx.printString(name);
+        }
         if (!type.getSuperclass().equals("Ljava/lang/Object;")) {
             ctx.printString(" extends ");
             ctx.emitTypeName(type.getSuperclassName());
@@ -104,7 +115,7 @@ public class ClassEntryEmitter implements AstEmitter<ClassEntry> {
             Map<String, Instruction> static_initializers = new HashMap<>();
 
             MethodEntry static_init = type.getStaticMethodSafe("<clinit>");
-            if (static_init != null) {
+            if (static_init != null && static_init.getInstructions() != null) {
                 for (Statement stmt : static_init.getInstructions().getStatements()) {
                     if (!(stmt instanceof StaticFieldAssignment)) {
                         break;
@@ -170,7 +181,22 @@ public class ClassEntryEmitter implements AstEmitter<ClassEntry> {
                 }
             }
         }
+
+        Collection<InnerClassInfo> inners = type.getInnerClasses();
+        for (InnerClassInfo inner : inners) {
+            if (inner.getOuterName() == null || !inner.getOuterName().equals(type.getName())) {
+                continue;
+            }
+            ctx.setOuterType(type);
+            TypeEntry inner_type = type.getSource().get(inner.getName());
+            ctx.printString("\n");
+            ctx.emit(inner_type);
+            ctx.setType(type);
+            ctx.setOuterType(null);
+        }
+
         ctx.dedent();
+        ctx.printIndentation();
         ctx.printString("}\n");
         return true;
     }

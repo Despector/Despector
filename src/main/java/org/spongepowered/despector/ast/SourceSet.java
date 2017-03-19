@@ -26,13 +26,13 @@ package org.spongepowered.despector.ast;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.collect.Maps;
 import org.spongepowered.despector.ast.type.ArrayTypeEntry;
 import org.spongepowered.despector.ast.type.EnumEntry;
 import org.spongepowered.despector.ast.type.InterfaceEntry;
 import org.spongepowered.despector.ast.type.TypeEntry;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -40,15 +40,12 @@ import java.util.Map;
  */
 public class SourceSet {
 
-    private final Map<String, TypeEntry> classes = Maps.newHashMap();
-    private final Map<String, EnumEntry> enums = Maps.newHashMap();
-    private final Map<String, InterfaceEntry> interfaces = Maps.newHashMap();
-    private final Map<String, ArrayTypeEntry> array_types = Maps.newHashMap();
+    private final Map<String, TypeEntry> classes = new HashMap<>();
+    private final Map<String, EnumEntry> enums = new HashMap<>();
+    private final Map<String, InterfaceEntry> interfaces = new HashMap<>();
+    private final Map<String, ArrayTypeEntry> array_types = new HashMap<>();
 
-    private final Map<String, AnnotationType> annotations = Maps.newHashMap();
-
-//    private final Map<String, TypeEntry> unique_string_constants = Maps.newHashMap();
-//    private final Set<String> non_unique_string_constants = Sets.newHashSet();
+    private final Map<String, AnnotationType> annotations = new HashMap<>();
 
     public SourceSet() {
     }
@@ -68,9 +65,6 @@ public class SourceSet {
 
     public TypeEntry get(String name) {
         checkNotNull(name);
-//        if (!ObfUtil.isMinecraftSource(name)) {
-//            return ClasspathSourceSet.classpath.get(name);
-//        }
         if (name.endsWith("[]")) {
             ArrayTypeEntry entry = this.array_types.get(name);
             if (entry == null) {
@@ -85,17 +79,11 @@ public class SourceSet {
     }
 
     public EnumEntry getEnum(String name) {
-//        if (!ObfUtil.isMinecraftSource(name)) {
-//            return ClasspathSourceSet.classpath.getEnum(name);
-//        }
         EnumEntry entry = this.enums.get(name);
         return entry;
     }
 
     public InterfaceEntry getInterface(String name) {
-//        if (!ObfUtil.isMinecraftSource(name)) {
-//            return ClasspathSourceSet.classpath.getInterface(name);
-//        }
         InterfaceEntry entry = this.interfaces.get(name);
         return entry;
     }

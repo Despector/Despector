@@ -56,6 +56,7 @@ public class EmitterContext {
     private Set<LocalInstance> defined_locals = Sets.newHashSet();
     private Set<String> imports = null;
     private TypeEntry type = null;
+    private TypeEntry outer_type = null;
     private MethodEntry method;
 
     private int indentation = 0;
@@ -78,6 +79,14 @@ public class EmitterContext {
 
     public void setType(TypeEntry type) {
         this.type = type;
+    }
+
+    public TypeEntry getOuterType() {
+        return this.outer_type;
+    }
+
+    public void setOuterType(TypeEntry t) {
+        this.outer_type = t;
     }
 
     public MethodEntry getMethod() {
@@ -103,13 +112,17 @@ public class EmitterContext {
     @SuppressWarnings("unchecked")
     public <T extends AstEntry> boolean emit(T obj) {
         if (obj instanceof TypeEntry) {
+            if (((TypeEntry) obj).isSynthetic()) {
+                return false;
+            }
             this.type = (TypeEntry) obj;
         }
         AstEmitter<T> emitter = (AstEmitter<T>) this.set.getAstEmitter(obj.getClass());
         if (emitter == null) {
             throw new IllegalArgumentException("No emitter for ast entry " + obj.getClass().getName());
         }
-        return emitter.emit(this, obj);
+        boolean state = emitter.emit(this, obj);
+        return state;
     }
 
     public void emitBody(StatementBlock instructions) {
