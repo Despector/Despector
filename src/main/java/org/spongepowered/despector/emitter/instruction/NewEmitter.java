@@ -35,6 +35,11 @@ public class NewEmitter implements InstructionEmitter<New> {
     public void emit(EmitterContext ctx, New arg, String type) {
         ctx.printString("new ");
         ctx.emitType(arg.getType());
+
+        if (ctx.getField() != null && !ctx.getField().getSignature().getArguments().isEmpty()) {
+            ctx.printString("<>");
+        }
+
         ctx.printString("(");
         // TODO get param types if we have the ast
         for (int i = 0; i < arg.getParameters().length; i++) {

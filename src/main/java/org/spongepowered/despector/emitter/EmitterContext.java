@@ -29,6 +29,7 @@ import com.google.common.collect.Sets;
 import org.spongepowered.despector.ast.Annotation;
 import org.spongepowered.despector.ast.AstEntry;
 import org.spongepowered.despector.ast.Locals.LocalInstance;
+import org.spongepowered.despector.ast.members.FieldEntry;
 import org.spongepowered.despector.ast.members.MethodEntry;
 import org.spongepowered.despector.ast.members.insn.Statement;
 import org.spongepowered.despector.ast.members.insn.StatementBlock;
@@ -55,9 +56,11 @@ public class EmitterContext {
     private StringBuilder buffer = null;
     private Set<LocalInstance> defined_locals = Sets.newHashSet();
     private Set<String> imports = null;
+
     private TypeEntry type = null;
     private TypeEntry outer_type = null;
     private MethodEntry method;
+    private FieldEntry field;
 
     private int indentation = 0;
     private int offs = 0;
@@ -98,6 +101,14 @@ public class EmitterContext {
         this.method = mth;
     }
 
+    public FieldEntry getField() {
+        return this.field;
+    }
+
+    public void setField(FieldEntry fld) {
+        this.field = fld;
+    }
+
     public EmitterFormat getFormat() {
         return this.format;
     }
@@ -117,12 +128,17 @@ public class EmitterContext {
                 return false;
             }
             this.type = (TypeEntry) obj;
+        } else if (obj instanceof FieldEntry) {
+            this.field = (FieldEntry) obj;
         }
         AstEmitter<T> emitter = (AstEmitter<T>) this.set.getAstEmitter(obj.getClass());
         if (emitter == null) {
             throw new IllegalArgumentException("No emitter for ast entry " + obj.getClass().getName());
         }
         boolean state = emitter.emit(this, obj);
+        if (obj instanceof FieldEntry) {
+            this.field = null;
+        }
         return state;
     }
 

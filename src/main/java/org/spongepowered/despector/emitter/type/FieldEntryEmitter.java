@@ -56,6 +56,10 @@ public class FieldEntryEmitter implements AstEmitter<FieldEntry> {
         }
         ctx.printString(" ");
         ctx.printString(ast.getName());
+        if (ast.getInitializer() != null) {
+            ctx.printString(" = ");
+            ctx.emit(ast.getInitializer(), ast.getType());
+        }
         return true;
     }
 

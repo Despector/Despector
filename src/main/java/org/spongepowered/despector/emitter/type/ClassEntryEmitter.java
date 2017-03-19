@@ -30,6 +30,7 @@ import org.spongepowered.despector.ast.members.FieldEntry;
 import org.spongepowered.despector.ast.members.MethodEntry;
 import org.spongepowered.despector.ast.members.insn.Statement;
 import org.spongepowered.despector.ast.members.insn.arg.Instruction;
+import org.spongepowered.despector.ast.members.insn.assign.FieldAssignment;
 import org.spongepowered.despector.ast.members.insn.assign.StaticFieldAssignment;
 import org.spongepowered.despector.ast.type.ClassEntry;
 import org.spongepowered.despector.ast.type.TypeEntry;
@@ -37,10 +38,13 @@ import org.spongepowered.despector.ast.type.TypeEntry.InnerClassInfo;
 import org.spongepowered.despector.emitter.AstEmitter;
 import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.GenericsEmitter;
+import org.spongepowered.despector.util.AstUtil;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class ClassEntryEmitter implements AstEmitter<ClassEntry> {
 
@@ -164,6 +168,31 @@ public class ClassEntryEmitter implements AstEmitter<ClassEntry> {
             }
         }
         if (!type.getFields().isEmpty()) {
+
+            List<MethodEntry> inits = type.getMethods().stream().filter((m) -> m.getName().equals("<init>")).collect(Collectors.toList());
+            MethodEntry main = null;
+            if(inits.size() == 1) {
+                main = inits.get(0);
+            }
+            if(main != null) {
+                for(int i = 1; i < main.getInstructions().getStatements().size(); i++) {
+                    Statement next = main.getInstructions().getStatements().get(i);
+                    if(!(next instanceof FieldAssignment)) {
+                        break;
+                    }
+                    FieldAssignment assign = (FieldAssignment) next;
+                    if(!type.getName().equals(assign.getOwnerName())) {
+                        break;
+                    }
+                    if(AstUtil.references(assign.getValue(), null)) {
+                        break;
+                    }
+                    assign.setInitializer(true);
+                    FieldEntry fld = type.getField(assign.getFieldName());
+                    fld.setInitializer(assign.getValue());
+                }
+            }
+
             boolean at_least_one = false;
             for (FieldEntry field : type.getFields()) {
                 if (field.isSynthetic()) {

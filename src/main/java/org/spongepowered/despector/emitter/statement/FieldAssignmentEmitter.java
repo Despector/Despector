@@ -39,6 +39,9 @@ public class FieldAssignmentEmitter implements StatementEmitter<FieldAssignment>
 
     @Override
     public void emit(EmitterContext ctx, FieldAssignment insn, boolean semicolon) {
+        if(insn.isInitializer()) {
+            return;
+        }
         if (insn instanceof StaticFieldAssignment) {
             if (ctx.getType() != null && !((StaticFieldAssignment) insn).getOwnerType().equals(ctx.getType().getDescriptor())) {
                 ctx.emitTypeName(((StaticFieldAssignment) insn).getOwnerName());

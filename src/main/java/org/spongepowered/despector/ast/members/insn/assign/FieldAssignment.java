@@ -35,6 +35,8 @@ public abstract class FieldAssignment extends Assignment {
     protected String type_desc;
     protected String owner_type;
 
+    protected boolean initializer = false;
+
     public FieldAssignment(String field, String type_desc, String owner, Instruction val) {
         super(val);
         this.field_name = checkNotNull(field, "field");
@@ -68,6 +70,14 @@ public abstract class FieldAssignment extends Assignment {
 
     public void setOwner(String owner) {
         this.owner_type = checkNotNull(owner, "owner");
+    }
+
+    public boolean isInitializer() {
+        return this.initializer;
+    }
+
+    public void setInitializer(boolean state) {
+        this.initializer = state;
     }
 
 }

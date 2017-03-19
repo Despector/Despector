@@ -32,6 +32,7 @@ import org.spongepowered.despector.ast.AnnotationType;
 import org.spongepowered.despector.ast.AstEntry;
 import org.spongepowered.despector.ast.SourceSet;
 import org.spongepowered.despector.ast.generic.ClassTypeSignature;
+import org.spongepowered.despector.ast.members.insn.arg.Instruction;
 import org.spongepowered.despector.util.TypeHelper;
 
 import java.util.Collection;
@@ -52,6 +53,8 @@ public class FieldEntry extends AstEntry {
     protected boolean is_final;
     protected boolean is_static;
     protected boolean is_synthetic;
+
+    protected Instruction init;
 
     protected final Map<AnnotationType, Annotation> annotations = new LinkedHashMap<>();
 
@@ -110,6 +113,14 @@ public class FieldEntry extends AstEntry {
 
     public void setSynthetic(boolean state) {
         this.is_synthetic = state;
+    }
+
+    public Instruction getInitializer() {
+        return this.init;
+    }
+
+    public void setInitializer(Instruction insn) {
+        this.init = insn;
     }
 
     /**
