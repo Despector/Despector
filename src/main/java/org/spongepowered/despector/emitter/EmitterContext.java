@@ -26,6 +26,7 @@ package org.spongepowered.despector.emitter;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import org.spongepowered.despector.ast.Annotation;
 import org.spongepowered.despector.ast.AstEntry;
 import org.spongepowered.despector.ast.Locals.LocalInstance;
 import org.spongepowered.despector.ast.members.MethodEntry;
@@ -101,7 +102,7 @@ public class EmitterContext {
 
     @SuppressWarnings("unchecked")
     public <T extends AstEntry> boolean emit(T obj) {
-        if(obj instanceof TypeEntry) {
+        if (obj instanceof TypeEntry) {
             this.type = (TypeEntry) obj;
         }
         AstEmitter<T> emitter = (AstEmitter<T>) this.set.getAstEmitter(obj.getClass());
@@ -158,6 +159,13 @@ public class EmitterContext {
             throw new IllegalArgumentException("No emitter for condition " + condition.getClass().getName());
         }
         emitter.emit(this, condition);
+    }
+
+    public void emit(Annotation anno) {
+        if (this.set.getAnnotationEmitter() == null) {
+            throw new IllegalArgumentException("No emitter for annotations");
+        }
+        this.set.getAnnotationEmitter().emit(this, anno);
     }
 
     public void indent() {

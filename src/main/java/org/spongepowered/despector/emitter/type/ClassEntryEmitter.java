@@ -25,6 +25,7 @@
 package org.spongepowered.despector.emitter.type;
 
 import org.spongepowered.despector.ast.AccessModifier;
+import org.spongepowered.despector.ast.Annotation;
 import org.spongepowered.despector.ast.members.FieldEntry;
 import org.spongepowered.despector.ast.members.MethodEntry;
 import org.spongepowered.despector.ast.members.insn.Statement;
@@ -41,6 +42,13 @@ public class ClassEntryEmitter implements AstEmitter<ClassEntry> {
 
     @Override
     public boolean emit(EmitterContext ctx, ClassEntry type) {
+
+        for (Annotation anno : type.getAnnotations()) {
+            ctx.printIndentation();
+            ctx.emit(anno);
+            ctx.printString("\n");
+        }
+
         ctx.printString(type.getAccessModifier().asString());
         if (type.getAccessModifier() != AccessModifier.PACKAGE_PRIVATE) {
             ctx.printString(" ");

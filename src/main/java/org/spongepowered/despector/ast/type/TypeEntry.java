@@ -27,17 +27,19 @@ package org.spongepowered.despector.ast.type;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.LinkedHashMultimap;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import org.spongepowered.despector.ast.AccessModifier;
+import org.spongepowered.despector.ast.Annotation;
+import org.spongepowered.despector.ast.AnnotationType;
 import org.spongepowered.despector.ast.AstEntry;
 import org.spongepowered.despector.ast.SourceSet;
 import org.spongepowered.despector.ast.members.FieldEntry;
 import org.spongepowered.despector.ast.members.MethodEntry;
 import org.spongepowered.despector.util.TypeHelper;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -51,21 +53,23 @@ public abstract class TypeEntry extends AstEntry {
     protected boolean is_synthetic;
     protected boolean is_final;
 
-    protected String name;
+    protected final String name;
 
-    protected final List<GenericType> generic_interfaces = Lists.newArrayList();
-    protected final List<String> interfaces = Lists.newArrayList();
+    protected final List<GenericType> generic_interfaces = new ArrayList<>();
+    protected final List<String> interfaces = new ArrayList<>();
 
-    protected final Map<String, FieldEntry> static_fields = Maps.newLinkedHashMap();
+    protected final Map<String, FieldEntry> static_fields = new LinkedHashMap<>();
     protected final Multimap<String, MethodEntry> static_methods = LinkedHashMultimap.create();
 
-    protected final Map<String, FieldEntry> fields = Maps.newLinkedHashMap();
+    protected final Map<String, FieldEntry> fields = new LinkedHashMap<>();
     protected final Multimap<String, MethodEntry> methods = LinkedHashMultimap.create();
 
-    protected final List<GenericArgument> generic_args = Lists.newArrayList();
+    protected final List<GenericArgument> generic_args = new ArrayList<>();
+    protected final Map<AnnotationType, Annotation> annotations = new LinkedHashMap<>();
 
-    public TypeEntry(SourceSet source) {
+    public TypeEntry(SourceSet source, String name) {
         super(source);
+        this.name = checkNotNull(name, "name");
     }
 
     public AccessModifier getAccessModifier() {
@@ -101,10 +105,6 @@ public abstract class TypeEntry extends AstEntry {
 
     public String getDescriptor() {
         return "L" + this.name + ";";
-    }
-
-    public void setName(String name) {
-        this.name = checkNotNull(name, "name");
     }
 
     // TODO
@@ -463,6 +463,18 @@ public abstract class TypeEntry extends AstEntry {
 
     public Collection<FieldEntry> getStaticFields() {
         return this.static_fields.values();
+    }
+
+    public Annotation getAnnotation(AnnotationType type) {
+        return this.annotations.get(type);
+    }
+
+    public Collection<Annotation> getAnnotations() {
+        return this.annotations.values();
+    }
+
+    public void addAnnotation(Annotation anno) {
+        this.annotations.put(anno.getType(), anno);
     }
 
     @Override

@@ -27,6 +27,7 @@ package org.spongepowered.despector.emitter.type;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import org.spongepowered.despector.ast.AccessModifier;
+import org.spongepowered.despector.ast.Annotation;
 import org.spongepowered.despector.ast.members.FieldEntry;
 import org.spongepowered.despector.ast.members.MethodEntry;
 import org.spongepowered.despector.ast.members.insn.Statement;
@@ -45,6 +46,13 @@ public class EnumEntryEmitter implements AstEmitter<EnumEntry> {
 
     @Override
     public boolean emit(EmitterContext ctx, EnumEntry type) {
+
+        for (Annotation anno : type.getAnnotations()) {
+            ctx.printIndentation();
+            ctx.emit(anno);
+            ctx.printString("\n");
+        }
+
         ctx.printString(type.getAccessModifier().asString());
         if (type.getAccessModifier() != AccessModifier.PACKAGE_PRIVATE) {
             ctx.printString(" ");
@@ -169,7 +177,7 @@ public class EnumEntryEmitter implements AstEmitter<EnumEntry> {
             }
             ctx.dedent();
             ctx.printIndentation();
-            ctx. printString("}\n");
+            ctx.printString("}\n");
         }
         if (!type.getStaticMethods().isEmpty()) {
             for (MethodEntry mth : type.getStaticMethods()) {

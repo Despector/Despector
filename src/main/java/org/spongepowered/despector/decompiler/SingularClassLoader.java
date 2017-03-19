@@ -33,10 +33,13 @@ import static org.objectweb.asm.Opcodes.ACC_SYNTHETIC;
 
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.tree.AbstractInsnNode;
+import org.objectweb.asm.tree.AnnotationNode;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.FieldNode;
 import org.objectweb.asm.tree.MethodNode;
 import org.spongepowered.despector.ast.AccessModifier;
+import org.spongepowered.despector.ast.Annotation;
+import org.spongepowered.despector.ast.AnnotationType;
 import org.spongepowered.despector.ast.SourceSet;
 import org.spongepowered.despector.ast.members.FieldEntry;
 import org.spongepowered.despector.ast.members.MethodEntry;
@@ -87,24 +90,49 @@ public class SingularClassLoader {
         return load(cn, src);
     }
 
+    private Annotation createAnnotation(SourceSet src, AnnotationNode an) {
+        AnnotationType anno_type = src.getAnnotationType(an.desc);
+        Annotation anno = new Annotation(anno_type);
+        if (an.values != null) {
+            for (int i = 0; i < an.values.size(); i += 2) {
+                String key = (String) an.values.get(i * 2);
+                Object value = an.values.get(i * 2 + 1);
+                anno.setValue(key, value);
+            }
+        }
+        return anno;
+    }
+
     @SuppressWarnings("unchecked")
     public TypeEntry load(ClassNode cn, SourceSet src) {
         System.out.println("Decompiling class " + cn.name);
         int acc = cn.access;
         TypeEntry entry = null;
         if ((acc & ACC_ENUM) != 0) {
-            entry = new EnumEntry(src);
+            entry = new EnumEntry(src, cn.name);
         } else if ((acc & ACC_INTERFACE) != 0) {
-            entry = new InterfaceEntry(src);
+            entry = new InterfaceEntry(src, cn.name);
         } else {
-            entry = new ClassEntry(src);
+            entry = new ClassEntry(src, cn.name);
             ((ClassEntry) entry).setSuperclass("L" + cn.superName + ";");
         }
-        entry.setName(cn.name);
         entry.setAccessModifier(AccessModifier.fromModifiers(cn.access));
         entry.setFinal((cn.access & ACC_FINAL) != 0);
         entry.setSynthetic((cn.access & ACC_SYNTHETIC) != 0);
         entry.getGenericArgs().addAll(TypeHelper.getGenericArgs(cn.signature));
+
+        if (cn.visibleAnnotations != null) {
+            for (AnnotationNode an : (List<AnnotationNode>) cn.visibleAnnotations) {
+                Annotation anno = createAnnotation(src, an);
+                entry.addAnnotation(anno);
+            }
+        }
+        if (cn.invisibleAnnotations != null) {
+            for (AnnotationNode an : (List<AnnotationNode>) cn.invisibleAnnotations) {
+                Annotation anno = createAnnotation(src, an);
+                entry.addAnnotation(anno);
+            }
+        }
 
         // Find all fields
         for (FieldNode fn : (List<FieldNode>) cn.fields) {
@@ -116,6 +144,20 @@ public class SingularClassLoader {
             f.setStatic((fn.access & ACC_STATIC) != 0);
             f.setSynthetic((fn.access & ACC_SYNTHETIC) != 0);
             f.setType(fn.desc);
+
+            if (fn.visibleAnnotations != null) {
+                for (AnnotationNode an : (List<AnnotationNode>) fn.visibleAnnotations) {
+                    Annotation anno = createAnnotation(src, an);
+                    f.addAnnotation(anno);
+                }
+            }
+            if (fn.invisibleAnnotations != null) {
+                for (AnnotationNode an : (List<AnnotationNode>) fn.invisibleAnnotations) {
+                    Annotation anno = createAnnotation(src, an);
+                    f.addAnnotation(anno);
+                }
+            }
+
             entry.addField(f);
         }
 
@@ -130,10 +172,24 @@ public class SingularClassLoader {
             m.setSignature(mn.desc);
             m.setStatic((mn.access & ACC_STATIC) != 0);
             m.setSynthetic((mn.access & ACC_SYNTHETIC) != 0);
+
+            if (mn.visibleAnnotations != null) {
+                for (AnnotationNode an : (List<AnnotationNode>) mn.visibleAnnotations) {
+                    Annotation anno = createAnnotation(src, an);
+                    m.addAnnotation(anno);
+                }
+            }
+            if (mn.invisibleAnnotations != null) {
+                for (AnnotationNode an : (List<AnnotationNode>) mn.invisibleAnnotations) {
+                    Annotation anno = createAnnotation(src, an);
+                    m.addAnnotation(anno);
+                }
+            }
+
             if (SET_SINGLE_GRAPH_DEBUG) {
                 OpcodeDecompiler.PRINT_BLOCKS = false;
                 ConfigManager.getConfig().print_opcodes_on_error = false;
-                if (cn.name.endsWith("Block") && mn.name.equals("dropBlockAsItemWithChance")) {
+                if (cn.name.endsWith("Block") && mn.name.equals("registerBlocks")) {
                     OpcodeDecompiler.PRINT_BLOCKS = true;
                     ConfigManager.getConfig().print_opcodes_on_error = true;
                 }
@@ -162,8 +218,8 @@ public class SingularClassLoader {
         }
 
         if (entry instanceof EnumEntry) {
-            MethodEntry clinit = entry.getStaticMethod("<clinit>");
-            if (clinit != null) {
+            MethodEntry clinit = entry.getStaticMethodSafe("<clinit>");
+            if (clinit != null && clinit.getInstructions() != null) {
                 Iterator<Statement> initializers = clinit.getInstructions().getStatements().iterator();
                 while (initializers.hasNext()) {
                     Statement next = initializers.next();
@@ -191,7 +247,6 @@ public class SingularClassLoader {
             out.flush();
         }
         return entry;
-
     }
 
 }

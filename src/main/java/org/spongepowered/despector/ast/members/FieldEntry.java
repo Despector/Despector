@@ -27,9 +27,15 @@ package org.spongepowered.despector.ast.members;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.spongepowered.despector.ast.AccessModifier;
+import org.spongepowered.despector.ast.Annotation;
+import org.spongepowered.despector.ast.AnnotationType;
 import org.spongepowered.despector.ast.AstEntry;
 import org.spongepowered.despector.ast.SourceSet;
 import org.spongepowered.despector.util.TypeHelper;
+
+import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * An ast entry for fields.
@@ -45,6 +51,8 @@ public class FieldEntry extends AstEntry {
     protected boolean is_final;
     protected boolean is_static;
     protected boolean is_synthetic;
+
+    protected final Map<AnnotationType, Annotation> annotations = new LinkedHashMap<>();
 
     public FieldEntry(SourceSet source) {
         super(source);
@@ -127,6 +135,18 @@ public class FieldEntry extends AstEntry {
      */
     public void setType(String type) {
         this.type = checkNotNull(type);
+    }
+
+    public Annotation getAnnotation(AnnotationType type) {
+        return this.annotations.get(type);
+    }
+
+    public Collection<Annotation> getAnnotations() {
+        return this.annotations.values();
+    }
+
+    public void addAnnotation(Annotation anno) {
+        this.annotations.put(anno.getType(), anno);
     }
 
     @Override

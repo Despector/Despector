@@ -38,8 +38,8 @@ public class EnumEntry extends TypeEntry {
 
     protected final List<String> enum_constants = Lists.newArrayList();
 
-    public EnumEntry(SourceSet src) {
-        super(src);
+    public EnumEntry(SourceSet src, String name) {
+        super(src, name);
     }
 
     /**

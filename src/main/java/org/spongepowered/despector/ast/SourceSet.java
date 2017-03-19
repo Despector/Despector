@@ -45,6 +45,8 @@ public class SourceSet {
     private final Map<String, InterfaceEntry> interfaces = Maps.newHashMap();
     private final Map<String, ArrayTypeEntry> array_types = Maps.newHashMap();
 
+    private final Map<String, AnnotationType> annotations = Maps.newHashMap();
+
 //    private final Map<String, TypeEntry> unique_string_constants = Maps.newHashMap();
 //    private final Set<String> non_unique_string_constants = Sets.newHashSet();
 
@@ -118,6 +120,23 @@ public class SourceSet {
      */
     public Collection<InterfaceEntry> getAllInterfaces() {
         return this.interfaces.values();
+    }
+
+    public void addAnnotation(AnnotationType anno) {
+        this.annotations.put(anno.getName(), anno);
+    }
+
+    public AnnotationType getAnnotationType(String name) {
+        AnnotationType anno = this.annotations.get(name);
+        if (anno == null) {
+            anno = new AnnotationType(name);
+            this.annotations.put(name, anno);
+        }
+        return anno;
+    }
+
+    public Collection<AnnotationType> getAllAnnotations() {
+        return this.annotations.values();
     }
 
 }

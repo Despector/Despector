@@ -34,7 +34,7 @@ public class ArrayTypeEntry extends TypeEntry {
     protected final String component_type;
 
     public ArrayTypeEntry(SourceSet source, String comp) {
-        super(source);
+        super(source, comp + "[]");
         this.component_type = comp;
     }
 

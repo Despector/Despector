@@ -129,6 +129,9 @@ public class Emitters {
     public static final EmitterSet JAVA = new EmitterSet();
 
     static {
+
+        JAVA.setAnnotationEmitter(new AnnotationEmitter());
+
         JAVA.setAstEmitter(ClassEntry.class, new ClassEntryEmitter());
         JAVA.setAstEmitter(EnumEntry.class, new EnumEntryEmitter());
         JAVA.setAstEmitter(InterfaceEntry.class, new InterfaceEntryEmitter());

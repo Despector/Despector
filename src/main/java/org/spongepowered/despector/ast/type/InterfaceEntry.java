@@ -31,8 +31,8 @@ import org.spongepowered.despector.ast.SourceSet;
  */
 public class InterfaceEntry extends TypeEntry {
 
-    public InterfaceEntry(SourceSet src) {
-        super(src);
+    public InterfaceEntry(SourceSet src, String name) {
+        super(src, name);
     }
 
     @Override

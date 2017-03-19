@@ -25,6 +25,7 @@
 package org.spongepowered.despector.emitter.type;
 
 import org.spongepowered.despector.ast.AccessModifier;
+import org.spongepowered.despector.ast.Annotation;
 import org.spongepowered.despector.ast.members.FieldEntry;
 import org.spongepowered.despector.ast.members.MethodEntry;
 import org.spongepowered.despector.ast.type.InterfaceEntry;
@@ -35,6 +36,13 @@ public class InterfaceEntryEmitter implements AstEmitter<InterfaceEntry> {
 
     @Override
     public boolean emit(EmitterContext ctx, InterfaceEntry type) {
+
+        for (Annotation anno : type.getAnnotations()) {
+            ctx.printIndentation();
+            ctx.emit(anno);
+            ctx.printString("\n");
+        }
+
         String name = type.getName().replace('/', '.');
         if (name.indexOf('.') != -1) {
             name = name.substring(name.lastIndexOf('.') + 1, name.length());

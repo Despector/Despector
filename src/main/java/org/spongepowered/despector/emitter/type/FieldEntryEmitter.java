@@ -24,6 +24,7 @@
  */
 package org.spongepowered.despector.emitter.type;
 
+import org.spongepowered.despector.ast.Annotation;
 import org.spongepowered.despector.ast.members.FieldEntry;
 import org.spongepowered.despector.emitter.AstEmitter;
 import org.spongepowered.despector.emitter.EmitterContext;
@@ -32,6 +33,13 @@ public class FieldEntryEmitter implements AstEmitter<FieldEntry> {
 
     @Override
     public boolean emit(EmitterContext ctx, FieldEntry ast) {
+
+        for (Annotation anno : ast.getAnnotations()) {
+            ctx.printIndentation();
+            ctx.emit(anno);
+            ctx.printString("\n");
+        }
+
         ctx.printString(ast.getAccessModifier().asString());
         ctx.printString(" ");
         if (ast.isStatic()) {

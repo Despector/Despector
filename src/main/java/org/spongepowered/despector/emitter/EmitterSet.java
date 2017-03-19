@@ -38,6 +38,7 @@ public class EmitterSet {
     private final Map<Class<?>, StatementEmitter<?>> stmt_emitters = new HashMap<>();
     private final Map<Class<?>, InstructionEmitter<?>> insn_emitters = new HashMap<>();
     private final Map<Class<?>, ConditionEmitter<?>> cond_emitters = new HashMap<>();
+    private AnnotationEmitter anno_emitter;
 
     public EmitterSet() {
 
@@ -47,17 +48,13 @@ public class EmitterSet {
         this.emitters.putAll(set.emitters);
     }
 
-    public <T extends AstEntry> void setAstEmitter(Class<? extends T> type, AstEmitter<T> emitter) {
-        this.emitters.put(type, emitter);
-    }
-
     @SuppressWarnings("unchecked")
     public <T extends AstEntry> AstEmitter<T> getAstEmitter(Class<T> type) {
         return (AstEmitter<T>) this.emitters.get(type);
     }
 
-    public <T extends Statement> void setStatementEmitter(Class<? extends T> type, StatementEmitter<T> emitter) {
-        this.stmt_emitters.put(type, emitter);
+    public <T extends AstEntry> void setAstEmitter(Class<? extends T> type, AstEmitter<T> emitter) {
+        this.emitters.put(type, emitter);
     }
 
     @SuppressWarnings("unchecked")
@@ -65,8 +62,8 @@ public class EmitterSet {
         return (StatementEmitter<T>) this.stmt_emitters.get(type);
     }
 
-    public <T extends Instruction> void setInstructionEmitter(Class<? extends T> type, InstructionEmitter<T> emitter) {
-        this.insn_emitters.put(type, emitter);
+    public <T extends Statement> void setStatementEmitter(Class<? extends T> type, StatementEmitter<T> emitter) {
+        this.stmt_emitters.put(type, emitter);
     }
 
     @SuppressWarnings("unchecked")
@@ -74,13 +71,25 @@ public class EmitterSet {
         return (InstructionEmitter<T>) this.insn_emitters.get(type);
     }
 
-    public <T extends Condition> void setConditionEmitter(Class<T> type, ConditionEmitter<T> emitter) {
-        this.cond_emitters.put(type, emitter);
+    public <T extends Instruction> void setInstructionEmitter(Class<? extends T> type, InstructionEmitter<T> emitter) {
+        this.insn_emitters.put(type, emitter);
     }
 
     @SuppressWarnings("unchecked")
     public <T extends Condition> ConditionEmitter<T> getConditionEmitter(Class<T> type) {
         return (ConditionEmitter<T>) this.cond_emitters.get(type);
+    }
+
+    public <T extends Condition> void setConditionEmitter(Class<T> type, ConditionEmitter<T> emitter) {
+        this.cond_emitters.put(type, emitter);
+    }
+
+    public AnnotationEmitter getAnnotationEmitter() {
+        return this.anno_emitter;
+    }
+
+    public void setAnnotationEmitter(AnnotationEmitter emitter) {
+        this.anno_emitter = emitter;
     }
 
 }

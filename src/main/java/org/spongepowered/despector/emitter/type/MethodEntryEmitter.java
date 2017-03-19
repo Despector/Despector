@@ -25,6 +25,7 @@
 package org.spongepowered.despector.emitter.type;
 
 import org.spongepowered.despector.ast.AccessModifier;
+import org.spongepowered.despector.ast.Annotation;
 import org.spongepowered.despector.ast.Locals.Local;
 import org.spongepowered.despector.ast.members.MethodEntry;
 import org.spongepowered.despector.ast.members.insn.Statement;
@@ -39,6 +40,13 @@ public class MethodEntryEmitter implements AstEmitter<MethodEntry> {
 
     @Override
     public boolean emit(EmitterContext ctx, MethodEntry method) {
+
+        for (Annotation anno : method.getAnnotations()) {
+            ctx.printIndentation();
+            ctx.emit(anno);
+            ctx.printString("\n");
+        }
+
         ctx.setMethod(method);
         if (method.getName().equals("<clinit>")) {
             int start = 0;

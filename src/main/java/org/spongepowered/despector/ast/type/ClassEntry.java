@@ -38,8 +38,8 @@ public class ClassEntry extends TypeEntry {
 
     protected GenericType superclass = null;
 
-    public ClassEntry(SourceSet src) {
-        super(src);
+    public ClassEntry(SourceSet src, String name) {
+        super(src, name);
     }
 
     /**

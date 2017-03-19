@@ -28,12 +28,17 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.Lists;
 import org.spongepowered.despector.ast.AccessModifier;
+import org.spongepowered.despector.ast.Annotation;
+import org.spongepowered.despector.ast.AnnotationType;
 import org.spongepowered.despector.ast.AstEntry;
 import org.spongepowered.despector.ast.SourceSet;
 import org.spongepowered.despector.ast.members.insn.StatementBlock;
 import org.spongepowered.despector.util.TypeHelper;
 
+import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Represents a method declaration in a type.
@@ -61,6 +66,8 @@ public class MethodEntry extends AstEntry {
     protected final List<String> param_types = Lists.newArrayList();
 
     protected StatementBlock instructions = null;
+
+    protected final Map<AnnotationType, Annotation> annotations = new LinkedHashMap<>();
 
     public MethodEntry(SourceSet source) {
         super(source);
@@ -174,6 +181,18 @@ public class MethodEntry extends AstEntry {
 
     public void setInstructions(StatementBlock block) {
         this.instructions = block;
+    }
+
+    public Annotation getAnnotation(AnnotationType type) {
+        return this.annotations.get(type);
+    }
+
+    public Collection<Annotation> getAnnotations() {
+        return this.annotations.values();
+    }
+
+    public void addAnnotation(Annotation anno) {
+        this.annotations.put(anno.getType(), anno);
     }
 
     @Override
