@@ -42,6 +42,9 @@ import org.spongepowered.despector.ast.AccessModifier;
 import org.spongepowered.despector.ast.Annotation;
 import org.spongepowered.despector.ast.AnnotationType;
 import org.spongepowered.despector.ast.SourceSet;
+import org.spongepowered.despector.ast.generic.ClassSignature;
+import org.spongepowered.despector.ast.generic.ClassTypeSignature;
+import org.spongepowered.despector.ast.generic.TypeSignature;
 import org.spongepowered.despector.ast.members.FieldEntry;
 import org.spongepowered.despector.ast.members.MethodEntry;
 import org.spongepowered.despector.ast.members.insn.Statement;
@@ -57,6 +60,7 @@ import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.Emitters;
 import org.spongepowered.despector.emitter.format.EmitterFormat;
 import org.spongepowered.despector.util.AstUtil;
+import org.spongepowered.despector.util.SignatureParser;
 import org.spongepowered.despector.util.TypeHelper;
 
 import java.io.FileInputStream;
@@ -120,7 +124,14 @@ public class SingularClassLoader {
         entry.setAccessModifier(AccessModifier.fromModifiers(cn.access));
         entry.setFinal((cn.access & ACC_FINAL) != 0);
         entry.setSynthetic((cn.access & ACC_SYNTHETIC) != 0);
-        entry.getGenericArgs().addAll(TypeHelper.getGenericArgs(cn.signature));
+
+        ClassSignature signature = SignatureParser.parse(cn.signature);
+        entry.setSignature(signature);
+        if (cn.interfaces != null) {
+            for (String inter : (List<String>) cn.interfaces) {
+                entry.addInterface(inter);
+            }
+        }
 
         if (cn.innerClasses != null) {
             for (InnerClassNode in : (List<InnerClassNode>) cn.innerClasses) {
@@ -151,6 +162,11 @@ public class SingularClassLoader {
             f.setStatic((fn.access & ACC_STATIC) != 0);
             f.setSynthetic((fn.access & ACC_SYNTHETIC) != 0);
             f.setType(fn.desc);
+
+            if (fn.signature != null) {
+                ClassTypeSignature sig = SignatureParser.parseClassTypeSignature(fn.signature);
+                f.setSignature(sig);
+            }
 
             if (fn.visibleAnnotations != null) {
                 for (AnnotationNode an : (List<AnnotationNode>) fn.visibleAnnotations) {

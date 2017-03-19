@@ -22,41 +22,40 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.despector.emitter.type;
+package org.spongepowered.despector.ast.generic;
 
-import org.spongepowered.despector.ast.Annotation;
-import org.spongepowered.despector.ast.members.FieldEntry;
-import org.spongepowered.despector.emitter.AstEmitter;
-import org.spongepowered.despector.emitter.EmitterContext;
-import org.spongepowered.despector.emitter.GenericsEmitter;
+public class TypeArgument {
 
-public class FieldEntryEmitter implements AstEmitter<FieldEntry> {
+    private WildcardType wildcard;
+    private TypeSignature sig;
+
+    public TypeArgument(WildcardType wildcard, TypeSignature sig) {
+        this.wildcard = wildcard;
+        this.sig = sig;
+    }
+
+    public WildcardType getWildcard() {
+        return this.wildcard;
+    }
+
+    public void setWildcard(WildcardType wild) {
+        this.wildcard = wild;
+    }
+
+    public TypeSignature getSignature() {
+        return this.sig;
+    }
+
+    public void setSignature(TypeSignature sig) {
+        this.sig = sig;
+    }
 
     @Override
-    public boolean emit(EmitterContext ctx, FieldEntry ast) {
-
-        for (Annotation anno : ast.getAnnotations()) {
-            ctx.printIndentation();
-            ctx.emit(anno);
-            ctx.printString("\n");
-        }
-
-        ctx.printString(ast.getAccessModifier().asString());
-        ctx.printString(" ");
-        if (ast.isStatic()) {
-            ctx.printString("static ");
-        }
-        if (ast.isFinal()) {
-            ctx.printString("final ");
-        }
-        ctx.emitTypeName(ast.getTypeName());
-        if (ast.getSignature() != null) {
-            GenericsEmitter generics = ctx.getEmitterSet().getGenericsEmitter();
-            generics.emitTypeArguments(ctx, ast.getSignature().getArguments());
-        }
-        ctx.printString(" ");
-        ctx.printString(ast.getName());
-        return true;
+    public String toString() {
+        StringBuilder str = new StringBuilder();
+        str.append(this.wildcard.getRepresentation());
+        str.append(this.sig);
+        return str.toString();
     }
 
 }

@@ -26,10 +26,7 @@ package org.spongepowered.despector.util;
 
 import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
-import org.spongepowered.despector.ast.type.GenericArgument;
 
-import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -254,50 +251,12 @@ public final class TypeHelper {
         return "V";
     }
 
-    private static final Pattern GENERIC = Pattern.compile("L[a-zA-Z0-9\\/$]+<((?:I|J|B|S|F|D|Z|(?:L[a-zA-Z0-9\\/$]+;))+)>;");
-    private static final Pattern TYPE    = Pattern.compile("L([a-zA-Z0-9\\/$]+);");
-
-    public static String[] getGenericContents(String sig) {
-        Matcher m = GENERIC.matcher(sig);
-        if (m.find()) {
-            String generic = m.group(1);
-            List<String> generics = Lists.newArrayList();
-            Matcher g = TYPE.matcher(generic);
-            while (g.find()) {
-                generics.add(g.group(1));
-            }
-            return generics.toArray(new String[generics.size()]);
-        }
-        return null;
-    }
-
     public static boolean isPrimative(String type) {
         if ("void".equals(type) || "boolean".equals(type) || "byte".equals(type) || "short".equals(type) || "int".equals(type) || "long".equals(type)
                 || "float".equals(type) || "double".equals(type) || "char".equals(type)) {
             return true;
         }
         return false;
-    }
-
-    public static Collection<? extends GenericArgument> getGenericArgs(String signature) {
-        if (signature != null && signature.startsWith("<")) {
-            int i = 1;
-            int depth = 1;
-            for (; i < signature.length(); i++) {
-                char next = signature.charAt(i);
-                if (next == '<') {
-                    depth++;
-                } else if (next == '>') {
-                    depth--;
-                    if (depth == 0) {
-                        break;
-                    }
-                }
-            }
-            //String type_params = signature.substring(1, i);
-            // TODO
-        }
-        return Collections.emptyList();
     }
 
     private TypeHelper() {

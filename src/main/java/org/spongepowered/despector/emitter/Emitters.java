@@ -131,6 +131,7 @@ public class Emitters {
     static {
 
         JAVA.setAnnotationEmitter(new AnnotationEmitter());
+        JAVA.setGenericsEmitter(new GenericsEmitter());
 
         JAVA.setAstEmitter(ClassEntry.class, new ClassEntryEmitter());
         JAVA.setAstEmitter(EnumEntry.class, new EnumEntryEmitter());

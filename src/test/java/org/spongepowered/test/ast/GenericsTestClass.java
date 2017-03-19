@@ -22,41 +22,31 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.despector.ast.type;
+package org.spongepowered.test.ast;
 
-import org.spongepowered.despector.ast.SourceSet;
-import org.spongepowered.despector.util.TypeHelper;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Consumer;
 
-/**
- * Represents a class type.
- */
-public class ClassEntry extends TypeEntry {
+public class GenericsTestClass<T, E extends Number> implements Comparator<E> {
 
-    protected String superclass = null;
+    private final List<String> list = new ArrayList<>();
 
-    public ClassEntry(SourceSet src, String name) {
-        super(src, name);
+    @Override
+    public int compare(E o1, E o2) {
+        return 0;
     }
 
-    /**
-     * Gets the super class of this type.
-     */
-    public String getSuperclass() {
-        return this.superclass;
+    public <G> G test(Class<G> type) {
+        Map<String, E> map = new HashMap<>();
+        return null;
     }
 
-    /**
-     * Gets the name of the superclass of this type.
-     */
-    public String getSuperclassName() {
-        return TypeHelper.descToType(this.superclass);
-    }
-
-    /**
-     * Sets the super class of this entry.
-     */
-    public void setSuperclass(String c) {
-        this.superclass = c;
+    public void ff(Consumer<? super E> t) {
+        t.accept(null);
     }
 
 }

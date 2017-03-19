@@ -22,41 +22,51 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.despector.emitter.type;
+package org.spongepowered.despector.ast.generic;
 
-import org.spongepowered.despector.ast.Annotation;
-import org.spongepowered.despector.ast.members.FieldEntry;
-import org.spongepowered.despector.emitter.AstEmitter;
-import org.spongepowered.despector.emitter.EmitterContext;
-import org.spongepowered.despector.emitter.GenericsEmitter;
+import java.util.ArrayList;
+import java.util.List;
 
-public class FieldEntryEmitter implements AstEmitter<FieldEntry> {
+public class ClassSignature {
 
-    @Override
-    public boolean emit(EmitterContext ctx, FieldEntry ast) {
+    private final List<TypeParameter> parameters = new ArrayList<>();
+    private ClassTypeSignature superclass;
+    private final List<ClassTypeSignature> interfaces = new ArrayList<>();
 
-        for (Annotation anno : ast.getAnnotations()) {
-            ctx.printIndentation();
-            ctx.emit(anno);
-            ctx.printString("\n");
-        }
+    public ClassSignature() {
 
-        ctx.printString(ast.getAccessModifier().asString());
-        ctx.printString(" ");
-        if (ast.isStatic()) {
-            ctx.printString("static ");
-        }
-        if (ast.isFinal()) {
-            ctx.printString("final ");
-        }
-        ctx.emitTypeName(ast.getTypeName());
-        if (ast.getSignature() != null) {
-            GenericsEmitter generics = ctx.getEmitterSet().getGenericsEmitter();
-            generics.emitTypeArguments(ctx, ast.getSignature().getArguments());
-        }
-        ctx.printString(" ");
-        ctx.printString(ast.getName());
-        return true;
     }
 
+    public List<TypeParameter> getParameters() {
+        return this.parameters;
+    }
+
+    public ClassTypeSignature getSuperclassSignature() {
+        return this.superclass;
+    }
+
+    public void setSuperclassSignature(ClassTypeSignature sig) {
+        this.superclass = sig;
+    }
+
+    public List<ClassTypeSignature> getInterfaceSignatures() {
+        return this.interfaces;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder str = new StringBuilder();
+        if (!this.parameters.isEmpty()) {
+            str.append("<");
+            for (TypeParameter param : this.parameters) {
+                str.append(param);
+            }
+            str.append(">");
+        }
+        str.append(this.superclass);
+        for (ClassTypeSignature inter : this.interfaces) {
+            str.append(inter);
+        }
+        return str.toString();
+    }
 }

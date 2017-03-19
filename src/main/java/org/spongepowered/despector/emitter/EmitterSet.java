@@ -39,6 +39,7 @@ public class EmitterSet {
     private final Map<Class<?>, InstructionEmitter<?>> insn_emitters = new HashMap<>();
     private final Map<Class<?>, ConditionEmitter<?>> cond_emitters = new HashMap<>();
     private AnnotationEmitter anno_emitter;
+    private GenericsEmitter generics_emitter;
 
     public EmitterSet() {
 
@@ -90,6 +91,14 @@ public class EmitterSet {
 
     public void setAnnotationEmitter(AnnotationEmitter emitter) {
         this.anno_emitter = emitter;
+    }
+
+    public GenericsEmitter getGenericsEmitter() {
+        return this.generics_emitter;
+    }
+
+    public void setGenericsEmitter(GenericsEmitter emitter) {
+        this.generics_emitter = emitter;
     }
 
 }

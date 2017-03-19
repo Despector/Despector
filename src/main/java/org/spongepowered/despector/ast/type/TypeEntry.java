@@ -25,7 +25,10 @@
 package org.spongepowered.despector.ast.type;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.objectweb.asm.Opcodes.*;
+import static org.objectweb.asm.Opcodes.ACC_ABSTRACT;
+import static org.objectweb.asm.Opcodes.ACC_FINAL;
+import static org.objectweb.asm.Opcodes.ACC_STATIC;
+import static org.objectweb.asm.Opcodes.ACC_SYNTHETIC;
 
 import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Multimap;
@@ -34,6 +37,8 @@ import org.spongepowered.despector.ast.Annotation;
 import org.spongepowered.despector.ast.AnnotationType;
 import org.spongepowered.despector.ast.AstEntry;
 import org.spongepowered.despector.ast.SourceSet;
+import org.spongepowered.despector.ast.generic.ClassSignature;
+import org.spongepowered.despector.ast.generic.TypeParameter;
 import org.spongepowered.despector.ast.members.FieldEntry;
 import org.spongepowered.despector.ast.members.MethodEntry;
 import org.spongepowered.despector.util.TypeHelper;
@@ -57,7 +62,6 @@ public abstract class TypeEntry extends AstEntry {
 
     protected final String name;
 
-    protected final List<GenericType> generic_interfaces = new ArrayList<>();
     protected final List<String> interfaces = new ArrayList<>();
 
     protected final Map<String, FieldEntry> static_fields = new LinkedHashMap<>();
@@ -66,9 +70,10 @@ public abstract class TypeEntry extends AstEntry {
     protected final Map<String, FieldEntry> fields = new LinkedHashMap<>();
     protected final Multimap<String, MethodEntry> methods = LinkedHashMultimap.create();
 
-    protected final List<GenericArgument> generic_args = new ArrayList<>();
     protected final Map<AnnotationType, Annotation> annotations = new LinkedHashMap<>();
     protected final Map<String, InnerClassInfo> inner_classes = new LinkedHashMap<>();
+
+    protected ClassSignature signature;
 
     public TypeEntry(SourceSet source, String name) {
         super(source);
@@ -115,13 +120,12 @@ public abstract class TypeEntry extends AstEntry {
         return "L" + this.name + ";";
     }
 
-    // TODO
-//    public boolean isStatic() {
-//        return !this.fields.containsKey("this$0");
-//    }
+    public ClassSignature getSignature() {
+        return this.signature;
+    }
 
-    public List<GenericArgument> getGenericArgs() {
-        return this.generic_args;
+    public void setSignature(ClassSignature signature) {
+        this.signature = signature;
     }
 
     /**
@@ -138,21 +142,12 @@ public abstract class TypeEntry extends AstEntry {
         return this.interfaces;
     }
 
-    public List<GenericType> getGenericInterfaces() {
-        return this.generic_interfaces;
-    }
-
     /**
      * Adds an interface for this type. Can only be used pre lock.
      */
     public void addInterface(String inter) {
-        addInterface(inter, null);
-    }
-
-    public void addInterface(String inter, List<String> generics) {
         checkNotNull(inter);
         this.interfaces.add(inter);
-        this.generic_interfaces.add(new GenericType(inter, generics));
     }
 
     protected MethodEntry findMethod(String name, Multimap<String, MethodEntry> map) {
@@ -165,32 +160,6 @@ public abstract class TypeEntry extends AstEntry {
                 ret = m;
             }
         }
-//        if (ret == null && this.actual_class != null) {
-//            Method found = null;
-//            for (Method mth : this.actual_class.getMethods()) {
-//                if (mth.getName().equals(name)) {
-//                    if (found != null) {
-//                        throw new IllegalStateException("Tried to get ambiguous method " + name);
-//                    }
-//                    found = mth;
-//                }
-//            }
-//            String sig = "(";
-//            for (Class<?> param : found.getParameterTypes()) {
-//                sig += Type.getDescriptor(param);
-//            }
-//            sig += ")";
-//            sig += Type.getDescriptor(found.getReturnType());
-//            MethodEntry dummy =
-//                    new MethodEntry(this, AccessModifier.fromModifiers(found.getModifiers()), name, sig, Modifier.isStatic(found.getModifiers()));
-//            dummy.setReturnType(this.set.get(Type.getInternalName(found.getReturnType())));
-//            if (Modifier.isStatic(found.getModifiers())) {
-//                this.static_methods.put(name, dummy);
-//            } else {
-//                this.methods.put(name, dummy);
-//            }
-//            return dummy;
-//        }
         return ret;
     }
 
@@ -200,58 +169,6 @@ public abstract class TypeEntry extends AstEntry {
                 return m;
             }
         }
-//        if (this.actual_class != null) {
-//            List<TypeEntry> params = Lists.newArrayList();
-//            for (String param : TypeHelper.splitSig(sig)) {
-//                params.add(this.set.get(TypeHelper.descToType(param)));
-//            }
-//            Class<?>[] args = new Class<?>[params.size()];
-//            for (int i = 0; i < args.length; i++) {
-//                args[i] = params.get(i).getActualClass();
-//            }
-//            if ("<init>".equals(name)) {
-//                try {
-//                    Constructor<?> ctor = this.actual_class.getConstructor(args);
-//                    MethodEntry dummy = new MethodEntry(this, AccessModifier.fromModifiers(ctor.getModifiers()), name, sig, false);
-//                    dummy.setReturnType(ClasspathSourceSet.void_t);
-//                    this.methods.put(name, dummy);
-//                    return dummy;
-//                } catch (NoSuchMethodException | SecurityException e) {
-//                    // TODO cache failures
-//                }
-//                MethodEntry dummy = new MethodEntry(this, AccessModifier.PACKAGE_PRIVATE, name, sig, false);
-//                dummy.setReturnType(ClasspathSourceSet.void_t);
-//                this.methods.put(name, dummy);
-//                return dummy;
-//            }
-//            try {
-//                Method method = this.actual_class.getDeclaredMethod(name, args);
-//                MethodEntry dummy = new MethodEntry(this, AccessModifier.fromModifiers(method.getModifiers()), name, sig,
-//                        Modifier.isStatic(method.getModifiers()));
-//                dummy.setReturnType(this.set.get(Type.getInternalName(method.getReturnType())));
-//                if (Modifier.isStatic(method.getModifiers())) {
-//                    this.static_methods.put(name, dummy);
-//                } else {
-//                    this.methods.put(name, dummy);
-//                }
-//                return dummy;
-//            } catch (NoSuchMethodException | SecurityException e) {
-//                e.printStackTrace();
-//            }
-//        }
-//        if (name.equals("clone") && sig.equals("()Ljava/lang/Object;")) {
-//            MethodEntry dummy = new MethodEntry(this, AccessModifier.PUBLIC, name, sig, false);
-//            dummy.setReturnType(ClasspathSourceSet.object_t);
-//            this.methods.put(name, dummy);
-//            return dummy;
-//        } else if (getClass() == EnumEntry.class) {
-//            if (name.equals("ordinal") && sig.equals("()I")) {
-//                MethodEntry dummy = new MethodEntry(this, AccessModifier.PUBLIC, name, sig, false);
-//                dummy.setReturnType(ClasspathSourceSet.int_t);
-//                this.methods.put(name, dummy);
-//                return dummy;
-//            }
-//        }
         return null;
     }
 
@@ -380,24 +297,6 @@ public abstract class TypeEntry extends AstEntry {
 
     protected FieldEntry findField(String name, Map<String, FieldEntry> map) {
         FieldEntry e = map.get(name);
-
-//        if (e == null && this.actual_class != null) {
-//            try {
-//                Field field = this.actual_class.getDeclaredField(name);
-//                boolean is_static = Modifier.isStatic(field.getModifiers());
-//                FieldEntry dummy = new FieldEntry(this, AccessModifier.fromModifiers(field.getModifiers()), name, is_static);
-//                dummy.setType(ClasspathSourceSet.classpath.get(Type.getInternalName(field.getType())));
-//                if (is_static) {
-//                    this.static_fields.put(name, dummy);
-//                } else {
-//                    this.fields.put(name, dummy);
-//                }
-//                return dummy;
-//            } catch (NoSuchFieldException | SecurityException e1) {
-//                e1.printStackTrace();
-//            }
-//        }
-
         return e;
     }
 

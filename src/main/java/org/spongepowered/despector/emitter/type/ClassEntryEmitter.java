@@ -36,6 +36,7 @@ import org.spongepowered.despector.ast.type.TypeEntry;
 import org.spongepowered.despector.ast.type.TypeEntry.InnerClassInfo;
 import org.spongepowered.despector.emitter.AstEmitter;
 import org.spongepowered.despector.emitter.EmitterContext;
+import org.spongepowered.despector.emitter.GenericsEmitter;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -80,14 +81,20 @@ public class ClassEntryEmitter implements AstEmitter<ClassEntry> {
             name = name.replace('$', '.');
             ctx.printString(name);
         }
+
+        GenericsEmitter generics = ctx.getEmitterSet().getGenericsEmitter();
+        generics.emitTypeParameters(ctx, type.getSignature().getParameters());
+
         if (!type.getSuperclass().equals("Ljava/lang/Object;")) {
             ctx.printString(" extends ");
             ctx.emitTypeName(type.getSuperclassName());
+            generics.emitTypeArguments(ctx, type.getSignature().getSuperclassSignature().getArguments());
         }
         if (!type.getInterfaces().isEmpty()) {
             ctx.printString(" implements ");
             for (int i = 0; i < type.getInterfaces().size(); i++) {
                 ctx.emitType(type.getInterfaces().get(i));
+                generics.emitTypeArguments(ctx, type.getSignature().getInterfaceSignatures().get(i).getArguments());
                 if (i < type.getInterfaces().size() - 1) {
                     if (ctx.getFormat().insert_space_before_comma_in_superinterfaces) {
                         ctx.printString(" ");

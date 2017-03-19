@@ -22,26 +22,46 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.despector.ast.type;
+package org.spongepowered.despector.ast.generic;
 
+import java.util.ArrayList;
 import java.util.List;
 
-public class GenericType {
+public class ClassTypeSignature extends TypeSignature {
 
-    private final String type;
-    private final List<String> generic_params;
+    private String type_name;
+    private List<TypeArgument> args = new ArrayList<>();
 
-    public GenericType(String type, List<String> params) {
-        this.type = type;
-        this.generic_params = params;
+    public ClassTypeSignature(String type) {
+        this.type_name = type;
     }
 
-    public String getType() {
-        return this.type;
+    public String getTypeName() {
+        return this.type_name;
     }
 
-    public List<String> getParams() {
-        return this.generic_params;
+    public void setTypeName(String type) {
+        this.type_name = type;
+    }
+
+    public List<TypeArgument> getArguments() {
+        return this.args;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder str = new StringBuilder();
+        str.append("L");
+        str.append(this.type_name);
+        if (!this.args.isEmpty()) {
+            str.append("<");
+            for (TypeArgument arg : this.args) {
+                str.append(arg);
+            }
+            str.append(">");
+        }
+        str.append(";");
+        return str.toString();
     }
 
 }

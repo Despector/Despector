@@ -31,6 +31,7 @@ import org.spongepowered.despector.ast.Annotation;
 import org.spongepowered.despector.ast.AnnotationType;
 import org.spongepowered.despector.ast.AstEntry;
 import org.spongepowered.despector.ast.SourceSet;
+import org.spongepowered.despector.ast.generic.ClassTypeSignature;
 import org.spongepowered.despector.util.TypeHelper;
 
 import java.util.Collection;
@@ -54,6 +55,8 @@ public class FieldEntry extends AstEntry {
 
     protected final Map<AnnotationType, Annotation> annotations = new LinkedHashMap<>();
 
+    protected ClassTypeSignature signature;
+
     public FieldEntry(SourceSet source) {
         super(source);
     }
@@ -72,6 +75,14 @@ public class FieldEntry extends AstEntry {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public ClassTypeSignature getSignature() {
+        return this.signature;
+    }
+
+    public void setSignature(ClassTypeSignature sig) {
+        this.signature = sig;
     }
 
     public boolean isFinal() {

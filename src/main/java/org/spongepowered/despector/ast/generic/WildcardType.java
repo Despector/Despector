@@ -22,41 +22,21 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.despector.ast.type;
+package org.spongepowered.despector.ast.generic;
 
-import org.spongepowered.despector.ast.SourceSet;
-import org.spongepowered.despector.util.TypeHelper;
+public enum WildcardType {
+    NONE(""),
+    EXTENDS("+"),
+    SUPER("-"),
+    STAR("*");
 
-/**
- * Represents a class type.
- */
-public class ClassEntry extends TypeEntry {
+    private final String rep;
 
-    protected String superclass = null;
-
-    public ClassEntry(SourceSet src, String name) {
-        super(src, name);
+    WildcardType(String t) {
+        this.rep = t;
     }
 
-    /**
-     * Gets the super class of this type.
-     */
-    public String getSuperclass() {
-        return this.superclass;
+    public String getRepresentation() {
+        return this.rep;
     }
-
-    /**
-     * Gets the name of the superclass of this type.
-     */
-    public String getSuperclassName() {
-        return TypeHelper.descToType(this.superclass);
-    }
-
-    /**
-     * Sets the super class of this entry.
-     */
-    public void setSuperclass(String c) {
-        this.superclass = c;
-    }
-
 }

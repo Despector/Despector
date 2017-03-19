@@ -22,24 +22,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.despector.ast.type;
+package org.spongepowered.despector.ast.generic;
 
-public class GenericArgument {
+public class TypeVariableSignature extends TypeSignature {
 
-    private final String name;
-    private final String bound;
+    private String identifier;
 
-    public GenericArgument(String name, String bound) {
-        this.name = name;
-        this.bound = bound;
+    public TypeVariableSignature(String ident) {
+        this.identifier = ident;
     }
 
-    public String getName() {
-        return this.name;
+    public String getDescription() {
+        return this.identifier;
     }
 
-    public String getBound() {
-        return this.bound;
+    public void setIdentifier(String ident) {
+        this.identifier = ident;
     }
 
+    @Override
+    public String toString() {
+        return this.identifier;
+    }
 }

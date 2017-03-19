@@ -22,41 +22,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.despector.ast.type;
+package org.spongepowered.despector.ast.generic;
 
-import org.spongepowered.despector.ast.SourceSet;
-import org.spongepowered.despector.util.TypeHelper;
 
-/**
- * Represents a class type.
- */
-public class ClassEntry extends TypeEntry {
-
-    protected String superclass = null;
-
-    public ClassEntry(SourceSet src, String name) {
-        super(src, name);
-    }
-
-    /**
-     * Gets the super class of this type.
-     */
-    public String getSuperclass() {
-        return this.superclass;
-    }
-
-    /**
-     * Gets the name of the superclass of this type.
-     */
-    public String getSuperclassName() {
-        return TypeHelper.descToType(this.superclass);
-    }
-
-    /**
-     * Sets the super class of this entry.
-     */
-    public void setSuperclass(String c) {
-        this.superclass = c;
-    }
+public abstract class TypeSignature {
 
 }

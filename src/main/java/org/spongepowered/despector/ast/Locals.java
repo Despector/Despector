@@ -154,8 +154,9 @@ public class Locals {
                 int end = label_indices.get(l.end.getLabel());
                 LocalInstance insn = new LocalInstance(this, l, l.name, l.desc, start - 1, end);
                 if (l.signature != null) {
-                    String[] generics = TypeHelper.getGenericContents(l.signature);
-                    insn.setGenericTypes(generics);
+                    // TODO generics
+//                    String[] generics = TypeHelper.getGenericContents(l.signature);
+//                    insn.setGenericTypes(generics);
                 }
                 this.instances.add(insn);
             }
