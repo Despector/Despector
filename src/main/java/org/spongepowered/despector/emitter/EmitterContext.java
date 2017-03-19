@@ -60,6 +60,7 @@ public class EmitterContext {
     private MethodEntry method;
 
     private int indentation = 0;
+    private int offs = 0;
 
     public EmitterContext(EmitterSet set, Writer output, EmitterFormat format) {
         this.set = set;
@@ -132,6 +133,7 @@ public class EmitterContext {
     public void emitBody(StatementBlock instructions, int start) {
         this.defined_locals.clear();
         boolean last_success = false;
+        boolean should_indent = true;
         for (int i = start; i < instructions.getStatements().size(); i++) {
             Statement insn = instructions.getStatements().get(i);
             if (insn instanceof Return && !((Return) insn).getValue().isPresent()
@@ -141,9 +143,17 @@ public class EmitterContext {
             if (last_success) {
                 printString("\n");
             }
-            printIndentation();
-            emit(insn, true);
             last_success = true;
+            if (should_indent) {
+                printIndentation();
+            }
+            should_indent = true;
+            int mark = this.offs;
+            emit(insn, true);
+            if (this.offs == mark) {
+                should_indent = false;
+                last_success = false;
+            }
         }
     }
 
@@ -239,6 +249,7 @@ public class EmitterContext {
     }
 
     public void printString(String line) {
+        this.offs += line.length();
         if (this.buffer == null) {
             try {
                 this.output.write(line);

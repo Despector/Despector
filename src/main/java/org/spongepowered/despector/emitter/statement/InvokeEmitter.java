@@ -25,6 +25,7 @@
 package org.spongepowered.despector.emitter.statement;
 
 import org.spongepowered.despector.ast.members.insn.arg.Instruction;
+import org.spongepowered.despector.ast.members.insn.function.InstanceMethodInvoke;
 import org.spongepowered.despector.ast.members.insn.function.InvokeStatement;
 import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.StatementEmitter;
@@ -34,8 +35,16 @@ public class InvokeEmitter implements StatementEmitter<InvokeStatement> {
     @Override
     public void emit(EmitterContext ctx, InvokeStatement insn, boolean semicolon) {
         Instruction i = insn.getInstruction();
+        if (i instanceof InstanceMethodInvoke) {
+            InstanceMethodInvoke mth = (InstanceMethodInvoke) i;
+            if (mth.getMethodName().equals("<init>") && mth.getParams().length == 0) {
+                return;
+            }
+        }
         ctx.emit(i, null);
-        if(semicolon) ctx.printString(";");
+        if (semicolon) {
+            ctx.printString(";");
+        }
     }
 
 }
