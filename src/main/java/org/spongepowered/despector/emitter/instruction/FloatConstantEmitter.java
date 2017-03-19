@@ -32,7 +32,7 @@ public class FloatConstantEmitter implements InstructionEmitter<FloatConstantArg
 
     @Override
     public void emit(EmitterContext ctx, FloatConstantArg arg, String type) {
-        ctx.printString(String.valueOf(arg.getConstant()));
+        ctx.printString(String.valueOf(arg.getConstant()) + "F");
     }
 
 }

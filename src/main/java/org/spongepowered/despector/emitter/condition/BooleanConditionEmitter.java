@@ -32,6 +32,15 @@ public class BooleanConditionEmitter implements ConditionEmitter<BooleanConditio
 
     @Override
     public void emit(EmitterContext ctx, BooleanCondition bool) {
+        if (bool.getConditionValue().inferType().equals("I")) {
+            ctx.emit(bool.getConditionValue(), "I");
+            if (bool.isInverse()) {
+                ctx.printString(" == 0");
+            } else {
+                ctx.printString(" != 0");
+            }
+            return;
+        }
         if (bool.isInverse()) {
             ctx.printString("!");
         }
