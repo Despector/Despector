@@ -107,7 +107,7 @@ public class InstanceMethodInvokeEmitter implements InstructionEmitter<InstanceM
                 ctx.printString("super");
             }
         } else {
-            if (arg.getCallee() instanceof LocalArg && !ctx.getMethod().isStatic()) {
+            if (arg.getCallee() instanceof LocalArg && ctx.getMethod() != null && !ctx.getMethod().isStatic()) {
                 LocalArg local = (LocalArg) arg.getCallee();
                 if (local.getLocal().getIndex() == 0) {
                     if (ctx.getType() != null && !arg.getOwnerType().equals(ctx.getType().getName())) {

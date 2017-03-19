@@ -106,7 +106,7 @@ public class SingularClassLoader {
 
     @SuppressWarnings("unchecked")
     public TypeEntry load(ClassNode cn, SourceSet src) {
-        System.out.println("Decompiling class " + cn.name);
+//        System.out.println("Decompiling class " + cn.name);
         int acc = cn.access;
         TypeEntry entry = null;
         if ((acc & ACC_ENUM) != 0) {
@@ -203,7 +203,7 @@ public class SingularClassLoader {
             }
 
             try {
-                System.out.println("Decompiling method " + mn.name);
+//                System.out.println("Decompiling method " + mn.name);
                 StatementBlock insns = InstructionTreeBuilder.build(m, mn);
                 m.setInstructions(insns);
             } catch (Exception ex) {
@@ -241,7 +241,7 @@ public class SingularClassLoader {
                 }
             }
         }
-        System.out.println("Done!");
+//        System.out.println("Done!");
         if (src != null) {
             src.add(entry);
         }
