@@ -112,9 +112,13 @@ public class EmitterContext {
     }
 
     public void emitBody(StatementBlock instructions) {
+        emitBody(instructions, 0);
+    }
+
+    public void emitBody(StatementBlock instructions, int start) {
         this.defined_locals.clear();
         boolean last_success = false;
-        for (int i = 0; i < instructions.getStatements().size(); i++) {
+        for (int i = start; i < instructions.getStatements().size(); i++) {
             Statement insn = instructions.getStatements().get(i);
             if (insn instanceof Return && !((Return) insn).getValue().isPresent()
                     && instructions.getType() == StatementBlock.Type.METHOD && i == instructions.getStatements().size() - 1) {

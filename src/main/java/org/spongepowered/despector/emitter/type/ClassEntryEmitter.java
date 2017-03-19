@@ -27,9 +27,15 @@ package org.spongepowered.despector.emitter.type;
 import org.spongepowered.despector.ast.AccessModifier;
 import org.spongepowered.despector.ast.members.FieldEntry;
 import org.spongepowered.despector.ast.members.MethodEntry;
+import org.spongepowered.despector.ast.members.insn.Statement;
+import org.spongepowered.despector.ast.members.insn.arg.Instruction;
+import org.spongepowered.despector.ast.members.insn.assign.StaticFieldAssignment;
 import org.spongepowered.despector.ast.type.ClassEntry;
 import org.spongepowered.despector.emitter.AstEmitter;
 import org.spongepowered.despector.emitter.EmitterContext;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class ClassEntryEmitter implements AstEmitter<ClassEntry> {
 
@@ -84,9 +90,25 @@ public class ClassEntryEmitter implements AstEmitter<ClassEntry> {
 
         // Ordering is static fields -> static methods -> instance fields ->
         // instance methods
-
         ctx.indent();
         if (!type.getStaticFields().isEmpty()) {
+
+            Map<String, Instruction> static_initializers = new HashMap<>();
+
+            MethodEntry static_init = type.getStaticMethodSafe("<clinit>");
+            if (static_init != null) {
+                for (Statement stmt : static_init.getInstructions().getStatements()) {
+                    if (!(stmt instanceof StaticFieldAssignment)) {
+                        break;
+                    }
+                    StaticFieldAssignment assign = (StaticFieldAssignment) stmt;
+                    if (!assign.getOwnerName().equals(type.getName())) {
+                        break;
+                    }
+                    static_initializers.put(assign.getFieldName(), assign.getValue());
+                }
+            }
+
             boolean at_least_one = false;
             for (FieldEntry field : type.getStaticFields()) {
                 if (field.isSynthetic()) {
@@ -95,6 +117,10 @@ public class ClassEntryEmitter implements AstEmitter<ClassEntry> {
                 at_least_one = true;
                 ctx.printIndentation();
                 ctx.emit(field);
+                if (static_initializers.containsKey(field.getName())) {
+                    ctx.printString(" = ");
+                    ctx.emit(static_initializers.get(field.getName()), field.getType());
+                }
                 ctx.printString(";\n");
             }
             if (at_least_one) {
@@ -106,8 +132,9 @@ public class ClassEntryEmitter implements AstEmitter<ClassEntry> {
                 if (mth.isSynthetic()) {
                     continue;
                 }
-                ctx.emit(mth);
-                ctx.printString("\n\n");
+                if (ctx.emit(mth)) {
+                    ctx.printString("\n\n");
+                }
             }
         }
         if (!type.getFields().isEmpty()) {

@@ -63,6 +63,9 @@ public class Return implements Statement {
 
     @Override
     public String toString() {
+        if(this.value == null) {
+            return "return;";
+        }
         return "return " + this.value + ";";
     }
 

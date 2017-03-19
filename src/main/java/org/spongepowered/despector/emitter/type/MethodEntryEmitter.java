@@ -27,7 +27,9 @@ package org.spongepowered.despector.emitter.type;
 import org.spongepowered.despector.ast.AccessModifier;
 import org.spongepowered.despector.ast.Locals.Local;
 import org.spongepowered.despector.ast.members.MethodEntry;
+import org.spongepowered.despector.ast.members.insn.Statement;
 import org.spongepowered.despector.ast.members.insn.StatementBlock;
+import org.spongepowered.despector.ast.members.insn.assign.StaticFieldAssignment;
 import org.spongepowered.despector.ast.type.EnumEntry;
 import org.spongepowered.despector.ast.type.InterfaceEntry;
 import org.spongepowered.despector.emitter.AstEmitter;
@@ -39,10 +41,25 @@ public class MethodEntryEmitter implements AstEmitter<MethodEntry> {
     public boolean emit(EmitterContext ctx, MethodEntry method) {
         ctx.setMethod(method);
         if (method.getName().equals("<clinit>")) {
+            int start = 0;
+            for (Statement stmt : method.getInstructions().getStatements()) {
+                if (!(stmt instanceof StaticFieldAssignment)) {
+                    break;
+                }
+                StaticFieldAssignment assign = (StaticFieldAssignment) stmt;
+                if (!assign.getOwnerName().equals(method.getOwner())) {
+                    break;
+                }
+                start++;
+            }
+            // only need one less as we can ignore the return at the end
+            if (start == method.getInstructions().getStatements().size() - 1) {
+                return false;
+            }
             ctx.printIndentation();
             ctx.printString("static {\n");
             ctx.indent();
-            ctx.emitBody(method.getInstructions());
+            ctx.emitBody(method.getInstructions(), start);
             ctx.printString("\n");
             ctx.dedent();
             ctx.printIndentation();
@@ -126,7 +143,7 @@ public class MethodEntryEmitter implements AstEmitter<MethodEntry> {
 
     private static void printReturn(EmitterContext ctx, String type) {
         char f = type.charAt(0);
-        if(f == 'V') {
+        if (f == 'V') {
             return;
         }
         ctx.printString("\n");
