@@ -102,4 +102,23 @@ public class TernaryTest {
         assertEquals(good, insn);
     }
 
+    public int mth_returnTernary2(boolean a) {
+        try {
+            return a ? 6 : 3;
+        } catch (Exception e) {
+            return 0;
+        }
+    }
+
+    @Test
+    public void testReturnedTernary2() throws IOException {
+        String insn = TestHelper.getAsString(getClass(), "mth_returnTernary2");
+        String good = "try {\n"
+                + "    return a ? 6 : 3;\n"
+                + "} catch (Exception e) {\n"
+                + "    return 0;\n"
+                + "}";
+        assertEquals(good, insn);
+    }
+
 }

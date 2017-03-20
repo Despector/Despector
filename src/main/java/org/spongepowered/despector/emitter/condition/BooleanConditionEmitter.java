@@ -24,6 +24,7 @@
  */
 package org.spongepowered.despector.emitter.condition;
 
+import org.spongepowered.despector.ast.members.insn.arg.InstanceOf;
 import org.spongepowered.despector.ast.members.insn.branch.condition.BooleanCondition;
 import org.spongepowered.despector.emitter.ConditionEmitter;
 import org.spongepowered.despector.emitter.EmitterContext;
@@ -44,7 +45,13 @@ public class BooleanConditionEmitter implements ConditionEmitter<BooleanConditio
         if (bool.isInverse()) {
             ctx.printString("!");
         }
-        ctx.emit(bool.getConditionValue(), "Z");
+        if (bool.isInverse() && bool.getConditionValue() instanceof InstanceOf) {
+            ctx.printString("(");
+            ctx.emit(bool.getConditionValue(), "Z");
+            ctx.printString(")");
+        } else {
+            ctx.emit(bool.getConditionValue(), "Z");
+        }
     }
 
 }
