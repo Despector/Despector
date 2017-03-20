@@ -50,6 +50,6 @@ public class InstructionsTest {
     @Test
     public void testInit() throws IOException {
         String mth = TestHelper.getAsString(getClass(), "<init>");
-        assertEquals("super();", mth);
+        assertEquals("", mth);
     }
 }
