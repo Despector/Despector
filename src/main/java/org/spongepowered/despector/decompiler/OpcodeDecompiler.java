@@ -962,9 +962,9 @@ public class OpcodeDecompiler {
         if (cond_ret != ret) {
             else_start = region.indexOf(cond_ret);
         }
-        
+
         OpcodeBlock body_end = region.get(else_start - 1);
-        if(body_end.isGoto() && body_end.target == start) {
+        if (body_end.isGoto() && body_end.target == start) {
             // we've got ourselves an inverse while/for loop
             WhileBlockSection section = new WhileBlockSection(cond);
             for (int i = body_start; i < else_start - 1; i++) {
@@ -982,7 +982,7 @@ public class OpcodeDecompiler {
             }
             return section;
         }
-        
+
         IfBlockSection section = new IfBlockSection(cond);
         // Append the body
         for (int i = body_start; i < else_start; i++) {
@@ -1599,7 +1599,11 @@ public class OpcodeDecompiler {
                 VarInsnNode var = (VarInsnNode) next;
                 Instruction val = stack.pop();
                 Local local = locals.getLocal(var.var);
-                block.append(new LocalAssignment(local.getInstance(label_index), val));
+                LocalInstance instance = local.getInstance(label_index);
+                if (!local.isParameter() && local.getParameterInstance() != null) {
+                    instance.setType(val.inferType());
+                }
+                block.append(new LocalAssignment(instance, val));
                 break;
             }
             case IASTORE:

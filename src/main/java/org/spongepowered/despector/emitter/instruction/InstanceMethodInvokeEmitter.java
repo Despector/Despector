@@ -124,7 +124,6 @@ public class InstanceMethodInvokeEmitter implements InstructionEmitter<InstanceM
             ctx.printString(arg.getMethodName());
         }
         ctx.printString("(");
-        // TODO get param types if we have the ast
         List<String> param_types = TypeHelper.splitSig(arg.getMethodDescription());
         for (int i = 0; i < arg.getParams().length; i++) {
             Instruction param = arg.getParams()[i];

@@ -210,7 +210,7 @@ public class ClassEntryEmitter implements AstEmitter<ClassEntry> {
             if (inits.size() == 1) {
                 main = inits.get(0);
             }
-            if (main != null) {
+            if (main != null && main.getInstructions() != null) {
                 for (int i = 1; i < main.getInstructions().getStatements().size(); i++) {
                     Statement next = main.getInstructions().getStatements().get(i);
                     if (!(next instanceof FieldAssignment)) {

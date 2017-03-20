@@ -39,6 +39,8 @@ import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.InstructionEmitter;
 import org.spongepowered.despector.util.TypeHelper;
 
+import java.util.List;
+
 public class StaticMethodInvokeEmitter implements InstructionEmitter<StaticMethodInvoke> {
 
     @Override
@@ -82,11 +84,11 @@ public class StaticMethodInvokeEmitter implements InstructionEmitter<StaticMetho
             ctx.printString(".");
         }
         ctx.printString(arg.getMethodName());
+        List<String> param_types = TypeHelper.splitSig(arg.getMethodDescription());
         ctx.printString("(");
-        // TODO get param types if we have the ast
         for (int i = 0; i < arg.getParams().length; i++) {
             Instruction param = arg.getParams()[i];
-            ctx.emit(param, null);
+            ctx.emit(param, param_types.get(i));
             if (i < arg.getParams().length - 1) {
                 ctx.printString(", ");
             }

@@ -166,6 +166,11 @@ public class Locals {
             if (this.parameter_instance != null) {
                 return this.parameter_instance;
             }
+            if (this.instances.isEmpty()) {
+                // No LVT entry for this local!
+                this.parameter_instance = new LocalInstance(this, null, "param" + this.index, null, -1, -1);
+                return this.parameter_instance;
+            }
             for (LocalInstance insn : this.instances) {
                 if (index >= insn.getStart() - 1 && index <= insn.getEnd()) {
                     return insn;
