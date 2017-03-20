@@ -24,9 +24,15 @@
  */
 package org.spongepowered.despector.ast.generic;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * A class signature containing information of generic types on the class and
+ * the direct supertype and superinterfaces.
+ */
 public class ClassSignature {
 
     private final List<TypeParameter> parameters = new ArrayList<>();
@@ -34,21 +40,34 @@ public class ClassSignature {
     private final List<ClassTypeSignature> interfaces = new ArrayList<>();
 
     public ClassSignature() {
-
     }
 
+    /**
+     * Gets the type paramters of this class. The returned collection is
+     * mutable.
+     */
     public List<TypeParameter> getParameters() {
         return this.parameters;
     }
 
+    /**
+     * Gets the type signature of the direct superclass.
+     */
     public ClassTypeSignature getSuperclassSignature() {
         return this.superclass;
     }
 
+    /**
+     * Sets the type signature of the direct superclass.
+     */
     public void setSuperclassSignature(ClassTypeSignature sig) {
-        this.superclass = sig;
+        this.superclass = checkNotNull(sig, "sig");
     }
 
+    /**
+     * Gets the type signatures of the direct superinterfaces. The returned
+     * collection is mutable.
+     */
     public List<ClassTypeSignature> getInterfaceSignatures() {
         return this.interfaces;
     }
@@ -68,5 +87,53 @@ public class ClassSignature {
             str.append(inter);
         }
         return str.toString();
+    }
+
+    @Override
+    public int hashCode() {
+        int h = 1;
+        for (int i = 0; i < this.parameters.size(); i++) {
+            h = h * 37 + this.parameters.get(i).hashCode();
+        }
+        h = h * 37 + (this.superclass == null ? 0 : this.superclass.hashCode());
+        for (int i = 0; i < this.interfaces.size(); i++) {
+            h = h * 37 + this.interfaces.get(i).hashCode();
+        }
+        return h;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == this) {
+            return true;
+        }
+        if (!(o instanceof ClassSignature)) {
+            return false;
+        }
+        ClassSignature sig = (ClassSignature) o;
+        if (this.superclass == null) {
+            if (sig.superclass != null) {
+                return false;
+            }
+        } else if (!this.superclass.equals(sig.superclass)) {
+            return false;
+        }
+        if (this.parameters.size() != sig.parameters.size()) {
+            return false;
+        }
+        for (int i = 0; i < this.parameters.size(); i++) {
+            if (!this.parameters.get(i).equals(sig.parameters.get(i))) {
+                return false;
+            }
+        }
+        if (this.interfaces.size() != sig.interfaces.size()) {
+            return false;
+        }
+        for (int i = 0; i < this.interfaces.size(); i++) {
+            if (!this.interfaces.get(i).equals(sig.interfaces.get(i))) {
+                return false;
+            }
+        }
+        return true;
     }
 }

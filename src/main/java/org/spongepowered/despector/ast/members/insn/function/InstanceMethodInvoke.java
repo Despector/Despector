@@ -24,7 +24,7 @@
  */
 package org.spongepowered.despector.ast.members.insn.function;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static org.spongepowered.despector.util.TypeHelper.checkType;
 
 import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
 import org.spongepowered.despector.ast.members.insn.arg.Instruction;
@@ -38,7 +38,7 @@ public class InstanceMethodInvoke extends MethodInvoke {
 
     public InstanceMethodInvoke(String name, String desc, String owner, Instruction[] args, Instruction call) {
         super(name, desc, owner, args);
-        this.callee = checkNotNull(call, "callee");
+        this.callee = checkType(call, owner, "callee");
     }
 
     public Instruction getCallee() {
@@ -46,7 +46,7 @@ public class InstanceMethodInvoke extends MethodInvoke {
     }
 
     public void setCallee(Instruction callee) {
-        this.callee = checkNotNull(callee, "callee");
+        this.callee = checkType(callee, this.method_owner, "callee");
     }
 
     @Override

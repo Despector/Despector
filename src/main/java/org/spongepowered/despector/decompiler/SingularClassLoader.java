@@ -43,7 +43,6 @@ import org.spongepowered.despector.ast.Annotation;
 import org.spongepowered.despector.ast.AnnotationType;
 import org.spongepowered.despector.ast.SourceSet;
 import org.spongepowered.despector.ast.generic.ClassSignature;
-import org.spongepowered.despector.ast.generic.ClassTypeSignature;
 import org.spongepowered.despector.ast.generic.TypeSignature;
 import org.spongepowered.despector.ast.members.FieldEntry;
 import org.spongepowered.despector.ast.members.MethodEntry;
@@ -142,12 +141,14 @@ public class SingularClassLoader {
         if (cn.visibleAnnotations != null) {
             for (AnnotationNode an : (List<AnnotationNode>) cn.visibleAnnotations) {
                 Annotation anno = createAnnotation(src, an);
+                anno.getType().setRuntimeVisible(true);
                 entry.addAnnotation(anno);
             }
         }
         if (cn.invisibleAnnotations != null) {
             for (AnnotationNode an : (List<AnnotationNode>) cn.invisibleAnnotations) {
                 Annotation anno = createAnnotation(src, an);
+                anno.getType().setRuntimeVisible(false);
                 entry.addAnnotation(anno);
             }
         }
@@ -164,19 +165,21 @@ public class SingularClassLoader {
             f.setType(fn.desc);
 
             if (fn.signature != null) {
-                ClassTypeSignature sig = SignatureParser.parseClassTypeSignature(fn.signature);
+                TypeSignature sig = SignatureParser.parseFieldTypeSignature(fn.signature);
                 f.setSignature(sig);
             }
 
             if (fn.visibleAnnotations != null) {
                 for (AnnotationNode an : (List<AnnotationNode>) fn.visibleAnnotations) {
                     Annotation anno = createAnnotation(src, an);
+                    anno.getType().setRuntimeVisible(true);
                     f.addAnnotation(anno);
                 }
             }
             if (fn.invisibleAnnotations != null) {
                 for (AnnotationNode an : (List<AnnotationNode>) fn.invisibleAnnotations) {
                     Annotation anno = createAnnotation(src, an);
+                    anno.getType().setRuntimeVisible(false);
                     f.addAnnotation(anno);
                 }
             }
@@ -203,12 +206,14 @@ public class SingularClassLoader {
             if (mn.visibleAnnotations != null) {
                 for (AnnotationNode an : (List<AnnotationNode>) mn.visibleAnnotations) {
                     Annotation anno = createAnnotation(src, an);
+                    anno.getType().setRuntimeVisible(true);
                     m.addAnnotation(anno);
                 }
             }
             if (mn.invisibleAnnotations != null) {
                 for (AnnotationNode an : (List<AnnotationNode>) mn.invisibleAnnotations) {
                     Annotation anno = createAnnotation(src, an);
+                    anno.getType().setRuntimeVisible(false);
                     m.addAnnotation(anno);
                 }
             }

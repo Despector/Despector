@@ -24,9 +24,15 @@
  */
 package org.spongepowered.despector.ast.generic;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * A method signature containing generic type information on any type
+ * parameters, parameters, exceptions, and the return type.
+ */
 public class MethodSignature {
 
     private final List<TypeParameter> type_parameters = new ArrayList<>();
@@ -38,22 +44,37 @@ public class MethodSignature {
 
     }
 
+    /**
+     * Gets the method type parameters.
+     */
     public List<TypeParameter> getTypeParameters() {
         return this.type_parameters;
     }
 
+    /**
+     * Gets the signatures of the method's parameters.
+     */
     public List<TypeSignature> getParameters() {
         return this.parameters;
     }
 
+    /**
+     * Gets the signature of the return type.
+     */
     public TypeSignature getReturnType() {
         return this.return_type;
     }
 
+    /**
+     * Sets the signature of the return type.
+     */
     public void setReturnType(TypeSignature sig) {
-        this.return_type = sig;
+        this.return_type = checkNotNull(sig, "sig");
     }
 
+    /**
+     * Gets the signatures of any declared thrown exceptions.
+     */
     public List<TypeSignature> getThrowsSignature() {
         return this.exceptions;
     }

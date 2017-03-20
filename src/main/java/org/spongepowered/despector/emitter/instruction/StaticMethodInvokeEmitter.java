@@ -26,9 +26,9 @@ package org.spongepowered.despector.emitter.instruction;
 
 import org.spongepowered.despector.ast.members.MethodEntry;
 import org.spongepowered.despector.ast.members.insn.arg.Instruction;
-import org.spongepowered.despector.ast.members.insn.arg.field.FieldArg;
-import org.spongepowered.despector.ast.members.insn.arg.field.InstanceFieldArg;
-import org.spongepowered.despector.ast.members.insn.arg.field.StaticFieldArg;
+import org.spongepowered.despector.ast.members.insn.arg.field.FieldAccess;
+import org.spongepowered.despector.ast.members.insn.arg.field.InstanceFieldAccess;
+import org.spongepowered.despector.ast.members.insn.arg.field.StaticFieldAccess;
 import org.spongepowered.despector.ast.members.insn.assign.FieldAssignment;
 import org.spongepowered.despector.ast.members.insn.assign.InstanceFieldAssignment;
 import org.spongepowered.despector.ast.members.insn.assign.StaticFieldAssignment;
@@ -66,12 +66,12 @@ public class StaticMethodInvokeEmitter implements InstructionEmitter<StaticMetho
                 }
                 // getter
                 Return ret = (Return) accessor.getInstructions().getStatements().get(0);
-                FieldArg getter = (FieldArg) ret.getValue().get();
-                FieldArg replacement = null;
+                FieldAccess getter = (FieldAccess) ret.getValue().get();
+                FieldAccess replacement = null;
                 if (arg.getParams().length == 1) {
-                    replacement = new InstanceFieldArg(getter.getFieldName(), getter.getTypeDescriptor(), getter.getOwner(), arg.getParams()[0]);
+                    replacement = new InstanceFieldAccess(getter.getFieldName(), getter.getTypeDescriptor(), getter.getOwnerType(), arg.getParams()[0]);
                 } else {
-                    replacement = new StaticFieldArg(getter.getFieldName(), getter.getTypeDescriptor(), getter.getOwner());
+                    replacement = new StaticFieldAccess(getter.getFieldName(), getter.getTypeDescriptor(), getter.getOwnerType());
                 }
                 ctx.emit(replacement, null);
                 return;

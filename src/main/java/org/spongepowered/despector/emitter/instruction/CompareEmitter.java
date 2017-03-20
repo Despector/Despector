@@ -24,14 +24,14 @@
  */
 package org.spongepowered.despector.emitter.instruction;
 
-import org.spongepowered.despector.ast.members.insn.arg.CompareArg;
+import org.spongepowered.despector.ast.members.insn.arg.NumberCompare;
 import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.InstructionEmitter;
 
-public class CompareEmitter implements InstructionEmitter<CompareArg> {
+public class CompareEmitter implements InstructionEmitter<NumberCompare> {
 
     @Override
-    public void emit(EmitterContext ctx, CompareArg arg, String type) {
+    public void emit(EmitterContext ctx, NumberCompare arg, String type) {
         if (arg.getRightOperand().inferType().equals("I") && arg.getLeftOperand().inferType().equals("I")) {
             ctx.printString("Integer.signum(");
             ctx.emit(arg.getRightOperand(), arg.inferType());

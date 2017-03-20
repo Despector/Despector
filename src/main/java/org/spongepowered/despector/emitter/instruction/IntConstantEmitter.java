@@ -24,14 +24,14 @@
  */
 package org.spongepowered.despector.emitter.instruction;
 
-import org.spongepowered.despector.ast.members.insn.arg.cst.IntConstantArg;
+import org.spongepowered.despector.ast.members.insn.arg.cst.IntConstant;
 import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.InstructionEmitter;
 
-public class IntConstantEmitter implements InstructionEmitter<IntConstantArg> {
+public class IntConstantEmitter implements InstructionEmitter<IntConstant> {
 
     @Override
-    public void emit(EmitterContext ctx, IntConstantArg arg, String type) {
+    public void emit(EmitterContext ctx, IntConstant arg, String type) {
         // Some basic constant replacement, TODO should probably make this
         // better
         int cst = arg.getConstant();

@@ -24,7 +24,9 @@
  */
 package org.spongepowered.despector.ast.members.insn.function;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static org.spongepowered.despector.util.TypeHelper.checkType;
 
 import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
 import org.spongepowered.despector.ast.members.insn.arg.Instruction;
@@ -44,7 +46,13 @@ public abstract class MethodInvoke implements Instruction {
         this.method_name = checkNotNull(name, "name");
         this.method_desc = checkNotNull(desc, "desc");
         this.method_owner = checkNotNull(owner, "owner");
-        this.params = checkNotNull(args, "args");
+        checkNotNull(args, "args");
+        checkArgument(TypeHelper.paramCount(this.method_desc) == args.length);
+        int i = 0;
+        for (String param_type : TypeHelper.splitSig(desc)) {
+            checkType(args[i++], param_type, "arg " + (i - 1));
+        }
+        this.params = args;
     }
 
     public String getMethodName() {
@@ -84,7 +92,13 @@ public abstract class MethodInvoke implements Instruction {
     }
 
     public void setParameters(Instruction... args) {
-        this.params = checkNotNull(args, "args");
+        checkNotNull(args, "args");
+        checkArgument(TypeHelper.paramCount(this.method_desc) == args.length);
+        int i = 0;
+        for (String param_type : TypeHelper.splitSig(this.method_desc)) {
+            checkType(args[i++], param_type, "arg " + (i - 1));
+        }
+        this.params = args;
     }
 
     @Override

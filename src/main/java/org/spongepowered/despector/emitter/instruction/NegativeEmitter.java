@@ -24,17 +24,17 @@
  */
 package org.spongepowered.despector.emitter.instruction;
 
-import org.spongepowered.despector.ast.members.insn.arg.operator.NegArg;
-import org.spongepowered.despector.ast.members.insn.arg.operator.OperatorInstruction;
+import org.spongepowered.despector.ast.members.insn.arg.operator.NegativeOperator;
+import org.spongepowered.despector.ast.members.insn.arg.operator.Operator;
 import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.InstructionEmitter;
 
-public class NegativeEmitter implements InstructionEmitter<NegArg> {
+public class NegativeEmitter implements InstructionEmitter<NegativeOperator> {
 
     @Override
-    public void emit(EmitterContext ctx, NegArg arg, String type) {
+    public void emit(EmitterContext ctx, NegativeOperator arg, String type) {
         ctx.printString("-");
-        if (arg.getOperand() instanceof OperatorInstruction) {
+        if (arg.getOperand() instanceof Operator) {
             ctx.printString("(");
             ctx.emit(arg.getOperand(), null);
             ctx.printString(")");

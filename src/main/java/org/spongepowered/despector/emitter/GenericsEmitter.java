@@ -51,7 +51,7 @@ public class GenericsEmitter {
 
     public void emitTypeSignature(EmitterContext ctx, TypeSignature sig) {
         if (sig instanceof TypeVariableSignature) {
-            String desc = ((TypeVariableSignature) sig).getDescription();
+            String desc = ((TypeVariableSignature) sig).getIdentifier();
             ctx.printString(desc.substring(1, desc.length() - 1));
         } else if (sig instanceof ClassTypeSignature) {
             ClassTypeSignature cls = (ClassTypeSignature) sig;

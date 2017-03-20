@@ -24,9 +24,14 @@
  */
 package org.spongepowered.despector.ast.generic;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * A type signature of a class or primative type (but not void).
+ */
 public class ClassTypeSignature extends TypeSignature {
 
     private String type_name;
@@ -36,16 +41,30 @@ public class ClassTypeSignature extends TypeSignature {
         this.type_name = type;
     }
 
+    /**
+     * Gets the type internal name.
+     */
     public String getTypeName() {
         return this.type_name;
     }
 
+    /**
+     * Sets the type internal name.
+     */
     public void setTypeName(String type) {
-        this.type_name = type;
+        this.type_name = checkNotNull(type, "type");
     }
 
+    /**
+     * Gets the type arguments.
+     */
     public List<TypeArgument> getArguments() {
         return this.args;
+    }
+
+    @Override
+    public boolean hasArguments() {
+        return !this.args.isEmpty();
     }
 
     @Override

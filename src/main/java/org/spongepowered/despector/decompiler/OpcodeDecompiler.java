@@ -53,35 +53,35 @@ import org.spongepowered.despector.ast.Locals.Local;
 import org.spongepowered.despector.ast.Locals.LocalInstance;
 import org.spongepowered.despector.ast.members.insn.Statement;
 import org.spongepowered.despector.ast.members.insn.StatementBlock;
-import org.spongepowered.despector.ast.members.insn.arg.CastArg;
-import org.spongepowered.despector.ast.members.insn.arg.CompareArg;
-import org.spongepowered.despector.ast.members.insn.arg.InstanceOfArg;
+import org.spongepowered.despector.ast.members.insn.arg.Cast;
+import org.spongepowered.despector.ast.members.insn.arg.NumberCompare;
+import org.spongepowered.despector.ast.members.insn.arg.InstanceOf;
 import org.spongepowered.despector.ast.members.insn.arg.Instruction;
-import org.spongepowered.despector.ast.members.insn.arg.NewArrayArg;
-import org.spongepowered.despector.ast.members.insn.arg.cst.DoubleConstantArg;
-import org.spongepowered.despector.ast.members.insn.arg.cst.FloatConstantArg;
-import org.spongepowered.despector.ast.members.insn.arg.cst.IntConstantArg;
-import org.spongepowered.despector.ast.members.insn.arg.cst.LongConstantArg;
-import org.spongepowered.despector.ast.members.insn.arg.cst.NullConstantArg;
-import org.spongepowered.despector.ast.members.insn.arg.cst.StringConstantArg;
-import org.spongepowered.despector.ast.members.insn.arg.cst.TypeConstantArg;
-import org.spongepowered.despector.ast.members.insn.arg.field.ArrayLoadArg;
-import org.spongepowered.despector.ast.members.insn.arg.field.FieldArg;
-import org.spongepowered.despector.ast.members.insn.arg.field.InstanceFieldArg;
-import org.spongepowered.despector.ast.members.insn.arg.field.LocalArg;
-import org.spongepowered.despector.ast.members.insn.arg.field.StaticFieldArg;
-import org.spongepowered.despector.ast.members.insn.arg.operator.AddArg;
-import org.spongepowered.despector.ast.members.insn.arg.operator.DivideArg;
-import org.spongepowered.despector.ast.members.insn.arg.operator.MultiplyArg;
-import org.spongepowered.despector.ast.members.insn.arg.operator.NegArg;
-import org.spongepowered.despector.ast.members.insn.arg.operator.RemainderInstruction;
-import org.spongepowered.despector.ast.members.insn.arg.operator.ShiftLeftArg;
-import org.spongepowered.despector.ast.members.insn.arg.operator.ShiftRightArg;
-import org.spongepowered.despector.ast.members.insn.arg.operator.SubtractArg;
-import org.spongepowered.despector.ast.members.insn.arg.operator.UnsignedShiftRightArg;
-import org.spongepowered.despector.ast.members.insn.arg.operator.bitwise.AndInstruction;
-import org.spongepowered.despector.ast.members.insn.arg.operator.bitwise.OrArg;
-import org.spongepowered.despector.ast.members.insn.arg.operator.bitwise.XorArg;
+import org.spongepowered.despector.ast.members.insn.arg.NewArray;
+import org.spongepowered.despector.ast.members.insn.arg.cst.DoubleConstant;
+import org.spongepowered.despector.ast.members.insn.arg.cst.FloatConstant;
+import org.spongepowered.despector.ast.members.insn.arg.cst.IntConstant;
+import org.spongepowered.despector.ast.members.insn.arg.cst.LongConstant;
+import org.spongepowered.despector.ast.members.insn.arg.cst.NullConstant;
+import org.spongepowered.despector.ast.members.insn.arg.cst.StringConstant;
+import org.spongepowered.despector.ast.members.insn.arg.cst.TypeConstant;
+import org.spongepowered.despector.ast.members.insn.arg.field.ArrayAccess;
+import org.spongepowered.despector.ast.members.insn.arg.field.FieldAccess;
+import org.spongepowered.despector.ast.members.insn.arg.field.InstanceFieldAccess;
+import org.spongepowered.despector.ast.members.insn.arg.field.LocalAccess;
+import org.spongepowered.despector.ast.members.insn.arg.field.StaticFieldAccess;
+import org.spongepowered.despector.ast.members.insn.arg.operator.AddOperator;
+import org.spongepowered.despector.ast.members.insn.arg.operator.DivideOperator;
+import org.spongepowered.despector.ast.members.insn.arg.operator.MultiplyOperator;
+import org.spongepowered.despector.ast.members.insn.arg.operator.NegativeOperator;
+import org.spongepowered.despector.ast.members.insn.arg.operator.RemainderOperator;
+import org.spongepowered.despector.ast.members.insn.arg.operator.ShiftLeftOperator;
+import org.spongepowered.despector.ast.members.insn.arg.operator.ShiftRightOperator;
+import org.spongepowered.despector.ast.members.insn.arg.operator.SubtractOperator;
+import org.spongepowered.despector.ast.members.insn.arg.operator.UnsignedShiftRightOperator;
+import org.spongepowered.despector.ast.members.insn.arg.operator.bitwise.AndOperator;
+import org.spongepowered.despector.ast.members.insn.arg.operator.bitwise.OrOperator;
+import org.spongepowered.despector.ast.members.insn.arg.operator.bitwise.XorOperator;
 import org.spongepowered.despector.ast.members.insn.assign.ArrayAssignment;
 import org.spongepowered.despector.ast.members.insn.assign.FieldAssignment;
 import org.spongepowered.despector.ast.members.insn.assign.InstanceFieldAssignment;
@@ -1208,7 +1208,7 @@ public class OpcodeDecompiler {
                 throw new IllegalStateException();
             }
             Instruction val = dummy_stack.pop();
-            return new CompareCondition(val, new IntConstantArg(0), CompareCondition.fromOpcode(block.last.getOpcode()));
+            return new CompareCondition(val, new IntConstant(0), CompareCondition.fromOpcode(block.last.getOpcode()));
         }
         case IF_ICMPEQ:
         case IF_ICMPNE:
@@ -1230,14 +1230,14 @@ public class OpcodeDecompiler {
                 throw new IllegalStateException();
             }
             Instruction val = dummy_stack.pop();
-            return new CompareCondition(val, new NullConstantArg(), CompareCondition.CompareOperator.EQUAL);
+            return new CompareCondition(val, new NullConstant(), CompareCondition.CompareOperator.EQUAL);
         }
         case IFNONNULL: {
             if (dummy_stack.size() != 1 || !dummy.getStatements().isEmpty()) {
                 throw new IllegalStateException();
             }
             Instruction val = dummy_stack.pop();
-            return new CompareCondition(val, new NullConstantArg(), CompareCondition.CompareOperator.NOT_EQUAL);
+            return new CompareCondition(val, new NullConstant(), CompareCondition.CompareOperator.NOT_EQUAL);
         }
         default:
             throw new IllegalStateException("Unsupported conditional jump opcode " + block.last.getOpcode());
@@ -1496,73 +1496,73 @@ public class OpcodeDecompiler {
             case NOP:
                 break;
             case ACONST_NULL:
-                stack.push(new NullConstantArg());
+                stack.push(new NullConstant());
                 break;
             case ICONST_M1:
-                stack.push(new IntConstantArg(-1));
+                stack.push(new IntConstant(-1));
                 break;
             case ICONST_0:
-                stack.push(new IntConstantArg(0));
+                stack.push(new IntConstant(0));
                 break;
             case ICONST_1:
-                stack.push(new IntConstantArg(1));
+                stack.push(new IntConstant(1));
                 break;
             case ICONST_2:
-                stack.push(new IntConstantArg(2));
+                stack.push(new IntConstant(2));
                 break;
             case ICONST_3:
-                stack.push(new IntConstantArg(3));
+                stack.push(new IntConstant(3));
                 break;
             case ICONST_4:
-                stack.push(new IntConstantArg(4));
+                stack.push(new IntConstant(4));
                 break;
             case ICONST_5:
-                stack.push(new IntConstantArg(5));
+                stack.push(new IntConstant(5));
                 break;
             case LCONST_0:
-                stack.push(new LongConstantArg(0));
+                stack.push(new LongConstant(0));
                 break;
             case LCONST_1:
-                stack.push(new LongConstantArg(1));
+                stack.push(new LongConstant(1));
                 break;
             case FCONST_0:
-                stack.push(new FloatConstantArg(0));
+                stack.push(new FloatConstant(0));
                 break;
             case FCONST_1:
-                stack.push(new FloatConstantArg(1));
+                stack.push(new FloatConstant(1));
                 break;
             case FCONST_2:
-                stack.push(new FloatConstantArg(2));
+                stack.push(new FloatConstant(2));
                 break;
             case DCONST_0:
-                stack.push(new DoubleConstantArg(0));
+                stack.push(new DoubleConstant(0));
                 break;
             case DCONST_1:
-                stack.push(new DoubleConstantArg(1));
+                stack.push(new DoubleConstant(1));
                 break;
             case BIPUSH:
             case SIPUSH: {
                 IntInsnNode insn = (IntInsnNode) next;
-                stack.push(new IntConstantArg(insn.operand));
+                stack.push(new IntConstant(insn.operand));
                 break;
             }
             case LDC: {
                 LdcInsnNode ldc = (LdcInsnNode) next;
                 if (ldc.cst instanceof String) {
-                    stack.push(new StringConstantArg((String) ldc.cst));
+                    stack.push(new StringConstant((String) ldc.cst));
                 } else if (ldc.cst instanceof Integer) {
-                    stack.push(new IntConstantArg((Integer) ldc.cst));
+                    stack.push(new IntConstant((Integer) ldc.cst));
                 } else if (ldc.cst instanceof Float) {
-                    stack.push(new FloatConstantArg((Float) ldc.cst));
+                    stack.push(new FloatConstant((Float) ldc.cst));
                 } else if (ldc.cst instanceof Long) {
                     // LDC_W appears to be merged with this opcode by asm so
                     // long
                     // and double constants will also be here
-                    stack.push(new LongConstantArg((Long) ldc.cst));
+                    stack.push(new LongConstant((Long) ldc.cst));
                 } else if (ldc.cst instanceof Double) {
-                    stack.push(new DoubleConstantArg((Double) ldc.cst));
+                    stack.push(new DoubleConstant((Double) ldc.cst));
                 } else if (ldc.cst instanceof Type) {
-                    stack.push(new TypeConstantArg((Type) ldc.cst));
+                    stack.push(new TypeConstant((Type) ldc.cst));
                 } else {
                     throw new IllegalStateException("Unsupported ldc constant: " + ldc.cst);
                 }
@@ -1575,7 +1575,7 @@ public class OpcodeDecompiler {
             case ALOAD: {
                 VarInsnNode var = (VarInsnNode) next;
                 Local local = locals.getLocal(var.var);
-                stack.push(new LocalArg(local.getInstance(label_index)));
+                stack.push(new LocalAccess(local.getInstance(label_index)));
                 break;
             }
             case IALOAD:
@@ -1588,7 +1588,7 @@ public class OpcodeDecompiler {
             case SALOAD: {
                 Instruction index_arg = stack.pop();
                 Instruction var = stack.pop();
-                stack.push(new ArrayLoadArg(var, index_arg));
+                stack.push(new ArrayAccess(var, index_arg));
                 break;
             }
             case ISTORE:
@@ -1613,12 +1613,12 @@ public class OpcodeDecompiler {
                 Instruction val = stack.pop();
                 Instruction index_arg = stack.pop();
                 Instruction var = stack.pop();
-                if (var instanceof NewArrayArg) {
-                    NewArrayArg array = (NewArrayArg) var;
+                if (var instanceof NewArray) {
+                    NewArray array = (NewArray) var;
                     if (array.getInitializer() == null) {
-                        array.setInitialValues(new Instruction[((IntConstantArg) array.getSize()).getConstant()]);
+                        array.setInitialValues(new Instruction[((IntConstant) array.getSize()).getConstant()]);
                     }
-                    array.getInitializer()[((IntConstantArg) index_arg).getConstant()] = val;
+                    array.getInitializer()[((IntConstant) index_arg).getConstant()] = val;
                     break;
                 }
                 block.append(new ArrayAssignment(var, index_arg, val));
@@ -1707,7 +1707,7 @@ public class OpcodeDecompiler {
             case DADD: {
                 Instruction right = stack.pop();
                 Instruction left = stack.pop();
-                stack.push(new AddArg(left, right));
+                stack.push(new AddOperator(left, right));
                 break;
             }
             case ISUB:
@@ -1716,7 +1716,7 @@ public class OpcodeDecompiler {
             case DSUB: {
                 Instruction right = stack.pop();
                 Instruction left = stack.pop();
-                stack.push(new SubtractArg(left, right));
+                stack.push(new SubtractOperator(left, right));
                 break;
             }
             case IMUL:
@@ -1725,7 +1725,7 @@ public class OpcodeDecompiler {
             case DMUL: {
                 Instruction right = stack.pop();
                 Instruction left = stack.pop();
-                stack.push(new MultiplyArg(left, right));
+                stack.push(new MultiplyOperator(left, right));
                 break;
             }
             case IDIV:
@@ -1734,7 +1734,7 @@ public class OpcodeDecompiler {
             case DDIV: {
                 Instruction right = stack.pop();
                 Instruction left = stack.pop();
-                stack.push(new DivideArg(left, right));
+                stack.push(new DivideOperator(left, right));
                 break;
             }
             case IREM:
@@ -1743,7 +1743,7 @@ public class OpcodeDecompiler {
             case DREM: {
                 Instruction right = stack.pop();
                 Instruction left = stack.pop();
-                stack.push(new RemainderInstruction(left, right));
+                stack.push(new RemainderOperator(left, right));
                 break;
             }
             case INEG:
@@ -1751,49 +1751,49 @@ public class OpcodeDecompiler {
             case FNEG:
             case DNEG: {
                 Instruction right = stack.pop();
-                stack.push(new NegArg(right));
+                stack.push(new NegativeOperator(right));
                 break;
             }
             case ISHL:
             case LSHL: {
                 Instruction right = stack.pop();
                 Instruction left = stack.pop();
-                stack.push(new ShiftLeftArg(left, right));
+                stack.push(new ShiftLeftOperator(left, right));
                 break;
             }
             case ISHR:
             case LSHR: {
                 Instruction right = stack.pop();
                 Instruction left = stack.pop();
-                stack.push(new ShiftRightArg(left, right));
+                stack.push(new ShiftRightOperator(left, right));
                 break;
             }
             case IUSHR:
             case LUSHR: {
                 Instruction right = stack.pop();
                 Instruction left = stack.pop();
-                stack.push(new UnsignedShiftRightArg(left, right));
+                stack.push(new UnsignedShiftRightOperator(left, right));
                 break;
             }
             case IAND:
             case LAND: {
                 Instruction right = stack.pop();
                 Instruction left = stack.pop();
-                stack.push(new AndInstruction(left, right));
+                stack.push(new AndOperator(left, right));
                 break;
             }
             case IOR:
             case LOR: {
                 Instruction right = stack.pop();
                 Instruction left = stack.pop();
-                stack.push(new OrArg(left, right));
+                stack.push(new OrOperator(left, right));
                 break;
             }
             case IXOR:
             case LXOR: {
                 Instruction right = stack.pop();
                 Instruction left = stack.pop();
-                stack.push(new XorArg(left, right));
+                stack.push(new XorOperator(left, right));
                 break;
             }
             case IINC: {
@@ -1806,31 +1806,31 @@ public class OpcodeDecompiler {
             case L2I:
             case F2I:
             case D2I:
-                stack.push(new CastArg("I", stack.pop()));
+                stack.push(new Cast("I", stack.pop()));
                 break;
             case I2L:
             case F2L:
             case D2L:
-                stack.push(new CastArg("J", stack.pop()));
+                stack.push(new Cast("J", stack.pop()));
                 break;
             case I2F:
             case L2F:
             case D2F:
-                stack.push(new CastArg("F", stack.pop()));
+                stack.push(new Cast("F", stack.pop()));
                 break;
             case I2D:
             case F2D:
             case L2D:
-                stack.push(new CastArg("D", stack.pop()));
+                stack.push(new Cast("D", stack.pop()));
                 break;
             case I2B:
-                stack.push(new CastArg("B", stack.pop()));
+                stack.push(new Cast("B", stack.pop()));
                 break;
             case I2C:
-                stack.push(new CastArg("C", stack.pop()));
+                stack.push(new Cast("C", stack.pop()));
                 break;
             case I2S:
-                stack.push(new CastArg("S", stack.pop()));
+                stack.push(new Cast("S", stack.pop()));
                 break;
             case LCMP:
             case FCMPL:
@@ -1839,7 +1839,7 @@ public class OpcodeDecompiler {
             case DCMPG: {
                 Instruction right = stack.pop();
                 Instruction left = stack.pop();
-                stack.push(new CompareArg(left, right));
+                stack.push(new NumberCompare(left, right));
                 break;
             }
             case IFEQ:
@@ -1880,7 +1880,7 @@ public class OpcodeDecompiler {
                 if (!owner.startsWith("[")) {
                     owner = "L" + owner + ";";
                 }
-                FieldArg arg = new StaticFieldArg(field.name, field.desc, owner);
+                FieldAccess arg = new StaticFieldAccess(field.name, field.desc, owner);
                 stack.push(arg);
                 break;
             }
@@ -1901,7 +1901,7 @@ public class OpcodeDecompiler {
                 if (!owner.startsWith("[")) {
                     owner = "L" + owner + ";";
                 }
-                FieldArg arg = new InstanceFieldArg(field.name, field.desc, owner, stack.pop());
+                FieldAccess arg = new InstanceFieldAccess(field.name, field.desc, owner, stack.pop());
                 stack.push(arg);
                 break;
             }
@@ -1939,8 +1939,8 @@ public class OpcodeDecompiler {
                         New insn = new New(new_arg.getType(), ctor.desc, args);
                         block.append(new InvokeStatement(insn));
                         break;
-                    } else if (stack.peek() instanceof LocalArg) {
-                        LocalArg callee = (LocalArg) stack.pop();
+                    } else if (stack.peek() instanceof LocalAccess) {
+                        LocalAccess callee = (LocalAccess) stack.pop();
                         String owner = ctor.owner;
                         if (!owner.startsWith("[")) {
                             owner = "L" + owner + ";";
@@ -2011,11 +2011,11 @@ public class OpcodeDecompiler {
                     TypeInsnNode array = (TypeInsnNode) next;
                     array_type = array.desc;
                 }
-                stack.push(new NewArrayArg(array_type, size, null));
+                stack.push(new NewArray(array_type, size, null));
                 break;
             }
             case ARRAYLENGTH:
-                stack.push(new InstanceFieldArg("length", "I", "hidden-array-field", stack.pop()));
+                stack.push(new InstanceFieldAccess("length", "I", "hidden-array-field", stack.pop()));
                 break;
             case ATHROW:
                 block.append(new Throw(stack.pop()));
@@ -2026,7 +2026,7 @@ public class OpcodeDecompiler {
                 if (!desc.startsWith("[")) {
                     desc = "L" + desc + ";";
                 }
-                stack.push(new CastArg(desc, stack.pop()));
+                stack.push(new Cast(desc, stack.pop()));
                 break;
             }
             case INSTANCEOF: {
@@ -2036,7 +2036,7 @@ public class OpcodeDecompiler {
                 if (!type.startsWith("[")) {
                     type = "L" + insn.desc + ";";
                 }
-                stack.push(new InstanceOfArg(val, type));
+                stack.push(new InstanceOf(val, type));
                 break;
             }
             case MONITORENTER:

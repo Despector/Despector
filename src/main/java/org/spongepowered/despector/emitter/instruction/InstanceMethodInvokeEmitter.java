@@ -26,8 +26,8 @@ package org.spongepowered.despector.emitter.instruction;
 
 import com.google.common.collect.Lists;
 import org.spongepowered.despector.ast.members.insn.arg.Instruction;
-import org.spongepowered.despector.ast.members.insn.arg.cst.StringConstantArg;
-import org.spongepowered.despector.ast.members.insn.arg.field.LocalArg;
+import org.spongepowered.despector.ast.members.insn.arg.cst.StringConstant;
+import org.spongepowered.despector.ast.members.insn.arg.field.LocalAccess;
 import org.spongepowered.despector.ast.members.insn.function.InstanceMethodInvoke;
 import org.spongepowered.despector.ast.members.insn.function.New;
 import org.spongepowered.despector.ast.members.insn.function.StaticMethodInvoke;
@@ -67,10 +67,10 @@ public class InstanceMethodInvokeEmitter implements InstructionEmitter<InstanceM
                                 StaticMethodInvoke valueof = (StaticMethodInvoke) initial;
                                 if (valueof.getMethodName().equals("valueOf") && valueof.getOwner().equals("Ljava/lang/String;")) {
                                     Instruction internal = valueof.getParams()[0];
-                                    if (internal instanceof StringConstantArg) {
+                                    if (internal instanceof StringConstant) {
                                         initial = internal;
-                                    } else if (internal instanceof LocalArg) {
-                                        LocalArg local = (LocalArg) internal;
+                                    } else if (internal instanceof LocalAccess) {
+                                        LocalAccess local = (LocalAccess) internal;
                                         if (local.getLocal().getType().equals("Ljava/lang/String;")) {
                                             initial = local;
                                         }
@@ -107,8 +107,8 @@ public class InstanceMethodInvokeEmitter implements InstructionEmitter<InstanceM
                 ctx.printString("super");
             }
         } else {
-            if (arg.getCallee() instanceof LocalArg && ctx.getMethod() != null && !ctx.getMethod().isStatic()) {
-                LocalArg local = (LocalArg) arg.getCallee();
+            if (arg.getCallee() instanceof LocalAccess && ctx.getMethod() != null && !ctx.getMethod().isStatic()) {
+                LocalAccess local = (LocalAccess) arg.getCallee();
                 if (local.getLocal().getIndex() == 0) {
                     if (ctx.getType() != null && !arg.getOwnerType().equals(ctx.getType().getName())) {
                         ctx.printString("super.");

@@ -27,9 +27,9 @@ package org.spongepowered.despector.emitter.statement;
 import com.google.common.collect.Maps;
 import org.spongepowered.despector.ast.members.MethodEntry;
 import org.spongepowered.despector.ast.members.insn.Statement;
-import org.spongepowered.despector.ast.members.insn.arg.cst.IntConstantArg;
-import org.spongepowered.despector.ast.members.insn.arg.field.ArrayLoadArg;
-import org.spongepowered.despector.ast.members.insn.arg.field.StaticFieldArg;
+import org.spongepowered.despector.ast.members.insn.arg.cst.IntConstant;
+import org.spongepowered.despector.ast.members.insn.arg.field.ArrayAccess;
+import org.spongepowered.despector.ast.members.insn.arg.field.StaticFieldAccess;
 import org.spongepowered.despector.ast.members.insn.assign.ArrayAssignment;
 import org.spongepowered.despector.ast.members.insn.branch.Switch;
 import org.spongepowered.despector.ast.members.insn.branch.TryCatch;
@@ -50,9 +50,9 @@ public class SwitchEmitter implements StatementEmitter<Switch> {
             if (stmt instanceof TryCatch) {
                 TryCatch next = (TryCatch) stmt;
                 ArrayAssignment assign = (ArrayAssignment) next.getTryBlock().getStatements().get(0);
-                int jump_index = ((IntConstantArg) assign.getValue()).getConstant();
+                int jump_index = ((IntConstant) assign.getValue()).getConstant();
                 InstanceMethodInvoke ordinal = (InstanceMethodInvoke) assign.getIndex();
-                StaticFieldArg callee = (StaticFieldArg) ordinal.getCallee();
+                StaticFieldAccess callee = (StaticFieldAccess) ordinal.getCallee();
                 table.put(jump_index, callee.getFieldName());
             }
         }
@@ -65,8 +65,8 @@ public class SwitchEmitter implements StatementEmitter<Switch> {
         Map<Integer, String> table = null;
         ctx.printString("switch (");
         boolean synthetic = false;
-        if (tswitch.getSwitchVar() instanceof ArrayLoadArg) {
-            ArrayLoadArg var = (ArrayLoadArg) tswitch.getSwitchVar();
+        if (tswitch.getSwitchVar() instanceof ArrayAccess) {
+            ArrayAccess var = (ArrayAccess) tswitch.getSwitchVar();
             if (var.getArrayVar() instanceof StaticMethodInvoke) {
                 StaticMethodInvoke arg = (StaticMethodInvoke) var.getArrayVar();
                 if (arg.getMethodName().contains("$SWITCH_TABLE$") && ctx.getType() != null) {

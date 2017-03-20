@@ -37,6 +37,7 @@ public class AnnotationType {
     private final Map<String, Class<?>> types = new HashMap<>();
     private final Map<String, Object> defaults = new HashMap<>();
 
+    private boolean runtime;
     private boolean complete;
 
     public AnnotationType(String name) {
@@ -73,6 +74,14 @@ public class AnnotationType {
 
     public void markComplete() {
         this.complete = true;
+    }
+
+    public boolean isRuntimeVisible() {
+        return this.runtime;
+    }
+
+    public void setRuntimeVisible(boolean state) {
+        this.runtime = state;
     }
 
 }

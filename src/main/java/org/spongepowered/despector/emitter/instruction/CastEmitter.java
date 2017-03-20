@@ -24,17 +24,25 @@
  */
 package org.spongepowered.despector.emitter.instruction;
 
-import org.spongepowered.despector.ast.members.insn.arg.CastArg;
+import org.spongepowered.despector.ast.members.insn.arg.Cast;
+import org.spongepowered.despector.ast.members.insn.arg.operator.Operator;
 import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.InstructionEmitter;
 
-public class CastEmitter implements InstructionEmitter<CastArg> {
+public class CastEmitter implements InstructionEmitter<Cast> {
 
     @Override
-    public void emit(EmitterContext ctx, CastArg arg, String type) {
-        ctx.printString("((");
+    public void emit(EmitterContext ctx, Cast arg, String type) {
+        boolean operator = arg.getValue() instanceof Operator;
+        ctx.printString("(");
+        if (!operator) {
+            ctx.printString("(");
+        }
         ctx.emitType(arg.getType());
         ctx.printString(") ");
+        if (operator) {
+            ctx.printString("(");
+        }
         ctx.emit(arg.getValue(), null);
         ctx.printString(")");
     }

@@ -25,10 +25,10 @@
 package org.spongepowered.despector.emitter.statement;
 
 import org.spongepowered.despector.ast.members.insn.arg.Instruction;
-import org.spongepowered.despector.ast.members.insn.arg.cst.IntConstantArg;
-import org.spongepowered.despector.ast.members.insn.arg.field.InstanceFieldArg;
-import org.spongepowered.despector.ast.members.insn.arg.field.LocalArg;
-import org.spongepowered.despector.ast.members.insn.arg.operator.OperatorInstruction;
+import org.spongepowered.despector.ast.members.insn.arg.cst.IntConstant;
+import org.spongepowered.despector.ast.members.insn.arg.field.InstanceFieldAccess;
+import org.spongepowered.despector.ast.members.insn.arg.field.LocalAccess;
+import org.spongepowered.despector.ast.members.insn.arg.operator.Operator;
 import org.spongepowered.despector.ast.members.insn.assign.FieldAssignment;
 import org.spongepowered.despector.ast.members.insn.assign.InstanceFieldAssignment;
 import org.spongepowered.despector.ast.members.insn.assign.StaticFieldAssignment;
@@ -54,22 +54,22 @@ public class FieldAssignmentEmitter implements StatementEmitter<FieldAssignment>
 
         ctx.printString(insn.getFieldName());
         Instruction val = insn.getValue();
-        if (val instanceof OperatorInstruction) {
-            Instruction left = ((OperatorInstruction) val).getLeftOperand();
-            Instruction right = ((OperatorInstruction) val).getRightOperand();
-            String op = " " + ((OperatorInstruction) val).getOperator() + "= ";
-            if (left instanceof InstanceFieldArg) {
-                InstanceFieldArg left_field = (InstanceFieldArg) left;
+        if (val instanceof Operator) {
+            Instruction left = ((Operator) val).getLeftOperand();
+            Instruction right = ((Operator) val).getRightOperand();
+            String op = " " + ((Operator) val).getOperator() + "= ";
+            if (left instanceof InstanceFieldAccess) {
+                InstanceFieldAccess left_field = (InstanceFieldAccess) left;
                 Instruction owner = left_field.getFieldOwner();
-                if (owner instanceof LocalArg && ((LocalArg) owner).getLocal().getIndex() == 0) {
+                if (owner instanceof LocalAccess && ((LocalAccess) owner).getLocal().getIndex() == 0) {
                     // If the field assign is of the form 'field = field + x'
                     // where + is any operator then we collapse it to the '+='
                     // form of the assignment.
                     if (left_field.getFieldName().equals(insn.getFieldName())) {
                         ctx.printString(op);
                         if (insn.getFieldDescription().equals("Z")) {
-                            if (val instanceof IntConstantArg) {
-                                IntConstantArg cst = (IntConstantArg) insn.getValue();
+                            if (val instanceof IntConstant) {
+                                IntConstant cst = (IntConstant) insn.getValue();
                                 if (cst.getConstant() == 1) {
                                     ctx.printString("true");
                                 } else {

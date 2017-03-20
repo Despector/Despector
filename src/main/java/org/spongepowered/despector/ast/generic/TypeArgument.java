@@ -24,30 +24,47 @@
  */
 package org.spongepowered.despector.ast.generic;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
+/**
+ * A type argument is a generic type specified as a type parameter of a type.
+ */
 public class TypeArgument {
 
     private WildcardType wildcard;
     private TypeSignature sig;
 
     public TypeArgument(WildcardType wildcard, TypeSignature sig) {
-        this.wildcard = wildcard;
-        this.sig = sig;
+        this.wildcard = checkNotNull(wildcard, "wildcard");
+        this.sig = checkNotNull(sig, "sig");
     }
 
+    /**
+     * Gets the wildcard type of this argument.
+     */
     public WildcardType getWildcard() {
         return this.wildcard;
     }
 
+    /**
+     * Sets the wildcard type of this argument.
+     */
     public void setWildcard(WildcardType wild) {
-        this.wildcard = wild;
+        this.wildcard = checkNotNull(wild, "wildcard");
     }
 
+    /**
+     * Gets the signature of the argument.
+     */
     public TypeSignature getSignature() {
         return this.sig;
     }
 
+    /**
+     * Sets the signature of the argument.
+     */
     public void setSignature(TypeSignature sig) {
-        this.sig = sig;
+        this.sig = checkNotNull(sig, "sig");
     }
 
     @Override

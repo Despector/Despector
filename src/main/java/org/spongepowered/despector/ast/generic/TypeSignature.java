@@ -24,7 +24,8 @@
  */
 package org.spongepowered.despector.ast.generic;
 
-
 public abstract class TypeSignature {
+
+    public abstract boolean hasArguments();
 
 }

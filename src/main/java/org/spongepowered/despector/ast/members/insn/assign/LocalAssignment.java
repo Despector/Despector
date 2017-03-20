@@ -29,20 +29,30 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import org.spongepowered.despector.ast.Locals.LocalInstance;
 import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
 import org.spongepowered.despector.ast.members.insn.arg.Instruction;
+import org.spongepowered.despector.util.TypeHelper;
 
+/**
+ * An assignment statement for assigning a value to a local.
+ */
 public class LocalAssignment extends Assignment {
 
     private LocalInstance local;
 
     public LocalAssignment(LocalInstance local, Instruction val) {
-        super(val);
+        super(val, TypeHelper.looseCompare(local.getType()));
         this.local = checkNotNull(local, "local");
     }
 
+    /**
+     * Gets the local to which the value is being assigned.
+     */
     public LocalInstance getLocal() {
         return this.local;
     }
 
+    /**
+     * Sets the local to which the value is being assigned.
+     */
     public void setLocal(LocalInstance local) {
         this.local = checkNotNull(local, "local");
     }

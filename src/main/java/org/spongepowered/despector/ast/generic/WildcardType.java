@@ -24,6 +24,9 @@
  */
 package org.spongepowered.despector.ast.generic;
 
+/**
+ * Represents the various type of generic wildcards.
+ */
 public enum WildcardType {
     NONE(""),
     EXTENDS("+"),
@@ -36,6 +39,9 @@ public enum WildcardType {
         this.rep = t;
     }
 
+    /**
+     * Gets the representation of the wildcard in a type signature string.
+     */
     public String getRepresentation() {
         return this.rep;
     }

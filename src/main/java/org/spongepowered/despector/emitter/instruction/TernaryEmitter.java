@@ -24,7 +24,7 @@
  */
 package org.spongepowered.despector.emitter.instruction;
 
-import org.spongepowered.despector.ast.members.insn.arg.cst.IntConstantArg;
+import org.spongepowered.despector.ast.members.insn.arg.cst.IntConstant;
 import org.spongepowered.despector.ast.members.insn.branch.Ternary;
 import org.spongepowered.despector.ast.members.insn.branch.condition.CompareCondition;
 import org.spongepowered.despector.emitter.EmitterContext;
@@ -35,11 +35,11 @@ public class TernaryEmitter implements InstructionEmitter<Ternary> {
 
     @Override
     public void emit(EmitterContext ctx, Ternary ternary, String type) {
-        if ("Z".equals(type) && ternary.getTrueValue() instanceof IntConstantArg && ternary.getFalseValue() instanceof IntConstantArg) {
+        if ("Z".equals(type) && ternary.getTrueValue() instanceof IntConstant && ternary.getFalseValue() instanceof IntConstant) {
             // if the ternary contains simple boolean constants on both sides
             // then we can simplify it to simply be the condition
-            IntConstantArg true_value = (IntConstantArg) ternary.getTrueValue();
-            IntConstantArg false_value = (IntConstantArg) ternary.getFalseValue();
+            IntConstant true_value = (IntConstant) ternary.getTrueValue();
+            IntConstant false_value = (IntConstant) ternary.getFalseValue();
             if (true_value.getConstant() == 1 && false_value.getConstant() == 0) {
                 ctx.emit(ternary.getCondition());
                 return;

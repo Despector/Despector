@@ -24,24 +24,24 @@
  */
 package org.spongepowered.despector.emitter.instruction;
 
-import org.spongepowered.despector.ast.members.insn.arg.field.FieldArg;
-import org.spongepowered.despector.ast.members.insn.arg.field.InstanceFieldArg;
-import org.spongepowered.despector.ast.members.insn.arg.field.StaticFieldArg;
+import org.spongepowered.despector.ast.members.insn.arg.field.FieldAccess;
+import org.spongepowered.despector.ast.members.insn.arg.field.InstanceFieldAccess;
+import org.spongepowered.despector.ast.members.insn.arg.field.StaticFieldAccess;
 import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.InstructionEmitter;
 
-public class FieldEmitter implements InstructionEmitter<FieldArg> {
+public class FieldEmitter implements InstructionEmitter<FieldAccess> {
 
     @Override
-    public void emit(EmitterContext ctx, FieldArg arg, String type) {
-        if (arg instanceof StaticFieldArg) {
-            if (ctx.getType() == null || !((StaticFieldArg) arg).getOwnerName().equals(ctx.getType().getName())) {
-                ctx.emitTypeName(((StaticFieldArg) arg).getOwnerName());
+    public void emit(EmitterContext ctx, FieldAccess arg, String type) {
+        if (arg instanceof StaticFieldAccess) {
+            if (ctx.getType() == null || !((StaticFieldAccess) arg).getOwnerName().equals(ctx.getType().getName())) {
+                ctx.emitTypeName(((StaticFieldAccess) arg).getOwnerName());
                 ctx.printString(".");
             }
             ctx.printString(arg.getFieldName());
-        } else if (arg instanceof InstanceFieldArg) {
-            ctx.emit(((InstanceFieldArg) arg).getFieldOwner(), arg.getOwner());
+        } else if (arg instanceof InstanceFieldAccess) {
+            ctx.emit(((InstanceFieldAccess) arg).getFieldOwner(), arg.getOwnerType());
             ctx.printString(".");
             ctx.printString(arg.getFieldName());
         } else {

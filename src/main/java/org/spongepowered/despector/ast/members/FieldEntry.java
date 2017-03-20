@@ -24,6 +24,7 @@
  */
 package org.spongepowered.despector.ast.members;
 
+import static org.spongepowered.despector.util.TypeHelper.checkType;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.spongepowered.despector.ast.AccessModifier;
@@ -31,7 +32,7 @@ import org.spongepowered.despector.ast.Annotation;
 import org.spongepowered.despector.ast.AnnotationType;
 import org.spongepowered.despector.ast.AstEntry;
 import org.spongepowered.despector.ast.SourceSet;
-import org.spongepowered.despector.ast.generic.ClassTypeSignature;
+import org.spongepowered.despector.ast.generic.TypeSignature;
 import org.spongepowered.despector.ast.members.insn.arg.Instruction;
 import org.spongepowered.despector.util.TypeHelper;
 
@@ -58,7 +59,7 @@ public class FieldEntry extends AstEntry {
 
     protected final Map<AnnotationType, Annotation> annotations = new LinkedHashMap<>();
 
-    protected ClassTypeSignature signature;
+    protected TypeSignature signature;
 
     public FieldEntry(SourceSet source) {
         super(source);
@@ -80,11 +81,11 @@ public class FieldEntry extends AstEntry {
         this.name = name;
     }
 
-    public ClassTypeSignature getSignature() {
+    public TypeSignature getSignature() {
         return this.signature;
     }
 
-    public void setSignature(ClassTypeSignature sig) {
+    public void setSignature(TypeSignature sig) {
         this.signature = sig;
     }
 
@@ -120,7 +121,7 @@ public class FieldEntry extends AstEntry {
     }
 
     public void setInitializer(Instruction insn) {
-        this.init = insn;
+        this.init = checkType(insn, this.type, "initializer");
     }
 
     /**

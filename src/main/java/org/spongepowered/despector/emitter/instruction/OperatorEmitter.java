@@ -24,14 +24,14 @@
  */
 package org.spongepowered.despector.emitter.instruction;
 
-import org.spongepowered.despector.ast.members.insn.arg.operator.OperatorInstruction;
+import org.spongepowered.despector.ast.members.insn.arg.operator.Operator;
 import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.InstructionEmitter;
 
-public class OperatorEmitter implements InstructionEmitter<OperatorInstruction> {
+public class OperatorEmitter implements InstructionEmitter<Operator> {
 
     @Override
-    public void emit(EmitterContext ctx, OperatorInstruction arg, String type) {
+    public void emit(EmitterContext ctx, Operator arg, String type) {
         ctx.emit(arg.getLeftOperand(), null);
         ctx.printString(" " + arg.getOperator() + " ");
         ctx.emit(arg.getRightOperand(), null);

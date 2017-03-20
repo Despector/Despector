@@ -53,7 +53,7 @@ public class SignatureParserTest {
         assertEquals(1, cls.getSuperclassSignature().getArguments().size());
         assertEquals(TypeVariableSignature.class, cls.getSuperclassSignature().getArguments().get(0).getSignature().getClass());
         TypeVariableSignature param = (TypeVariableSignature) cls.getSuperclassSignature().getArguments().get(0).getSignature();
-        assertEquals("TT;", param.getDescription());
+        assertEquals("TT;", param.getIdentifier());
         assertEquals(0, cls.getInterfaceSignatures().size());
     }
 

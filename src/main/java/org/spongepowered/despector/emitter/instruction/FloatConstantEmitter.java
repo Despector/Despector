@@ -24,14 +24,14 @@
  */
 package org.spongepowered.despector.emitter.instruction;
 
-import org.spongepowered.despector.ast.members.insn.arg.cst.FloatConstantArg;
+import org.spongepowered.despector.ast.members.insn.arg.cst.FloatConstant;
 import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.InstructionEmitter;
 
-public class FloatConstantEmitter implements InstructionEmitter<FloatConstantArg> {
+public class FloatConstantEmitter implements InstructionEmitter<FloatConstant> {
 
     @Override
-    public void emit(EmitterContext ctx, FloatConstantArg arg, String type) {
+    public void emit(EmitterContext ctx, FloatConstant arg, String type) {
         ctx.printString(String.valueOf(arg.getConstant()) + "F");
     }
 

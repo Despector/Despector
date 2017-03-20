@@ -25,12 +25,12 @@
 package org.spongepowered.despector.emitter.statement;
 
 import org.spongepowered.despector.ast.Locals.LocalInstance;
-import org.spongepowered.despector.ast.members.insn.arg.CastArg;
+import org.spongepowered.despector.ast.members.insn.arg.Cast;
 import org.spongepowered.despector.ast.members.insn.arg.Instruction;
-import org.spongepowered.despector.ast.members.insn.arg.cst.IntConstantArg;
-import org.spongepowered.despector.ast.members.insn.arg.field.LocalArg;
-import org.spongepowered.despector.ast.members.insn.arg.operator.AddArg;
-import org.spongepowered.despector.ast.members.insn.arg.operator.SubtractArg;
+import org.spongepowered.despector.ast.members.insn.arg.cst.IntConstant;
+import org.spongepowered.despector.ast.members.insn.arg.field.LocalAccess;
+import org.spongepowered.despector.ast.members.insn.arg.operator.AddOperator;
+import org.spongepowered.despector.ast.members.insn.arg.operator.SubtractOperator;
 import org.spongepowered.despector.ast.members.insn.assign.LocalAssignment;
 import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.GenericsEmitter;
@@ -53,16 +53,16 @@ public class LocalAssignmentEmitter implements StatementEmitter<LocalAssignment>
         } else {
             // TODO replace with more generic handling from FieldAssign
             Instruction val = insn.getValue();
-            if (val instanceof CastArg) {
-                val = ((CastArg) val).getValue();
-            } else if (val instanceof AddArg) {
-                AddArg add = (AddArg) val;
-                if (add.getLeftOperand() instanceof LocalArg) {
-                    LocalArg local = (LocalArg) add.getLeftOperand();
+            if (val instanceof Cast) {
+                val = ((Cast) val).getValue();
+            } else if (val instanceof AddOperator) {
+                AddOperator add = (AddOperator) val;
+                if (add.getLeftOperand() instanceof LocalAccess) {
+                    LocalAccess local = (LocalAccess) add.getLeftOperand();
                     if (local.getLocal().getIndex() == insn.getLocal().getIndex()) {
                         ctx.printString(insn.getLocal().getName());
-                        if (add.getRightOperand() instanceof IntConstantArg) {
-                            IntConstantArg right = (IntConstantArg) add.getRightOperand();
+                        if (add.getRightOperand() instanceof IntConstant) {
+                            IntConstant right = (IntConstant) add.getRightOperand();
                             if (right.getConstant() == 1) {
                                 ctx.printString("++");
                                 if (semicolon)
@@ -82,14 +82,14 @@ public class LocalAssignmentEmitter implements StatementEmitter<LocalAssignment>
                         return;
                     }
                 }
-            } else if (val instanceof SubtractArg) {
-                SubtractArg sub = (SubtractArg) val;
-                if (sub.getLeftOperand() instanceof LocalArg) {
-                    LocalArg local = (LocalArg) sub.getLeftOperand();
+            } else if (val instanceof SubtractOperator) {
+                SubtractOperator sub = (SubtractOperator) val;
+                if (sub.getLeftOperand() instanceof LocalAccess) {
+                    LocalAccess local = (LocalAccess) sub.getLeftOperand();
                     if (local.getLocal().getIndex() == insn.getLocal().getIndex()) {
                         ctx.printString(insn.getLocal().getName());
-                        if (sub.getRightOperand() instanceof IntConstantArg) {
-                            IntConstantArg right = (IntConstantArg) sub.getRightOperand();
+                        if (sub.getRightOperand() instanceof IntConstant) {
+                            IntConstant right = (IntConstant) sub.getRightOperand();
                             if (right.getConstant() == 1) {
                                 ctx.printString("--");
                                 if (semicolon)

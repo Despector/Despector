@@ -24,7 +24,7 @@
  */
 package org.spongepowered.despector.ast.members.insn.branch.condition;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static org.spongepowered.despector.util.TypeHelper.checkType;
 
 import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
 import org.spongepowered.despector.ast.members.insn.arg.Instruction;
@@ -38,9 +38,8 @@ public class BooleanCondition extends Condition {
     private boolean inverse;
 
     public BooleanCondition(Instruction value, boolean inverse) {
-        this.value = checkNotNull(value, "value");
+        this.value = checkType(value, (t) -> "I".equals(t) || "Z".equals(t), "value");
         this.inverse = inverse;
-        // TODO check infered type is boolean
     }
 
     /**
@@ -54,7 +53,7 @@ public class BooleanCondition extends Condition {
      * Sets the instruction for the value of this condition.
      */
     public void setConditionValue(Instruction insn) {
-        this.value = checkNotNull(insn, "value");
+        this.value = checkType(insn, "Z", "value");
     }
 
     /**

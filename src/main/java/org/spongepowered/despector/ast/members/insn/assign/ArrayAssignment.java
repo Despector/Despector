@@ -24,10 +24,11 @@
  */
 package org.spongepowered.despector.ast.members.insn.assign;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static org.spongepowered.despector.util.TypeHelper.checkType;
 
 import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
 import org.spongepowered.despector.ast.members.insn.arg.Instruction;
+import org.spongepowered.despector.util.TypeHelper;
 
 /**
  * An array assignment statement.
@@ -40,10 +41,9 @@ public class ArrayAssignment extends Assignment {
     private Instruction index;
 
     public ArrayAssignment(Instruction array, Instruction index, Instruction val) {
-        super(val);
-        this.index = checkNotNull(index, "index");
-        this.array = checkNotNull(array, "array");
-        // TODO check infer types are correct
+        super(val, (t) -> t.equals(array.inferType().substring(1)));
+        this.index = checkType(index, "I", "index");
+        this.array = checkType(array, TypeHelper.IS_ARRAY, "array");
     }
 
     /**
@@ -57,8 +57,9 @@ public class ArrayAssignment extends Assignment {
      * Sets the instruction providing the array object.
      */
     public void setArray(Instruction array) {
-        this.array = checkNotNull(array, "array");
-        // TODO check infer type is array
+        checkType(array, TypeHelper.IS_ARRAY, "array");
+        checkType(this.val, (t) -> t.equals(array.inferType().substring(1)), "array");
+        this.array = array;
     }
 
     /**
@@ -72,8 +73,7 @@ public class ArrayAssignment extends Assignment {
      * Sets the instruction providing the array index.
      */
     public void setIndex(Instruction index) {
-        this.index = checkNotNull(index, "index");
-        // TODO check infer type is int
+        this.index = checkType(index, "I", "index");
     }
 
     @Override

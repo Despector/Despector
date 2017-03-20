@@ -24,14 +24,14 @@
  */
 package org.spongepowered.despector.emitter.instruction;
 
-import org.spongepowered.despector.ast.members.insn.arg.cst.NullConstantArg;
+import org.spongepowered.despector.ast.members.insn.arg.cst.NullConstant;
 import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.InstructionEmitter;
 
-public class NullConstantEmitter implements InstructionEmitter<NullConstantArg> {
+public class NullConstantEmitter implements InstructionEmitter<NullConstant> {
 
     @Override
-    public void emit(EmitterContext ctx, NullConstantArg arg, String type) {
+    public void emit(EmitterContext ctx, NullConstant arg, String type) {
         ctx.printString("null");
     }
 

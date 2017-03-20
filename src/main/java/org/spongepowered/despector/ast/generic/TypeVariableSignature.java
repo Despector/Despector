@@ -24,20 +24,36 @@
  */
 package org.spongepowered.despector.ast.generic;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
+/**
+ * A type signature referencing a type variable.
+ */
 public class TypeVariableSignature extends TypeSignature {
 
     private String identifier;
 
     public TypeVariableSignature(String ident) {
-        this.identifier = ident;
+        this.identifier = checkNotNull(ident, "identifier");
     }
 
-    public String getDescription() {
+    /**
+     * Gets the identifier of the type variable.
+     */
+    public String getIdentifier() {
         return this.identifier;
     }
 
+    /**
+     * Sets the identifier of the type variable.
+     */
     public void setIdentifier(String ident) {
-        this.identifier = ident;
+        this.identifier = checkNotNull(ident, "identifier");
+    }
+
+    @Override
+    public boolean hasArguments() {
+        return false;
     }
 
     @Override

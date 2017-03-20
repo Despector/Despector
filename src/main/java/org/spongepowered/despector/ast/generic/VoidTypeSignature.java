@@ -24,12 +24,20 @@
  */
 package org.spongepowered.despector.ast.generic;
 
+/**
+ * The void type signature.
+ */
 public class VoidTypeSignature extends TypeSignature {
 
     public static final VoidTypeSignature VOID = new VoidTypeSignature();
 
     private VoidTypeSignature() {
 
+    }
+
+    @Override
+    public boolean hasArguments() {
+        return false;
     }
 
 }

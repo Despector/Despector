@@ -24,7 +24,7 @@
  */
 package org.spongepowered.despector.emitter.condition;
 
-import org.spongepowered.despector.ast.members.insn.arg.CompareArg;
+import org.spongepowered.despector.ast.members.insn.arg.NumberCompare;
 import org.spongepowered.despector.ast.members.insn.branch.condition.CompareCondition;
 import org.spongepowered.despector.emitter.ConditionEmitter;
 import org.spongepowered.despector.emitter.EmitterContext;
@@ -33,8 +33,8 @@ public class CompareConditionEmitter implements ConditionEmitter<CompareConditio
 
     @Override
     public void emit(EmitterContext ctx, CompareCondition compare) {
-        if(compare.getLeft() instanceof CompareArg) {
-            CompareArg cmp = (CompareArg) compare.getLeft();
+        if(compare.getLeft() instanceof NumberCompare) {
+            NumberCompare cmp = (NumberCompare) compare.getLeft();
             ctx.emit(cmp.getLeftOperand(), null);
             ctx.printString(compare.getOperator().asString());
             ctx.emit(cmp.getRightOperand(), null);

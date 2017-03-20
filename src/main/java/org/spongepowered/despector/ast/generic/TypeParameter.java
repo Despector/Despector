@@ -24,36 +24,58 @@
  */
 package org.spongepowered.despector.ast.generic;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.annotation.Nullable;
+
+/**
+ * A generic type parameter.
+ */
 public class TypeParameter {
 
     private String identifier;
     private TypeSignature class_bound;
     private List<TypeSignature> interface_bounds = new ArrayList<>();
 
-    public TypeParameter(String ident, TypeSignature cl) {
-        this.identifier = ident;
+    public TypeParameter(String ident, @Nullable TypeSignature cl) {
+        this.identifier = checkNotNull(ident, "identifier");
         this.class_bound = cl;
     }
 
+    /**
+     * Gets the identifier of the parameter.
+     */
     public String getIdentifier() {
         return this.identifier;
     }
 
+    /**
+     * Sets the identifier of the parameter.
+     */
     public void setIdentifier(String ident) {
-        this.identifier = ident;
+        this.identifier = checkNotNull(ident, "identifier");
     }
 
+    /**
+     * Gets the class bound of the type parameter, if present.
+     */
+    @Nullable
     public TypeSignature getClassBound() {
         return this.class_bound;
     }
 
-    public void setClassBound(TypeSignature sig) {
+    /**
+     * Sets the class bound of the type parameter, may be null.
+     */
+    public void setClassBound(@Nullable TypeSignature sig) {
         this.class_bound = sig;
     }
 
+    /**
+     * Gets the interface bounds of the type parameter.
+     */
     public List<TypeSignature> getInterfaceBounds() {
         return this.interface_bounds;
     }

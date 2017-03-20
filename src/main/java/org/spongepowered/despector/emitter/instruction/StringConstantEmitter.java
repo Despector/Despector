@@ -24,15 +24,16 @@
  */
 package org.spongepowered.despector.emitter.instruction;
 
-import org.spongepowered.despector.ast.members.insn.arg.cst.StringConstantArg;
+import org.spongepowered.despector.ast.members.insn.arg.cst.StringConstant;
 import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.InstructionEmitter;
 
-public class StringConstantEmitter implements InstructionEmitter<StringConstantArg> {
+public class StringConstantEmitter implements InstructionEmitter<StringConstant> {
 
     @Override
-    public void emit(EmitterContext ctx, StringConstantArg arg, String type) {
+    public void emit(EmitterContext ctx, StringConstant arg, String type) {
         ctx.printString("\"");
+        // TODO escape string
         ctx.printString(arg.getConstant());
         ctx.printString("\"");
     }

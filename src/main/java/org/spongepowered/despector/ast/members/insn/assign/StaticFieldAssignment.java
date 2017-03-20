@@ -26,6 +26,7 @@ package org.spongepowered.despector.ast.members.insn.assign;
 
 import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
 import org.spongepowered.despector.ast.members.insn.arg.Instruction;
+import org.spongepowered.despector.util.TypeHelper;
 
 public class StaticFieldAssignment extends FieldAssignment {
 
@@ -41,7 +42,7 @@ public class StaticFieldAssignment extends FieldAssignment {
 
     @Override
     public String toString() {
-        return this.owner_type + "." + this.field_name + " = " + this.val + ";";
+        return TypeHelper.descToTypeName(this.owner_type) + "." + this.field_name + " = " + this.val + ";";
     }
 
 }

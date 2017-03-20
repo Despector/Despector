@@ -24,14 +24,14 @@
  */
 package org.spongepowered.despector.emitter.instruction;
 
-import org.spongepowered.despector.ast.members.insn.arg.NewArrayArg;
+import org.spongepowered.despector.ast.members.insn.arg.NewArray;
 import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.InstructionEmitter;
 
-public class NewArrayEmitter implements InstructionEmitter<NewArrayArg> {
+public class NewArrayEmitter implements InstructionEmitter<NewArray> {
 
     @Override
-    public void emit(EmitterContext ctx, NewArrayArg arg, String type) {
+    public void emit(EmitterContext ctx, NewArray arg, String type) {
         ctx.printString("new ");
         ctx.emitType(arg.getType());
         if (arg.getInitializer() == null || arg.getInitializer().length == 0) {
