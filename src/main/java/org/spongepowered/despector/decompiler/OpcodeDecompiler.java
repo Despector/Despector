@@ -514,6 +514,8 @@ public class OpcodeDecompiler {
         OpcodeBlock first = condition_blocks.get(0);
         first.last = null;
         first.internal = ternary;
+        first.target = consumer;
+        first.else_target = null;
         start = blocks.indexOf(first);
         int removed = has_more ? 1 : 0;
         for (int i = end - 1; i >= start + 1; i--) {

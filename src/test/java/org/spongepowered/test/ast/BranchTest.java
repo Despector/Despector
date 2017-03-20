@@ -475,6 +475,31 @@ public class BranchTest {
         assertEquals(good, insn);
     }
 
+    public boolean mth_ifred(int i, boolean a, boolean b, boolean c, boolean d, boolean e, boolean f) {
+        if (a != b) {
+            return false;
+        }
+        if (d && e) {
+            return !c;
+        }
+        return false;
+    }
+
+    @Test
+    public void testIfWithReturns() throws IOException {
+        String insn = TestHelper.getAsString(getClass(), "mth_ifred");
+        // This output looks wrong because there is no type information to
+        // convert the ints to bools
+        String good = "if (a != b) {\n"
+                + "    return 0;\n"
+                + "}\n"
+                + "if (d && e) {\n"
+                + "    return c ? 0 : 1;\n"
+                + "}\n"
+                + "return 0;";
+        assertEquals(good, insn);
+    }
+
     @Test
     public void testInverseFor() throws IOException {
         TestMethodBuilder builder = new TestMethodBuilder("mth_inversefor", "(ILjava/lang/String;)V");
