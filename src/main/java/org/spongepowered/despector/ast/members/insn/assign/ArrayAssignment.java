@@ -41,7 +41,7 @@ public class ArrayAssignment extends Assignment {
     private Instruction index;
 
     public ArrayAssignment(Instruction array, Instruction index, Instruction val) {
-        super(val, (t) -> t.equals(array.inferType().substring(1)));
+        super(val);
         this.index = checkType(index, "I", "index");
         this.array = checkType(array, TypeHelper.IS_ARRAY, "array");
     }

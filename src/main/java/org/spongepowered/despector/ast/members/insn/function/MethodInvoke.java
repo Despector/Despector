@@ -48,10 +48,6 @@ public abstract class MethodInvoke implements Instruction {
         this.method_owner = checkNotNull(owner, "owner");
         checkNotNull(args, "args");
         checkArgument(TypeHelper.paramCount(this.method_desc) == args.length);
-        int i = 0;
-        for (String param_type : TypeHelper.splitSig(desc)) {
-            checkType(args[i++], param_type, "arg " + (i - 1));
-        }
         this.params = args;
     }
 
@@ -94,10 +90,6 @@ public abstract class MethodInvoke implements Instruction {
     public void setParameters(Instruction... args) {
         checkNotNull(args, "args");
         checkArgument(TypeHelper.paramCount(this.method_desc) == args.length);
-        int i = 0;
-        for (String param_type : TypeHelper.splitSig(this.method_desc)) {
-            checkType(args[i++], param_type, "arg " + (i - 1));
-        }
         this.params = args;
     }
 

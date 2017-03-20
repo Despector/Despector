@@ -41,11 +41,6 @@ public class NewArray implements Instruction {
     public NewArray(String type, Instruction size, @Nullable Instruction[] values) {
         this.type = checkNotNull(type, "type");
         this.size = checkType(size, "I", "size");
-        if (values != null) {
-            for (Instruction insn : values) {
-                checkType(insn, this.type, "value");
-            }
-        }
         this.values = values;
     }
 
@@ -89,11 +84,6 @@ public class NewArray implements Instruction {
      * Sets the initial values of the array, if specified.
      */
     public void setInitialValues(@Nullable Instruction... values) {
-        if (values != null) {
-            for (Instruction insn : values) {
-                checkType(insn, this.type, "value");
-            }
-        }
         this.values = values;
     }
 

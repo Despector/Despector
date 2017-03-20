@@ -350,12 +350,12 @@ public class EmitterContext {
         this.buffer = null;
 
         String pkg = this.type.getName();
-        int last = pkg.lastIndexOf('.');
+        int last = pkg.lastIndexOf('/');
         if (last != -1) {
             for (int i = 0; i < this.format.blank_lines_before_package; i++) {
                 printString("\n");
             }
-            pkg = pkg.substring(0, last);
+            pkg = pkg.substring(0, last).replace('/', '.');
             printString("package ");
             printString(pkg);
             printString(";\n");

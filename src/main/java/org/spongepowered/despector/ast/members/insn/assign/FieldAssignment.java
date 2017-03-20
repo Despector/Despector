@@ -38,7 +38,7 @@ public abstract class FieldAssignment extends Assignment {
     protected boolean initializer = false;
 
     public FieldAssignment(String field, String type_desc, String owner, Instruction val) {
-        super(val, TypeHelper.looseCompare(type_desc));
+        super(val);
         this.field_name = checkNotNull(field, "field");
         this.type_desc = checkNotNull(type_desc, "field_desc");
         this.owner_type = checkNotNull(owner, "owner");

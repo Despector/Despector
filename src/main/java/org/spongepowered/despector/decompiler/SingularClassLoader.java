@@ -233,8 +233,8 @@ public class SingularClassLoader {
                 m.setInstructions(insns);
             } catch (Exception ex) {
                 System.err.println("Error decompiling method body for " + cn.name + " " + m.toString());
+                ex.printStackTrace();
                 if (ConfigManager.getConfig().print_opcodes_on_error) {
-                    ex.printStackTrace();
                     System.err.println("Offending method bytecode:");
                     Iterator<AbstractInsnNode> it = mn.instructions.iterator();
                     while (it.hasNext()) {

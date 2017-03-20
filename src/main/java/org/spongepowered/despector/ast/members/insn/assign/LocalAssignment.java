@@ -39,7 +39,7 @@ public class LocalAssignment extends Assignment {
     private LocalInstance local;
 
     public LocalAssignment(LocalInstance local, Instruction val) {
-        super(val, TypeHelper.looseCompare(local.getType()));
+        super(val);
         this.local = checkNotNull(local, "local");
     }
 

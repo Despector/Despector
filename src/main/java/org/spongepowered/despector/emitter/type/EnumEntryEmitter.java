@@ -101,7 +101,7 @@ public class EnumEntryEmitter implements AstEmitter<EnumEntry> {
         MethodEntry clinit = type.getStaticMethod("<clinit>");
         List<Statement> remaining = Lists.newArrayList();
         Set<String> found = Sets.newHashSet();
-        if (clinit != null) {
+        if (clinit != null && clinit.getInstructions() != null) {
             Iterator<Statement> initializers = clinit.getInstructions().getStatements().iterator();
             boolean first = true;
             while (initializers.hasNext()) {
@@ -110,6 +110,9 @@ public class EnumEntryEmitter implements AstEmitter<EnumEntry> {
                     break;
                 }
                 StaticFieldAssignment assign = (StaticFieldAssignment) next;
+                if(assign.getFieldName().equals("$VALUES")) {
+                    continue;
+                }
                 if (!TypeHelper.descToType(assign.getOwnerType()).equals(type.getName()) || !(assign.getValue() instanceof New)) {
                     remaining.add(assign);
                     break;

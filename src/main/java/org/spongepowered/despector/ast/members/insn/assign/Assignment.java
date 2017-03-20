@@ -24,12 +24,10 @@
  */
 package org.spongepowered.despector.ast.members.insn.assign;
 
-import static org.spongepowered.despector.util.TypeHelper.checkType;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.spongepowered.despector.ast.members.insn.Statement;
 import org.spongepowered.despector.ast.members.insn.arg.Instruction;
-
-import java.util.function.Predicate;
 
 /**
  * An abstract statement for assignments.
@@ -37,11 +35,9 @@ import java.util.function.Predicate;
 public abstract class Assignment implements Statement {
 
     protected Instruction val;
-    protected Predicate<String> value_type;
 
-    protected Assignment(Instruction val, Predicate<String> value_type) {
-        this.val = checkType(val, value_type, "value");
-        this.value_type = value_type;
+    protected Assignment(Instruction val) {
+        this.val = checkNotNull(val, "value");
     }
 
     /**
@@ -55,7 +51,7 @@ public abstract class Assignment implements Statement {
      * Sets the value being assigned.
      */
     public void setValue(Instruction insn) {
-        this.val = checkType(insn, this.value_type, "value");
+        this.val = checkNotNull(insn, "value");
     }
 
 }
