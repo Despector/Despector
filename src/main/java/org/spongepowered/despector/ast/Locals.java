@@ -27,6 +27,8 @@ package org.spongepowered.despector.ast;
 import com.google.common.collect.Lists;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.tree.LocalVariableNode;
+import org.spongepowered.despector.ast.generic.TypeSignature;
+import org.spongepowered.despector.util.SignatureParser;
 import org.spongepowered.despector.util.TypeHelper;
 
 import java.util.Arrays;
@@ -154,9 +156,7 @@ public class Locals {
                 int end = label_indices.get(l.end.getLabel());
                 LocalInstance insn = new LocalInstance(this, l, l.name, l.desc, start - 1, end);
                 if (l.signature != null) {
-                    // TODO generics
-//                    String[] generics = TypeHelper.getGenericContents(l.signature);
-//                    insn.setGenericTypes(generics);
+                    insn.setGenericTypes(SignatureParser.parseFieldTypeSignature(l.signature));
                 }
                 this.instances.add(insn);
             }
@@ -210,8 +210,8 @@ public class Locals {
         private String type;
         private int start;
         private int end;
-        private String[] generics = null;
         private LocalVariableNode lvn;
+        private TypeSignature signature;
 
         public LocalInstance(Local l, LocalVariableNode lvn, String n, String t, int start, int end) {
             this.local = l;
@@ -265,12 +265,12 @@ public class Locals {
             return this.end;
         }
 
-        public String[] getGenericTypes() {
-            return this.generics;
+        public TypeSignature getSignature() {
+            return this.signature;
         }
 
-        public void setGenericTypes(String[] generic_types) {
-            this.generics = generic_types;
+        public void setGenericTypes(TypeSignature sig) {
+            this.signature = sig;
         }
 
         @Override

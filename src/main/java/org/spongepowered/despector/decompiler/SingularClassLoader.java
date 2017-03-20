@@ -196,6 +196,10 @@ public class SingularClassLoader {
             m.setStatic((mn.access & ACC_STATIC) != 0);
             m.setSynthetic((mn.access & ACC_SYNTHETIC) != 0);
 
+            if (mn.signature != null) {
+                m.setMethodSignature(SignatureParser.parseMethod(mn.signature));
+            }
+
             if (mn.visibleAnnotations != null) {
                 for (AnnotationNode an : (List<AnnotationNode>) mn.visibleAnnotations) {
                     Annotation anno = createAnnotation(src, an);

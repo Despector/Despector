@@ -29,6 +29,7 @@ import org.spongepowered.despector.ast.generic.TypeArgument;
 import org.spongepowered.despector.ast.generic.TypeParameter;
 import org.spongepowered.despector.ast.generic.TypeSignature;
 import org.spongepowered.despector.ast.generic.TypeVariableSignature;
+import org.spongepowered.despector.ast.generic.VoidTypeSignature;
 
 import java.util.List;
 
@@ -55,6 +56,9 @@ public class GenericsEmitter {
         } else if (sig instanceof ClassTypeSignature) {
             ClassTypeSignature cls = (ClassTypeSignature) sig;
             ctx.emitTypeName(cls.getTypeName());
+            emitTypeArguments(ctx, cls.getArguments());
+        } else if(sig instanceof VoidTypeSignature) {
+            ctx.printString("void");
         }
     }
 
@@ -79,6 +83,17 @@ public class GenericsEmitter {
         switch (arg.getWildcard()) {
         case NONE:
             emitTypeSignature(ctx, arg.getSignature());
+            break;
+        case EXTENDS:
+            ctx.printString("? extends ");
+            emitTypeSignature(ctx, arg.getSignature());
+            break;
+        case SUPER:
+            ctx.printString("? super ");
+            emitTypeSignature(ctx, arg.getSignature());
+            break;
+        case STAR:
+            ctx.printString("?");
             break;
         default:
             break;

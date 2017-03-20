@@ -28,11 +28,15 @@ import static com.google.common.base.Preconditions.checkState;
 
 import org.spongepowered.despector.ast.generic.ClassSignature;
 import org.spongepowered.despector.ast.generic.ClassTypeSignature;
+import org.spongepowered.despector.ast.generic.MethodSignature;
 import org.spongepowered.despector.ast.generic.TypeArgument;
 import org.spongepowered.despector.ast.generic.TypeParameter;
 import org.spongepowered.despector.ast.generic.TypeSignature;
 import org.spongepowered.despector.ast.generic.TypeVariableSignature;
+import org.spongepowered.despector.ast.generic.VoidTypeSignature;
 import org.spongepowered.despector.ast.generic.WildcardType;
+
+import java.util.List;
 
 public class SignatureParser {
 
@@ -43,41 +47,69 @@ public class SignatureParser {
         ClassSignature struct = new ClassSignature();
         if (signature.startsWith("<")) {
             parser.skip(1);
-            parseFormalTypeParameters(parser, struct);
+            parseFormalTypeParameters(parser, struct.getParameters());
         }
-        ClassTypeSignature superclass = parseClassTypeSignature(parser);
+        ClassTypeSignature superclass = parseClassTypeSignature(parser, "");
         struct.setSuperclassSignature(superclass);
         while (parser.hasNext()) {
-            ClassTypeSignature sig = parseClassTypeSignature(parser);
+            ClassTypeSignature sig = parseClassTypeSignature(parser, "");
             struct.getInterfaceSignatures().add(sig);
         }
         return struct;
     }
 
-    private static void parseFormalTypeParameters(Parser parser, ClassSignature struct) {
+    public static MethodSignature parseMethod(String signature) {
+        Parser parser = new Parser(signature);
+        MethodSignature sig = new MethodSignature();
+        if (parser.check('<')) {
+            parseFormalTypeParameters(parser, sig.getTypeParameters());
+        }
+        parser.expect('(');
+        while (!parser.check(')')) {
+            sig.getParameters().add(parseTypeSignature(parser));
+        }
+        if (parser.check('V')) {
+            sig.setReturnType(VoidTypeSignature.VOID);
+        } else {
+            sig.setReturnType(parseTypeSignature(parser));
+        }
+        // TODO throws signature
+        return sig;
+    }
+
+    private static void parseFormalTypeParameters(Parser parser, List<TypeParameter> type_params) {
         while (parser.peek() != '>') {
             String identifier = parser.nextIdentifier();
             parser.expect(':');
             TypeSignature class_bound = null;
             if (parser.peek() != ':') {
-                class_bound = parseTypeSignature(parser);
+                class_bound = parseFieldTypeSignature(parser);
             }
             TypeParameter param = new TypeParameter(identifier, class_bound);
-            struct.getParameters().add(param);
+            type_params.add(param);
             while (parser.peek() == ':') {
                 parser.skip(1);
-                param.getInterfaceBounds().add(parseTypeSignature(parser));
+                param.getInterfaceBounds().add(parseFieldTypeSignature(parser));
             }
         }
         parser.skip(1);
     }
 
-    public static TypeSignature parseTypeSignature(String sig) {
+    public static TypeSignature parseFieldTypeSignature(String sig) {
         Parser parser = new Parser(sig);
-        return parseTypeSignature(parser);
+        return parseFieldTypeSignature(parser);
     }
 
     private static TypeSignature parseTypeSignature(Parser parser) {
+        char next = parser.peek();
+        if (VALID_PRIM.indexOf(next) != -1) {
+            parser.skip(1);
+            return new ClassTypeSignature(TypeHelper.descToType(next + ""));
+        }
+        return parseFieldTypeSignature(parser);
+    }
+
+    private static TypeSignature parseFieldTypeSignature(Parser parser) {
         StringBuilder ident = new StringBuilder();
         while (parser.check('[')) {
             ident.append('[');
@@ -86,7 +118,7 @@ public class SignatureParser {
         if (ident.length() > 0) {
             if (VALID_PRIM.indexOf(next) != -1) {
                 ident.append(next);
-                return new ClassTypeSignature(ident.toString());
+                return new ClassTypeSignature(TypeHelper.descToType(ident.toString()));
             }
         }
         if (next == 'T') {
@@ -99,16 +131,16 @@ public class SignatureParser {
             return sig;
         }
         checkState(next == 'L');
-        return parseClassTypeSignature(parser);
+        return parseClassTypeSignature(parser, ident.toString());
     }
 
     public static ClassTypeSignature parseClassTypeSignature(String sig) {
         Parser parser = new Parser(sig);
-        return parseClassTypeSignature(parser);
+        return parseClassTypeSignature(parser, "");
     }
 
-    private static ClassTypeSignature parseClassTypeSignature(Parser parser) {
-        StringBuilder ident = new StringBuilder();
+    private static ClassTypeSignature parseClassTypeSignature(Parser parser, String prefix) {
+        StringBuilder ident = new StringBuilder(prefix);
         parser.expect('L');
         ident.append(parser.nextIdentifier());
         while (parser.check('/')) {
@@ -125,17 +157,19 @@ public class SignatureParser {
                     parser.skip(1);
                     continue;
                 } else if (wild == '+') {
+                    parser.skip(1);
                     wildcard = WildcardType.EXTENDS;
                 } else if (wild == '-') {
+                    parser.skip(1);
                     wildcard = WildcardType.SUPER;
                 } else {
                     wildcard = WildcardType.NONE;
                 }
-                sig.getArguments().add(new TypeArgument(wildcard, parseTypeSignature(parser)));
+                sig.getArguments().add(new TypeArgument(wildcard, parseFieldTypeSignature(parser)));
             }
         }
         if (parser.peek() == '.') {
-
+            // TODO child class support
         }
         parser.expect(';');
         return sig;

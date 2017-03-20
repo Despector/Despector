@@ -61,6 +61,7 @@ public class EmitterContext {
     private TypeEntry outer_type = null;
     private MethodEntry method;
     private FieldEntry field;
+    private Statement statement;
 
     private int indentation = 0;
     private int offs = 0;
@@ -107,6 +108,14 @@ public class EmitterContext {
 
     public void setField(FieldEntry fld) {
         this.field = fld;
+    }
+
+    public Statement getStatement() {
+        return this.statement;
+    }
+
+    public void setStatement(Statement stmt) {
+        this.statement = stmt;
     }
 
     public EmitterFormat getFormat() {
@@ -179,7 +188,10 @@ public class EmitterContext {
         if (emitter == null) {
             throw new IllegalArgumentException("No emitter for statement " + obj.getClass().getName());
         }
+        Statement last = getStatement();
+        setStatement(obj);
         emitter.emit(this, obj, semicolon);
+        setStatement(last);
     }
 
     @SuppressWarnings("unchecked")

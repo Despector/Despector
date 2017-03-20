@@ -33,6 +33,7 @@ import org.spongepowered.despector.ast.members.insn.arg.operator.AddArg;
 import org.spongepowered.despector.ast.members.insn.arg.operator.SubtractArg;
 import org.spongepowered.despector.ast.members.insn.assign.LocalAssignment;
 import org.spongepowered.despector.emitter.EmitterContext;
+import org.spongepowered.despector.emitter.GenericsEmitter;
 import org.spongepowered.despector.emitter.StatementEmitter;
 
 public class LocalAssignmentEmitter implements StatementEmitter<LocalAssignment> {
@@ -41,16 +42,11 @@ public class LocalAssignmentEmitter implements StatementEmitter<LocalAssignment>
     public void emit(EmitterContext ctx, LocalAssignment insn, boolean semicolon) {
         if (!insn.getLocal().getLocal().isParameter() && !ctx.isDefined(insn.getLocal())) {
             LocalInstance local = insn.getLocal();
-            ctx.emitTypeName(local.getTypeName());
-            if (local.getGenericTypes() != null) {
-                ctx.printString("<");
-                for (int i = 0; i < local.getGenericTypes().length; i++) {
-                    ctx.emitTypeName(local.getGenericTypes()[i]);
-                    if (i < local.getGenericTypes().length - 1) {
-                        ctx.printString(",");
-                    }
-                }
-                ctx.printString(">");
+            if (local.getSignature() != null) {
+                GenericsEmitter generics = ctx.getEmitterSet().getGenericsEmitter();
+                generics.emitTypeSignature(ctx, local.getSignature());
+            } else {
+                ctx.emitTypeName(local.getTypeName());
             }
             ctx.printString(" ");
             ctx.markDefined(insn.getLocal());
@@ -69,17 +65,20 @@ public class LocalAssignmentEmitter implements StatementEmitter<LocalAssignment>
                             IntConstantArg right = (IntConstantArg) add.getRightOperand();
                             if (right.getConstant() == 1) {
                                 ctx.printString("++");
-                                if(semicolon) ctx.printString(";");
+                                if (semicolon)
+                                    ctx.printString(";");
                                 return;
                             } else if (right.getConstant() == -1) {
                                 ctx.printString("--");
-                                if(semicolon) ctx.printString(";");
+                                if (semicolon)
+                                    ctx.printString(";");
                                 return;
                             }
                         }
                         ctx.printString(" += ");
                         ctx.emit(add.getRightOperand(), null);
-                        if(semicolon) ctx.printString(";");
+                        if (semicolon)
+                            ctx.printString(";");
                         return;
                     }
                 }
@@ -93,17 +92,20 @@ public class LocalAssignmentEmitter implements StatementEmitter<LocalAssignment>
                             IntConstantArg right = (IntConstantArg) sub.getRightOperand();
                             if (right.getConstant() == 1) {
                                 ctx.printString("--");
-                                if(semicolon) ctx.printString(";");
+                                if (semicolon)
+                                    ctx.printString(";");
                                 return;
                             } else if (right.getConstant() == -1) {
                                 ctx.printString("++");
-                                if(semicolon) ctx.printString(";");
+                                if (semicolon)
+                                    ctx.printString(";");
                                 return;
                             }
                         }
                         ctx.printString(" += ");
                         ctx.emit(sub.getRightOperand(), local.getLocal().getType());
-                        if(semicolon) ctx.printString(";");
+                        if (semicolon)
+                            ctx.printString(";");
                         return;
                     }
                 }
@@ -112,7 +114,8 @@ public class LocalAssignmentEmitter implements StatementEmitter<LocalAssignment>
         ctx.printString(insn.getLocal().getName());
         ctx.printString(" = ");
         ctx.emit(insn.getValue(), insn.getLocal().getType());
-        if(semicolon) ctx.printString(";");
+        if (semicolon)
+            ctx.printString(";");
     }
 
 }

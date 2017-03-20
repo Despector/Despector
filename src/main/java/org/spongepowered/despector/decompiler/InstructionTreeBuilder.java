@@ -32,6 +32,7 @@ import org.spongepowered.despector.ast.Locals.Local;
 import org.spongepowered.despector.ast.Locals.LocalInstance;
 import org.spongepowered.despector.ast.members.MethodEntry;
 import org.spongepowered.despector.ast.members.insn.StatementBlock;
+import org.spongepowered.despector.util.SignatureParser;
 import org.spongepowered.despector.util.TypeHelper;
 
 import java.util.List;
@@ -64,7 +65,11 @@ public final class InstructionTreeBuilder {
                 }
             } else {
                 LocalVariableNode lvt = local.getLVT().get(0);
-                local.setParameterInstance(new LocalInstance(local, lvt, lvt.name, lvt.desc, -1, -1));
+                LocalInstance insn = new LocalInstance(local, lvt, lvt.name, lvt.desc, -1, -1);
+                local.setParameterInstance(insn);
+                if (lvt.signature != null) {
+                    insn.setGenericTypes(SignatureParser.parseFieldTypeSignature(lvt.signature));
+                }
             }
         }
         DecompilerOptions options = new DecompilerOptions();

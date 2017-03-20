@@ -27,6 +27,8 @@ package org.spongepowered.despector.emitter.type;
 import org.spongepowered.despector.ast.AccessModifier;
 import org.spongepowered.despector.ast.Annotation;
 import org.spongepowered.despector.ast.Locals.Local;
+import org.spongepowered.despector.ast.Locals.LocalInstance;
+import org.spongepowered.despector.ast.generic.MethodSignature;
 import org.spongepowered.despector.ast.members.MethodEntry;
 import org.spongepowered.despector.ast.members.insn.Statement;
 import org.spongepowered.despector.ast.members.insn.StatementBlock;
@@ -35,6 +37,7 @@ import org.spongepowered.despector.ast.type.EnumEntry;
 import org.spongepowered.despector.ast.type.InterfaceEntry;
 import org.spongepowered.despector.emitter.AstEmitter;
 import org.spongepowered.despector.emitter.EmitterContext;
+import org.spongepowered.despector.emitter.GenericsEmitter;
 
 public class MethodEntryEmitter implements AstEmitter<MethodEntry> {
 
@@ -84,6 +87,8 @@ public class MethodEntryEmitter implements AstEmitter<MethodEntry> {
         }
         if ("<init>".equals(method.getName()) && method.getAccessModifier() == AccessModifier.PUBLIC && method.getParamTypes().isEmpty()
                 && method.getInstructions().getStatements().size() == 2) {
+            // TODO this could omit somewhere the ctor is purely passing
+            // constants to the super ctor
             return false;
         }
         ctx.printIndentation();
@@ -93,6 +98,8 @@ public class MethodEntryEmitter implements AstEmitter<MethodEntry> {
                 ctx.printString(" ");
             }
         }
+        GenericsEmitter generics = ctx.getEmitterSet().getGenericsEmitter();
+        MethodSignature sig = method.getMethodSignature();
         if ("<init>".equals(method.getName())) {
             ctx.emitTypeName(method.getOwnerName());
         } else {
@@ -105,7 +112,17 @@ public class MethodEntryEmitter implements AstEmitter<MethodEntry> {
             if (method.isAbstract() && !(ctx.getType() instanceof InterfaceEntry)) {
                 ctx.printString("abstract ");
             }
-            ctx.emitType(method.getReturnType());
+
+            if (sig != null) {
+                if (!sig.getTypeParameters().isEmpty()) {
+                    generics.emitTypeParameters(ctx, sig.getTypeParameters());
+                    ctx.printString(" ");
+                }
+                generics.emitTypeSignature(ctx, sig.getReturnType());
+            } else {
+                ctx.emitType(method.getReturnType());
+            }
+
             ctx.printString(" ");
             ctx.printString(method.getName());
         }
@@ -123,13 +140,20 @@ public class MethodEntryEmitter implements AstEmitter<MethodEntry> {
             if (!method.isStatic()) {
                 param_index++;
             }
-            ctx.emitType(method.getParamTypes().get(i));
-            ctx.printString(" ");
             if (block == null) {
+                ctx.emitType(method.getParamTypes().get(i));
+                ctx.printString(" ");
                 ctx.printString("local" + param_index);
             } else {
                 Local local = block.getLocals().getLocal(param_index);
-                ctx.printString(local.getParameterInstance().getName());
+                LocalInstance insn = local.getParameterInstance();
+                if (insn.getSignature() != null) {
+                    generics.emitTypeSignature(ctx, insn.getSignature());
+                } else {
+                    ctx.emitType(method.getParamTypes().get(i));
+                }
+                ctx.printString(" ");
+                ctx.printString(insn.getName());
             }
             if (i < method.getParamTypes().size() - 1) {
                 ctx.printString(", ");

@@ -32,6 +32,7 @@ import org.spongepowered.despector.ast.Annotation;
 import org.spongepowered.despector.ast.AnnotationType;
 import org.spongepowered.despector.ast.AstEntry;
 import org.spongepowered.despector.ast.SourceSet;
+import org.spongepowered.despector.ast.generic.MethodSignature;
 import org.spongepowered.despector.ast.members.insn.StatementBlock;
 import org.spongepowered.despector.util.TypeHelper;
 
@@ -66,6 +67,8 @@ public class MethodEntry extends AstEntry {
     protected final List<String> param_types = Lists.newArrayList();
 
     protected StatementBlock instructions = null;
+
+    protected MethodSignature sig;
 
     protected final Map<AnnotationType, Annotation> annotations = new LinkedHashMap<>();
 
@@ -170,6 +173,14 @@ public class MethodEntry extends AstEntry {
      */
     public List<String> getParamTypes() {
         return this.param_types;
+    }
+
+    public MethodSignature getMethodSignature() {
+        return this.sig;
+    }
+
+    public void setMethodSignature(MethodSignature sig) {
+        this.sig = sig;
     }
 
     public StatementBlock getInstructions() {
