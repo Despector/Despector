@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.despector.emitter;
+package org.spongepowered.despector.emitter.special;
 
 import org.spongepowered.despector.ast.generic.ClassTypeSignature;
 import org.spongepowered.despector.ast.generic.TypeArgument;
@@ -30,10 +30,11 @@ import org.spongepowered.despector.ast.generic.TypeParameter;
 import org.spongepowered.despector.ast.generic.TypeSignature;
 import org.spongepowered.despector.ast.generic.TypeVariableSignature;
 import org.spongepowered.despector.ast.generic.VoidTypeSignature;
+import org.spongepowered.despector.emitter.EmitterContext;
 
 import java.util.List;
 
-public class GenericsEmitter {
+public class GenericsEmitter implements SpecialEmitter {
 
     public void emitTypeParameter(EmitterContext ctx, TypeParameter param) {
         ctx.printString(param.getIdentifier());
@@ -57,7 +58,7 @@ public class GenericsEmitter {
             ClassTypeSignature cls = (ClassTypeSignature) sig;
             ctx.emitTypeName(cls.getTypeName());
             emitTypeArguments(ctx, cls.getArguments());
-        } else if(sig instanceof VoidTypeSignature) {
+        } else if (sig instanceof VoidTypeSignature) {
             ctx.printString("void");
         }
     }

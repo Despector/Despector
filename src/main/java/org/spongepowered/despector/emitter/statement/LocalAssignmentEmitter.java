@@ -33,8 +33,8 @@ import org.spongepowered.despector.ast.members.insn.arg.operator.AddOperator;
 import org.spongepowered.despector.ast.members.insn.arg.operator.SubtractOperator;
 import org.spongepowered.despector.ast.members.insn.assign.LocalAssignment;
 import org.spongepowered.despector.emitter.EmitterContext;
-import org.spongepowered.despector.emitter.GenericsEmitter;
 import org.spongepowered.despector.emitter.StatementEmitter;
+import org.spongepowered.despector.emitter.special.GenericsEmitter;
 
 public class LocalAssignmentEmitter implements StatementEmitter<LocalAssignment> {
 
@@ -43,7 +43,7 @@ public class LocalAssignmentEmitter implements StatementEmitter<LocalAssignment>
         if (!insn.getLocal().getLocal().isParameter() && !ctx.isDefined(insn.getLocal())) {
             LocalInstance local = insn.getLocal();
             if (local.getSignature() != null) {
-                GenericsEmitter generics = ctx.getEmitterSet().getGenericsEmitter();
+                GenericsEmitter generics = ctx.getEmitterSet().getSpecialEmitter(GenericsEmitter.class);
                 generics.emitTypeSignature(ctx, local.getSignature());
             } else {
                 ctx.emitTypeName(local.getTypeName());

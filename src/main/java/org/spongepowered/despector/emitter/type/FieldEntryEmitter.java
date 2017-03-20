@@ -28,7 +28,7 @@ import org.spongepowered.despector.ast.Annotation;
 import org.spongepowered.despector.ast.members.FieldEntry;
 import org.spongepowered.despector.emitter.AstEmitter;
 import org.spongepowered.despector.emitter.EmitterContext;
-import org.spongepowered.despector.emitter.GenericsEmitter;
+import org.spongepowered.despector.emitter.special.GenericsEmitter;
 
 public class FieldEntryEmitter implements AstEmitter<FieldEntry> {
 
@@ -50,7 +50,7 @@ public class FieldEntryEmitter implements AstEmitter<FieldEntry> {
             ctx.printString("final ");
         }
         if (ast.getSignature() != null) {
-            GenericsEmitter generics = ctx.getEmitterSet().getGenericsEmitter();
+            GenericsEmitter generics = ctx.getEmitterSet().getSpecialEmitter(GenericsEmitter.class);
             generics.emitTypeSignature(ctx, ast.getSignature());
         } else {
             ctx.emitTypeName(ast.getTypeName());

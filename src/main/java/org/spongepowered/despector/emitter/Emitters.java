@@ -27,9 +27,9 @@ package org.spongepowered.despector.emitter;
 import org.spongepowered.despector.ast.members.FieldEntry;
 import org.spongepowered.despector.ast.members.MethodEntry;
 import org.spongepowered.despector.ast.members.insn.arg.Cast;
-import org.spongepowered.despector.ast.members.insn.arg.NumberCompare;
 import org.spongepowered.despector.ast.members.insn.arg.InstanceOf;
 import org.spongepowered.despector.ast.members.insn.arg.NewArray;
+import org.spongepowered.despector.ast.members.insn.arg.NumberCompare;
 import org.spongepowered.despector.ast.members.insn.arg.cst.DoubleConstant;
 import org.spongepowered.despector.ast.members.insn.arg.cst.FloatConstant;
 import org.spongepowered.despector.ast.members.insn.arg.cst.IntConstant;
@@ -105,6 +105,9 @@ import org.spongepowered.despector.emitter.instruction.StaticMethodInvokeEmitter
 import org.spongepowered.despector.emitter.instruction.StringConstantEmitter;
 import org.spongepowered.despector.emitter.instruction.TernaryEmitter;
 import org.spongepowered.despector.emitter.instruction.TypeConstantEmitter;
+import org.spongepowered.despector.emitter.special.AnnotationEmitter;
+import org.spongepowered.despector.emitter.special.AnonymousClassEmitter;
+import org.spongepowered.despector.emitter.special.GenericsEmitter;
 import org.spongepowered.despector.emitter.statement.ArrayAssignmentEmitter;
 import org.spongepowered.despector.emitter.statement.DoWhileEmitter;
 import org.spongepowered.despector.emitter.statement.FieldAssignmentEmitter;
@@ -130,8 +133,9 @@ public class Emitters {
 
     static {
 
-        JAVA.setAnnotationEmitter(new AnnotationEmitter());
-        JAVA.setGenericsEmitter(new GenericsEmitter());
+        JAVA.setSpecialEmitter(AnnotationEmitter.class, new AnnotationEmitter());
+        JAVA.setSpecialEmitter(GenericsEmitter.class, new GenericsEmitter());
+        JAVA.setSpecialEmitter(AnonymousClassEmitter.class, new AnonymousClassEmitter());
 
         JAVA.setAstEmitter(ClassEntry.class, new ClassEntryEmitter());
         JAVA.setAstEmitter(EnumEntry.class, new EnumEntryEmitter());

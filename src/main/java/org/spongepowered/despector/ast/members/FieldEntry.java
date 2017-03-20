@@ -24,7 +24,6 @@
  */
 package org.spongepowered.despector.ast.members;
 
-import static org.spongepowered.despector.util.TypeHelper.checkType;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.spongepowered.despector.ast.AccessModifier;
@@ -121,7 +120,7 @@ public class FieldEntry extends AstEntry {
     }
 
     public void setInitializer(Instruction insn) {
-        this.init = checkType(insn, this.type, "initializer");
+        this.init = checkNotNull(insn, "initializer");
     }
 
     /**

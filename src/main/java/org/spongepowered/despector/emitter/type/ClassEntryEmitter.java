@@ -37,7 +37,7 @@ import org.spongepowered.despector.ast.type.TypeEntry;
 import org.spongepowered.despector.ast.type.TypeEntry.InnerClassInfo;
 import org.spongepowered.despector.emitter.AstEmitter;
 import org.spongepowered.despector.emitter.EmitterContext;
-import org.spongepowered.despector.emitter.GenericsEmitter;
+import org.spongepowered.despector.emitter.special.GenericsEmitter;
 import org.spongepowered.despector.util.AstUtil;
 
 import java.util.Collection;
@@ -86,8 +86,10 @@ public class ClassEntryEmitter implements AstEmitter<ClassEntry> {
             ctx.printString(name);
         }
 
-        GenericsEmitter generics = ctx.getEmitterSet().getGenericsEmitter();
-        generics.emitTypeParameters(ctx, type.getSignature().getParameters());
+        GenericsEmitter generics = ctx.getEmitterSet().getSpecialEmitter(GenericsEmitter.class);
+        if (type.getSignature() != null) {
+            generics.emitTypeParameters(ctx, type.getSignature().getParameters());
+        }
 
         if (!type.getSuperclass().equals("Ljava/lang/Object;")) {
             ctx.printString(" extends ");
@@ -121,6 +123,32 @@ public class ClassEntryEmitter implements AstEmitter<ClassEntry> {
         // Ordering is static fields -> static methods -> instance fields ->
         // instance methods
         ctx.indent();
+
+        emitStaticFields(ctx, type);
+        emitStaticMethods(ctx, type);
+        emitFields(ctx, type);
+        emitMethods(ctx, type);
+
+        Collection<InnerClassInfo> inners = type.getInnerClasses();
+        for (InnerClassInfo inner : inners) {
+            if (inner.getOuterName() == null || !inner.getOuterName().equals(type.getName())) {
+                continue;
+            }
+            ctx.setOuterType(type);
+            TypeEntry inner_type = type.getSource().get(inner.getName());
+            ctx.printString("\n");
+            ctx.emit(inner_type);
+            ctx.setType(type);
+            ctx.setOuterType(null);
+        }
+
+        ctx.dedent();
+        ctx.printIndentation();
+        ctx.printString("}\n");
+        return true;
+    }
+
+    public void emitStaticFields(EmitterContext ctx, ClassEntry type) {
         if (!type.getStaticFields().isEmpty()) {
 
             Map<String, Instruction> static_initializers = new HashMap<>();
@@ -157,6 +185,9 @@ public class ClassEntryEmitter implements AstEmitter<ClassEntry> {
                 ctx.printString("\n");
             }
         }
+    }
+
+    public void emitStaticMethods(EmitterContext ctx, ClassEntry type) {
         if (!type.getStaticMethods().isEmpty()) {
             for (MethodEntry mth : type.getStaticMethods()) {
                 if (mth.isSynthetic()) {
@@ -167,24 +198,27 @@ public class ClassEntryEmitter implements AstEmitter<ClassEntry> {
                 }
             }
         }
+    }
+
+    public void emitFields(EmitterContext ctx, ClassEntry type) {
         if (!type.getFields().isEmpty()) {
 
             List<MethodEntry> inits = type.getMethods().stream().filter((m) -> m.getName().equals("<init>")).collect(Collectors.toList());
             MethodEntry main = null;
-            if(inits.size() == 1) {
+            if (inits.size() == 1) {
                 main = inits.get(0);
             }
-            if(main != null) {
-                for(int i = 1; i < main.getInstructions().getStatements().size(); i++) {
+            if (main != null) {
+                for (int i = 1; i < main.getInstructions().getStatements().size(); i++) {
                     Statement next = main.getInstructions().getStatements().get(i);
-                    if(!(next instanceof FieldAssignment)) {
+                    if (!(next instanceof FieldAssignment)) {
                         break;
                     }
                     FieldAssignment assign = (FieldAssignment) next;
-                    if(!type.getName().equals(assign.getOwnerName())) {
+                    if (!type.getName().equals(assign.getOwnerName())) {
                         break;
                     }
-                    if(AstUtil.references(assign.getValue(), null)) {
+                    if (AstUtil.references(assign.getValue(), null)) {
                         break;
                     }
                     assign.setInitializer(true);
@@ -207,6 +241,9 @@ public class ClassEntryEmitter implements AstEmitter<ClassEntry> {
                 ctx.printString("\n");
             }
         }
+    }
+
+    public void emitMethods(EmitterContext ctx, ClassEntry type) {
         if (!type.getMethods().isEmpty()) {
             for (MethodEntry mth : type.getMethods()) {
                 if (mth.isSynthetic()) {
@@ -217,24 +254,6 @@ public class ClassEntryEmitter implements AstEmitter<ClassEntry> {
                 }
             }
         }
-
-        Collection<InnerClassInfo> inners = type.getInnerClasses();
-        for (InnerClassInfo inner : inners) {
-            if (inner.getOuterName() == null || !inner.getOuterName().equals(type.getName())) {
-                continue;
-            }
-            ctx.setOuterType(type);
-            TypeEntry inner_type = type.getSource().get(inner.getName());
-            ctx.printString("\n");
-            ctx.emit(inner_type);
-            ctx.setType(type);
-            ctx.setOuterType(null);
-        }
-
-        ctx.dedent();
-        ctx.printIndentation();
-        ctx.printString("}\n");
-        return true;
     }
 
 }

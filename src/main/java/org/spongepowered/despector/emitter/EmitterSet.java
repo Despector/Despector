@@ -28,6 +28,7 @@ import org.spongepowered.despector.ast.AstEntry;
 import org.spongepowered.despector.ast.members.insn.Statement;
 import org.spongepowered.despector.ast.members.insn.arg.Instruction;
 import org.spongepowered.despector.ast.members.insn.branch.condition.Condition;
+import org.spongepowered.despector.emitter.special.SpecialEmitter;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -38,8 +39,7 @@ public class EmitterSet {
     private final Map<Class<?>, StatementEmitter<?>> stmt_emitters = new HashMap<>();
     private final Map<Class<?>, InstructionEmitter<?>> insn_emitters = new HashMap<>();
     private final Map<Class<?>, ConditionEmitter<?>> cond_emitters = new HashMap<>();
-    private AnnotationEmitter anno_emitter;
-    private GenericsEmitter generics_emitter;
+    private final Map<Class<?>, SpecialEmitter> special_emitters = new HashMap<>();
 
     public EmitterSet() {
 
@@ -85,20 +85,13 @@ public class EmitterSet {
         this.cond_emitters.put(type, emitter);
     }
 
-    public AnnotationEmitter getAnnotationEmitter() {
-        return this.anno_emitter;
+    @SuppressWarnings("unchecked")
+    public <T extends SpecialEmitter> T getSpecialEmitter(Class<T> type) {
+        return (T) this.special_emitters.get(type);
     }
 
-    public void setAnnotationEmitter(AnnotationEmitter emitter) {
-        this.anno_emitter = emitter;
-    }
-
-    public GenericsEmitter getGenericsEmitter() {
-        return this.generics_emitter;
-    }
-
-    public void setGenericsEmitter(GenericsEmitter emitter) {
-        this.generics_emitter = emitter;
+    public <T extends SpecialEmitter> void setSpecialEmitter(Class<T> type, T emitter) {
+        this.special_emitters.put(type, emitter);
     }
 
 }

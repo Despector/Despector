@@ -37,7 +37,7 @@ import org.spongepowered.despector.ast.type.EnumEntry;
 import org.spongepowered.despector.ast.type.InterfaceEntry;
 import org.spongepowered.despector.emitter.AstEmitter;
 import org.spongepowered.despector.emitter.EmitterContext;
-import org.spongepowered.despector.emitter.GenericsEmitter;
+import org.spongepowered.despector.emitter.special.GenericsEmitter;
 
 public class MethodEntryEmitter implements AstEmitter<MethodEntry> {
 
@@ -98,7 +98,7 @@ public class MethodEntryEmitter implements AstEmitter<MethodEntry> {
                 ctx.printString(" ");
             }
         }
-        GenericsEmitter generics = ctx.getEmitterSet().getGenericsEmitter();
+        GenericsEmitter generics = ctx.getEmitterSet().getSpecialEmitter(GenericsEmitter.class);
         MethodSignature sig = method.getMethodSignature();
         if ("<init>".equals(method.getName())) {
             ctx.emitTypeName(method.getOwnerName());

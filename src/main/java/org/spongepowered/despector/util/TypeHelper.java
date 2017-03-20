@@ -38,7 +38,7 @@ import java.util.regex.Pattern;
  */
 public final class TypeHelper {
 
-    private static final Pattern ANON_CLASS = Pattern.compile("[a-zA-Z0-9]+(\\$[a-zA-Z0-9]+)*\\$[0-9]+");
+    private static final Pattern ANON_CLASS = Pattern.compile(".*\\$[0-9]+");
 
     public static boolean isAnonClass(String name) {
         return ANON_CLASS.matcher(name).matches();

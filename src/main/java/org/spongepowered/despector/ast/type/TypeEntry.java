@@ -38,7 +38,6 @@ import org.spongepowered.despector.ast.AnnotationType;
 import org.spongepowered.despector.ast.AstEntry;
 import org.spongepowered.despector.ast.SourceSet;
 import org.spongepowered.despector.ast.generic.ClassSignature;
-import org.spongepowered.despector.ast.generic.TypeParameter;
 import org.spongepowered.despector.ast.members.FieldEntry;
 import org.spongepowered.despector.ast.members.MethodEntry;
 import org.spongepowered.despector.util.TypeHelper;
@@ -48,6 +47,8 @@ import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+
+import javax.annotation.Nullable;
 
 /**
  * Represents a type, may be a class, interface, or enum.
@@ -73,7 +74,7 @@ public abstract class TypeEntry extends AstEntry {
     protected final Map<AnnotationType, Annotation> annotations = new LinkedHashMap<>();
     protected final Map<String, InnerClassInfo> inner_classes = new LinkedHashMap<>();
 
-    protected ClassSignature signature;
+    @Nullable protected ClassSignature signature;
 
     public TypeEntry(SourceSet source, String name) {
         super(source);
@@ -120,11 +121,12 @@ public abstract class TypeEntry extends AstEntry {
         return "L" + this.name + ";";
     }
 
+    @Nullable
     public ClassSignature getSignature() {
         return this.signature;
     }
 
-    public void setSignature(ClassSignature signature) {
+    public void setSignature(@Nullable ClassSignature signature) {
         this.signature = signature;
     }
 

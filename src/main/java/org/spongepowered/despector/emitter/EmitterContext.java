@@ -38,6 +38,7 @@ import org.spongepowered.despector.ast.members.insn.branch.condition.Condition;
 import org.spongepowered.despector.ast.members.insn.misc.Return;
 import org.spongepowered.despector.ast.type.TypeEntry;
 import org.spongepowered.despector.emitter.format.EmitterFormat;
+import org.spongepowered.despector.emitter.special.AnnotationEmitter;
 import org.spongepowered.despector.util.TypeHelper;
 
 import java.io.IOException;
@@ -213,10 +214,11 @@ public class EmitterContext {
     }
 
     public void emit(Annotation anno) {
-        if (this.set.getAnnotationEmitter() == null) {
+        AnnotationEmitter emitter = this.set.getSpecialEmitter(AnnotationEmitter.class);
+        if (emitter == null) {
             throw new IllegalArgumentException("No emitter for annotations");
         }
-        this.set.getAnnotationEmitter().emit(this, anno);
+        emitter.emit(this, anno);
     }
 
     public void indent() {

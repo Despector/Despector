@@ -124,8 +124,11 @@ public class SingularClassLoader {
         entry.setFinal((cn.access & ACC_FINAL) != 0);
         entry.setSynthetic((cn.access & ACC_SYNTHETIC) != 0);
 
-        ClassSignature signature = SignatureParser.parse(cn.signature);
-        entry.setSignature(signature);
+        if (cn.signature != null) {
+            ClassSignature signature = SignatureParser.parse(cn.signature);
+            entry.setSignature(signature);
+        }
+
         if (cn.interfaces != null) {
             for (String inter : (List<String>) cn.interfaces) {
                 entry.addInterface(inter);

@@ -60,12 +60,6 @@ public class EnumEntryEmitter implements AstEmitter<EnumEntry> {
         if (type.getAccessModifier() != AccessModifier.PACKAGE_PRIVATE) {
             ctx.printString(" ");
         }
-//        if (type.isStatic()) {
-//            printString("static ");
-//        }
-        if (type.isFinal()) {
-            ctx.printString("final ");
-        }
         ctx.printString("enum ");
         String name = type.getName().replace('/', '.');
         if (name.indexOf('.') != -1) {
@@ -110,7 +104,7 @@ public class EnumEntryEmitter implements AstEmitter<EnumEntry> {
                     break;
                 }
                 StaticFieldAssignment assign = (StaticFieldAssignment) next;
-                if(assign.getFieldName().equals("$VALUES")) {
+                if (assign.getFieldName().equals("$VALUES")) {
                     continue;
                 }
                 if (!TypeHelper.descToType(assign.getOwnerType()).equals(type.getName()) || !(assign.getValue() instanceof New)) {

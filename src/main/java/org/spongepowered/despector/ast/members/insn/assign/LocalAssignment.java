@@ -29,7 +29,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import org.spongepowered.despector.ast.Locals.LocalInstance;
 import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
 import org.spongepowered.despector.ast.members.insn.arg.Instruction;
-import org.spongepowered.despector.util.TypeHelper;
 
 /**
  * An assignment statement for assigning a value to a local.

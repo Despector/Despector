@@ -29,13 +29,33 @@ import org.spongepowered.despector.ast.generic.TypeSignature;
 import org.spongepowered.despector.ast.members.insn.arg.Instruction;
 import org.spongepowered.despector.ast.members.insn.assign.LocalAssignment;
 import org.spongepowered.despector.ast.members.insn.function.New;
+import org.spongepowered.despector.ast.type.ClassEntry;
+import org.spongepowered.despector.ast.type.TypeEntry;
 import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.InstructionEmitter;
+import org.spongepowered.despector.emitter.special.AnonymousClassEmitter;
+import org.spongepowered.despector.util.TypeHelper;
 
 public class NewEmitter implements InstructionEmitter<New> {
 
     @Override
     public void emit(EmitterContext ctx, New arg, String type) {
+
+        if (arg.getType().contains("$")) {
+            String last = TypeHelper.descToType(arg.getType());
+            int last$ = last.indexOf('$');
+            last = last.substring(last$ + 1);
+            if (last.matches("[0-9]+")) {
+                TypeEntry anon_type = ctx.getType().getSource().get(TypeHelper.descToType(arg.getType()));
+                if (anon_type != null) {
+                    AnonymousClassEmitter emitter = ctx.getEmitterSet().getSpecialEmitter(AnonymousClassEmitter.class);
+                    emitter.emit(ctx, (ClassEntry) anon_type, arg);
+                    return;
+                }
+                System.err.println("Missing TypeEntry for anon type " + arg.getType());
+            }
+        }
+
         ctx.printString("new ");
         ctx.emitType(arg.getType());
 

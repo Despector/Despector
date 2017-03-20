@@ -143,7 +143,7 @@ public class Main {
         }
 
         for (TypeEntry type : source.getAllClasses()) {
-            if (type.isInnerClass()) {
+            if (type.isInnerClass() || type.isAnonType()) {
                 continue;
             }
             Path out = output.resolve(type.getName() + ".java");

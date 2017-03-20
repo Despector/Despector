@@ -22,14 +22,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.despector.emitter;
+package org.spongepowered.despector.emitter.special;
 
 import org.objectweb.asm.Type;
 import org.spongepowered.despector.ast.Annotation;
+import org.spongepowered.despector.emitter.EmitterContext;
 
 import java.util.List;
 
-public class AnnotationEmitter {
+public class AnnotationEmitter implements SpecialEmitter {
 
     private void emitValue(EmitterContext ctx, Object value) {
         if (value instanceof List) {
