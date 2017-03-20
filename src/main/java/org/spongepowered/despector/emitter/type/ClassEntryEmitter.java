@@ -94,7 +94,9 @@ public class ClassEntryEmitter implements AstEmitter<ClassEntry> {
         if (!type.getSuperclass().equals("Ljava/lang/Object;")) {
             ctx.printString(" extends ");
             ctx.emitTypeName(type.getSuperclassName());
-            generics.emitTypeArguments(ctx, type.getSignature().getSuperclassSignature().getArguments());
+            if (type.getSignature() != null && type.getSignature().getSuperclassSignature() != null) {
+                generics.emitTypeArguments(ctx, type.getSignature().getSuperclassSignature().getArguments());
+            }
         }
         if (!type.getInterfaces().isEmpty()) {
             ctx.printString(" implements ");

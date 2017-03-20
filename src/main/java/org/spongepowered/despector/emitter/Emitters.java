@@ -108,6 +108,7 @@ import org.spongepowered.despector.emitter.instruction.TypeConstantEmitter;
 import org.spongepowered.despector.emitter.special.AnnotationEmitter;
 import org.spongepowered.despector.emitter.special.AnonymousClassEmitter;
 import org.spongepowered.despector.emitter.special.GenericsEmitter;
+import org.spongepowered.despector.emitter.special.PackageInfoEmitter;
 import org.spongepowered.despector.emitter.statement.ArrayAssignmentEmitter;
 import org.spongepowered.despector.emitter.statement.DoWhileEmitter;
 import org.spongepowered.despector.emitter.statement.FieldAssignmentEmitter;
@@ -136,6 +137,7 @@ public class Emitters {
         JAVA.setSpecialEmitter(AnnotationEmitter.class, new AnnotationEmitter());
         JAVA.setSpecialEmitter(GenericsEmitter.class, new GenericsEmitter());
         JAVA.setSpecialEmitter(AnonymousClassEmitter.class, new AnonymousClassEmitter());
+        JAVA.setSpecialEmitter(PackageInfoEmitter.class, new PackageInfoEmitter());
 
         JAVA.setAstEmitter(ClassEntry.class, new ClassEntryEmitter());
         JAVA.setAstEmitter(EnumEntry.class, new EnumEntryEmitter());

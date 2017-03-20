@@ -36,9 +36,11 @@ import org.spongepowered.despector.ast.members.insn.StatementBlock;
 import org.spongepowered.despector.ast.members.insn.arg.Instruction;
 import org.spongepowered.despector.ast.members.insn.branch.condition.Condition;
 import org.spongepowered.despector.ast.members.insn.misc.Return;
+import org.spongepowered.despector.ast.type.InterfaceEntry;
 import org.spongepowered.despector.ast.type.TypeEntry;
 import org.spongepowered.despector.emitter.format.EmitterFormat;
 import org.spongepowered.despector.emitter.special.AnnotationEmitter;
+import org.spongepowered.despector.emitter.special.PackageInfoEmitter;
 import org.spongepowered.despector.util.TypeHelper;
 
 import java.io.IOException;
@@ -85,6 +87,8 @@ public class EmitterContext {
 
     public void setType(TypeEntry type) {
         this.type = type;
+        System.out.println("type set to " + this.type);
+        Thread.dumpStack();
     }
 
     public TypeEntry getOuterType() {
@@ -131,13 +135,29 @@ public class EmitterContext {
         this.defined_locals.add(local);
     }
 
+    public <T extends AstEntry> void emitOuterType(T obj) {
+        if (obj instanceof TypeEntry) {
+            TypeEntry type = (TypeEntry) obj;
+            if (type.getName().endsWith("package-info")) {
+                PackageInfoEmitter emitter = this.set.getSpecialEmitter(PackageInfoEmitter.class);
+                emitter.emit(this, (InterfaceEntry) type);
+                return;
+            }
+        }
+        enableBuffer();
+        emit(obj);
+        outputBuffer();
+    }
+
     @SuppressWarnings("unchecked")
     public <T extends AstEntry> boolean emit(T obj) {
         if (obj instanceof TypeEntry) {
-            if (((TypeEntry) obj).isSynthetic()) {
+            TypeEntry type = (TypeEntry) obj;
+            if (type.isSynthetic()) {
                 return false;
             }
             this.type = (TypeEntry) obj;
+            System.out.println("type set to " + this.type);
         } else if (obj instanceof FieldEntry) {
             this.field = (FieldEntry) obj;
         }

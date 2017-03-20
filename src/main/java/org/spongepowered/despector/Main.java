@@ -152,9 +152,7 @@ public class Main {
             }
             try (FileWriter writer = new FileWriter(out.toFile())) {
                 EmitterContext emitter = new EmitterContext(Emitters.JAVA, writer, formatter);
-                emitter.enableBuffer();
-                emitter.emit(type);
-                emitter.outputBuffer();
+                emitter.emitOuterType(type);
             }
         }
 
