@@ -38,6 +38,7 @@ public class GenericsEmitter implements SpecialEmitter {
 
     public void emitTypeParameter(EmitterContext ctx, TypeParameter param) {
         ctx.printString(param.getIdentifier());
+        boolean had_superclass = false;
         superclass: if (param.getClassBound() != null) {
             if (param.getClassBound() instanceof ClassTypeSignature) {
                 ClassTypeSignature cls = (ClassTypeSignature) param.getClassBound();
@@ -47,6 +48,15 @@ public class GenericsEmitter implements SpecialEmitter {
             }
             ctx.printString(" extends ");
             emitTypeSignature(ctx, param.getClassBound());
+            had_superclass = true;
+        }
+        for (TypeSignature ibound : param.getInterfaceBounds()) {
+            if (!had_superclass) {
+                ctx.printString(" extends ");
+            } else {
+                ctx.printString(" & ");
+            }
+            emitTypeSignature(ctx, ibound);
         }
     }
 

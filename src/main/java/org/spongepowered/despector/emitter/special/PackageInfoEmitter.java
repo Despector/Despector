@@ -51,6 +51,9 @@ public class PackageInfoEmitter implements SpecialEmitter {
         }
     }
 
+    // TODO add some settings to the annotation emitter / emitter context to
+    // disable import tracking
+
     private void emitValue(EmitterContext ctx, Object value) {
         if (value instanceof List) {
             List<?> list = (List<?>) value;

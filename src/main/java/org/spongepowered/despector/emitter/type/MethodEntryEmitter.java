@@ -141,7 +141,13 @@ public class MethodEntryEmitter implements AstEmitter<MethodEntry> {
                 param_index++;
             }
             if (block == null) {
-                ctx.emitType(method.getParamTypes().get(i));
+                if (sig != null) {
+                    // interfaces have no lvt for parameters, need to get
+                    // generic types from the method signature
+                    generics.emitTypeSignature(ctx, sig.getParameters().get(i));
+                } else {
+                    ctx.emitType(method.getParamTypes().get(i));
+                }
                 ctx.printString(" ");
                 ctx.printString("local" + param_index);
             } else {

@@ -33,6 +33,7 @@ import org.spongepowered.despector.ast.type.TypeEntry;
 import org.spongepowered.despector.ast.type.TypeEntry.InnerClassInfo;
 import org.spongepowered.despector.emitter.AstEmitter;
 import org.spongepowered.despector.emitter.EmitterContext;
+import org.spongepowered.despector.emitter.special.GenericsEmitter;
 
 import java.util.Collection;
 
@@ -60,6 +61,10 @@ public class InterfaceEntryEmitter implements AstEmitter<InterfaceEntry> {
         }
         ctx.printString("interface ");
         ctx.printString(name);
+        GenericsEmitter generics = ctx.getEmitterSet().getSpecialEmitter(GenericsEmitter.class);
+        if (type.getSignature() != null) {
+            generics.emitTypeParameters(ctx, type.getSignature().getParameters());
+        }
         if (!type.getInterfaces().isEmpty()) {
             ctx.printString(" extends ");
             for (int i = 0; i < type.getInterfaces().size(); i++) {
