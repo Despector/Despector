@@ -42,7 +42,7 @@ public class GenericsEmitter implements SpecialEmitter {
         superclass: if (param.getClassBound() != null) {
             if (param.getClassBound() instanceof ClassTypeSignature) {
                 ClassTypeSignature cls = (ClassTypeSignature) param.getClassBound();
-                if (cls.getTypeName().equals("java/lang/Object")) {
+                if (cls.getType().equals("Ljava/lang/Object;")) {
                     break superclass;
                 }
             }
@@ -66,8 +66,17 @@ public class GenericsEmitter implements SpecialEmitter {
             ctx.printString(desc.substring(1, desc.length() - 1));
         } else if (sig instanceof ClassTypeSignature) {
             ClassTypeSignature cls = (ClassTypeSignature) sig;
-            ctx.emitTypeName(cls.getTypeName());
+            int array_depth = 0;
+            String type = cls.getType();
+            while(type.startsWith("[")) {
+                array_depth++;
+                type = type.substring(1);
+            }
+            ctx.emitType(type);
             emitTypeArguments(ctx, cls.getArguments());
+            for(int i = 0; i < array_depth; i++) {
+                ctx.printString("[]");
+            }
         } else if (sig instanceof VoidTypeSignature) {
             ctx.printString("void");
         }

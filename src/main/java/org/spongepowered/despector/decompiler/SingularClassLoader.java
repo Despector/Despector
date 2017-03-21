@@ -109,7 +109,7 @@ public class SingularClassLoader {
 
     @SuppressWarnings("unchecked")
     public TypeEntry load(ClassNode cn, SourceSet src) {
-//        System.out.println("Decompiling class " + cn.name);
+        System.out.println("Decompiling class " + cn.name);
         int acc = cn.access;
         TypeEntry entry = null;
         if ((acc & ACC_ENUM) != 0) {
@@ -224,7 +224,7 @@ public class SingularClassLoader {
             if (SET_SINGLE_GRAPH_DEBUG) {
                 OpcodeDecompiler.PRINT_BLOCKS = false;
                 ConfigManager.getConfig().print_opcodes_on_error = false;
-                if (cn.name.endsWith("BlockPattern") && mn.name.equals("translateOffset")) {
+                if (cn.name.endsWith("BlockPattern") && mn.name.equals("")) {
                     OpcodeDecompiler.PRINT_BLOCKS = true;
                     ConfigManager.getConfig().print_opcodes_on_error = true;
                 }

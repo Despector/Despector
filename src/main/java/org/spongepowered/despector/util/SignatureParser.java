@@ -142,11 +142,13 @@ public class SignatureParser {
     private static ClassTypeSignature parseClassTypeSignature(Parser parser, String prefix) {
         StringBuilder ident = new StringBuilder(prefix);
         parser.expect('L');
+        ident.append("L");
         ident.append(parser.nextIdentifier());
         while (parser.check('/')) {
             ident.append('/');
             ident.append(parser.nextIdentifier());
         }
+        ident.append(";");
         ClassTypeSignature sig = new ClassTypeSignature(ident.toString());
         if (parser.check('<')) {
             while (!parser.check('>')) {

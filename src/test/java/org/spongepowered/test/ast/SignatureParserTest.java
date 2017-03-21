@@ -40,7 +40,7 @@ public class SignatureParserTest {
         String sig = "Ljava/lang/Object;";
         ClassSignature cls = SignatureParser.parse(sig);
         assertEquals(0, cls.getParameters().size());
-        assertEquals("java/lang/Object", cls.getSuperclassSignature().getTypeName());
+        assertEquals("Ljava/lang/Object;", cls.getSuperclassSignature().getType());
         assertEquals(0, cls.getInterfaceSignatures().size());
     }
 
@@ -49,7 +49,7 @@ public class SignatureParserTest {
         String sig = "Ljava/lang/Object<TT;>;";
         ClassSignature cls = SignatureParser.parse(sig);
         assertEquals(0, cls.getParameters().size());
-        assertEquals("java/lang/Object", cls.getSuperclassSignature().getTypeName());
+        assertEquals("Ljava/lang/Object;", cls.getSuperclassSignature().getType());
         assertEquals(1, cls.getSuperclassSignature().getArguments().size());
         assertEquals(TypeVariableSignature.class, cls.getSuperclassSignature().getArguments().get(0).getSignature().getClass());
         TypeVariableSignature param = (TypeVariableSignature) cls.getSuperclassSignature().getArguments().get(0).getSignature();
@@ -66,7 +66,7 @@ public class SignatureParserTest {
         assertEquals("T", param1.getIdentifier());
         assertEquals(ClassTypeSignature.class, param1.getClassBound().getClass());
         ClassTypeSignature param1_classbound = (ClassTypeSignature) param1.getClassBound();
-        assertEquals("java/lang/Object", param1_classbound.getTypeName());
+        assertEquals("Ljava/lang/Object;", param1_classbound.getType());
     }
 
 }

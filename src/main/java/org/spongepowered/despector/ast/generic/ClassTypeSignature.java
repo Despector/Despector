@@ -42,16 +42,16 @@ public class ClassTypeSignature extends TypeSignature {
     }
 
     /**
-     * Gets the type internal name.
+     * Gets the type descriptor.
      */
-    public String getTypeName() {
+    public String getType() {
         return this.type_name;
     }
 
     /**
-     * Sets the type internal name.
+     * Sets the type descriptor.
      */
-    public void setTypeName(String type) {
+    public void setType(String type) {
         this.type_name = checkNotNull(type, "type");
     }
 
@@ -70,7 +70,6 @@ public class ClassTypeSignature extends TypeSignature {
     @Override
     public String toString() {
         StringBuilder str = new StringBuilder();
-        str.append("L");
         str.append(this.type_name);
         if (!this.args.isEmpty()) {
             str.append("<");
@@ -79,7 +78,6 @@ public class ClassTypeSignature extends TypeSignature {
             }
             str.append(">");
         }
-        str.append(";");
         return str.toString();
     }
 

@@ -101,7 +101,9 @@ public class MethodEntryEmitter implements AstEmitter<MethodEntry> {
         GenericsEmitter generics = ctx.getEmitterSet().getSpecialEmitter(GenericsEmitter.class);
         MethodSignature sig = method.getMethodSignature();
         if ("<init>".equals(method.getName())) {
-            ctx.emitTypeName(method.getOwnerName());
+            String name = method.getOwnerName();
+            name = name.substring(Math.max(name.lastIndexOf('/'), name.lastIndexOf('$')) + 1);
+            ctx.printString(name);
         } else {
             if (method.isStatic()) {
                 ctx.printString("static ");
