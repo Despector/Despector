@@ -224,7 +224,7 @@ public class SingularClassLoader {
             if (SET_SINGLE_GRAPH_DEBUG) {
                 OpcodeDecompiler.PRINT_BLOCKS = false;
                 ConfigManager.getConfig().print_opcodes_on_error = false;
-                if (cn.name.endsWith("BlockPattern") && mn.name.equals("<init>")) {
+                if (cn.name.endsWith("BlockPattern") && mn.name.equals("translateOffset")) {
                     OpcodeDecompiler.PRINT_BLOCKS = true;
                     ConfigManager.getConfig().print_opcodes_on_error = true;
                 }

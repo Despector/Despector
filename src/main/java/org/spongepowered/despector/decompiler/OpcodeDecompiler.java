@@ -210,7 +210,7 @@ public class OpcodeDecompiler {
                 break_points.add(label_indices.get(ts.dflt.getLabel()));
             }
             int op = next.getOpcode();
-            if (op <= RETURN && op >= IRETURN) {
+            if (op <= RETURN && op >= IRETURN || op == ATHROW) {
                 break_points.add(i);
             }
         }
@@ -1518,7 +1518,7 @@ public class OpcodeDecompiler {
             AbstractInsnNode next;
             if (index < op.opcodes.size()) {
                 next = op.opcodes.get(index);
-            } else if (op.isReturn() && op.last != null) {
+            } else if ((op.isReturn() || op.isThrow()) && op.last != null) {
                 next = op.last;
             } else {
                 break;
@@ -2126,6 +2126,10 @@ public class OpcodeDecompiler {
 
         public boolean isReturn() {
             return this.last != null && this.last.getOpcode() >= IRETURN && this.last.getOpcode() <= RETURN;
+        }
+
+        public boolean isThrow() {
+            return this.last != null && this.last.getOpcode() == ATHROW;
         }
 
         public boolean isConditional() {
