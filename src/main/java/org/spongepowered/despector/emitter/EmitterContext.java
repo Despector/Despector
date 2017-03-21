@@ -87,8 +87,6 @@ public class EmitterContext {
 
     public void setType(TypeEntry type) {
         this.type = type;
-        System.out.println("type set to " + this.type);
-        Thread.dumpStack();
     }
 
     public TypeEntry getOuterType() {
@@ -157,7 +155,6 @@ public class EmitterContext {
                 return false;
             }
             this.type = (TypeEntry) obj;
-            System.out.println("type set to " + this.type);
         } else if (obj instanceof FieldEntry) {
             this.field = (FieldEntry) obj;
         }

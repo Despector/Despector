@@ -500,6 +500,34 @@ public class BranchTest {
         assertEquals(good, insn);
     }
 
+    public void mth_ifnestedelse(int i, boolean a, boolean b, boolean c, boolean d, boolean e, boolean f) {
+        if (a) {
+            if (b) {
+                System.out.println(a);
+            } else {
+                System.out.println(b);
+            }
+        } else {
+            System.out.println(c);
+        }
+    }
+
+    @Test
+    public void testIfWithNestedElse() throws IOException {
+        String insn = TestHelper.getAsString(getClass(), "mth_ifnestedelse");
+        String good = "if (a) {\n"
+                + "    if (b) {\n"
+                + "        System.out.println(a);\n"
+                + "    } else {\n"
+                + "        System.out.println(b);\n"
+                + "    }\n"
+                + "} else {\n"
+                + "    System.out.println(c);\n"
+                + "}";
+        assertEquals(good, insn);
+    }
+
+
     @Test
     public void testInverseFor() throws IOException {
         TestMethodBuilder builder = new TestMethodBuilder("mth_inversefor", "(ILjava/lang/String;)V");

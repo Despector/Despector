@@ -24,7 +24,7 @@
  */
 package org.spongepowered.despector.ast.members.insn.arg.field;
 
-import static org.spongepowered.despector.util.TypeHelper.checkType;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
 import org.spongepowered.despector.ast.members.insn.arg.Instruction;
@@ -38,7 +38,7 @@ public class InstanceFieldAccess extends FieldAccess {
 
     public InstanceFieldAccess(String name, String desc, String owner_type, Instruction owner) {
         super(name, desc, owner_type);
-        this.owner = checkType(owner, owner_type, "owner");
+        this.owner = checkNotNull(owner, "owner");
     }
 
     /**
@@ -52,7 +52,7 @@ public class InstanceFieldAccess extends FieldAccess {
      * Sets the object the field is referenced from.
      */
     public void setFieldOwner(Instruction owner) {
-        this.owner = checkType(owner, this.owner_type, "owner");
+        this.owner = checkNotNull(owner, "owner");
     }
 
     @Override

@@ -522,7 +522,7 @@ public class OpcodeDecompiler {
         start = blocks.indexOf(first);
         int removed = has_more ? 1 : 0;
         for (int i = end - 1; i >= start + 1; i--) {
-            if(blocks.get(i) instanceof TryCatchMarkerOpcodeBlock) {
+            if (blocks.get(i) instanceof TryCatchMarkerOpcodeBlock) {
                 removed--;
                 continue;
             }
@@ -560,7 +560,7 @@ public class OpcodeDecompiler {
                 if (tc.marker_type == TryCatchMarkerType.CATCH) {
                     blocks.get(i + 1).exclude_from_ternary_check = true;
                 }
-            } else if(block.internal != null && block.internal instanceof TernaryBlockSection) {
+            } else if (block.internal != null && block.internal instanceof TernaryBlockSection) {
                 blocks.get(i + 1).exclude_from_ternary_check = true;
             }
         }
@@ -861,6 +861,15 @@ public class OpcodeDecompiler {
                 end = getRegionEnd(region, i);
             }
 
+            if (is_first_condition) {
+                for (int o = i; o < end; o++) {
+                    if (region.get(o).isGoto()) {
+                        is_first_condition = false;
+                        break;
+                    }
+                }
+            }
+
             if (end != -1 && (!is_first_condition || end < region.size() - 1)) {
 
                 List<OpcodeBlock> subregion = new ArrayList<>();
@@ -1144,6 +1153,25 @@ public class OpcodeDecompiler {
                 int new_end = Math.max(end_a, end_b);
 
                 if (new_end > end) {
+                    if (next.isGoto()) {
+                        OpcodeBlock target = next.target;
+                        OpcodeBlock alt = next;
+                        int alt_end = o;
+                        for (OpcodeBlock block : target.targetted_by) {
+                            if (block.isGoto()) {
+                                int block_index = blocks.indexOf(block);
+                                if (block_index > start && block_index < end && block_index > alt_end) {
+                                    alt_end = block_index;
+                                    alt = block;
+                                }
+                            }
+                        }
+                        if (alt != next) {
+                            end = Math.max(end, alt_end);
+                            next.target = alt;
+                            continue;
+                        }
+                    }
                     // We've found a block inside the current region that points
                     // to a block past the current end of the region. Resize the
                     // region to include it and restart the search.
