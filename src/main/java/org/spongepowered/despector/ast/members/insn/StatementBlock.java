@@ -109,4 +109,27 @@ public class StatementBlock {
         return sb.toString();
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        }
+        if (!(obj instanceof StatementBlock)) {
+            return false;
+        }
+        StatementBlock insn = (StatementBlock) obj;
+        if (this.type != insn.type) {
+            return false;
+        }
+        if (this.statements.size() != insn.statements.size()) {
+            return false;
+        }
+        for (int i = 0; i < this.statements.size(); i++) {
+            if (!this.statements.get(i).equals(insn.statements.get(i))) {
+                return false;
+            }
+        }
+        return true;
+    }
+
 }

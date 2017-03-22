@@ -71,4 +71,16 @@ public class LocalAccess implements Instruction {
         return this.local.toString();
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        }
+        if (!(obj instanceof LocalAccess)) {
+            return false;
+        }
+        LocalAccess insn = (LocalAccess) obj;
+        return this.local.equals(insn.local);
+    }
+
 }

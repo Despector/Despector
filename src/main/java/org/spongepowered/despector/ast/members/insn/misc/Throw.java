@@ -61,4 +61,16 @@ public class Throw implements Statement {
         return "throw " + this.ex + ";";
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        }
+        if (!(obj instanceof Throw)) {
+            return false;
+        }
+        Throw insn = (Throw) obj;
+        return this.ex.equals(insn.ex);
+    }
+
 }

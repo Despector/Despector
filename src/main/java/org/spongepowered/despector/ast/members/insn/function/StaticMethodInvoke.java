@@ -28,6 +28,8 @@ import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
 import org.spongepowered.despector.ast.members.insn.arg.Instruction;
 import org.spongepowered.despector.util.TypeHelper;
 
+import java.util.Arrays;
+
 /**
  * A statement calling a static method.
  */
@@ -53,6 +55,19 @@ public class StaticMethodInvoke extends MethodInvoke {
             }
         }
         return TypeHelper.descToType(this.method_owner) + "." + this.method_name + "(" + params + ");";
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        }
+        if (!(obj instanceof StaticMethodInvoke)) {
+            return false;
+        }
+        StaticMethodInvoke insn = (StaticMethodInvoke) obj;
+        return this.method_desc.equals(insn.method_desc) && this.method_name.equals(insn.method_name)
+                && this.method_owner.equals(insn.method_owner) && Arrays.equals(this.params, insn.params);
     }
 
 }

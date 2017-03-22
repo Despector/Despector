@@ -29,6 +29,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
 import org.spongepowered.despector.ast.members.insn.arg.Instruction;
 
+import java.util.Arrays;
+
 /**
  * A statement calling an instance method.
  */
@@ -66,6 +68,19 @@ public class InstanceMethodInvoke extends MethodInvoke {
             }
         }
         return this.callee + "." + this.method_name + "(" + params + ");";
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        }
+        if (!(obj instanceof InstanceMethodInvoke)) {
+            return false;
+        }
+        InstanceMethodInvoke insn = (InstanceMethodInvoke) obj;
+        return this.callee.equals(insn.callee) && this.method_desc.equals(insn.method_desc) && this.method_name.equals(insn.method_name)
+                && this.method_owner.equals(insn.method_owner) && Arrays.equals(this.params, insn.params);
     }
 
 }

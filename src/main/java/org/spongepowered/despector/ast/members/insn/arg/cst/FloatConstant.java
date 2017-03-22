@@ -63,4 +63,16 @@ public class FloatConstant extends Constant {
         return String.valueOf(this.cst);
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        }
+        if (!(obj instanceof FloatConstant)) {
+            return false;
+        }
+        FloatConstant cast = (FloatConstant) obj;
+        return this.cst == cast.cst;
+    }
+
 }

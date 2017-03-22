@@ -37,4 +37,7 @@ public interface Instruction {
 
     @Override
     String toString();
+
+    @Override
+    boolean equals(Object obj);
 }

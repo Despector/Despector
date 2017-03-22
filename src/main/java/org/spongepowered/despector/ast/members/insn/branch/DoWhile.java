@@ -94,4 +94,16 @@ public class DoWhile implements Statement {
         return sb.toString();
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        }
+        if (!(obj instanceof DoWhile)) {
+            return false;
+        }
+        DoWhile insn = (DoWhile) obj;
+        return this.condition.equals(insn.condition) && this.body.equals(insn.body);
+    }
+
 }

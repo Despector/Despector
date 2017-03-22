@@ -119,4 +119,24 @@ public class NewArray implements Instruction {
         return result;
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        }
+        if (!(obj instanceof NewArray)) {
+            return false;
+        }
+        NewArray insn = (NewArray) obj;
+        if (this.values.length != insn.values.length) {
+            return false;
+        }
+        for (int i = 0; i < this.values.length; i++) {
+            if (!this.values[i].equals(insn.values[i])) {
+                return false;
+            }
+        }
+        return this.size.equals(insn.size) && this.type.equals(insn.type);
+    }
+
 }

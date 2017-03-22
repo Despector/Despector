@@ -94,4 +94,16 @@ public class InstanceOf implements Instruction {
         return this.check + " instanceof " + getTypeName();
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        }
+        if (!(obj instanceof InstanceOf)) {
+            return false;
+        }
+        InstanceOf insn = (InstanceOf) obj;
+        return this.check.equals(insn.check) && this.type.equals(insn.type);
+    }
+
 }

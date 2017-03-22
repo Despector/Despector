@@ -88,4 +88,16 @@ public class Cast implements Instruction {
         return "((" + TypeHelper.descToType(this.type) + ") " + this.val + ")";
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        }
+        if (!(obj instanceof Cast)) {
+            return false;
+        }
+        Cast cast = (Cast) obj;
+        return this.type.equals(cast.type) && this.val.equals(cast.val);
+    }
+
 }

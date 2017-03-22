@@ -65,4 +65,16 @@ public class DoubleConstant extends Constant {
     public String toString() {
         return String.valueOf(this.cst);
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        }
+        if (!(obj instanceof DoubleConstant)) {
+            return false;
+        }
+        DoubleConstant cast = (DoubleConstant) obj;
+        return this.cst == cast.cst;
+    }
 }

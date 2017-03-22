@@ -63,4 +63,16 @@ public class IntConstant extends Constant {
         return String.valueOf(this.cst);
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        }
+        if (!(obj instanceof IntConstant)) {
+            return false;
+        }
+        IntConstant cast = (IntConstant) obj;
+        return this.cst == cast.cst;
+    }
+
 }

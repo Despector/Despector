@@ -83,4 +83,16 @@ public class NumberCompare implements Instruction {
     public String toString() {
         return "Integer.signum(" + this.right + " - " + this.left + ");";
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        }
+        if (!(obj instanceof NumberCompare)) {
+            return false;
+        }
+        NumberCompare insn = (NumberCompare) obj;
+        return this.left.equals(insn.left) && this.right.equals(insn.right);
+    }
 }

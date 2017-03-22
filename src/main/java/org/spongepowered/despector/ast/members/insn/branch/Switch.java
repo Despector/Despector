@@ -64,6 +64,18 @@ public class Switch implements Statement {
         }
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        }
+        if (!(obj instanceof Switch)) {
+            return false;
+        }
+        Switch insn = (Switch) obj;
+        return this.variable.equals(insn.variable) && this.cases.equals(insn.cases);
+    }
+
     public class Case {
 
         private StatementBlock body;
@@ -112,6 +124,19 @@ public class Switch implements Statement {
             for (Statement stmt : this.body.getStatements()) {
                 stmt.accept(visitor);
             }
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (obj == this) {
+                return true;
+            }
+            if (!(obj instanceof Case)) {
+                return false;
+            }
+            Case insn = (Case) obj;
+            return this.body.equals(insn.body) && this.breaks == insn.breaks && this.is_default == insn.is_default
+                    && this.indices.equals(insn.indices);
         }
 
     }

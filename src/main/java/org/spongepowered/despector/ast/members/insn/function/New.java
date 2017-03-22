@@ -30,6 +30,8 @@ import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
 import org.spongepowered.despector.ast.members.insn.arg.Instruction;
 import org.spongepowered.despector.util.TypeHelper;
 
+import java.util.Arrays;
+
 /**
  * A statement instantiating a new instance of a type.
  */
@@ -92,6 +94,18 @@ public class New implements Instruction {
             }
         }
         return "new " + TypeHelper.descToType(this.type) + "(" + params + ");";
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        }
+        if (!(obj instanceof New)) {
+            return false;
+        }
+        New insn = (New) obj;
+        return this.type.equals(insn.type) && this.ctor.equals(insn.ctor) && Arrays.equals(this.params, insn.params);
     }
 
 }

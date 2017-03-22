@@ -45,4 +45,17 @@ public class StaticFieldAssignment extends FieldAssignment {
         return TypeHelper.descToTypeName(this.owner_type) + "." + this.field_name + " = " + this.val + ";";
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        }
+        if (!(obj instanceof StaticFieldAssignment)) {
+            return false;
+        }
+        StaticFieldAssignment insn = (StaticFieldAssignment) obj;
+        return this.val.equals(insn.val);
+    }
+
+
 }

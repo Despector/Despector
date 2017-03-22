@@ -84,4 +84,16 @@ public class Ternary implements Instruction {
         return this.condition + " ? " + this.true_val + " : " + this.false_val;
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        }
+        if (!(obj instanceof Ternary)) {
+            return false;
+        }
+        Ternary insn = (Ternary) obj;
+        return this.condition.equals(insn.condition) && this.true_val.equals(insn.true_val) && this.false_val.equals(insn.false_val);
+    }
+
 }

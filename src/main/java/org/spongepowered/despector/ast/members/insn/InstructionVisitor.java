@@ -26,9 +26,9 @@ package org.spongepowered.despector.ast.members.insn;
 
 import org.spongepowered.despector.ast.Locals.LocalInstance;
 import org.spongepowered.despector.ast.members.insn.arg.Cast;
-import org.spongepowered.despector.ast.members.insn.arg.NumberCompare;
 import org.spongepowered.despector.ast.members.insn.arg.InstanceOf;
 import org.spongepowered.despector.ast.members.insn.arg.NewArray;
+import org.spongepowered.despector.ast.members.insn.arg.NumberCompare;
 import org.spongepowered.despector.ast.members.insn.arg.cst.DoubleConstant;
 import org.spongepowered.despector.ast.members.insn.arg.cst.FloatConstant;
 import org.spongepowered.despector.ast.members.insn.arg.cst.IntConstant;
@@ -58,6 +58,7 @@ import org.spongepowered.despector.ast.members.insn.assign.LocalAssignment;
 import org.spongepowered.despector.ast.members.insn.assign.StaticFieldAssignment;
 import org.spongepowered.despector.ast.members.insn.branch.DoWhile;
 import org.spongepowered.despector.ast.members.insn.branch.For;
+import org.spongepowered.despector.ast.members.insn.branch.ForEach;
 import org.spongepowered.despector.ast.members.insn.branch.If;
 import org.spongepowered.despector.ast.members.insn.branch.If.Elif;
 import org.spongepowered.despector.ast.members.insn.branch.If.Else;
@@ -126,6 +127,9 @@ public abstract class InstructionVisitor {
     }
 
     public void visitFloatConstantArg(FloatConstant floatConstantArg) {
+    }
+
+    public void visitForEachLoop(ForEach forLoop) {
     }
 
     public void visitForLoop(For forLoop) {

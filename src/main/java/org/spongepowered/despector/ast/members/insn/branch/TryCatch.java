@@ -68,6 +68,18 @@ public class TryCatch implements Statement {
         }
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        }
+        if (!(obj instanceof TryCatch)) {
+            return false;
+        }
+        TryCatch insn = (TryCatch) obj;
+        return this.block.equals(insn.block) && this.catch_blocks.equals(insn.catch_blocks);
+    }
+
     public class CatchBlock {
 
         private final List<String> exceptions;
@@ -138,6 +150,19 @@ public class TryCatch implements Statement {
             for (Statement stmt : this.block.getStatements()) {
                 stmt.accept(visitor);
             }
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (obj == this) {
+                return true;
+            }
+            if (!(obj instanceof CatchBlock)) {
+                return false;
+            }
+            CatchBlock insn = (CatchBlock) obj;
+            return this.exception_local.equals(insn.exception_local) && this.exceptions.equals(insn.exceptions) && this.block.equals(insn.block)
+                    && this.dummy_name.equals(insn.dummy_name);
         }
 
     }

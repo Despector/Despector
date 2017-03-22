@@ -96,4 +96,16 @@ public abstract class Operator implements Instruction {
         return this.left.toString() + " " + getOperator() + " " + this.right.toString();
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        }
+        if (getClass().equals(obj.getClass())) {
+            return false;
+        }
+        Operator insn = (Operator) obj;
+        return this.left.equals(insn.left) && this.right.equals(insn.right);
+    }
+
 }

@@ -26,30 +26,41 @@ package org.spongepowered.despector.ast.members.insn.branch;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import org.spongepowered.despector.ast.Locals.LocalInstance;
 import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
 import org.spongepowered.despector.ast.members.insn.Statement;
 import org.spongepowered.despector.ast.members.insn.StatementBlock;
-import org.spongepowered.despector.ast.members.insn.branch.condition.Condition;
+import org.spongepowered.despector.ast.members.insn.arg.Instruction;
 
 /**
- * A while loop.
+ * A for loop.
  */
-public class While implements Statement {
+public class ForEach implements Statement {
 
-    private Condition condition;
+    private Instruction collection;
+    private LocalInstance val;
     private StatementBlock body;
 
-    public While(Condition condition, StatementBlock body) {
-        this.condition = checkNotNull(condition, "condition");
+    public ForEach(Instruction collection, LocalInstance val, StatementBlock body) {
+        this.collection = checkNotNull(collection, "collection");
+        this.val = checkNotNull(val, "val");
         this.body = checkNotNull(body, "body");
     }
 
-    public Condition getCondition() {
-        return this.condition;
+    public Instruction getCollectionValue() {
+        return this.collection;
     }
 
-    public void setCondition(Condition condition) {
-        this.condition = checkNotNull(condition, "condition");
+    public void setCollectionValue(Instruction collection) {
+        this.collection = checkNotNull(collection, "collection");
+    }
+
+    public LocalInstance getValueAssignment() {
+        return this.val;
+    }
+
+    public void setValueAssignment(LocalInstance val) {
+        this.val = checkNotNull(val, "val");
     }
 
     public StatementBlock getBody() {
@@ -57,13 +68,14 @@ public class While implements Statement {
     }
 
     public void setBody(StatementBlock block) {
-        this.body = checkNotNull(block, "body");
+        this.body = checkNotNull(block, "block");
     }
 
     @Override
     public void accept(InstructionVisitor visitor) {
-        visitor.visitWhileLoop(this);
-        this.condition.accept(visitor);
+        visitor.visitForEachLoop(this);
+        visitor.visitLocal(this.val);
+        this.collection.accept(visitor);
         for (Statement stmt : this.body.getStatements()) {
             stmt.accept(visitor);
         }
@@ -72,8 +84,11 @@ public class While implements Statement {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append("while (");
-        sb.append(this.condition);
+        sb.append("for (");
+        sb.append(this.val.getTypeName());
+        sb.append(" ").append(this.val.getName());
+        sb.append(": ");
+        sb.append(this.collection);
         sb.append(") {\n");
         for (Statement insn : this.body.getStatements()) {
             sb.append("    ").append(insn).append("\n");
@@ -87,11 +102,11 @@ public class While implements Statement {
         if (obj == this) {
             return true;
         }
-        if (!(obj instanceof While)) {
+        if (!(obj instanceof ForEach)) {
             return false;
         }
-        While insn = (While) obj;
-        return this.condition.equals(insn.condition) && this.body.equals(insn.body);
+        ForEach insn = (ForEach) obj;
+        return this.collection.equals(insn.collection) && this.body.equals(insn.body) && this.val.equals(insn.val);
     }
 
 }

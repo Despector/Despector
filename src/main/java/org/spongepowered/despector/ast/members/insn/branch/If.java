@@ -111,6 +111,28 @@ public class If implements Statement {
         return sb.toString();
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        }
+        if (!(obj instanceof If)) {
+            return false;
+        }
+        If insn = (If) obj;
+        if (this.else_block != null) {
+            if (!this.else_block.equals(insn.else_block)) {
+                return false;
+            }
+        } else if (insn.else_block != null) {
+            return false;
+        }
+        if (!this.elif_blocks.equals(insn.elif_blocks)) {
+            return false;
+        }
+        return this.condition.equals(insn.condition) && this.block.equals(insn.block);
+    }
+
     public class Elif {
 
         private StatementBlock block;
@@ -157,6 +179,18 @@ public class If implements Statement {
             sb.append("}");
             return sb.toString();
         }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (obj == this) {
+                return true;
+            }
+            if (!(obj instanceof Elif)) {
+                return false;
+            }
+            Elif insn = (Elif) obj;
+            return this.condition.equals(insn.condition) && this.block.equals(insn.block);
+        }
     }
 
     public class Else {
@@ -192,6 +226,18 @@ public class If implements Statement {
             }
             sb.append("}");
             return sb.toString();
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (obj == this) {
+                return true;
+            }
+            if (!(obj instanceof Else)) {
+                return false;
+            }
+            Else insn = (Else) obj;
+            return this.block.equals(insn.block);
         }
 
     }

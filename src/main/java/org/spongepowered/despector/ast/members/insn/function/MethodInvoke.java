@@ -26,7 +26,6 @@ package org.spongepowered.despector.ast.members.insn.function;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spongepowered.despector.util.TypeHelper.checkType;
 
 import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
 import org.spongepowered.despector.ast.members.insn.arg.Instruction;

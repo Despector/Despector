@@ -68,4 +68,16 @@ public class LocalAssignment extends Assignment {
         return this.local + " = " + this.val + ";";
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        }
+        if (!(obj instanceof LocalAssignment)) {
+            return false;
+        }
+        LocalAssignment insn = (LocalAssignment) obj;
+        return this.val.equals(insn.val) && this.local.equals(insn.local);
+    }
+
 }

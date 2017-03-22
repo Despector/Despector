@@ -63,4 +63,16 @@ public class LongConstant extends Constant {
         return String.valueOf(this.cst);
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        }
+        if (!(obj instanceof LongConstant)) {
+            return false;
+        }
+        LongConstant cast = (LongConstant) obj;
+        return this.cst == cast.cst;
+    }
+
 }

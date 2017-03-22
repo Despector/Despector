@@ -46,4 +46,16 @@ public class StaticFieldAccess extends FieldAccess {
         return TypeHelper.descToTypeName(this.owner_type) + "." + this.field_name;
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        }
+        if (!(obj instanceof StaticFieldAccess)) {
+            return false;
+        }
+        StaticFieldAccess insn = (StaticFieldAccess) obj;
+        return this.field_desc.equals(insn.field_desc) && this.field_name.equals(insn.field_name) && this.owner_type.equals(insn.owner_type);
+    }
+
 }

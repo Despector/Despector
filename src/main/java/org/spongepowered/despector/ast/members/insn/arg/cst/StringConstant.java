@@ -65,4 +65,16 @@ public class StringConstant extends Constant {
         return "\"" + this.cst + "\"";
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        }
+        if (!(obj instanceof StringConstant)) {
+            return false;
+        }
+        StringConstant insn = (StringConstant) obj;
+        return this.cst.equals(insn.cst);
+    }
+
 }

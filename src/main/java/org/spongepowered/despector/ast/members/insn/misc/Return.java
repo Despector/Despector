@@ -63,10 +63,22 @@ public class Return implements Statement {
 
     @Override
     public String toString() {
-        if(this.value == null) {
+        if (this.value == null) {
             return "return;";
         }
         return "return " + this.value + ";";
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        }
+        if (!(obj instanceof Return)) {
+            return false;
+        }
+        Return insn = (Return) obj;
+        return this.value.equals(insn.value);
     }
 
 }

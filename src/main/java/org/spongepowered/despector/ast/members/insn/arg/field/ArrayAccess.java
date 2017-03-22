@@ -89,4 +89,16 @@ public class ArrayAccess implements Instruction {
         return this.array + "[" + this.index + "]";
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        }
+        if (!(obj instanceof ArrayAccess)) {
+            return false;
+        }
+        ArrayAccess insn = (ArrayAccess) obj;
+        return this.array.equals(insn.array) && this.index.equals(insn.index);
+    }
+
 }

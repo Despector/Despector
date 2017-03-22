@@ -28,7 +28,9 @@ import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
 
 public class NullConstant extends Constant {
 
-    public NullConstant() {
+    public static final NullConstant NULL = new NullConstant();
+
+    private NullConstant() {
     }
 
     @Override
@@ -44,6 +46,17 @@ public class NullConstant extends Constant {
     @Override
     public String toString() {
         return "null";
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        }
+        if (!(obj instanceof LongConstant)) {
+            return false;
+        }
+        return true;
     }
 
 }

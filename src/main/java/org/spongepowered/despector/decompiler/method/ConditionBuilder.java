@@ -104,14 +104,14 @@ public class ConditionBuilder {
                 throw new IllegalStateException();
             }
             Instruction val = dummy_stack.pop();
-            return new CompareCondition(val, new NullConstant(), CompareCondition.CompareOperator.EQUAL);
+            return new CompareCondition(val, NullConstant.NULL, CompareCondition.CompareOperator.EQUAL);
         }
         case IFNONNULL: {
             if (dummy_stack.size() != 1 || !dummy.getStatements().isEmpty()) {
                 throw new IllegalStateException();
             }
             Instruction val = dummy_stack.pop();
-            return new CompareCondition(val, new NullConstant(), CompareCondition.CompareOperator.NOT_EQUAL);
+            return new CompareCondition(val, NullConstant.NULL, CompareCondition.CompareOperator.NOT_EQUAL);
         }
         default:
             throw new IllegalStateException("Unsupported conditional jump opcode " + block.getLast().getOpcode());

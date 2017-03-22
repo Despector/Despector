@@ -116,4 +116,30 @@ public class For implements Statement {
         return sb.toString();
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        }
+        if (!(obj instanceof For)) {
+            return false;
+        }
+        For insn = (For) obj;
+        if (this.init != null) {
+            if (!this.init.equals(insn.init)) {
+                return false;
+            }
+        } else if (insn.init != null) {
+            return false;
+        }
+        if (this.incr != null) {
+            if (!this.incr.equals(insn.incr)) {
+                return false;
+            }
+        } else if (insn.incr != null) {
+            return false;
+        }
+        return this.condition.equals(insn.condition) && this.body.equals(insn.body);
+    }
+
 }

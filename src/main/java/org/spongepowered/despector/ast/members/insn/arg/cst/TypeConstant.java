@@ -65,4 +65,16 @@ public class TypeConstant extends Constant {
         return this.cst.getClassName() + ".class";
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        }
+        if (!(obj instanceof TypeConstant)) {
+            return false;
+        }
+        TypeConstant insn = (TypeConstant) obj;
+        return this.cst.equals(insn.cst);
+    }
+
 }

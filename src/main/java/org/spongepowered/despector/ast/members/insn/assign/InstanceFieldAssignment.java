@@ -58,4 +58,16 @@ public class InstanceFieldAssignment extends FieldAssignment {
         return this.owner + "." + this.field_name + " = " + this.val + ";";
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        }
+        if (!(obj instanceof InstanceFieldAssignment)) {
+            return false;
+        }
+        InstanceFieldAssignment insn = (InstanceFieldAssignment) obj;
+        return this.val.equals(insn.val) && this.owner.equals(insn.owner);
+    }
+
 }

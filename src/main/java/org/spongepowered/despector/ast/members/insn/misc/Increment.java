@@ -70,4 +70,16 @@ public class Increment implements Statement {
         return this.local + " += " + this.val + ";";
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        }
+        if (!(obj instanceof Increment)) {
+            return false;
+        }
+        Increment insn = (Increment) obj;
+        return this.local.equals(insn.local) && this.val == insn.val;
+    }
+
 }

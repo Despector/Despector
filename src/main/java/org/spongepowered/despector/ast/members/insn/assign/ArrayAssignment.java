@@ -89,4 +89,16 @@ public class ArrayAssignment extends Assignment {
         return this.array + "[" + this.index + "] = " + this.val + ";";
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        }
+        if (!(obj instanceof ArrayAssignment)) {
+            return false;
+        }
+        ArrayAssignment insn = (ArrayAssignment) obj;
+        return this.val.equals(insn.val) && this.array.equals(insn.array) && this.index.equals(insn.index);
+    }
+
 }

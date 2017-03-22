@@ -66,4 +66,17 @@ public class InstanceFieldAccess extends FieldAccess {
         return this.owner + "." + this.field_name;
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        }
+        if (!(obj instanceof InstanceFieldAccess)) {
+            return false;
+        }
+        InstanceFieldAccess insn = (InstanceFieldAccess) obj;
+        return this.field_desc.equals(insn.field_desc) && this.field_name.equals(insn.field_name) && this.owner_type.equals(insn.owner_type)
+                && this.owner.equals(insn.owner);
+    }
+
 }
