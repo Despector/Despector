@@ -22,24 +22,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.despector.decompiler.method.graph.data;
+package org.spongepowered.despector.decompiler.method.graph.data.opcode;
 
-import org.spongepowered.despector.ast.members.insn.StatementBlock;
-import org.spongepowered.despector.ast.members.insn.arg.Instruction;
+public class GotoOpcodeBlock extends OpcodeBlock {
 
-import java.util.Deque;
-
-/**
- * Represents a single section in the final output.
- */
-public abstract class BlockSection {
-
-    /**
-     * Appends this block section to the final output.
-     * 
-     * @param block The statement block to append to
-     * @param stack The current instruction stack
-     */
-    public abstract void appendTo(StatementBlock block, Deque<Instruction> stack);
+    public GotoOpcodeBlock(int br) {
+        super(br);
+    }
 
 }

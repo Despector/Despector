@@ -24,11 +24,14 @@
  */
 package org.spongepowered.despector.decompiler.method;
 
+import static org.mockito.asm.Opcodes.GOTO;
+
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.AbstractInsnNode;
+import org.objectweb.asm.tree.JumpInsnNode;
 import org.objectweb.asm.tree.LabelNode;
 import org.objectweb.asm.tree.LocalVariableNode;
 import org.objectweb.asm.tree.MethodNode;
@@ -38,12 +41,17 @@ import org.spongepowered.despector.ast.Locals.LocalInstance;
 import org.spongepowered.despector.ast.members.MethodEntry;
 import org.spongepowered.despector.ast.members.insn.StatementBlock;
 import org.spongepowered.despector.ast.members.insn.arg.Instruction;
+import org.spongepowered.despector.config.Constants;
 import org.spongepowered.despector.decompiler.method.graph.GraphOperation;
 import org.spongepowered.despector.decompiler.method.graph.GraphProcessor;
 import org.spongepowered.despector.decompiler.method.graph.GraphProducerStep;
 import org.spongepowered.despector.decompiler.method.graph.RegionProcessor;
-import org.spongepowered.despector.decompiler.method.graph.data.BlockSection;
-import org.spongepowered.despector.decompiler.method.graph.data.OpcodeBlock;
+import org.spongepowered.despector.decompiler.method.graph.data.block.BlockSection;
+import org.spongepowered.despector.decompiler.method.graph.data.opcode.BodyOpcodeBlock;
+import org.spongepowered.despector.decompiler.method.graph.data.opcode.ConditionalOpcodeBlock;
+import org.spongepowered.despector.decompiler.method.graph.data.opcode.GotoOpcodeBlock;
+import org.spongepowered.despector.decompiler.method.graph.data.opcode.OpcodeBlock;
+import org.spongepowered.despector.decompiler.method.graph.operate.TernaryPrePassOperation;
 import org.spongepowered.despector.decompiler.method.postprocess.StatementPostProcessor;
 import org.spongepowered.despector.util.SignatureParser;
 import org.spongepowered.despector.util.TypeHelper;
@@ -145,10 +153,18 @@ public class MethodDecompiler {
         partial.setGraph(graph);
 
         for (GraphOperation op : this.cleanup_operations) {
+            // TODO separate cleanup and pre-pass operations
+            if (op instanceof TernaryPrePassOperation) {
+                if (Constants.TRACE_ACTIVE) {
+                    for (OpcodeBlock op2 : graph) {
+                        op2.print();
+                    }
+                }
+            }
             op.process(partial);
         }
 
-        // Performs a sequence of transformations to conver the graph into a
+        // Performs a sequence of transformations to convert the graph into a
         // simple array of partially decompiled block sections.
         List<BlockSection> flat_graph = flattenGraph(partial, graph, graph.size());
 
@@ -184,18 +200,21 @@ public class MethodDecompiler {
         int last_brk = 0;
         for (int brk : sorted_break_points) {
             // accumulate the opcodes beween the next breakpoint and the last
-            // breakpoint. Also split the last opcode off into a special field
-            // it it is a jump. We use this to more easily tell which blocks
-            // have a conditional outcome.
-            OpcodeBlock block = new OpcodeBlock(brk);
+            // breakpoint.
+            OpcodeBlock block = new BodyOpcodeBlock(brk);
             block_list.add(block);
-            for (int i = last_brk; i < brk; i++) {
+            for (int i = last_brk; i <= brk; i++) {
                 block.getOpcodes().add(instructions.get(i));
             }
-            AbstractInsnNode last = instructions.get(brk);
-            block.setLast(last);
             blocks.put(brk, block);
             last_brk = brk + 1;
+        }
+
+        for (int i = 0; i < block_list.size() - 1; i++) {
+            OpcodeBlock next = block_list.get(i);
+            if (next.getLast() instanceof LabelNode) {
+                next.setTarget(block_list.get(i + 1));
+            }
         }
 
         for (GraphProducerStep step : this.graph_producers) {

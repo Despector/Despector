@@ -22,29 +22,44 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.despector.decompiler.method.graph;
+package org.spongepowered.despector.decompiler.method.graph.data.opcode;
 
-import org.spongepowered.despector.decompiler.method.PartialMethod;
-import org.spongepowered.despector.decompiler.method.graph.data.opcode.OpcodeBlock;
+public class ConditionalOpcodeBlock extends OpcodeBlock {
 
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+    private OpcodeBlock else_target;
 
-/**
- * A producer for dividing up the opcodes into blocks and joining them together
- * into a graph.
- */
-public interface GraphProducerStep {
+    public ConditionalOpcodeBlock(int br) {
+        super(br);
+    }
 
     /**
-     * Adds the indices of any opcodes that the opcode list should be split
-     * after to the break_points set.
+     * Gets the alternate target of this block. Only present for conditional
+     * jumps where it represents the block to which control is passed if the
+     * condition is false.
      */
-    void collectBreakpoints(PartialMethod partial, Set<Integer> break_points);
+    public OpcodeBlock getElseTarget() {
+        return this.else_target;
+    }
 
     /**
-     * Forms edges between blocks in the graph.
+     * Has an alternate target.
      */
-    void formEdges(PartialMethod partial, Map<Integer, OpcodeBlock> blocks, List<Integer> sorted_break_points, List<OpcodeBlock> block_list);
+    public boolean hasElseTarget() {
+        return this.else_target != null;
+    }
+
+    /**
+     * Sets the alternate target.
+     */
+    public void setElseTarget(OpcodeBlock block) {
+        this.else_target = block;
+    }
+
+    @Override
+    public void print() {
+        super.print();
+        System.out.println("    Target: " + (this.target != null ? this.target.break_point : -1));
+        System.out.println("    Else Target: " + (this.else_target != null ? this.else_target.break_point : -1));
+    }
+
 }

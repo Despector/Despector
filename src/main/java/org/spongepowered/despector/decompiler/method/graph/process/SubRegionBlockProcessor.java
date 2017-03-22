@@ -24,13 +24,16 @@
  */
 package org.spongepowered.despector.decompiler.method.graph.process;
 
+import org.spongepowered.despector.config.Constants;
 import org.spongepowered.despector.decompiler.method.PartialMethod;
 import org.spongepowered.despector.decompiler.method.graph.GraphProcessor;
 import org.spongepowered.despector.decompiler.method.graph.RegionProcessor;
-import org.spongepowered.despector.decompiler.method.graph.data.BlockSection;
-import org.spongepowered.despector.decompiler.method.graph.data.InlineBlockSection;
-import org.spongepowered.despector.decompiler.method.graph.data.OpcodeBlock;
-import org.spongepowered.despector.decompiler.method.graph.data.TryCatchMarkerOpcodeBlock;
+import org.spongepowered.despector.decompiler.method.graph.data.block.BlockSection;
+import org.spongepowered.despector.decompiler.method.graph.data.block.InlineBlockSection;
+import org.spongepowered.despector.decompiler.method.graph.data.opcode.ConditionalOpcodeBlock;
+import org.spongepowered.despector.decompiler.method.graph.data.opcode.GotoOpcodeBlock;
+import org.spongepowered.despector.decompiler.method.graph.data.opcode.OpcodeBlock;
+import org.spongepowered.despector.decompiler.method.graph.data.opcode.TryCatchMarkerOpcodeBlock;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -59,7 +62,7 @@ public class SubRegionBlockProcessor implements GraphProcessor {
         int i = blocks.indexOf(region_start);
         int end = -1;
         boolean targeted_in_future = false;
-        if (!region_start.isJump()) {
+        if (!(region_start instanceof ConditionalOpcodeBlock) && !(region_start instanceof GotoOpcodeBlock)) {
             for (OpcodeBlock t : region_start.getTargettedBy()) {
                 int index = blocks.indexOf(t);
                 if (index > i) {
@@ -100,8 +103,15 @@ public class SubRegionBlockProcessor implements GraphProcessor {
         for (int o = i; o < end; o++) {
             region.add(blocks.get(o));
         }
+        if (Constants.TRACE_ACTIVE) {
+            System.err.println("Processing subregion from " + region.get(0).getBreakpoint() + " to " + region.get(region.size() - 1).getBreakpoint());
+        }
         // process the region down to a single block
         final_blocks.add(partial.getDecompiler().processRegion(partial, region, last, targeted_in_future ? 0 : 1));
+
+        if (Constants.TRACE_ACTIVE) {
+            System.err.println("Done sub region");
+        }
         return end - 1;
     }
 

@@ -22,34 +22,5 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.despector.decompiler.method.graph.data;
-
-import org.spongepowered.despector.ast.members.insn.StatementBlock;
-import org.spongepowered.despector.ast.members.insn.arg.Instruction;
-import org.spongepowered.despector.decompiler.method.StatementBuilder;
-
-import java.util.Deque;
-
-/**
- * A block section that contains a single {@link OpcodeBlock}.
- */
-public class InlineBlockSection extends BlockSection {
-
-    private final OpcodeBlock block;
-
-    public InlineBlockSection(OpcodeBlock block) {
-        this.block = block;
-    }
-
-    /**
-     * Gets the {@link OpcodeBlock} that is represented by this block section.
-     */
-    public OpcodeBlock getBlock() {
-        return this.block;
-    }
-
-    @Override
-    public void appendTo(StatementBlock block, Deque<Instruction> stack) {
-        StatementBuilder.appendBlock(this.block, block, block.getLocals(), stack);
-    }
-}
+@org.spongepowered.despector.util.NonnullByDefault
+package org.spongepowered.despector.decompiler.method.graph.data.block;

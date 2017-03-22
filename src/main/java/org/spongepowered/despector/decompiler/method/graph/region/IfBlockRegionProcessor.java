@@ -25,15 +25,19 @@
 package org.spongepowered.despector.decompiler.method.graph.region;
 
 import org.spongepowered.despector.ast.members.insn.branch.condition.Condition;
+import org.spongepowered.despector.config.Constants;
 import org.spongepowered.despector.decompiler.method.ConditionBuilder;
 import org.spongepowered.despector.decompiler.method.PartialMethod;
 import org.spongepowered.despector.decompiler.method.graph.RegionProcessor;
-import org.spongepowered.despector.decompiler.method.graph.data.BlockSection;
-import org.spongepowered.despector.decompiler.method.graph.data.IfBlockSection;
-import org.spongepowered.despector.decompiler.method.graph.data.IfBlockSection.ElifBlockSection;
-import org.spongepowered.despector.decompiler.method.graph.data.InlineBlockSection;
-import org.spongepowered.despector.decompiler.method.graph.data.OpcodeBlock;
-import org.spongepowered.despector.decompiler.method.graph.data.WhileBlockSection;
+import org.spongepowered.despector.decompiler.method.graph.data.block.BlockSection;
+import org.spongepowered.despector.decompiler.method.graph.data.block.IfBlockSection;
+import org.spongepowered.despector.decompiler.method.graph.data.block.InlineBlockSection;
+import org.spongepowered.despector.decompiler.method.graph.data.block.WhileBlockSection;
+import org.spongepowered.despector.decompiler.method.graph.data.block.IfBlockSection.ElifBlockSection;
+import org.spongepowered.despector.decompiler.method.graph.data.opcode.ConditionalOpcodeBlock;
+import org.spongepowered.despector.decompiler.method.graph.data.opcode.GotoOpcodeBlock;
+import org.spongepowered.despector.decompiler.method.graph.data.opcode.OpcodeBlock;
+import org.spongepowered.despector.decompiler.method.graph.data.opcode.ProcessedOpcodeBlock;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -53,7 +57,7 @@ public class IfBlockRegionProcessor implements RegionProcessor {
         List<OpcodeBlock> condition_blocks = new ArrayList<>();
         OpcodeBlock next = region.get(body_start);
         condition_blocks.add(start);
-        while (next.isConditional()) {
+        while (next instanceof ConditionalOpcodeBlock) {
             condition_blocks.add(next);
             body_start++;
             next = region.get(body_start);
@@ -66,6 +70,11 @@ public class IfBlockRegionProcessor implements RegionProcessor {
                 break;
             }
         }
+        if (Constants.TRACE_ACTIVE) {
+            System.err.println("Processing if region");
+            System.err.println("    Condition is " + condition_blocks.get(0).getBreakpoint() + " to "
+                    + condition_blocks.get(condition_blocks.size() - 1).getBreakpoint());
+        }
 
         // form the condition from the header
         Condition cond = ConditionBuilder.makeCondition(condition_blocks, partial.getLocals(), body, cond_ret);
@@ -75,14 +84,17 @@ public class IfBlockRegionProcessor implements RegionProcessor {
         }
 
         OpcodeBlock body_end = region.get(else_start - 1);
-        if (body_end.isGoto() && body_end.getTarget() == start) {
+        if (body_end instanceof GotoOpcodeBlock && body_end.getTarget() == start) {
             // we've got ourselves an inverse while/for loop
+            if (Constants.TRACE_ACTIVE) {
+                System.err.println("    Was actally invered while loop, end is " + body_end.getBreakpoint());
+            }
             WhileBlockSection section = new WhileBlockSection(cond);
             for (int i = body_start; i < else_start - 1; i++) {
                 next = region.get(i);
-                if (next.hasPrecompiledSection()) {
-                    section.appendBody(next.getPrecompiledSection());
-                } else if (next.isConditional()) {
+                if (next instanceof ProcessedOpcodeBlock) {
+                    section.appendBody(((ProcessedOpcodeBlock) next).getPrecompiledSection());
+                } else if (next instanceof ConditionalOpcodeBlock || next instanceof GotoOpcodeBlock) {
                     // If we encounter another conditional block then its an
                     // error
                     // as we should have already processed all sub regions
@@ -93,14 +105,17 @@ public class IfBlockRegionProcessor implements RegionProcessor {
             }
             return section;
         }
+        if (body_end instanceof GotoOpcodeBlock) {
+            else_start--;
+        }
 
         IfBlockSection section = new IfBlockSection(cond);
         // Append the body
         for (int i = body_start; i < else_start; i++) {
             next = region.get(i);
-            if (next.hasPrecompiledSection()) {
-                section.appendBody(next.getPrecompiledSection());
-            } else if (next.isConditional()) {
+            if (next instanceof ProcessedOpcodeBlock) {
+                section.appendBody(((ProcessedOpcodeBlock) next).getPrecompiledSection());
+            } else if (next instanceof ConditionalOpcodeBlock || next instanceof GotoOpcodeBlock) {
                 // If we encounter another conditional block then its an error
                 // as we should have already processed all sub regions
                 throw new IllegalStateException("Unexpected conditional when building if body");
@@ -110,12 +125,12 @@ public class IfBlockRegionProcessor implements RegionProcessor {
         }
 
         while (cond_ret != ret) {
-            if (cond_ret.isConditional()) {
+            if (cond_ret instanceof ConditionalOpcodeBlock) {
                 List<OpcodeBlock> elif_condition = new ArrayList<>();
                 next = region.get(body_start);
                 elif_condition.add(cond_ret);
                 body_start = region.indexOf(cond_ret) + 1;
-                while (next.isConditional()) {
+                while (next instanceof ConditionalOpcodeBlock) {
                     elif_condition.add(next);
                     body_start++;
                     next = region.get(body_start);
@@ -134,12 +149,15 @@ public class IfBlockRegionProcessor implements RegionProcessor {
                 if (cond_ret != ret) {
                     elif_end = region.indexOf(cond_ret);
                 }
+                if(region.get(elif_end - 1) instanceof GotoOpcodeBlock) {
+                    elif_end--;
+                }
                 // Append the body
                 for (int i = body_start; i < elif_end; i++) {
                     next = region.get(i);
-                    if (next.hasPrecompiledSection()) {
-                        elif.append(next.getPrecompiledSection());
-                    } else if (next.isConditional()) {
+                    if (next instanceof ProcessedOpcodeBlock) {
+                        section.appendBody(((ProcessedOpcodeBlock) next).getPrecompiledSection());
+                    } else if (next instanceof ConditionalOpcodeBlock || next instanceof GotoOpcodeBlock) {
                         // If we encounter another conditional block then its an
                         // error as we should have already processed all sub
                         // regions
@@ -152,9 +170,9 @@ public class IfBlockRegionProcessor implements RegionProcessor {
                 else_start = region.indexOf(cond_ret);
                 for (int i = else_start; i < region.size(); i++) {
                     next = region.get(i);
-                    if (next.hasPrecompiledSection()) {
-                        section.appendElseBody(next.getPrecompiledSection());
-                    } else if (next.isConditional()) {
+                    if (next instanceof ProcessedOpcodeBlock) {
+                        section.appendBody(((ProcessedOpcodeBlock) next).getPrecompiledSection());
+                    } else if (next instanceof ConditionalOpcodeBlock || next instanceof GotoOpcodeBlock) {
                         // If we encounter another conditional block then its an
                         // error as we should have already processed all sub
                         // regions

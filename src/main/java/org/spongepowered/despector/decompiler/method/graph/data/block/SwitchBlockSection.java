@@ -22,14 +22,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.despector.decompiler.method.graph.data;
+package org.spongepowered.despector.decompiler.method.graph.data.block;
 
 import static com.google.common.base.Preconditions.checkState;
 
+import org.objectweb.asm.tree.AbstractInsnNode;
 import org.spongepowered.despector.ast.members.insn.StatementBlock;
 import org.spongepowered.despector.ast.members.insn.arg.Instruction;
 import org.spongepowered.despector.ast.members.insn.branch.Switch;
 import org.spongepowered.despector.decompiler.method.StatementBuilder;
+import org.spongepowered.despector.decompiler.method.graph.data.opcode.OpcodeBlock;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -71,7 +73,10 @@ public class SwitchBlockSection extends BlockSection {
 
     @Override
     public void appendTo(StatementBlock block, Deque<Instruction> stack) {
+        AbstractInsnNode last = this.switchblock.getLast();
+        this.switchblock.getOpcodes().remove(last);
         StatementBuilder.appendBlock(this.switchblock, block, block.getLocals(), stack);
+        this.switchblock.getOpcodes().add(last);
         Switch sswitch = new Switch(stack.pop());
         for (SwitchCaseBlockSection cs : this.cases) {
             StatementBlock body = new StatementBlock(StatementBlock.Type.SWITCH, block.getLocals());

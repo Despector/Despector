@@ -24,9 +24,14 @@
  */
 package org.spongepowered.despector.decompiler.method.graph.operate;
 
+import org.objectweb.asm.tree.AbstractInsnNode;
 import org.spongepowered.despector.decompiler.method.PartialMethod;
 import org.spongepowered.despector.decompiler.method.graph.GraphOperation;
-import org.spongepowered.despector.decompiler.method.graph.data.OpcodeBlock;
+import org.spongepowered.despector.decompiler.method.graph.data.opcode.BodyOpcodeBlock;
+import org.spongepowered.despector.decompiler.method.graph.data.opcode.ConditionalOpcodeBlock;
+import org.spongepowered.despector.decompiler.method.graph.data.opcode.GotoOpcodeBlock;
+import org.spongepowered.despector.decompiler.method.graph.data.opcode.OpcodeBlock;
+import org.spongepowered.despector.decompiler.method.graph.data.opcode.SwitchOpcodeBlock;
 import org.spongepowered.despector.util.AstUtil;
 
 import java.util.ArrayList;
@@ -45,14 +50,18 @@ public class JumpSeparateOperation implements GraphOperation {
         List<OpcodeBlock> blocks = partial.getGraph();
         List<OpcodeBlock> fblocks = new ArrayList<>();
         for (OpcodeBlock block : blocks) {
-            if (block.isGoto()) {
-                if (AstUtil.isEmptyOfLogic(block.getOpcodes())) {
+            if (block instanceof GotoOpcodeBlock) {
+                if (AstUtil.isEmptyOfLogic(block.getOpcodes(), block.getOpcodes().size() - 1)) {
                     fblocks.add(block);
                     continue;
                 }
-                OpcodeBlock header = new OpcodeBlock(block.getBreakpoint());
-                header.getOpcodes().addAll(block.getOpcodes());
+                OpcodeBlock header = new BodyOpcodeBlock(block.getBreakpoint());
+                for(int i = 0; i < block.getOpcodes().size() - 1; i++) {
+                    header.getOpcodes().add(block.getOpcodes().get(i));
+                }
+                AbstractInsnNode ggoto = block.getOpcodes().get(block.getOpcodes().size() - 1);
                 block.getOpcodes().clear();
+                block.getOpcodes().add(ggoto);
                 // Have to ensure that we remap any blocks that were
                 // targeting this block to target the header.
                 GraphOperation.remap(blocks, block, header);
@@ -60,10 +69,10 @@ public class JumpSeparateOperation implements GraphOperation {
                 header.setTarget(block);
                 fblocks.add(header);
                 fblocks.add(block);
-            } else if (block.isConditional() || block.isSwitch()) {
-                int cond_start = AstUtil.findStartLastStatement(block.getOpcodes(), block.getLast());
+            } else if (block instanceof ConditionalOpcodeBlock || block instanceof SwitchOpcodeBlock) {
+                int cond_start = AstUtil.findStartLastStatement(block.getOpcodes());
                 if (cond_start > 0) {
-                    OpcodeBlock header = new OpcodeBlock(block.getBreakpoint());
+                    OpcodeBlock header = new BodyOpcodeBlock(block.getBreakpoint());
                     for (int i = 0; i < cond_start; i++) {
                         header.getOpcodes().add(block.getOpcodes().get(i));
                     }

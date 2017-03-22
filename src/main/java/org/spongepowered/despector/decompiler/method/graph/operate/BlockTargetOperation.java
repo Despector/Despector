@@ -26,7 +26,8 @@ package org.spongepowered.despector.decompiler.method.graph.operate;
 
 import org.spongepowered.despector.decompiler.method.PartialMethod;
 import org.spongepowered.despector.decompiler.method.graph.GraphOperation;
-import org.spongepowered.despector.decompiler.method.graph.data.OpcodeBlock;
+import org.spongepowered.despector.decompiler.method.graph.data.opcode.ConditionalOpcodeBlock;
+import org.spongepowered.despector.decompiler.method.graph.data.opcode.OpcodeBlock;
 
 import java.util.List;
 
@@ -41,12 +42,10 @@ public class BlockTargetOperation implements GraphOperation {
         List<OpcodeBlock> blocks = partial.getGraph();
         for (int i = 0; i < blocks.size(); i++) {
             OpcodeBlock block = blocks.get(i);
-            if (block.isConditional()) {
-                block.getElseTarget().targettedBy(block);
+            if (block instanceof ConditionalOpcodeBlock) {
+                ((ConditionalOpcodeBlock) block).getElseTarget().targettedBy(block);
             }
-            if (block.isJump()) {
-                block.getTarget().targettedBy(block);
-            } else if (block.hasTarget() && blocks.indexOf(block.getTarget()) != i + 1) {
+            if (block.hasTarget() && blocks.indexOf(block.getTarget()) != i + 1) {
                 block.getTarget().targettedBy(block);
             }
         }

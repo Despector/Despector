@@ -22,20 +22,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.despector.decompiler.method.graph.data;
+package org.spongepowered.despector.decompiler.method.graph.data.opcode;
 
-import static org.objectweb.asm.Opcodes.*;
-
-import org.objectweb.asm.Label;
+import com.google.common.base.MoreObjects;
+import com.google.common.base.MoreObjects.ToStringHelper;
 import org.objectweb.asm.tree.AbstractInsnNode;
-import org.objectweb.asm.tree.JumpInsnNode;
 import org.spongepowered.despector.util.AstUtil;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 /**
@@ -44,20 +40,14 @@ import java.util.Set;
  * created by sectioning the original opcodes at any point that may cause a jump
  * and any point targeted by a jump.
  */
-public class OpcodeBlock {
+public abstract class OpcodeBlock {
 
-    // TODO: split in to different types for jumps, switches, precompiled, etc.
+    protected final int break_point;
+    protected final List<AbstractInsnNode> opcodes = new ArrayList<>();
+    protected OpcodeBlock target;
 
-    private final int break_point;
-    private final List<AbstractInsnNode> opcodes = new ArrayList<>();
-    private AbstractInsnNode last;
-    private OpcodeBlock target;
-    private OpcodeBlock else_target;
-    private final Map<Label, OpcodeBlock> additional_targets = new HashMap<>();
-
-    private Set<OpcodeBlock> targetted_by = new HashSet<>();
-    private BlockSection internal = null;
-    private boolean exclude_from_ternary_check = false;
+    protected Set<OpcodeBlock> targetted_by = new HashSet<>();
+    protected boolean exclude_from_ternary_check = false;
 
     public OpcodeBlock(int br) {
         this.break_point = br;
@@ -79,64 +69,8 @@ public class OpcodeBlock {
         return this.opcodes;
     }
 
-    /**
-     * Gets the last opcode in this block if it is a special opcode (eg. a jump,
-     * switch, etc.). This opcode is not included in the results of
-     * {@link #getOpcodes()}.
-     */
     public AbstractInsnNode getLast() {
-        return this.last;
-    }
-
-    /**
-     * Sets the last opcode of this block.
-     * 
-     * @see #getLast()
-     */
-    public void setLast(AbstractInsnNode insn) {
-        this.last = insn;
-    }
-
-    /**
-     * Gets if this block ends with a goto.
-     */
-    public boolean isGoto() {
-        return this.last != null && this.last.getOpcode() == GOTO;
-    }
-
-    /**
-     * Gets if this block ends with a conditional jump.
-     */
-    public boolean isJump() {
-        return this.last != null && this.last instanceof JumpInsnNode;
-    }
-
-    /**
-     * Gets if this block ends with a return.
-     */
-    public boolean isReturn() {
-        return this.last != null && this.last.getOpcode() >= IRETURN && this.last.getOpcode() <= RETURN;
-    }
-
-    /**
-     * Gets if this block ends with a throw.
-     */
-    public boolean isThrow() {
-        return this.last != null && this.last.getOpcode() == ATHROW;
-    }
-
-    /**
-     * Gets if this block ends with a switch.
-     */
-    public boolean isSwitch() {
-        return this.last != null && (this.last.getOpcode() == TABLESWITCH || this.last.getOpcode() == LOOKUPSWITCH);
-    }
-
-    /**
-     * Gets if this block has an alternate execution path.
-     */
-    public boolean isConditional() {
-        return this.else_target != null;
+        return this.opcodes.get(this.opcodes.size() - 1);
     }
 
     /**
@@ -163,37 +97,6 @@ public class OpcodeBlock {
     }
 
     /**
-     * Gets the alternate target of this block. Only present for conditional
-     * jumps where it represents the block to which control is passed if the
-     * condition is false.
-     */
-    public OpcodeBlock getElseTarget() {
-        return this.else_target;
-    }
-
-    /**
-     * Has an alternate target.
-     */
-    public boolean hasElseTarget() {
-        return this.else_target != null;
-    }
-
-    /**
-     * Sets the alternate target.
-     */
-    public void setElseTarget(OpcodeBlock block) {
-        this.else_target = block;
-    }
-
-    /**
-     * Gets a map of any additional target blocks. Used by switches to represent
-     * the blocks targetted by the various cases.
-     */
-    public Map<Label, OpcodeBlock> getAdditionalTargets() {
-        return this.additional_targets;
-    }
-
-    /**
      * Gets a set of blocks which target this block.
      */
     public Set<OpcodeBlock> getTargettedBy() {
@@ -205,27 +108,6 @@ public class OpcodeBlock {
      */
     public void targettedBy(OpcodeBlock block) {
         this.targetted_by.add(block);
-    }
-
-    /**
-     * Gets the precompiled {@link BlockSection} of this block if it exists.
-     */
-    public BlockSection getPrecompiledSection() {
-        return this.internal;
-    }
-
-    /**
-     * Gets if this block has been precompiled into a {@link BlockSection}.
-     */
-    public boolean hasPrecompiledSection() {
-        return this.internal != null;
-    }
-
-    /**
-     * Sets the precompiled {@link BlockSection} of this block..
-     */
-    public void setPrecompiled(BlockSection section) {
-        this.internal = section;
     }
 
     /**
@@ -255,13 +137,18 @@ public class OpcodeBlock {
      * Prints this block's information for debugging.
      */
     public void print() {
-        System.out.println("Block " + this.break_point + ":");
-        for (AbstractInsnNode op : this.opcodes) {
-            System.out.println(AstUtil.insnToString(op));
+        System.out.println(toString());
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append(getClass().getSimpleName()).append(" breakpoint: ").append(this.break_point);
+        builder.append(" target: ").append(this.target != null ? this.target.break_point : -1).append("\n");
+        for (AbstractInsnNode insn : this.opcodes) {
+            builder.append("  ").append(AstUtil.insnToString(insn)).append("\n");
         }
-        System.out.println("Last: " + (this.last != null ? AstUtil.insnToString(this.last) : "null"));
-        System.out.println("Target: " + (this.target != null ? this.target.break_point : -1));
-        System.out.println("Else Target: " + (this.else_target != null ? this.else_target.break_point : -1));
+        return builder.toString();
     }
 
 }

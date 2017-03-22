@@ -22,29 +22,27 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.despector.decompiler.method.graph;
+package org.spongepowered.despector.decompiler.method.graph.data.opcode;
 
-import org.spongepowered.despector.decompiler.method.PartialMethod;
-import org.spongepowered.despector.decompiler.method.graph.data.opcode.OpcodeBlock;
+import org.objectweb.asm.Label;
 
-import java.util.List;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
-/**
- * A producer for dividing up the opcodes into blocks and joining them together
- * into a graph.
- */
-public interface GraphProducerStep {
+public class SwitchOpcodeBlock extends OpcodeBlock {
 
-    /**
-     * Adds the indices of any opcodes that the opcode list should be split
-     * after to the break_points set.
-     */
-    void collectBreakpoints(PartialMethod partial, Set<Integer> break_points);
+    private final Map<Label, OpcodeBlock> additional_targets = new HashMap<>();
+
+    public SwitchOpcodeBlock(int br) {
+        super(br);
+    }
 
     /**
-     * Forms edges between blocks in the graph.
+     * Gets a map of any additional target blocks. Used by switches to represent
+     * the blocks targetted by the various cases.
      */
-    void formEdges(PartialMethod partial, Map<Integer, OpcodeBlock> blocks, List<Integer> sorted_break_points, List<OpcodeBlock> block_list);
+    public Map<Label, OpcodeBlock> getAdditionalTargets() {
+        return this.additional_targets;
+    }
+
 }

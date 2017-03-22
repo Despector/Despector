@@ -22,62 +22,35 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.despector.decompiler.method.graph.data;
-
-import static com.google.common.base.Preconditions.checkState;
+package org.spongepowered.despector.decompiler.method.graph.data.block;
 
 import org.spongepowered.despector.ast.members.insn.StatementBlock;
 import org.spongepowered.despector.ast.members.insn.arg.Instruction;
-import org.spongepowered.despector.ast.members.insn.branch.DoWhile;
-import org.spongepowered.despector.ast.members.insn.branch.condition.Condition;
+import org.spongepowered.despector.decompiler.method.StatementBuilder;
+import org.spongepowered.despector.decompiler.method.graph.data.opcode.OpcodeBlock;
 
-import java.util.ArrayDeque;
-import java.util.ArrayList;
 import java.util.Deque;
-import java.util.List;
 
 /**
- * A block section representing a do-while loop.
+ * A block section that contains a single {@link OpcodeBlock}.
  */
-public class DoWhileBlockSection extends BlockSection {
+public class InlineBlockSection extends BlockSection {
 
-    private final Condition condition;
-    private final List<BlockSection> body = new ArrayList<>();
+    private final OpcodeBlock block;
 
-    public DoWhileBlockSection(Condition cond) {
-        this.condition = cond;
+    public InlineBlockSection(OpcodeBlock block) {
+        this.block = block;
     }
 
     /**
-     * Gets the condition of the loop.
+     * Gets the {@link OpcodeBlock} that is represented by this block section.
      */
-    public Condition getCondition() {
-        return this.condition;
-    }
-
-    /**
-     * Gets the {@link BlockSection}s that form the body of the loop.
-     */
-    public List<BlockSection> getBody() {
-        return this.body;
-    }
-
-    /**
-     * Appends the given {@link BlockSection} to the body of the loop.
-     */
-    public void append(BlockSection section) {
-        this.body.add(section);
+    public OpcodeBlock getBlock() {
+        return this.block;
     }
 
     @Override
     public void appendTo(StatementBlock block, Deque<Instruction> stack) {
-        StatementBlock body = new StatementBlock(StatementBlock.Type.WHILE, block.getLocals());
-        Deque<Instruction> body_stack = new ArrayDeque<>();
-        for (BlockSection body_section : this.body) {
-            body_section.appendTo(body, body_stack);
-        }
-        checkState(body_stack.isEmpty());
-        DoWhile dowhile = new DoWhile(this.condition, body);
-        block.append(dowhile);
+        StatementBuilder.appendBlock(this.block, block, block.getLocals(), stack);
     }
 }

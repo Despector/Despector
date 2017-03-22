@@ -25,13 +25,17 @@
 package org.spongepowered.despector.decompiler.method.graph.region;
 
 import org.spongepowered.despector.ast.members.insn.branch.condition.Condition;
+import org.spongepowered.despector.config.Constants;
 import org.spongepowered.despector.decompiler.method.ConditionBuilder;
 import org.spongepowered.despector.decompiler.method.PartialMethod;
 import org.spongepowered.despector.decompiler.method.graph.RegionProcessor;
-import org.spongepowered.despector.decompiler.method.graph.data.BlockSection;
-import org.spongepowered.despector.decompiler.method.graph.data.DoWhileBlockSection;
-import org.spongepowered.despector.decompiler.method.graph.data.InlineBlockSection;
-import org.spongepowered.despector.decompiler.method.graph.data.OpcodeBlock;
+import org.spongepowered.despector.decompiler.method.graph.data.block.BlockSection;
+import org.spongepowered.despector.decompiler.method.graph.data.block.DoWhileBlockSection;
+import org.spongepowered.despector.decompiler.method.graph.data.block.InlineBlockSection;
+import org.spongepowered.despector.decompiler.method.graph.data.opcode.ConditionalOpcodeBlock;
+import org.spongepowered.despector.decompiler.method.graph.data.opcode.GotoOpcodeBlock;
+import org.spongepowered.despector.decompiler.method.graph.data.opcode.OpcodeBlock;
+import org.spongepowered.despector.decompiler.method.graph.data.opcode.ProcessedOpcodeBlock;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -48,10 +52,15 @@ public class DoWhileRegionProcessor implements RegionProcessor {
             List<OpcodeBlock> condition_blocks = new ArrayList<>();
             int cond_start = region.size() - 1;
             OpcodeBlock next = region.get(cond_start);
-            while (next.isConditional()) {
+            while (next instanceof ConditionalOpcodeBlock) {
                 condition_blocks.add(0, next);
                 cond_start--;
                 next = region.get(cond_start);
+            }
+            if (Constants.TRACE_ACTIVE) {
+                System.err.println("Processing Do_while loop, start is " + start.getBreakpoint());
+                System.err.println("    Condition is " + condition_blocks.get(0).getBreakpoint() + " to "
+                        + condition_blocks.get(condition_blocks.size() - 1).getBreakpoint());
             }
             cond_start++;
             Condition cond = ConditionBuilder.makeCondition(condition_blocks, partial.getLocals(), start, ret);
@@ -60,9 +69,9 @@ public class DoWhileRegionProcessor implements RegionProcessor {
 
             for (int i = 0; i < cond_start; i++) {
                 next = region.get(i);
-                if (next.hasPrecompiledSection()) {
-                    section.append(next.getPrecompiledSection());
-                } else if (next.isConditional()) {
+                if (next instanceof ProcessedOpcodeBlock) {
+                    section.append(((ProcessedOpcodeBlock) next).getPrecompiledSection());
+                } else if (next instanceof ConditionalOpcodeBlock || next instanceof GotoOpcodeBlock) {
                     // If we encounter another conditional block then its an
                     // error
                     // as we should have already processed all sub regions

@@ -26,8 +26,9 @@ package org.spongepowered.despector.decompiler.method.graph.process;
 
 import org.spongepowered.despector.decompiler.method.PartialMethod;
 import org.spongepowered.despector.decompiler.method.graph.GraphProcessor;
-import org.spongepowered.despector.decompiler.method.graph.data.BlockSection;
-import org.spongepowered.despector.decompiler.method.graph.data.OpcodeBlock;
+import org.spongepowered.despector.decompiler.method.graph.data.block.BlockSection;
+import org.spongepowered.despector.decompiler.method.graph.data.opcode.OpcodeBlock;
+import org.spongepowered.despector.decompiler.method.graph.data.opcode.ProcessedOpcodeBlock;
 
 import java.util.List;
 
@@ -38,8 +39,8 @@ public class InternalBlockProcessor implements GraphProcessor {
 
     @Override
     public int process(PartialMethod partial, List<OpcodeBlock> blocks, OpcodeBlock region_start, List<BlockSection> final_blocks) {
-        if (region_start.hasPrecompiledSection()) {
-            final_blocks.add(region_start.getPrecompiledSection());
+        if (region_start instanceof ProcessedOpcodeBlock) {
+            final_blocks.add(((ProcessedOpcodeBlock) region_start).getPrecompiledSection());
             return blocks.indexOf(region_start);
         }
         return -1;

@@ -30,8 +30,10 @@ import org.objectweb.asm.tree.LabelNode;
 import org.objectweb.asm.tree.LookupSwitchInsnNode;
 import org.objectweb.asm.tree.TableSwitchInsnNode;
 import org.spongepowered.despector.decompiler.method.PartialMethod;
+import org.spongepowered.despector.decompiler.method.graph.GraphOperation;
 import org.spongepowered.despector.decompiler.method.graph.GraphProducerStep;
-import org.spongepowered.despector.decompiler.method.graph.data.OpcodeBlock;
+import org.spongepowered.despector.decompiler.method.graph.data.opcode.OpcodeBlock;
+import org.spongepowered.despector.decompiler.method.graph.data.opcode.SwitchOpcodeBlock;
 
 import java.util.List;
 import java.util.Map;
@@ -76,25 +78,34 @@ public class SwitchGraphProducerStep implements GraphProducerStep {
             // Now we go through and form an edge from any block and the block
             // it flows (or jumps) into next.
             OpcodeBlock block = e.getValue();
+            if (!(block.getLast() instanceof TableSwitchInsnNode) && !(block.getLast() instanceof LookupSwitchInsnNode)) {
+                continue;
+            }
+            SwitchOpcodeBlock replacement = new SwitchOpcodeBlock(block.getBreakpoint());
+            replacement.getOpcodes().addAll(block.getOpcodes());
+            replacement.setTarget(block.getTarget());
+            block_list.set(block_list.indexOf(block), replacement);
+            e.setValue(replacement);
+            GraphOperation.remap(block_list, block, replacement);
             if (block.getLast() instanceof TableSwitchInsnNode) {
                 TableSwitchInsnNode ts = (TableSwitchInsnNode) block.getLast();
                 for (LabelNode l : (List<LabelNode>) ts.labels) {
                     Label label = l.getLabel();
-                    block.getAdditionalTargets().put(label,
+                    replacement.getAdditionalTargets().put(label,
                             blocks.get(sorted_break_points.get(sorted_break_points.indexOf(label_indices.get(label)) + 1)));
                 }
                 Label label = ts.dflt.getLabel();
-                block.getAdditionalTargets().put(label,
+                replacement.getAdditionalTargets().put(label,
                         blocks.get(sorted_break_points.get(sorted_break_points.indexOf(label_indices.get(label)) + 1)));
             } else if (block.getLast() instanceof LookupSwitchInsnNode) {
                 LookupSwitchInsnNode ts = (LookupSwitchInsnNode) block.getLast();
                 for (LabelNode l : (List<LabelNode>) ts.labels) {
                     Label label = l.getLabel();
-                    block.getAdditionalTargets().put(label,
+                    replacement.getAdditionalTargets().put(label,
                             blocks.get(sorted_break_points.get(sorted_break_points.indexOf(label_indices.get(label)) + 1)));
                 }
                 Label label = ts.dflt.getLabel();
-                block.getAdditionalTargets().put(label,
+                replacement.getAdditionalTargets().put(label,
                         blocks.get(sorted_break_points.get(sorted_break_points.indexOf(label_indices.get(label)) + 1)));
             }
         }

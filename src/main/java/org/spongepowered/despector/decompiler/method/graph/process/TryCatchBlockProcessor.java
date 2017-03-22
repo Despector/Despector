@@ -32,12 +32,13 @@ import org.objectweb.asm.tree.VarInsnNode;
 import org.spongepowered.despector.ast.Locals;
 import org.spongepowered.despector.decompiler.method.PartialMethod;
 import org.spongepowered.despector.decompiler.method.graph.GraphProcessor;
-import org.spongepowered.despector.decompiler.method.graph.data.BlockSection;
-import org.spongepowered.despector.decompiler.method.graph.data.OpcodeBlock;
-import org.spongepowered.despector.decompiler.method.graph.data.TryCatchBlockSection;
-import org.spongepowered.despector.decompiler.method.graph.data.TryCatchBlockSection.CatchBlockSection;
-import org.spongepowered.despector.decompiler.method.graph.data.TryCatchMarkerOpcodeBlock;
 import org.spongepowered.despector.decompiler.method.graph.data.TryCatchMarkerType;
+import org.spongepowered.despector.decompiler.method.graph.data.block.BlockSection;
+import org.spongepowered.despector.decompiler.method.graph.data.block.TryCatchBlockSection;
+import org.spongepowered.despector.decompiler.method.graph.data.block.TryCatchBlockSection.CatchBlockSection;
+import org.spongepowered.despector.decompiler.method.graph.data.opcode.GotoOpcodeBlock;
+import org.spongepowered.despector.decompiler.method.graph.data.opcode.OpcodeBlock;
+import org.spongepowered.despector.decompiler.method.graph.data.opcode.TryCatchMarkerOpcodeBlock;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -76,7 +77,7 @@ public class TryCatchBlockProcessor implements GraphProcessor {
             OpcodeBlock next = blocks.get(end);
             OpcodeBlock end_of_catch = null;
             int last_block = -1;
-            if (next.isGoto()) {
+            if (next instanceof GotoOpcodeBlock) {
                 end_of_catch = next.getTarget();
                 last_block = blocks.indexOf(end_of_catch);
             } else {
@@ -135,7 +136,7 @@ public class TryCatchBlockProcessor implements GraphProcessor {
                         for (int j = end; j < blocks.size(); j++) {
                             OpcodeBlock cnext = blocks.get(j);
                             catch_body.add(cnext);
-                            if (cnext.isGoto() && cnext.getTarget() == end_of_catch) {
+                            if (cnext instanceof GotoOpcodeBlock && cnext.getTarget() == end_of_catch) {
                                 break;
                             } else if (cnext == end_of_catch) {
                                 allEnds.clear();

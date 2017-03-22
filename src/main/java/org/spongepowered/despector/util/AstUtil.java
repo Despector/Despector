@@ -348,20 +348,8 @@ public final class AstUtil {
      * in the given list of opcodes.
      */
     public static int findStartLastStatement(List<AbstractInsnNode> opcodes) {
-        return findStartLastStatement(opcodes, opcodes.size() - 1, opcodes.get(opcodes.size() - 1));
-    }
-
-    /**
-     * Returns the index of the opcode that is the start of the last statement
-     * in the given list of opcodes.
-     */
-    public static int findStartLastStatement(List<AbstractInsnNode> opcodes, AbstractInsnNode last) {
-        return findStartLastStatement(opcodes, opcodes.size(), last);
-    }
-
-    private static int findStartLastStatement(List<AbstractInsnNode> opcodes, int size, AbstractInsnNode last) {
-        int required_stack = getStackDelta(last);
-        for (int index = size - 1; index >= 0; index--) {
+        int required_stack = getStackDelta(opcodes.get(opcodes.size() - 1));
+        for (int index = opcodes.size() - 2; index >= 0; index--) {
             if (required_stack == 0) {
                 return index + 1;
             }
@@ -388,6 +376,17 @@ public final class AstUtil {
      */
     public static boolean isEmptyOfLogic(List<AbstractInsnNode> opcodes) {
         for (int i = 0; i < opcodes.size(); i++) {
+            AbstractInsnNode next = opcodes.get(i);
+            if (next instanceof FrameNode || next instanceof LabelNode || next instanceof LineNumberNode) {
+                continue;
+            }
+            return false;
+        }
+        return true;
+    }
+
+    public static boolean isEmptyOfLogic(List<AbstractInsnNode> opcodes, int size) {
+        for (int i = 0; i < size; i++) {
             AbstractInsnNode next = opcodes.get(i);
             if (next instanceof FrameNode || next instanceof LabelNode || next instanceof LineNumberNode) {
                 continue;

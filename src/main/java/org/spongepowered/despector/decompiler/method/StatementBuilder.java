@@ -83,7 +83,7 @@ import org.spongepowered.despector.ast.members.insn.function.StaticMethodInvoke;
 import org.spongepowered.despector.ast.members.insn.misc.Increment;
 import org.spongepowered.despector.ast.members.insn.misc.Return;
 import org.spongepowered.despector.ast.members.insn.misc.Throw;
-import org.spongepowered.despector.decompiler.method.graph.data.OpcodeBlock;
+import org.spongepowered.despector.decompiler.method.graph.data.opcode.OpcodeBlock;
 import org.spongepowered.despector.util.AstUtil;
 import org.spongepowered.despector.util.TypeHelper;
 
@@ -95,16 +95,9 @@ public class StatementBuilder {
 
         // Decompiles a set of opcodes into statements.
 
-        for (int index = 0; index < op.getOpcodes().size() + 1; index++) {
+        for (int index = 0; index < op.getOpcodes().size(); index++) {
             int label_index = op.getBreakpoint() - (op.getOpcodes().size() - index);
-            AbstractInsnNode next;
-            if (index < op.getOpcodes().size()) {
-                next = op.getOpcodes().get(index);
-            } else if ((op.isReturn() || op.isThrow()) && op.getLast() != null) {
-                next = op.getLast();
-            } else {
-                break;
-            }
+            AbstractInsnNode next = op.getOpcodes().get(index);
             if (next instanceof LabelNode) {
                 continue;
             } else if (next instanceof FrameNode) {

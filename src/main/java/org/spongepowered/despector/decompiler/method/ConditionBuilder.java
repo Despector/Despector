@@ -37,7 +37,9 @@ import org.spongepowered.despector.ast.members.insn.branch.condition.BooleanCond
 import org.spongepowered.despector.ast.members.insn.branch.condition.CompareCondition;
 import org.spongepowered.despector.ast.members.insn.branch.condition.Condition;
 import org.spongepowered.despector.ast.members.insn.branch.condition.OrCondition;
-import org.spongepowered.despector.decompiler.method.graph.data.OpcodeBlock;
+import org.spongepowered.despector.config.Constants;
+import org.spongepowered.despector.decompiler.method.graph.data.opcode.ConditionalOpcodeBlock;
+import org.spongepowered.despector.decompiler.method.graph.data.opcode.OpcodeBlock;
 import org.spongepowered.despector.util.ConditionUtil;
 
 import java.util.ArrayDeque;
@@ -50,7 +52,7 @@ import java.util.List;
  */
 public class ConditionBuilder {
 
-    private static Condition makeSimpleCondition(OpcodeBlock block, Locals locals) {
+    private static Condition makeSimpleCondition(ConditionalOpcodeBlock block, Locals locals) {
 
         // This forms the condition representing the conditional jump of the
         // given block
@@ -154,6 +156,12 @@ public class ConditionBuilder {
      * Converts the given set of {@link OpcodeBlock}s to a condition.
      */
     public static Condition makeCondition(List<OpcodeBlock> blocks, Locals locals, OpcodeBlock body, OpcodeBlock ret) {
+        if (Constants.TRACE_ACTIVE) {
+            System.err.println(
+                    "Making condition with blocks from " + blocks.get(0).getBreakpoint() + " to " + blocks.get(blocks.size() - 1).getBreakpoint());
+            System.err.println("    Ret is " + ret.getBreakpoint());
+            System.err.println("    Body is " + body.getBreakpoint());
+        }
         List<ConditionGraphNode> nodes = new ArrayList<>(blocks.size());
 
         ConditionGraphNode body_node = new ConditionGraphNode(null);
@@ -168,12 +176,15 @@ public class ConditionBuilder {
 
         for (int i = 0; i < blocks.size(); i++) {
             OpcodeBlock next = blocks.get(i);
+            if (!(next instanceof ConditionalOpcodeBlock)) {
+                throw new IllegalStateException();
+            }
             // make the nodes and compute the simple condition for each node.
-            nodes.add(new ConditionGraphNode(makeSimpleCondition(next, locals)));
+            nodes.add(new ConditionGraphNode(makeSimpleCondition((ConditionalOpcodeBlock) next, locals)));
         }
 
         for (int i = 0; i < blocks.size(); i++) {
-            OpcodeBlock next = blocks.get(i);
+            ConditionalOpcodeBlock next = (ConditionalOpcodeBlock) blocks.get(i);
             ConditionGraphNode node = nodes.get(i);
             // connect the nodes
             if (next.getTarget() == body) {

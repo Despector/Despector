@@ -22,29 +22,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.despector.decompiler.method.graph;
+package org.spongepowered.despector.decompiler.method.graph.data.block;
 
-import org.spongepowered.despector.decompiler.method.PartialMethod;
-import org.spongepowered.despector.decompiler.method.graph.data.opcode.OpcodeBlock;
+import org.spongepowered.despector.ast.members.insn.StatementBlock;
+import org.spongepowered.despector.ast.members.insn.arg.Instruction;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.Deque;
 
 /**
- * A producer for dividing up the opcodes into blocks and joining them together
- * into a graph.
+ * Represents a single section in the final output.
  */
-public interface GraphProducerStep {
+public abstract class BlockSection {
 
     /**
-     * Adds the indices of any opcodes that the opcode list should be split
-     * after to the break_points set.
+     * Appends this block section to the final output.
+     * 
+     * @param block The statement block to append to
+     * @param stack The current instruction stack
      */
-    void collectBreakpoints(PartialMethod partial, Set<Integer> break_points);
+    public abstract void appendTo(StatementBlock block, Deque<Instruction> stack);
 
-    /**
-     * Forms edges between blocks in the graph.
-     */
-    void formEdges(PartialMethod partial, Map<Integer, OpcodeBlock> blocks, List<Integer> sorted_break_points, List<OpcodeBlock> block_list);
 }

@@ -30,10 +30,12 @@ import org.objectweb.asm.tree.LookupSwitchInsnNode;
 import org.objectweb.asm.tree.TableSwitchInsnNode;
 import org.spongepowered.despector.decompiler.method.PartialMethod;
 import org.spongepowered.despector.decompiler.method.graph.GraphProcessor;
-import org.spongepowered.despector.decompiler.method.graph.data.BlockSection;
-import org.spongepowered.despector.decompiler.method.graph.data.OpcodeBlock;
-import org.spongepowered.despector.decompiler.method.graph.data.SwitchBlockSection;
-import org.spongepowered.despector.decompiler.method.graph.data.SwitchBlockSection.SwitchCaseBlockSection;
+import org.spongepowered.despector.decompiler.method.graph.data.block.BlockSection;
+import org.spongepowered.despector.decompiler.method.graph.data.block.SwitchBlockSection;
+import org.spongepowered.despector.decompiler.method.graph.data.block.SwitchBlockSection.SwitchCaseBlockSection;
+import org.spongepowered.despector.decompiler.method.graph.data.opcode.GotoOpcodeBlock;
+import org.spongepowered.despector.decompiler.method.graph.data.opcode.OpcodeBlock;
+import org.spongepowered.despector.decompiler.method.graph.data.opcode.SwitchOpcodeBlock;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -48,20 +50,21 @@ public class SwitchBlockProcessor implements GraphProcessor {
     @SuppressWarnings("unchecked")
     @Override
     public int process(PartialMethod partial, List<OpcodeBlock> blocks, OpcodeBlock region_start, List<BlockSection> final_blocks) {
-        if (region_start.isSwitch()) {
+        if (region_start instanceof SwitchOpcodeBlock) {
+            SwitchOpcodeBlock sblock = (SwitchOpcodeBlock) region_start;
             List<LabelNode> labels = null;
             List<Integer> keys = null;
             LabelNode dflt = null;
-            if (region_start.getLast() instanceof TableSwitchInsnNode) {
-                TableSwitchInsnNode ts = (TableSwitchInsnNode) region_start.getLast();
+            if (sblock.getLast() instanceof TableSwitchInsnNode) {
+                TableSwitchInsnNode ts = (TableSwitchInsnNode) sblock.getLast();
                 labels = ts.labels;
                 dflt = ts.dflt;
                 keys = new ArrayList<>();
                 for (int k = ts.min; k <= ts.max; k++) {
                     keys.add(k);
                 }
-            } else if (region_start.getLast() instanceof LookupSwitchInsnNode) {
-                LookupSwitchInsnNode ts = (LookupSwitchInsnNode) region_start.getLast();
+            } else if (sblock.getLast() instanceof LookupSwitchInsnNode) {
+                LookupSwitchInsnNode ts = (LookupSwitchInsnNode) sblock.getLast();
                 labels = ts.labels;
                 dflt = ts.dflt;
                 keys = ts.keys;
@@ -82,18 +85,18 @@ public class SwitchBlockProcessor implements GraphProcessor {
                 cases.put(l.getLabel(), cs);
                 cs.getTargets().add(keys.get(index++));
                 List<OpcodeBlock> case_region = new ArrayList<>();
-                OpcodeBlock block = region_start.getAdditionalTargets().get(l.getLabel());
+                OpcodeBlock block = sblock.getAdditionalTargets().get(l.getLabel());
                 case_region.add(block);
                 int start = blocks.indexOf(block) + 1;
                 block = blocks.get(start);
-                while (!region_start.getAdditionalTargets().containsValue(block) && block != end) {
+                while (!sblock.getAdditionalTargets().containsValue(block) && block != end) {
                     case_region.add(block);
                     start++;
                     block = blocks.get(start);
                 }
 
                 OpcodeBlock last = case_region.get(case_region.size() - 1);
-                if (last.isGoto()) {
+                if (last instanceof GotoOpcodeBlock) {
                     end = last.getTarget();
                     case_region.remove(last);
                     cs.setBreaks(true);
@@ -110,11 +113,11 @@ public class SwitchBlockProcessor implements GraphProcessor {
                 cases.put(dflt.getLabel(), cs);
                 sswitch.addCase(cs);
                 List<OpcodeBlock> case_region = new ArrayList<>();
-                OpcodeBlock block = region_start.getAdditionalTargets().get(dflt.getLabel());
+                OpcodeBlock block = sblock.getAdditionalTargets().get(dflt.getLabel());
                 case_region.add(block);
                 int start = blocks.indexOf(block) + 1;
                 block = blocks.get(start);
-                while (!region_start.getAdditionalTargets().containsValue(block) && block != end) {
+                while (!sblock.getAdditionalTargets().containsValue(block) && block != end) {
                     case_region.add(block);
                     start++;
                     block = blocks.get(start);

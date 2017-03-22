@@ -22,9 +22,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.despector.decompiler.method.graph.data;
+package org.spongepowered.despector.decompiler.method.graph.data.opcode;
 
 import org.objectweb.asm.tree.TryCatchBlockNode;
+import org.spongepowered.despector.decompiler.method.graph.data.TryCatchMarkerType;
 
 /**
  * An opcode block that acts as a marker to mark the start and end of a try

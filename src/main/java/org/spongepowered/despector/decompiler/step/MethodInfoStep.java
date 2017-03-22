@@ -39,6 +39,7 @@ import org.spongepowered.despector.ast.members.MethodEntry;
 import org.spongepowered.despector.ast.members.insn.StatementBlock;
 import org.spongepowered.despector.ast.type.TypeEntry;
 import org.spongepowered.despector.config.ConfigManager;
+import org.spongepowered.despector.config.Constants;
 import org.spongepowered.despector.decompiler.Decompiler;
 import org.spongepowered.despector.decompiler.DecompilerStep;
 import org.spongepowered.despector.decompiler.method.MethodDecompiler;
@@ -96,7 +97,18 @@ public class MethodInfoStep implements DecompilerStep {
             } catch (Exception ex) {
                 System.err.println("Error decompiling method body for " + cn.name + " " + m.toString());
                 ex.printStackTrace();
-                if (ConfigManager.getConfig().print_opcodes_on_error) {
+                if (Constants.TRACE_ERRORS) {
+                    System.out.println("Starting error trace");
+                    System.out.flush();
+                    System.err.flush();
+                    Constants.TRACE_ACTIVE = true;
+                    try {
+                        this.method_decomp.decompile(m, mn);
+                    } catch (Exception e) {
+                    }
+                    Constants.TRACE_ACTIVE = false;
+                    System.exit(1);
+                } else if (ConfigManager.getConfig().print_opcodes_on_error) {
                     System.err.println("Offending method bytecode:");
                     Iterator<AbstractInsnNode> it = mn.instructions.iterator();
                     while (it.hasNext()) {

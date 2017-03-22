@@ -32,9 +32,9 @@ import org.spongepowered.despector.ast.Locals;
 import org.spongepowered.despector.ast.Locals.LocalInstance;
 import org.spongepowered.despector.decompiler.method.PartialMethod;
 import org.spongepowered.despector.decompiler.method.graph.GraphProducerStep;
-import org.spongepowered.despector.decompiler.method.graph.data.OpcodeBlock;
-import org.spongepowered.despector.decompiler.method.graph.data.TryCatchMarkerOpcodeBlock;
 import org.spongepowered.despector.decompiler.method.graph.data.TryCatchMarkerType;
+import org.spongepowered.despector.decompiler.method.graph.data.opcode.OpcodeBlock;
+import org.spongepowered.despector.decompiler.method.graph.data.opcode.TryCatchMarkerOpcodeBlock;
 
 import java.util.List;
 import java.util.Map;

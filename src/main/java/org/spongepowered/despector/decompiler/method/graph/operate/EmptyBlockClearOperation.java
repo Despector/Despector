@@ -26,8 +26,9 @@ package org.spongepowered.despector.decompiler.method.graph.operate;
 
 import org.spongepowered.despector.decompiler.method.PartialMethod;
 import org.spongepowered.despector.decompiler.method.graph.GraphOperation;
-import org.spongepowered.despector.decompiler.method.graph.data.OpcodeBlock;
-import org.spongepowered.despector.decompiler.method.graph.data.TryCatchMarkerOpcodeBlock;
+import org.spongepowered.despector.decompiler.method.graph.data.opcode.ConditionalOpcodeBlock;
+import org.spongepowered.despector.decompiler.method.graph.data.opcode.OpcodeBlock;
+import org.spongepowered.despector.decompiler.method.graph.data.opcode.TryCatchMarkerOpcodeBlock;
 import org.spongepowered.despector.util.AstUtil;
 
 import java.util.Iterator;
@@ -47,7 +48,7 @@ public class EmptyBlockClearOperation implements GraphOperation {
             if (block instanceof TryCatchMarkerOpcodeBlock) {
                 continue;
             }
-            if (AstUtil.isEmptyOfLogic(block.getOpcodes()) && block.getLast() == null) {
+            if (AstUtil.isEmptyOfLogic(block.getOpcodes())) {
                 // some conditions can create an empty block as a breakpoint
                 // gets inserted on either side of a label immediately following
                 // a jump
@@ -59,8 +60,11 @@ public class EmptyBlockClearOperation implements GraphOperation {
                     if (other.getTarget() == block) {
                         other.setTarget(block.getTarget());
                     }
-                    if (other.getElseTarget() == block) {
-                        other.setElseTarget(block.getTarget());
+                    if (other instanceof ConditionalOpcodeBlock) {
+                        ConditionalOpcodeBlock cond = (ConditionalOpcodeBlock) other;
+                        if (cond.getElseTarget() == block) {
+                            cond.setElseTarget(block.getTarget());
+                        }
                     }
                 }
                 it.remove();

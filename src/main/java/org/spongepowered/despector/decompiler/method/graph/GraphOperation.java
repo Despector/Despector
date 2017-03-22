@@ -26,7 +26,10 @@ package org.spongepowered.despector.decompiler.method.graph;
 
 import org.objectweb.asm.Label;
 import org.spongepowered.despector.decompiler.method.PartialMethod;
-import org.spongepowered.despector.decompiler.method.graph.data.OpcodeBlock;
+import org.spongepowered.despector.decompiler.method.graph.data.opcode.ConditionalOpcodeBlock;
+import org.spongepowered.despector.decompiler.method.graph.data.opcode.OpcodeBlock;
+import org.spongepowered.despector.decompiler.method.graph.data.opcode.SwitchOpcodeBlock;
+import org.spongepowered.despector.decompiler.method.graph.process.SwitchBlockProcessor;
 
 import java.util.List;
 import java.util.Map;
@@ -43,15 +46,21 @@ public interface GraphOperation {
 
     static void remap(List<OpcodeBlock> blocks, OpcodeBlock from, OpcodeBlock to) {
         for (OpcodeBlock other : blocks) {
+            if (other instanceof ConditionalOpcodeBlock) {
+                ConditionalOpcodeBlock cond = (ConditionalOpcodeBlock) other;
+                if (cond.getElseTarget() == from) {
+                    cond.setElseTarget(to);
+                }
+            }
             if (other.getTarget() == from) {
                 other.setTarget(to);
             }
-            if (other.getElseTarget() == from) {
-                other.setElseTarget(to);
-            }
-            for (Map.Entry<Label, OpcodeBlock> e : other.getAdditionalTargets().entrySet()) {
-                if (e.getValue() == from) {
-                    other.getAdditionalTargets().put(e.getKey(), to);
+            if (other instanceof SwitchOpcodeBlock) {
+                SwitchOpcodeBlock sswitch = (SwitchOpcodeBlock) other;
+                for (Map.Entry<Label, OpcodeBlock> e : sswitch.getAdditionalTargets().entrySet()) {
+                    if (e.getValue() == from) {
+                        sswitch.getAdditionalTargets().put(e.getKey(), to);
+                    }
                 }
             }
         }

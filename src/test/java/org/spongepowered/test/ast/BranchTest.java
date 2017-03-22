@@ -527,6 +527,28 @@ public class BranchTest {
         assertEquals(good, insn);
     }
 
+    public void mth_whilebreak(int i, boolean a, boolean d, boolean e) {
+        while (a) {
+            if (d) {
+                break;
+            }
+            System.out.println(e);
+        }
+    }
+
+    @Test
+    public void testBasicWhileBreak() throws IOException {
+        String insn = TestHelper.getAsString(getClass(), "mth_whilebreak");
+        String good = "while (a) {\n"
+                + "    if (b) {\n"
+                + "        break;\n"
+                + "    }\n"
+                + "    System.out.println(e);\n"
+                + "}";
+        assertEquals(good, insn);
+    }
+
+
 
     @Test
     public void testInverseFor() throws IOException {

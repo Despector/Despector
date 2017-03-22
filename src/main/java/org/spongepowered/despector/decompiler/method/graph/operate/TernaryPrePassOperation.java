@@ -28,14 +28,18 @@ import static com.google.common.base.Preconditions.checkState;
 
 import org.spongepowered.despector.ast.Locals;
 import org.spongepowered.despector.ast.members.insn.branch.condition.Condition;
+import org.spongepowered.despector.config.Constants;
 import org.spongepowered.despector.decompiler.method.ConditionBuilder;
 import org.spongepowered.despector.decompiler.method.PartialMethod;
 import org.spongepowered.despector.decompiler.method.graph.GraphOperation;
-import org.spongepowered.despector.decompiler.method.graph.data.InlineBlockSection;
-import org.spongepowered.despector.decompiler.method.graph.data.OpcodeBlock;
-import org.spongepowered.despector.decompiler.method.graph.data.TernaryBlockSection;
-import org.spongepowered.despector.decompiler.method.graph.data.TryCatchMarkerOpcodeBlock;
 import org.spongepowered.despector.decompiler.method.graph.data.TryCatchMarkerType;
+import org.spongepowered.despector.decompiler.method.graph.data.block.InlineBlockSection;
+import org.spongepowered.despector.decompiler.method.graph.data.block.TernaryBlockSection;
+import org.spongepowered.despector.decompiler.method.graph.data.opcode.ConditionalOpcodeBlock;
+import org.spongepowered.despector.decompiler.method.graph.data.opcode.GotoOpcodeBlock;
+import org.spongepowered.despector.decompiler.method.graph.data.opcode.OpcodeBlock;
+import org.spongepowered.despector.decompiler.method.graph.data.opcode.ProcessedOpcodeBlock;
+import org.spongepowered.despector.decompiler.method.graph.data.opcode.TryCatchMarkerOpcodeBlock;
 import org.spongepowered.despector.util.AstUtil;
 
 import java.util.ArrayList;
@@ -59,14 +63,14 @@ public class TernaryPrePassOperation implements GraphOperation {
                 if (tc.getType() == TryCatchMarkerType.CATCH) {
                     blocks.get(i + 1).omitFromTernaryCheck(true);
                 }
-            } else if (block.hasPrecompiledSection() && block.getPrecompiledSection() instanceof TernaryBlockSection) {
+            } else if (block instanceof ProcessedOpcodeBlock
+                    && ((ProcessedOpcodeBlock) block).getPrecompiledSection() instanceof TernaryBlockSection) {
                 blocks.get(i + 1).omitFromTernaryCheck(true);
             }
         }
         for (int i = 0; i < blocks.size(); i++) {
             OpcodeBlock block = blocks.get(i);
-            if (!block.isOmittedFromTernaryCheck() && (AstUtil.hasStartingRequirement(block.getOpcodes())
-                    || (block.getLast() != null && AstUtil.isEmptyOfLogic(block.getOpcodes()) && AstUtil.getStackDelta(block.getLast()) < 0))) {
+            if (!block.isOmittedFromTernaryCheck() && AstUtil.hasStartingRequirement(block.getOpcodes())) {
                 i -= compileTernary(blocks, i, partial.getLocals());
             }
         }
@@ -77,6 +81,9 @@ public class TernaryPrePassOperation implements GraphOperation {
             return 0;
         }
         OpcodeBlock consumer = blocks.get(end);
+        if (Constants.TRACE_ACTIVE) {
+            System.err.println("Forming a ternary from blocks ending in " + consumer.getBreakpoint());
+        }
         int start = end - 1;
         List<OpcodeBlock> true_blocks = new ArrayList<>();
         OpcodeBlock tr = blocks.get(start--);
@@ -85,14 +92,15 @@ public class TernaryPrePassOperation implements GraphOperation {
         }
         true_blocks.add(0, tr);
         OpcodeBlock go = blocks.get(start--);
-        while (!go.isGoto() || go.getTarget() != consumer) {
+        while (!(go instanceof GotoOpcodeBlock) || go.getTarget() != consumer) {
             true_blocks.add(0, go);
             go = blocks.get(start--);
         }
+        checkState(!true_blocks.isEmpty());
         List<OpcodeBlock> false_blocks = new ArrayList<>();
         OpcodeBlock fl = blocks.get(start--);
         OpcodeBlock first_true = true_blocks.get(0);
-        while (!fl.isConditional() || fl.getTarget() != first_true) {
+        while ((!(go instanceof GotoOpcodeBlock) && !(go instanceof ConditionalOpcodeBlock)) || fl.getTarget() != first_true) {
             false_blocks.add(0, fl);
             fl = blocks.get(start--);
         }
@@ -108,10 +116,10 @@ public class TernaryPrePassOperation implements GraphOperation {
         boolean has_more = false;
         for (; start >= 0; start--) {
             OpcodeBlock next = blocks.get(start);
-            if (next.isGoto() && next.getTarget() == consumer) {
+            if (next instanceof GotoOpcodeBlock && next.getTarget() == consumer) {
                 has_more = true;
             }
-            if (!next.isConditional()) {
+            if (!(next instanceof GotoOpcodeBlock) && !(next instanceof ConditionalOpcodeBlock)) {
                 break;
             }
             if (!seen.contains(next.getTarget())) {
@@ -128,10 +136,10 @@ public class TernaryPrePassOperation implements GraphOperation {
             true_blocks.remove(consumer);
         }
         for (OpcodeBlock t : true_blocks) {
-            if (t.hasPrecompiledSection()) {
-                ternary.getFalseBody().add(t.getPrecompiledSection());
+            if (t instanceof ProcessedOpcodeBlock) {
+                ternary.getFalseBody().add(((ProcessedOpcodeBlock) t).getPrecompiledSection());
             } else {
-                checkState(!t.isConditional());
+                checkState(!(t instanceof GotoOpcodeBlock) && !(t instanceof ConditionalOpcodeBlock));
                 ternary.getFalseBody().add(new InlineBlockSection(t));
             }
         }
@@ -141,20 +149,20 @@ public class TernaryPrePassOperation implements GraphOperation {
             false_blocks.remove(consumer);
         }
         for (OpcodeBlock t : false_blocks) {
-            if (t.hasPrecompiledSection()) {
-                ternary.getTrueBody().add(t.getPrecompiledSection());
+            if (t instanceof ProcessedOpcodeBlock) {
+                ternary.getTrueBody().add(((ProcessedOpcodeBlock) t).getPrecompiledSection());
             } else {
-                checkState(!t.isConditional());
+                checkState(!(t instanceof GotoOpcodeBlock) && !(t instanceof ConditionalOpcodeBlock));
                 ternary.getTrueBody().add(new InlineBlockSection(t));
             }
         }
         OpcodeBlock first = condition_blocks.get(0);
-        first.setLast(null);
-        first.setPrecompiled(ternary);
-        first.setTarget(consumer);
-        first.setElseTarget(null);
+        OpcodeBlock replacement = new ProcessedOpcodeBlock(first.getBreakpoint(), ternary);
+        replacement.setTarget(consumer);
         start = blocks.indexOf(first);
         int removed = has_more ? 1 : 0;
+        blocks.set(start, replacement);
+        GraphOperation.remap(blocks, first, replacement);
         for (int i = end - 1; i >= start + 1; i--) {
             if (blocks.get(i) instanceof TryCatchMarkerOpcodeBlock) {
                 removed--;

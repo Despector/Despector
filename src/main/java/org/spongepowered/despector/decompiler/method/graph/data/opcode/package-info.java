@@ -22,29 +22,5 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.despector.decompiler.method.graph;
-
-import org.spongepowered.despector.decompiler.method.PartialMethod;
-import org.spongepowered.despector.decompiler.method.graph.data.opcode.OpcodeBlock;
-
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-/**
- * A producer for dividing up the opcodes into blocks and joining them together
- * into a graph.
- */
-public interface GraphProducerStep {
-
-    /**
-     * Adds the indices of any opcodes that the opcode list should be split
-     * after to the break_points set.
-     */
-    void collectBreakpoints(PartialMethod partial, Set<Integer> break_points);
-
-    /**
-     * Forms edges between blocks in the graph.
-     */
-    void formEdges(PartialMethod partial, Map<Integer, OpcodeBlock> blocks, List<Integer> sorted_break_points, List<OpcodeBlock> block_list);
-}
+@org.spongepowered.despector.util.NonnullByDefault
+package org.spongepowered.despector.decompiler.method.graph.data.opcode;

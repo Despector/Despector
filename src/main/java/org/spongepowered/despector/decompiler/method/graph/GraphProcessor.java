@@ -25,8 +25,8 @@
 package org.spongepowered.despector.decompiler.method.graph;
 
 import org.spongepowered.despector.decompiler.method.PartialMethod;
-import org.spongepowered.despector.decompiler.method.graph.data.BlockSection;
-import org.spongepowered.despector.decompiler.method.graph.data.OpcodeBlock;
+import org.spongepowered.despector.decompiler.method.graph.data.block.BlockSection;
+import org.spongepowered.despector.decompiler.method.graph.data.opcode.OpcodeBlock;
 
 import java.util.List;
 

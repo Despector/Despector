@@ -22,29 +22,31 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.despector.decompiler.method.graph;
+package org.spongepowered.despector.decompiler.method.graph.data.opcode;
 
-import org.spongepowered.despector.decompiler.method.PartialMethod;
-import org.spongepowered.despector.decompiler.method.graph.data.opcode.OpcodeBlock;
+import org.spongepowered.despector.decompiler.method.graph.data.block.BlockSection;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+public class ProcessedOpcodeBlock extends OpcodeBlock {
 
-/**
- * A producer for dividing up the opcodes into blocks and joining them together
- * into a graph.
- */
-public interface GraphProducerStep {
+    private BlockSection internal = null;
+
+    public ProcessedOpcodeBlock(int br, BlockSection internal) {
+        super(br);
+        this.internal = internal;
+    }
 
     /**
-     * Adds the indices of any opcodes that the opcode list should be split
-     * after to the break_points set.
+     * Gets the precompiled {@link BlockSection} of this block if it exists.
      */
-    void collectBreakpoints(PartialMethod partial, Set<Integer> break_points);
+    public BlockSection getPrecompiledSection() {
+        return this.internal;
+    }
 
     /**
-     * Forms edges between blocks in the graph.
+     * Sets the precompiled {@link BlockSection} of this block..
      */
-    void formEdges(PartialMethod partial, Map<Integer, OpcodeBlock> blocks, List<Integer> sorted_break_points, List<OpcodeBlock> block_list);
+    public void setPrecompiled(BlockSection section) {
+        this.internal = section;
+    }
+
 }

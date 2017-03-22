@@ -22,29 +22,29 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.despector.decompiler.method.graph;
+package org.spongepowered.despector.decompiler.method.graph.operate;
 
 import org.spongepowered.despector.decompiler.method.PartialMethod;
+import org.spongepowered.despector.decompiler.method.graph.GraphOperation;
+import org.spongepowered.despector.decompiler.method.graph.data.opcode.GotoOpcodeBlock;
 import org.spongepowered.despector.decompiler.method.graph.data.opcode.OpcodeBlock;
 
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.stream.Collectors;
 
-/**
- * A producer for dividing up the opcodes into blocks and joining them together
- * into a graph.
- */
-public interface GraphProducerStep {
+public class BreakPrePassOperation implements GraphOperation {
 
-    /**
-     * Adds the indices of any opcodes that the opcode list should be split
-     * after to the break_points set.
-     */
-    void collectBreakpoints(PartialMethod partial, Set<Integer> break_points);
+    @Override
+    public void process(PartialMethod partial) {
+        List<OpcodeBlock> blocks = partial.getGraph();
+        List<GotoOpcodeBlock> candidates = blocks.stream()
+                .filter((op) -> op instanceof GotoOpcodeBlock)
+                .map((op) -> (GotoOpcodeBlock) op)
+                .collect(Collectors.toList());
+        if (candidates.size() < 2) {
+            return;
+        }
+        // TODO
+    }
 
-    /**
-     * Forms edges between blocks in the graph.
-     */
-    void formEdges(PartialMethod partial, Map<Integer, OpcodeBlock> blocks, List<Integer> sorted_break_points, List<OpcodeBlock> block_list);
 }
