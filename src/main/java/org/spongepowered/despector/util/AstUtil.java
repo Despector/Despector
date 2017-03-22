@@ -37,6 +37,7 @@ import org.objectweb.asm.util.Textifier;
 import org.objectweb.asm.util.TraceMethodVisitor;
 import org.spongepowered.despector.ast.Locals.LocalInstance;
 import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
+import org.spongepowered.despector.ast.members.insn.Statement;
 import org.spongepowered.despector.ast.members.insn.arg.Instruction;
 import org.spongepowered.despector.ast.members.insn.branch.condition.Condition;
 
@@ -394,6 +395,12 @@ public final class AstUtil {
             return false;
         }
         return true;
+    }
+
+    public static boolean references(Statement insn, LocalInstance local) {
+        LocalFinder visitor = new LocalFinder(local);
+        insn.accept(visitor);
+        return visitor.isFound();
     }
 
     public static boolean references(Instruction insn, LocalInstance local) {

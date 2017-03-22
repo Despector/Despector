@@ -24,9 +24,9 @@
  */
 package org.spongepowered.despector.decompiler.method.postprocess;
 
+import org.spongepowered.despector.ast.Locals.LocalInstance;
 import org.spongepowered.despector.ast.members.insn.Statement;
 import org.spongepowered.despector.ast.members.insn.StatementBlock;
-import org.spongepowered.despector.ast.members.insn.arg.Cast;
 import org.spongepowered.despector.ast.members.insn.arg.Instruction;
 import org.spongepowered.despector.ast.members.insn.arg.field.LocalAccess;
 import org.spongepowered.despector.ast.members.insn.assign.LocalAssignment;
@@ -40,13 +40,21 @@ import org.spongepowered.despector.ast.members.insn.branch.Switch.Case;
 import org.spongepowered.despector.ast.members.insn.branch.TryCatch;
 import org.spongepowered.despector.ast.members.insn.branch.TryCatch.CatchBlock;
 import org.spongepowered.despector.ast.members.insn.branch.While;
-import org.spongepowered.despector.ast.members.insn.branch.condition.BooleanCondition;
 import org.spongepowered.despector.ast.members.insn.function.InstanceMethodInvoke;
+import org.spongepowered.despector.ast.members.insn.misc.Increment;
+import org.spongepowered.despector.transform.matcher.ConditionMatcher;
+import org.spongepowered.despector.transform.matcher.InstructionMatcher;
+import org.spongepowered.despector.transform.matcher.StatementMatcher;
+import org.spongepowered.despector.util.AstUtil;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class ForEachPostProcessor implements StatementPostProcessor {
 
     @Override
     public void postprocess(StatementBlock block) {
+        List<Statement> to_remove = new ArrayList<>();
         for (Statement stmt : block.getStatements()) {
             if (stmt instanceof If) {
                 If iif = (If) stmt;
@@ -64,9 +72,10 @@ public class ForEachPostProcessor implements StatementPostProcessor {
                 DoWhile dowhile = (DoWhile) stmt;
                 postprocess(dowhile.getBody());
             } else if (stmt instanceof For) {
-                if (!check(block, (For) stmt)) {
-                    postprocess(((For) stmt).getBody());
+                if (!checkIterator(block, (For) stmt)) {
+                    checkArray(block, (For) stmt, to_remove);
                 }
+                postprocess(((For) stmt).getBody());
             } else if (stmt instanceof Switch) {
                 Switch sswitch = (Switch) stmt;
                 for (Case cs : sswitch.getCases()) {
@@ -80,9 +89,12 @@ public class ForEachPostProcessor implements StatementPostProcessor {
                 }
             }
         }
+        for (Statement stmt : to_remove) {
+            block.getStatements().remove(stmt);
+        }
     }
 
-    public boolean check(StatementBlock block, For ffor) {
+    public boolean checkIterator(StatementBlock block, For ffor) {
         if (ffor.getInit() == null || !(ffor.getInit() instanceof LocalAssignment)) {
             return false;
         }
@@ -93,54 +105,29 @@ public class ForEachPostProcessor implements StatementPostProcessor {
             return false;
         }
         LocalAssignment init = (LocalAssignment) ffor.getInit();
-        if (!(init.getValue() instanceof InstanceMethodInvoke)) {
+        InstanceMethodInvoke init_invoke = InstructionMatcher.requireInstanceMethodInvoke(init.getValue(), "iterator", "()Ljava/util/Iterator;");
+        if (init_invoke == null) {
             return false;
         }
-        InstanceMethodInvoke init_invoke = (InstanceMethodInvoke) init.getValue();
-        if (!"iterator".equals(init_invoke.getMethodName())) {
+        Instruction condition = ConditionMatcher.requireBooleanCondition(ffor.getCondition());
+        if (condition == null) {
             return false;
         }
-        if (!"()Ljava/util/Iterator;".equals(init_invoke.getMethodDescription())) {
+        InstanceMethodInvoke condition_invoke = InstructionMatcher.requireInstanceMethodInvoke(condition, "hasNext", "()Z");
+        if (condition_invoke == null) {
             return false;
         }
-        if (!(ffor.getCondition() instanceof BooleanCondition)) {
+        if (!InstructionMatcher.isLocalAccess(condition_invoke.getCallee(), init.getLocal())) {
             return false;
         }
-        Instruction condition = ((BooleanCondition) ffor.getCondition()).getConditionValue();
-        if (!(condition instanceof InstanceMethodInvoke)) {
+        LocalAssignment next_assign = StatementMatcher.requireLocalAssignment(ffor.getBody().getStatement(0));
+        if (next_assign == null) {
             return false;
         }
-        InstanceMethodInvoke condition_invoke = (InstanceMethodInvoke) condition;
-        if (!(condition_invoke.getCallee() instanceof LocalAccess)) {
+        InstanceMethodInvoke next_invoke =
+                InstructionMatcher.requireInstanceMethodInvoke(InstructionMatcher.unwrapCast(next_assign.getValue()), "next", null);
+        if (next_invoke == null) {
             return false;
-        }
-        if (!((LocalAccess) condition_invoke.getCallee()).getLocal().equals(init.getLocal())) {
-            return false;
-        }
-        if (!"hasNext".equals(condition_invoke.getMethodName())) {
-            return false;
-        }
-        if (!"()Z".equals(condition_invoke.getMethodDescription())) {
-            return false;
-        }
-        Statement first = ffor.getBody().getStatement(0);
-        if (!(first instanceof LocalAssignment)) {
-            return false;
-        }
-        LocalAssignment next_assign = (LocalAssignment) first;
-        InstanceMethodInvoke next_invoke = null;
-        if (!(next_assign.getValue() instanceof InstanceMethodInvoke)) {
-            if (next_assign.getValue() instanceof Cast) {
-                Cast cst = (Cast) next_assign.getValue();
-                if (!(cst.getValue() instanceof InstanceMethodInvoke)) {
-                    return false;
-                }
-                next_invoke = (InstanceMethodInvoke) cst.getValue();
-            } else {
-                return false;
-            }
-        } else {
-            next_invoke = (InstanceMethodInvoke) next_assign.getValue();
         }
         if (!(next_invoke.getCallee() instanceof LocalAccess)) {
             return false;
@@ -148,13 +135,84 @@ public class ForEachPostProcessor implements StatementPostProcessor {
         if (!((LocalAccess) next_invoke.getCallee()).getLocal().equals(init.getLocal())) {
             return false;
         }
-        if (!"next".equals(next_invoke.getMethodName())) {
-            return false;
-        }
 
         ffor.getBody().getStatements().remove(next_assign);
 
+        for (Statement stmt : ffor.getBody().getStatements()) {
+            if (AstUtil.references(stmt, next_assign.getLocal())) {
+                return false;
+            }
+        }
+
         ForEach foreach = new ForEach(init_invoke.getCallee(), next_assign.getLocal(), ffor.getBody());
+        block.getStatements().set(block.getStatements().indexOf(ffor), foreach);
+
+        return true;
+    }
+
+    public boolean checkArray(StatementBlock block, For ffor, List<Statement> to_remove) {
+        int i = block.getStatements().indexOf(ffor);
+        if (i < 2) {
+            return false;
+        }
+        if (ffor.getBody().getStatementCount() < 1) {
+            return false;
+        }
+        LocalAssignment array_assign = StatementMatcher.requireLocalAssignment(block.getStatement(i - 2));
+        if (array_assign == null) {
+            return false;
+        }
+        LocalInstance array = array_assign.getLocal();
+        if (!array.getType().startsWith("[")) {
+            return false;
+        }
+        String value_type = array.getType().substring(1);
+        LocalAssignment size_assign = StatementMatcher.requireLocalAssignment(block.getStatement(i - 1));
+        if (size_assign == null) {
+            return false;
+        }
+        LocalInstance size = size_assign.getLocal();
+        if (!"I".equals(size.getType())) {
+            return false;
+        }
+        if (!InstructionMatcher.isInstanceFieldAccess(size_assign.getValue(), "length", new LocalAccess(array))) {
+            return false;
+        }
+        LocalAssignment index_assign = StatementMatcher.requireLocalAssignment(ffor.getInit());
+        if (index_assign == null) {
+            return false;
+        }
+        LocalInstance index = index_assign.getLocal();
+        if (!InstructionMatcher.isIntConstant(index_assign.getValue(), 0)) {
+            return false;
+        }
+        Increment incr = StatementMatcher.requireIncrement(ffor.getIncr());
+        if (incr == null) {
+            return false;
+        }
+        LocalAssignment value_assign = StatementMatcher.requireLocalAssignment(ffor.getBody().getStatement(0));
+        if (value_assign == null) {
+            return false;
+        }
+        if (!InstructionMatcher.isArrayAccess(value_assign.getValue(), new LocalAccess(array), new LocalAccess(index))) {
+            return false;
+        }
+        LocalInstance value = value_assign.getLocal();
+        if (!value_type.equals(value.getType())) {
+            return false;
+        }
+
+        to_remove.add(array_assign);
+        to_remove.add(size_assign);
+        ffor.getBody().getStatements().remove(value_assign);
+
+        for (Statement stmt : ffor.getBody().getStatements()) {
+            if (AstUtil.references(stmt, index) || AstUtil.references(stmt, size)) {
+                return false;
+            }
+        }
+
+        ForEach foreach = new ForEach(array_assign.getValue(), value, ffor.getBody());
         block.getStatements().set(block.getStatements().indexOf(ffor), foreach);
 
         return true;

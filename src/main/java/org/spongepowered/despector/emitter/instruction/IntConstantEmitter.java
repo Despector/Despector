@@ -49,6 +49,15 @@ public class IntConstantEmitter implements InstructionEmitter<IntConstant> {
                 ctx.printString("true");
             }
             return;
+        } else if ("C".equals(type)) {
+            char c = (char) cst;
+            if (c < 127 && c > 31) {
+                ctx.printString("'" + c + "'");
+                return;
+            } else if (c >= 127) {
+                ctx.printString("'\\u" + Integer.toHexString(cst).toLowerCase() + "'");
+                return;
+            }
         }
         ctx.printString(String.valueOf(cst));
     }
