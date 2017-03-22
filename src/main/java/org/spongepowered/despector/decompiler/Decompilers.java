@@ -40,6 +40,7 @@ import org.spongepowered.despector.decompiler.method.graph.region.ChildRegionPro
 import org.spongepowered.despector.decompiler.method.graph.region.DoWhileRegionProcessor;
 import org.spongepowered.despector.decompiler.method.graph.region.IfBlockRegionProcessor;
 import org.spongepowered.despector.decompiler.method.graph.region.WhileRegionProcessor;
+import org.spongepowered.despector.decompiler.method.postprocess.IfCombiningPostProcessor;
 import org.spongepowered.despector.decompiler.step.ClassInfoStep;
 import org.spongepowered.despector.decompiler.step.EnumConstantsStep;
 import org.spongepowered.despector.decompiler.step.FieldInfoStep;
@@ -72,6 +73,7 @@ public class Decompilers {
         JAVA_METHOD.addRegionProcessor(new DoWhileRegionProcessor());
         JAVA_METHOD.addRegionProcessor(new WhileRegionProcessor());
         JAVA_METHOD.addRegionProcessor(new IfBlockRegionProcessor());
+        JAVA_METHOD.addPostProcessor(new IfCombiningPostProcessor());
     }
 
 }

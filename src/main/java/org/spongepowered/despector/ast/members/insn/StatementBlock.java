@@ -82,6 +82,14 @@ public class StatementBlock {
         return this.statements;
     }
 
+    public int getStatementCount() {
+        return this.statements.size();
+    }
+
+    public Statement getStatement(int i) {
+        return this.statements.get(i);
+    }
+
     public void append(Statement insn) {
         this.statements.add(checkNotNull(insn, "insn"));
     }

@@ -44,6 +44,7 @@ import org.spongepowered.despector.decompiler.method.graph.GraphProducerStep;
 import org.spongepowered.despector.decompiler.method.graph.RegionProcessor;
 import org.spongepowered.despector.decompiler.method.graph.data.BlockSection;
 import org.spongepowered.despector.decompiler.method.graph.data.OpcodeBlock;
+import org.spongepowered.despector.decompiler.method.postprocess.StatementPostProcessor;
 import org.spongepowered.despector.util.SignatureParser;
 import org.spongepowered.despector.util.TypeHelper;
 
@@ -66,6 +67,7 @@ public class MethodDecompiler {
     private final List<GraphOperation> cleanup_operations = new ArrayList<>();
     private final List<GraphProcessor> processors = new ArrayList<>();
     private final List<RegionProcessor> region_processors = new ArrayList<>();
+    private final List<StatementPostProcessor> post_processors = new ArrayList<>();
 
     public void addGraphProducer(GraphProducerStep step) {
         this.graph_producers.add(step);
@@ -81,6 +83,10 @@ public class MethodDecompiler {
 
     public void addRegionProcessor(RegionProcessor proc) {
         this.region_processors.add(proc);
+    }
+
+    public void addPostProcessor(StatementPostProcessor post) {
+        this.post_processors.add(post);
     }
 
     @SuppressWarnings("unchecked")
@@ -151,6 +157,10 @@ public class MethodDecompiler {
         Deque<Instruction> stack = new ArrayDeque<>();
         for (BlockSection op : flat_graph) {
             op.appendTo(block, stack);
+        }
+
+        for (StatementPostProcessor post : this.post_processors) {
+            post.postprocess(block);
         }
 
         return block;
