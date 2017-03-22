@@ -22,45 +22,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.despector.decompiler;
+package org.spongepowered.despector.decompiler.method;
 
-import org.spongepowered.despector.ast.SourceSet;
+public interface MethodDecompilerStep {
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Path;
-
-/**
- * A directory walker which walks a directory and visits all child files and
- * directories.
- */
-public class DirectoryWalker {
-
-    private final Path directory;
-
-    public DirectoryWalker(Path dir) {
-        this.directory = dir;
-    }
-
-    /**
-     * Walks this directory and visits all class files in it or any child
-     * directory and loads them into the given {@link SourceSet}.
-     */
-    public void walk(SourceSet src, Decompiler decomp) throws IOException {
-        File dir = this.directory.toFile();
-        visit(dir, src, decomp);
-    }
-
-    private void visit(File file, SourceSet src, Decompiler decomp) throws IOException {
-        if (file.isDirectory()) {
-            for (File f : file.listFiles()) {
-                visit(f, src, decomp);
-            }
-        } else {
-            if (file.getName().endsWith(".class")) {
-                decomp.decompile(file, src);
-            }
-        }
-    }
+    void process(PartialMethod partial, MethodState state);
 
 }

@@ -22,11 +22,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.despector.decompiler;
+package org.spongepowered.despector.decompiler.method.graph.data;
 
 /**
- * A container for any options required for the decompiler. Currently unused.
+ * An enumeration of the different types of markers used to deliminate try-catch
+ * blocks.
  */
-public class DecompilerOptions {
-
+public enum TryCatchMarkerType {
+    START,
+    END,
+    CATCH
 }

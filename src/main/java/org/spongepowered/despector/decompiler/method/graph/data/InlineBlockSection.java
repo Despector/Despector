@@ -22,45 +22,34 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.despector.decompiler;
+package org.spongepowered.despector.decompiler.method.graph.data;
 
-import org.spongepowered.despector.ast.SourceSet;
+import org.spongepowered.despector.ast.members.insn.StatementBlock;
+import org.spongepowered.despector.ast.members.insn.arg.Instruction;
+import org.spongepowered.despector.decompiler.method.StatementBuilder;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Path;
+import java.util.Deque;
 
 /**
- * A directory walker which walks a directory and visits all child files and
- * directories.
+ * A block section that contains a single {@link OpcodeBlock}.
  */
-public class DirectoryWalker {
+public class InlineBlockSection extends BlockSection {
 
-    private final Path directory;
+    private final OpcodeBlock block;
 
-    public DirectoryWalker(Path dir) {
-        this.directory = dir;
+    public InlineBlockSection(OpcodeBlock block) {
+        this.block = block;
     }
 
     /**
-     * Walks this directory and visits all class files in it or any child
-     * directory and loads them into the given {@link SourceSet}.
+     * Gets the {@link OpcodeBlock} that is represented by this block section.
      */
-    public void walk(SourceSet src, Decompiler decomp) throws IOException {
-        File dir = this.directory.toFile();
-        visit(dir, src, decomp);
+    public OpcodeBlock getBlock() {
+        return this.block;
     }
 
-    private void visit(File file, SourceSet src, Decompiler decomp) throws IOException {
-        if (file.isDirectory()) {
-            for (File f : file.listFiles()) {
-                visit(f, src, decomp);
-            }
-        } else {
-            if (file.getName().endsWith(".class")) {
-                decomp.decompile(file, src);
-            }
-        }
+    @Override
+    public void appendTo(StatementBlock block, Deque<Instruction> stack) {
+        StatementBuilder.appendBlock(this.block, block, block.getLocals(), stack);
     }
-
 }

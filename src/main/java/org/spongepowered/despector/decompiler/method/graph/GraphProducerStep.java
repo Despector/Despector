@@ -22,45 +22,29 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.despector.decompiler;
+package org.spongepowered.despector.decompiler.method.graph;
 
-import org.spongepowered.despector.ast.SourceSet;
+import org.spongepowered.despector.decompiler.method.PartialMethod;
+import org.spongepowered.despector.decompiler.method.graph.data.OpcodeBlock;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Path;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
- * A directory walker which walks a directory and visits all child files and
- * directories.
+ * A producer for dividing up the opcodes into blocks and joining them together
+ * into a graph.
  */
-public class DirectoryWalker {
-
-    private final Path directory;
-
-    public DirectoryWalker(Path dir) {
-        this.directory = dir;
-    }
+public interface GraphProducerStep {
 
     /**
-     * Walks this directory and visits all class files in it or any child
-     * directory and loads them into the given {@link SourceSet}.
+     * Adds the indices of any opcodes that the opcode list should be split
+     * after to the break_points set.
      */
-    public void walk(SourceSet src, Decompiler decomp) throws IOException {
-        File dir = this.directory.toFile();
-        visit(dir, src, decomp);
-    }
+    void collectBreakpoints(PartialMethod partial, Set<Integer> break_points);
 
-    private void visit(File file, SourceSet src, Decompiler decomp) throws IOException {
-        if (file.isDirectory()) {
-            for (File f : file.listFiles()) {
-                visit(f, src, decomp);
-            }
-        } else {
-            if (file.getName().endsWith(".class")) {
-                decomp.decompile(file, src);
-            }
-        }
-    }
-
+    /**
+     * Forms edges between blocks in the graph.
+     */
+    void formEdges(PartialMethod partial, Map<Integer, OpcodeBlock> blocks, List<Integer> sorted_break_points, List<OpcodeBlock> block_list);
 }

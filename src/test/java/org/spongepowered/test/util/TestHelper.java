@@ -29,8 +29,10 @@ import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.MethodNode;
+import org.spongepowered.despector.ast.SourceSet;
+import org.spongepowered.despector.ast.members.MethodEntry;
 import org.spongepowered.despector.ast.members.insn.StatementBlock;
-import org.spongepowered.despector.decompiler.InstructionTreeBuilder;
+import org.spongepowered.despector.decompiler.Decompilers;
 import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.Emitters;
 import org.spongepowered.despector.emitter.format.EmitterFormat;
@@ -47,19 +49,22 @@ import java.util.Map;
 
 public class TestHelper {
 
-    private static final Map<Class<?>, ClassNode> cached_types = Maps.newHashMap();
+    private static final Map<Class<?>, ClassNode> CACHED_TYPES = Maps.newHashMap();
+    private static final SourceSet DUMMY_SOURCE_SET = new SourceSet();
 
     @SuppressWarnings("unchecked")
     public static StatementBlock get(Class<?> cls, String method_name) throws IOException {
-        ClassNode type = cached_types.get(cls);
+        ClassNode type = CACHED_TYPES.get(cls);
         if (type == null) {
             String path = cls.getProtectionDomain().getCodeSource().getLocation().getPath();
             File file = new File(path, cls.getName().replace('.', '/') + ".class");
             ClassReader cr = new ClassReader(new FileInputStream(file));
             type = new ClassNode();
             cr.accept(type, 0);
-            cached_types.put(cls, type);
+            CACHED_TYPES.put(cls, type);
         }
+        MethodEntry dummy = new MethodEntry(DUMMY_SOURCE_SET);
+        dummy.setOwner("Ljava/lang/Object;");
         MethodNode mn = null;
         for (MethodNode m : ((List<MethodNode>) type.methods)) {
             if (m.name.equals(method_name)) {
@@ -73,7 +78,7 @@ public class TestHelper {
         StatementBlock insns = null;
         try {
             System.out.println("Decompiling method " + mn.name);
-            insns = InstructionTreeBuilder.build(mn);
+            insns = Decompilers.JAVA_METHOD.decompile(dummy, mn);
         } catch (Exception ex) {
             System.err.println("Error decompiling method body for " + type.name + " " + method_name);
             ex.printStackTrace();
@@ -88,14 +93,14 @@ public class TestHelper {
     }
 
     public static String getAsString(Class<?> cls, String method_name) throws IOException {
-        ClassNode type = cached_types.get(cls);
+        ClassNode type = CACHED_TYPES.get(cls);
         if (type == null) {
             String path = cls.getProtectionDomain().getCodeSource().getLocation().getPath();
             File file = new File(path, cls.getName().replace('.', '/') + ".class");
             ClassReader cr = new ClassReader(new FileInputStream(file));
             type = new ClassNode();
             cr.accept(type, 0);
-            cached_types.put(cls, type);
+            CACHED_TYPES.put(cls, type);
         }
         return getAsString(type, method_name);
     }
@@ -119,10 +124,12 @@ public class TestHelper {
         if (mn == null) {
             return "";
         }
+        MethodEntry dummy = new MethodEntry(DUMMY_SOURCE_SET);
+        dummy.setOwner("Ljava/lang/Object;");
         StatementBlock insns = null;
         try {
             System.out.println("Decompiling method " + mn.name);
-            insns = InstructionTreeBuilder.build(mn);
+            insns = Decompilers.JAVA_METHOD.decompile(dummy, mn);
         } catch (Exception ex) {
             System.err.println("Error decompiling method body for " + type.name + " " + method_name);
             ex.printStackTrace();

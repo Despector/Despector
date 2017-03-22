@@ -38,13 +38,13 @@ import java.util.jar.JarInputStream;
 import java.util.zip.ZipEntry;
 
 /**
- * Walks a jar file to produce an ast. Steps such as associating overriding methods and finding string
- * constants are also during this traversal.
+ * Walks a jar file to produce an ast. Steps such as associating overriding
+ * methods and finding string constants are also during this traversal.
  */
 public class JarWalker {
 
     // TODO move to conf
-    private static final Set<String> EXCLUDES      = Sets.newHashSet();
+    private static final Set<String> EXCLUDES = Sets.newHashSet();
     private static final Set<String> NON_OBF_NAMES = Sets.newHashSet();
 
     static {
@@ -85,11 +85,11 @@ public class JarWalker {
     /**
      * Produces a new obfuscated source set for this version.
      */
-    public void walk(SourceSet sources) {
-        scanJar(this.jar, sources);
+    public void walk(SourceSet sources, Decompiler decomp) {
+        scanJar(this.jar, sources, decomp);
     }
 
-    private void scanJar(Path path, SourceSet src) {
+    private void scanJar(Path path, SourceSet src, Decompiler decomp) {
         try (JarInputStream jar = new JarInputStream(new BufferedInputStream(Files.newInputStream(path)))) {
             ZipEntry entry = jar.getNextEntry();
             if (entry == null) {
@@ -103,7 +103,7 @@ public class JarWalker {
                 if (!name.endsWith(".class")) {
                     continue;
                 }
-                scanClassFile(jar, src);
+                scanClassFile(jar, src, decomp);
             } while ((entry = jar.getNextEntry()) != null);
         } catch (IOException e) {
             e.printStackTrace();
@@ -111,7 +111,7 @@ public class JarWalker {
         }
     }
 
-    private void scanClassFile(JarInputStream input, SourceSet src) throws IOException {
+    private void scanClassFile(JarInputStream input, SourceSet src, Decompiler decomp) throws IOException {
         ClassReader reader = new ClassReader(input);
         ClassNode cn = new ClassNode();
         reader.accept(cn, 0);
@@ -120,7 +120,7 @@ public class JarWalker {
                 return;
             }
         }
-        SingularClassLoader.instance.load(cn, src);
+        decomp.decompile(cn, src);
     }
 
 }

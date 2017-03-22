@@ -22,45 +22,27 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.despector.decompiler;
+package org.spongepowered.despector.decompiler.method.graph;
 
-import org.spongepowered.despector.ast.SourceSet;
+import org.spongepowered.despector.decompiler.method.PartialMethod;
+import org.spongepowered.despector.decompiler.method.graph.data.BlockSection;
+import org.spongepowered.despector.decompiler.method.graph.data.OpcodeBlock;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Path;
+import java.util.List;
 
 /**
- * A directory walker which walks a directory and visits all child files and
- * directories.
+ * A processor that processes a region of the graph into one or more block
+ * sections.
  */
-public class DirectoryWalker {
-
-    private final Path directory;
-
-    public DirectoryWalker(Path dir) {
-        this.directory = dir;
-    }
+public interface GraphProcessor {
 
     /**
-     * Walks this directory and visits all class files in it or any child
-     * directory and loads them into the given {@link SourceSet}.
+     * Processes the given region starting at the start block and outputs zero
+     * or more blocks to the {@link BlockSection} list.
+     * 
+     * @return -1 if no part of the region was processed, else return the index
+     *         in the region of the last processed block
      */
-    public void walk(SourceSet src, Decompiler decomp) throws IOException {
-        File dir = this.directory.toFile();
-        visit(dir, src, decomp);
-    }
-
-    private void visit(File file, SourceSet src, Decompiler decomp) throws IOException {
-        if (file.isDirectory()) {
-            for (File f : file.listFiles()) {
-                visit(f, src, decomp);
-            }
-        } else {
-            if (file.getName().endsWith(".class")) {
-                decomp.decompile(file, src);
-            }
-        }
-    }
+    int process(PartialMethod partial, List<OpcodeBlock> blocks, OpcodeBlock region_start, List<BlockSection> final_blocks);
 
 }

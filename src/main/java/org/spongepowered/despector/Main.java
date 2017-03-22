@@ -29,9 +29,10 @@ import com.google.common.collect.Maps;
 import org.spongepowered.despector.ast.SourceSet;
 import org.spongepowered.despector.ast.type.TypeEntry;
 import org.spongepowered.despector.config.ConfigManager;
+import org.spongepowered.despector.decompiler.Decompiler;
+import org.spongepowered.despector.decompiler.Decompilers;
 import org.spongepowered.despector.decompiler.DirectoryWalker;
 import org.spongepowered.despector.decompiler.JarWalker;
-import org.spongepowered.despector.decompiler.SingularClassLoader;
 import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.Emitters;
 import org.spongepowered.despector.emitter.format.EmitterFormat;
@@ -95,6 +96,8 @@ public class Main {
             formatter = EmitterFormat.defaults();
         }
 
+        Decompiler decompiler = Decompilers.JAVA;
+
         SourceSet source = new SourceSet();
         for (String s : sources) {
             Path path = Paths.get(s);
@@ -102,17 +105,17 @@ public class Main {
                 System.err.println("Unknown source: " + path.toAbsolutePath().toString());
             } else if (s.endsWith(".jar")) {
                 JarWalker walker = new JarWalker(path);
-                walker.walk(source);
+                walker.walk(source, decompiler);
             } else if (Files.isDirectory(path)) {
                 DirectoryWalker walker = new DirectoryWalker(path);
                 try {
-                    walker.walk(source);
+                    walker.walk(source, decompiler);
                 } catch (IOException e) {
                     System.err.println("Error while walking directory: " + path.toAbsolutePath().toString());
                     e.printStackTrace();
                 }
             } else if (s.endsWith(".class")) {
-                SingularClassLoader.instance.load(path, source);
+                decompiler.decompile(path, source);
             } else {
                 System.err.println("Unknown source type: " + path.toAbsolutePath().toString() + " must be jar or directory");
             }

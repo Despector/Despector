@@ -22,43 +22,37 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.despector.decompiler;
+package org.spongepowered.despector.decompiler.method.graph;
 
-import org.spongepowered.despector.ast.SourceSet;
+import org.objectweb.asm.Label;
+import org.spongepowered.despector.decompiler.method.PartialMethod;
+import org.spongepowered.despector.decompiler.method.graph.data.OpcodeBlock;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Path;
+import java.util.List;
+import java.util.Map;
 
 /**
- * A directory walker which walks a directory and visits all child files and
- * directories.
+ * An operation on the opcode graph that modifies the graph in place.
  */
-public class DirectoryWalker {
-
-    private final Path directory;
-
-    public DirectoryWalker(Path dir) {
-        this.directory = dir;
-    }
+public interface GraphOperation {
 
     /**
-     * Walks this directory and visits all class files in it or any child
-     * directory and loads them into the given {@link SourceSet}.
+     * Processes the opcode graph of the given partial method.
      */
-    public void walk(SourceSet src, Decompiler decomp) throws IOException {
-        File dir = this.directory.toFile();
-        visit(dir, src, decomp);
-    }
+    void process(PartialMethod partial);
 
-    private void visit(File file, SourceSet src, Decompiler decomp) throws IOException {
-        if (file.isDirectory()) {
-            for (File f : file.listFiles()) {
-                visit(f, src, decomp);
+    static void remap(List<OpcodeBlock> blocks, OpcodeBlock from, OpcodeBlock to) {
+        for (OpcodeBlock other : blocks) {
+            if (other.getTarget() == from) {
+                other.setTarget(to);
             }
-        } else {
-            if (file.getName().endsWith(".class")) {
-                decomp.decompile(file, src);
+            if (other.getElseTarget() == from) {
+                other.setElseTarget(to);
+            }
+            for (Map.Entry<Label, OpcodeBlock> e : other.getAdditionalTargets().entrySet()) {
+                if (e.getValue() == from) {
+                    other.getAdditionalTargets().put(e.getKey(), to);
+                }
             }
         }
     }

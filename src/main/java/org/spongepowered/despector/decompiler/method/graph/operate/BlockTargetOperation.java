@@ -22,43 +22,32 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.despector.decompiler;
+package org.spongepowered.despector.decompiler.method.graph.operate;
 
-import org.spongepowered.despector.ast.SourceSet;
+import org.spongepowered.despector.decompiler.method.PartialMethod;
+import org.spongepowered.despector.decompiler.method.graph.GraphOperation;
+import org.spongepowered.despector.decompiler.method.graph.data.OpcodeBlock;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Path;
+import java.util.List;
 
 /**
- * A directory walker which walks a directory and visits all child files and
- * directories.
+ * A graph operation that populates the {@link OpcodeBlock#getTargettedBy()}
+ * collection.
  */
-public class DirectoryWalker {
+public class BlockTargetOperation implements GraphOperation {
 
-    private final Path directory;
-
-    public DirectoryWalker(Path dir) {
-        this.directory = dir;
-    }
-
-    /**
-     * Walks this directory and visits all class files in it or any child
-     * directory and loads them into the given {@link SourceSet}.
-     */
-    public void walk(SourceSet src, Decompiler decomp) throws IOException {
-        File dir = this.directory.toFile();
-        visit(dir, src, decomp);
-    }
-
-    private void visit(File file, SourceSet src, Decompiler decomp) throws IOException {
-        if (file.isDirectory()) {
-            for (File f : file.listFiles()) {
-                visit(f, src, decomp);
+    @Override
+    public void process(PartialMethod partial) {
+        List<OpcodeBlock> blocks = partial.getGraph();
+        for (int i = 0; i < blocks.size(); i++) {
+            OpcodeBlock block = blocks.get(i);
+            if (block.isConditional()) {
+                block.getElseTarget().targettedBy(block);
             }
-        } else {
-            if (file.getName().endsWith(".class")) {
-                decomp.decompile(file, src);
+            if (block.isJump()) {
+                block.getTarget().targettedBy(block);
+            } else if (block.hasTarget() && blocks.indexOf(block.getTarget()) != i + 1) {
+                block.getTarget().targettedBy(block);
             }
         }
     }

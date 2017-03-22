@@ -22,45 +22,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.despector.decompiler;
+package org.spongepowered.despector.decompiler.method.graph.data;
 
-import org.spongepowered.despector.ast.SourceSet;
+import org.spongepowered.despector.ast.members.insn.StatementBlock;
+import org.spongepowered.despector.ast.members.insn.arg.Instruction;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Path;
+import java.util.Deque;
 
 /**
- * A directory walker which walks a directory and visits all child files and
- * directories.
+ * Represents a single section in the final output.
  */
-public class DirectoryWalker {
-
-    private final Path directory;
-
-    public DirectoryWalker(Path dir) {
-        this.directory = dir;
-    }
+public abstract class BlockSection {
 
     /**
-     * Walks this directory and visits all class files in it or any child
-     * directory and loads them into the given {@link SourceSet}.
+     * Appends this block section to the final output.
+     * 
+     * @param block The statement block to append to
+     * @param stack The current instruction stack
      */
-    public void walk(SourceSet src, Decompiler decomp) throws IOException {
-        File dir = this.directory.toFile();
-        visit(dir, src, decomp);
-    }
-
-    private void visit(File file, SourceSet src, Decompiler decomp) throws IOException {
-        if (file.isDirectory()) {
-            for (File f : file.listFiles()) {
-                visit(f, src, decomp);
-            }
-        } else {
-            if (file.getName().endsWith(".class")) {
-                decomp.decompile(file, src);
-            }
-        }
-    }
+    public abstract void appendTo(StatementBlock block, Deque<Instruction> stack);
 
 }
