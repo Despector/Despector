@@ -84,7 +84,7 @@ public class SubRegionBlockProcessor implements GraphProcessor {
         }
         if (end == -1) {
             end = RegionProcessor.getRegionEnd(blocks, i);
-        } else {
+        } else if (end != blocks.size() - 1) {
             end++;
         }
 
@@ -111,6 +111,9 @@ public class SubRegionBlockProcessor implements GraphProcessor {
 
         if (Constants.TRACE_ACTIVE) {
             System.err.println("Done sub region");
+        }
+        if(targeted_in_future && blocks.get(end) instanceof GotoOpcodeBlock) {
+            return end;
         }
         return end - 1;
     }

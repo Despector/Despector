@@ -24,6 +24,10 @@
  */
 package org.spongepowered.despector.decompiler.method.graph.region;
 
+import static com.google.common.base.Preconditions.checkState;
+
+import org.spongepowered.despector.ast.members.insn.arg.cst.IntConstant;
+import org.spongepowered.despector.ast.members.insn.branch.condition.BooleanCondition;
 import org.spongepowered.despector.ast.members.insn.branch.condition.Condition;
 import org.spongepowered.despector.config.Constants;
 import org.spongepowered.despector.decompiler.method.ConditionBuilder;
@@ -31,11 +35,10 @@ import org.spongepowered.despector.decompiler.method.PartialMethod;
 import org.spongepowered.despector.decompiler.method.graph.RegionProcessor;
 import org.spongepowered.despector.decompiler.method.graph.data.block.BlockSection;
 import org.spongepowered.despector.decompiler.method.graph.data.block.DoWhileBlockSection;
-import org.spongepowered.despector.decompiler.method.graph.data.block.InlineBlockSection;
+import org.spongepowered.despector.decompiler.method.graph.data.block.WhileBlockSection;
 import org.spongepowered.despector.decompiler.method.graph.data.opcode.ConditionalOpcodeBlock;
 import org.spongepowered.despector.decompiler.method.graph.data.opcode.GotoOpcodeBlock;
 import org.spongepowered.despector.decompiler.method.graph.data.opcode.OpcodeBlock;
-import org.spongepowered.despector.decompiler.method.graph.data.opcode.ProcessedOpcodeBlock;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -62,8 +65,19 @@ public class DoWhileRegionProcessor implements RegionProcessor {
                 System.err.println("    Condition is " + condition_blocks.get(0).getBreakpoint() + " to "
                         + condition_blocks.get(condition_blocks.size() - 1).getBreakpoint());
             }
+            Condition cond = null;
+            if (condition_blocks.isEmpty()) {
+                checkState(ret instanceof GotoOpcodeBlock);
+                WhileBlockSection section = new WhileBlockSection(new BooleanCondition(new IntConstant(1), false));
+                for (int i = 0; i < region.size(); i++) {
+                    next = region.get(i);
+                    section.appendBody(next.toBlockSection());
+                }
+                return section;
+            }
+
             cond_start++;
-            Condition cond = ConditionBuilder.makeCondition(condition_blocks, partial.getLocals(), start, ret);
+            cond = ConditionBuilder.makeCondition(condition_blocks, partial.getLocals(), start, ret);
 
             DoWhileBlockSection section = new DoWhileBlockSection(cond);
 

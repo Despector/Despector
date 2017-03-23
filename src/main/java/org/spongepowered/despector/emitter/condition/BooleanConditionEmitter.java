@@ -25,6 +25,7 @@
 package org.spongepowered.despector.emitter.condition;
 
 import org.spongepowered.despector.ast.members.insn.arg.InstanceOf;
+import org.spongepowered.despector.ast.members.insn.arg.cst.IntConstant;
 import org.spongepowered.despector.ast.members.insn.branch.condition.BooleanCondition;
 import org.spongepowered.despector.emitter.ConditionEmitter;
 import org.spongepowered.despector.emitter.EmitterContext;
@@ -34,6 +35,15 @@ public class BooleanConditionEmitter implements ConditionEmitter<BooleanConditio
     @Override
     public void emit(EmitterContext ctx, BooleanCondition bool) {
         if (bool.getConditionValue().inferType().equals("I")) {
+            if(bool.getConditionValue() instanceof IntConstant) {
+                IntConstant cst = (IntConstant) bool.getConditionValue();
+                if(cst.getConstant() == 0) {
+                    ctx.printString("false");
+                } else {
+                    ctx.printString("true");
+                }
+                return;
+            }
             ctx.emit(bool.getConditionValue(), "I");
             if (bool.isInverse()) {
                 ctx.printString(" == 0");
