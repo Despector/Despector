@@ -605,6 +605,27 @@ public class BranchTest {
         assertEquals(good, insn);
     }
 
+    public void mth_ifthenwhile(int i, boolean a, boolean d, boolean e) {
+        if (a) {
+            return;
+        }
+        while (d) {
+            System.out.println(e);
+        }
+    }
+
+    @Test
+    public void testIfThenWhile() throws IOException {
+        String insn = TestHelper.getAsString(getClass(), "mth_ifthenwhile");
+        String good = "if (a) {\n"
+                + "    return;\n"
+                + "}\n"
+                + "while (d) {\n"
+                + "    System.out.println(e);\n"
+                + "}";
+        assertEquals(good, insn);
+    }
+
     @Test
     public void testInverseFor() throws IOException {
         TestMethodBuilder builder = new TestMethodBuilder("mth_inversefor", "(ILjava/lang/String;)V");

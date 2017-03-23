@@ -79,6 +79,18 @@ public class DoWhileRegionProcessor implements RegionProcessor {
             cond_start++;
             cond = ConditionBuilder.makeCondition(condition_blocks, partial.getLocals(), start, ret);
 
+            boolean targetted_by_previous_jump = condition_blocks.get(0).getTargettedBy().stream()
+                    .filter((b) -> b.getBreakpoint() < start.getBreakpoint()).findAny().isPresent();
+
+            if (targetted_by_previous_jump) {
+                WhileBlockSection section = new WhileBlockSection(cond);
+                for (int i = 0; i < cond_start; i++) {
+                    next = region.get(i);
+                    section.appendBody(next.toBlockSection());
+                }
+                return section;
+            }
+
             DoWhileBlockSection section = new DoWhileBlockSection(cond);
 
             for (int i = 0; i < cond_start; i++) {

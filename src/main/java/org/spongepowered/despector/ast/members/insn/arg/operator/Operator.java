@@ -101,7 +101,7 @@ public abstract class Operator implements Instruction {
         if (obj == this) {
             return true;
         }
-        if (getClass().equals(obj.getClass())) {
+        if (!getClass().equals(obj.getClass())) {
             return false;
         }
         Operator insn = (Operator) obj;

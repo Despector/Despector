@@ -77,7 +77,7 @@ public class IfBlockRegionProcessor implements RegionProcessor {
         // form the condition from the header
         Condition cond = ConditionBuilder.makeCondition(condition_blocks, partial.getLocals(), body, cond_ret);
         int else_start = region.size();
-        if (cond_ret != ret) {
+        if (cond_ret != ret && region.contains(cond_ret)) {
             else_start = region.indexOf(cond_ret);
         }
 
@@ -108,7 +108,7 @@ public class IfBlockRegionProcessor implements RegionProcessor {
             section.appendBody(next.toBlockSection());
         }
 
-        while (cond_ret != ret) {
+        while (region.contains(cond_ret)) {
             if (cond_ret instanceof ConditionalOpcodeBlock) {
                 List<OpcodeBlock> elif_condition = new ArrayList<>();
                 next = region.get(body_start);

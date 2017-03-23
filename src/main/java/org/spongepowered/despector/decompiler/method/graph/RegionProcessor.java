@@ -62,7 +62,15 @@ public interface RegionProcessor {
                 return -1;
             }
             int end_a = blocks.indexOf(cond.getTarget());
-            if (end_a == -1) {
+            if (end_a > start) {
+                if (cond.getTarget() instanceof ConditionalOpcodeBlock) {
+                    ConditionalOpcodeBlock cond_target = (ConditionalOpcodeBlock) cond.getTarget();
+                    if (cond_target.getTarget().getBreakpoint() < cond_target.getBreakpoint()
+                            && cond_target.getTarget().getBreakpoint() > region_start.getBreakpoint()) {
+                        end_a = blocks.indexOf(cond_target.getTarget());
+                    }
+                }
+            } else if (end_a == -1) {
                 end_a = blocks.size();
             }
             int end_b = blocks.indexOf(cond.getElseTarget());
@@ -72,7 +80,7 @@ public interface RegionProcessor {
             // Use the target of the start node as a starting point for our
             // search
             end = Math.max(end_a, end_b);
-        } else  {
+        } else {
             end = blocks.indexOf(region_start.getTarget());
             if (end == -1) {
                 end = blocks.size();
