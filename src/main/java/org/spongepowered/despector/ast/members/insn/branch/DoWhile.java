@@ -29,15 +29,20 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
 import org.spongepowered.despector.ast.members.insn.Statement;
 import org.spongepowered.despector.ast.members.insn.StatementBlock;
+import org.spongepowered.despector.ast.members.insn.branch.Break.Breakable;
 import org.spongepowered.despector.ast.members.insn.branch.condition.Condition;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A do-while loop.
  */
-public class DoWhile implements Statement {
+public class DoWhile implements Statement, Breakable {
 
     private Condition condition;
     private StatementBlock body;
+    private List<Break> breaks = new ArrayList<>();
 
     public DoWhile(Condition condition, StatementBlock body) {
         this.condition = checkNotNull(condition, "condition");
@@ -70,6 +75,11 @@ public class DoWhile implements Statement {
      */
     public void setBody(StatementBlock block) {
         this.body = checkNotNull(block, "block");
+    }
+
+    @Override
+    public List<Break> getBreaks() {
+        return this.breaks;
     }
 
     @Override

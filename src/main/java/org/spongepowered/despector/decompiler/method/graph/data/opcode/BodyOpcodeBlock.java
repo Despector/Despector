@@ -24,10 +24,18 @@
  */
 package org.spongepowered.despector.decompiler.method.graph.data.opcode;
 
+import org.spongepowered.despector.decompiler.method.graph.data.block.BlockSection;
+import org.spongepowered.despector.decompiler.method.graph.data.block.InlineBlockSection;
+
 public class BodyOpcodeBlock extends OpcodeBlock {
 
     public BodyOpcodeBlock(int br) {
         super(br);
+    }
+
+    @Override
+    public BlockSection toBlockSection() {
+        return new InlineBlockSection(this);
     }
 
 }

@@ -69,16 +69,7 @@ public class DoWhileRegionProcessor implements RegionProcessor {
 
             for (int i = 0; i < cond_start; i++) {
                 next = region.get(i);
-                if (next instanceof ProcessedOpcodeBlock) {
-                    section.append(((ProcessedOpcodeBlock) next).getPrecompiledSection());
-                } else if (next instanceof ConditionalOpcodeBlock || next instanceof GotoOpcodeBlock) {
-                    // If we encounter another conditional block then its an
-                    // error
-                    // as we should have already processed all sub regions
-                    throw new IllegalStateException("Unexpected conditional when building if body");
-                } else {
-                    section.append(new InlineBlockSection(next));
-                }
+                section.append(next.toBlockSection());
             }
             return section;
         }

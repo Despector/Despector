@@ -30,12 +30,20 @@ import org.spongepowered.despector.decompiler.method.ConditionBuilder;
 import org.spongepowered.despector.decompiler.method.PartialMethod;
 import org.spongepowered.despector.decompiler.method.graph.RegionProcessor;
 import org.spongepowered.despector.decompiler.method.graph.data.block.BlockSection;
-import org.spongepowered.despector.decompiler.method.graph.data.block.InlineBlockSection;
+import org.spongepowered.despector.decompiler.method.graph.data.block.BreakBlockSection;
+import org.spongepowered.despector.decompiler.method.graph.data.block.BreakableBlockSection;
+import org.spongepowered.despector.decompiler.method.graph.data.block.DoWhileBlockSection;
+import org.spongepowered.despector.decompiler.method.graph.data.block.IfBlockSection;
+import org.spongepowered.despector.decompiler.method.graph.data.block.IfBlockSection.ElifBlockSection;
+import org.spongepowered.despector.decompiler.method.graph.data.block.SwitchBlockSection;
+import org.spongepowered.despector.decompiler.method.graph.data.block.SwitchBlockSection.SwitchCaseBlockSection;
+import org.spongepowered.despector.decompiler.method.graph.data.block.TryCatchBlockSection;
+import org.spongepowered.despector.decompiler.method.graph.data.block.TryCatchBlockSection.CatchBlockSection;
 import org.spongepowered.despector.decompiler.method.graph.data.block.WhileBlockSection;
+import org.spongepowered.despector.decompiler.method.graph.data.opcode.BreakMarkerOpcodeBlock.MarkerType;
 import org.spongepowered.despector.decompiler.method.graph.data.opcode.ConditionalOpcodeBlock;
 import org.spongepowered.despector.decompiler.method.graph.data.opcode.GotoOpcodeBlock;
 import org.spongepowered.despector.decompiler.method.graph.data.opcode.OpcodeBlock;
-import org.spongepowered.despector.decompiler.method.graph.data.opcode.ProcessedOpcodeBlock;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -74,21 +82,71 @@ public class WhileRegionProcessor implements RegionProcessor {
 
             for (int i = 1; i < cond_start; i++) {
                 next = region.get(i);
-                if (next instanceof ProcessedOpcodeBlock) {
-                    section.appendBody(((ProcessedOpcodeBlock) next).getPrecompiledSection());
-                } else if (next instanceof ConditionalOpcodeBlock || next instanceof GotoOpcodeBlock) {
-                    // If we encounter another conditional block then its an
-                    // error
-                    // as we should have already processed all sub regions
-                    throw new IllegalStateException("Unexpected conditional when building if body");
-                } else {
-                    section.appendBody(new InlineBlockSection(next));
-                }
+                BlockSection block = next.toBlockSection();
+                replaceBreaks(block, start.getTarget(), ret, section, false);
+                section.appendBody(block);
             }
 
             return section;
         }
         return null;
+    }
+
+    public static void replaceBreaks(BlockSection section, OpcodeBlock continue_point, OpcodeBlock break_point, BreakableBlockSection loop,
+            boolean nested) {
+        if (section instanceof BreakBlockSection) {
+            BreakBlockSection bbreak = (BreakBlockSection) section;
+            OpcodeBlock target = bbreak.getMarker().getOldTarget();
+            if (bbreak.getType() == MarkerType.BREAK && target == break_point) {
+                loop.getBreaks().add(bbreak);
+                bbreak.setLoop((BlockSection) loop);
+                bbreak.setNested(nested);
+            } else if (bbreak.getType() == MarkerType.CONTINUE && target == continue_point) {
+                loop.getBreaks().add(bbreak);
+                bbreak.setLoop((BlockSection) loop);
+                bbreak.setNested(nested);
+            }
+        } else if (section instanceof WhileBlockSection) {
+            WhileBlockSection wwhile = (WhileBlockSection) section;
+            for (BlockSection block : wwhile.getBody()) {
+                replaceBreaks(block, continue_point, break_point, loop, true);
+            }
+        } else if (section instanceof IfBlockSection) {
+            IfBlockSection iif = (IfBlockSection) section;
+            for (BlockSection block : iif.getBody()) {
+                replaceBreaks(block, continue_point, break_point, loop, nested);
+            }
+            for (BlockSection block : iif.getElseBody()) {
+                replaceBreaks(block, continue_point, break_point, loop, nested);
+            }
+            for (ElifBlockSection elif : iif.getElifBlocks()) {
+                for (BlockSection block : elif.getBody()) {
+                    replaceBreaks(block, continue_point, break_point, loop, nested);
+                }
+            }
+        } else if (section instanceof DoWhileBlockSection) {
+            DoWhileBlockSection dowhile = (DoWhileBlockSection) section;
+            for (BlockSection block : dowhile.getBody()) {
+                replaceBreaks(block, continue_point, break_point, loop, true);
+            }
+        } else if (section instanceof SwitchBlockSection) {
+            SwitchBlockSection sswitch = (SwitchBlockSection) section;
+            for (SwitchCaseBlockSection cs : sswitch.getCases()) {
+                for (BlockSection block : cs.getBody()) {
+                    replaceBreaks(block, continue_point, break_point, loop, true);
+                }
+            }
+        } else if (section instanceof TryCatchBlockSection) {
+            TryCatchBlockSection trycatch = (TryCatchBlockSection) section;
+            for (BlockSection block : trycatch.getBody()) {
+                replaceBreaks(block, continue_point, break_point, loop, nested);
+            }
+            for (CatchBlockSection cb : trycatch.getCatchBlocks()) {
+                for (BlockSection block : cb.getBody()) {
+                    replaceBreaks(block, continue_point, break_point, loop, nested);
+                }
+            }
+        }
     }
 
 }

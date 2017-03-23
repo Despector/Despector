@@ -540,7 +540,7 @@ public class BranchTest {
     public void testBasicWhileBreak() throws IOException {
         String insn = TestHelper.getAsString(getClass(), "mth_whilebreak");
         String good = "while (a) {\n"
-                + "    if (b) {\n"
+                + "    if (d) {\n"
                 + "        break;\n"
                 + "    }\n"
                 + "    System.out.println(e);\n"

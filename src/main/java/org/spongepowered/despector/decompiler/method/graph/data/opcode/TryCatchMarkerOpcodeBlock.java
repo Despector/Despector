@@ -26,6 +26,7 @@ package org.spongepowered.despector.decompiler.method.graph.data.opcode;
 
 import org.objectweb.asm.tree.TryCatchBlockNode;
 import org.spongepowered.despector.decompiler.method.graph.data.TryCatchMarkerType;
+import org.spongepowered.despector.decompiler.method.graph.data.block.BlockSection;
 
 /**
  * An opcode block that acts as a marker to mark the start and end of a try
@@ -91,6 +92,11 @@ public class TryCatchMarkerOpcodeBlock extends OpcodeBlock {
      */
     public void setEndMarker(TryCatchMarkerOpcodeBlock end) {
         this.end = end;
+    }
+
+    @Override
+    public BlockSection toBlockSection() {
+        throw new IllegalStateException("Unexpected try-catch marker block");
     }
 
     @Override

@@ -24,14 +24,11 @@
  */
 package org.spongepowered.despector.decompiler.method;
 
-import static org.mockito.asm.Opcodes.GOTO;
-
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.AbstractInsnNode;
-import org.objectweb.asm.tree.JumpInsnNode;
 import org.objectweb.asm.tree.LabelNode;
 import org.objectweb.asm.tree.LocalVariableNode;
 import org.objectweb.asm.tree.MethodNode;
@@ -48,8 +45,6 @@ import org.spongepowered.despector.decompiler.method.graph.GraphProducerStep;
 import org.spongepowered.despector.decompiler.method.graph.RegionProcessor;
 import org.spongepowered.despector.decompiler.method.graph.data.block.BlockSection;
 import org.spongepowered.despector.decompiler.method.graph.data.opcode.BodyOpcodeBlock;
-import org.spongepowered.despector.decompiler.method.graph.data.opcode.ConditionalOpcodeBlock;
-import org.spongepowered.despector.decompiler.method.graph.data.opcode.GotoOpcodeBlock;
 import org.spongepowered.despector.decompiler.method.graph.data.opcode.OpcodeBlock;
 import org.spongepowered.despector.decompiler.method.graph.operate.TernaryPrePassOperation;
 import org.spongepowered.despector.decompiler.method.postprocess.StatementPostProcessor;

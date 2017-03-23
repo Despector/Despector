@@ -49,4 +49,9 @@ public class ProcessedOpcodeBlock extends OpcodeBlock {
         this.internal = section;
     }
 
+    @Override
+    public BlockSection toBlockSection() {
+        return this.internal;
+    }
+
 }

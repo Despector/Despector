@@ -24,9 +24,8 @@
  */
 package org.spongepowered.despector.decompiler.method.graph.data.opcode;
 
-import com.google.common.base.MoreObjects;
-import com.google.common.base.MoreObjects.ToStringHelper;
 import org.objectweb.asm.tree.AbstractInsnNode;
+import org.spongepowered.despector.decompiler.method.graph.data.block.BlockSection;
 import org.spongepowered.despector.util.AstUtil;
 
 import java.util.ArrayList;
@@ -132,6 +131,8 @@ public abstract class OpcodeBlock {
     public void omitFromTernaryCheck(boolean state) {
         this.exclude_from_ternary_check = state;
     }
+
+    public abstract BlockSection toBlockSection();
 
     /**
      * Prints this block's information for debugging.

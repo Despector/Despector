@@ -22,33 +22,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.despector.decompiler.method.graph.data.opcode;
+package org.spongepowered.despector.decompiler.method.graph.data.block;
 
-import org.objectweb.asm.Label;
-import org.spongepowered.despector.decompiler.method.graph.data.block.BlockSection;
+import java.util.List;
 
-import java.util.HashMap;
-import java.util.Map;
+public interface BreakableBlockSection {
 
-public class SwitchOpcodeBlock extends OpcodeBlock {
-
-    private final Map<Label, OpcodeBlock> additional_targets = new HashMap<>();
-
-    public SwitchOpcodeBlock(int br) {
-        super(br);
-    }
-
-    /**
-     * Gets a map of any additional target blocks. Used by switches to represent
-     * the blocks targetted by the various cases.
-     */
-    public Map<Label, OpcodeBlock> getAdditionalTargets() {
-        return this.additional_targets;
-    }
-
-    @Override
-    public BlockSection toBlockSection() {
-        throw new IllegalStateException("Unexpected switch block");
-    }
+    List<BreakBlockSection> getBreaks();
 
 }

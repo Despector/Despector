@@ -29,6 +29,7 @@ import org.spongepowered.despector.decompiler.method.graph.create.JumpGraphProdu
 import org.spongepowered.despector.decompiler.method.graph.create.SwitchGraphProducerStep;
 import org.spongepowered.despector.decompiler.method.graph.create.TryCatchGraphProducerStep;
 import org.spongepowered.despector.decompiler.method.graph.operate.BlockTargetOperation;
+import org.spongepowered.despector.decompiler.method.graph.operate.BreakPrePassOperation;
 import org.spongepowered.despector.decompiler.method.graph.operate.EmptyBlockClearOperation;
 import org.spongepowered.despector.decompiler.method.graph.operate.JumpSeparateOperation;
 import org.spongepowered.despector.decompiler.method.graph.operate.TernaryPrePassOperation;
@@ -66,6 +67,7 @@ public class Decompilers {
         JAVA_METHOD.addCleanupOperation(new JumpSeparateOperation());
         JAVA_METHOD.addCleanupOperation(new BlockTargetOperation());
         JAVA_METHOD.addCleanupOperation(new TernaryPrePassOperation());
+        JAVA_METHOD.addCleanupOperation(new BreakPrePassOperation());
         JAVA_METHOD.addProcessor(new TryCatchBlockProcessor());
         JAVA_METHOD.addProcessor(new InternalBlockProcessor());
         JAVA_METHOD.addProcessor(new SwitchBlockProcessor());

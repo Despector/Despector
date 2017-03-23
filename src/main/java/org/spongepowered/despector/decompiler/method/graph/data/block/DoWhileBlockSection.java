@@ -39,10 +39,11 @@ import java.util.List;
 /**
  * A block section representing a do-while loop.
  */
-public class DoWhileBlockSection extends BlockSection {
+public class DoWhileBlockSection extends BlockSection implements BreakableBlockSection {
 
     private final Condition condition;
     private final List<BlockSection> body = new ArrayList<>();
+    private final List<BreakBlockSection> breaks = new ArrayList<>();
 
     public DoWhileBlockSection(Condition cond) {
         this.condition = cond;
@@ -67,6 +68,11 @@ public class DoWhileBlockSection extends BlockSection {
      */
     public void append(BlockSection section) {
         this.body.add(section);
+    }
+
+    @Override
+    public List<BreakBlockSection> getBreaks() {
+        return this.breaks;
     }
 
     @Override

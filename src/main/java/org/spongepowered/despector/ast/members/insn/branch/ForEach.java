@@ -31,15 +31,20 @@ import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
 import org.spongepowered.despector.ast.members.insn.Statement;
 import org.spongepowered.despector.ast.members.insn.StatementBlock;
 import org.spongepowered.despector.ast.members.insn.arg.Instruction;
+import org.spongepowered.despector.ast.members.insn.branch.Break.Breakable;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A for loop.
  */
-public class ForEach implements Statement {
+public class ForEach implements Statement, Breakable {
 
     private Instruction collection;
     private LocalInstance val;
     private StatementBlock body;
+    private List<Break> breaks = new ArrayList<>();
 
     public ForEach(Instruction collection, LocalInstance val, StatementBlock body) {
         this.collection = checkNotNull(collection, "collection");
@@ -69,6 +74,11 @@ public class ForEach implements Statement {
 
     public void setBody(StatementBlock block) {
         this.body = checkNotNull(block, "block");
+    }
+
+    @Override
+    public List<Break> getBreaks() {
+        return this.breaks;
     }
 
     @Override

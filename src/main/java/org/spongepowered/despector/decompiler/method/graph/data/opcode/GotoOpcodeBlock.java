@@ -24,10 +24,17 @@
  */
 package org.spongepowered.despector.decompiler.method.graph.data.opcode;
 
+import org.spongepowered.despector.decompiler.method.graph.data.block.BlockSection;
+
 public class GotoOpcodeBlock extends OpcodeBlock {
 
     public GotoOpcodeBlock(int br) {
         super(br);
+    }
+
+    @Override
+    public BlockSection toBlockSection() {
+        throw new IllegalStateException("Unexpected conditional block");
     }
 
 }

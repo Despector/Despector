@@ -31,13 +31,11 @@ import org.spongepowered.despector.decompiler.method.PartialMethod;
 import org.spongepowered.despector.decompiler.method.graph.RegionProcessor;
 import org.spongepowered.despector.decompiler.method.graph.data.block.BlockSection;
 import org.spongepowered.despector.decompiler.method.graph.data.block.IfBlockSection;
-import org.spongepowered.despector.decompiler.method.graph.data.block.InlineBlockSection;
-import org.spongepowered.despector.decompiler.method.graph.data.block.WhileBlockSection;
 import org.spongepowered.despector.decompiler.method.graph.data.block.IfBlockSection.ElifBlockSection;
+import org.spongepowered.despector.decompiler.method.graph.data.block.WhileBlockSection;
 import org.spongepowered.despector.decompiler.method.graph.data.opcode.ConditionalOpcodeBlock;
 import org.spongepowered.despector.decompiler.method.graph.data.opcode.GotoOpcodeBlock;
 import org.spongepowered.despector.decompiler.method.graph.data.opcode.OpcodeBlock;
-import org.spongepowered.despector.decompiler.method.graph.data.opcode.ProcessedOpcodeBlock;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -92,16 +90,7 @@ public class IfBlockRegionProcessor implements RegionProcessor {
             WhileBlockSection section = new WhileBlockSection(cond);
             for (int i = body_start; i < else_start - 1; i++) {
                 next = region.get(i);
-                if (next instanceof ProcessedOpcodeBlock) {
-                    section.appendBody(((ProcessedOpcodeBlock) next).getPrecompiledSection());
-                } else if (next instanceof ConditionalOpcodeBlock || next instanceof GotoOpcodeBlock) {
-                    // If we encounter another conditional block then its an
-                    // error
-                    // as we should have already processed all sub regions
-                    throw new IllegalStateException("Unexpected conditional when building if body");
-                } else {
-                    section.appendBody(new InlineBlockSection(next));
-                }
+                section.appendBody(next.toBlockSection());
             }
             return section;
         }
@@ -113,15 +102,7 @@ public class IfBlockRegionProcessor implements RegionProcessor {
         // Append the body
         for (int i = body_start; i < else_start; i++) {
             next = region.get(i);
-            if (next instanceof ProcessedOpcodeBlock) {
-                section.appendBody(((ProcessedOpcodeBlock) next).getPrecompiledSection());
-            } else if (next instanceof ConditionalOpcodeBlock || next instanceof GotoOpcodeBlock) {
-                // If we encounter another conditional block then its an error
-                // as we should have already processed all sub regions
-                throw new IllegalStateException("Unexpected conditional when building if body");
-            } else {
-                section.appendBody(new InlineBlockSection(next));
-            }
+            section.appendBody(next.toBlockSection());
         }
 
         while (cond_ret != ret) {
@@ -149,37 +130,19 @@ public class IfBlockRegionProcessor implements RegionProcessor {
                 if (cond_ret != ret) {
                     elif_end = region.indexOf(cond_ret);
                 }
-                if(region.get(elif_end - 1) instanceof GotoOpcodeBlock) {
+                if (region.get(elif_end - 1) instanceof GotoOpcodeBlock) {
                     elif_end--;
                 }
                 // Append the body
                 for (int i = body_start; i < elif_end; i++) {
                     next = region.get(i);
-                    if (next instanceof ProcessedOpcodeBlock) {
-                        section.appendBody(((ProcessedOpcodeBlock) next).getPrecompiledSection());
-                    } else if (next instanceof ConditionalOpcodeBlock || next instanceof GotoOpcodeBlock) {
-                        // If we encounter another conditional block then its an
-                        // error as we should have already processed all sub
-                        // regions
-                        throw new IllegalStateException("Unexpected conditional when building elif body");
-                    } else {
-                        elif.append(new InlineBlockSection(next));
-                    }
+                    section.appendBody(next.toBlockSection());
                 }
             } else {
                 else_start = region.indexOf(cond_ret);
                 for (int i = else_start; i < region.size(); i++) {
                     next = region.get(i);
-                    if (next instanceof ProcessedOpcodeBlock) {
-                        section.appendBody(((ProcessedOpcodeBlock) next).getPrecompiledSection());
-                    } else if (next instanceof ConditionalOpcodeBlock || next instanceof GotoOpcodeBlock) {
-                        // If we encounter another conditional block then its an
-                        // error as we should have already processed all sub
-                        // regions
-                        throw new IllegalStateException("Unexpected conditional when building else body");
-                    } else {
-                        section.appendElseBody(new InlineBlockSection(next));
-                    }
+                    section.appendElseBody(next.toBlockSection());
                 }
                 break;
             }

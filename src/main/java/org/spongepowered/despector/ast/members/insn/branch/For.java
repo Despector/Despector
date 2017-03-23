@@ -29,19 +29,24 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
 import org.spongepowered.despector.ast.members.insn.Statement;
 import org.spongepowered.despector.ast.members.insn.StatementBlock;
+import org.spongepowered.despector.ast.members.insn.branch.Break.Breakable;
 import org.spongepowered.despector.ast.members.insn.branch.condition.Condition;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.annotation.Nullable;
 
 /**
  * A for loop.
  */
-public class For implements Statement {
+public class For implements Statement, Breakable {
 
     private Statement init;
     private Condition condition;
     private Statement incr;
     private StatementBlock body;
+    private List<Break> breaks = new ArrayList<>();
 
     public For(@Nullable Statement init, Condition condition, @Nullable Statement incr, StatementBlock body) {
         this.init = init;
@@ -82,6 +87,11 @@ public class For implements Statement {
 
     public void setBody(StatementBlock block) {
         this.body = checkNotNull(block, "block");
+    }
+
+    @Override
+    public List<Break> getBreaks() {
+        return this.breaks;
     }
 
     @Override

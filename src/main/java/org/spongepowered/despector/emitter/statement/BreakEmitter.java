@@ -22,33 +22,20 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.despector.decompiler.method.graph.data.opcode;
+package org.spongepowered.despector.emitter.statement;
 
-import org.objectweb.asm.Label;
-import org.spongepowered.despector.decompiler.method.graph.data.block.BlockSection;
+import org.spongepowered.despector.ast.members.insn.branch.Break;
+import org.spongepowered.despector.emitter.EmitterContext;
+import org.spongepowered.despector.emitter.StatementEmitter;
 
-import java.util.HashMap;
-import java.util.Map;
-
-public class SwitchOpcodeBlock extends OpcodeBlock {
-
-    private final Map<Label, OpcodeBlock> additional_targets = new HashMap<>();
-
-    public SwitchOpcodeBlock(int br) {
-        super(br);
-    }
-
-    /**
-     * Gets a map of any additional target blocks. Used by switches to represent
-     * the blocks targetted by the various cases.
-     */
-    public Map<Label, OpcodeBlock> getAdditionalTargets() {
-        return this.additional_targets;
-    }
+public class BreakEmitter implements StatementEmitter<Break> {
 
     @Override
-    public BlockSection toBlockSection() {
-        throw new IllegalStateException("Unexpected switch block");
+    public void emit(EmitterContext ctx, Break stmt, boolean semicolon) {
+        ctx.printString(stmt.getType().getKeyword());
+        if (semicolon) {
+            ctx.printString(";");
+        }
     }
 
 }

@@ -45,10 +45,11 @@ import java.util.List;
 /**
  * A block section representing a while block.
  */
-public class WhileBlockSection extends BlockSection {
+public class WhileBlockSection extends BlockSection implements BreakableBlockSection {
 
     private final Condition condition;
     private final List<BlockSection> body = new ArrayList<>();
+    private final List<BreakBlockSection> breaks = new ArrayList<>();
 
     public WhileBlockSection(Condition cond) {
         this.condition = cond;
@@ -76,8 +77,17 @@ public class WhileBlockSection extends BlockSection {
     }
 
     @Override
+    public List<BreakBlockSection> getBreaks() {
+        return this.breaks;
+    }
+
+    @Override
     public void appendTo(StatementBlock block, Deque<Instruction> stack) {
         StatementBlock body = new StatementBlock(StatementBlock.Type.WHILE, block.getLocals());
+        While wwhile = new While(this.condition, body);
+        for (BreakBlockSection bbreak : this.breaks) {
+            bbreak.setBreakable(wwhile);
+        }
         Deque<Instruction> body_stack = new ArrayDeque<>();
         for (BlockSection body_section : this.body) {
             body_section.appendTo(body, body_stack);
@@ -101,12 +111,14 @@ public class WhileBlockSection extends BlockSection {
                         body.getStatements().remove(increment);
                     }
                     For ffor = new For(last, this.condition, increment, body);
+                    for (BreakBlockSection bbreak : this.breaks) {
+                        bbreak.setBreakable(ffor);
+                    }
                     block.append(ffor);
                     return;
                 }
             }
         }
-        While wwhile = new While(this.condition, body);
         block.append(wwhile);
     }
 }

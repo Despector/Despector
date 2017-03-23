@@ -58,6 +58,7 @@ import org.spongepowered.despector.ast.members.insn.assign.FieldAssignment;
 import org.spongepowered.despector.ast.members.insn.assign.InstanceFieldAssignment;
 import org.spongepowered.despector.ast.members.insn.assign.LocalAssignment;
 import org.spongepowered.despector.ast.members.insn.assign.StaticFieldAssignment;
+import org.spongepowered.despector.ast.members.insn.branch.Break;
 import org.spongepowered.despector.ast.members.insn.branch.DoWhile;
 import org.spongepowered.despector.ast.members.insn.branch.For;
 import org.spongepowered.despector.ast.members.insn.branch.ForEach;
@@ -111,6 +112,7 @@ import org.spongepowered.despector.emitter.special.AnonymousClassEmitter;
 import org.spongepowered.despector.emitter.special.GenericsEmitter;
 import org.spongepowered.despector.emitter.special.PackageInfoEmitter;
 import org.spongepowered.despector.emitter.statement.ArrayAssignmentEmitter;
+import org.spongepowered.despector.emitter.statement.BreakEmitter;
 import org.spongepowered.despector.emitter.statement.DoWhileEmitter;
 import org.spongepowered.despector.emitter.statement.FieldAssignmentEmitter;
 import org.spongepowered.despector.emitter.statement.ForEachEmitter;
@@ -149,6 +151,7 @@ public class Emitters {
         JAVA.setAstEmitter(MethodEntry.class, new MethodEntryEmitter());
 
         JAVA.setStatementEmitter(ArrayAssignment.class, new ArrayAssignmentEmitter());
+        JAVA.setStatementEmitter(Break.class, new BreakEmitter());
         JAVA.setStatementEmitter(DoWhile.class, new DoWhileEmitter());
         FieldAssignmentEmitter fld_assign = new FieldAssignmentEmitter();
         JAVA.setStatementEmitter(FieldAssignment.class, fld_assign);

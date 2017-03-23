@@ -24,31 +24,57 @@
  */
 package org.spongepowered.despector.decompiler.method.graph.data.opcode;
 
-import org.objectweb.asm.Label;
 import org.spongepowered.despector.decompiler.method.graph.data.block.BlockSection;
+import org.spongepowered.despector.decompiler.method.graph.data.block.BreakBlockSection;
 
-import java.util.HashMap;
-import java.util.Map;
+public class BreakMarkerOpcodeBlock extends OpcodeBlock {
 
-public class SwitchOpcodeBlock extends OpcodeBlock {
+    private MarkerType type;
+    private ConditionalOpcodeBlock marked;
 
-    private final Map<Label, OpcodeBlock> additional_targets = new HashMap<>();
-
-    public SwitchOpcodeBlock(int br) {
+    public BreakMarkerOpcodeBlock(int br, MarkerType type) {
         super(br);
+        this.type = type;
     }
 
-    /**
-     * Gets a map of any additional target blocks. Used by switches to represent
-     * the blocks targetted by the various cases.
-     */
-    public Map<Label, OpcodeBlock> getAdditionalTargets() {
-        return this.additional_targets;
+    public MarkerType getType() {
+        return this.type;
+    }
+
+    public void setType(MarkerType type) {
+        this.type = type;
+    }
+
+    public ConditionalOpcodeBlock getMarked() {
+        return this.marked;
+    }
+
+    public void setMarked(ConditionalOpcodeBlock marked) {
+        this.marked = marked;
+    }
+
+    @Override
+    public OpcodeBlock getTarget() {
+        return null;
+    }
+
+    @Override
+    public boolean hasTarget() {
+        return false;
+    }
+
+    public OpcodeBlock getOldTarget() {
+        return this.target;
     }
 
     @Override
     public BlockSection toBlockSection() {
-        throw new IllegalStateException("Unexpected switch block");
+        return new BreakBlockSection(this, this.type);
+    }
+
+    public static enum MarkerType {
+        BREAK,
+        CONTINUE;
     }
 
 }

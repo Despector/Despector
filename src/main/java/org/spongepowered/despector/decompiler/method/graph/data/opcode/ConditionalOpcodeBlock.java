@@ -24,6 +24,8 @@
  */
 package org.spongepowered.despector.decompiler.method.graph.data.opcode;
 
+import org.spongepowered.despector.decompiler.method.graph.data.block.BlockSection;
+
 public class ConditionalOpcodeBlock extends OpcodeBlock {
 
     private OpcodeBlock else_target;
@@ -56,10 +58,14 @@ public class ConditionalOpcodeBlock extends OpcodeBlock {
     }
 
     @Override
+    public BlockSection toBlockSection() {
+        throw new IllegalStateException("Unexpected conditional block");
+    }
+
+    @Override
     public void print() {
         super.print();
         System.out.println("    Target: " + (this.target != null ? this.target.break_point : -1));
         System.out.println("    Else Target: " + (this.else_target != null ? this.else_target.break_point : -1));
     }
-
 }

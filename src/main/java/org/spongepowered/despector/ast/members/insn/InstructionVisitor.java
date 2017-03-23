@@ -56,6 +56,7 @@ import org.spongepowered.despector.ast.members.insn.assign.ArrayAssignment;
 import org.spongepowered.despector.ast.members.insn.assign.InstanceFieldAssignment;
 import org.spongepowered.despector.ast.members.insn.assign.LocalAssignment;
 import org.spongepowered.despector.ast.members.insn.assign.StaticFieldAssignment;
+import org.spongepowered.despector.ast.members.insn.branch.Break;
 import org.spongepowered.despector.ast.members.insn.branch.DoWhile;
 import org.spongepowered.despector.ast.members.insn.branch.For;
 import org.spongepowered.despector.ast.members.insn.branch.ForEach;
@@ -80,7 +81,7 @@ import org.spongepowered.despector.ast.members.insn.misc.Return;
 import org.spongepowered.despector.ast.members.insn.misc.Throw;
 
 public abstract class InstructionVisitor {
-    
+
     public void visitAddOperatorArg(AddOperator addArg) {
     }
 
@@ -97,6 +98,9 @@ public abstract class InstructionVisitor {
     }
 
     public void visitBooleanCondition(BooleanCondition booleanCondition) {
+    }
+
+    public void visitBreak(Break breakStatement) {
     }
 
     public void visitCastArg(Cast castArg) {
