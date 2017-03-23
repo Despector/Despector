@@ -27,6 +27,7 @@ package org.spongepowered.despector.config;
 public class Constants {
 
     public static final boolean TRACE_ERRORS = Boolean.valueOf("despect.trace_on_error");
-    public static boolean TRACE_ACTIVE = false;
+    public static final boolean TRACE_ALL = Boolean.valueOf("despect.trace_all");
+    public static boolean TRACE_ACTIVE = TRACE_ALL;
 
 }

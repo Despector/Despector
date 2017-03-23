@@ -33,9 +33,7 @@ import org.spongepowered.despector.decompiler.method.graph.data.opcode.GotoOpcod
 import org.spongepowered.despector.decompiler.method.graph.data.opcode.OpcodeBlock;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 public class BreakPrePassOperation implements GraphOperation {
@@ -43,13 +41,8 @@ public class BreakPrePassOperation implements GraphOperation {
     @Override
     public void process(PartialMethod partial) {
         List<OpcodeBlock> blocks = partial.getGraph();
-        List<GotoOpcodeBlock> candidates = blocks.stream()
-                .filter((op) -> op instanceof GotoOpcodeBlock)
-                .map((op) -> (GotoOpcodeBlock) op)
+        List<GotoOpcodeBlock> candidates = blocks.stream().filter((op) -> op instanceof GotoOpcodeBlock).map((op) -> (GotoOpcodeBlock) op)
                 .collect(Collectors.toList());
-        if (candidates.size() < 2) {
-            return;
-        }
 
         List<Loop> loops = new ArrayList<>();
 
@@ -58,10 +51,8 @@ public class BreakPrePassOperation implements GraphOperation {
             int target_index = blocks.indexOf(target);
             if (target.getBreakpoint() < ggoto.getBreakpoint()) {
                 // a back edge is either a while loop or a continue statement
-                List<GotoOpcodeBlock> others = target.getTargettedBy().stream()
-                        .filter((op) -> op instanceof GotoOpcodeBlock)
-                        .map((op) -> (GotoOpcodeBlock) op)
-                        .collect(Collectors.toList());
+                List<GotoOpcodeBlock> others = target.getTargettedBy().stream().filter((op) -> op instanceof GotoOpcodeBlock)
+                        .map((op) -> (GotoOpcodeBlock) op).collect(Collectors.toList());
                 int goto_index = blocks.indexOf(ggoto);
                 for (GotoOpcodeBlock other : others) {
                     int other_index = blocks.indexOf(other);
@@ -75,7 +66,7 @@ public class BreakPrePassOperation implements GraphOperation {
                 loop.start = Math.min(goto_index, target_index);
                 loop.end = Math.max(goto_index, target_index);
                 loop.ggoto = ggoto;
-                loop.condition = (ConditionalOpcodeBlock) target;
+                loop.condition = target;
                 loops.add(loop);
                 continue;
             }
@@ -101,10 +92,8 @@ public class BreakPrePassOperation implements GraphOperation {
                 if (!found) {
                     continue;
                 }
-                List<GotoOpcodeBlock> others = target.getTargettedBy().stream()
-                        .filter((op) -> op instanceof GotoOpcodeBlock)
-                        .map((op) -> (GotoOpcodeBlock) op)
-                        .collect(Collectors.toList());
+                List<GotoOpcodeBlock> others = target.getTargettedBy().stream().filter((op) -> op instanceof GotoOpcodeBlock)
+                        .map((op) -> (GotoOpcodeBlock) op).collect(Collectors.toList());
                 int goto_index = blocks.indexOf(ggoto);
                 for (GotoOpcodeBlock other : others) {
                     int other_index = blocks.indexOf(other);
@@ -118,10 +107,46 @@ public class BreakPrePassOperation implements GraphOperation {
                 loop.start = Math.min(goto_index, target_index);
                 loop.end = Math.max(goto_index, target_index);
                 loop.ggoto = ggoto;
-                loop.condition = (ConditionalOpcodeBlock) target;
+                loop.condition = target;
                 loops.add(loop);
             }
         }
+
+        dowhile: for (OpcodeBlock block : blocks) {
+            if (!(block instanceof ConditionalOpcodeBlock)) {
+                continue;
+            }
+            ConditionalOpcodeBlock cond = (ConditionalOpcodeBlock) block;
+            if (cond.getTarget().getBreakpoint() < cond.getBreakpoint()) {
+                int i = blocks.indexOf(cond);
+                OpcodeBlock prev = blocks.get(i);
+                ConditionalOpcodeBlock first = cond;
+                while (prev instanceof ConditionalOpcodeBlock) {
+                    OpcodeBlock target = prev.getTarget();
+                    if (target.getBreakpoint() < prev.getBreakpoint()) {
+                        break;
+                    }
+                    first = (ConditionalOpcodeBlock) prev;
+                    if (i == 0) {
+                        break;
+                    }
+                    prev = blocks.get(--i);
+                }
+                for (Loop loop : loops) {
+                    if (loop.condition == first) {
+                        continue dowhile;
+                    }
+                }
+                Loop loop = new Loop();
+                loop.start = blocks.indexOf(cond.getTarget());
+                loop.end = blocks.indexOf(first);
+                loop.ggoto = null;
+                loop.condition = first;
+                loops.add(loop);
+
+            }
+        }
+
         outer: for (GotoOpcodeBlock ggoto : candidates) {
             int goto_index = blocks.indexOf(ggoto);
             for (Loop loop : loops) {
@@ -165,7 +190,7 @@ public class BreakPrePassOperation implements GraphOperation {
         public int start;
         public int end;
         public GotoOpcodeBlock ggoto;
-        public ConditionalOpcodeBlock condition;
+        public OpcodeBlock condition;
         public OpcodeBlock ret;
 
         public Loop() {

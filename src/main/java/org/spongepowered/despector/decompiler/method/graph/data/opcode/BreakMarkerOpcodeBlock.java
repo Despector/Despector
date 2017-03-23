@@ -30,7 +30,7 @@ import org.spongepowered.despector.decompiler.method.graph.data.block.BreakBlock
 public class BreakMarkerOpcodeBlock extends OpcodeBlock {
 
     private MarkerType type;
-    private ConditionalOpcodeBlock marked;
+    private OpcodeBlock marked;
 
     public BreakMarkerOpcodeBlock(int br, MarkerType type) {
         super(br);
@@ -45,11 +45,11 @@ public class BreakMarkerOpcodeBlock extends OpcodeBlock {
         this.type = type;
     }
 
-    public ConditionalOpcodeBlock getMarked() {
+    public OpcodeBlock getMarked() {
         return this.marked;
     }
 
-    public void setMarked(ConditionalOpcodeBlock marked) {
+    public void setMarked(OpcodeBlock marked) {
         this.marked = marked;
     }
 

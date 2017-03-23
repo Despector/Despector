@@ -97,7 +97,7 @@ public class MethodInfoStep implements DecompilerStep {
             } catch (Exception ex) {
                 System.err.println("Error decompiling method body for " + cn.name + " " + m.toString());
                 ex.printStackTrace();
-                if (Constants.TRACE_ERRORS) {
+                if (Constants.TRACE_ERRORS && !Constants.TRACE_ALL) {
                     System.out.println("Starting error trace");
                     System.out.flush();
                     System.err.flush();

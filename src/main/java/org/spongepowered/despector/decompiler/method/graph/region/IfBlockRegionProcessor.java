@@ -100,6 +100,9 @@ public class IfBlockRegionProcessor implements RegionProcessor {
 
         IfBlockSection section = new IfBlockSection(cond);
         // Append the body
+        if (Constants.TRACE_ACTIVE) {
+            System.err.println("If body is " + region.get(body_start).getBreakpoint() + " to " + region.get(else_start - 1).getBreakpoint());
+        }
         for (int i = body_start; i < else_start; i++) {
             next = region.get(i);
             section.appendBody(next.toBlockSection());
@@ -136,13 +139,19 @@ public class IfBlockRegionProcessor implements RegionProcessor {
                 // Append the body
                 for (int i = body_start; i < elif_end; i++) {
                     next = region.get(i);
-                    section.appendBody(next.toBlockSection());
+                    elif.append(next.toBlockSection());
+                }
+                if (Constants.TRACE_ACTIVE) {
+                    System.err.println("Next elif is " + region.get(body_start).getBreakpoint() + " to " + region.get(elif_end - 1).getBreakpoint());
                 }
             } else {
                 else_start = region.indexOf(cond_ret);
                 for (int i = else_start; i < region.size(); i++) {
                     next = region.get(i);
                     section.appendElseBody(next.toBlockSection());
+                }
+                if (Constants.TRACE_ACTIVE) {
+                    System.err.println("Else is " + region.get(else_start).getBreakpoint() + " to " + region.get(region.size() - 1).getBreakpoint());
                 }
                 break;
             }

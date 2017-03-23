@@ -83,15 +83,17 @@ public class TestHelper {
         } catch (Exception ex) {
             System.err.println("Error decompiling method body for " + type.name + " " + method_name);
             ex.printStackTrace();
-            System.out.println("Starting error trace");
-            System.out.flush();
-            System.err.flush();
-            Constants.TRACE_ACTIVE = true;
-            try {
-                Decompilers.JAVA_METHOD.decompile(dummy, mn);
-            } catch (Exception e) {
+            if (!Constants.TRACE_ALL) {
+                System.out.println("Starting error trace");
+                System.out.flush();
+                System.err.flush();
+                Constants.TRACE_ACTIVE = true;
+                try {
+                    Decompilers.JAVA_METHOD.decompile(dummy, mn);
+                } catch (Exception e) {
+                }
+                Constants.TRACE_ACTIVE = false;
             }
-            Constants.TRACE_ACTIVE = false;
             System.err.println("Offending method bytecode:");
             Iterator<AbstractInsnNode> it = mn.instructions.iterator();
             while (it.hasNext()) {
@@ -143,15 +145,17 @@ public class TestHelper {
         } catch (Exception ex) {
             System.err.println("Error decompiling method body for " + type.name + " " + method_name);
             ex.printStackTrace();
-            System.out.println("Starting error trace");
-            System.out.flush();
-            System.err.flush();
-            Constants.TRACE_ACTIVE = true;
-            try {
-                Decompilers.JAVA_METHOD.decompile(dummy, mn);
-            } catch (Exception e) {
+            if (!Constants.TRACE_ALL) {
+                System.out.println("Starting error trace");
+                System.out.flush();
+                System.err.flush();
+                Constants.TRACE_ACTIVE = true;
+                try {
+                    Decompilers.JAVA_METHOD.decompile(dummy, mn);
+                } catch (Exception e) {
+                }
+                Constants.TRACE_ACTIVE = false;
             }
-            Constants.TRACE_ACTIVE = false;
             System.err.println("Offending method bytecode:");
             Iterator<AbstractInsnNode> it = mn.instructions.iterator();
             while (it.hasNext()) {
