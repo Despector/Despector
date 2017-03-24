@@ -30,14 +30,32 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import org.objectweb.asm.Type;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
 public class Annotation {
 
+    private static final Set<Class<?>> VALID_TYPES = new HashSet<>();
+
+    static {
+        VALID_TYPES.add(String.class);
+        VALID_TYPES.add(Type.class);
+        VALID_TYPES.add(ArrayList.class);
+
+        VALID_TYPES.add(Boolean.class);
+        VALID_TYPES.add(Byte.class);
+        VALID_TYPES.add(Short.class);
+        VALID_TYPES.add(Integer.class);
+        VALID_TYPES.add(Long.class);
+        VALID_TYPES.add(Float.class);
+        VALID_TYPES.add(Double.class);
+        VALID_TYPES.add(Character.class);
+    }
+
     public static boolean isValidValue(Class<?> type) {
-        if (type == String.class || type == Type.class || type == ArrayList.class || type.isPrimitive()) {
+        if (type.isPrimitive() || VALID_TYPES.contains(type)) {
             return true;
         }
         if (type.isArray()) {

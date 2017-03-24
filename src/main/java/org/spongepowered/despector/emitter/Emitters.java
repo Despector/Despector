@@ -107,6 +107,11 @@ import org.spongepowered.despector.emitter.instruction.StaticMethodInvokeEmitter
 import org.spongepowered.despector.emitter.instruction.StringConstantEmitter;
 import org.spongepowered.despector.emitter.instruction.TernaryEmitter;
 import org.spongepowered.despector.emitter.instruction.TypeConstantEmitter;
+import org.spongepowered.despector.emitter.kotlin.type.KotlinClassEntryEmitter;
+import org.spongepowered.despector.emitter.kotlin.type.KotlinCompanionClassEmitter;
+import org.spongepowered.despector.emitter.kotlin.type.KotlinDataClassEmitter;
+import org.spongepowered.despector.emitter.kotlin.type.KotlinEnumEntryEmitter;
+import org.spongepowered.despector.emitter.kotlin.type.KotlinMethodEntryEmitter;
 import org.spongepowered.despector.emitter.special.AnnotationEmitter;
 import org.spongepowered.despector.emitter.special.AnonymousClassEmitter;
 import org.spongepowered.despector.emitter.special.GenericsEmitter;
@@ -135,6 +140,7 @@ import org.spongepowered.despector.emitter.type.MethodEntryEmitter;
 public class Emitters {
 
     public static final EmitterSet JAVA = new EmitterSet();
+    public static final EmitterSet KOTLIN = new EmitterSet();
 
     static {
 
@@ -208,6 +214,15 @@ public class Emitters {
         JAVA.setConditionEmitter(InverseCondition.class, new InverseConditionEmitter());
         JAVA.setConditionEmitter(CompareCondition.class, new CompareConditionEmitter());
         JAVA.setConditionEmitter(BooleanCondition.class, new BooleanConditionEmitter());
+
+        KOTLIN.clone(JAVA);
+
+        KOTLIN.setAstEmitter(ClassEntry.class, new KotlinClassEntryEmitter());
+        KOTLIN.setAstEmitter(EnumEntry.class, new KotlinEnumEntryEmitter());
+        KOTLIN.setAstEmitter(MethodEntry.class, new KotlinMethodEntryEmitter());
+        
+        KOTLIN.setSpecialEmitter(KotlinDataClassEmitter.class, new KotlinDataClassEmitter());
+        KOTLIN.setSpecialEmitter(KotlinCompanionClassEmitter.class, new KotlinCompanionClassEmitter());
     }
 
 }

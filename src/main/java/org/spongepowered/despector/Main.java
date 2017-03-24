@@ -53,11 +53,24 @@ public class Main {
 
     private static final Map<String, Consumer<String>> flags = Maps.newHashMap();
 
+    public static Language LANGUAGE = Language.JAVA;
+
     static {
         flags.put("--config=", (arg) -> {
             String config = arg.substring(9);
             Path config_path = Paths.get(".").resolve(config);
             ConfigManager.load(config_path);
+        });
+        flags.put("--lang=", (arg) -> {
+            String lang = arg.substring(7);
+            if ("kotlin".equalsIgnoreCase(lang)) {
+                LANGUAGE = Language.KOTLIN;
+            } else if ("java".equalsIgnoreCase(lang)) {
+                LANGUAGE = Language.JAVA;
+            } else {
+                System.err.println("Unknown language: " + lang);
+                System.exit(0);
+            }
         });
     }
 
@@ -96,7 +109,7 @@ public class Main {
             formatter = EmitterFormat.defaults();
         }
 
-        Decompiler decompiler = Decompilers.JAVA;
+        Decompiler decompiler = LANGUAGE.getDecompiler();
 
         SourceSet source = new SourceSet();
         for (String s : sources) {
@@ -149,12 +162,12 @@ public class Main {
             if (type.isInnerClass() || type.isAnonType()) {
                 continue;
             }
-            Path out = output.resolve(type.getName() + ".java");
+            Path out = output.resolve(type.getName() + LANGUAGE.getFileExt());
             if (!Files.exists(out.getParent())) {
                 Files.createDirectories(out.getParent());
             }
             try (FileWriter writer = new FileWriter(out.toFile())) {
-                EmitterContext emitter = new EmitterContext(Emitters.JAVA, writer, formatter);
+                EmitterContext emitter = new EmitterContext(LANGUAGE.getEmitter(), writer, formatter);
                 emitter.emitOuterType(type);
             }
         }

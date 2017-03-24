@@ -22,11 +22,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.despector.emitter.type;
+package org.spongepowered.despector.emitter.kotlin.type;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import org.spongepowered.despector.ast.AccessModifier;
 import org.spongepowered.despector.ast.Annotation;
 import org.spongepowered.despector.ast.members.FieldEntry;
 import org.spongepowered.despector.ast.members.MethodEntry;
@@ -38,28 +37,36 @@ import org.spongepowered.despector.ast.type.TypeEntry;
 import org.spongepowered.despector.ast.type.TypeEntry.InnerClassInfo;
 import org.spongepowered.despector.emitter.AstEmitter;
 import org.spongepowered.despector.emitter.EmitterContext;
+import org.spongepowered.despector.emitter.kotlin.KotlinEmitterUtil;
 import org.spongepowered.despector.util.TypeHelper;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-public class EnumEntryEmitter implements AstEmitter<EnumEntry> {
+public class KotlinEnumEntryEmitter implements AstEmitter<EnumEntry> {
+
+    private static final Set<String> HIDDEN_ANNOTATIONS = new HashSet<>();
+
+    static {
+        HIDDEN_ANNOTATIONS.add("Lkotlin/Metadata;");
+    }
 
     @Override
     public boolean emit(EmitterContext ctx, EnumEntry type) {
 
         for (Annotation anno : type.getAnnotations()) {
+            if (HIDDEN_ANNOTATIONS.contains(anno.getType().getName())) {
+                continue;
+            }
             ctx.printIndentation();
             ctx.emit(anno);
             ctx.printString("\n");
         }
         ctx.printIndentation();
-        ctx.printString(type.getAccessModifier().asString());
-        if (type.getAccessModifier() != AccessModifier.PACKAGE_PRIVATE) {
-            ctx.printString(" ");
-        }
         ctx.printString("enum ");
         InnerClassInfo inner_info = null;
         if (type.isInnerClass() && ctx.getOuterType() != null) {
@@ -77,7 +84,7 @@ public class EnumEntryEmitter implements AstEmitter<EnumEntry> {
             ctx.printString(name);
         }
         if (!type.getInterfaces().isEmpty()) {
-            ctx.printString(" implements ");
+            ctx.printString(" : ");
             for (int i = 0; i < type.getInterfaces().size(); i++) {
                 ctx.emitType(type.getInterfaces().get(i));
                 if (i < type.getInterfaces().size() - 1) {
@@ -91,6 +98,48 @@ public class EnumEntryEmitter implements AstEmitter<EnumEntry> {
                 }
             }
         }
+
+        List<EnumField> fields = new ArrayList<>();
+
+        for (FieldEntry fld : type.getFields()) {
+            if (fld.isSynthetic()) {
+                continue;
+            }
+            EnumField efld = new EnumField();
+            efld.name = fld.getName();
+            efld.type = fld.getType();
+            efld.is_final = fld.isFinal();
+            fields.add(efld);
+            MethodEntry getter = type.getMethodSafe("get" + Character.toUpperCase(efld.name.charAt(0)) + efld.name.substring(1), "()" + efld.type);
+            if (getter == null) {
+                efld.is_private = true;
+            } else {
+                getter.setSynthetic(true);
+            }
+        }
+
+        if (fields != null) {
+            ctx.printString("(");
+            for (int i = 0; i < fields.size(); i++) {
+                if (i > 0) {
+                    ctx.printString(", ");
+                }
+                EnumField fld = fields.get(i);
+                if (fld.is_private) {
+                    ctx.printString("private ");
+                }
+                if (fld.is_final) {
+                    ctx.printString("val ");
+                } else {
+                    ctx.printString("var ");
+                }
+                ctx.printString(fld.name);
+                ctx.printString(": ");
+                KotlinEmitterUtil.emitBoxedType(ctx, fld.type);
+            }
+            ctx.printString(")");
+        }
+
         if (ctx.getFormat().insert_space_before_opening_brace_in_type_declaration) {
             ctx.printString(" ");
         }
@@ -201,27 +250,12 @@ public class EnumEntryEmitter implements AstEmitter<EnumEntry> {
                 ctx.printString("\n\n");
             }
         }
-        if (!type.getFields().isEmpty()) {
-            for (FieldEntry field : type.getFields()) {
-                if (field.isSynthetic()) {
-                    continue;
-                }
-                ctx.printIndentation();
-                ctx.emit(field);
-                ctx.printString(";\n");
-            }
-            ctx.printString("\n");
-        }
         if (!type.getMethods().isEmpty()) {
             for (MethodEntry mth : type.getMethods()) {
                 if (mth.isSynthetic()) {
                     continue;
                 }
-                if (mth.getName().equals("<init>") && mth.getInstructions().getStatements().size() == 2) {
-                    // If the initializer contains only two statement (which
-                    // will be the invoke of the super constructor and the void
-                    // return) then we can
-                    // skip emitting it
+                if (mth.getName().equals("<init>")) {
                     continue;
                 }
                 ctx.emit(mth);
@@ -246,6 +280,17 @@ public class EnumEntryEmitter implements AstEmitter<EnumEntry> {
         ctx.printIndentation();
         ctx.printString("}\n");
         return true;
+    }
+
+    private static class EnumField {
+
+        public String name;
+        public String type;
+        public boolean is_final;
+        public boolean is_private;
+
+        public EnumField() {
+        }
     }
 
 }

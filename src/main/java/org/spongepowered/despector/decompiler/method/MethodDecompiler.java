@@ -146,17 +146,26 @@ public class MethodDecompiler {
 
         List<OpcodeBlock> graph = makeGraph(partial);
         partial.setGraph(graph);
+        
+        boolean hasPrintedBlocks = false;
 
         for (GraphOperation op : this.cleanup_operations) {
             // TODO separate cleanup and pre-pass operations
             if (op instanceof TernaryPrePassOperation) {
                 if (Constants.TRACE_ACTIVE) {
+                    hasPrintedBlocks = true;
                     for (OpcodeBlock op2 : graph) {
                         op2.print();
                     }
                 }
             }
             op.process(partial);
+        }
+
+        if (Constants.TRACE_ACTIVE && !hasPrintedBlocks) {
+            for (OpcodeBlock op2 : graph) {
+                op2.print();
+            }
         }
 
         // Performs a sequence of transformations to convert the graph into a

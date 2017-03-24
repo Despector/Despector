@@ -97,7 +97,7 @@ public class Decompiler {
         AnnotationType anno_type = src.getAnnotationType(an.desc);
         Annotation anno = new Annotation(anno_type);
         if (an.values != null) {
-            for (int i = 0; i < an.values.size(); i += 2) {
+            for (int i = 0; i * 2 < an.values.size(); i += 2) {
                 String key = (String) an.values.get(i * 2);
                 Object value = an.values.get(i * 2 + 1);
                 anno.setValue(key, value);

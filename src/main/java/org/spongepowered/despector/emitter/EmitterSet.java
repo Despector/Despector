@@ -94,4 +94,12 @@ public class EmitterSet {
         this.special_emitters.put(type, emitter);
     }
 
+    public void clone(EmitterSet other) {
+        this.emitters.putAll(other.emitters);
+        this.cond_emitters.putAll(other.cond_emitters);
+        this.insn_emitters.putAll(other.insn_emitters);
+        this.special_emitters.putAll(other.special_emitters);
+        this.stmt_emitters.putAll(other.stmt_emitters);
+    }
+
 }

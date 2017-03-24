@@ -140,74 +140,23 @@ public final class AstUtil {
      * Gets the change in the stack size caused by the given
      * {@link AbstractInsnNode}.
      */
-    public static int getStackDelta(AbstractInsnNode next) {
+    public static int getStackRequirementsSize(AbstractInsnNode next) {
+        if (next == null) {
+            return 0;
+        }
         switch (next.getOpcode()) {
+        case IASTORE:
+        case LASTORE:
+        case FASTORE:
+        case DASTORE:
+        case AASTORE:
+        case BASTORE:
+        case CASTORE:
+        case SASTORE:
+            return 3;
         case DUP2:
         case DUP2_X1:
         case DUP2_X2:
-            return 2;
-        case ACONST_NULL:
-        case ICONST_M1:
-        case ICONST_0:
-        case ICONST_1:
-        case ICONST_2:
-        case ICONST_3:
-        case ICONST_4:
-        case ICONST_5:
-        case LCONST_0:
-        case LCONST_1:
-        case FCONST_0:
-        case FCONST_1:
-        case FCONST_2:
-        case DCONST_0:
-        case DCONST_1:
-        case BIPUSH:
-        case SIPUSH:
-        case LDC:
-        case ILOAD:
-        case LLOAD:
-        case FLOAD:
-        case DLOAD:
-        case ALOAD:
-        case DUP:
-        case DUP_X1:
-        case DUP_X2:
-        case GETSTATIC:
-        case NEW:
-            return 1;
-        case NOP:
-        case SWAP:
-        case INEG:
-        case LNEG:
-        case FNEG:
-        case DNEG:
-        case IINC:
-        case L2I:
-        case F2I:
-        case D2I:
-        case I2L:
-        case F2L:
-        case D2L:
-        case I2F:
-        case L2F:
-        case D2F:
-        case I2D:
-        case F2D:
-        case L2D:
-        case I2B:
-        case I2C:
-        case I2S:
-        case GOTO:
-        case JSR:
-        case RET:
-        case RETURN:
-        case GETFIELD:
-        case NEWARRAY:
-        case ANEWARRAY:
-        case ARRAYLENGTH:
-        case CHECKCAST:
-        case INSTANCEOF:
-            return 0;
         case IALOAD:
         case LALOAD:
         case FALOAD:
@@ -216,12 +165,6 @@ public final class AstUtil {
         case BALOAD:
         case CALOAD:
         case SALOAD:
-        case ISTORE:
-        case LSTORE:
-        case FSTORE:
-        case DSTORE:
-        case ASTORE:
-        case POP:
         case IADD:
         case LADD:
         case FADD:
@@ -259,6 +202,52 @@ public final class AstUtil {
         case FCMPG:
         case DCMPL:
         case DCMPG:
+        case POP2:
+        case IF_ICMPEQ:
+        case IF_ICMPNE:
+        case IF_ICMPLT:
+        case IF_ICMPGE:
+        case IF_ICMPGT:
+        case IF_ICMPLE:
+        case IF_ACMPEQ:
+        case IF_ACMPNE:
+        case PUTFIELD:
+            return 2;
+        case DUP:
+        case DUP_X1:
+        case DUP_X2:
+        case SWAP:
+        case INEG:
+        case LNEG:
+        case FNEG:
+        case DNEG:
+        case L2I:
+        case F2I:
+        case D2I:
+        case I2L:
+        case F2L:
+        case D2L:
+        case I2F:
+        case L2F:
+        case D2F:
+        case I2D:
+        case F2D:
+        case L2D:
+        case I2B:
+        case I2C:
+        case I2S:
+        case GETFIELD:
+        case NEWARRAY:
+        case ANEWARRAY:
+        case ARRAYLENGTH:
+        case CHECKCAST:
+        case INSTANCEOF:
+        case ISTORE:
+        case LSTORE:
+        case FSTORE:
+        case DSTORE:
+        case ASTORE:
+        case POP:
         case IFEQ:
         case IFNE:
         case IFLT:
@@ -276,44 +265,50 @@ public final class AstUtil {
         case ATHROW:
         case TABLESWITCH:
         case LOOKUPSWITCH:
-            return -1;
-        case POP2:
-        case IF_ICMPEQ:
-        case IF_ICMPNE:
-        case IF_ICMPLT:
-        case IF_ICMPGE:
-        case IF_ICMPGT:
-        case IF_ICMPLE:
-        case IF_ACMPEQ:
-        case IF_ACMPNE:
-        case PUTFIELD:
-            return -2;
-        case IASTORE:
-        case LASTORE:
-        case FASTORE:
-        case DASTORE:
-        case AASTORE:
-        case BASTORE:
-        case CASTORE:
-        case SASTORE:
-            return -3;
+            return 1;
+        case ACONST_NULL:
+        case ICONST_M1:
+        case ICONST_0:
+        case ICONST_1:
+        case ICONST_2:
+        case ICONST_3:
+        case ICONST_4:
+        case ICONST_5:
+        case LCONST_0:
+        case LCONST_1:
+        case FCONST_0:
+        case FCONST_1:
+        case FCONST_2:
+        case DCONST_0:
+        case DCONST_1:
+        case BIPUSH:
+        case SIPUSH:
+        case LDC:
+        case ILOAD:
+        case LLOAD:
+        case FLOAD:
+        case DLOAD:
+        case ALOAD:
+        case GETSTATIC:
+        case NEW:
+        case NOP:
+        case IINC:
+        case GOTO:
+        case JSR:
+        case RET:
+        case RETURN:
+            return 0;
         case INVOKESPECIAL:
         case INVOKEVIRTUAL:
         case INVOKEINTERFACE: {
             MethodInsnNode method = (MethodInsnNode) next;
-            int count = -TypeHelper.paramCount(method.desc);
-            count--; // the object ref
-            if (!TypeHelper.getRet(method.desc).equals("V")) {
-                count++;
-            }
+            int count = TypeHelper.paramCount(method.desc);
+            count++; // the object ref
             return count;
         }
         case INVOKESTATIC: {
             MethodInsnNode method = (MethodInsnNode) next;
-            int count = -TypeHelper.paramCount(method.desc);
-            if (!TypeHelper.getRet(method.desc).equals("V")) {
-                count++;
-            }
+            int count = TypeHelper.paramCount(method.desc);
             return count;
         }
         case INVOKEDYNAMIC:
@@ -328,7 +323,190 @@ public final class AstUtil {
         }
     }
 
-    public static boolean hasStartingRequirement(List<AbstractInsnNode> opcodes) {
+    public static int getStackResultSize(AbstractInsnNode next) {
+        if (next == null) {
+            return 0;
+        }
+        switch (next.getOpcode()) {
+        case DUP2:
+        case DUP2_X1:
+        case DUP2_X2:
+            return 2;
+        case ACONST_NULL:
+        case ICONST_M1:
+        case ICONST_0:
+        case ICONST_1:
+        case ICONST_2:
+        case ICONST_3:
+        case ICONST_4:
+        case ICONST_5:
+        case LCONST_0:
+        case LCONST_1:
+        case FCONST_0:
+        case FCONST_1:
+        case FCONST_2:
+        case DCONST_0:
+        case DCONST_1:
+        case BIPUSH:
+        case SIPUSH:
+        case LDC:
+        case ILOAD:
+        case LLOAD:
+        case FLOAD:
+        case DLOAD:
+        case ALOAD:
+        case DUP:
+        case DUP_X1:
+        case DUP_X2:
+        case GETSTATIC:
+        case NEW:
+        case SWAP:
+        case INEG:
+        case LNEG:
+        case FNEG:
+        case DNEG:
+        case L2I:
+        case F2I:
+        case D2I:
+        case I2L:
+        case F2L:
+        case D2L:
+        case I2F:
+        case L2F:
+        case D2F:
+        case I2D:
+        case F2D:
+        case L2D:
+        case I2B:
+        case I2C:
+        case I2S:
+        case GETFIELD:
+        case NEWARRAY:
+        case ANEWARRAY:
+        case ARRAYLENGTH:
+        case CHECKCAST:
+        case INSTANCEOF:
+        case IALOAD:
+        case LALOAD:
+        case FALOAD:
+        case DALOAD:
+        case AALOAD:
+        case BALOAD:
+        case CALOAD:
+        case SALOAD:
+        case IADD:
+        case LADD:
+        case FADD:
+        case DADD:
+        case ISUB:
+        case LSUB:
+        case FSUB:
+        case DSUB:
+        case IMUL:
+        case LMUL:
+        case FMUL:
+        case DMUL:
+        case IDIV:
+        case LDIV:
+        case FDIV:
+        case DDIV:
+        case IREM:
+        case LREM:
+        case FREM:
+        case DREM:
+        case ISHL:
+        case LSHL:
+        case ISHR:
+        case LSHR:
+        case IUSHR:
+        case LUSHR:
+        case IAND:
+        case LAND:
+        case IOR:
+        case LOR:
+        case IXOR:
+        case LXOR:
+        case LCMP:
+        case FCMPL:
+        case FCMPG:
+        case DCMPL:
+        case DCMPG:
+            return 1;
+        case NOP:
+        case IINC:
+        case GOTO:
+        case JSR:
+        case RET:
+        case RETURN:
+        case ISTORE:
+        case LSTORE:
+        case FSTORE:
+        case DSTORE:
+        case ASTORE:
+        case POP:
+        case IFEQ:
+        case IFNE:
+        case IFLT:
+        case IFGE:
+        case IFGT:
+        case IFLE:
+        case IFNULL:
+        case IFNONNULL:
+        case IRETURN:
+        case LRETURN:
+        case FRETURN:
+        case DRETURN:
+        case ARETURN:
+        case PUTSTATIC:
+        case ATHROW:
+        case TABLESWITCH:
+        case LOOKUPSWITCH:
+        case POP2:
+        case IF_ICMPEQ:
+        case IF_ICMPNE:
+        case IF_ICMPLT:
+        case IF_ICMPGE:
+        case IF_ICMPGT:
+        case IF_ICMPLE:
+        case IF_ACMPEQ:
+        case IF_ACMPNE:
+        case PUTFIELD:
+        case IASTORE:
+        case LASTORE:
+        case FASTORE:
+        case DASTORE:
+        case AASTORE:
+        case BASTORE:
+        case CASTORE:
+        case SASTORE:
+            return 0;
+        case INVOKESPECIAL:
+        case INVOKEVIRTUAL:
+        case INVOKESTATIC:
+        case INVOKEINTERFACE: {
+            MethodInsnNode method = (MethodInsnNode) next;
+            if (!TypeHelper.getRet(method.desc).equals("V")) {
+                return 1;
+            }
+            return 0;
+        }
+        case INVOKEDYNAMIC:
+        case MONITORENTER:
+        case MONITOREXIT:
+        case MULTIANEWARRAY:
+            // TODO
+            throw new IllegalArgumentException();
+        default:
+            System.err.println("Unsupported opcode: " + next.getOpcode());
+            throw new IllegalStateException();
+        }
+    }
+
+    public static int getStackDelta(AbstractInsnNode next) {
+        return getStackResultSize(next) - getStackRequirementsSize(next);
+    }
+
+    public static AbstractInsnNode getFirstOpcode(List<AbstractInsnNode> opcodes) {
         for (int index = 0; index < opcodes.size(); index++) {
             AbstractInsnNode next = opcodes.get(index);
             if (next instanceof LabelNode) {
@@ -338,9 +516,13 @@ public final class AstUtil {
             } else if (next instanceof LineNumberNode) {
                 continue;
             }
-            return getStackDelta(next) < 0;
+            return next;
         }
-        return false;
+        return null;
+    }
+
+    public static boolean hasStartingRequirement(List<AbstractInsnNode> opcodes) {
+        return getStackRequirementsSize(getFirstOpcode(opcodes)) > 0;
     }
 
     /**

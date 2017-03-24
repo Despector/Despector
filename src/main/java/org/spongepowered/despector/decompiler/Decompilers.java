@@ -24,6 +24,8 @@
  */
 package org.spongepowered.despector.decompiler;
 
+import org.spongepowered.despector.decompiler.kotlin.method.graph.operate.ElvisPrePassOperation;
+import org.spongepowered.despector.decompiler.kotlin.step.KotlinMethodInfoStep;
 import org.spongepowered.despector.decompiler.method.MethodDecompiler;
 import org.spongepowered.despector.decompiler.method.graph.create.JumpGraphProducerStep;
 import org.spongepowered.despector.decompiler.method.graph.create.SwitchGraphProducerStep;
@@ -51,14 +53,21 @@ import org.spongepowered.despector.decompiler.step.MethodInfoStep;
 public class Decompilers {
 
     public static final Decompiler JAVA = new Decompiler();
+    public static final Decompiler KOTLIN = new Decompiler();
 
     public static final MethodDecompiler JAVA_METHOD = new MethodDecompiler();
+    public static final MethodDecompiler KOTLIN_METHOD = new MethodDecompiler();
 
     static {
         JAVA.addStep(new ClassInfoStep());
         JAVA.addStep(new FieldInfoStep());
         JAVA.addStep(new MethodInfoStep(JAVA_METHOD));
         JAVA.addStep(new EnumConstantsStep());
+
+        KOTLIN.addStep(new ClassInfoStep());
+        KOTLIN.addStep(new FieldInfoStep());
+        KOTLIN.addStep(new KotlinMethodInfoStep(KOTLIN_METHOD));
+        KOTLIN.addStep(new EnumConstantsStep());
 
         JAVA_METHOD.addGraphProducer(new JumpGraphProducerStep());
         JAVA_METHOD.addGraphProducer(new SwitchGraphProducerStep());
@@ -78,6 +87,25 @@ public class Decompilers {
         JAVA_METHOD.addRegionProcessor(new IfBlockRegionProcessor());
         JAVA_METHOD.addPostProcessor(new IfCombiningPostProcessor());
         JAVA_METHOD.addPostProcessor(new ForEachPostProcessor());
+
+        KOTLIN_METHOD.addGraphProducer(new JumpGraphProducerStep());
+        KOTLIN_METHOD.addGraphProducer(new SwitchGraphProducerStep());
+        KOTLIN_METHOD.addGraphProducer(new TryCatchGraphProducerStep());
+        KOTLIN_METHOD.addCleanupOperation(new EmptyBlockClearOperation());
+        KOTLIN_METHOD.addCleanupOperation(new JumpSeparateOperation());
+        KOTLIN_METHOD.addCleanupOperation(new BlockTargetOperation());
+        KOTLIN_METHOD.addCleanupOperation(new ElvisPrePassOperation());
+        KOTLIN_METHOD.addCleanupOperation(new BreakPrePassOperation());
+        KOTLIN_METHOD.addProcessor(new TryCatchBlockProcessor());
+        KOTLIN_METHOD.addProcessor(new InternalBlockProcessor());
+        KOTLIN_METHOD.addProcessor(new SwitchBlockProcessor());
+        KOTLIN_METHOD.addProcessor(new SubRegionBlockProcessor());
+        KOTLIN_METHOD.addRegionProcessor(new ChildRegionProcessor());
+        KOTLIN_METHOD.addRegionProcessor(new DoWhileRegionProcessor());
+        KOTLIN_METHOD.addRegionProcessor(new WhileRegionProcessor());
+        KOTLIN_METHOD.addRegionProcessor(new IfBlockRegionProcessor());
+        KOTLIN_METHOD.addPostProcessor(new IfCombiningPostProcessor());
+        KOTLIN_METHOD.addPostProcessor(new ForEachPostProcessor());
     }
 
 }

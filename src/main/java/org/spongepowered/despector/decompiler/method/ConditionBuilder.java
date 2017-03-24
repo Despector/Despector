@@ -52,7 +52,7 @@ import java.util.List;
  */
 public class ConditionBuilder {
 
-    private static Condition makeSimpleCondition(ConditionalOpcodeBlock block, Locals locals) {
+    public static Condition makeSimpleCondition(ConditionalOpcodeBlock block, Locals locals) {
 
         // This forms the condition representing the conditional jump of the
         // given block

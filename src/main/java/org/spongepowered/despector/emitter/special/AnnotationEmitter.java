@@ -28,30 +28,62 @@ import org.objectweb.asm.Type;
 import org.spongepowered.despector.ast.Annotation;
 import org.spongepowered.despector.emitter.EmitterContext;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.function.BiConsumer;
 
 public class AnnotationEmitter implements SpecialEmitter {
 
-    private void emitValue(EmitterContext ctx, Object value) {
-        if (value instanceof List) {
+    private static final Map<Class<?>, BiConsumer<EmitterContext, Object>> value_emitters = new HashMap<>();
+
+    static {
+        value_emitters.put(Boolean.class, (ctx, value) -> ctx.printString(String.valueOf(value)));
+        value_emitters.put(Integer.class, (ctx, value) -> ctx.printString(String.valueOf(value)));
+        value_emitters.put(int[].class, (ctx, value) -> {
+            int[] values = (int[]) value;
+            ctx.printString("{");
+            for (int i = 0; i < values.length; i++) {
+                if (i > 0) {
+                    ctx.printString(", ");
+                }
+                ctx.printString(String.valueOf(values[i]));
+            }
+            ctx.printString("}");
+        });
+        value_emitters.put(ArrayList.class, (ctx, value) -> {
             List<?> list = (List<?>) value;
             if (list.isEmpty()) {
                 ctx.printString("{}");
             } else if (list.size() == 1) {
                 emitValue(ctx, list.get(0));
             } else {
+                ctx.printString("{");
                 for (int i = 0; i < list.size(); i++) {
                     if (i != 0) {
                         ctx.printString(", ");
                     }
                     emitValue(ctx, list.get(i));
                 }
+                ctx.printString("}");
             }
-        } else if (value instanceof Type) {
-            ctx.emitTypeName(((Type) value).getInternalName());
-        } else {
+        });
+        value_emitters.put(String.class, (ctx, value) -> {
+            ctx.printString("\"");
+            // TODO escape string
+            ctx.printString((String) value);
+            ctx.printString("\"");
+        });
+        value_emitters.put(Type.class, (ctx, value) -> ctx.emitTypeName(((Type) value).getInternalName()));
+    }
+
+    private static void emitValue(EmitterContext ctx, Object value) {
+        BiConsumer<EmitterContext, Object> emitter = value_emitters.get(value.getClass());
+        if (emitter == null) {
             throw new IllegalStateException("Unknown annotation value type in emitter: " + value.getClass().getName());
         }
+        emitter.accept(ctx, value);
     }
 
     public void emit(EmitterContext ctx, Annotation annotation) {
@@ -67,10 +99,10 @@ public class AnnotationEmitter implements SpecialEmitter {
             ctx.printString("(");
             boolean first = true;
             for (String key : annotation.getKeys()) {
-                if (first) {
-                    first = false;
+                if (!first) {
                     ctx.printString(", ");
                 }
+                first = false;
                 ctx.printString(key);
                 ctx.printString(" = ");
                 Object value = annotation.getValue(key);

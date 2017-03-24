@@ -36,6 +36,8 @@ import org.spongepowered.despector.emitter.InstructionEmitter;
 import org.spongepowered.despector.emitter.special.AnonymousClassEmitter;
 import org.spongepowered.despector.util.TypeHelper;
 
+import java.util.List;
+
 public class NewEmitter implements InstructionEmitter<New> {
 
     @Override
@@ -59,7 +61,7 @@ public class NewEmitter implements InstructionEmitter<New> {
         ctx.printString("new ");
         ctx.emitType(arg.getType());
 
-        if (ctx.getField() != null && !ctx.getField().getSignature().hasArguments()) {
+        if (ctx.getField() != null && ctx.getField().getSignature() != null && !ctx.getField().getSignature().hasArguments()) {
             ctx.printString("<>");
         }
         if (ctx.getStatement() != null && ctx.getStatement() instanceof LocalAssignment) {
@@ -71,10 +73,10 @@ public class NewEmitter implements InstructionEmitter<New> {
         }
 
         ctx.printString("(");
-        // TODO get param types if we have the ast
+        List<String> args = TypeHelper.splitSig(arg.getCtorDescription());
         for (int i = 0; i < arg.getParameters().length; i++) {
             Instruction param = arg.getParameters()[i];
-            ctx.emit(param, null);
+            ctx.emit(param, args.get(i));
             if (i < arg.getParameters().length - 1) {
                 ctx.printString(", ");
             }
