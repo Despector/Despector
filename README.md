@@ -11,16 +11,18 @@ While not as useful for modifying source and reconstruction a java class file th
 very useful for decompiling and for code analysis where you would like to search for patterns
 on a statement rather than an opcode level.
 
+For support and discussion see our [Development/Support Chat] on irc.esper.net in the #decompiler channel.
+
 ## Kotlin
 
 At this time the kotlin support is quite new and all features are not set supported and bugs in the
-output are to be exptected.
+output are to be expected.
 
 # Usage as a Decompiler
 
 `java -jar Despector.jar <--config=[path]> <--lang=[java|kotlin]> [sources...] [destination]`
 
-- The `--confif=` allows you to define a config file for certain decompilation settings.
+- The `--config=` allows you to define a config file for certain decompilation settings.
 - The `--lang=` forces the output to be in a particular language. Normal behaviour is to attempt to
 determine the class files source language from its contents.
 
