@@ -158,7 +158,7 @@ public class KotlinMethodEntryEmitter extends MethodEntryEmitter {
         }
         ctx.printString(")");
 
-        if (method.getInstructions().getStatementCount() == 1) {
+        if (method.getInstructions() != null && method.getInstructions().getStatementCount() == 1) {
             Statement stmt = method.getInstructions().getStatement(0);
             if (stmt instanceof Return && ((Return) stmt).getValue().isPresent()) {
                 ctx.printString(" = ");

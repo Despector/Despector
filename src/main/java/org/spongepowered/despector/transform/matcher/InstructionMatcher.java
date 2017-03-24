@@ -51,10 +51,10 @@ public class InstructionMatcher {
             return null;
         }
         InstanceMethodInvoke invoke = (InstanceMethodInvoke) insn;
-        if (!invoke.getMethodName().equals(method_name)) {
+        if (method_name != null && !invoke.getMethodName().equals(method_name)) {
             return null;
         }
-        if (!invoke.getMethodDescription().equals(method_desc)) {
+        if (method_desc != null && !invoke.getMethodDescription().equals(method_desc)) {
             return null;
         }
         return invoke;

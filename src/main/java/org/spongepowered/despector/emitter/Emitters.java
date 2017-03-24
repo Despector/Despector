@@ -117,6 +117,7 @@ import org.spongepowered.despector.emitter.kotlin.special.KotlinCompanionClassEm
 import org.spongepowered.despector.emitter.kotlin.special.KotlinDataClassEmitter;
 import org.spongepowered.despector.emitter.kotlin.special.KotlinGenericsEmitter;
 import org.spongepowered.despector.emitter.kotlin.special.KotlinPackageEmitter;
+import org.spongepowered.despector.emitter.kotlin.statement.KotlinForEachEmitter;
 import org.spongepowered.despector.emitter.kotlin.statement.KotlinInvokeEmitter;
 import org.spongepowered.despector.emitter.kotlin.statement.KotlinLocalAssignmentEmitter;
 import org.spongepowered.despector.emitter.kotlin.type.KotlinClassEntryEmitter;
@@ -240,6 +241,7 @@ public class Emitters {
 
         KOTLIN.setStatementEmitter(InvokeStatement.class, new KotlinInvokeEmitter());
         KOTLIN.setStatementEmitter(LocalAssignment.class, new KotlinLocalAssignmentEmitter());
+        KOTLIN.setStatementEmitter(ForEach.class, new KotlinForEachEmitter());
 
         KOTLIN.setInstructionEmitter(InstanceMethodInvoke.class, new KotlinInstanceMethodInvokeEmitter());
         KOTLIN.setInstructionEmitter(StaticMethodInvoke.class, new KotlinStaticMethodInvokeEmitter());

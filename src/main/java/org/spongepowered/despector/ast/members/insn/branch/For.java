@@ -97,9 +97,13 @@ public class For implements Statement, Breakable {
     @Override
     public void accept(InstructionVisitor visitor) {
         visitor.visitForLoop(this);
-        this.init.accept(visitor);
+        if (this.init != null) {
+            this.init.accept(visitor);
+        }
         this.condition.accept(visitor);
-        this.incr.accept(visitor);
+        if (this.incr != null) {
+            this.incr.accept(visitor);
+        }
         for (Statement stmt : this.body.getStatements()) {
             stmt.accept(visitor);
         }

@@ -136,13 +136,14 @@ public class ForEachPostProcessor implements StatementPostProcessor {
             return false;
         }
 
-        ffor.getBody().getStatements().remove(next_assign);
-
-        for (Statement stmt : ffor.getBody().getStatements()) {
-            if (AstUtil.references(stmt, next_assign.getLocal())) {
+        for (int o = 1; o < ffor.getBody().getStatementCount(); o++) {
+            Statement stmt = ffor.getBody().getStatement(o);
+            if (AstUtil.references(stmt, init.getLocal())) {
                 return false;
             }
         }
+
+        ffor.getBody().getStatements().remove(next_assign);
 
         ForEach foreach = new ForEach(init_invoke.getCallee(), next_assign.getLocal(), ffor.getBody());
         block.getStatements().set(block.getStatements().indexOf(ffor), foreach);
@@ -202,15 +203,16 @@ public class ForEachPostProcessor implements StatementPostProcessor {
             return false;
         }
 
-        to_remove.add(array_assign);
-        to_remove.add(size_assign);
-        ffor.getBody().getStatements().remove(value_assign);
-
-        for (Statement stmt : ffor.getBody().getStatements()) {
+        for (int o = 1; o < ffor.getBody().getStatementCount(); o++) {
+            Statement stmt = ffor.getBody().getStatement(o);
             if (AstUtil.references(stmt, index) || AstUtil.references(stmt, size)) {
                 return false;
             }
         }
+
+        to_remove.add(array_assign);
+        to_remove.add(size_assign);
+        ffor.getBody().getStatements().remove(value_assign);
 
         ForEach foreach = new ForEach(array_assign.getValue(), value, ffor.getBody());
         block.getStatements().set(block.getStatements().indexOf(ffor), foreach);
