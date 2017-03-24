@@ -30,15 +30,18 @@ import static org.objectweb.asm.Opcodes.ASTORE;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.VarInsnNode;
 import org.spongepowered.despector.ast.Locals;
+import org.spongepowered.despector.config.ConfigManager;
 import org.spongepowered.despector.decompiler.method.PartialMethod;
 import org.spongepowered.despector.decompiler.method.graph.GraphProcessor;
 import org.spongepowered.despector.decompiler.method.graph.data.TryCatchMarkerType;
 import org.spongepowered.despector.decompiler.method.graph.data.block.BlockSection;
+import org.spongepowered.despector.decompiler.method.graph.data.block.CommentBlockSection;
 import org.spongepowered.despector.decompiler.method.graph.data.block.TryCatchBlockSection;
 import org.spongepowered.despector.decompiler.method.graph.data.block.TryCatchBlockSection.CatchBlockSection;
 import org.spongepowered.despector.decompiler.method.graph.data.opcode.GotoOpcodeBlock;
 import org.spongepowered.despector.decompiler.method.graph.data.opcode.OpcodeBlock;
 import org.spongepowered.despector.decompiler.method.graph.data.opcode.TryCatchMarkerOpcodeBlock;
+import org.spongepowered.despector.util.AstUtil;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -84,7 +87,22 @@ public class TryCatchBlockProcessor implements GraphProcessor {
                 body.add(next);
             }
             TryCatchBlockSection try_section = new TryCatchBlockSection();
-            try_section.getBody().addAll(partial.getDecompiler().flattenGraph(partial, body, body.size()));
+            try {
+                partial.getDecompiler().flattenGraph(partial, body, body.size(), try_section.getBody());
+            } catch (Exception e) {
+                if (ConfigManager.getConfig().print_opcodes_on_error) {
+                    List<String> comment = new ArrayList<>();
+                    for (OpcodeBlock op : body) {
+                        comment.add(op.getDebugHeader());
+                        for (AbstractInsnNode insn : op.getOpcodes()) {
+                            comment.add(AstUtil.insnToString(insn));
+                        }
+                    }
+                    try_section.getBody().add(new CommentBlockSection(comment));
+                } else {
+                    throw e;
+                }
+            }
             while (!allEnds.isEmpty()) {
                 end++;
                 next = blocks.get(end);
@@ -160,7 +178,22 @@ public class TryCatchBlockProcessor implements GraphProcessor {
                         stop_index = catch_body.size();
                     }
                     CatchBlockSection cblock = new CatchBlockSection(extra_exceptions, local);
-                    cblock.getBody().addAll(partial.getDecompiler().flattenGraph(partial, catch_body, stop_index));
+                    try {
+                        partial.getDecompiler().flattenGraph(partial, catch_body, stop_index, cblock.getBody());
+                    } catch (Exception e) {
+                        if (ConfigManager.getConfig().print_opcodes_on_error) {
+                            List<String> comment = new ArrayList<>();
+                            for (OpcodeBlock op : catch_body) {
+                                comment.add(op.getDebugHeader());
+                                for (AbstractInsnNode insn : op.getOpcodes()) {
+                                    comment.add(AstUtil.insnToString(insn));
+                                }
+                            }
+                            cblock.getBody().add(new CommentBlockSection(comment));
+                        } else {
+                            throw e;
+                        }
+                    }
                     try_section.getCatchBlocks().add(cblock);
                 }
             }

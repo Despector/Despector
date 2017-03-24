@@ -104,4 +104,10 @@ public class TryCatchMarkerOpcodeBlock extends OpcodeBlock {
         System.out.println("TryCatch marker: " + this.marker_type.name());
         System.out.println("    part of " + this.tc_node);
     }
+
+    @Override
+    public String getDebugHeader() {
+        return "TryCatch: " + this.break_point + " (target: " + (this.target != null ? this.target.getBreakpoint() : -1) + ", marker: "
+                + this.marker_type.name() + ")";
+    }
 }

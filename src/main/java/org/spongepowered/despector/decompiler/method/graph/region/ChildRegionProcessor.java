@@ -24,7 +24,6 @@
  */
 package org.spongepowered.despector.decompiler.method.graph.region;
 
-import org.spongepowered.despector.config.Constants;
 import org.spongepowered.despector.decompiler.method.PartialMethod;
 import org.spongepowered.despector.decompiler.method.graph.GraphOperation;
 import org.spongepowered.despector.decompiler.method.graph.RegionProcessor;
@@ -93,16 +92,10 @@ public class ChildRegionProcessor implements RegionProcessor {
                 for (int o = i; o < end; o++) {
                     subregion.add(region.get(o));
                 }
-                if (Constants.TRACE_ACTIVE) {
-                    System.err.println("Processing child region from " + subregion.get(0).getBreakpoint() + " to "
-                            + subregion.get(subregion.size() - 1).getBreakpoint());
-                }
+
                 OpcodeBlock sub_ret = end >= region.size() ? ret : region.get(end);
                 BlockSection s = partial.getDecompiler().processRegion(partial, subregion, sub_ret, 1);
 
-                if (Constants.TRACE_ACTIVE) {
-                    System.err.println("Done child region");
-                }
                 // the first block is set to the condensed subregion block and
                 // the rest if the blocks in the subregion are removed.
                 ProcessedOpcodeBlock replacement = new ProcessedOpcodeBlock(region.get(i).getBreakpoint(), s);

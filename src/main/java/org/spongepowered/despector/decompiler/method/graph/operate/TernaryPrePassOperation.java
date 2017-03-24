@@ -28,7 +28,6 @@ import static com.google.common.base.Preconditions.checkState;
 
 import org.spongepowered.despector.ast.Locals;
 import org.spongepowered.despector.ast.members.insn.branch.condition.Condition;
-import org.spongepowered.despector.config.Constants;
 import org.spongepowered.despector.decompiler.method.ConditionBuilder;
 import org.spongepowered.despector.decompiler.method.PartialMethod;
 import org.spongepowered.despector.decompiler.method.graph.GraphOperation;
@@ -81,9 +80,6 @@ public class TernaryPrePassOperation implements GraphOperation {
             return 0;
         }
         OpcodeBlock consumer = blocks.get(end);
-        if (Constants.TRACE_ACTIVE) {
-            System.err.println("Forming a ternary from blocks ending in " + consumer.getBreakpoint());
-        }
         int start = end - 1;
         List<OpcodeBlock> true_blocks = new ArrayList<>();
         OpcodeBlock tr = blocks.get(start--);

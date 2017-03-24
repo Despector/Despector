@@ -22,12 +22,30 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.despector.config;
+package org.spongepowered.despector.decompiler.method.graph.data.block;
 
-public class Constants {
+import org.spongepowered.despector.ast.members.insn.Comment;
+import org.spongepowered.despector.ast.members.insn.StatementBlock;
+import org.spongepowered.despector.ast.members.insn.arg.Instruction;
 
-    public static final boolean TRACE_ERRORS = Boolean.getBoolean("despect.trace_on_error");
-    public static final boolean TRACE_ALL = Boolean.getBoolean("despect.trace_all");
-    public static boolean TRACE_ACTIVE = TRACE_ALL;
+import java.util.ArrayList;
+import java.util.Deque;
+import java.util.List;
+
+/**
+ * Represents a block section containing a comment;
+ */
+public class CommentBlockSection extends BlockSection {
+
+    private final List<String> text = new ArrayList<>();
+
+    public CommentBlockSection(List<String> txt) {
+        this.text.addAll(txt);
+    }
+
+    @Override
+    public void appendTo(StatementBlock block, Deque<Instruction> stack) {
+        block.append(new Comment(this.text));
+    }
 
 }

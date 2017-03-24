@@ -38,7 +38,6 @@ import org.spongepowered.despector.ast.Locals.LocalInstance;
 import org.spongepowered.despector.ast.members.MethodEntry;
 import org.spongepowered.despector.ast.members.insn.StatementBlock;
 import org.spongepowered.despector.ast.members.insn.arg.Instruction;
-import org.spongepowered.despector.config.Constants;
 import org.spongepowered.despector.decompiler.method.graph.GraphOperation;
 import org.spongepowered.despector.decompiler.method.graph.GraphProcessor;
 import org.spongepowered.despector.decompiler.method.graph.GraphProducerStep;
@@ -46,7 +45,6 @@ import org.spongepowered.despector.decompiler.method.graph.RegionProcessor;
 import org.spongepowered.despector.decompiler.method.graph.data.block.BlockSection;
 import org.spongepowered.despector.decompiler.method.graph.data.opcode.BodyOpcodeBlock;
 import org.spongepowered.despector.decompiler.method.graph.data.opcode.OpcodeBlock;
-import org.spongepowered.despector.decompiler.method.graph.operate.TernaryPrePassOperation;
 import org.spongepowered.despector.decompiler.method.postprocess.StatementPostProcessor;
 import org.spongepowered.despector.util.SignatureParser;
 import org.spongepowered.despector.util.TypeHelper;
@@ -93,27 +91,21 @@ public class MethodDecompiler {
     }
 
     @SuppressWarnings("unchecked")
-    public StatementBlock decompile(MethodEntry entry, MethodNode asm) {
-        if (asm.instructions.size() == 0) {
-            return null;
-        }
-
-        PartialMethod partial = new PartialMethod(this, asm, entry);
-
+    public Locals createLocals(MethodEntry entry, MethodNode asm) {
         Locals locals = new Locals();
-        for (LocalVariableNode node : (List<LocalVariableNode>) partial.getAsmNode().localVariables) {
+        for (LocalVariableNode node : (List<LocalVariableNode>) asm.localVariables) {
             Local local = locals.getLocal(node.index);
             local.addLVT(node);
         }
-        int offs = ((partial.getAsmNode().access & Opcodes.ACC_STATIC) != 0) ? 0 : 1;
-        List<String> param_types = TypeHelper.splitSig(partial.getAsmNode().desc);
+        int offs = ((asm.access & Opcodes.ACC_STATIC) != 0) ? 0 : 1;
+        List<String> param_types = TypeHelper.splitSig(asm.desc);
 
         for (int i = 0; i < param_types.size() + offs; i++) {
             Local local = locals.getLocal(i);
             local.setAsParameter();
             if (local.getLVT().isEmpty()) {
                 if (i < offs) {
-                    local.setParameterInstance(new LocalInstance(local, null, "this", partial.getEntry().getOwner(), -1, -1));
+                    local.setParameterInstance(new LocalInstance(local, null, "this", entry.getOwner(), -1, -1));
                 } else {
                     local.setParameterInstance(new LocalInstance(local, null, "param" + i, param_types.get(i - offs), -1, -1));
                 }
@@ -126,7 +118,16 @@ public class MethodDecompiler {
                 }
             }
         }
+        return locals;
+    }
 
+    @SuppressWarnings("unchecked")
+    public StatementBlock decompile(MethodEntry entry, MethodNode asm, Locals locals) {
+        if (asm.instructions.size() == 0) {
+            return null;
+        }
+
+        PartialMethod partial = new PartialMethod(this, asm, entry);
         partial.setLocals(locals);
 
         List<AbstractInsnNode> ops = Lists.newArrayList(asm.instructions.iterator());
@@ -146,31 +147,16 @@ public class MethodDecompiler {
 
         List<OpcodeBlock> graph = makeGraph(partial);
         partial.setGraph(graph);
-        
-        boolean hasPrintedBlocks = false;
 
         for (GraphOperation op : this.cleanup_operations) {
-            // TODO separate cleanup and pre-pass operations
-            if (op instanceof TernaryPrePassOperation) {
-                if (Constants.TRACE_ACTIVE) {
-                    hasPrintedBlocks = true;
-                    for (OpcodeBlock op2 : graph) {
-                        op2.print();
-                    }
-                }
-            }
             op.process(partial);
-        }
-
-        if (Constants.TRACE_ACTIVE && !hasPrintedBlocks) {
-            for (OpcodeBlock op2 : graph) {
-                op2.print();
-            }
         }
 
         // Performs a sequence of transformations to convert the graph into a
         // simple array of partially decompiled block sections.
-        List<BlockSection> flat_graph = flattenGraph(partial, graph, graph.size());
+        List<BlockSection> flat_graph = new ArrayList<>();
+
+        flattenGraph(partial, graph, graph.size(), flat_graph);
 
         // Append all block sections to the output in order. This finalizes all
         // decompilation of statements not already decompiled.
@@ -180,7 +166,12 @@ public class MethodDecompiler {
         }
 
         for (StatementPostProcessor post : this.post_processors) {
-            post.postprocess(block);
+            try {
+                post.postprocess(block);
+            } catch (Exception e) {
+                System.err.println("Failed to apply post processor: " + post.getClass().getSimpleName());
+                e.printStackTrace();
+            }
         }
 
         return block;
@@ -228,21 +219,18 @@ public class MethodDecompiler {
         return block_list;
     }
 
-    public List<BlockSection> flattenGraph(PartialMethod partial, List<OpcodeBlock> blocks, int stop_point) {
+    public void flattenGraph(PartialMethod partial, List<OpcodeBlock> blocks, int stop_point, List<BlockSection> result) {
         int stop_offs = blocks.size() - stop_point;
-        List<BlockSection> final_blocks = new ArrayList<>();
-
         outer: for (int i = 0; i < blocks.size() - stop_offs; i++) {
             OpcodeBlock region_start = blocks.get(i);
             for (GraphProcessor processor : this.processors) {
-                int next = processor.process(partial, blocks, region_start, final_blocks);
+                int next = processor.process(partial, blocks, region_start, result);
                 if (next != -1) {
                     i = next;
                     continue outer;
                 }
             }
         }
-        return final_blocks;
     }
 
     public BlockSection processRegion(PartialMethod partial, List<OpcodeBlock> region, OpcodeBlock ret, int body_start) {

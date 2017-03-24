@@ -29,7 +29,6 @@ import static com.google.common.base.Preconditions.checkState;
 import org.spongepowered.despector.ast.members.insn.arg.cst.IntConstant;
 import org.spongepowered.despector.ast.members.insn.branch.condition.BooleanCondition;
 import org.spongepowered.despector.ast.members.insn.branch.condition.Condition;
-import org.spongepowered.despector.config.Constants;
 import org.spongepowered.despector.decompiler.method.ConditionBuilder;
 import org.spongepowered.despector.decompiler.method.PartialMethod;
 import org.spongepowered.despector.decompiler.method.graph.RegionProcessor;
@@ -69,11 +68,6 @@ public class DoWhileRegionProcessor implements RegionProcessor {
                     section.appendBody(next.toBlockSection());
                 }
                 return section;
-            }
-            if (Constants.TRACE_ACTIVE) {
-                System.err.println("Processing Do_while loop, start is " + start.getBreakpoint());
-                System.err.println("    Condition is " + condition_blocks.get(0).getBreakpoint() + " to "
-                        + condition_blocks.get(condition_blocks.size() - 1).getBreakpoint());
             }
 
             cond_start++;

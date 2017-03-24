@@ -28,6 +28,14 @@ import org.spongepowered.despector.emitter.EmitterContext;
 
 public class KotlinEmitterUtil {
 
+    public static void emitParamType(EmitterContext ctx, String type) {
+        if ("Ljava/lang/Object;".equals(type)) {
+            ctx.printString("Any");
+        } else {
+            emitType(ctx, type);
+        }
+    }
+
     public static void emitType(EmitterContext ctx, String type) {
         if (type.startsWith("[")) {
             ctx.printString("Array<");
@@ -49,8 +57,6 @@ public class KotlinEmitterUtil {
             ctx.printString("Boolean");
         } else if ("C".equals(type)) {
             ctx.printString("Character");
-        } else if ("Ljava/lang/Object;".equals(type)) {
-            ctx.printString("Any");
         } else {
             ctx.emitType(type);
         }

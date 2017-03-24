@@ -51,4 +51,9 @@ public class SwitchOpcodeBlock extends OpcodeBlock {
         throw new IllegalStateException("Unexpected switch block");
     }
 
+    @Override
+    public String getDebugHeader() {
+        return "Switch: " + this.break_point + " (target: " + (this.target != null ? this.target.getBreakpoint() : -1) + ")";
+    }
+
 }

@@ -24,16 +24,19 @@
  */
 package org.spongepowered.despector.decompiler.method.graph.process;
 
-import org.spongepowered.despector.config.Constants;
+import org.objectweb.asm.tree.AbstractInsnNode;
+import org.spongepowered.despector.config.ConfigManager;
 import org.spongepowered.despector.decompiler.method.PartialMethod;
 import org.spongepowered.despector.decompiler.method.graph.GraphProcessor;
 import org.spongepowered.despector.decompiler.method.graph.RegionProcessor;
 import org.spongepowered.despector.decompiler.method.graph.data.block.BlockSection;
+import org.spongepowered.despector.decompiler.method.graph.data.block.CommentBlockSection;
 import org.spongepowered.despector.decompiler.method.graph.data.block.InlineBlockSection;
 import org.spongepowered.despector.decompiler.method.graph.data.opcode.ConditionalOpcodeBlock;
 import org.spongepowered.despector.decompiler.method.graph.data.opcode.GotoOpcodeBlock;
 import org.spongepowered.despector.decompiler.method.graph.data.opcode.OpcodeBlock;
 import org.spongepowered.despector.decompiler.method.graph.data.opcode.TryCatchMarkerOpcodeBlock;
+import org.spongepowered.despector.util.AstUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -103,16 +106,32 @@ public class SubRegionBlockProcessor implements GraphProcessor {
         for (int o = i; o < end; o++) {
             region.add(blocks.get(o));
         }
-        if (Constants.TRACE_ACTIVE) {
-            System.err.println("Processing subregion from " + region.get(0).getBreakpoint() + " to " + region.get(region.size() - 1).getBreakpoint());
-        }
         // process the region down to a single block
-        final_blocks.add(partial.getDecompiler().processRegion(partial, region, last, targeted_in_future ? 0 : 1));
-
-        if (Constants.TRACE_ACTIVE) {
-            System.err.println("Done sub region");
+        try {
+            final_blocks.add(partial.getDecompiler().processRegion(partial, region, last, targeted_in_future ? 0 : 1));
+        } catch (Exception e) {
+            if (ConfigManager.getConfig().print_opcodes_on_error) {
+                List<String> comment = new ArrayList<>();
+                for (OpcodeBlock op : region) {
+                    comment.add(op.getDebugHeader());
+                    for (AbstractInsnNode insn : op.getOpcodes()) {
+                        comment.add(AstUtil.insnToString(insn));
+                    }
+                }
+                OpcodeBlock op = blocks.get(end);
+                if (targeted_in_future && op instanceof GotoOpcodeBlock) {
+                    comment.add(op.getDebugHeader());
+                    for (AbstractInsnNode insn : op.getOpcodes()) {
+                        comment.add(AstUtil.insnToString(insn));
+                    }
+                }
+                final_blocks.add(new CommentBlockSection(comment));
+            } else {
+                throw e;
+            }
         }
-        if(targeted_in_future && blocks.get(end) instanceof GotoOpcodeBlock) {
+
+        if (targeted_in_future && blocks.get(end) instanceof GotoOpcodeBlock) {
             return end;
         }
         return end - 1;

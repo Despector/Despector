@@ -54,4 +54,10 @@ public class ProcessedOpcodeBlock extends OpcodeBlock {
         return this.internal;
     }
 
+    @Override
+    public String getDebugHeader() {
+        return "Processed: " + this.break_point + " (target: " + (this.target != null ? this.target.getBreakpoint() : -1) + ", internal: "
+                + this.internal.getClass().getSimpleName() + ")";
+    }
+
 }

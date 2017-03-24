@@ -22,25 +22,46 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.despector.decompiler.method.graph.data.opcode;
+package org.spongepowered.despector.ast.members.insn;
 
-import org.spongepowered.despector.decompiler.method.graph.data.block.BlockSection;
-import org.spongepowered.despector.decompiler.method.graph.data.block.InlineBlockSection;
+import java.util.ArrayList;
+import java.util.List;
 
-public class BodyOpcodeBlock extends OpcodeBlock {
+public class Comment implements Statement {
 
-    public BodyOpcodeBlock(int br) {
-        super(br);
+    private final List<String> comment_text = new ArrayList<>();
+
+    public Comment(String text) {
+        this.comment_text.add(text);
+    }
+
+    public Comment(List<String> text) {
+        this.comment_text.addAll(text);
+    }
+
+    public List<String> getCommentText() {
+        return this.comment_text;
     }
 
     @Override
-    public BlockSection toBlockSection() {
-        return new InlineBlockSection(this);
+    public void accept(InstructionVisitor visitor) {
     }
 
     @Override
-    public String getDebugHeader() {
-        return "Body: " + this.break_point + " (target: " + (this.target != null ? this.target.getBreakpoint() : -1) + ")";
+    public String toString() {
+        if (this.comment_text.isEmpty()) {
+            return "";
+        }
+        if (this.comment_text.size() == 1) {
+            return "// " + this.comment_text.get(0);
+        }
+        StringBuilder str = new StringBuilder();
+        str.append("/*\n");
+        for (String line : this.comment_text) {
+            str.append(" * ").append(line).append("\n");
+        }
+        str.append(" */");
+        return str.toString();
     }
 
 }

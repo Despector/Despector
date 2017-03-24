@@ -25,7 +25,6 @@
 package org.spongepowered.despector.decompiler.method.graph.region;
 
 import org.spongepowered.despector.ast.members.insn.branch.condition.Condition;
-import org.spongepowered.despector.config.Constants;
 import org.spongepowered.despector.decompiler.method.ConditionBuilder;
 import org.spongepowered.despector.decompiler.method.PartialMethod;
 import org.spongepowered.despector.decompiler.method.graph.RegionProcessor;
@@ -68,11 +67,6 @@ public class IfBlockRegionProcessor implements RegionProcessor {
                 break;
             }
         }
-        if (Constants.TRACE_ACTIVE) {
-            System.err.println("Processing if region");
-            System.err.println("    Condition is " + condition_blocks.get(0).getBreakpoint() + " to "
-                    + condition_blocks.get(condition_blocks.size() - 1).getBreakpoint());
-        }
 
         // form the condition from the header
         Condition cond = ConditionBuilder.makeCondition(condition_blocks, partial.getLocals(), body, cond_ret);
@@ -84,9 +78,6 @@ public class IfBlockRegionProcessor implements RegionProcessor {
         OpcodeBlock body_end = region.get(else_start - 1);
         if (body_end instanceof GotoOpcodeBlock && body_end.getTarget() == start) {
             // we've got ourselves an inverse while/for loop
-            if (Constants.TRACE_ACTIVE) {
-                System.err.println("    Was actally invered while loop, end is " + body_end.getBreakpoint());
-            }
             WhileBlockSection section = new WhileBlockSection(cond);
             for (int i = body_start; i < else_start - 1; i++) {
                 next = region.get(i);
@@ -100,9 +91,6 @@ public class IfBlockRegionProcessor implements RegionProcessor {
 
         IfBlockSection section = new IfBlockSection(cond);
         // Append the body
-        if (Constants.TRACE_ACTIVE) {
-            System.err.println("If body is " + region.get(body_start).getBreakpoint() + " to " + region.get(else_start - 1).getBreakpoint());
-        }
         for (int i = body_start; i < else_start; i++) {
             next = region.get(i);
             section.appendBody(next.toBlockSection());
@@ -141,17 +129,11 @@ public class IfBlockRegionProcessor implements RegionProcessor {
                     next = region.get(i);
                     elif.append(next.toBlockSection());
                 }
-                if (Constants.TRACE_ACTIVE) {
-                    System.err.println("Next elif is " + region.get(body_start).getBreakpoint() + " to " + region.get(elif_end - 1).getBreakpoint());
-                }
             } else {
                 else_start = region.indexOf(cond_ret);
                 for (int i = else_start; i < region.size(); i++) {
                     next = region.get(i);
                     section.appendElseBody(next.toBlockSection());
-                }
-                if (Constants.TRACE_ACTIVE) {
-                    System.err.println("Else is " + region.get(else_start).getBreakpoint() + " to " + region.get(region.size() - 1).getBreakpoint());
                 }
                 break;
             }

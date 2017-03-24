@@ -25,7 +25,6 @@
 package org.spongepowered.despector.decompiler.method.graph.region;
 
 import org.spongepowered.despector.ast.members.insn.branch.condition.Condition;
-import org.spongepowered.despector.config.Constants;
 import org.spongepowered.despector.decompiler.method.ConditionBuilder;
 import org.spongepowered.despector.decompiler.method.PartialMethod;
 import org.spongepowered.despector.decompiler.method.graph.RegionProcessor;
@@ -68,11 +67,6 @@ public class WhileRegionProcessor implements RegionProcessor {
                     break;
                 }
                 next = region.get(pos);
-            }
-            if (Constants.TRACE_ACTIVE) {
-                System.err.println("Processing while loop, start is " + start.getBreakpoint());
-                System.err.println("    Condition is " + condition_blocks.get(0).getBreakpoint() + " to "
-                        + condition_blocks.get(condition_blocks.size() - 1).getBreakpoint());
             }
 
             OpcodeBlock body = region.get(1);

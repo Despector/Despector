@@ -24,7 +24,22 @@
  */
 package org.spongepowered.despector.decompiler.method;
 
-import static org.objectweb.asm.Opcodes.*;
+import static org.objectweb.asm.Opcodes.IFEQ;
+import static org.objectweb.asm.Opcodes.IFGE;
+import static org.objectweb.asm.Opcodes.IFGT;
+import static org.objectweb.asm.Opcodes.IFLE;
+import static org.objectweb.asm.Opcodes.IFLT;
+import static org.objectweb.asm.Opcodes.IFNE;
+import static org.objectweb.asm.Opcodes.IFNONNULL;
+import static org.objectweb.asm.Opcodes.IFNULL;
+import static org.objectweb.asm.Opcodes.IF_ACMPEQ;
+import static org.objectweb.asm.Opcodes.IF_ACMPNE;
+import static org.objectweb.asm.Opcodes.IF_ICMPEQ;
+import static org.objectweb.asm.Opcodes.IF_ICMPGE;
+import static org.objectweb.asm.Opcodes.IF_ICMPGT;
+import static org.objectweb.asm.Opcodes.IF_ICMPLE;
+import static org.objectweb.asm.Opcodes.IF_ICMPLT;
+import static org.objectweb.asm.Opcodes.IF_ICMPNE;
 import static org.spongepowered.despector.util.ConditionUtil.inverse;
 
 import org.spongepowered.despector.ast.Locals;
@@ -37,7 +52,6 @@ import org.spongepowered.despector.ast.members.insn.branch.condition.BooleanCond
 import org.spongepowered.despector.ast.members.insn.branch.condition.CompareCondition;
 import org.spongepowered.despector.ast.members.insn.branch.condition.Condition;
 import org.spongepowered.despector.ast.members.insn.branch.condition.OrCondition;
-import org.spongepowered.despector.config.Constants;
 import org.spongepowered.despector.decompiler.method.graph.data.opcode.ConditionalOpcodeBlock;
 import org.spongepowered.despector.decompiler.method.graph.data.opcode.OpcodeBlock;
 import org.spongepowered.despector.util.ConditionUtil;
@@ -156,12 +170,6 @@ public class ConditionBuilder {
      * Converts the given set of {@link OpcodeBlock}s to a condition.
      */
     public static Condition makeCondition(List<OpcodeBlock> blocks, Locals locals, OpcodeBlock body, OpcodeBlock ret) {
-        if (Constants.TRACE_ACTIVE) {
-            System.err.println(
-                    "Making condition with blocks from " + blocks.get(0).getBreakpoint() + " to " + blocks.get(blocks.size() - 1).getBreakpoint());
-            System.err.println("    Ret is " + ret.getBreakpoint());
-            System.err.println("    Body is " + body.getBreakpoint());
-        }
         List<ConditionGraphNode> nodes = new ArrayList<>(blocks.size());
 
         ConditionGraphNode body_node = new ConditionGraphNode(null);

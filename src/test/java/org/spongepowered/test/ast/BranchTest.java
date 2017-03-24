@@ -25,23 +25,34 @@
 package org.spongepowered.test.ast;
 
 import static org.junit.Assert.assertEquals;
-import static org.objectweb.asm.Opcodes.*;
+import static org.objectweb.asm.Opcodes.GETSTATIC;
+import static org.objectweb.asm.Opcodes.GOTO;
+import static org.objectweb.asm.Opcodes.ICONST_0;
+import static org.objectweb.asm.Opcodes.ICONST_5;
+import static org.objectweb.asm.Opcodes.IFEQ;
+import static org.objectweb.asm.Opcodes.IF_ICMPGE;
+import static org.objectweb.asm.Opcodes.ILOAD;
+import static org.objectweb.asm.Opcodes.INVOKEVIRTUAL;
+import static org.objectweb.asm.Opcodes.ISTORE;
+import static org.objectweb.asm.Opcodes.RETURN;
 
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
-import org.objectweb.asm.Opcodes;
-import org.objectweb.asm.Type;
-import org.objectweb.asm.commons.GeneratorAdapter;
-import org.objectweb.asm.commons.Method;
+import org.spongepowered.despector.config.ConfigManager;
 import org.spongepowered.test.util.TestHelper;
 import org.spongepowered.test.util.TestMethodBuilder;
 
 import java.io.IOException;
-import java.io.PrintStream;
 
 @SuppressWarnings("unused")
 public class BranchTest {
+
+    @BeforeClass
+    public static void setup() {
+        ConfigManager.getConfig().print_opcodes_on_error = true;
+    }
 
     private void mth_simpleif(boolean a, boolean b) {
         if (a) {

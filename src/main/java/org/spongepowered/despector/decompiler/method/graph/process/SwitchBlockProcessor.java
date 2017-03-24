@@ -25,17 +25,21 @@
 package org.spongepowered.despector.decompiler.method.graph.process;
 
 import org.objectweb.asm.Label;
+import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.LabelNode;
 import org.objectweb.asm.tree.LookupSwitchInsnNode;
 import org.objectweb.asm.tree.TableSwitchInsnNode;
+import org.spongepowered.despector.config.ConfigManager;
 import org.spongepowered.despector.decompiler.method.PartialMethod;
 import org.spongepowered.despector.decompiler.method.graph.GraphProcessor;
 import org.spongepowered.despector.decompiler.method.graph.data.block.BlockSection;
+import org.spongepowered.despector.decompiler.method.graph.data.block.CommentBlockSection;
 import org.spongepowered.despector.decompiler.method.graph.data.block.SwitchBlockSection;
 import org.spongepowered.despector.decompiler.method.graph.data.block.SwitchBlockSection.SwitchCaseBlockSection;
 import org.spongepowered.despector.decompiler.method.graph.data.opcode.GotoOpcodeBlock;
 import org.spongepowered.despector.decompiler.method.graph.data.opcode.OpcodeBlock;
 import org.spongepowered.despector.decompiler.method.graph.data.opcode.SwitchOpcodeBlock;
+import org.spongepowered.despector.util.AstUtil;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -101,8 +105,22 @@ public class SwitchBlockProcessor implements GraphProcessor {
                     case_region.remove(last);
                     cs.setBreaks(true);
                 }
-
-                cs.getBody().addAll(partial.getDecompiler().flattenGraph(partial, case_region, case_region.size()));
+                try {
+                    partial.getDecompiler().flattenGraph(partial, case_region, case_region.size(), cs.getBody());
+                } catch (Exception e) {
+                    if (ConfigManager.getConfig().print_opcodes_on_error) {
+                        List<String> comment = new ArrayList<>();
+                        for (OpcodeBlock op : case_region) {
+                            comment.add(op.getDebugHeader());
+                            for (AbstractInsnNode insn : op.getOpcodes()) {
+                                comment.add(AstUtil.insnToString(insn));
+                            }
+                        }
+                        cs.getBody().add(new CommentBlockSection(comment));
+                    } else {
+                        throw e;
+                    }
+                }
             }
             SwitchCaseBlockSection cs = cases.get(dflt.getLabel());
             if (cs != null) {
@@ -123,7 +141,22 @@ public class SwitchBlockProcessor implements GraphProcessor {
                     block = blocks.get(start);
                 }
                 cs.setDefault(true);
-                cs.getBody().addAll(partial.getDecompiler().flattenGraph(partial, case_region, case_region.size()));
+                try {
+                    partial.getDecompiler().flattenGraph(partial, case_region, case_region.size(), cs.getBody());
+                } catch (Exception e) {
+                    if (ConfigManager.getConfig().print_opcodes_on_error) {
+                        List<String> comment = new ArrayList<>();
+                        for (OpcodeBlock op : case_region) {
+                            comment.add(op.getDebugHeader());
+                            for (AbstractInsnNode insn : op.getOpcodes()) {
+                                comment.add(AstUtil.insnToString(insn));
+                            }
+                        }
+                        cs.getBody().add(new CommentBlockSection(comment));
+                    } else {
+                        throw e;
+                    }
+                }
             }
             return blocks.indexOf(end) - 1;
         }

@@ -26,6 +26,7 @@ package org.spongepowered.despector.emitter;
 
 import org.spongepowered.despector.ast.members.FieldEntry;
 import org.spongepowered.despector.ast.members.MethodEntry;
+import org.spongepowered.despector.ast.members.insn.Comment;
 import org.spongepowered.despector.ast.members.insn.arg.Cast;
 import org.spongepowered.despector.ast.members.insn.arg.InstanceOf;
 import org.spongepowered.despector.ast.members.insn.arg.NewArray;
@@ -130,6 +131,7 @@ import org.spongepowered.despector.emitter.special.PackageEmitter;
 import org.spongepowered.despector.emitter.special.PackageInfoEmitter;
 import org.spongepowered.despector.emitter.statement.ArrayAssignmentEmitter;
 import org.spongepowered.despector.emitter.statement.BreakEmitter;
+import org.spongepowered.despector.emitter.statement.CommentEmitter;
 import org.spongepowered.despector.emitter.statement.DoWhileEmitter;
 import org.spongepowered.despector.emitter.statement.FieldAssignmentEmitter;
 import org.spongepowered.despector.emitter.statement.ForEachEmitter;
@@ -171,6 +173,7 @@ public class Emitters {
 
         JAVA.setStatementEmitter(ArrayAssignment.class, new ArrayAssignmentEmitter());
         JAVA.setStatementEmitter(Break.class, new BreakEmitter());
+        JAVA.setStatementEmitter(Comment.class, new CommentEmitter());
         JAVA.setStatementEmitter(DoWhile.class, new DoWhileEmitter());
         FieldAssignmentEmitter fld_assign = new FieldAssignmentEmitter();
         JAVA.setStatementEmitter(FieldAssignment.class, fld_assign);

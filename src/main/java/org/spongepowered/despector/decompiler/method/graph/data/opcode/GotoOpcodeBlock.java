@@ -37,4 +37,9 @@ public class GotoOpcodeBlock extends OpcodeBlock {
         throw new IllegalStateException("Unexpected conditional block");
     }
 
+    @Override
+    public String getDebugHeader() {
+        return "Goto: " + this.break_point + " (target: " + (this.target != null ? this.target.getBreakpoint() : -1) + ")";
+    }
+
 }

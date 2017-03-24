@@ -72,6 +72,12 @@ public class BreakMarkerOpcodeBlock extends OpcodeBlock {
         return new BreakBlockSection(this, this.type);
     }
 
+    @Override
+    public String getDebugHeader() {
+        return "Break: " + this.break_point + " (target: " + (this.target != null ? this.target.getBreakpoint() : -1) + ", marker: "
+                + this.type.name() + ", marked: " + (this.marked != null ? this.marked.getBreakpoint() : -1) + ")";
+    }
+
     public static enum MarkerType {
         BREAK,
         CONTINUE;

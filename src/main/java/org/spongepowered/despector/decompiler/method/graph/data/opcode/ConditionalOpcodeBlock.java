@@ -68,4 +68,10 @@ public class ConditionalOpcodeBlock extends OpcodeBlock {
         System.out.println("    Target: " + (this.target != null ? this.target.break_point : -1));
         System.out.println("    Else Target: " + (this.else_target != null ? this.else_target.break_point : -1));
     }
+
+    @Override
+    public String getDebugHeader() {
+        return "Conditional: " + this.break_point + " (target: " + (this.target != null ? this.target.getBreakpoint() : -1) + ", else_target: "
+                + (this.else_target != null ? this.else_target.getBreakpoint() : -1) + ")";
+    }
 }

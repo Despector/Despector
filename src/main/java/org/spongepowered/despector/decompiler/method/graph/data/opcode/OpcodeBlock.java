@@ -141,6 +141,12 @@ public abstract class OpcodeBlock {
         System.out.println(toString());
     }
 
+    /**
+     * Gets a single line of information for emitting this block in a comment
+     * for debugging.
+     */
+    public abstract String getDebugHeader();
+
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();

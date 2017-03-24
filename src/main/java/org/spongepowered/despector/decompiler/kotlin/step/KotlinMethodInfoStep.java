@@ -35,17 +35,20 @@ import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.MethodNode;
 import org.spongepowered.despector.ast.AccessModifier;
 import org.spongepowered.despector.ast.Annotation;
+import org.spongepowered.despector.ast.Locals;
 import org.spongepowered.despector.ast.members.MethodEntry;
+import org.spongepowered.despector.ast.members.insn.Comment;
 import org.spongepowered.despector.ast.members.insn.StatementBlock;
+import org.spongepowered.despector.ast.members.insn.StatementBlock.Type;
 import org.spongepowered.despector.ast.type.TypeEntry;
 import org.spongepowered.despector.config.ConfigManager;
-import org.spongepowered.despector.config.Constants;
 import org.spongepowered.despector.decompiler.Decompiler;
 import org.spongepowered.despector.decompiler.DecompilerStep;
 import org.spongepowered.despector.decompiler.method.MethodDecompiler;
 import org.spongepowered.despector.util.AstUtil;
 import org.spongepowered.despector.util.SignatureParser;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
@@ -91,30 +94,26 @@ public class KotlinMethodInfoStep implements DecompilerStep {
                 }
             }
 
+            Locals locals = this.method_decomp.createLocals(m, mn);
             try {
-                StatementBlock insns = this.method_decomp.decompile(m, mn);
+                StatementBlock insns = this.method_decomp.decompile(m, mn, locals);
                 m.setInstructions(insns);
             } catch (Exception ex) {
                 System.err.println("Error decompiling method body for " + cn.name + " " + m.toString());
                 ex.printStackTrace();
-                if (Constants.TRACE_ERRORS && !Constants.TRACE_ALL) {
-                    System.out.println("Starting error trace");
-                    System.out.flush();
-                    System.err.flush();
-                    Constants.TRACE_ACTIVE = true;
-                    try {
-                        this.method_decomp.decompile(m, mn);
-                    } catch (Exception e) {
+                StatementBlock insns = new StatementBlock(Type.METHOD, locals);
+                if (ConfigManager.getConfig().print_opcodes_on_error) {
+                    List<String> text = new ArrayList<>();
+                    text.add("Error decompiling block");
+                    for (Iterator<AbstractInsnNode> it = mn.instructions.iterator(); it.hasNext();) {
+                        AbstractInsnNode next = it.next();
+                        text.add(AstUtil.insnToString(next));
                     }
-                    Constants.TRACE_ACTIVE = false;
-//                    System.exit(1);
-                } else if (ConfigManager.getConfig().print_opcodes_on_error) {
-                    System.err.println("Offending method bytecode:");
-                    Iterator<AbstractInsnNode> it = mn.instructions.iterator();
-                    while (it.hasNext()) {
-                        System.err.println(AstUtil.insnToString(it.next()));
-                    }
+                    insns.append(new Comment(text));
+                } else {
+                    insns.append(new Comment("Error decompiling block"));
                 }
+                m.setInstructions(insns);
             }
             entry.addMethod(m);
         }

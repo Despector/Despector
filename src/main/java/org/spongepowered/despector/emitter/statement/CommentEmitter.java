@@ -22,25 +22,33 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.despector.decompiler.method.graph.data.opcode;
+package org.spongepowered.despector.emitter.statement;
 
-import org.spongepowered.despector.decompiler.method.graph.data.block.BlockSection;
-import org.spongepowered.despector.decompiler.method.graph.data.block.InlineBlockSection;
+import org.spongepowered.despector.ast.members.insn.Comment;
+import org.spongepowered.despector.emitter.EmitterContext;
+import org.spongepowered.despector.emitter.StatementEmitter;
 
-public class BodyOpcodeBlock extends OpcodeBlock {
-
-    public BodyOpcodeBlock(int br) {
-        super(br);
-    }
+public class CommentEmitter implements StatementEmitter<Comment> {
 
     @Override
-    public BlockSection toBlockSection() {
-        return new InlineBlockSection(this);
-    }
-
-    @Override
-    public String getDebugHeader() {
-        return "Body: " + this.break_point + " (target: " + (this.target != null ? this.target.getBreakpoint() : -1) + ")";
+    public void emit(EmitterContext ctx, Comment stmt, boolean semicolon) {
+        if (stmt.getCommentText().isEmpty()) {
+            return;
+        }
+        if (stmt.getCommentText().size() == 1) {
+            ctx.printString("// ");
+            ctx.printString(stmt.getCommentText().get(0));
+        } else {
+            ctx.printString("/*\n");
+            for (String line : stmt.getCommentText()) {
+                ctx.printIndentation();
+                ctx.printString(" * ");
+                ctx.printString(line);
+                ctx.printString("\n");
+            }
+            ctx.printIndentation();
+            ctx.printString(" */");
+        }
     }
 
 }
