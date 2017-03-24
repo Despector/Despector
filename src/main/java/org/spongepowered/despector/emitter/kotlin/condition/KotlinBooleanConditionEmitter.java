@@ -22,19 +22,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.despector.emitter.condition;
+package org.spongepowered.despector.emitter.kotlin.condition;
 
 import org.spongepowered.despector.ast.members.insn.arg.InstanceOf;
-import org.spongepowered.despector.ast.members.insn.arg.cst.IntConstant;
 import org.spongepowered.despector.ast.members.insn.branch.condition.BooleanCondition;
-import org.spongepowered.despector.emitter.ConditionEmitter;
 import org.spongepowered.despector.emitter.EmitterContext;
+import org.spongepowered.despector.emitter.condition.BooleanConditionEmitter;
 
-public class BooleanConditionEmitter implements ConditionEmitter<BooleanCondition> {
+public class KotlinBooleanConditionEmitter extends BooleanConditionEmitter {
 
     @Override
     public void emit(EmitterContext ctx, BooleanCondition bool) {
         if (checkConstant(ctx, bool)) {
+            return;
+        }
+        if (bool.getConditionValue() instanceof InstanceOf) {
+            InstanceOf arg = (InstanceOf) bool.getConditionValue();
+            ctx.emit(arg.getCheckedValue(), null);
+            ctx.printString(" !is ");
+            ctx.emitType(arg.getType());
             return;
         }
         if (bool.isInverse()) {
@@ -47,28 +53,6 @@ public class BooleanConditionEmitter implements ConditionEmitter<BooleanConditio
         } else {
             ctx.emit(bool.getConditionValue(), "Z");
         }
-    }
-
-    protected boolean checkConstant(EmitterContext ctx, BooleanCondition bool) {
-        if (bool.getConditionValue().inferType().equals("I")) {
-            if (bool.getConditionValue() instanceof IntConstant) {
-                IntConstant cst = (IntConstant) bool.getConditionValue();
-                if (cst.getConstant() == 0) {
-                    ctx.printString("false");
-                } else {
-                    ctx.printString("true");
-                }
-                return true;
-            }
-            ctx.emit(bool.getConditionValue(), "I");
-            if (bool.isInverse()) {
-                ctx.printString(" == 0");
-            } else {
-                ctx.printString(" != 0");
-            }
-            return true;
-        }
-        return false;
     }
 
 }

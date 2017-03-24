@@ -46,7 +46,9 @@ import org.spongepowered.despector.util.TypeHelper;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.util.ArrayDeque;
 import java.util.Collections;
+import java.util.Deque;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -66,10 +68,11 @@ public class EmitterContext {
     private MethodEntry method;
     private FieldEntry field;
     private Statement statement;
+    private Deque<Instruction> insn_stack = new ArrayDeque<>();
 
     private int indentation = 0;
     private int offs = 0;
-    
+
     private boolean semicolons = true;
 
     public EmitterContext(EmitterSet set, Writer output, EmitterFormat format) {
@@ -131,7 +134,11 @@ public class EmitterContext {
     public void setSemicolons(boolean state) {
         this.semicolons = state;
     }
-    
+
+    public Deque<Instruction> getCurrentInstructionStack() {
+        return this.insn_stack;
+    }
+
     public boolean isDefined(LocalInstance local) {
         return this.defined_locals.contains(local);
     }
@@ -225,7 +232,9 @@ public class EmitterContext {
         if (emitter == null) {
             throw new IllegalArgumentException("No emitter for instruction " + obj.getClass().getName());
         }
+        this.insn_stack.push(obj);
         emitter.emit(this, obj, type);
+        this.insn_stack.pop();
     }
 
     @SuppressWarnings("unchecked")
@@ -353,7 +362,7 @@ public class EmitterContext {
             for (String import_ : group_imports) {
                 printString("import ");
                 printString(import_);
-                if(this.semicolons) {
+                if (this.semicolons) {
                     printString(";\n");
                 } else {
                     printString("\n");

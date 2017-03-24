@@ -35,9 +35,20 @@ import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.instruction.InstanceMethodInvokeEmitter;
 import org.spongepowered.despector.util.TypeHelper;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class KotlinInstanceMethodInvokeEmitter extends InstanceMethodInvokeEmitter {
+
+    private static final Set<String> NO_CALLEE = new HashSet<>();
+    private static final Set<String> NO_PARAMS = new HashSet<>();
+
+    static {
+        NO_CALLEE.add("Ljava/io/PrintStream;println");
+        
+        NO_PARAMS.add("Ljava/lang/String;length");
+    }
 
     @Override
     public void emit(EmitterContext ctx, InstanceMethodInvoke arg, String type) {
@@ -46,6 +57,7 @@ public class KotlinInstanceMethodInvokeEmitter extends InstanceMethodInvokeEmitt
                 return;
             }
         }
+        String key = arg.getOwner() + arg.getMethodName();
         if (arg.getMethodName().equals("<init>")) {
             if (ctx.getType() != null) {
                 if (arg.getOwnerType().equals(ctx.getType().getName())) {
@@ -57,7 +69,7 @@ public class KotlinInstanceMethodInvokeEmitter extends InstanceMethodInvokeEmitt
                 ctx.printString("super");
             }
         } else {
-            if (!("Ljava/io/PrintStream;".equals(arg.getOwner()) && "println".equals(arg.getMethodName()))) {
+            if (!NO_CALLEE.contains(key)) {
                 if (arg.getCallee() instanceof LocalAccess && ctx.getMethod() != null && !ctx.getMethod().isStatic()) {
                     LocalAccess local = (LocalAccess) arg.getCallee();
                     if (local.getLocal().getIndex() == 0) {
@@ -74,6 +86,9 @@ public class KotlinInstanceMethodInvokeEmitter extends InstanceMethodInvokeEmitt
                 }
             }
             ctx.printString(arg.getMethodName());
+        }
+        if (NO_PARAMS.contains(key)) {
+            return;
         }
         ctx.printString("(");
         List<String> param_types = TypeHelper.splitSig(arg.getMethodDescription());

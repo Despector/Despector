@@ -107,7 +107,10 @@ import org.spongepowered.despector.emitter.instruction.StaticMethodInvokeEmitter
 import org.spongepowered.despector.emitter.instruction.StringConstantEmitter;
 import org.spongepowered.despector.emitter.instruction.TernaryEmitter;
 import org.spongepowered.despector.emitter.instruction.TypeConstantEmitter;
+import org.spongepowered.despector.emitter.kotlin.condition.KotlinBooleanConditionEmitter;
+import org.spongepowered.despector.emitter.kotlin.instruction.KotlinCastEmitter;
 import org.spongepowered.despector.emitter.kotlin.instruction.KotlinInstanceMethodInvokeEmitter;
+import org.spongepowered.despector.emitter.kotlin.instruction.KotlinInstanceOfEmitter;
 import org.spongepowered.despector.emitter.kotlin.instruction.KotlinStaticMethodInvokeEmitter;
 import org.spongepowered.despector.emitter.kotlin.instruction.KotlinTernaryEmitter;
 import org.spongepowered.despector.emitter.kotlin.special.KotlinCompanionClassEmitter;
@@ -241,6 +244,10 @@ public class Emitters {
         KOTLIN.setInstructionEmitter(InstanceMethodInvoke.class, new KotlinInstanceMethodInvokeEmitter());
         KOTLIN.setInstructionEmitter(StaticMethodInvoke.class, new KotlinStaticMethodInvokeEmitter());
         KOTLIN.setInstructionEmitter(Ternary.class, new KotlinTernaryEmitter());
+        KOTLIN.setInstructionEmitter(InstanceOf.class, new KotlinInstanceOfEmitter());
+        KOTLIN.setInstructionEmitter(Cast.class, new KotlinCastEmitter());
+        
+        KOTLIN.setConditionEmitter(BooleanCondition.class, new KotlinBooleanConditionEmitter());
     }
 
 }

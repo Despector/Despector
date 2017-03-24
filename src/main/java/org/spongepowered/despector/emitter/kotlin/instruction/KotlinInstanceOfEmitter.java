@@ -22,41 +22,19 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.despector.emitter.kotlin;
+package org.spongepowered.despector.emitter.kotlin.instruction;
 
+import org.spongepowered.despector.ast.members.insn.arg.InstanceOf;
 import org.spongepowered.despector.emitter.EmitterContext;
+import org.spongepowered.despector.emitter.InstructionEmitter;
 
-public class KotlinEmitterUtil {
+public class KotlinInstanceOfEmitter implements InstructionEmitter<InstanceOf> {
 
-    public static void emitType(EmitterContext ctx, String type) {
-        if (type.startsWith("[")) {
-            ctx.printString("Array<");
-            emitType(ctx, type.substring(1));
-            ctx.printString(">");
-        } else if ("B".equals(type)) {
-            ctx.printString("Byte");
-        } else if ("S".equals(type)) {
-            ctx.printString("Short");
-        } else if ("I".equals(type) || "Ljava/lang/Integer;".equals(type)) {
-            ctx.printString("Int");
-        } else if ("J".equals(type)) {
-            ctx.printString("Long");
-        } else if ("F".equals(type)) {
-            ctx.printString("Float");
-        } else if ("D".equals(type)) {
-            ctx.printString("Double");
-        } else if ("Z".equals(type)) {
-            ctx.printString("Boolean");
-        } else if ("C".equals(type)) {
-            ctx.printString("Character");
-        } else if ("Ljava/lang/Object;".equals(type)) {
-            ctx.printString("Any");
-        } else {
-            ctx.emitType(type);
-        }
-    }
-
-    private KotlinEmitterUtil() {
+    @Override
+    public void emit(EmitterContext ctx, InstanceOf arg, String type) {
+        ctx.emit(arg.getCheckedValue(), null);
+        ctx.printString(" is ");
+        ctx.emitType(arg.getType());
     }
 
 }
