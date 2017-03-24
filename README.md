@@ -1,7 +1,7 @@
 Despector
 ===========
 
-A java decompilation tool and AST library.
+A java / kotlin decompilation tool and AST library.
 
 The main goal of this library was to construct a complete Abstract Source Tree (AST) for a java
 class file including nodes for all instructions. It is built of top of [ASM] which has AST
@@ -11,8 +11,60 @@ While not as useful for modifying source and reconstruction a java class file th
 very useful for decompiling and for code analysis where you would like to search for patterns
 on a statement rather than an opcode level.
 
+## Kotlin
+
+At this time the kotlin support is quite new and all features are not set supported and bugs in the
+output are to be exptected.
+
 # Usage as a Decompiler
 
-`java -jar Despector.jar [sources...] [destination]`
+`java -jar Despector.jar <--config=[path]> <--lang=[java|kotlin]> [sources...] [destination]`
 
-Command line options and/or configuration is limited at the moment but is planned.
+- The `--confif=` allows you to define a config file for certain decompilation settings.
+- The `--lang=` forces the output to be in a particular language. Normal behaviour is to attempt to
+determine the class files source language from its contents.
+
+# Issues
+
+This decompiler is still under heavy development and issues will happen. If you encounter any incorrect output
+please open an issue in the [Issue Tracker]. At a minimum include the expected and encountered output. A compiled
+class demonstrating the issue would also be extemely helpful.
+
+# Feature Requests
+
+Feature requests are always welcome and can be made in the [Issue Tracker] with as much information as possible.
+
+# Configuration file
+
+Here is a sample configuration file. It is optional but allows you to control decompilation settings
+such as formatting. If you would like more settings open a feature request in the [Issue Tracker]. The
+configuration file uses the [HOCON] configuration format.
+
+```
+# Despector decompiler configuration:
+
+# Cleanup configuration
+cleanup {
+    # Cleanup operations to apply before emitting
+    operations=[]
+}
+# Emits source when loading classes (useful when debugging the decompiler).
+emit-source-on-load=false
+# Emitter configuration
+emitter {
+    # The path of the formatter configuration
+    formatting-path="run/eclipse_formatter.xml"
+    # One of: eclipse,intellij
+    formatting-type=eclipse
+    # The path of the import order configuration
+    import-order-path="run/eclipse.importorder"
+}
+# Prints out opcodes of a method when it fails to decompile.
+print-opcodes-on-error=true
+```
+
+[Gradle]: https://www.gradle.org/
+[ASM]: http://asm.ow2.org/
+[Development/Support Chat]: https://webchat.esper.net/?channels=decompiler
+[Issue Tracker]: https://github.com/Deamon5550/Despector/issues
+[HOCON]: https://github.com/typesafehub/config/blob/master/HOCON.md
