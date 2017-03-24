@@ -328,7 +328,8 @@ public class EmitterContext {
 
     public void emitImports() {
         List<String> imports = Lists.newArrayList(this.imports);
-        for (String group : this.format.import_order) {
+        for (int i = 0; i < this.format.import_order.size(); i++) {
+            String group = this.format.import_order.get(i);
             if (group.startsWith("/#")) {
                 // don't have static imports yet
                 continue;
@@ -347,8 +348,8 @@ public class EmitterContext {
                 printString(import_);
                 printString(";\n");
             }
-            if (!group_imports.isEmpty()) {
-                for (int i = 0; i < this.format.blank_lines_between_import_groups; i++) {
+            if (!group_imports.isEmpty() && i < this.format.import_order.size() - 1) {
+                for (int o = 0; o < this.format.blank_lines_between_import_groups; o++) {
                     printString("\n");
                 }
             }
@@ -387,7 +388,7 @@ public class EmitterContext {
         emitImports();
 
         if (!this.imports.isEmpty()) {
-            for (int i = 0; i < this.format.blank_lines_after_imports; i++) {
+            for (int i = 0; i < this.format.blank_lines_after_imports - 1; i++) {
                 printString("\n");
             }
         }

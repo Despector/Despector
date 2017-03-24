@@ -37,7 +37,7 @@ public class KotlinEmitterUtil {
         } else if ("S".equals(type)) {
             ctx.printString("Short");
         } else if ("I".equals(type)) {
-            ctx.printString("Integer");
+            ctx.printString("Int");
         } else if ("J".equals(type)) {
             ctx.printString("Long");
         } else if ("F".equals(type)) {

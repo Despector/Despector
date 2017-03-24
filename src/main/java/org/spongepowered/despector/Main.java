@@ -24,17 +24,13 @@
  */
 package org.spongepowered.despector;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import org.spongepowered.despector.ast.SourceSet;
 import org.spongepowered.despector.ast.type.TypeEntry;
 import org.spongepowered.despector.config.ConfigManager;
 import org.spongepowered.despector.decompiler.Decompiler;
-import org.spongepowered.despector.decompiler.Decompilers;
 import org.spongepowered.despector.decompiler.DirectoryWalker;
 import org.spongepowered.despector.decompiler.JarWalker;
 import org.spongepowered.despector.emitter.EmitterContext;
-import org.spongepowered.despector.emitter.Emitters;
 import org.spongepowered.despector.emitter.format.EmitterFormat;
 import org.spongepowered.despector.emitter.format.FormatLoader;
 import org.spongepowered.despector.transform.TypeTransformer;
@@ -45,13 +41,15 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
 public class Main {
 
-    private static final Map<String, Consumer<String>> flags = Maps.newHashMap();
+    private static final Map<String, Consumer<String>> flags = new HashMap<>();
 
     public static Language LANGUAGE = Language.JAVA;
 
@@ -80,7 +78,7 @@ public class Main {
             return;
         }
 
-        List<String> sources = Lists.newArrayList();
+        List<String> sources = new ArrayList<>();
         outer: for (int i = 0; i < args.length - 1; i++) {
             if (args[i].startsWith("-")) {
                 for (String flag : flags.keySet()) {
@@ -140,7 +138,7 @@ public class Main {
         }
 
         if (!ConfigManager.getConfig().cleanup.operations.isEmpty()) {
-            List<TypeTransformer> transformers = Lists.newArrayList();
+            List<TypeTransformer> transformers = new ArrayList<>();
             for (String operation : ConfigManager.getConfig().cleanup.operations) {
                 TypeTransformer transformer = CleanupOperations.getOperation(operation);
                 if (transformer == null) {

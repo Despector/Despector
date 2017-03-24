@@ -60,11 +60,6 @@ public class DoWhileRegionProcessor implements RegionProcessor {
                 cond_start--;
                 next = region.get(cond_start);
             }
-            if (Constants.TRACE_ACTIVE) {
-                System.err.println("Processing Do_while loop, start is " + start.getBreakpoint());
-                System.err.println("    Condition is " + condition_blocks.get(0).getBreakpoint() + " to "
-                        + condition_blocks.get(condition_blocks.size() - 1).getBreakpoint());
-            }
             Condition cond = null;
             if (condition_blocks.isEmpty()) {
                 checkState(ret instanceof GotoOpcodeBlock);
@@ -74,6 +69,11 @@ public class DoWhileRegionProcessor implements RegionProcessor {
                     section.appendBody(next.toBlockSection());
                 }
                 return section;
+            }
+            if (Constants.TRACE_ACTIVE) {
+                System.err.println("Processing Do_while loop, start is " + start.getBreakpoint());
+                System.err.println("    Condition is " + condition_blocks.get(0).getBreakpoint() + " to "
+                        + condition_blocks.get(condition_blocks.size() - 1).getBreakpoint());
             }
 
             cond_start++;

@@ -61,10 +61,9 @@ public class NewEmitter implements InstructionEmitter<New> {
         ctx.printString("new ");
         ctx.emitType(arg.getType());
 
-        if (ctx.getField() != null && ctx.getField().getSignature() != null && !ctx.getField().getSignature().hasArguments()) {
+        if (ctx.getField() != null && ctx.getField().getSignature() != null && ctx.getField().getSignature().hasArguments()) {
             ctx.printString("<>");
-        }
-        if (ctx.getStatement() != null && ctx.getStatement() instanceof LocalAssignment) {
+        } else if (ctx.getStatement() != null && ctx.getStatement() instanceof LocalAssignment) {
             LocalAssignment assign = (LocalAssignment) ctx.getStatement();
             TypeSignature sig = assign.getLocal().getSignature();
             if (sig != null && sig instanceof ClassTypeSignature && !((ClassTypeSignature) sig).getArguments().isEmpty()) {
