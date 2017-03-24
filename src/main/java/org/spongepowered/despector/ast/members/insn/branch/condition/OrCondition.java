@@ -46,6 +46,9 @@ public class OrCondition extends Condition {
         this.args = checkNotNull(args, "args");
     }
 
+    /**
+     * Gets the operands of this condition.
+     */
     public List<Condition> getOperands() {
         return this.args;
     }

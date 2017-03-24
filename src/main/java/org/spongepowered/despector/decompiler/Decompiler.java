@@ -72,7 +72,7 @@ public class Decompiler {
         return decompile(cn, source);
     }
 
-    public TypeEntry decompile(ClassNode cn, SourceSet source) throws IOException {
+    public TypeEntry decompile(ClassNode cn, SourceSet source) {
         System.out.println("Decompiling class " + cn.name);
         int acc = cn.access;
         TypeEntry entry = null;

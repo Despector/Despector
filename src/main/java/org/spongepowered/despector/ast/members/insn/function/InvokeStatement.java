@@ -31,6 +31,11 @@ import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
 import org.spongepowered.despector.ast.members.insn.Statement;
 import org.spongepowered.despector.ast.members.insn.arg.Instruction;
 
+/**
+ * A statement wrapping an instruction. Typically used for method invokes that
+ * have no return value and therefore are called as instructions rather than as
+ * part of another statement.
+ */
 public class InvokeStatement implements Statement {
 
     private Instruction inner;
@@ -40,10 +45,16 @@ public class InvokeStatement implements Statement {
         this.inner = checkNotNull(inner, "instruction");
     }
 
+    /**
+     * Gets the instruction being invoked in this statement.
+     */
     public Instruction getInstruction() {
         return this.inner;
     }
 
+    /**
+     * Sets the instruction being invoked in this statement.
+     */
     public void setInstruction(Instruction insn) {
         this.inner = checkNotNull(insn, "instruction");
     }

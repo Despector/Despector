@@ -26,6 +26,9 @@ package org.spongepowered.despector.ast.members.insn.arg.cst;
 
 import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
 
+/**
+ * A constant long value.
+ */
 public class LongConstant extends Constant {
 
     private long cst;

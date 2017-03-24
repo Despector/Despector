@@ -51,35 +51,59 @@ public class If implements Statement {
         this.block = checkNotNull(insn, "block");
     }
 
+    /**
+     * Gets the condition.
+     */
     public Condition getCondition() {
         return this.condition;
     }
 
+    /**
+     * Sets the condition.
+     */
     public void setCondition(Condition condition) {
         this.condition = checkNotNull(condition, "condition");
     }
 
+    /**
+     * Gets the body of the if statement.
+     */
     public StatementBlock getIfBody() {
         return this.block;
     }
 
+    /**
+     * Sets the body of the if statement.
+     */
     public void setBody(StatementBlock block) {
         this.block = checkNotNull(block, "block");
     }
 
+    /**
+     * Gets any else-if blocks attached to this if statement.
+     */
     public List<Elif> getElifBlocks() {
         return this.elif_blocks;
     }
 
+    /**
+     * Adds the given else-if block to this if statement.
+     */
     public void addElifBlock(Elif e) {
         this.elif_blocks.add(checkNotNull(e, "elif"));
     }
 
+    /**
+     * Gets the else block of this if statement, may be null.
+     */
     @Nullable
     public Else getElseBlock() {
         return this.else_block;
     }
 
+    /**
+     * Sets the else block of this if statement, may be null.
+     */
     public void setElseBlock(@Nullable Else else_block) {
         this.else_block = else_block;
     }
@@ -133,6 +157,9 @@ public class If implements Statement {
         return this.condition.equals(insn.condition) && this.block.equals(insn.block);
     }
 
+    /**
+     * An else-if block attached to an if statement.
+     */
     public class Elif {
 
         private StatementBlock block;
@@ -144,18 +171,30 @@ public class If implements Statement {
             If.this.addElifBlock(this);
         }
 
+        /**
+         * Gets the condition of this block.
+         */
         public Condition getCondition() {
             return this.condition;
         }
 
+        /**
+         * Sets the condition of this block.
+         */
         public void setCondition(Condition cond) {
             this.condition = checkNotNull(cond, "condition");
         }
 
+        /**
+         * Gets the body of this block.
+         */
         public StatementBlock getBody() {
             return this.block;
         }
 
+        /**
+         * Sets the body of this block.
+         */
         public void setBody(StatementBlock block) {
             this.block = checkNotNull(block, "block");
         }
@@ -193,6 +232,9 @@ public class If implements Statement {
         }
     }
 
+    /**
+     * The else block of an if statement.
+     */
     public class Else {
 
         private StatementBlock block;
@@ -202,10 +244,16 @@ public class If implements Statement {
             If.this.setElseBlock(this);
         }
 
+        /**
+         * Gets the body of this block.
+         */
         public StatementBlock getElseBody() {
             return this.block;
         }
 
+        /**
+         * Sets the body of this block.
+         */
         public void setElseBody(StatementBlock block) {
             this.block = checkNotNull(block, "block");
         }

@@ -28,6 +28,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
 
+/**
+ * A constant String value.
+ */
 public class StringConstant extends Constant {
 
     private String cst;

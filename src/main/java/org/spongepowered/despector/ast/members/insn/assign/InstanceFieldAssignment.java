@@ -29,6 +29,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
 import org.spongepowered.despector.ast.members.insn.arg.Instruction;
 
+/**
+ * An assignment to an instance field.
+ */
 public class InstanceFieldAssignment extends FieldAssignment {
 
     private Instruction owner;
@@ -38,10 +41,16 @@ public class InstanceFieldAssignment extends FieldAssignment {
         this.owner = checkNotNull(owner, "owner");
     }
 
+    /**
+     * Gets the object on which the field is being set.
+     */
     public Instruction getOwner() {
         return this.owner;
     }
 
+    /**
+     * Sets the object on which the field is being set.
+     */
     public void setOwner(Instruction owner) {
         this.owner = checkNotNull(owner, "owner");
     }

@@ -42,10 +42,16 @@ public class NegativeOperator implements Instruction {
         this.val = checkNotNull(val, "val");
     }
 
+    /**
+     * Gets the operand that this unary operator is operating on.
+     */
     public Instruction getOperand() {
         return this.val;
     }
 
+    /**
+     * Sets the operand that this unary operator is operating on.
+     */
     public void setOperand(Instruction insn) {
         this.val = checkNotNull(insn, "val");
     }

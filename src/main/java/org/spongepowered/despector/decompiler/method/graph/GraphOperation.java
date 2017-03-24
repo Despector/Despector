@@ -29,7 +29,6 @@ import org.spongepowered.despector.decompiler.method.PartialMethod;
 import org.spongepowered.despector.decompiler.method.graph.data.opcode.ConditionalOpcodeBlock;
 import org.spongepowered.despector.decompiler.method.graph.data.opcode.OpcodeBlock;
 import org.spongepowered.despector.decompiler.method.graph.data.opcode.SwitchOpcodeBlock;
-import org.spongepowered.despector.decompiler.method.graph.process.SwitchBlockProcessor;
 
 import java.util.List;
 import java.util.Map;

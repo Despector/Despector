@@ -32,7 +32,6 @@ public class VoidTypeSignature extends TypeSignature {
     public static final VoidTypeSignature VOID = new VoidTypeSignature();
 
     private VoidTypeSignature() {
-
     }
 
     @Override

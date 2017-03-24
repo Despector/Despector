@@ -26,6 +26,9 @@ package org.spongepowered.despector.ast.members.insn.arg.cst;
 
 import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
 
+/**
+ * A constant float value.
+ */
 public class FloatConstant extends Constant {
 
     private float cst;

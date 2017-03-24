@@ -24,8 +24,15 @@
  */
 package org.spongepowered.despector.ast.generic;
 
+/**
+ * A type signature which can be either a type variable or a concrete class or
+ * void.
+ */
 public abstract class TypeSignature {
 
+    /**
+     * Gets if this signature has any type arguments.
+     */
     public abstract boolean hasArguments();
 
 }

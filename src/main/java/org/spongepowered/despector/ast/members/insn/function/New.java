@@ -47,26 +47,44 @@ public class New implements Instruction {
         this.params = args;
     }
 
+    /**
+     * Gets the description of the constructor being called.
+     */
     public String getCtorDescription() {
         return this.ctor;
     }
 
+    /**
+     * Sets the description of the constructor being called.
+     */
     public void setCtorDescription(String desc) {
         this.ctor = checkNotNull(desc, "ctor_desc");
     }
 
+    /**
+     * Gets the type description of the type being instanciated.
+     */
     public String getType() {
         return this.type;
     }
 
+    /**
+     * Sets the type description of the type being instanciated.
+     */
     public void setType(String type) {
         this.type = checkNotNull(type, "type");
     }
 
+    /**
+     * Gets the parameters of the constructor.
+     */
     public Instruction[] getParameters() {
         return this.params;
     }
 
+    /**
+     * Sets the parameters of the constructor.
+     */
     public void setParameters(Instruction... args) {
         this.params = checkNotNull(args, "args");
     }

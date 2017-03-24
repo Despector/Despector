@@ -28,6 +28,9 @@ import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
 import org.spongepowered.despector.ast.members.insn.arg.Instruction;
 import org.spongepowered.despector.util.TypeHelper;
 
+/**
+ * An assignment to a static field.
+ */
 public class StaticFieldAssignment extends FieldAssignment {
 
     public StaticFieldAssignment(String field, String type_desc, String owner, Instruction val) {
@@ -56,6 +59,5 @@ public class StaticFieldAssignment extends FieldAssignment {
         StaticFieldAssignment insn = (StaticFieldAssignment) obj;
         return this.val.equals(insn.val);
     }
-
 
 }

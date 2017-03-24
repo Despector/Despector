@@ -26,6 +26,9 @@ package org.spongepowered.despector.ast.members.insn.arg.cst;
 
 import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
 
+/**
+ * A constant null value.
+ */
 public class NullConstant extends Constant {
 
     public static final NullConstant NULL = new NullConstant();

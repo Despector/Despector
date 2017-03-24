@@ -43,10 +43,16 @@ public class InstanceMethodInvoke extends MethodInvoke {
         this.callee = checkNotNull(call, "callee");
     }
 
+    /**
+     * Gets the object that the method is onvoked on.
+     */
     public Instruction getCallee() {
         return this.callee;
     }
 
+    /**
+     * Sets the object that the method is onvoked on.
+     */
     public void setCallee(Instruction callee) {
         this.callee = checkNotNull(callee, "callee");
     }

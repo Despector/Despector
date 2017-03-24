@@ -29,6 +29,9 @@ import static org.spongepowered.despector.util.TypeHelper.checkType;
 import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
 import org.spongepowered.despector.util.TypeHelper;
 
+/**
+ * An instruction performing a comparison between two numerical values.
+ */
 public class NumberCompare implements Instruction {
 
     protected Instruction left;

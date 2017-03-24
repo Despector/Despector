@@ -42,10 +42,16 @@ public class Throw implements Statement {
         this.ex = checkType(arg, TypeHelper.IS_OBJECT, "exception");
     }
 
+    /**
+     * Gets the exception object being thrown.
+     */
     public Instruction getException() {
         return this.ex;
     }
 
+    /**
+     * Sets the exception object being thrown.
+     */
     public void setException(Instruction ex) {
         this.ex = checkType(ex, TypeHelper.IS_OBJECT, "exception");
     }

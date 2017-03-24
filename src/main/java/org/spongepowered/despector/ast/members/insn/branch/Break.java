@@ -29,6 +29,9 @@ import org.spongepowered.despector.ast.members.insn.Statement;
 
 import java.util.List;
 
+/**
+ * A statement breaking control flow out of a surrounding loop.
+ */
 public class Break implements Statement {
 
     private Breakable loop;
@@ -41,34 +44,48 @@ public class Break implements Statement {
         this.nested = nested;
     }
 
+    /**
+     * Gets the loop being broken.
+     */
     public Breakable getLoop() {
         return this.loop;
     }
 
+    /**
+     * Sets the loop being broken.
+     */
     public void setLoop(Breakable loop) {
         this.loop = loop;
     }
 
+    /**
+     * Gets whether this is a break or a continue statement.
+     */
     public Type getType() {
         return this.type;
     }
 
+    /**
+     * Sets whether this is a break or a continue statement.
+     */
     public void setType(Type type) {
         this.type = type;
     }
 
+    /**
+     * Gets if this break is breaking a loop other than the immediate
+     * surrounding loop and will therefore require a label on the outer loop.
+     */
     public boolean isNested() {
         return this.nested;
     }
 
+    /**
+     * Sets if this break is breaking a loop other than the immediate
+     * surrounding loop and will therefore require a label on the outer loop.
+     */
     public void setNested(boolean state) {
         this.nested = state;
-    }
-
-    public static interface Breakable {
-
-        List<Break> getBreaks();
-
     }
 
     @Override
@@ -76,6 +93,18 @@ public class Break implements Statement {
         visitor.visitBreak(this);
     }
 
+    /**
+     * A marker interface for a statement which may be broken.
+     */
+    public static interface Breakable {
+
+        List<Break> getBreaks();
+
+    }
+
+    /**
+     * The type of the break statement.
+     */
     public static enum Type {
         BREAK("break"),
         CONTINUE("continue");
@@ -86,6 +115,9 @@ public class Break implements Statement {
             this.keyword = keyword;
         }
 
+        /**
+         * Gets the java keyword for this type.
+         */
         public String getKeyword() {
             return this.keyword;
         }

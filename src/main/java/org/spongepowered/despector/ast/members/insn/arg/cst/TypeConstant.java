@@ -28,6 +28,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import org.objectweb.asm.Type;
 import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
 
+/**
+ * A constant type value.
+ */
 public class TypeConstant extends Constant {
 
     private Type cst;

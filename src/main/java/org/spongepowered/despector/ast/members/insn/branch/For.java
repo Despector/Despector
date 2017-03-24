@@ -55,36 +55,60 @@ public class For implements Statement, Breakable {
         this.body = checkNotNull(body, "body");
     }
 
+    /**
+     * Gets the initialization statement, may be null.
+     */
     @Nullable
     public Statement getInit() {
         return this.init;
     }
 
+    /**
+     * Sets the initialization statement, may be null.
+     */
     public void setInit(@Nullable Statement init) {
         this.init = init;
     }
 
+    /**
+     * Gets the loop condition.
+     */
     public Condition getCondition() {
         return this.condition;
     }
 
+    /**
+     * Sets the loop condition.
+     */
     public void setCondition(Condition condition) {
         this.condition = checkNotNull(condition, "condition");
     }
 
+    /**
+     * Gets the incrementing statement, may be null.
+     */
     @Nullable
     public Statement getIncr() {
         return this.incr;
     }
 
+    /**
+     * Sets the incrementing statement, may be null.
+     */
     public void setIncr(@Nullable Statement incr) {
         this.incr = incr;
     }
 
+    /**
+     * Gets the loop body.
+     */
     public StatementBlock getBody() {
         return this.body;
     }
 
+    /**
+     * Sets the loop body.
+     */
     public void setBody(StatementBlock block) {
         this.body = checkNotNull(block, "block");
     }

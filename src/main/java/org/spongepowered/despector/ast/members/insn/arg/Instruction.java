@@ -31,8 +31,14 @@ import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
  */
 public interface Instruction {
 
+    /**
+     * Gets the inferred type description of this instruction.
+     */
     String inferType();
 
+    /**
+     * Passes itself and any child nodes to the given visitor.
+     */
     void accept(InstructionVisitor visitor);
 
     @Override

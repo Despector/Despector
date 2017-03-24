@@ -52,26 +52,44 @@ public class ForEach implements Statement, Breakable {
         this.body = checkNotNull(body, "body");
     }
 
+    /**
+     * Gets the collection being iterated over.
+     */
     public Instruction getCollectionValue() {
         return this.collection;
     }
 
+    /**
+     * Sets the collection being iterated over.
+     */
     public void setCollectionValue(Instruction collection) {
         this.collection = checkNotNull(collection, "collection");
     }
 
+    /**
+     * Gets the local that the current loop value is set to.
+     */
     public LocalInstance getValueAssignment() {
         return this.val;
     }
 
+    /**
+     * Sets the local that the current loop value is set to.
+     */
     public void setValueAssignment(LocalInstance val) {
         this.val = checkNotNull(val, "val");
     }
 
+    /**
+     * Gets the loop body.
+     */
     public StatementBlock getBody() {
         return this.body;
     }
 
+    /**
+     * Sets the loop body.
+     */
     public void setBody(StatementBlock block) {
         this.body = checkNotNull(block, "block");
     }

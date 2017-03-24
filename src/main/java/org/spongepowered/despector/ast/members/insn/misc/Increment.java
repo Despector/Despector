@@ -43,18 +43,30 @@ public class Increment implements Statement {
         this.val = val;
     }
 
+    /**
+     * Gets the local being incremented.
+     */
     public LocalInstance getLocal() {
         return this.local;
     }
 
+    /**
+     * Sets the local being incremented.
+     */
     public void setLocal(LocalInstance local) {
         this.local = checkNotNull(local, "local");
     }
 
+    /**
+     * Gets the value that the local is incremented by.
+     */
     public int getIncrementValue() {
         return this.val;
     }
 
+    /**
+     * Sets the value that the local is incremented by.
+     */
     public void setIncrementValue(int val) {
         this.val = val;
     }

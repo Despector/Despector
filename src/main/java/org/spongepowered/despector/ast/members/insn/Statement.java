@@ -29,6 +29,9 @@ package org.spongepowered.despector.ast.members.insn;
  */
 public interface Statement {
 
+    /**
+     * Accepts the given visitor.
+     */
     void accept(InstructionVisitor visitor);
 
     @Override

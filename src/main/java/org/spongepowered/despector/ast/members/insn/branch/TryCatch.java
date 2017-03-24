@@ -36,6 +36,9 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
+/**
+ * A try-catch block.
+ */
 public class TryCatch implements Statement {
 
     private StatementBlock block;
@@ -45,14 +48,23 @@ public class TryCatch implements Statement {
         this.block = checkNotNull(block, "block");
     }
 
+    /**
+     * Gets the body of the try block.
+     */
     public StatementBlock getTryBlock() {
         return this.block;
     }
 
+    /**
+     * Sets the body of the try block.
+     */
     public void setBlock(StatementBlock block) {
         this.block = checkNotNull(block, "block");
     }
 
+    /**
+     * Gets all attached catch blocks.
+     */
     public List<CatchBlock> getCatchBlocks() {
         return this.catch_blocks;
     }
@@ -80,6 +92,9 @@ public class TryCatch implements Statement {
         return this.block.equals(insn.block) && this.catch_blocks.equals(insn.catch_blocks);
     }
 
+    /**
+     * A catch block.
+     */
     public class CatchBlock {
 
         private final List<String> exceptions;
@@ -103,11 +118,17 @@ public class TryCatch implements Statement {
             TryCatch.this.catch_blocks.add(this);
         }
 
+        /**
+         * Gets the local that the exception is placed into.
+         */
         @Nullable
         public LocalInstance getExceptionLocal() {
             return this.exception_local;
         }
 
+        /**
+         * Sets the local that the exception is placed into.
+         */
         public void setExceptionLocal(@Nullable LocalInstance local) {
             if (local == null && this.dummy_name == null) {
                 throw new IllegalStateException("Cannot have both a null exception local and dummy name in catch block.");
@@ -115,6 +136,10 @@ public class TryCatch implements Statement {
             this.exception_local = local;
         }
 
+        /**
+         * Gets the dummy name for this variable. This name is ignored if the
+         * {@link #getExceptionLocal()} is not null.
+         */
         public String getDummyName() {
             if (this.exception_local != null) {
                 return this.exception_local.getName();
@@ -133,18 +158,30 @@ public class TryCatch implements Statement {
             this.dummy_name = name;
         }
 
+        /**
+         * Gets all exceptions that this catch block is catching.
+         */
         public List<String> getExceptions() {
             return this.exceptions;
         }
 
+        /**
+         * Gets the body of this catch block.
+         */
         public StatementBlock getBlock() {
             return this.block;
         }
 
+        /**
+         * Sets the body of this catch block.
+         */
         public void setBlock(StatementBlock block) {
             this.block = checkNotNull(block, "block");
         }
 
+        /**
+         * Accepts the given visitor.
+         */
         public void accept(InstructionVisitor visitor) {
             visitor.visitCatchBlock(this);
             for (Statement stmt : this.block.getStatements()) {

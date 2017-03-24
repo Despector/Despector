@@ -34,6 +34,9 @@ import org.spongepowered.despector.ast.members.insn.arg.Instruction;
 
 import java.util.List;
 
+/**
+ * A switch statement.
+ */
 public class Switch implements Statement {
 
     private Instruction variable;
@@ -43,14 +46,23 @@ public class Switch implements Statement {
         this.variable = checkNotNull(var, "var");
     }
 
+    /**
+     * Gets the variable that the switch is acting upon.
+     */
     public Instruction getSwitchVar() {
         return this.variable;
     }
 
+    /**
+     * Sets the variable that the switch is acting upon.
+     */
     public void setSwitchVar(Instruction var) {
         this.variable = checkNotNull(var, "var");
     }
 
+    /**
+     * Gets all cases of this switch.
+     */
     public List<Case> getCases() {
         return this.cases;
     }
@@ -76,6 +88,9 @@ public class Switch implements Statement {
         return this.variable.equals(insn.variable) && this.cases.equals(insn.cases);
     }
 
+    /**
+     * A switch case.
+     */
     public class Case {
 
         private StatementBlock body;
@@ -91,34 +106,58 @@ public class Switch implements Statement {
             Switch.this.cases.add(this);
         }
 
+        /**
+         * Gets the body of this case.
+         */
         public StatementBlock getBody() {
             return this.body;
         }
 
+        /**
+         * Sets the body of this case.
+         */
         public void setBody(StatementBlock block) {
             this.body = checkNotNull(block, "block");
         }
 
+        /**
+         * Gets if this case breaks at the end.
+         */
         public boolean doesBreak() {
             return this.breaks;
         }
 
+        /**
+         * Sets if this case breaks at the end.
+         */
         public void setBreak(boolean state) {
             this.breaks = state;
         }
 
+        /**
+         * Gets if this is the default case.
+         */
         public boolean isDefault() {
             return this.is_default;
         }
 
+        /**
+         * Sets if this is the default case.
+         */
         public void setDefault(boolean state) {
             this.is_default = state;
         }
 
+        /**
+         * Gets the indices targeting this case.
+         */
         public List<Integer> getIndices() {
             return this.indices;
         }
 
+        /**
+         * Accepts the given visitor.
+         */
         public void accept(InstructionVisitor visitor) {
             visitor.visitSwitchCase(this);
             for (Statement stmt : this.body.getStatements()) {

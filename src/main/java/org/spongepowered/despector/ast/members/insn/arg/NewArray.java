@@ -32,6 +32,9 @@ import org.spongepowered.despector.util.TypeHelper;
 
 import javax.annotation.Nullable;
 
+/**
+ * An instruction initializing a new array.
+ */
 public class NewArray implements Instruction {
 
     private String type;

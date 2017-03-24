@@ -50,42 +50,72 @@ public abstract class MethodInvoke implements Instruction {
         this.params = args;
     }
 
+    /**
+     * Gets the name of the method being invoked.
+     */
     public String getMethodName() {
         return this.method_name;
     }
 
+    /**
+     * Sets the name of the method being invoked.
+     */
     public void setMethodName(String name) {
         this.method_name = checkNotNull(name, "name");
     }
 
+    /**
+     * Gets the description of the method being invoked.
+     */
     public String getMethodDescription() {
         return this.method_desc;
     }
 
+    /**
+     * Gets the return type of the method being invoked.
+     */
     public String getReturnType() {
         return TypeHelper.getRet(this.method_desc);
     }
 
+    /**
+     * Sets the description of the method being invoked.
+     */
     public void setMethodDescription(String desc) {
         this.method_desc = checkNotNull(desc, "desc");
     }
 
+    /**
+     * Gets the type description of the owner of the method being invoked.
+     */
     public String getOwner() {
         return this.method_owner;
     }
 
+    /**
+     * Gets the internal name of the owner of the method being invoked.
+     */
     public String getOwnerType() {
         return TypeHelper.descToType(this.method_owner);
     }
 
+    /**
+     * Sets the type description of the owner of the method being invoked.
+     */
     public void setOwner(String type) {
         this.method_owner = checkNotNull(type, "owner");
     }
 
+    /**
+     * Gets the parameters of this method call.
+     */
     public Instruction[] getParams() {
         return this.params;
     }
 
+    /**
+     * Sets the parameters of this method call.
+     */
     public void setParameters(Instruction... args) {
         checkNotNull(args, "args");
         checkArgument(TypeHelper.paramCount(this.method_desc) == args.length);

@@ -30,6 +30,9 @@ import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
 import org.spongepowered.despector.ast.members.insn.arg.Instruction;
 import org.spongepowered.despector.ast.members.insn.branch.condition.Condition;
 
+/**
+ * A ternary instruction.
+ */
 public class Ternary implements Instruction {
 
     private Condition condition;
@@ -42,26 +45,44 @@ public class Ternary implements Instruction {
         this.false_val = checkNotNull(false_val, "false_val");
     }
 
+    /**
+     * Gets the condition of this ternary.
+     */
     public Condition getCondition() {
         return this.condition;
     }
 
+    /**
+     * Sets the condition of this ternary.
+     */
     public void setCondition(Condition condition) {
         this.condition = checkNotNull(condition, "condition");
     }
 
+    /**
+     * Gets the value if the condition is true.
+     */
     public Instruction getTrueValue() {
         return this.true_val;
     }
 
+    /**
+     * Sets the value if the condition is true.
+     */
     public void setTrueValue(Instruction val) {
         this.true_val = checkNotNull(val, "true_val");
     }
 
+    /**
+     * Gets the value if the condition is false.
+     */
     public Instruction getFalseValue() {
         return this.false_val;
     }
 
+    /**
+     * Sets the value if the condition is false.
+     */
     public void setFalseValue(Instruction val) {
         this.false_val = checkNotNull(val, "false_val");
     }

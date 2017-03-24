@@ -39,10 +39,16 @@ public class InverseCondition extends Condition {
         this.value = checkNotNull(value, "value");
     }
 
+    /**
+     * Gets the condition value being inverted.
+     */
     public Condition getConditionValue() {
         return this.value;
     }
 
+    /**
+     * Sets the condition value being inverted.
+     */
     public void setConditionValue(Condition val) {
         this.value = checkNotNull(val, "value");
     }

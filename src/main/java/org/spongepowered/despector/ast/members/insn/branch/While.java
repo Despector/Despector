@@ -49,18 +49,30 @@ public class While implements Statement, Breakable {
         this.body = checkNotNull(body, "body");
     }
 
+    /**
+     * Gets the condition of the loop.
+     */
     public Condition getCondition() {
         return this.condition;
     }
 
+    /**
+     * Sets the condition of the loop.
+     */
     public void setCondition(Condition condition) {
         this.condition = checkNotNull(condition, "condition");
     }
 
+    /**
+     * Gets the body of the loop.
+     */
     public StatementBlock getBody() {
         return this.body;
     }
 
+    /**
+     * Sets the body of the loop.
+     */
     public void setBody(StatementBlock block) {
         this.body = checkNotNull(block, "body");
     }

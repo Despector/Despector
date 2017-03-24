@@ -32,6 +32,8 @@ import org.spongepowered.despector.ast.members.insn.arg.Instruction;
 
 import java.util.Optional;
 
+import javax.annotation.Nullable;
+
 /**
  * A return statement which returns a value.
  */
@@ -47,18 +49,24 @@ public class Return implements Statement {
         this.value = checkNotNull(val, "value");
     }
 
+    /**
+     * Gets the value being returned, if present.
+     */
     public Optional<Instruction> getValue() {
         return Optional.ofNullable(this.value);
     }
 
-    public void setValue(Instruction insn) {
+    /**
+     * Sets the value being returned, may be null.
+     */
+    public void setValue(@Nullable Instruction insn) {
         this.value = insn;
     }
 
     @Override
     public void accept(InstructionVisitor visitor) {
         visitor.visitValueReturn(this);
-        if(this.value != null) {
+        if (this.value != null) {
             this.value.accept(visitor);
         }
     }

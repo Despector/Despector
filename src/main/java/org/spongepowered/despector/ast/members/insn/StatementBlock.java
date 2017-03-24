@@ -66,40 +66,67 @@ public class StatementBlock {
         this.statements = Lists.newArrayList(block.statements);
     }
 
+    /**
+     * Gets the type of this statement block.
+     */
     public Type getType() {
         return this.type;
     }
 
+    /**
+     * Sets the type of this statement block.
+     */
     public void setType(Type t) {
         this.type = checkNotNull(t, "type");
     }
 
+    /**
+     * Gets the locals of this block.
+     */
     public Locals getLocals() {
         return this.locals;
     }
 
+    /**
+     * Sets the locals of this block.
+     */
     public List<Statement> getStatements() {
         return this.statements;
     }
 
+    /**
+     * Gets the number of statements in this block.
+     */
     public int getStatementCount() {
         return this.statements.size();
     }
 
+    /**
+     * Gets the given statement in this block.
+     */
     public Statement getStatement(int i) {
         return this.statements.get(i);
     }
 
+    /**
+     * Appends the given statement to the end of this block.
+     */
     public void append(Statement insn) {
         this.statements.add(checkNotNull(insn, "insn"));
     }
 
+    /**
+     * Pops the last statement off this block and returns it.
+     */
     public Statement popStatement() {
         Statement last = this.statements.get(this.statements.size() - 1);
         this.statements.remove(this.statements.size() - 1);
         return last;
     }
 
+    /**
+     * Accepts the given visitor to each statement in this block.
+     */
     public void accept(InstructionVisitor visitor) {
         for (Statement stmt : this.statements) {
             stmt.accept(visitor);

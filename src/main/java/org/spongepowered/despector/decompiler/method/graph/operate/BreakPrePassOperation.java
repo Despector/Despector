@@ -191,7 +191,6 @@ public class BreakPrePassOperation implements GraphOperation {
         public int end;
         public GotoOpcodeBlock ggoto;
         public OpcodeBlock condition;
-        public OpcodeBlock ret;
 
         public Loop() {
 

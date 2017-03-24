@@ -80,6 +80,9 @@ import org.spongepowered.despector.ast.members.insn.misc.Increment;
 import org.spongepowered.despector.ast.members.insn.misc.Return;
 import org.spongepowered.despector.ast.members.insn.misc.Throw;
 
+/**
+ * A visitor which may be used to traverse the AST.
+ */
 public abstract class InstructionVisitor {
 
     public void visitAddOperatorArg(AddOperator addArg) {

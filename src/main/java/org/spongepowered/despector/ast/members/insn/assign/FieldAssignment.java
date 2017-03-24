@@ -29,6 +29,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import org.spongepowered.despector.ast.members.insn.arg.Instruction;
 import org.spongepowered.despector.util.TypeHelper;
 
+/**
+ * An assignment to an instance or static field.
+ */
 public abstract class FieldAssignment extends Assignment {
 
     protected String field_name;
@@ -44,38 +47,68 @@ public abstract class FieldAssignment extends Assignment {
         this.owner_type = checkNotNull(owner, "owner");
     }
 
+    /**
+     * Gets the field name.
+     */
     public String getFieldName() {
         return this.field_name;
     }
 
+    /**
+     * Sets the field name.
+     */
     public void setFieldName(String name) {
         this.field_name = checkNotNull(name, "name");
     }
 
+    /**
+     * Gets the field's type description.
+     */
     public String getFieldDescription() {
         return this.type_desc;
     }
 
+    /**
+     * Sets the field's type description.
+     */
     public void setFieldDescription(String desc) {
         this.type_desc = checkNotNull(desc, "desc");
     }
 
+    /**
+     * Gets the field owner's type description.
+     */
     public String getOwnerType() {
         return this.owner_type;
     }
 
+    /**
+     * Gets the field owner's type internal name.
+     */
     public String getOwnerName() {
         return TypeHelper.descToType(this.owner_type);
     }
 
+    /**
+     * Sets the field owner's type description.
+     */
     public void setOwner(String owner) {
         this.owner_type = checkNotNull(owner, "owner");
     }
 
+    /**
+     * Gets if this field assignment is an initializer and therefore should be
+     * ignored when encountered in a method.
+     */
     public boolean isInitializer() {
         return this.initializer;
     }
 
+    /**
+     * Sets if this field assignment is an initializer.
+     * 
+     * @see #isInitializer()
+     */
     public void setInitializer(boolean state) {
         this.initializer = state;
     }
