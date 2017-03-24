@@ -30,12 +30,26 @@ import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.instruction.StaticMethodInvokeEmitter;
 import org.spongepowered.despector.util.TypeHelper;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class KotlinStaticMethodInvokeEmitter extends StaticMethodInvokeEmitter {
 
+    private static final Set<String> IGNORED_METHODS = new HashSet<>();
+
+    static {
+        IGNORED_METHODS.add("Ljava/lang/Integer;valueOf");
+        IGNORED_METHODS.add("Ljava/lang/String;valueOf");
+    }
+
     @Override
     public void emit(EmitterContext ctx, StaticMethodInvoke arg, String type) {
+        String key = arg.getOwner() + arg.getMethodName();
+        if (IGNORED_METHODS.contains(key) && arg.getParams().length == 1) {
+            ctx.emit(arg.getParams()[0], arg.getReturnType());
+            return;
+        }
         String owner = TypeHelper.descToType(arg.getOwner());
         if (arg.getMethodName().startsWith("access$") && ctx.getType() != null) {
             if (replaceSyntheticAccessor(ctx, arg, owner)) {

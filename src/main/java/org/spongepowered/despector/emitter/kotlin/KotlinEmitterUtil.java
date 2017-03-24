@@ -37,7 +37,7 @@ public class KotlinEmitterUtil {
             ctx.printString("Byte");
         } else if ("S".equals(type)) {
             ctx.printString("Short");
-        } else if ("I".equals(type)) {
+        } else if ("I".equals(type) || "Ljava/lang/Integer;".equals(type)) {
             ctx.printString("Int");
         } else if ("J".equals(type)) {
             ctx.printString("Long");

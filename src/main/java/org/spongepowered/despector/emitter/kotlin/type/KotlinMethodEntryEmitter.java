@@ -56,8 +56,14 @@ public class KotlinMethodEntryEmitter extends MethodEntryEmitter {
     @Override
     public boolean emit(EmitterContext ctx, MethodEntry method) {
 
+        boolean nullable_return = false;
+        
         for (Annotation anno : method.getAnnotations()) {
             if ("Lorg/jetbrains/annotations/NotNull;".equals(anno.getType().getName())) {
+                continue;
+            }
+            if ("Lorg/jetbrains/annotations/Nullable;".equals(anno.getType().getName())) {
+                nullable_return = true;
                 continue;
             }
             ctx.printIndentation();
@@ -171,6 +177,9 @@ public class KotlinMethodEntryEmitter extends MethodEntryEmitter {
                 generics.emitTypeSignature(ctx, sig.getReturnType());
             } else {
                 KotlinEmitterUtil.emitType(ctx, method.getReturnType());
+            }
+            if(nullable_return) {
+                ctx.printString("?");
             }
         }
 
