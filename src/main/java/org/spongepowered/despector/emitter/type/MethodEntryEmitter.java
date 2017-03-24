@@ -189,7 +189,7 @@ public class MethodEntryEmitter implements AstEmitter<MethodEntry> {
         return true;
     }
 
-    private static void printReturn(EmitterContext ctx, String type) {
+    protected static void printReturn(EmitterContext ctx, String type) {
         char f = type.charAt(0);
         if (f == 'V') {
             return;

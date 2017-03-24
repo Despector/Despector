@@ -47,35 +47,7 @@ public class StaticMethodInvokeEmitter implements InstructionEmitter<StaticMetho
     public void emit(EmitterContext ctx, StaticMethodInvoke arg, String type) {
         String owner = TypeHelper.descToType(arg.getOwner());
         if (arg.getMethodName().startsWith("access$") && ctx.getType() != null) {
-            // synthetic accessor
-            // we resolve these to the field that they are accessing directly
-            TypeEntry owner_type = ctx.getType().getSource().get(owner);
-            if (owner_type != null) {
-                MethodEntry accessor = owner_type.getStaticMethod(arg.getMethodName());
-                if (accessor.getReturnType().equals("V")) {
-                    // setter
-                    FieldAssignment assign = (FieldAssignment) accessor.getInstructions().getStatements().get(0);
-                    FieldAssignment replacement = null;
-                    if (arg.getParams().length == 2) {
-                        replacement = new InstanceFieldAssignment(assign.getFieldName(), assign.getFieldDescription(), assign.getOwnerType(),
-                                arg.getParams()[0], arg.getParams()[1]);
-                    } else {
-                        replacement = new StaticFieldAssignment(assign.getFieldName(), assign.getFieldDescription(), assign.getOwnerType(),
-                                arg.getParams()[0]);
-                    }
-                    ctx.emit(replacement, true);
-                    return;
-                }
-                // getter
-                Return ret = (Return) accessor.getInstructions().getStatements().get(0);
-                FieldAccess getter = (FieldAccess) ret.getValue().get();
-                FieldAccess replacement = null;
-                if (arg.getParams().length == 1) {
-                    replacement = new InstanceFieldAccess(getter.getFieldName(), getter.getTypeDescriptor(), getter.getOwnerType(), arg.getParams()[0]);
-                } else {
-                    replacement = new StaticFieldAccess(getter.getFieldName(), getter.getTypeDescriptor(), getter.getOwnerType());
-                }
-                ctx.emit(replacement, null);
+            if (replaceSyntheticAccessor(ctx, arg, owner)) {
                 return;
             }
         }
@@ -94,6 +66,41 @@ public class StaticMethodInvokeEmitter implements InstructionEmitter<StaticMetho
             }
         }
         ctx.printString(")");
+    }
+
+    protected boolean replaceSyntheticAccessor(EmitterContext ctx, StaticMethodInvoke arg, String owner) {
+        // synthetic accessor
+        // we resolve these to the field that they are accessing directly
+        TypeEntry owner_type = ctx.getType().getSource().get(owner);
+        if (owner_type != null) {
+            MethodEntry accessor = owner_type.getStaticMethod(arg.getMethodName());
+            if (accessor.getReturnType().equals("V")) {
+                // setter
+                FieldAssignment assign = (FieldAssignment) accessor.getInstructions().getStatements().get(0);
+                FieldAssignment replacement = null;
+                if (arg.getParams().length == 2) {
+                    replacement = new InstanceFieldAssignment(assign.getFieldName(), assign.getFieldDescription(), assign.getOwnerType(),
+                            arg.getParams()[0], arg.getParams()[1]);
+                } else {
+                    replacement = new StaticFieldAssignment(assign.getFieldName(), assign.getFieldDescription(), assign.getOwnerType(),
+                            arg.getParams()[0]);
+                }
+                ctx.emit(replacement, true);
+                return true;
+            }
+            // getter
+            Return ret = (Return) accessor.getInstructions().getStatements().get(0);
+            FieldAccess getter = (FieldAccess) ret.getValue().get();
+            FieldAccess replacement = null;
+            if (arg.getParams().length == 1) {
+                replacement = new InstanceFieldAccess(getter.getFieldName(), getter.getTypeDescriptor(), getter.getOwnerType(), arg.getParams()[0]);
+            } else {
+                replacement = new StaticFieldAccess(getter.getFieldName(), getter.getTypeDescriptor(), getter.getOwnerType());
+            }
+            ctx.emit(replacement, null);
+            return true;
+        }
+        return false;
     }
 
 }

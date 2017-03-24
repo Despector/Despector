@@ -40,6 +40,7 @@ import org.spongepowered.despector.ast.type.InterfaceEntry;
 import org.spongepowered.despector.ast.type.TypeEntry;
 import org.spongepowered.despector.emitter.format.EmitterFormat;
 import org.spongepowered.despector.emitter.special.AnnotationEmitter;
+import org.spongepowered.despector.emitter.special.PackageEmitter;
 import org.spongepowered.despector.emitter.special.PackageInfoEmitter;
 import org.spongepowered.despector.util.TypeHelper;
 
@@ -68,6 +69,8 @@ public class EmitterContext {
 
     private int indentation = 0;
     private int offs = 0;
+    
+    private boolean semicolons = true;
 
     public EmitterContext(EmitterSet set, Writer output, EmitterFormat format) {
         this.set = set;
@@ -125,6 +128,10 @@ public class EmitterContext {
         return this.format;
     }
 
+    public void setSemicolons(boolean state) {
+        this.semicolons = state;
+    }
+    
     public boolean isDefined(LocalInstance local) {
         return this.defined_locals.contains(local);
     }
@@ -192,7 +199,7 @@ public class EmitterContext {
             }
             should_indent = true;
             int mark = this.offs;
-            emit(insn, true);
+            emit(insn, this.semicolons);
             if (this.offs == mark) {
                 should_indent = false;
                 last_success = false;
@@ -346,7 +353,11 @@ public class EmitterContext {
             for (String import_ : group_imports) {
                 printString("import ");
                 printString(import_);
-                printString(";\n");
+                if(this.semicolons) {
+                    printString(";\n");
+                } else {
+                    printString("\n");
+                }
             }
             if (!group_imports.isEmpty() && i < this.format.import_order.size() - 1) {
                 for (int o = 0; o < this.format.blank_lines_between_import_groups; o++) {
@@ -368,7 +379,7 @@ public class EmitterContext {
 
         StringBuilder buf = this.buffer;
         this.buffer = null;
-
+        PackageEmitter pkg_emitter = this.set.getSpecialEmitter(PackageEmitter.class);
         String pkg = this.type.getName();
         int last = pkg.lastIndexOf('/');
         if (last != -1) {
@@ -376,9 +387,8 @@ public class EmitterContext {
                 printString("\n");
             }
             pkg = pkg.substring(0, last).replace('/', '.');
-            printString("package ");
-            printString(pkg);
-            printString(";\n");
+            pkg_emitter.emitPackage(this, pkg);
+            printString("\n");
         }
         int lines = Math.max(this.format.blank_lines_after_package, this.format.blank_lines_before_imports);
         for (int i = 0; i < lines; i++) {

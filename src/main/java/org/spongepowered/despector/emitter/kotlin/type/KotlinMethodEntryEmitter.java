@@ -30,14 +30,21 @@ import org.spongepowered.despector.ast.Locals.Local;
 import org.spongepowered.despector.ast.Locals.LocalInstance;
 import org.spongepowered.despector.ast.generic.MethodSignature;
 import org.spongepowered.despector.ast.members.MethodEntry;
+import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
 import org.spongepowered.despector.ast.members.insn.Statement;
 import org.spongepowered.despector.ast.members.insn.StatementBlock;
+import org.spongepowered.despector.ast.members.insn.assign.LocalAssignment;
 import org.spongepowered.despector.ast.members.insn.assign.StaticFieldAssignment;
-import org.spongepowered.despector.emitter.AstEmitter;
+import org.spongepowered.despector.ast.members.insn.misc.Return;
 import org.spongepowered.despector.emitter.EmitterContext;
+import org.spongepowered.despector.emitter.kotlin.KotlinEmitterUtil;
 import org.spongepowered.despector.emitter.special.GenericsEmitter;
+import org.spongepowered.despector.emitter.type.MethodEntryEmitter;
 
-public class KotlinMethodEntryEmitter implements AstEmitter<MethodEntry> {
+import java.util.HashSet;
+import java.util.Set;
+
+public class KotlinMethodEntryEmitter extends MethodEntryEmitter {
 
     public static boolean isOverriden(MethodEntry method) {
         if (method.getName().equals("toString") && method.getSignature().equals("()Ljava/lang/String;")) {
@@ -49,11 +56,8 @@ public class KotlinMethodEntryEmitter implements AstEmitter<MethodEntry> {
     @Override
     public boolean emit(EmitterContext ctx, MethodEntry method) {
 
-        boolean non_null = false;
-
         for (Annotation anno : method.getAnnotations()) {
             if ("Lorg/jetbrains/annotations/NotNull;".equals(anno.getType().getName())) {
-                non_null = true;
                 continue;
             }
             ctx.printIndentation();
@@ -122,31 +126,41 @@ public class KotlinMethodEntryEmitter implements AstEmitter<MethodEntry> {
                 param_index++;
             }
             if (block == null) {
+                ctx.printString("local" + param_index);
+                ctx.printString(": ");
                 if (sig != null) {
                     // interfaces have no lvt for parameters, need to get
                     // generic types from the method signature
                     generics.emitTypeSignature(ctx, sig.getParameters().get(i));
                 } else {
-                    ctx.emitType(method.getParamTypes().get(i));
+                    KotlinEmitterUtil.emitType(ctx, method.getParamTypes().get(i));
                 }
-                ctx.printString(" ");
-                ctx.printString("local" + param_index);
             } else {
                 Local local = block.getLocals().getLocal(param_index);
                 LocalInstance insn = local.getParameterInstance();
+                ctx.printString(insn.getName());
+                ctx.printString(": ");
                 if (insn.getSignature() != null) {
                     generics.emitTypeSignature(ctx, insn.getSignature());
                 } else {
-                    ctx.emitType(method.getParamTypes().get(i));
+                    KotlinEmitterUtil.emitType(ctx, method.getParamTypes().get(i));
                 }
-                ctx.printString(" ");
-                ctx.printString(insn.getName());
             }
             if (i < method.getParamTypes().size() - 1) {
                 ctx.printString(", ");
             }
         }
         ctx.printString(")");
+
+        if (method.getInstructions().getStatementCount() == 1) {
+            Statement stmt = method.getInstructions().getStatement(0);
+            if (stmt instanceof Return && ((Return) stmt).getValue().isPresent()) {
+                ctx.printString(" = ");
+                ctx.emit(((Return) stmt).getValue().get(), method.getReturnType());
+                return true;
+            }
+        }
+
         if (!method.getReturnType().equals("V")) {
             ctx.printString(": ");
             if (sig != null) {
@@ -156,9 +170,10 @@ public class KotlinMethodEntryEmitter implements AstEmitter<MethodEntry> {
                 }
                 generics.emitTypeSignature(ctx, sig.getReturnType());
             } else {
-                ctx.emitType(method.getReturnType());
+                KotlinEmitterUtil.emitType(ctx, method.getReturnType());
             }
         }
+
         if (!method.isAbstract()) {
             ctx.printString(" {\n");
             ctx.indent();
@@ -167,6 +182,8 @@ public class KotlinMethodEntryEmitter implements AstEmitter<MethodEntry> {
                 ctx.printString("// Error decompiling block");
                 printReturn(ctx, method.getReturnType());
             } else {
+                LocalMutabilityVisitor visitor = new LocalMutabilityVisitor();
+                block.accept(visitor);
                 ctx.emitBody(block);
             }
             ctx.printString("\n");
@@ -180,38 +197,25 @@ public class KotlinMethodEntryEmitter implements AstEmitter<MethodEntry> {
         return true;
     }
 
-    private static void printReturn(EmitterContext ctx, String type) {
-        char f = type.charAt(0);
-        if (f == 'V') {
-            return;
+    private static class LocalMutabilityVisitor extends InstructionVisitor {
+
+        private final Set<LocalInstance> defined = new HashSet<>();
+
+        public LocalMutabilityVisitor() {
+
         }
-        ctx.printString("\n");
-        ctx.printIndentation();
-        switch (f) {
-        case 'I':
-        case 'S':
-        case 'B':
-        case 'C':
-            ctx.printString("return 0;");
-            break;
-        case 'J':
-            ctx.printString("return 0L;");
-            break;
-        case 'F':
-            ctx.printString("return 0.0f;");
-            break;
-        case 'D':
-            ctx.printString("return 0.0;");
-            break;
-        case 'Z':
-            ctx.printString("return false;");
-            break;
-        case 'L':
-            ctx.printString("return null;");
-            break;
-        default:
-            throw new IllegalStateException("Malformed return type " + type);
+
+        @Override
+        public void visitLocalAssign(LocalAssignment assign) {
+            LocalInstance local = assign.getLocal();
+            if (this.defined.contains(local)) {
+                local.setEffectivelyFinal(false);
+                return;
+            }
+            this.defined.add(local);
+            local.setEffectivelyFinal(true);
         }
+
     }
 
 }

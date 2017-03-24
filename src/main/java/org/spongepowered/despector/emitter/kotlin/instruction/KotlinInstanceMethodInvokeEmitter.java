@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.despector.emitter.instruction;
+package org.spongepowered.despector.emitter.kotlin.instruction;
 
 import com.google.common.collect.Lists;
 import org.spongepowered.despector.ast.members.insn.arg.Instruction;
@@ -32,12 +32,12 @@ import org.spongepowered.despector.ast.members.insn.function.InstanceMethodInvok
 import org.spongepowered.despector.ast.members.insn.function.New;
 import org.spongepowered.despector.ast.members.insn.function.StaticMethodInvoke;
 import org.spongepowered.despector.emitter.EmitterContext;
-import org.spongepowered.despector.emitter.InstructionEmitter;
+import org.spongepowered.despector.emitter.instruction.InstanceMethodInvokeEmitter;
 import org.spongepowered.despector.util.TypeHelper;
 
 import java.util.List;
 
-public class InstanceMethodInvokeEmitter implements InstructionEmitter<InstanceMethodInvoke> {
+public class KotlinInstanceMethodInvokeEmitter extends InstanceMethodInvokeEmitter {
 
     @Override
     public void emit(EmitterContext ctx, InstanceMethodInvoke arg, String type) {
@@ -57,19 +57,21 @@ public class InstanceMethodInvokeEmitter implements InstructionEmitter<InstanceM
                 ctx.printString("super");
             }
         } else {
-            if (arg.getCallee() instanceof LocalAccess && ctx.getMethod() != null && !ctx.getMethod().isStatic()) {
-                LocalAccess local = (LocalAccess) arg.getCallee();
-                if (local.getLocal().getIndex() == 0) {
-                    if (ctx.getType() != null && !arg.getOwnerType().equals(ctx.getType().getName())) {
-                        ctx.printString("super.");
+            if (!("Ljava/io/PrintStream;".equals(arg.getOwner()) && "println".equals(arg.getMethodName()))) {
+                if (arg.getCallee() instanceof LocalAccess && ctx.getMethod() != null && !ctx.getMethod().isStatic()) {
+                    LocalAccess local = (LocalAccess) arg.getCallee();
+                    if (local.getLocal().getIndex() == 0) {
+                        if (ctx.getType() != null && !arg.getOwnerType().equals(ctx.getType().getName())) {
+                            ctx.printString("super.");
+                        }
+                    } else {
+                        ctx.emit(local, null);
+                        ctx.printString(".");
                     }
                 } else {
-                    ctx.emit(local, null);
+                    ctx.emit(arg.getCallee(), arg.getOwner());
                     ctx.printString(".");
                 }
-            } else {
-                ctx.emit(arg.getCallee(), arg.getOwner());
-                ctx.printString(".");
             }
             ctx.printString(arg.getMethodName());
         }
@@ -85,6 +87,7 @@ public class InstanceMethodInvokeEmitter implements InstructionEmitter<InstanceM
         ctx.printString(")");
     }
 
+    @Override
     protected boolean replaceStringConcat(EmitterContext ctx, InstanceMethodInvoke arg) {
         // We detect and collapse string builder chains used to perform
         // string concatentation into simple "foo" + "bar" form
@@ -131,11 +134,65 @@ public class InstanceMethodInvokeEmitter implements InstructionEmitter<InstanceM
             valid = false;
         }
         if (valid) {
+            boolean in_string = false;
             for (int i = 0; i < constants.size(); i++) {
+                Instruction next = constants.get(i);
+                if (next instanceof StringConstant) {
+                    if (!in_string) {
+                        if (i == 0) {
+                            ctx.printString("\"");
+                        } else {
+                            ctx.printString(" + \"");
+                        }
+                        in_string = true;
+                    }
+                    // TODO escape string
+                    ctx.printString(((StringConstant) next).getConstant());
+                    continue;
+                } else if (next instanceof LocalAccess) {
+                    if (in_string) {
+                        ctx.printString("$");
+                        ctx.printString(((LocalAccess) next).getLocal().getName());
+                    } else {
+                        ctx.printString(" + ");
+                        ctx.printString(((LocalAccess) next).getLocal().getName());
+                        if (i < constants.size() - 1) {
+                            ctx.printString(" + ");
+                        }
+                    }
+                    continue;
+                } else if (next instanceof StaticMethodInvoke) {
+                    StaticMethodInvoke mth = (StaticMethodInvoke) next;
+                    if ("Lkotlin/text/StringsKt;".equals(mth.getOwner()) && "replace$default".equals(mth.getMethodName())) {
+                        if (!in_string) {
+                            if (i == 0) {
+                                ctx.printString("\"");
+                            } else {
+                                ctx.printString(" + \"");
+                            }
+                            in_string = true;
+                        }
+                        ctx.printString("${");
+                        ctx.emit(mth.getParams()[0], "Ljava/lang/String;");
+                        ctx.printString(".replace(");
+                        ctx.emit(mth.getParams()[1], "Ljava/lang/String;");
+                        ctx.printString(", ");
+                        ctx.emit(mth.getParams()[2], "Ljava/lang/String;");
+                        ctx.printString(")}");
+                        continue;
+                    }
+                }
+                if (in_string) {
+                    ctx.printString("\" + ");
+                    in_string = false;
+                }
                 ctx.emit(constants.get(i), "Ljava/lang/String;");
                 if (i < constants.size() - 1) {
                     ctx.printString(" + ");
                 }
+            }
+            if (in_string) {
+                ctx.printString("\"");
             }
             return true;
         }

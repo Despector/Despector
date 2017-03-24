@@ -22,39 +22,32 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.despector.emitter.kotlin;
+package org.spongepowered.despector.emitter.kotlin.statement;
 
+import org.spongepowered.despector.ast.members.insn.arg.Instruction;
+import org.spongepowered.despector.ast.members.insn.function.InstanceMethodInvoke;
+import org.spongepowered.despector.ast.members.insn.function.InvokeStatement;
+import org.spongepowered.despector.ast.members.insn.function.StaticMethodInvoke;
 import org.spongepowered.despector.emitter.EmitterContext;
+import org.spongepowered.despector.emitter.StatementEmitter;
 
-public class KotlinEmitterUtil {
+public class KotlinInvokeEmitter implements StatementEmitter<InvokeStatement> {
 
-    public static void emitType(EmitterContext ctx, String type) {
-        if (type.startsWith("[")) {
-            ctx.printString("Array<");
-            emitType(ctx, type.substring(1));
-            ctx.printString(">");
-        } else if ("B".equals(type)) {
-            ctx.printString("Byte");
-        } else if ("S".equals(type)) {
-            ctx.printString("Short");
-        } else if ("I".equals(type)) {
-            ctx.printString("Int");
-        } else if ("J".equals(type)) {
-            ctx.printString("Long");
-        } else if ("F".equals(type)) {
-            ctx.printString("Float");
-        } else if ("D".equals(type)) {
-            ctx.printString("Double");
-        } else if ("Z".equals(type)) {
-            ctx.printString("Boolean");
-        } else if ("C".equals(type)) {
-            ctx.printString("Character");
-        } else {
-            ctx.emitType(type);
+    @Override
+    public void emit(EmitterContext ctx, InvokeStatement insn, boolean semicolon) {
+        Instruction i = insn.getInstruction();
+        if (i instanceof InstanceMethodInvoke) {
+            InstanceMethodInvoke mth = (InstanceMethodInvoke) i;
+            if (mth.getMethodName().equals("<init>") && mth.getParams().length == 0) {
+                return;
+            }
+        } else if(i instanceof StaticMethodInvoke) {
+            StaticMethodInvoke mth = (StaticMethodInvoke) i;
+            if("Lkotlin/jvm/internal/Intrinsics;".equals(mth.getOwner())) {
+                return;
+            }
         }
-    }
-
-    private KotlinEmitterUtil() {
+        ctx.emit(i, null);
     }
 
 }

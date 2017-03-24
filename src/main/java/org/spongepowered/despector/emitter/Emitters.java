@@ -107,14 +107,21 @@ import org.spongepowered.despector.emitter.instruction.StaticMethodInvokeEmitter
 import org.spongepowered.despector.emitter.instruction.StringConstantEmitter;
 import org.spongepowered.despector.emitter.instruction.TernaryEmitter;
 import org.spongepowered.despector.emitter.instruction.TypeConstantEmitter;
+import org.spongepowered.despector.emitter.kotlin.instruction.KotlinInstanceMethodInvokeEmitter;
+import org.spongepowered.despector.emitter.kotlin.instruction.KotlinStaticMethodInvokeEmitter;
+import org.spongepowered.despector.emitter.kotlin.special.KotlinCompanionClassEmitter;
+import org.spongepowered.despector.emitter.kotlin.special.KotlinDataClassEmitter;
+import org.spongepowered.despector.emitter.kotlin.special.KotlinGenericsEmitter;
+import org.spongepowered.despector.emitter.kotlin.special.KotlinPackageEmitter;
+import org.spongepowered.despector.emitter.kotlin.statement.KotlinInvokeEmitter;
+import org.spongepowered.despector.emitter.kotlin.statement.KotlinLocalAssignmentEmitter;
 import org.spongepowered.despector.emitter.kotlin.type.KotlinClassEntryEmitter;
-import org.spongepowered.despector.emitter.kotlin.type.KotlinCompanionClassEmitter;
-import org.spongepowered.despector.emitter.kotlin.type.KotlinDataClassEmitter;
 import org.spongepowered.despector.emitter.kotlin.type.KotlinEnumEntryEmitter;
 import org.spongepowered.despector.emitter.kotlin.type.KotlinMethodEntryEmitter;
 import org.spongepowered.despector.emitter.special.AnnotationEmitter;
 import org.spongepowered.despector.emitter.special.AnonymousClassEmitter;
 import org.spongepowered.despector.emitter.special.GenericsEmitter;
+import org.spongepowered.despector.emitter.special.PackageEmitter;
 import org.spongepowered.despector.emitter.special.PackageInfoEmitter;
 import org.spongepowered.despector.emitter.statement.ArrayAssignmentEmitter;
 import org.spongepowered.despector.emitter.statement.BreakEmitter;
@@ -148,6 +155,7 @@ public class Emitters {
         JAVA.setSpecialEmitter(GenericsEmitter.class, new GenericsEmitter());
         JAVA.setSpecialEmitter(AnonymousClassEmitter.class, new AnonymousClassEmitter());
         JAVA.setSpecialEmitter(PackageInfoEmitter.class, new PackageInfoEmitter());
+        JAVA.setSpecialEmitter(PackageEmitter.class, new PackageEmitter());
 
         JAVA.setAstEmitter(ClassEntry.class, new ClassEntryEmitter());
         JAVA.setAstEmitter(EnumEntry.class, new EnumEntryEmitter());
@@ -220,9 +228,17 @@ public class Emitters {
         KOTLIN.setAstEmitter(ClassEntry.class, new KotlinClassEntryEmitter());
         KOTLIN.setAstEmitter(EnumEntry.class, new KotlinEnumEntryEmitter());
         KOTLIN.setAstEmitter(MethodEntry.class, new KotlinMethodEntryEmitter());
-        
+
         KOTLIN.setSpecialEmitter(KotlinDataClassEmitter.class, new KotlinDataClassEmitter());
         KOTLIN.setSpecialEmitter(KotlinCompanionClassEmitter.class, new KotlinCompanionClassEmitter());
+        KOTLIN.setSpecialEmitter(PackageEmitter.class, new KotlinPackageEmitter());
+        KOTLIN.setSpecialEmitter(GenericsEmitter.class, new KotlinGenericsEmitter());
+
+        KOTLIN.setStatementEmitter(InvokeStatement.class, new KotlinInvokeEmitter());
+        KOTLIN.setStatementEmitter(LocalAssignment.class, new KotlinLocalAssignmentEmitter());
+
+        KOTLIN.setInstructionEmitter(InstanceMethodInvoke.class, new KotlinInstanceMethodInvokeEmitter());
+        KOTLIN.setInstructionEmitter(StaticMethodInvoke.class, new KotlinStaticMethodInvokeEmitter());
     }
 
 }

@@ -58,7 +58,9 @@ public class Return implements Statement {
     @Override
     public void accept(InstructionVisitor visitor) {
         visitor.visitValueReturn(this);
-        this.value.accept(visitor);
+        if(this.value != null) {
+            this.value.accept(visitor);
+        }
     }
 
     @Override

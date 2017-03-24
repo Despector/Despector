@@ -25,12 +25,10 @@
 package org.spongepowered.despector.emitter.statement;
 
 import org.spongepowered.despector.ast.Locals.LocalInstance;
-import org.spongepowered.despector.ast.members.insn.arg.Cast;
 import org.spongepowered.despector.ast.members.insn.arg.Instruction;
 import org.spongepowered.despector.ast.members.insn.arg.cst.IntConstant;
 import org.spongepowered.despector.ast.members.insn.arg.field.LocalAccess;
-import org.spongepowered.despector.ast.members.insn.arg.operator.AddOperator;
-import org.spongepowered.despector.ast.members.insn.arg.operator.SubtractOperator;
+import org.spongepowered.despector.ast.members.insn.arg.operator.Operator;
 import org.spongepowered.despector.ast.members.insn.assign.LocalAssignment;
 import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.StatementEmitter;
@@ -51,71 +49,54 @@ public class LocalAssignmentEmitter implements StatementEmitter<LocalAssignment>
             ctx.printString(" ");
             ctx.markDefined(insn.getLocal());
         } else {
-            // TODO replace with more generic handling from FieldAssign
             Instruction val = insn.getValue();
-            if (val instanceof Cast) {
-                val = ((Cast) val).getValue();
-            } else if (val instanceof AddOperator) {
-                AddOperator add = (AddOperator) val;
-                if (add.getLeftOperand() instanceof LocalAccess) {
-                    LocalAccess local = (LocalAccess) add.getLeftOperand();
-                    if (local.getLocal().getIndex() == insn.getLocal().getIndex()) {
-                        ctx.printString(insn.getLocal().getName());
-                        if (add.getRightOperand() instanceof IntConstant) {
-                            IntConstant right = (IntConstant) add.getRightOperand();
-                            if (right.getConstant() == 1) {
-                                ctx.printString("++");
-                                if (semicolon)
-                                    ctx.printString(";");
-                                return;
-                            } else if (right.getConstant() == -1) {
-                                ctx.printString("--");
-                                if (semicolon)
-                                    ctx.printString(";");
-                                return;
-                            }
-                        }
-                        ctx.printString(" += ");
-                        ctx.emit(add.getRightOperand(), null);
-                        if (semicolon)
-                            ctx.printString(";");
-                        return;
-                    }
-                }
-            } else if (val instanceof SubtractOperator) {
-                SubtractOperator sub = (SubtractOperator) val;
-                if (sub.getLeftOperand() instanceof LocalAccess) {
-                    LocalAccess local = (LocalAccess) sub.getLeftOperand();
-                    if (local.getLocal().getIndex() == insn.getLocal().getIndex()) {
-                        ctx.printString(insn.getLocal().getName());
-                        if (sub.getRightOperand() instanceof IntConstant) {
-                            IntConstant right = (IntConstant) sub.getRightOperand();
-                            if (right.getConstant() == 1) {
-                                ctx.printString("--");
-                                if (semicolon)
-                                    ctx.printString(";");
-                                return;
-                            } else if (right.getConstant() == -1) {
-                                ctx.printString("++");
-                                if (semicolon)
-                                    ctx.printString(";");
-                                return;
-                            }
-                        }
-                        ctx.printString(" += ");
-                        ctx.emit(sub.getRightOperand(), local.getLocal().getType());
-                        if (semicolon)
-                            ctx.printString(";");
-                        return;
-                    }
-                }
+            if (checkOperator(ctx, insn, val, semicolon)) {
+                return;
             }
         }
         ctx.printString(insn.getLocal().getName());
         ctx.printString(" = ");
         ctx.emit(insn.getValue(), insn.getLocal().getType());
-        if (semicolon)
+        if (semicolon) {
             ctx.printString(";");
+        }
+    }
+
+    protected boolean checkOperator(EmitterContext ctx, LocalAssignment insn, Instruction val, boolean semicolon) {
+        if (val instanceof Operator) {
+            Instruction left = ((Operator) val).getLeftOperand();
+            Instruction right = ((Operator) val).getRightOperand();
+            String op = " " + ((Operator) val).getOperator() + "= ";
+            if (left instanceof LocalAccess) {
+                LocalAccess left_field = (LocalAccess) left;
+                // If the field assign is of the form 'field = field + x'
+                // where + is any operator then we collapse it to the '+='
+                // form of the assignment.
+                if (left_field.getLocal().getIndex() == insn.getLocal().getIndex()) {
+                    ctx.printString(op);
+                    if ("Z".equals(insn.getLocal().getType())) {
+                        if (val instanceof IntConstant) {
+                            IntConstant cst = (IntConstant) insn.getValue();
+                            if (cst.getConstant() == 1) {
+                                ctx.printString("true");
+                            } else {
+                                ctx.printString("false");
+                            }
+                            if (semicolon) {
+                                ctx.printString(";");
+                            }
+                            return true;
+                        }
+                    }
+                    ctx.emit(right, insn.getLocal().getType());
+                    if (semicolon) {
+                        ctx.printString(";");
+                    }
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
 }

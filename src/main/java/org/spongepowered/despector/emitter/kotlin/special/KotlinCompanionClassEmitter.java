@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.despector.emitter.kotlin.type;
+package org.spongepowered.despector.emitter.kotlin.special;
 
 import org.spongepowered.despector.ast.Annotation;
 import org.spongepowered.despector.ast.members.MethodEntry;
@@ -106,7 +106,7 @@ public class KotlinCompanionClassEmitter implements SpecialEmitter {
             ctx.printString("val ");
             ctx.printString(fld.name);
             ctx.printString(": ");
-            KotlinEmitterUtil.emitBoxedType(ctx, fld.type);
+            KotlinEmitterUtil.emitType(ctx, fld.type);
             if (fld.getter != null) {
                 ctx.printString("\n");
                 ctx.indent();

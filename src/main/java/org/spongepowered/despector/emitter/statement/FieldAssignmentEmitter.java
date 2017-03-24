@@ -39,7 +39,7 @@ public class FieldAssignmentEmitter implements StatementEmitter<FieldAssignment>
 
     @Override
     public void emit(EmitterContext ctx, FieldAssignment insn, boolean semicolon) {
-        if(insn.isInitializer()) {
+        if (insn.isInitializer()) {
             return;
         }
         if (insn instanceof StaticFieldAssignment) {
@@ -54,6 +54,16 @@ public class FieldAssignmentEmitter implements StatementEmitter<FieldAssignment>
 
         ctx.printString(insn.getFieldName());
         Instruction val = insn.getValue();
+        if (checkOperator(ctx, insn, val, semicolon)) {
+            return;
+        }
+        ctx.printString(" = ");
+        ctx.emit(val, insn.getFieldDescription());
+        if (semicolon)
+            ctx.printString(";");
+    }
+
+    protected boolean checkOperator(EmitterContext ctx, FieldAssignment insn, Instruction val, boolean semicolon) {
         if (val instanceof Operator) {
             Instruction left = ((Operator) val).getLeftOperand();
             Instruction right = ((Operator) val).getRightOperand();
@@ -77,21 +87,18 @@ public class FieldAssignmentEmitter implements StatementEmitter<FieldAssignment>
                                 }
                                 if (semicolon)
                                     ctx.printString(";");
-                                return;
+                                return true;
                             }
                         }
                         ctx.emit(right, insn.getFieldDescription());
                         if (semicolon)
                             ctx.printString(";");
-                        return;
+                        return true;
                     }
                 }
             }
         }
-        ctx.printString(" = ");
-        ctx.emit(val, insn.getFieldDescription());
-        if (semicolon)
-            ctx.printString(";");
+        return false;
     }
 
 }

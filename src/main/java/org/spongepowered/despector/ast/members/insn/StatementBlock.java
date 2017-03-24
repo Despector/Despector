@@ -100,6 +100,12 @@ public class StatementBlock {
         return last;
     }
 
+    public void accept(InstructionVisitor visitor) {
+        for (Statement stmt : this.statements) {
+            stmt.accept(visitor);
+        }
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();

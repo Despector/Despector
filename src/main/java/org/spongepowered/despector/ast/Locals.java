@@ -217,6 +217,7 @@ public class Locals {
         private int end;
         private LocalVariableNode lvn;
         private TypeSignature signature;
+        private boolean effectively_final = false;
 
         public LocalInstance(Local l, LocalVariableNode lvn, String n, String t, int start, int end) {
             this.local = l;
@@ -276,6 +277,14 @@ public class Locals {
 
         public void setGenericTypes(TypeSignature sig) {
             this.signature = sig;
+        }
+
+        public boolean isEffectivelyFinal() {
+            return this.effectively_final;
+        }
+
+        public void setEffectivelyFinal(boolean state) {
+            this.effectively_final = state;
         }
 
         @Override

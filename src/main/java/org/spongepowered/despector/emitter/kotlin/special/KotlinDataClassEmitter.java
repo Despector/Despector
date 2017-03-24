@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.despector.emitter.kotlin.type;
+package org.spongepowered.despector.emitter.kotlin.special;
 
 import org.spongepowered.despector.ast.members.FieldEntry;
 import org.spongepowered.despector.ast.members.MethodEntry;
@@ -111,7 +111,7 @@ public class KotlinDataClassEmitter implements SpecialEmitter {
             ctx.printString("var ");
             ctx.printString(fld.name);
             ctx.printString(": ");
-            KotlinEmitterUtil.emitBoxedType(ctx, fld.type);
+            KotlinEmitterUtil.emitType(ctx, fld.type);
             if (fld.default_val != null) {
                 ctx.printString(" = ");
                 ctx.emit(fld.default_val, fld.type);

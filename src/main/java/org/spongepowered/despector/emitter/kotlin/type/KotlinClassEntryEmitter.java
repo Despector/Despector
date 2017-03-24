@@ -36,6 +36,8 @@ import org.spongepowered.despector.ast.type.TypeEntry;
 import org.spongepowered.despector.ast.type.TypeEntry.InnerClassInfo;
 import org.spongepowered.despector.emitter.AstEmitter;
 import org.spongepowered.despector.emitter.EmitterContext;
+import org.spongepowered.despector.emitter.kotlin.special.KotlinCompanionClassEmitter;
+import org.spongepowered.despector.emitter.kotlin.special.KotlinDataClassEmitter;
 import org.spongepowered.despector.emitter.special.GenericsEmitter;
 import org.spongepowered.despector.util.AstUtil;
 
@@ -70,71 +72,74 @@ public class KotlinClassEntryEmitter implements AstEmitter<ClassEntry> {
             return true;
         }
 
-        for (Annotation anno : type.getAnnotations()) {
-            if (HIDDEN_ANNOTATIONS.contains(anno.getType().getName())) {
-                continue;
+        boolean emit_class = !type.getMethods().isEmpty() || !type.getFields().isEmpty();
+
+        if (emit_class) {
+            for (Annotation anno : type.getAnnotations()) {
+                if (HIDDEN_ANNOTATIONS.contains(anno.getType().getName())) {
+                    continue;
+                }
+                ctx.printIndentation();
+                ctx.emit(anno);
+                ctx.printString("\n");
             }
             ctx.printIndentation();
-            ctx.emit(anno);
-            ctx.printString("\n");
-        }
-        ctx.printIndentation();
-        InnerClassInfo inner_info = null;
-        if (type.isInnerClass() && ctx.getOuterType() != null) {
-            inner_info = ctx.getOuterType().getInnerClassInfo(type.getName());
-        }
-        ctx.printString("class ");
-        if (inner_info != null) {
-            ctx.printString(inner_info.getSimpleName());
-        } else {
-            String name = type.getName().replace('/', '.');
-            if (name.indexOf('.') != -1) {
-                name = name.substring(name.lastIndexOf('.') + 1, name.length());
+            InnerClassInfo inner_info = null;
+            if (type.isInnerClass() && ctx.getOuterType() != null) {
+                inner_info = ctx.getOuterType().getInnerClassInfo(type.getName());
             }
-            name = name.replace('$', '.');
-            ctx.printString(name);
-        }
-
-        GenericsEmitter generics = ctx.getEmitterSet().getSpecialEmitter(GenericsEmitter.class);
-        if (type.getSignature() != null) {
-            generics.emitTypeParameters(ctx, type.getSignature().getParameters());
-        }
-
-        if (!type.getSuperclass().equals("Ljava/lang/Object;")) {
-            ctx.printString(" extends ");
-            ctx.emitTypeName(type.getSuperclassName());
-            if (type.getSignature() != null && type.getSignature().getSuperclassSignature() != null) {
-                generics.emitTypeArguments(ctx, type.getSignature().getSuperclassSignature().getArguments());
+            ctx.printString("class ");
+            if (inner_info != null) {
+                ctx.printString(inner_info.getSimpleName());
+            } else {
+                String name = type.getName().replace('/', '.');
+                if (name.indexOf('.') != -1) {
+                    name = name.substring(name.lastIndexOf('.') + 1, name.length());
+                }
+                name = name.replace('$', '.');
+                ctx.printString(name);
             }
-        }
-        if (!type.getInterfaces().isEmpty()) {
-            ctx.printString(" : ");
-            for (int i = 0; i < type.getInterfaces().size(); i++) {
-                ctx.emitType(type.getInterfaces().get(i));
-                generics.emitTypeArguments(ctx, type.getSignature().getInterfaceSignatures().get(i).getArguments());
-                if (i < type.getInterfaces().size() - 1) {
-                    if (ctx.getFormat().insert_space_before_comma_in_superinterfaces) {
-                        ctx.printString(" ");
-                    }
-                    ctx.printString(",");
-                    if (ctx.getFormat().insert_space_after_comma_in_superinterfaces) {
-                        ctx.printString(" ");
+
+            GenericsEmitter generics = ctx.getEmitterSet().getSpecialEmitter(GenericsEmitter.class);
+            if (type.getSignature() != null) {
+                generics.emitTypeParameters(ctx, type.getSignature().getParameters());
+            }
+
+            if (!type.getSuperclass().equals("Ljava/lang/Object;")) {
+                ctx.printString(" extends ");
+                ctx.emitTypeName(type.getSuperclassName());
+                if (type.getSignature() != null && type.getSignature().getSuperclassSignature() != null) {
+                    generics.emitTypeArguments(ctx, type.getSignature().getSuperclassSignature().getArguments());
+                }
+            }
+            if (!type.getInterfaces().isEmpty()) {
+                ctx.printString(" : ");
+                for (int i = 0; i < type.getInterfaces().size(); i++) {
+                    ctx.emitType(type.getInterfaces().get(i));
+                    generics.emitTypeArguments(ctx, type.getSignature().getInterfaceSignatures().get(i).getArguments());
+                    if (i < type.getInterfaces().size() - 1) {
+                        if (ctx.getFormat().insert_space_before_comma_in_superinterfaces) {
+                            ctx.printString(" ");
+                        }
+                        ctx.printString(",");
+                        if (ctx.getFormat().insert_space_after_comma_in_superinterfaces) {
+                            ctx.printString(" ");
+                        }
                     }
                 }
             }
-        }
-        if (ctx.getFormat().insert_space_before_opening_brace_in_type_declaration) {
-            ctx.printString(" ");
-        }
-        ctx.printString("{\n");
-        for (int i = 0; i < ctx.getFormat().blank_lines_before_first_class_body_declaration; i++) {
-            ctx.printString("\n");
-        }
+            if (ctx.getFormat().insert_space_before_opening_brace_in_type_declaration) {
+                ctx.printString(" ");
+            }
+            ctx.printString("{\n");
+            for (int i = 0; i < ctx.getFormat().blank_lines_before_first_class_body_declaration; i++) {
+                ctx.printString("\n");
+            }
 
-        // Ordering is static fields -> static methods -> instance fields ->
-        // instance methods
-        ctx.indent();
-
+            // Ordering is static fields -> static methods -> instance fields ->
+            // instance methods
+            ctx.indent();
+        }
         emitStaticFields(ctx, type);
         emitStaticMethods(ctx, type);
         emitFields(ctx, type);
@@ -152,10 +157,11 @@ public class KotlinClassEntryEmitter implements AstEmitter<ClassEntry> {
             ctx.setType(type);
             ctx.setOuterType(null);
         }
-
-        ctx.dedent();
-        ctx.printIndentation();
-        ctx.printString("}\n");
+        if (emit_class) {
+            ctx.dedent();
+            ctx.printIndentation();
+            ctx.printString("}\n");
+        }
         return true;
     }
 

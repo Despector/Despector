@@ -166,6 +166,9 @@ public class Main {
             }
             try (FileWriter writer = new FileWriter(out.toFile())) {
                 EmitterContext emitter = new EmitterContext(LANGUAGE.getEmitter(), writer, formatter);
+                if (LANGUAGE == Language.KOTLIN) {
+                    emitter.setSemicolons(false);
+                }
                 emitter.emitOuterType(type);
             }
         }

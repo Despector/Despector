@@ -135,7 +135,7 @@ public class KotlinEnumEntryEmitter implements AstEmitter<EnumEntry> {
                 }
                 ctx.printString(fld.name);
                 ctx.printString(": ");
-                KotlinEmitterUtil.emitBoxedType(ctx, fld.type);
+                KotlinEmitterUtil.emitType(ctx, fld.type);
             }
             ctx.printString(")");
         }
