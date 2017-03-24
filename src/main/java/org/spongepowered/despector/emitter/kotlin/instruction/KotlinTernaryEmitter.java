@@ -22,50 +22,30 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.despector.emitter.instruction;
+package org.spongepowered.despector.emitter.kotlin.instruction;
 
-import org.spongepowered.despector.ast.members.insn.arg.cst.IntConstant;
 import org.spongepowered.despector.ast.members.insn.branch.Ternary;
 import org.spongepowered.despector.ast.members.insn.branch.condition.CompareCondition;
 import org.spongepowered.despector.emitter.EmitterContext;
-import org.spongepowered.despector.emitter.InstructionEmitter;
-import org.spongepowered.despector.util.ConditionUtil;
+import org.spongepowered.despector.emitter.instruction.TernaryEmitter;
 
-public class TernaryEmitter implements InstructionEmitter<Ternary> {
+public class KotlinTernaryEmitter extends TernaryEmitter {
 
     @Override
     public void emit(EmitterContext ctx, Ternary ternary, String type) {
         if (checkConstant(ctx, ternary, type)) {
             return;
         }
+        ctx.printString("if (");
         if (ternary.getCondition() instanceof CompareCondition) {
-            ctx.printString("(");
             ctx.emit(ternary.getCondition());
-            ctx.printString(")");
         } else {
             ctx.emit(ternary.getCondition());
         }
-        ctx.printString(" ? ");
+        ctx.printString(") ");
         ctx.emit(ternary.getTrueValue(), type);
-        ctx.printString(" : ");
+        ctx.printString(" else ");
         ctx.emit(ternary.getFalseValue(), type);
-    }
-
-    protected boolean checkConstant(EmitterContext ctx, Ternary ternary, String type) {
-        if ("Z".equals(type) && ternary.getTrueValue() instanceof IntConstant && ternary.getFalseValue() instanceof IntConstant) {
-            // if the ternary contains simple boolean constants on both sides
-            // then we can simplify it to simply be the condition
-            IntConstant true_value = (IntConstant) ternary.getTrueValue();
-            IntConstant false_value = (IntConstant) ternary.getFalseValue();
-            if (true_value.getConstant() == 1 && false_value.getConstant() == 0) {
-                ctx.emit(ternary.getCondition());
-                return true;
-            } else if (true_value.getConstant() == 0 && false_value.getConstant() == 1) {
-                ctx.emit(ConditionUtil.inverse(ternary.getCondition()));
-                return true;
-            }
-        }
-        return false;
     }
 
 }

@@ -109,6 +109,7 @@ import org.spongepowered.despector.emitter.instruction.TernaryEmitter;
 import org.spongepowered.despector.emitter.instruction.TypeConstantEmitter;
 import org.spongepowered.despector.emitter.kotlin.instruction.KotlinInstanceMethodInvokeEmitter;
 import org.spongepowered.despector.emitter.kotlin.instruction.KotlinStaticMethodInvokeEmitter;
+import org.spongepowered.despector.emitter.kotlin.instruction.KotlinTernaryEmitter;
 import org.spongepowered.despector.emitter.kotlin.special.KotlinCompanionClassEmitter;
 import org.spongepowered.despector.emitter.kotlin.special.KotlinDataClassEmitter;
 import org.spongepowered.despector.emitter.kotlin.special.KotlinGenericsEmitter;
@@ -239,6 +240,7 @@ public class Emitters {
 
         KOTLIN.setInstructionEmitter(InstanceMethodInvoke.class, new KotlinInstanceMethodInvokeEmitter());
         KOTLIN.setInstructionEmitter(StaticMethodInvoke.class, new KotlinStaticMethodInvokeEmitter());
+        KOTLIN.setInstructionEmitter(Ternary.class, new KotlinTernaryEmitter());
     }
 
 }

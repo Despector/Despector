@@ -96,6 +96,7 @@ public class Decompilers {
         KOTLIN_METHOD.addCleanupOperation(new BlockTargetOperation());
         KOTLIN_METHOD.addCleanupOperation(new ElvisPrePassOperation());
         KOTLIN_METHOD.addCleanupOperation(new BreakPrePassOperation());
+        KOTLIN_METHOD.addCleanupOperation(new TernaryPrePassOperation());
         KOTLIN_METHOD.addProcessor(new TryCatchBlockProcessor());
         KOTLIN_METHOD.addProcessor(new InternalBlockProcessor());
         KOTLIN_METHOD.addProcessor(new SwitchBlockProcessor());
