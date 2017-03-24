@@ -26,6 +26,7 @@ package org.spongepowered.despector.emitter.instruction;
 
 import org.spongepowered.despector.ast.members.MethodEntry;
 import org.spongepowered.despector.ast.members.insn.arg.Instruction;
+import org.spongepowered.despector.ast.members.insn.arg.NewArray;
 import org.spongepowered.despector.ast.members.insn.arg.field.FieldAccess;
 import org.spongepowered.despector.ast.members.insn.arg.field.InstanceFieldAccess;
 import org.spongepowered.despector.ast.members.insn.arg.field.StaticFieldAccess;
@@ -60,6 +61,16 @@ public class StaticMethodInvokeEmitter implements InstructionEmitter<StaticMetho
         ctx.printString("(");
         for (int i = 0; i < arg.getParams().length; i++) {
             Instruction param = arg.getParams()[i];
+            if (arg.getParams().length == 1 && param instanceof NewArray) {
+                NewArray varargs = (NewArray) param;
+                for (int o = 0; o < varargs.getInitializer().length; o++) {
+                    ctx.emit(varargs.getInitializer()[o], varargs.getType());
+                    if (o < varargs.getInitializer().length - 1) {
+                        ctx.printString(", ");
+                    }
+                }
+                break;
+            }
             ctx.emit(param, param_types.get(i));
             if (i < arg.getParams().length - 1) {
                 ctx.printString(", ");
