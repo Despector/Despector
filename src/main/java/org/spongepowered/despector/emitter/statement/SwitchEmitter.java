@@ -36,6 +36,7 @@ import org.spongepowered.despector.ast.members.insn.branch.TryCatch;
 import org.spongepowered.despector.ast.members.insn.branch.Switch.Case;
 import org.spongepowered.despector.ast.members.insn.function.InstanceMethodInvoke;
 import org.spongepowered.despector.ast.members.insn.function.StaticMethodInvoke;
+import org.spongepowered.despector.ast.type.TypeEntry;
 import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.StatementEmitter;
 
@@ -73,6 +74,16 @@ public class SwitchEmitter implements StatementEmitter<Switch> {
                     MethodEntry mth = ctx.getType().getStaticMethod(arg.getMethodName(), arg.getMethodDescription());
                     table = buildSwitchTable(mth);
                     String enum_type = arg.getMethodName().substring("$SWITCH_TABLE$".length()).replace('$', '/');
+                    ctx.emit(((InstanceMethodInvoke) var.getIndex()).getCallee(), "L" + enum_type + ";");
+                    synthetic = true;
+                }
+            } else if(var.getArrayVar() instanceof StaticFieldAccess) {
+                StaticFieldAccess arg = (StaticFieldAccess) var.getArrayVar();
+                if(arg.getFieldName().startsWith("$SwitchMap") && ctx.getType() != null) {
+                    TypeEntry owner = ctx.getType().getSource().get(arg.getOwnerName());
+                    MethodEntry mth = owner.getStaticMethod("<clinit>");
+                    table = buildSwitchTable(mth);
+                    String enum_type = arg.getFieldName().substring("$SwitchMap/".length()).replace('$', '/');
                     ctx.emit(((InstanceMethodInvoke) var.getIndex()).getCallee(), "L" + enum_type + ";");
                     synthetic = true;
                 }

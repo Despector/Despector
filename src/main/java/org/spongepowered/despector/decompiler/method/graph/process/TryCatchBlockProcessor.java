@@ -83,6 +83,12 @@ public class TryCatchBlockProcessor implements GraphProcessor {
             if (next instanceof GotoOpcodeBlock) {
                 end_of_catch = next.getTarget();
                 last_block = blocks.indexOf(end_of_catch);
+                if(last_block > 1) {
+                    OpcodeBlock prev = blocks.get(last_block - 1);
+                    if (prev instanceof TryCatchMarkerOpcodeBlock && ((TryCatchMarkerOpcodeBlock) prev).getType() == TryCatchMarkerType.START) {
+                        last_block -= 2;
+                    }
+                }
             } else {
                 body.add(next);
             }
@@ -153,6 +159,9 @@ public class TryCatchBlockProcessor implements GraphProcessor {
                     if (end_of_catch != null && last_block != -1) {
                         for (int j = end; j < blocks.size(); j++) {
                             OpcodeBlock cnext = blocks.get(j);
+                            if (cnext instanceof TryCatchMarkerOpcodeBlock) {
+                                break;
+                            }
                             catch_body.add(cnext);
                             if (cnext instanceof GotoOpcodeBlock && cnext.getTarget() == end_of_catch) {
                                 break;

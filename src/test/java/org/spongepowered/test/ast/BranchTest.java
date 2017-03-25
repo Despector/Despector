@@ -398,11 +398,11 @@ public class BranchTest {
     @Test
     public void testLookupSwitch() throws IOException {
         String good =
-                "switch (BranchTest.$SWITCH_TABLE$org$spongepowered$test$ast$BranchTest$TestEnum()[ie.ordinal()]) {\n"
-                        + "case 1:\n"
+                "switch (ie) {\n"
+                        + "case ONE:\n"
                         + "    System.out.println(a);\n"
                         + "    break;\n"
-                        + "case 8:\n"
+                        + "case EIGHT:\n"
                         + "    System.out.println(c);\n"
                         + "    break;\n"
                         + "default:\n"
@@ -427,15 +427,12 @@ public class BranchTest {
 
     @Test
     public void testTableSwitch() throws IOException {
-        // this test produces the raw switch because the test helper decompiles
-        // single methods and therefore the emitter lacks the information to
-        // cleanup the switch condition and cases.
         String good =
-                "switch (BranchTest.$SWITCH_TABLE$org$spongepowered$test$ast$BranchTest$TestEnum()[ie.ordinal()]) {\n"
-                        + "case 1:\n"
+                "switch (ie) {\n"
+                        + "case ONE:\n"
                         + "    System.out.println(a);\n"
                         + "    break;\n"
-                        + "case 2:\n"
+                        + "case TWO:\n"
                         + "    System.out.println(c);\n"
                         + "    break;\n"
                         + "default:\n"

@@ -70,7 +70,7 @@ public class FullClassTests {
         StringWriter writer = new StringWriter();
         EmitterContext ctx = new EmitterContext(writer, EmitterFormat.defaults());
         Emitters.get(lang).emit(ctx, type);
-        String source_str = new String(Files.readAllBytes(Paths.get(source.toURI())));
+        String source_str = new String(Files.readAllBytes(Paths.get(source.toURI()))).replaceAll("\r\n", "\n");
         Assert.assertEquals(source_str, writer.toString());
     }
 

@@ -74,7 +74,7 @@ public class TryCatchGraphProducerStep implements GraphProducerStep {
                     break;
                 }
             }
-            if (local.getEnd() < instructions.size() - 1) {
+            if (local != null && local.getEnd() < instructions.size() - 1) {
                 break_points.add(local.getEnd());
             }
         }
