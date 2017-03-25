@@ -56,7 +56,7 @@ jar {
         attributes(
                 'Built-By': System.properties['user.name'],
                 'Created-By': "${System.properties['java.vm.version']} (${System.properties['java.vm.vendor']})",
-                'Main-Class': "org.spongepowered.despector.Main"
+                'Main-Class': "org.spongepowered.despector.Despector"
         )
     }
 }

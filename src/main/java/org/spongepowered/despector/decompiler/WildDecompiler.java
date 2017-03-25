@@ -54,13 +54,13 @@ public class WildDecompiler implements Decompiler {
     @SuppressWarnings("unchecked")
     @Override
     public TypeEntry decompile(ClassNode cn, SourceSet source) {
-
-        for (AnnotationNode anno : (List<AnnotationNode>) cn.visibleAnnotations) {
-            if (anno.desc.startsWith("Lkotlin")) {
-                return Decompilers.KOTLIN.decompile(cn, source);
+        if (cn.visibleAnnotations != null) {
+            for (AnnotationNode anno : (List<AnnotationNode>) cn.visibleAnnotations) {
+                if (anno.desc.startsWith("Lkotlin")) {
+                    return Decompilers.KOTLIN.decompile(cn, source);
+                }
             }
         }
-
         return Decompilers.JAVA.decompile(cn, source);
     }
 }

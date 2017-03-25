@@ -53,7 +53,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
-public class Main {
+public class Despector {
 
     private static final Map<String, Consumer<String>> flags = new HashMap<>();
 
