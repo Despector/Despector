@@ -93,9 +93,11 @@ public class MethodDecompiler {
     @SuppressWarnings("unchecked")
     public Locals createLocals(MethodEntry entry, MethodNode asm) {
         Locals locals = new Locals();
-        for (LocalVariableNode node : (List<LocalVariableNode>) asm.localVariables) {
-            Local local = locals.getLocal(node.index);
-            local.addLVT(node);
+        if (asm.localVariables != null) {
+            for (LocalVariableNode node : (List<LocalVariableNode>) asm.localVariables) {
+                Local local = locals.getLocal(node.index);
+                local.addLVT(node);
+            }
         }
         int offs = ((asm.access & Opcodes.ACC_STATIC) != 0) ? 0 : 1;
         List<String> param_types = TypeHelper.splitSig(asm.desc);
