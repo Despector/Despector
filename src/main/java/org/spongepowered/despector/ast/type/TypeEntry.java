@@ -32,6 +32,7 @@ import static org.objectweb.asm.Opcodes.ACC_SYNTHETIC;
 
 import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Multimap;
+import org.spongepowered.despector.Language;
 import org.spongepowered.despector.ast.AccessModifier;
 import org.spongepowered.despector.ast.Annotation;
 import org.spongepowered.despector.ast.AnnotationType;
@@ -55,6 +56,8 @@ import javax.annotation.Nullable;
  */
 public abstract class TypeEntry extends AstEntry {
 
+    protected Language lang;
+
     protected AccessModifier access;
 
     protected boolean is_synthetic;
@@ -76,10 +79,15 @@ public abstract class TypeEntry extends AstEntry {
 
     @Nullable protected ClassSignature signature;
 
-    public TypeEntry(SourceSet source, String name) {
+    public TypeEntry(SourceSet source, Language lang, String name) {
         super(source);
         this.name = checkNotNull(name, "name");
+        this.lang = lang;
         this.inner_class = name.contains("$");
+    }
+
+    public Language getLanguage() {
+        return this.lang;
     }
 
     public AccessModifier getAccessModifier() {

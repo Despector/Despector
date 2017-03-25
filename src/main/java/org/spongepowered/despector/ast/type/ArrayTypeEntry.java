@@ -24,6 +24,7 @@
  */
 package org.spongepowered.despector.ast.type;
 
+import org.spongepowered.despector.Language;
 import org.spongepowered.despector.ast.SourceSet;
 
 /**
@@ -33,8 +34,8 @@ public class ArrayTypeEntry extends TypeEntry {
 
     protected final String component_type;
 
-    public ArrayTypeEntry(SourceSet source, String comp) {
-        super(source, comp + "[]");
+    public ArrayTypeEntry(SourceSet source, Language lang, String comp) {
+        super(source, lang, comp + "[]");
         this.component_type = comp;
     }
 

@@ -42,7 +42,7 @@ import org.spongepowered.despector.ast.members.insn.StatementBlock;
 import org.spongepowered.despector.ast.members.insn.StatementBlock.Type;
 import org.spongepowered.despector.ast.type.TypeEntry;
 import org.spongepowered.despector.config.ConfigManager;
-import org.spongepowered.despector.decompiler.Decompiler;
+import org.spongepowered.despector.decompiler.BaseDecompiler;
 import org.spongepowered.despector.decompiler.DecompilerStep;
 import org.spongepowered.despector.decompiler.method.MethodDecompiler;
 import org.spongepowered.despector.util.AstUtil;
@@ -81,14 +81,14 @@ public class KotlinMethodInfoStep implements DecompilerStep {
 
             if (mn.visibleAnnotations != null) {
                 for (AnnotationNode an : (List<AnnotationNode>) mn.visibleAnnotations) {
-                    Annotation anno = Decompiler.createAnnotation(entry.getSource(), an);
+                    Annotation anno = BaseDecompiler.createAnnotation(entry.getSource(), an);
                     anno.getType().setRuntimeVisible(true);
                     m.addAnnotation(anno);
                 }
             }
             if (mn.invisibleAnnotations != null) {
                 for (AnnotationNode an : (List<AnnotationNode>) mn.invisibleAnnotations) {
-                    Annotation anno = Decompiler.createAnnotation(entry.getSource(), an);
+                    Annotation anno = BaseDecompiler.createAnnotation(entry.getSource(), an);
                     anno.getType().setRuntimeVisible(false);
                     m.addAnnotation(anno);
                 }

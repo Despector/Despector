@@ -66,8 +66,8 @@ public class FullClassTests {
         SourceSet src = new SourceSet();
         TypeEntry type = lang.getDecompiler().decompile(cn, src);
         StringWriter writer = new StringWriter();
-        EmitterContext ctx = new EmitterContext(lang.getEmitter(), writer, EmitterFormat.defaults());
-        ctx.emitOuterType(type);
+        EmitterContext ctx = new EmitterContext(writer, EmitterFormat.defaults());
+        lang.getEmitter().emit(ctx, type);
         String source_str = new String(Files.readAllBytes(Paths.get(source.toURI())));
         Assert.assertEquals(source_str, writer.toString());
     }

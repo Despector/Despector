@@ -155,107 +155,111 @@ import org.spongepowered.despector.emitter.type.MethodEntryEmitter;
 
 public class Emitters {
 
-    public static final EmitterSet JAVA = new EmitterSet();
-    public static final EmitterSet KOTLIN = new EmitterSet();
+    public static final EmitterSet JAVA_SET = new EmitterSet();
+    public static final EmitterSet KOTLIN_SET = new EmitterSet();
+
+    public static final Emitter JAVA = new BaseEmitter(JAVA_SET);
+    public static final Emitter KOTLIN = new BaseEmitter(KOTLIN_SET);
+    public static final Emitter WILD = new WildEmitter();
 
     static {
 
-        JAVA.setSpecialEmitter(AnnotationEmitter.class, new AnnotationEmitter());
-        JAVA.setSpecialEmitter(GenericsEmitter.class, new GenericsEmitter());
-        JAVA.setSpecialEmitter(AnonymousClassEmitter.class, new AnonymousClassEmitter());
-        JAVA.setSpecialEmitter(PackageInfoEmitter.class, new PackageInfoEmitter());
-        JAVA.setSpecialEmitter(PackageEmitter.class, new PackageEmitter());
+        JAVA_SET.setSpecialEmitter(AnnotationEmitter.class, new AnnotationEmitter());
+        JAVA_SET.setSpecialEmitter(GenericsEmitter.class, new GenericsEmitter());
+        JAVA_SET.setSpecialEmitter(AnonymousClassEmitter.class, new AnonymousClassEmitter());
+        JAVA_SET.setSpecialEmitter(PackageInfoEmitter.class, new PackageInfoEmitter());
+        JAVA_SET.setSpecialEmitter(PackageEmitter.class, new PackageEmitter());
 
-        JAVA.setAstEmitter(ClassEntry.class, new ClassEntryEmitter());
-        JAVA.setAstEmitter(EnumEntry.class, new EnumEntryEmitter());
-        JAVA.setAstEmitter(InterfaceEntry.class, new InterfaceEntryEmitter());
+        JAVA_SET.setAstEmitter(ClassEntry.class, new ClassEntryEmitter());
+        JAVA_SET.setAstEmitter(EnumEntry.class, new EnumEntryEmitter());
+        JAVA_SET.setAstEmitter(InterfaceEntry.class, new InterfaceEntryEmitter());
 
-        JAVA.setAstEmitter(FieldEntry.class, new FieldEntryEmitter());
-        JAVA.setAstEmitter(MethodEntry.class, new MethodEntryEmitter());
+        JAVA_SET.setAstEmitter(FieldEntry.class, new FieldEntryEmitter());
+        JAVA_SET.setAstEmitter(MethodEntry.class, new MethodEntryEmitter());
 
-        JAVA.setStatementEmitter(ArrayAssignment.class, new ArrayAssignmentEmitter());
-        JAVA.setStatementEmitter(Break.class, new BreakEmitter());
-        JAVA.setStatementEmitter(Comment.class, new CommentEmitter());
-        JAVA.setStatementEmitter(DoWhile.class, new DoWhileEmitter());
+        JAVA_SET.setStatementEmitter(ArrayAssignment.class, new ArrayAssignmentEmitter());
+        JAVA_SET.setStatementEmitter(Break.class, new BreakEmitter());
+        JAVA_SET.setStatementEmitter(Comment.class, new CommentEmitter());
+        JAVA_SET.setStatementEmitter(DoWhile.class, new DoWhileEmitter());
         FieldAssignmentEmitter fld_assign = new FieldAssignmentEmitter();
-        JAVA.setStatementEmitter(FieldAssignment.class, fld_assign);
-        JAVA.setStatementEmitter(InstanceFieldAssignment.class, fld_assign);
-        JAVA.setStatementEmitter(StaticFieldAssignment.class, fld_assign);
-        JAVA.setStatementEmitter(For.class, new ForEmitter());
-        JAVA.setStatementEmitter(ForEach.class, new ForEachEmitter());
-        JAVA.setStatementEmitter(If.class, new IfEmitter());
-        JAVA.setStatementEmitter(Increment.class, new IncrementEmitter());
-        JAVA.setStatementEmitter(InvokeStatement.class, new InvokeEmitter());
-        JAVA.setStatementEmitter(LocalAssignment.class, new LocalAssignmentEmitter());
-        JAVA.setStatementEmitter(Return.class, new ReturnEmitter());
-        JAVA.setStatementEmitter(Switch.class, new SwitchEmitter());
-        JAVA.setStatementEmitter(Throw.class, new ThrowEmitter());
-        JAVA.setStatementEmitter(TryCatch.class, new TryCatchEmitter());
-        JAVA.setStatementEmitter(While.class, new WhileEmitter());
+        JAVA_SET.setStatementEmitter(FieldAssignment.class, fld_assign);
+        JAVA_SET.setStatementEmitter(InstanceFieldAssignment.class, fld_assign);
+        JAVA_SET.setStatementEmitter(StaticFieldAssignment.class, fld_assign);
+        JAVA_SET.setStatementEmitter(For.class, new ForEmitter());
+        JAVA_SET.setStatementEmitter(ForEach.class, new ForEachEmitter());
+        JAVA_SET.setStatementEmitter(If.class, new IfEmitter());
+        JAVA_SET.setStatementEmitter(Increment.class, new IncrementEmitter());
+        JAVA_SET.setStatementEmitter(InvokeStatement.class, new InvokeEmitter());
+        JAVA_SET.setStatementEmitter(LocalAssignment.class, new LocalAssignmentEmitter());
+        JAVA_SET.setStatementEmitter(Return.class, new ReturnEmitter());
+        JAVA_SET.setStatementEmitter(Switch.class, new SwitchEmitter());
+        JAVA_SET.setStatementEmitter(Throw.class, new ThrowEmitter());
+        JAVA_SET.setStatementEmitter(TryCatch.class, new TryCatchEmitter());
+        JAVA_SET.setStatementEmitter(While.class, new WhileEmitter());
 
-        JAVA.setInstructionEmitter(ArrayAccess.class, new ArrayLoadEmitter());
-        JAVA.setInstructionEmitter(Cast.class, new CastEmitter());
-        JAVA.setInstructionEmitter(NumberCompare.class, new CompareEmitter());
-        JAVA.setInstructionEmitter(DoubleConstant.class, new DoubleConstantEmitter());
+        JAVA_SET.setInstructionEmitter(ArrayAccess.class, new ArrayLoadEmitter());
+        JAVA_SET.setInstructionEmitter(Cast.class, new CastEmitter());
+        JAVA_SET.setInstructionEmitter(NumberCompare.class, new CompareEmitter());
+        JAVA_SET.setInstructionEmitter(DoubleConstant.class, new DoubleConstantEmitter());
         FieldEmitter fld = new FieldEmitter();
-        JAVA.setInstructionEmitter(InstanceFieldAccess.class, fld);
-        JAVA.setInstructionEmitter(FloatConstant.class, new FloatConstantEmitter());
-        JAVA.setInstructionEmitter(InstanceMethodInvoke.class, new InstanceMethodInvokeEmitter());
-        JAVA.setInstructionEmitter(InstanceOf.class, new InstanceOfEmitter());
-        JAVA.setInstructionEmitter(IntConstant.class, new IntConstantEmitter());
-        JAVA.setInstructionEmitter(LocalAccess.class, new LocalEmitter());
-        JAVA.setInstructionEmitter(LongConstant.class, new LongConstantEmitter());
-        JAVA.setInstructionEmitter(NegativeOperator.class, new NegativeEmitter());
-        JAVA.setInstructionEmitter(NewArray.class, new NewArrayEmitter());
-        JAVA.setInstructionEmitter(New.class, new NewEmitter());
-        JAVA.setInstructionEmitter(NullConstant.class, new NullConstantEmitter());
+        JAVA_SET.setInstructionEmitter(InstanceFieldAccess.class, fld);
+        JAVA_SET.setInstructionEmitter(FloatConstant.class, new FloatConstantEmitter());
+        JAVA_SET.setInstructionEmitter(InstanceMethodInvoke.class, new InstanceMethodInvokeEmitter());
+        JAVA_SET.setInstructionEmitter(InstanceOf.class, new InstanceOfEmitter());
+        JAVA_SET.setInstructionEmitter(IntConstant.class, new IntConstantEmitter());
+        JAVA_SET.setInstructionEmitter(LocalAccess.class, new LocalEmitter());
+        JAVA_SET.setInstructionEmitter(LongConstant.class, new LongConstantEmitter());
+        JAVA_SET.setInstructionEmitter(NegativeOperator.class, new NegativeEmitter());
+        JAVA_SET.setInstructionEmitter(NewArray.class, new NewArrayEmitter());
+        JAVA_SET.setInstructionEmitter(New.class, new NewEmitter());
+        JAVA_SET.setInstructionEmitter(NullConstant.class, new NullConstantEmitter());
         OperatorEmitter op = new OperatorEmitter();
-        JAVA.setInstructionEmitter(AddOperator.class, op);
-        JAVA.setInstructionEmitter(SubtractOperator.class, op);
-        JAVA.setInstructionEmitter(MultiplyOperator.class, op);
-        JAVA.setInstructionEmitter(DivideOperator.class, op);
-        JAVA.setInstructionEmitter(RemainderOperator.class, op);
-        JAVA.setInstructionEmitter(AndOperator.class, op);
-        JAVA.setInstructionEmitter(OrOperator.class, op);
-        JAVA.setInstructionEmitter(ShiftLeftOperator.class, op);
-        JAVA.setInstructionEmitter(ShiftRightOperator.class, op);
-        JAVA.setInstructionEmitter(UnsignedShiftRightOperator.class, op);
-        JAVA.setInstructionEmitter(XorOperator.class, op);
-        JAVA.setInstructionEmitter(StaticMethodInvoke.class, new StaticMethodInvokeEmitter());
-        JAVA.setInstructionEmitter(StringConstant.class, new StringConstantEmitter());
-        JAVA.setInstructionEmitter(Ternary.class, new TernaryEmitter());
-        JAVA.setInstructionEmitter(TypeConstant.class, new TypeConstantEmitter());
-        JAVA.setInstructionEmitter(StaticFieldAccess.class, fld);
+        JAVA_SET.setInstructionEmitter(AddOperator.class, op);
+        JAVA_SET.setInstructionEmitter(SubtractOperator.class, op);
+        JAVA_SET.setInstructionEmitter(MultiplyOperator.class, op);
+        JAVA_SET.setInstructionEmitter(DivideOperator.class, op);
+        JAVA_SET.setInstructionEmitter(RemainderOperator.class, op);
+        JAVA_SET.setInstructionEmitter(AndOperator.class, op);
+        JAVA_SET.setInstructionEmitter(OrOperator.class, op);
+        JAVA_SET.setInstructionEmitter(ShiftLeftOperator.class, op);
+        JAVA_SET.setInstructionEmitter(ShiftRightOperator.class, op);
+        JAVA_SET.setInstructionEmitter(UnsignedShiftRightOperator.class, op);
+        JAVA_SET.setInstructionEmitter(XorOperator.class, op);
+        JAVA_SET.setInstructionEmitter(StaticMethodInvoke.class, new StaticMethodInvokeEmitter());
+        JAVA_SET.setInstructionEmitter(StringConstant.class, new StringConstantEmitter());
+        JAVA_SET.setInstructionEmitter(Ternary.class, new TernaryEmitter());
+        JAVA_SET.setInstructionEmitter(TypeConstant.class, new TypeConstantEmitter());
+        JAVA_SET.setInstructionEmitter(StaticFieldAccess.class, fld);
 
-        JAVA.setConditionEmitter(AndCondition.class, new AndConditionEmitter());
-        JAVA.setConditionEmitter(OrCondition.class, new OrConditionEmitter());
-        JAVA.setConditionEmitter(InverseCondition.class, new InverseConditionEmitter());
-        JAVA.setConditionEmitter(CompareCondition.class, new CompareConditionEmitter());
-        JAVA.setConditionEmitter(BooleanCondition.class, new BooleanConditionEmitter());
+        JAVA_SET.setConditionEmitter(AndCondition.class, new AndConditionEmitter());
+        JAVA_SET.setConditionEmitter(OrCondition.class, new OrConditionEmitter());
+        JAVA_SET.setConditionEmitter(InverseCondition.class, new InverseConditionEmitter());
+        JAVA_SET.setConditionEmitter(CompareCondition.class, new CompareConditionEmitter());
+        JAVA_SET.setConditionEmitter(BooleanCondition.class, new BooleanConditionEmitter());
 
-        KOTLIN.clone(JAVA);
+        KOTLIN_SET.clone(JAVA_SET);
 
-        KOTLIN.setAstEmitter(ClassEntry.class, new KotlinClassEntryEmitter());
-        KOTLIN.setAstEmitter(EnumEntry.class, new KotlinEnumEntryEmitter());
-        KOTLIN.setAstEmitter(MethodEntry.class, new KotlinMethodEntryEmitter());
+        KOTLIN_SET.setAstEmitter(ClassEntry.class, new KotlinClassEntryEmitter());
+        KOTLIN_SET.setAstEmitter(EnumEntry.class, new KotlinEnumEntryEmitter());
+        KOTLIN_SET.setAstEmitter(MethodEntry.class, new KotlinMethodEntryEmitter());
 
-        KOTLIN.setSpecialEmitter(KotlinDataClassEmitter.class, new KotlinDataClassEmitter());
-        KOTLIN.setSpecialEmitter(KotlinCompanionClassEmitter.class, new KotlinCompanionClassEmitter());
-        KOTLIN.setSpecialEmitter(PackageEmitter.class, new KotlinPackageEmitter());
-        KOTLIN.setSpecialEmitter(GenericsEmitter.class, new KotlinGenericsEmitter());
+        KOTLIN_SET.setSpecialEmitter(KotlinDataClassEmitter.class, new KotlinDataClassEmitter());
+        KOTLIN_SET.setSpecialEmitter(KotlinCompanionClassEmitter.class, new KotlinCompanionClassEmitter());
+        KOTLIN_SET.setSpecialEmitter(PackageEmitter.class, new KotlinPackageEmitter());
+        KOTLIN_SET.setSpecialEmitter(GenericsEmitter.class, new KotlinGenericsEmitter());
 
-        KOTLIN.setStatementEmitter(InvokeStatement.class, new KotlinInvokeEmitter());
-        KOTLIN.setStatementEmitter(LocalAssignment.class, new KotlinLocalAssignmentEmitter());
-        KOTLIN.setStatementEmitter(ForEach.class, new KotlinForEachEmitter());
+        KOTLIN_SET.setStatementEmitter(InvokeStatement.class, new KotlinInvokeEmitter());
+        KOTLIN_SET.setStatementEmitter(LocalAssignment.class, new KotlinLocalAssignmentEmitter());
+        KOTLIN_SET.setStatementEmitter(ForEach.class, new KotlinForEachEmitter());
 
-        KOTLIN.setInstructionEmitter(InstanceMethodInvoke.class, new KotlinInstanceMethodInvokeEmitter());
-        KOTLIN.setInstructionEmitter(StaticMethodInvoke.class, new KotlinStaticMethodInvokeEmitter());
-        KOTLIN.setInstructionEmitter(Ternary.class, new KotlinTernaryEmitter());
-        KOTLIN.setInstructionEmitter(InstanceOf.class, new KotlinInstanceOfEmitter());
-        KOTLIN.setInstructionEmitter(Cast.class, new KotlinCastEmitter());
-        KOTLIN.setInstructionEmitter(Elvis.class, new ElvisEmitter());
-        
-        KOTLIN.setConditionEmitter(BooleanCondition.class, new KotlinBooleanConditionEmitter());
+        KOTLIN_SET.setInstructionEmitter(InstanceMethodInvoke.class, new KotlinInstanceMethodInvokeEmitter());
+        KOTLIN_SET.setInstructionEmitter(StaticMethodInvoke.class, new KotlinStaticMethodInvokeEmitter());
+        KOTLIN_SET.setInstructionEmitter(Ternary.class, new KotlinTernaryEmitter());
+        KOTLIN_SET.setInstructionEmitter(InstanceOf.class, new KotlinInstanceOfEmitter());
+        KOTLIN_SET.setInstructionEmitter(Cast.class, new KotlinCastEmitter());
+        KOTLIN_SET.setInstructionEmitter(Elvis.class, new ElvisEmitter());
+
+        KOTLIN_SET.setConditionEmitter(BooleanCondition.class, new KotlinBooleanConditionEmitter());
     }
 
 }

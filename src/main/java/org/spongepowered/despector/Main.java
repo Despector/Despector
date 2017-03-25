@@ -24,13 +24,17 @@
  */
 package org.spongepowered.despector;
 
+import org.objectweb.asm.ClassReader;
+import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.despector.ast.SourceSet;
 import org.spongepowered.despector.ast.type.TypeEntry;
 import org.spongepowered.despector.config.ConfigManager;
 import org.spongepowered.despector.decompiler.Decompiler;
+import org.spongepowered.despector.decompiler.Decompilers;
 import org.spongepowered.despector.decompiler.DirectoryWalker;
 import org.spongepowered.despector.decompiler.JarWalker;
 import org.spongepowered.despector.emitter.EmitterContext;
+import org.spongepowered.despector.emitter.Emitters;
 import org.spongepowered.despector.emitter.format.EmitterFormat;
 import org.spongepowered.despector.emitter.format.FormatLoader;
 import org.spongepowered.despector.transform.TypeTransformer;
@@ -38,6 +42,8 @@ import org.spongepowered.despector.transform.cleanup.CleanupOperations;
 
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.StringWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -51,7 +57,7 @@ public class Main {
 
     private static final Map<String, Consumer<String>> flags = new HashMap<>();
 
-    public static Language LANGUAGE = Language.JAVA;
+    public static Language LANGUAGE = Language.ANY;
 
     static {
         flags.put("--config=", (arg) -> {
@@ -65,11 +71,26 @@ public class Main {
                 LANGUAGE = Language.KOTLIN;
             } else if ("java".equalsIgnoreCase(lang)) {
                 LANGUAGE = Language.JAVA;
+            } else if ("any".equalsIgnoreCase(lang)) {
+                LANGUAGE = Language.ANY;
             } else {
                 System.err.println("Unknown language: " + lang);
+                System.err.println("Options are: java, kotlin, any");
                 System.exit(0);
             }
         });
+    }
+
+    public static String decompile(InputStream input) throws IOException {
+        ClassReader reader = new ClassReader(input);
+        ClassNode cn = new ClassNode();
+        reader.accept(cn, 0);
+        SourceSet source = new SourceSet();
+        TypeEntry type = Decompilers.WILD.decompile(cn, source);
+        StringWriter writer = new StringWriter();
+        EmitterContext ctx = new EmitterContext(writer, EmitterFormat.defaults());
+        Emitters.WILD.emit(ctx, type);
+        return writer.toString();
     }
 
     public static void main(String[] args) throws IOException {
@@ -160,15 +181,12 @@ public class Main {
             if (type.isInnerClass() || type.isAnonType()) {
                 continue;
             }
-            Path out = output.resolve(type.getName() + LANGUAGE.getFileExt());
+            Path out = output.resolve(type.getName() + LANGUAGE.getFileExt(type));
             if (!Files.exists(out.getParent())) {
                 Files.createDirectories(out.getParent());
             }
             try (FileWriter writer = new FileWriter(out.toFile())) {
-                EmitterContext emitter = new EmitterContext(LANGUAGE.getEmitter(), writer, formatter);
-                if (LANGUAGE == Language.KOTLIN) {
-                    emitter.setSemicolons(false);
-                }
+                EmitterContext emitter = new EmitterContext(writer, formatter);
                 emitter.emitOuterType(type);
             }
         }

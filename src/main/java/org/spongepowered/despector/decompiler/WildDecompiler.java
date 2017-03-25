@@ -22,41 +22,45 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.despector;
+package org.spongepowered.despector.decompiler;
 
+import org.objectweb.asm.ClassReader;
+import org.objectweb.asm.tree.AnnotationNode;
+import org.objectweb.asm.tree.ClassNode;
+import org.spongepowered.despector.ast.SourceSet;
 import org.spongepowered.despector.ast.type.TypeEntry;
-import org.spongepowered.despector.decompiler.Decompiler;
-import org.spongepowered.despector.decompiler.Decompilers;
-import org.spongepowered.despector.emitter.Emitter;
-import org.spongepowered.despector.emitter.Emitters;
 
-import java.util.function.Function;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.util.List;
 
-public enum Language {
+public class WildDecompiler implements Decompiler {
 
-    JAVA(Decompilers.JAVA, (t)->".java", Emitters.JAVA),
-    KOTLIN(Decompilers.KOTLIN, (t)->".kt", Emitters.KOTLIN),
-    ANY(Decompilers.WILD, (t)->t.getLanguage().getFileExt(t), Emitters.WILD);
-
-    private final Decompiler decompiler;
-    private final Function<TypeEntry, String> ext;
-    private final Emitter emitter;
-
-    Language(Decompiler decomp, Function<TypeEntry, String> ext, Emitter emitter) {
-        this.decompiler = decomp;
-        this.ext = ext;
-        this.emitter = emitter;
+    @Override
+    public TypeEntry decompile(Path cls_path, SourceSet source) throws IOException {
+        return decompile(cls_path.toFile(), source);
     }
 
-    public Decompiler getDecompiler() {
-        return this.decompiler;
+    @Override
+    public TypeEntry decompile(File cls_path, SourceSet source) throws IOException {
+        ClassReader reader = new ClassReader(new FileInputStream(cls_path));
+        ClassNode cn = new ClassNode();
+        reader.accept(cn, 0);
+        return decompile(cn, source);
     }
 
-    public String getFileExt(TypeEntry type) {
-        return this.ext.apply(type);
-    }
+    @SuppressWarnings("unchecked")
+    @Override
+    public TypeEntry decompile(ClassNode cn, SourceSet source) {
 
-    public Emitter getEmitter() {
-        return this.emitter;
+        for (AnnotationNode anno : (List<AnnotationNode>) cn.visibleAnnotations) {
+            if (anno.desc.startsWith("Lkotlin")) {
+                return Decompilers.KOTLIN.decompile(cn, source);
+            }
+        }
+
+        return Decompilers.JAVA.decompile(cn, source);
     }
 }

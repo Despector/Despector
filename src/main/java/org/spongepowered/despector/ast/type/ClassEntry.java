@@ -24,6 +24,7 @@
  */
 package org.spongepowered.despector.ast.type;
 
+import org.spongepowered.despector.Language;
 import org.spongepowered.despector.ast.SourceSet;
 import org.spongepowered.despector.util.TypeHelper;
 
@@ -34,8 +35,8 @@ public class ClassEntry extends TypeEntry {
 
     protected String superclass = null;
 
-    public ClassEntry(SourceSet src, String name) {
-        super(src, name);
+    public ClassEntry(SourceSet src, Language lang, String name) {
+        super(src, lang, name);
     }
 
     /**

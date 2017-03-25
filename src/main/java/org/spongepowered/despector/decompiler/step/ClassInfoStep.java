@@ -34,7 +34,7 @@ import org.spongepowered.despector.ast.AccessModifier;
 import org.spongepowered.despector.ast.Annotation;
 import org.spongepowered.despector.ast.generic.ClassSignature;
 import org.spongepowered.despector.ast.type.TypeEntry;
-import org.spongepowered.despector.decompiler.Decompiler;
+import org.spongepowered.despector.decompiler.BaseDecompiler;
 import org.spongepowered.despector.decompiler.DecompilerStep;
 import org.spongepowered.despector.util.SignatureParser;
 
@@ -68,14 +68,14 @@ public class ClassInfoStep implements DecompilerStep {
 
         if (cn.visibleAnnotations != null) {
             for (AnnotationNode an : (List<AnnotationNode>) cn.visibleAnnotations) {
-                Annotation anno = Decompiler.createAnnotation(entry.getSource(), an);
+                Annotation anno = BaseDecompiler.createAnnotation(entry.getSource(), an);
                 anno.getType().setRuntimeVisible(true);
                 entry.addAnnotation(anno);
             }
         }
         if (cn.invisibleAnnotations != null) {
             for (AnnotationNode an : (List<AnnotationNode>) cn.invisibleAnnotations) {
-                Annotation anno = Decompiler.createAnnotation(entry.getSource(), an);
+                Annotation anno = BaseDecompiler.createAnnotation(entry.getSource(), an);
                 anno.getType().setRuntimeVisible(false);
                 entry.addAnnotation(anno);
             }

@@ -24,6 +24,7 @@
  */
 package org.spongepowered.despector.decompiler;
 
+import org.spongepowered.despector.Language;
 import org.spongepowered.despector.decompiler.kotlin.method.graph.create.ElvisGraphProducerStep;
 import org.spongepowered.despector.decompiler.kotlin.step.KotlinMethodInfoStep;
 import org.spongepowered.despector.decompiler.method.MethodDecompiler;
@@ -52,8 +53,9 @@ import org.spongepowered.despector.decompiler.step.MethodInfoStep;
 
 public class Decompilers {
 
-    public static final Decompiler JAVA = new Decompiler();
-    public static final Decompiler KOTLIN = new Decompiler();
+    public static final BaseDecompiler JAVA = new BaseDecompiler(Language.JAVA);
+    public static final BaseDecompiler KOTLIN = new BaseDecompiler(Language.KOTLIN);
+    public static final WildDecompiler WILD = new WildDecompiler();
 
     public static final MethodDecompiler JAVA_METHOD = new MethodDecompiler();
     public static final MethodDecompiler KOTLIN_METHOD = new MethodDecompiler();

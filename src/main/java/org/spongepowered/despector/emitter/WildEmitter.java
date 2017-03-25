@@ -22,41 +22,19 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.despector;
+package org.spongepowered.despector.emitter;
 
+import org.spongepowered.despector.Language;
 import org.spongepowered.despector.ast.type.TypeEntry;
-import org.spongepowered.despector.decompiler.Decompiler;
-import org.spongepowered.despector.decompiler.Decompilers;
-import org.spongepowered.despector.emitter.Emitter;
-import org.spongepowered.despector.emitter.Emitters;
 
-import java.util.function.Function;
+public class WildEmitter implements Emitter {
 
-public enum Language {
-
-    JAVA(Decompilers.JAVA, (t)->".java", Emitters.JAVA),
-    KOTLIN(Decompilers.KOTLIN, (t)->".kt", Emitters.KOTLIN),
-    ANY(Decompilers.WILD, (t)->t.getLanguage().getFileExt(t), Emitters.WILD);
-
-    private final Decompiler decompiler;
-    private final Function<TypeEntry, String> ext;
-    private final Emitter emitter;
-
-    Language(Decompiler decomp, Function<TypeEntry, String> ext, Emitter emitter) {
-        this.decompiler = decomp;
-        this.ext = ext;
-        this.emitter = emitter;
+    @Override
+    public void emit(EmitterContext ctx, TypeEntry type) {
+        if(type.getLanguage() == Language.KOTLIN) {
+            Emitters.KOTLIN.emit(ctx, type);
+        }
+        Emitters.JAVA.emit(ctx, type);
     }
 
-    public Decompiler getDecompiler() {
-        return this.decompiler;
-    }
-
-    public String getFileExt(TypeEntry type) {
-        return this.ext.apply(type);
-    }
-
-    public Emitter getEmitter() {
-        return this.emitter;
-    }
 }

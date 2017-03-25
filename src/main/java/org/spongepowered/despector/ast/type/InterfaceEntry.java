@@ -24,6 +24,7 @@
  */
 package org.spongepowered.despector.ast.type;
 
+import org.spongepowered.despector.Language;
 import org.spongepowered.despector.ast.SourceSet;
 
 /**
@@ -31,8 +32,8 @@ import org.spongepowered.despector.ast.SourceSet;
  */
 public class InterfaceEntry extends TypeEntry {
 
-    public InterfaceEntry(SourceSet src, String name) {
-        super(src, name);
+    public InterfaceEntry(SourceSet src, Language lang, String name) {
+        super(src, lang, name);
     }
 
     @Override

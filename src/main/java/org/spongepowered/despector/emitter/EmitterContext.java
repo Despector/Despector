@@ -55,7 +55,7 @@ import java.util.Set;
 
 public class EmitterContext {
 
-    private final EmitterSet set;
+    private EmitterSet set;
 
     private EmitterFormat format;
     private Writer output;
@@ -75,8 +75,7 @@ public class EmitterContext {
 
     private boolean semicolons = true;
 
-    public EmitterContext(EmitterSet set, Writer output, EmitterFormat format) {
-        this.set = set;
+    public EmitterContext(Writer output, EmitterFormat format) {
         this.output = output;
         this.format = format;
 
@@ -85,6 +84,10 @@ public class EmitterContext {
 
     public EmitterSet getEmitterSet() {
         return this.set;
+    }
+
+    public void setEmitterSet(EmitterSet set) {
+        this.set = set;
     }
 
     public TypeEntry getType() {

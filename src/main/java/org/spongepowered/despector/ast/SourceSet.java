@@ -26,6 +26,7 @@ package org.spongepowered.despector.ast;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import org.spongepowered.despector.Language;
 import org.spongepowered.despector.ast.type.ArrayTypeEntry;
 import org.spongepowered.despector.ast.type.EnumEntry;
 import org.spongepowered.despector.ast.type.InterfaceEntry;
@@ -69,7 +70,7 @@ public class SourceSet {
             ArrayTypeEntry entry = this.array_types.get(name);
             if (entry == null) {
                 TypeEntry comp = get(name.substring(0, name.length() - 2));
-                entry = new ArrayTypeEntry(this, comp.getName());
+                entry = new ArrayTypeEntry(this, Language.ANY, comp.getName());
                 this.array_types.put(name, entry);
             }
             return entry;

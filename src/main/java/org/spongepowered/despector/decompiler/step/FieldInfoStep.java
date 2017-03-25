@@ -36,7 +36,7 @@ import org.spongepowered.despector.ast.Annotation;
 import org.spongepowered.despector.ast.generic.TypeSignature;
 import org.spongepowered.despector.ast.members.FieldEntry;
 import org.spongepowered.despector.ast.type.TypeEntry;
-import org.spongepowered.despector.decompiler.Decompiler;
+import org.spongepowered.despector.decompiler.BaseDecompiler;
 import org.spongepowered.despector.decompiler.DecompilerStep;
 import org.spongepowered.despector.util.SignatureParser;
 
@@ -65,14 +65,14 @@ public class FieldInfoStep implements DecompilerStep {
 
             if (fn.visibleAnnotations != null) {
                 for (AnnotationNode an : (List<AnnotationNode>) fn.visibleAnnotations) {
-                    Annotation anno = Decompiler.createAnnotation(entry.getSource(), an);
+                    Annotation anno = BaseDecompiler.createAnnotation(entry.getSource(), an);
                     anno.getType().setRuntimeVisible(true);
                     f.addAnnotation(anno);
                 }
             }
             if (fn.invisibleAnnotations != null) {
                 for (AnnotationNode an : (List<AnnotationNode>) fn.invisibleAnnotations) {
-                    Annotation anno = Decompiler.createAnnotation(entry.getSource(), an);
+                    Annotation anno = BaseDecompiler.createAnnotation(entry.getSource(), an);
                     anno.getType().setRuntimeVisible(false);
                     f.addAnnotation(anno);
                 }

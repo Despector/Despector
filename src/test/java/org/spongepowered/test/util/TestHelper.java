@@ -131,7 +131,8 @@ public class TestHelper {
             return "";
         }
         StringWriter writer = new StringWriter();
-        EmitterContext emitter = new EmitterContext(Emitters.JAVA, writer, EmitterFormat.defaults());
+        EmitterContext emitter = new EmitterContext(writer, EmitterFormat.defaults());
+        emitter.setEmitterSet(Emitters.JAVA_SET);
         emitter.emitBody(insns);
         return writer.toString();
     }
