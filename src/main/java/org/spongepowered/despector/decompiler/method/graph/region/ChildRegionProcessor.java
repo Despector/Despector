@@ -77,15 +77,6 @@ public class ChildRegionProcessor implements RegionProcessor {
                 end = RegionProcessor.getRegionEnd(region, i);
             }
 
-            if (is_first_condition) {
-                for (int o = i; o < end; o++) {
-                    if (region.get(o) instanceof GotoOpcodeBlock) {
-                        is_first_condition = false;
-                        break;
-                    }
-                }
-            }
-
             if (end != -1 && (!is_first_condition || end < region.size())) {
 
                 List<OpcodeBlock> subregion = new ArrayList<>();

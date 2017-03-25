@@ -464,7 +464,7 @@ public class BranchTest {
         check(getClass(), "mth_ifnestedinstanceof", good);
     }
 
-    public boolean mth_ifred(int i, boolean a, boolean b, boolean c, boolean d, boolean e, boolean f) {
+    public boolean mth_ifret(int i, boolean a, boolean b, boolean c, boolean d, boolean e, boolean f) {
         if (a != b) {
             return false;
         }
@@ -479,13 +479,13 @@ public class BranchTest {
         // This output looks wrong because there is no type information to
         // convert the ints to bools
         String good = "if (a != b) {\n"
-                + "    return 0;\n"
+                + "    return false;\n"
                 + "}\n"
                 + "if (d && e) {\n"
-                + "    return c ? 0 : 1;\n"
+                + "    return !c;\n"
                 + "}\n"
-                + "return 0;";
-        check(getClass(), "mth_ifred", good);
+                + "return false;";
+        check(getClass(), "mth_ifret", good);
     }
 
     public void mth_ifnestedelse(int i, boolean a, boolean b, boolean c, boolean d, boolean e, boolean f) {

@@ -30,6 +30,7 @@ import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.MethodNode;
+import org.spongepowered.despector.ast.AccessModifier;
 import org.spongepowered.despector.ast.Locals;
 import org.spongepowered.despector.ast.SourceSet;
 import org.spongepowered.despector.ast.members.MethodEntry;
@@ -39,6 +40,7 @@ import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.Emitters;
 import org.spongepowered.despector.emitter.format.EmitterFormat;
 import org.spongepowered.despector.util.AstUtil;
+import org.spongepowered.despector.util.SignatureParser;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -48,6 +50,8 @@ import java.io.StringWriter;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+
+import static org.objectweb.asm.Opcodes.*;
 
 public class TestHelper {
 
@@ -132,7 +136,18 @@ public class TestHelper {
 
     public static String getAsString(ClassNode type, MethodNode mn) {
         MethodEntry dummy = new MethodEntry(DUMMY_SOURCE_SET);
-        dummy.setOwner("Ljava/lang/Object;");
+        dummy.setAbstract((mn.access & ACC_ABSTRACT) != 0);
+        dummy.setAccessModifier(AccessModifier.fromModifiers(mn.access));
+        dummy.setFinal((mn.access & ACC_FINAL) != 0);
+        dummy.setName(mn.name);
+        dummy.setOwner(type.name);
+        dummy.setSignature(mn.desc);
+        dummy.setStatic((mn.access & ACC_STATIC) != 0);
+        dummy.setSynthetic((mn.access & ACC_SYNTHETIC) != 0);
+
+        if (mn.signature != null) {
+            dummy.setMethodSignature(SignatureParser.parseMethod(mn.signature));
+        }
         StatementBlock insns = null;
         Locals locals = Decompilers.JAVA_METHOD.createLocals(dummy, mn);
         try {
@@ -146,6 +161,7 @@ public class TestHelper {
         StringWriter writer = new StringWriter();
         EmitterContext emitter = new EmitterContext(writer, EmitterFormat.defaults());
         emitter.setEmitterSet(Emitters.JAVA_SET);
+        emitter.setMethod(dummy);
         emitter.emitBody(insns);
         return writer.toString();
     }
