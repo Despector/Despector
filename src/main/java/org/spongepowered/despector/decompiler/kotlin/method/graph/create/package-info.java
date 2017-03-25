@@ -23,4 +23,4 @@
  * THE SOFTWARE.
  */
 @org.spongepowered.despector.util.NonnullByDefault
-package org.spongepowered.despector.decompiler.kotlin.method.graph.operate;
+package org.spongepowered.despector.decompiler.kotlin.method.graph.create;

@@ -24,6 +24,7 @@
  */
 package org.spongepowered.despector.emitter;
 
+import org.spongepowered.despector.ast.kotlin.Elvis;
 import org.spongepowered.despector.ast.members.FieldEntry;
 import org.spongepowered.despector.ast.members.MethodEntry;
 import org.spongepowered.despector.ast.members.insn.Comment;
@@ -109,6 +110,7 @@ import org.spongepowered.despector.emitter.instruction.StringConstantEmitter;
 import org.spongepowered.despector.emitter.instruction.TernaryEmitter;
 import org.spongepowered.despector.emitter.instruction.TypeConstantEmitter;
 import org.spongepowered.despector.emitter.kotlin.condition.KotlinBooleanConditionEmitter;
+import org.spongepowered.despector.emitter.kotlin.instruction.ElvisEmitter;
 import org.spongepowered.despector.emitter.kotlin.instruction.KotlinCastEmitter;
 import org.spongepowered.despector.emitter.kotlin.instruction.KotlinInstanceMethodInvokeEmitter;
 import org.spongepowered.despector.emitter.kotlin.instruction.KotlinInstanceOfEmitter;
@@ -251,6 +253,7 @@ public class Emitters {
         KOTLIN.setInstructionEmitter(Ternary.class, new KotlinTernaryEmitter());
         KOTLIN.setInstructionEmitter(InstanceOf.class, new KotlinInstanceOfEmitter());
         KOTLIN.setInstructionEmitter(Cast.class, new KotlinCastEmitter());
+        KOTLIN.setInstructionEmitter(Elvis.class, new ElvisEmitter());
         
         KOTLIN.setConditionEmitter(BooleanCondition.class, new KotlinBooleanConditionEmitter());
     }

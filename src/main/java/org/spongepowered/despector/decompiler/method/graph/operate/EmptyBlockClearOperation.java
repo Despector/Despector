@@ -26,6 +26,7 @@ package org.spongepowered.despector.decompiler.method.graph.operate;
 
 import org.spongepowered.despector.decompiler.method.PartialMethod;
 import org.spongepowered.despector.decompiler.method.graph.GraphOperation;
+import org.spongepowered.despector.decompiler.method.graph.data.opcode.BodyOpcodeBlock;
 import org.spongepowered.despector.decompiler.method.graph.data.opcode.ConditionalOpcodeBlock;
 import org.spongepowered.despector.decompiler.method.graph.data.opcode.OpcodeBlock;
 import org.spongepowered.despector.decompiler.method.graph.data.opcode.TryCatchMarkerOpcodeBlock;
@@ -45,7 +46,7 @@ public class EmptyBlockClearOperation implements GraphOperation {
         List<OpcodeBlock> blocks = partial.getGraph();
         for (Iterator<OpcodeBlock> it = blocks.iterator(); it.hasNext();) {
             OpcodeBlock block = it.next();
-            if (block instanceof TryCatchMarkerOpcodeBlock) {
+            if (!(block instanceof BodyOpcodeBlock)) {
                 continue;
             }
             if (AstUtil.isEmptyOfLogic(block.getOpcodes())) {

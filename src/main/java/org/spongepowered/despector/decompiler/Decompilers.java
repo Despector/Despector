@@ -24,7 +24,7 @@
  */
 package org.spongepowered.despector.decompiler;
 
-import org.spongepowered.despector.decompiler.kotlin.method.graph.operate.ElvisPrePassOperation;
+import org.spongepowered.despector.decompiler.kotlin.method.graph.create.ElvisGraphProducerStep;
 import org.spongepowered.despector.decompiler.kotlin.step.KotlinMethodInfoStep;
 import org.spongepowered.despector.decompiler.method.MethodDecompiler;
 import org.spongepowered.despector.decompiler.method.graph.create.JumpGraphProducerStep;
@@ -91,10 +91,10 @@ public class Decompilers {
         KOTLIN_METHOD.addGraphProducer(new JumpGraphProducerStep());
         KOTLIN_METHOD.addGraphProducer(new SwitchGraphProducerStep());
         KOTLIN_METHOD.addGraphProducer(new TryCatchGraphProducerStep());
+        KOTLIN_METHOD.addGraphProducer(new ElvisGraphProducerStep());
         KOTLIN_METHOD.addCleanupOperation(new EmptyBlockClearOperation());
         KOTLIN_METHOD.addCleanupOperation(new JumpSeparateOperation());
         KOTLIN_METHOD.addCleanupOperation(new BlockTargetOperation());
-        KOTLIN_METHOD.addCleanupOperation(new ElvisPrePassOperation());
         KOTLIN_METHOD.addCleanupOperation(new BreakPrePassOperation());
         KOTLIN_METHOD.addCleanupOperation(new TernaryPrePassOperation());
         KOTLIN_METHOD.addProcessor(new TryCatchBlockProcessor());
