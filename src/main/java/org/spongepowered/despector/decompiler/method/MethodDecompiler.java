@@ -163,7 +163,9 @@ public class MethodDecompiler {
         // Append all block sections to the output in order. This finalizes all
         // decompilation of statements not already decompiled.
         Deque<Instruction> stack = new ArrayDeque<>();
-        for (BlockSection op : flat_graph) {
+        int start = entry.getName().startsWith("$SWITCH_TABLE$") ? 2 : 0;
+        for (int i = start; i < flat_graph.size(); i++) {
+            BlockSection op = flat_graph.get(i);
             op.appendTo(block, stack);
         }
 

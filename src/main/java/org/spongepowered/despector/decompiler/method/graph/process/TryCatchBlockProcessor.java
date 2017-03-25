@@ -25,7 +25,7 @@
 package org.spongepowered.despector.decompiler.method.graph.process;
 
 import static com.google.common.base.Preconditions.checkState;
-import static org.objectweb.asm.Opcodes.ASTORE;
+import static org.objectweb.asm.Opcodes.*;
 
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.VarInsnNode;
@@ -148,11 +148,13 @@ public class TryCatchBlockProcessor implements GraphProcessor {
                             label_index = catch_start.getBreakpoint() - (catch_start.getOpcodes().size() - k);
                             it.remove();
                             break;
+                        } else if(op.getOpcode() == POP) {
+                            it.remove();
+                            break;
                         }
                         k++;
                     }
-                    checkState(local_num != -1);
-                    Locals.LocalInstance local = partial.getLocals().getLocal(local_num).getInstance(label_index);
+                    Locals.LocalInstance local = label_index == -1? null : partial.getLocals().getLocal(local_num).getInstance(label_index);
                     List<OpcodeBlock> catch_body = new ArrayList<>();
                     catch_body.add(catch_start);
                     int stop_index = -1;

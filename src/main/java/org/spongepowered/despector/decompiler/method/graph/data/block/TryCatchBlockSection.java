@@ -75,7 +75,11 @@ public class TryCatchBlockSection extends BlockSection {
                 body_section.appendTo(cbody, cbody_stack);
             }
             checkState(cbody_stack.isEmpty());
-            ttry.new CatchBlock(c.getLocal(), c.getExceptions(), cbody);
+            if (c.getLocal() != null) {
+                ttry.new CatchBlock(c.getLocal(), c.getExceptions(), cbody);
+            } else {
+                ttry.new CatchBlock("e", c.getExceptions(), cbody);
+            }
         }
     }
 

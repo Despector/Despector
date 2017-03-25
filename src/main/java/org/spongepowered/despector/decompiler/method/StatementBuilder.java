@@ -231,6 +231,12 @@ public class StatementBuilder {
                 Instruction val = stack.pop();
                 Instruction index_arg = stack.pop();
                 Instruction var = stack.pop();
+                if(var instanceof LocalAccess) {
+                    LocalInstance local = ((LocalAccess) var).getLocal();
+                    if(local.getType() == null) {
+                        local.setType("[" + val.inferType());
+                    }
+                }
                 if (var instanceof NewArray) {
                     NewArray array = (NewArray) var;
                     if (array.getInitializer() == null) {
