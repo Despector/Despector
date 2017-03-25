@@ -31,6 +31,7 @@ import org.spongepowered.despector.ast.type.ArrayTypeEntry;
 import org.spongepowered.despector.ast.type.EnumEntry;
 import org.spongepowered.despector.ast.type.InterfaceEntry;
 import org.spongepowered.despector.ast.type.TypeEntry;
+import org.spongepowered.despector.decompiler.Decompilers;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -98,7 +99,7 @@ public class SourceSet {
                 return null;
             }
             try {
-                entry = Language.ANY.getDecompiler().decompile(data, this);
+                entry = Decompilers.get(Language.ANY).decompile(data, this);
             } catch (IOException e) {
                 e.printStackTrace();
                 this.load_failed_cache.add(name);

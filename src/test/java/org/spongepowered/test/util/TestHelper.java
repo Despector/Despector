@@ -25,7 +25,9 @@
 package org.spongepowered.test.util;
 
 import com.google.common.collect.Maps;
+import org.junit.Assert;
 import org.objectweb.asm.ClassReader;
+import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.MethodNode;
 import org.spongepowered.despector.ast.Locals;
@@ -36,12 +38,14 @@ import org.spongepowered.despector.decompiler.Decompilers;
 import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.Emitters;
 import org.spongepowered.despector.emitter.format.EmitterFormat;
+import org.spongepowered.despector.util.AstUtil;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.StringWriter;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -107,7 +111,7 @@ public class TestHelper {
     }
 
     @SuppressWarnings("unchecked")
-    public static String getAsString(ClassNode type, String method_name) {
+    private static MethodNode getMethod(ClassNode type, String method_name) {
         MethodNode mn = null;
         for (MethodNode m : ((List<MethodNode>) type.methods)) {
             if (m.name.equals(method_name)) {
@@ -116,8 +120,17 @@ public class TestHelper {
             }
         }
         if (mn == null) {
-            return "";
+            throw new IllegalArgumentException("Method not found: " + method_name);
         }
+        return mn;
+    }
+
+    public static String getAsString(ClassNode type, String method_name) {
+        MethodNode mn = getMethod(type, method_name);
+        return getAsString(type, mn);
+    }
+
+    public static String getAsString(ClassNode type, MethodNode mn) {
         MethodEntry dummy = new MethodEntry(DUMMY_SOURCE_SET);
         dummy.setOwner("Ljava/lang/Object;");
         StatementBlock insns = null;
@@ -126,15 +139,47 @@ public class TestHelper {
             System.out.println("Decompiling method " + mn.name);
             insns = Decompilers.JAVA_METHOD.decompile(dummy, mn, locals);
         } catch (Exception ex) {
-            System.err.println("Error decompiling method body for " + type.name + " " + method_name);
+            System.err.println("Error decompiling method body for " + type.name + " " + mn.name);
             ex.printStackTrace();
-            return "";
+            throw ex;
         }
         StringWriter writer = new StringWriter();
         EmitterContext emitter = new EmitterContext(writer, EmitterFormat.defaults());
         emitter.setEmitterSet(Emitters.JAVA_SET);
         emitter.emitBody(insns);
         return writer.toString();
+    }
+
+    public static void check(Class<?> cls, String method_name, String expected) throws IOException {
+        ClassNode type = CACHED_TYPES.get(cls);
+        if (type == null) {
+            String path = cls.getProtectionDomain().getCodeSource().getLocation().getPath();
+            File file = new File(path, cls.getName().replace('.', '/') + ".class");
+            ClassReader cr = new ClassReader(new FileInputStream(file));
+            type = new ClassNode();
+            cr.accept(type, 0);
+            CACHED_TYPES.put(cls, type);
+        }
+        check(type, method_name, expected);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static void check(ClassNode type, String method_name, String expected) {
+        MethodNode mn = getMethod(type, method_name);
+        String actual = getAsString(type, method_name);
+        if (!actual.equals(expected)) {
+            System.err.println("Test " + method_name + " failed!");
+            System.err.println("Expected:");
+            System.err.println(expected);
+            System.err.println("Found:");
+            System.err.println(actual);
+            System.err.println("Bytecode:");
+            for (Iterator<AbstractInsnNode> it = mn.instructions.iterator(); it.hasNext();) {
+                AbstractInsnNode next = it.next();
+                System.err.println(AstUtil.insnToString(next));
+            }
+            Assert.assertEquals(expected, actual);
+        }
     }
 
 }

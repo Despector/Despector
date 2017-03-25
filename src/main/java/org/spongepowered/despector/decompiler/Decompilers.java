@@ -51,6 +51,8 @@ import org.spongepowered.despector.decompiler.step.EnumConstantsStep;
 import org.spongepowered.despector.decompiler.step.FieldInfoStep;
 import org.spongepowered.despector.decompiler.step.MethodInfoStep;
 
+import java.util.EnumMap;
+
 public class Decompilers {
 
     public static final BaseDecompiler JAVA = new BaseDecompiler(Language.JAVA);
@@ -59,6 +61,8 @@ public class Decompilers {
 
     public static final MethodDecompiler JAVA_METHOD = new MethodDecompiler();
     public static final MethodDecompiler KOTLIN_METHOD = new MethodDecompiler();
+
+    private static final EnumMap<Language, Decompiler> DECOMPILERS = new EnumMap<>(Language.class);
 
     static {
         JAVA.addStep(new ClassInfoStep());
@@ -109,6 +113,14 @@ public class Decompilers {
         KOTLIN_METHOD.addRegionProcessor(new IfBlockRegionProcessor());
         KOTLIN_METHOD.addPostProcessor(new IfCombiningPostProcessor());
         KOTLIN_METHOD.addPostProcessor(new ForEachPostProcessor());
+
+        DECOMPILERS.put(Language.JAVA, JAVA);
+        DECOMPILERS.put(Language.KOTLIN, KOTLIN);
+        DECOMPILERS.put(Language.ANY, WILD);
+    }
+
+    public static Decompiler get(Language lang) {
+        return DECOMPILERS.get(lang);
     }
 
 }

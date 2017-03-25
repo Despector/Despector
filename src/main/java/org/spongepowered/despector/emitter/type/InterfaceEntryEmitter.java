@@ -48,12 +48,21 @@ public class InterfaceEntryEmitter implements AstEmitter<InterfaceEntry> {
             ctx.printString("\n");
         }
         ctx.printIndentation();
-        String name = type.getName().replace('/', '.');
-        if (name.indexOf('.') != -1) {
-            name = name.substring(name.lastIndexOf('.') + 1, name.length());
+        InnerClassInfo inner_info = null;
+        if (type.isInnerClass() && ctx.getOuterType() != null) {
+            inner_info = ctx.getOuterType().getInnerClassInfo(type.getName());
         }
-        name = name.replace('$', '.');
-        if (!(name.contains(".") && type.getAccessModifier() == AccessModifier.PUBLIC)) {
+        String name = null;
+        if (inner_info != null) {
+            name = inner_info.getSimpleName();
+        } else {
+            name = type.getName().replace('/', '.');
+            if (name.indexOf('.') != -1) {
+                name = name.substring(name.lastIndexOf('.') + 1, name.length());
+            }
+            name = name.replace('$', '.');
+        }
+        if (!(name.contains(".") && inner_info == null && type.getAccessModifier() == AccessModifier.PUBLIC)) {
             ctx.printString(type.getAccessModifier().asString());
             if (type.getAccessModifier() != AccessModifier.PACKAGE_PRIVATE) {
                 ctx.printString(" ");

@@ -24,7 +24,7 @@
  */
 package org.spongepowered.test.ast;
 
-import static org.junit.Assert.assertEquals;
+import static org.spongepowered.test.util.TestHelper.check;
 
 import org.junit.Test;
 import org.spongepowered.test.util.TestHelper;
@@ -40,9 +40,8 @@ public class TernaryTest {
 
     @Test
     public void testBasicTernary() throws IOException {
-        String insn = TestHelper.getAsString(getClass(), "mth_basicTernary");
         String good = "int r = a ? 6 : 3;";
-        assertEquals(good, insn);
+        check(getClass(), "mth_basicTernary", good);
     }
 
     public void mth_moreComplexTernary(boolean a, boolean b, int j) {
@@ -51,9 +50,8 @@ public class TernaryTest {
 
     @Test
     public void testMoreComplexTernary() throws IOException {
-        String insn = TestHelper.getAsString(getClass(), "mth_moreComplexTernary");
         String good = "int i = a || b ? 0 - j * 24 + Integer.MAX_VALUE : 1 + j;";
-        assertEquals(good, insn);
+        check(getClass(), "mth_moreComplexTernary", good);
     }
 
     private int field;
@@ -64,9 +62,8 @@ public class TernaryTest {
 
     @Test
     public void testBasicTernaryToField() throws IOException {
-        String insn = TestHelper.getAsString(getClass(), "mth_basicTernaryToField");
         String good = "this.field = a ? 255 : 0;";
-        assertEquals(good, insn);
+        check(getClass(), "mth_basicTernaryToField", good);
     }
 
     public void mth_nestedTernary(boolean a, boolean b) {
@@ -75,9 +72,8 @@ public class TernaryTest {
 
     @Test
     public void testNestedTernary() throws IOException {
-        String insn = TestHelper.getAsString(getClass(), "mth_nestedTernary");
         String good = "int r = a ? b ? 4 : 5 : 3;";
-        assertEquals(good, insn);
+        check(getClass(), "mth_nestedTernary", good);
     }
 
     public void mth_nestedTernary2(boolean a, boolean b) {
@@ -86,9 +82,8 @@ public class TernaryTest {
 
     @Test
     public void testNestedTernary2() throws IOException {
-        String insn = TestHelper.getAsString(getClass(), "mth_nestedTernary2");
         String good = "int r = a ? 5 : b ? 4 : 3;";
-        assertEquals(good, insn);
+        check(getClass(), "mth_nestedTernary2", good);
     }
 
     public int mth_returnTernary(boolean a) {
@@ -97,9 +92,8 @@ public class TernaryTest {
 
     @Test
     public void testReturnedTernary() throws IOException {
-        String insn = TestHelper.getAsString(getClass(), "mth_returnTernary");
         String good = "return a ? 6 : 3;";
-        assertEquals(good, insn);
+        check(getClass(), "mth_returnTernary", good);
     }
 
     public int mth_returnTernary2(boolean a) {
@@ -112,13 +106,12 @@ public class TernaryTest {
 
     @Test
     public void testReturnedTernary2() throws IOException {
-        String insn = TestHelper.getAsString(getClass(), "mth_returnTernary2");
         String good = "try {\n"
                 + "    return a ? 6 : 3;\n"
                 + "} catch (Exception e) {\n"
                 + "    return 0;\n"
                 + "}";
-        assertEquals(good, insn);
+        check(getClass(), "mth_returnTernary2", good);
     }
 
 }

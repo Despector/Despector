@@ -23,7 +23,7 @@
  * THE SOFTWARE.
  */
 package org.spongepowered.despector.ast.type;
-
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.objectweb.asm.Opcodes.ACC_ABSTRACT;
 import static org.objectweb.asm.Opcodes.ACC_FINAL;
@@ -82,6 +82,7 @@ public abstract class TypeEntry extends AstEntry {
     public TypeEntry(SourceSet source, Language lang, String name) {
         super(source);
         this.name = checkNotNull(name, "name");
+        checkArgument(lang != Language.ANY, "Type language cannot be set to any");
         this.lang = lang;
         this.inner_class = name.contains("$");
     }

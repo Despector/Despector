@@ -24,7 +24,7 @@
  */
 package org.spongepowered.test.ast;
 
-import static org.junit.Assert.assertEquals;
+import static org.spongepowered.test.util.TestHelper.check;
 
 import org.junit.Test;
 import org.spongepowered.test.util.TestHelper;
@@ -40,8 +40,7 @@ public class InstructionsTest {
 
     @Test
     public void testNew() throws IOException {
-        String mth = TestHelper.getAsString(getClass(), "mth_new");
-        assertEquals("String test = new String(\"\");", mth);
+        check(getClass(), "mth_new", "String test = new String(\"\");");
     }
 
     public InstructionsTest() {
@@ -49,7 +48,6 @@ public class InstructionsTest {
 
     @Test
     public void testInit() throws IOException {
-        String mth = TestHelper.getAsString(getClass(), "<init>");
-        assertEquals("", mth);
+        check(getClass(), "<init>", "");
     }
 }

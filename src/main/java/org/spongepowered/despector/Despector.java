@@ -24,8 +24,6 @@
  */
 package org.spongepowered.despector;
 
-import org.objectweb.asm.ClassReader;
-import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.despector.ast.SourceSet;
 import org.spongepowered.despector.ast.type.TypeEntry;
 import org.spongepowered.despector.config.ConfigManager;
@@ -135,7 +133,7 @@ public class Despector {
             formatter = EmitterFormat.defaults();
         }
 
-        Decompiler decompiler = LANGUAGE.getDecompiler();
+        Decompiler decompiler = Decompilers.get(LANGUAGE);
 
         SourceSet source = new SourceSet();
         for (String s : sources) {
@@ -188,7 +186,7 @@ public class Despector {
             if (type.isInnerClass() || type.isAnonType()) {
                 continue;
             }
-            Path out = output.resolve(type.getName() + LANGUAGE.getFileExt(type));
+            Path out = output.resolve(type.getName() + LANGUAGE.getExtension(type));
             if (!Files.exists(out.getParent())) {
                 Files.createDirectories(out.getParent());
             }

@@ -24,6 +24,7 @@
  */
 package org.spongepowered.despector.emitter;
 
+import org.spongepowered.despector.Language;
 import org.spongepowered.despector.ast.kotlin.Elvis;
 import org.spongepowered.despector.ast.members.FieldEntry;
 import org.spongepowered.despector.ast.members.MethodEntry;
@@ -153,6 +154,8 @@ import org.spongepowered.despector.emitter.type.FieldEntryEmitter;
 import org.spongepowered.despector.emitter.type.InterfaceEntryEmitter;
 import org.spongepowered.despector.emitter.type.MethodEntryEmitter;
 
+import java.util.EnumMap;
+
 public class Emitters {
 
     public static final EmitterSet JAVA_SET = new EmitterSet();
@@ -161,6 +164,8 @@ public class Emitters {
     public static final Emitter JAVA = new BaseEmitter(JAVA_SET);
     public static final Emitter KOTLIN = new BaseEmitter(KOTLIN_SET);
     public static final Emitter WILD = new WildEmitter();
+
+    private static final EnumMap<Language, Emitter> EMITTERS = new EnumMap<>(Language.class);
 
     static {
 
@@ -260,6 +265,14 @@ public class Emitters {
         KOTLIN_SET.setInstructionEmitter(Elvis.class, new ElvisEmitter());
 
         KOTLIN_SET.setConditionEmitter(BooleanCondition.class, new KotlinBooleanConditionEmitter());
+
+        EMITTERS.put(Language.JAVA, JAVA);
+        EMITTERS.put(Language.KOTLIN, KOTLIN);
+        EMITTERS.put(Language.ANY, WILD);
+    }
+
+    public static Emitter get(Language lang) {
+        return EMITTERS.get(lang);
     }
 
 }

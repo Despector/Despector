@@ -24,7 +24,6 @@
  */
 package org.spongepowered.test.ast;
 
-import static org.junit.Assert.assertEquals;
 import static org.objectweb.asm.Opcodes.GETSTATIC;
 import static org.objectweb.asm.Opcodes.GOTO;
 import static org.objectweb.asm.Opcodes.ICONST_0;
@@ -35,7 +34,9 @@ import static org.objectweb.asm.Opcodes.ILOAD;
 import static org.objectweb.asm.Opcodes.INVOKEVIRTUAL;
 import static org.objectweb.asm.Opcodes.ISTORE;
 import static org.objectweb.asm.Opcodes.RETURN;
+import static org.spongepowered.test.util.TestHelper.check;
 
+import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.objectweb.asm.Label;
@@ -62,9 +63,8 @@ public class BranchTest {
 
     @Test
     public void testSimpleIf() throws IOException {
-        String insn = TestHelper.getAsString(getClass(), "mth_simpleif");
         String good = "if (a) {\n    System.out.println(a);\n}";
-        assertEquals(good, insn);
+        check(getClass(), "mth_simpleif", good);
     }
 
     public void mth_if1(Object o, int i) {
@@ -75,11 +75,10 @@ public class BranchTest {
 
     @Test
     public void testIfWithComparisonAndNullCheck() throws IOException {
-        String insn = TestHelper.getAsString(getClass(), "mth_if1");
         String good = "if (i < 3 || o != null) {\n"
                 + "    i++;\n"
                 + "}";
-        assertEquals(good, insn);
+        check(getClass(), "mth_if1", good);
     }
 
     public void mth_if3(int i, boolean a, boolean b) {
@@ -90,11 +89,10 @@ public class BranchTest {
 
     @Test
     public void testIfWithOr() throws IOException {
-        String insn = TestHelper.getAsString(getClass(), "mth_if3");
         String good = "if (a || b) {\n"
                 + "    i += 5;\n"
                 + "}";
-        assertEquals(good, insn);
+        check(getClass(), "mth_if3", good);
     }
 
     public void mth_if4(int i, boolean a, boolean b) {
@@ -105,11 +103,10 @@ public class BranchTest {
 
     @Test
     public void testIfWithAnd() throws IOException {
-        String insn = TestHelper.getAsString(getClass(), "mth_if4");
         String good = "if (a && b) {\n"
                 + "    i += 5;\n"
                 + "}";
-        assertEquals(good, insn);
+        check(getClass(), "mth_if4", good);
     }
 
     public void mth_if5(int i, boolean a, boolean b, boolean c) {
@@ -120,11 +117,10 @@ public class BranchTest {
 
     @Test
     public void testIfWithMultipleAnd() throws IOException {
-        String insn = TestHelper.getAsString(getClass(), "mth_if5");
         String good = "if (a && b && c) {\n"
                 + "    i += 5;\n"
                 + "}";
-        assertEquals(good, insn);
+        check(getClass(), "mth_if5", good);
     }
 
     public void mth_if6(int i, boolean a, boolean b, boolean c) {
@@ -135,11 +131,10 @@ public class BranchTest {
 
     @Test
     public void testIfWithMultipleOr() throws IOException {
-        String insn = TestHelper.getAsString(getClass(), "mth_if6");
         String good = "if (a || b || c) {\n"
                 + "    i += 5;\n"
                 + "}";
-        assertEquals(good, insn);
+        check(getClass(), "mth_if6", good);
     }
 
     public void mth_if7(int i, boolean a, boolean b, boolean c) {
@@ -150,11 +145,10 @@ public class BranchTest {
 
     @Test
     public void testIfWithOrandAnd() throws IOException {
-        String insn = TestHelper.getAsString(getClass(), "mth_if7");
         String good = "if (a || b && c) {\n"
                 + "    i += 5;\n"
                 + "}";
-        assertEquals(good, insn);
+        check(getClass(), "mth_if7", good);
     }
 
     public void mth_if8(int i, boolean a, boolean b, boolean c) {
@@ -165,11 +159,10 @@ public class BranchTest {
 
     @Test
     public void testIfWithAndandOr() throws IOException {
-        String insn = TestHelper.getAsString(getClass(), "mth_if8");
         String good = "if (a && b || c) {\n"
                 + "    i += 5;\n"
                 + "}";
-        assertEquals(good, insn);
+        check(getClass(), "mth_if8", good);
     }
 
     public void mth_if9(int i, boolean a, boolean b, boolean c, boolean d) {
@@ -180,11 +173,10 @@ public class BranchTest {
 
     @Test
     public void testIfWithPoS() throws IOException {
-        String insn = TestHelper.getAsString(getClass(), "mth_if9");
         String good = "if ((a || d) && (b || c)) {\n"
                 + "    i += 5;\n"
                 + "}";
-        assertEquals(good, insn);
+        check(getClass(), "mth_if9", good);
     }
 
     public void mth_if10(int i, boolean a, boolean b, boolean c, boolean d) {
@@ -195,11 +187,10 @@ public class BranchTest {
 
     @Test
     public void testIfWithSoP() throws IOException {
-        String insn = TestHelper.getAsString(getClass(), "mth_if10");
         String good = "if (a && d || b && c) {\n"
                 + "    i += 5;\n"
                 + "}";
-        assertEquals(good, insn);
+        check(getClass(), "mth_if10", good);
     }
 
     public void mth_if11(int i, boolean a, boolean b, boolean c, boolean d, boolean e) {
@@ -210,11 +201,10 @@ public class BranchTest {
 
     @Test
     public void testIfWithCommonFactor() throws IOException {
-        String insn = TestHelper.getAsString(getClass(), "mth_if11");
         String good = "if ((a || e) && d || b && c) {\n"
                 + "    i += 5;\n"
                 + "}";
-        assertEquals(good, insn);
+        check(getClass(), "mth_if11", good);
     }
 
     public void mth_ifelse(int i, boolean a, boolean b, boolean c, boolean d, boolean e, boolean f) {
@@ -227,13 +217,12 @@ public class BranchTest {
 
     @Test
     public void testIfWithElse() throws IOException {
-        String insn = TestHelper.getAsString(getClass(), "mth_ifelse");
         String good = "if (a) {\n"
                 + "    System.out.println(c);\n"
                 + "} else {\n"
                 + "    System.out.println(d);\n"
                 + "}";
-        assertEquals(good, insn);
+        check(getClass(), "mth_ifelse", good);
     }
 
     public boolean mth_ifelseret(int i, boolean a, boolean b, boolean c, boolean d, boolean e, boolean f) {
@@ -247,14 +236,13 @@ public class BranchTest {
 
     @Test
     public void testIfWithElseReturn() throws IOException {
-        String insn = TestHelper.getAsString(getClass(), "mth_ifelseret");
         String good = "if (a) {\n"
                 + "    System.out.println(c);\n"
                 + "    return c;\n"
                 + "}\n"
                 + "System.out.println(d);\n"
                 + "return d;";
-        assertEquals(good, insn);
+        check(getClass(), "mth_ifelseret", good);
     }
 
     public void mth_if13(int i, boolean a, boolean b, boolean c, boolean d, boolean e, boolean f) {
@@ -272,7 +260,6 @@ public class BranchTest {
 
     @Test
     public void testIfWithNestingAndElse() throws IOException {
-        String insn = TestHelper.getAsString(getClass(), "mth_if13");
         String good = "if (a) {\n"
                 + "    if (b) {\n"
                 + "        System.out.println(e);\n"
@@ -283,7 +270,7 @@ public class BranchTest {
                 + "} else {\n"
                 + "    System.out.println(d);\n"
                 + "}";
-        assertEquals(good, insn);
+        check(getClass(), "mth_if13", good);
     }
 
     public void mth_if15(int i, boolean a, boolean b, boolean c, boolean d, boolean e, boolean f) {
@@ -298,7 +285,6 @@ public class BranchTest {
 
     @Test
     public void testIfWithElif() throws IOException {
-        String insn = TestHelper.getAsString(getClass(), "mth_if15");
         String good = "if (a) {\n"
                 + "    System.out.println(a);\n"
                 + "} else if (b) {\n"
@@ -306,7 +292,7 @@ public class BranchTest {
                 + "} else {\n"
                 + "    System.out.println(f);\n"
                 + "}";
-        assertEquals(good, insn);
+        check(getClass(), "mth_if15", good);
     }
 
     public void mth_for(int i, boolean c) {
@@ -317,11 +303,10 @@ public class BranchTest {
 
     @Test
     public void testBasicFor() throws IOException {
-        String insn = TestHelper.getAsString(getClass(), "mth_for");
         String good = "for (i = 0; i < 5; i++) {\n"
                 + "    System.out.println(c);\n"
                 + "}";
-        assertEquals(good, insn);
+        check(getClass(), "mth_for", good);
     }
 
     public void mth_for2(int i, boolean d, boolean e, boolean f) {
@@ -332,11 +317,10 @@ public class BranchTest {
 
     @Test
     public void testForThatLooksLikeAWhile() throws IOException {
-        String insn = TestHelper.getAsString(getClass(), "mth_for2");
         String good = "while (e && d) {\n"
                 + "    System.out.println(f);\n"
                 + "}";
-        assertEquals(good, insn);
+        check(getClass(), "mth_for2", good);
     }
 
     public void mth_while(int i, boolean a, boolean d, boolean e) {
@@ -347,11 +331,10 @@ public class BranchTest {
 
     @Test
     public void testBasicWhile() throws IOException {
-        String insn = TestHelper.getAsString(getClass(), "mth_while");
         String good = "while (a ^ d) {\n"
                 + "    System.out.println(e);\n"
                 + "}";
-        assertEquals(good, insn);
+        check(getClass(), "mth_while", good);
     }
 
     public void mth_while2(int i, boolean a, boolean d, boolean e) {
@@ -364,13 +347,12 @@ public class BranchTest {
 
     @Test
     public void testBasicWhileWithNesting() throws IOException {
-        String insn = TestHelper.getAsString(getClass(), "mth_while2");
         String good = "while (a ^ d) {\n"
                 + "    if (e) {\n"
                 + "        System.out.println(e);\n"
                 + "    }\n"
                 + "}";
-        assertEquals(good, insn);
+        check(getClass(), "mth_while2", good);
     }
 
     public void mth_dowhile(int i, boolean d, boolean e, boolean f) {
@@ -381,11 +363,10 @@ public class BranchTest {
 
     @Test
     public void testDoWhile() throws IOException {
-        String insn = TestHelper.getAsString(getClass(), "mth_dowhile");
         String good = "do {\n"
                 + "    System.out.println(d);\n"
                 + "} while (d || e || f);";
-        assertEquals(good, insn);
+        check(getClass(), "mth_dowhile", good);
     }
 
     private static enum TestEnum {
@@ -416,7 +397,6 @@ public class BranchTest {
 
     @Test
     public void testLookupSwitch() throws IOException {
-        String insn = TestHelper.getAsString(getClass(), "mth_lookupswitch");
         String good =
                 "switch (BranchTest.$SWITCH_TABLE$org$spongepowered$test$ast$BranchTest$TestEnum()[ie.ordinal()]) {\n"
                         + "case 1:\n"
@@ -428,7 +408,7 @@ public class BranchTest {
                         + "default:\n"
                         + "    System.out.println(d);\n"
                         + "}";
-        assertEquals(good, insn);
+        check(getClass(), "mth_lookupswitch", good);
     }
 
     public void mth_tableswitch(int i, TestEnum ie, boolean a, boolean c, boolean d) {
@@ -447,7 +427,6 @@ public class BranchTest {
 
     @Test
     public void testTableSwitch() throws IOException {
-        String insn = TestHelper.getAsString(getClass(), "mth_tableswitch");
         // this test produces the raw switch because the test helper decompiles
         // single methods and therefore the emitter lacks the information to
         // cleanup the switch condition and cases.
@@ -462,7 +441,7 @@ public class BranchTest {
                         + "default:\n"
                         + "    System.out.println(d);\n"
                         + "}";
-        assertEquals(good, insn);
+        check(getClass(), "mth_tableswitch", good);
     }
 
     private void mth_ifnestedinstanceof(boolean a, Object b) {
@@ -476,14 +455,13 @@ public class BranchTest {
 
     @Test
     public void testIfWithNestedInstanceof() throws IOException {
-        String insn = TestHelper.getAsString(getClass(), "mth_ifnestedinstanceof");
         String good = "if (!a) {\n"
                 + "    System.out.println(a);\n"
                 + "    if (b instanceof String) {\n"
                 + "        System.out.println(b);\n"
                 + "    }\n"
                 + "}";
-        assertEquals(good, insn);
+        check(getClass(), "mth_ifnestedinstanceof", good);
     }
 
     public boolean mth_ifred(int i, boolean a, boolean b, boolean c, boolean d, boolean e, boolean f) {
@@ -498,7 +476,6 @@ public class BranchTest {
 
     @Test
     public void testIfWithReturns() throws IOException {
-        String insn = TestHelper.getAsString(getClass(), "mth_ifred");
         // This output looks wrong because there is no type information to
         // convert the ints to bools
         String good = "if (a != b) {\n"
@@ -508,7 +485,7 @@ public class BranchTest {
                 + "    return c ? 0 : 1;\n"
                 + "}\n"
                 + "return 0;";
-        assertEquals(good, insn);
+        check(getClass(), "mth_ifred", good);
     }
 
     public void mth_ifnestedelse(int i, boolean a, boolean b, boolean c, boolean d, boolean e, boolean f) {
@@ -525,7 +502,6 @@ public class BranchTest {
 
     @Test
     public void testIfWithNestedElse() throws IOException {
-        String insn = TestHelper.getAsString(getClass(), "mth_ifnestedelse");
         String good = "if (a) {\n"
                 + "    if (b) {\n"
                 + "        System.out.println(a);\n"
@@ -535,7 +511,7 @@ public class BranchTest {
                 + "} else {\n"
                 + "    System.out.println(c);\n"
                 + "}";
-        assertEquals(good, insn);
+        check(getClass(), "mth_ifnestedelse", good);
     }
 
     public void mth_whilebreak(int i, boolean a, boolean d, boolean e) {
@@ -549,14 +525,13 @@ public class BranchTest {
 
     @Test
     public void testBasicWhileBreak() throws IOException {
-        String insn = TestHelper.getAsString(getClass(), "mth_whilebreak");
         String good = "while (a) {\n"
                 + "    if (d) {\n"
                 + "        break;\n"
                 + "    }\n"
                 + "    System.out.println(e);\n"
                 + "}";
-        assertEquals(good, insn);
+        check(getClass(), "mth_whilebreak", good);
     }
 
     public void mth_whilecontinue(int i, boolean a, boolean d, boolean e) {
@@ -570,14 +545,13 @@ public class BranchTest {
 
     @Test
     public void testBasicWhileContinue() throws IOException {
-        String insn = TestHelper.getAsString(getClass(), "mth_whilecontinue");
         String good = "while (a) {\n"
                 + "    if (d) {\n"
                 + "        continue;\n"
                 + "    }\n"
                 + "    System.out.println(e);\n"
                 + "}";
-        assertEquals(good, insn);
+        check(getClass(), "mth_whilecontinue", good);
     }
 
     public void mth_dowhilebreak(int i, boolean a, boolean d, boolean e) {
@@ -591,14 +565,13 @@ public class BranchTest {
 
     @Test
     public void testBasicDoWhileBreak() throws IOException {
-        String insn = TestHelper.getAsString(getClass(), "mth_dowhilebreak");
         String good = "do {\n"
                 + "    System.out.println(i);\n"
                 + "    if (d) {\n"
                 + "        break;\n"
                 + "    }\n"
                 + "} while (a);";
-        assertEquals(good, insn);
+        check(getClass(), "mth_dowhilebreak", good);
     }
 
     public void mth_whiletrue(int i, boolean a, boolean d, boolean e) {
@@ -609,11 +582,10 @@ public class BranchTest {
 
     @Test
     public void testWhileTrue() throws IOException {
-        String insn = TestHelper.getAsString(getClass(), "mth_whiletrue");
         String good = "while (true) {\n"
                 + "    System.out.println(e);\n"
                 + "}";
-        assertEquals(good, insn);
+        check(getClass(), "mth_whiletrue", good);
     }
 
     public void mth_ifthenwhile(int i, boolean a, boolean d, boolean e) {
@@ -627,14 +599,13 @@ public class BranchTest {
 
     @Test
     public void testIfThenWhile() throws IOException {
-        String insn = TestHelper.getAsString(getClass(), "mth_ifthenwhile");
         String good = "if (a) {\n"
                 + "    return;\n"
                 + "}\n"
                 + "while (d) {\n"
                 + "    System.out.println(e);\n"
                 + "}";
-        assertEquals(good, insn);
+        check(getClass(), "mth_ifthenwhile", good);
     }
 
     @Test
@@ -667,7 +638,7 @@ public class BranchTest {
         String good = "for (i = 0; i < 5; i++) {\n"
                 + "    System.out.println(c);\n"
                 + "}";
-        assertEquals(good, insn);
+        Assert.assertEquals(good, insn);
     }
 
     @Test
@@ -707,7 +678,7 @@ public class BranchTest {
                 + "        System.out.println(c);\n"
                 + "    }\n"
                 + "}";
-        assertEquals(good, insn);
+        Assert.assertEquals(good, insn);
     }
 
 }

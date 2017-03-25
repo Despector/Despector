@@ -25,38 +25,24 @@
 package org.spongepowered.despector;
 
 import org.spongepowered.despector.ast.type.TypeEntry;
-import org.spongepowered.despector.decompiler.Decompiler;
-import org.spongepowered.despector.decompiler.Decompilers;
-import org.spongepowered.despector.emitter.Emitter;
-import org.spongepowered.despector.emitter.Emitters;
-
-import java.util.function.Function;
 
 public enum Language {
 
-    JAVA(Decompilers.JAVA, (t)->".java", Emitters.JAVA),
-    KOTLIN(Decompilers.KOTLIN, (t)->".kt", Emitters.KOTLIN),
-    ANY(Decompilers.WILD, (t)->t.getLanguage().getFileExt(t), Emitters.WILD);
+    JAVA(".java"),
+    KOTLIN(".kt"),
+    ANY(null);
 
-    private final Decompiler decompiler;
-    private final Function<TypeEntry, String> ext;
-    private final Emitter emitter;
+    private final String ext;
 
-    Language(Decompiler decomp, Function<TypeEntry, String> ext, Emitter emitter) {
-        this.decompiler = decomp;
+    Language(String ext) {
         this.ext = ext;
-        this.emitter = emitter;
     }
 
-    public Decompiler getDecompiler() {
-        return this.decompiler;
+    public String getExtension(TypeEntry type) {
+        if (this.ext != null) {
+            return this.ext;
+        }
+        return type.getLanguage().getExtension(type);
     }
 
-    public String getFileExt(TypeEntry type) {
-        return this.ext.apply(type);
-    }
-
-    public Emitter getEmitter() {
-        return this.emitter;
-    }
 }

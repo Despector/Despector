@@ -31,7 +31,9 @@ import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.despector.Language;
 import org.spongepowered.despector.ast.SourceSet;
 import org.spongepowered.despector.ast.type.TypeEntry;
+import org.spongepowered.despector.decompiler.Decompilers;
 import org.spongepowered.despector.emitter.EmitterContext;
+import org.spongepowered.despector.emitter.Emitters;
 import org.spongepowered.despector.emitter.format.EmitterFormat;
 
 import java.io.IOException;
@@ -64,10 +66,10 @@ public class FullClassTests {
         ClassNode cn = new ClassNode();
         cr.accept(cn, 0);
         SourceSet src = new SourceSet();
-        TypeEntry type = lang.getDecompiler().decompile(cn, src);
+        TypeEntry type = Decompilers.get(lang).decompile(cn, src);
         StringWriter writer = new StringWriter();
         EmitterContext ctx = new EmitterContext(writer, EmitterFormat.defaults());
-        lang.getEmitter().emit(ctx, type);
+        Emitters.get(lang).emit(ctx, type);
         String source_str = new String(Files.readAllBytes(Paths.get(source.toURI())));
         Assert.assertEquals(source_str, writer.toString());
     }

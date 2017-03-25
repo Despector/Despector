@@ -24,7 +24,7 @@
  */
 package org.spongepowered.test.ast;
 
-import static org.junit.Assert.assertEquals;
+import static org.spongepowered.test.util.TestHelper.check;
 
 import org.junit.Test;
 import org.spongepowered.test.util.TestHelper;
@@ -40,8 +40,7 @@ public class OperatorsTest {
 
     @Test
     public void testIntConstant() throws IOException {
-        String mth = TestHelper.getAsString(getClass(), "mth_intconstant");
-        assertEquals("int i = 65;", mth);
+        check(getClass(), "mth_intconstant", "int i = 65;");
     }
 
     private void mth_neg(int a, int b) {
@@ -50,8 +49,7 @@ public class OperatorsTest {
 
     @Test
     public void testUnaryNegative() throws IOException {
-        String mth = TestHelper.getAsString(getClass(), "mth_neg");
-        assertEquals("int i = -(a + b);", mth);
+        check(getClass(), "mth_neg", "int i = -(a + b);");
     }
     
     private void mth_floatcmp(float a, float b) {
@@ -60,8 +58,7 @@ public class OperatorsTest {
 
     @Test
     public void testFloatCompare() throws IOException {
-        String mth = TestHelper.getAsString(getClass(), "mth_floatcmp");
-        assertEquals("boolean z = a <= b;", mth);
+        check(getClass(), "mth_floatcmp", "boolean z = a <= b;");
     }
 
 }
