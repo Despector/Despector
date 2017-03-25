@@ -29,7 +29,6 @@ import org.spongepowered.despector.decompiler.method.graph.GraphOperation;
 import org.spongepowered.despector.decompiler.method.graph.data.opcode.BodyOpcodeBlock;
 import org.spongepowered.despector.decompiler.method.graph.data.opcode.ConditionalOpcodeBlock;
 import org.spongepowered.despector.decompiler.method.graph.data.opcode.OpcodeBlock;
-import org.spongepowered.despector.decompiler.method.graph.data.opcode.TryCatchMarkerOpcodeBlock;
 import org.spongepowered.despector.util.AstUtil;
 
 import java.util.Iterator;

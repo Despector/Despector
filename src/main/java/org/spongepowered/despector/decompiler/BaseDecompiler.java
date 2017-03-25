@@ -42,6 +42,7 @@ import org.spongepowered.despector.ast.type.TypeEntry;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
@@ -70,7 +71,12 @@ public class BaseDecompiler implements Decompiler {
 
     @Override
     public TypeEntry decompile(File cls_path, SourceSet source) throws IOException {
-        ClassReader reader = new ClassReader(new FileInputStream(cls_path));
+        return decompile(new FileInputStream(cls_path), source);
+    }
+
+    @Override
+    public TypeEntry decompile(InputStream cls_path, SourceSet source) throws IOException {
+        ClassReader reader = new ClassReader(cls_path);
         ClassNode cn = new ClassNode();
         reader.accept(cn, 0);
         return decompile(cn, source);

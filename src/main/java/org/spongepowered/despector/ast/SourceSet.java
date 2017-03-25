@@ -32,14 +32,21 @@ import org.spongepowered.despector.ast.type.EnumEntry;
 import org.spongepowered.despector.ast.type.InterfaceEntry;
 import org.spongepowered.despector.ast.type.TypeEntry;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * A source set for types which are part of the obfuscated source being mapped.
  */
 public class SourceSet {
+
+    private Loader loader;
+    private final Set<String> load_failed_cache = new HashSet<>();
 
     private final Map<String, TypeEntry> classes = new HashMap<>();
     private final Map<String, EnumEntry> enums = new HashMap<>();
@@ -49,6 +56,14 @@ public class SourceSet {
     private final Map<String, AnnotationType> annotations = new HashMap<>();
 
     public SourceSet() {
+    }
+
+    public Loader getLoader() {
+        return this.loader;
+    }
+
+    public void setLoader(Loader loader) {
+        this.loader = loader;
     }
 
     /**
@@ -76,6 +91,21 @@ public class SourceSet {
             return entry;
         }
         TypeEntry entry = this.classes.get(name);
+        if (entry == null && this.loader != null && !this.load_failed_cache.contains(name)) {
+            InputStream data = this.loader.find(name);
+            if (data == null) {
+                this.load_failed_cache.add(name);
+                return null;
+            }
+            try {
+                entry = Language.ANY.getDecompiler().decompile(data, this);
+            } catch (IOException e) {
+                e.printStackTrace();
+                this.load_failed_cache.add(name);
+                return null;
+            }
+            add(entry);
+        }
         return entry;
     }
 
@@ -126,6 +156,12 @@ public class SourceSet {
 
     public Collection<AnnotationType> getAllAnnotations() {
         return this.annotations.values();
+    }
+
+    public static interface Loader {
+
+        InputStream find(String name);
+
     }
 
 }

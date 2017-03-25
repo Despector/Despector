@@ -82,11 +82,18 @@ public class Despector {
     }
 
     public static String decompile(InputStream input) throws IOException {
-        ClassReader reader = new ClassReader(input);
-        ClassNode cn = new ClassNode();
-        reader.accept(cn, 0);
         SourceSet source = new SourceSet();
-        TypeEntry type = Decompilers.WILD.decompile(cn, source);
+        return decompile(input, source);
+    }
+
+    public static String decompile(InputStream input, SourceSet.Loader loader) throws IOException {
+        SourceSet source = new SourceSet();
+        source.setLoader(loader);
+        return decompile(input, source);
+    }
+
+    public static String decompile(InputStream input, SourceSet source) throws IOException {
+        TypeEntry type = Decompilers.WILD.decompile(input, source);
         StringWriter writer = new StringWriter();
         EmitterContext ctx = new EmitterContext(writer, EmitterFormat.defaults());
         Emitters.WILD.emit(ctx, type);

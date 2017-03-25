@@ -30,6 +30,7 @@ import org.spongepowered.despector.ast.type.TypeEntry;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Path;
 
 public interface Decompiler {
@@ -37,6 +38,8 @@ public interface Decompiler {
     TypeEntry decompile(Path cls_path, SourceSet source) throws IOException;
 
     TypeEntry decompile(File cls_path, SourceSet source) throws IOException;
+
+    TypeEntry decompile(InputStream cls_path, SourceSet source) throws IOException;
 
     TypeEntry decompile(ClassNode cn, SourceSet source);
 
