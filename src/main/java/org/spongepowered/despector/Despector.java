@@ -92,10 +92,14 @@ public class Despector {
     }
 
     public static String decompile(InputStream input, SourceSet source) throws IOException {
-        TypeEntry type = Decompilers.WILD.decompile(input, source);
+        return decompile(input, source, Language.ANY);
+    }
+
+    public static String decompile(InputStream input, SourceSet source, Language lang) throws IOException {
+        TypeEntry type = Decompilers.get(lang).decompile(input, source);
         StringWriter writer = new StringWriter();
         EmitterContext ctx = new EmitterContext(writer, EmitterFormat.defaults());
-        Emitters.WILD.emit(ctx, type);
+        Emitters.get(lang).emit(ctx, type);
         return writer.toString();
     }
 
