@@ -24,12 +24,11 @@
  */
 package org.spongepowered.despector.ast.members.insn.misc;
 
-import static org.spongepowered.despector.util.TypeHelper.checkType;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
 import org.spongepowered.despector.ast.members.insn.Statement;
 import org.spongepowered.despector.ast.members.insn.arg.Instruction;
-import org.spongepowered.despector.util.TypeHelper;
 
 /**
  * A statement throwing an exception type.
@@ -39,7 +38,7 @@ public class Throw implements Statement {
     private Instruction ex;
 
     public Throw(Instruction arg) {
-        this.ex = checkType(arg, TypeHelper.IS_OBJECT, "exception");
+        this.ex = checkNotNull(arg, "ex");
     }
 
     /**
@@ -53,7 +52,7 @@ public class Throw implements Statement {
      * Sets the exception object being thrown.
      */
     public void setException(Instruction ex) {
-        this.ex = checkType(ex, TypeHelper.IS_OBJECT, "exception");
+        this.ex = checkNotNull(ex, "ex");
     }
 
     @Override

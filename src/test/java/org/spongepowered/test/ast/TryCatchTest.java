@@ -29,8 +29,6 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 import org.spongepowered.test.util.TestHelper;
 
-import java.io.IOException;
-
 public class TryCatchTest {
 
     public void mth_trycatch(int i, Object o) {
@@ -42,7 +40,7 @@ public class TryCatchTest {
     }
 
     @Test
-    public void testmth_trycatch() throws IOException {
+    public void testmth_trycatch() {
         String insn = TestHelper.getAsString(getClass(), "mth_trycatch");
         String good = "try {\n"
                     + "    i = o.hashCode();\n"
@@ -63,7 +61,7 @@ public class TryCatchTest {
     }
 
     @Test
-    public void testmth_trycatch2() throws IOException {
+    public void testmth_trycatch2() {
         String insn = TestHelper.getAsString(getClass(), "mth_trycatch2");
         String good = "try {\n"
                     + "    i = o.hashCode();\n"
@@ -84,7 +82,7 @@ public class TryCatchTest {
     }
 
     @Test
-    public void testmth_trycatch3() throws IOException {
+    public void testmth_trycatch3() {
         String insn = TestHelper.getAsString(getClass(), "mth_trycatch3");
         String good = "try {\n"
                     + "    i = o.hashCode();\n"
@@ -105,7 +103,7 @@ public class TryCatchTest {
     }
 
     @Test
-    public void testmth_trycatchreturn() throws IOException {
+    public void testmth_trycatchreturn() {
         String insn = TestHelper.getAsString(getClass(), "mth_trycatchreturn");
         String good = "try {\n"
                     + "    i = o.hashCode();\n"
@@ -128,7 +126,7 @@ public class TryCatchTest {
     }
 
     @Test
-    public void testmth_trycatchreturn2() throws IOException {
+    public void testmth_trycatchreturn2() {
         String insn = TestHelper.getAsString(getClass(), "mth_trycatchreturn2");
         String good = "try {\n"
                     + "    i = o.hashCode();\n"
@@ -153,7 +151,7 @@ public class TryCatchTest {
     }
 
     @Test
-    public void testmth_nestedtrycatch() throws IOException {
+    public void testmth_nestedtrycatch() {
         String insn = TestHelper.getAsString(getClass(), "mth_nestedtrycatch");
         String good = "try {\n"
                 + "    try {\n"
@@ -178,7 +176,7 @@ public class TryCatchTest {
     }
 
     @Test
-    public void testTryCatchWithControlFlow() throws IOException {
+    public void testTryCatchWithControlFlow() {
         String insn = TestHelper.getAsString(getClass(), "mth_trycatchWithControlFlow");
         String good = "try {\n"
                     + "    i = o.hashCode();\n"

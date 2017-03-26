@@ -24,10 +24,9 @@
  */
 package org.spongepowered.despector.ast.members.insn.arg;
 
-import static org.spongepowered.despector.util.TypeHelper.checkType;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
-import org.spongepowered.despector.util.TypeHelper;
 
 /**
  * An instruction performing a comparison between two numerical values.
@@ -38,8 +37,8 @@ public class NumberCompare implements Instruction {
     protected Instruction right;
 
     public NumberCompare(Instruction left, Instruction right) {
-        this.left = checkType(left, TypeHelper.IS_NUMBER, "left");
-        this.right = checkType(right, TypeHelper.IS_NUMBER, "right");
+        this.left = checkNotNull(left, "left");
+        this.right = checkNotNull(right, "right");
     }
 
     /**
@@ -53,7 +52,7 @@ public class NumberCompare implements Instruction {
      * Sets the left operand of the comparison.
      */
     public void setLeftOperand(Instruction left) {
-        this.left = checkType(left, TypeHelper.IS_NUMBER, "left");
+        this.left = checkNotNull(left, "left");
     }
 
     /**
@@ -67,7 +66,7 @@ public class NumberCompare implements Instruction {
      * Sets the right operand of the comparison.
      */
     public void setRightOperand(Instruction right) {
-        this.right = checkType(right, TypeHelper.IS_NUMBER, "right");
+        this.right = checkNotNull(right, "right");
     }
 
     @Override

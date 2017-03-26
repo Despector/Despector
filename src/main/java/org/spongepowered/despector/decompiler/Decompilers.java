@@ -26,6 +26,7 @@ package org.spongepowered.despector.decompiler;
 
 import org.spongepowered.despector.Language;
 import org.spongepowered.despector.decompiler.kotlin.method.graph.create.ElvisGraphProducerStep;
+import org.spongepowered.despector.decompiler.kotlin.method.graph.operate.KotlinTernaryPrePassOperation;
 import org.spongepowered.despector.decompiler.kotlin.step.KotlinMethodInfoStep;
 import org.spongepowered.despector.decompiler.method.MethodDecompiler;
 import org.spongepowered.despector.decompiler.method.graph.create.JumpGraphProducerStep;
@@ -102,7 +103,7 @@ public class Decompilers {
         KOTLIN_METHOD.addCleanupOperation(new JumpSeparateOperation());
         KOTLIN_METHOD.addCleanupOperation(new BlockTargetOperation());
         KOTLIN_METHOD.addCleanupOperation(new BreakPrePassOperation());
-        KOTLIN_METHOD.addCleanupOperation(new TernaryPrePassOperation());
+        KOTLIN_METHOD.addCleanupOperation(new KotlinTernaryPrePassOperation());
         KOTLIN_METHOD.addProcessor(new TryCatchBlockProcessor());
         KOTLIN_METHOD.addProcessor(new InternalBlockProcessor());
         KOTLIN_METHOD.addProcessor(new SwitchBlockProcessor());

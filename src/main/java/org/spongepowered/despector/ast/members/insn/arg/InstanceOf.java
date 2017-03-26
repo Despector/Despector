@@ -26,7 +26,6 @@ package org.spongepowered.despector.ast.members.insn.arg;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spongepowered.despector.util.TypeHelper.checkType;
 
 import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
 import org.spongepowered.despector.util.TypeHelper;
@@ -40,7 +39,7 @@ public class InstanceOf implements Instruction {
     private String type;
 
     public InstanceOf(Instruction check, String type) {
-        this.check = checkType(check, TypeHelper.IS_OBJECT_OR_ARRAY, "check");
+        this.check = checkNotNull(check, "check");
         this.type = checkNotNull(type, "type");
         checkArgument(TypeHelper.IS_OBJECT_OR_ARRAY.test(this.type));
     }
@@ -56,7 +55,7 @@ public class InstanceOf implements Instruction {
      * Sets the value being tested, must be an array or object.
      */
     public void setCheckedValue(Instruction val) {
-        this.check = checkType(val, TypeHelper.IS_OBJECT_OR_ARRAY, "check");
+        this.check = checkNotNull(val, "check");
     }
 
     /**

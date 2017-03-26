@@ -26,6 +26,7 @@ package org.spongepowered.despector.emitter;
 
 import org.spongepowered.despector.Language;
 import org.spongepowered.despector.ast.kotlin.Elvis;
+import org.spongepowered.despector.ast.kotlin.When;
 import org.spongepowered.despector.ast.members.FieldEntry;
 import org.spongepowered.despector.ast.members.MethodEntry;
 import org.spongepowered.despector.ast.members.insn.Comment;
@@ -117,6 +118,7 @@ import org.spongepowered.despector.emitter.kotlin.instruction.KotlinInstanceMeth
 import org.spongepowered.despector.emitter.kotlin.instruction.KotlinInstanceOfEmitter;
 import org.spongepowered.despector.emitter.kotlin.instruction.KotlinStaticMethodInvokeEmitter;
 import org.spongepowered.despector.emitter.kotlin.instruction.KotlinTernaryEmitter;
+import org.spongepowered.despector.emitter.kotlin.instruction.WhenEmitter;
 import org.spongepowered.despector.emitter.kotlin.special.KotlinCompanionClassEmitter;
 import org.spongepowered.despector.emitter.kotlin.special.KotlinDataClassEmitter;
 import org.spongepowered.despector.emitter.kotlin.special.KotlinGenericsEmitter;
@@ -263,6 +265,7 @@ public class Emitters {
         KOTLIN_SET.setInstructionEmitter(InstanceOf.class, new KotlinInstanceOfEmitter());
         KOTLIN_SET.setInstructionEmitter(Cast.class, new KotlinCastEmitter());
         KOTLIN_SET.setInstructionEmitter(Elvis.class, new ElvisEmitter());
+        KOTLIN_SET.setInstructionEmitter(When.class, new WhenEmitter());
 
         KOTLIN_SET.setConditionEmitter(BooleanCondition.class, new KotlinBooleanConditionEmitter());
 

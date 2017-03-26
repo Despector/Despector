@@ -26,7 +26,6 @@ package org.spongepowered.despector.util;
 
 import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
-import org.spongepowered.despector.ast.members.insn.arg.Instruction;
 
 import java.util.List;
 import java.util.function.Predicate;
@@ -271,38 +270,6 @@ public final class TypeHelper {
         }
         return t.startsWith("L");
     };
-
-    public static Predicate<String> looseCompare(String type) {
-        return (t) -> {
-            if (type.equals(t)) {
-                return true;
-            }
-            if (type.equals("Z") && t.equals("I")) {
-                return true;
-            }
-            return false;
-        };
-    }
-
-    public static <T extends Instruction> T checkType(T insn, Predicate<String> type, String name) {
-        if (insn == null) {
-            throw new NullPointerException(name);
-        }
-        if (!type.test(insn.inferType())) {
-            throw new IllegalArgumentException("Incorrect inferred type for " + name + " " + insn.inferType() + " expected: " + type);
-        }
-        return insn;
-    }
-
-    public static <T extends Instruction> T checkType(T insn, String type, String name) {
-        if (insn == null) {
-            throw new NullPointerException(name);
-        }
-        if (!insn.inferType().equals(type)) {
-            throw new IllegalArgumentException("Incorrect inferred type for " + name + " " + insn.inferType() + " expected: " + type);
-        }
-        return insn;
-    }
 
     private TypeHelper() {
     }

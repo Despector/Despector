@@ -24,7 +24,7 @@
  */
 package org.spongepowered.despector.ast.members.insn.arg.field;
 
-import static org.spongepowered.despector.util.TypeHelper.checkType;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
 import org.spongepowered.despector.ast.members.insn.arg.Instruction;
@@ -40,8 +40,8 @@ public class ArrayAccess implements Instruction {
     private Instruction index;
 
     public ArrayAccess(Instruction array, Instruction index) {
-        this.array = checkType(array, (t) -> t.startsWith("["), "array");
-        this.index = checkType(index, "I", "index");
+        this.array = checkNotNull(array, "array");
+        this.index = checkNotNull(index, "index");
     }
 
     /**
@@ -55,7 +55,7 @@ public class ArrayAccess implements Instruction {
      * Sets the instruction providing the array object.
      */
     public void setArrayVar(Instruction array) {
-        this.array = checkType(array, (t) -> t.startsWith("["), "array");
+        this.array = checkNotNull(array, "array");
     }
 
     /**
@@ -69,7 +69,7 @@ public class ArrayAccess implements Instruction {
      * Sets the instruction providing the array index.
      */
     public void setIndex(Instruction index) {
-        this.index = checkType(index, "I", "index");
+        this.index = checkNotNull(index, "index");
     }
 
     @Override

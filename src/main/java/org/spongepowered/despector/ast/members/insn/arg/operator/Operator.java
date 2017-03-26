@@ -24,11 +24,10 @@
  */
 package org.spongepowered.despector.ast.members.insn.arg.operator;
 
-import static org.spongepowered.despector.util.TypeHelper.checkType;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
 import org.spongepowered.despector.ast.members.insn.arg.Instruction;
-import org.spongepowered.despector.util.TypeHelper;
 
 /**
  * An abstract instruction arg for binary operator.
@@ -41,8 +40,8 @@ public abstract class Operator implements Instruction {
     protected Instruction right;
 
     public Operator(Instruction left, Instruction right) {
-        this.left = checkType(left, TypeHelper.IS_NUMBER_OR_BOOL, "left");
-        this.right = checkType(right, TypeHelper.IS_NUMBER_OR_BOOL, "right");
+        this.left = checkNotNull(left, "left");
+        this.right = checkNotNull(right, "right");
     }
 
     /**
@@ -56,7 +55,7 @@ public abstract class Operator implements Instruction {
      * Sets the left operand.
      */
     public void setLeftOperand(Instruction left) {
-        this.left = checkType(left, TypeHelper.IS_NUMBER, "left");
+        this.left = checkNotNull(left, "left");
     }
 
     /**
@@ -70,7 +69,7 @@ public abstract class Operator implements Instruction {
      * Sets the right operand.
      */
     public void setRightOperand(Instruction right) {
-        this.right = checkType(right, TypeHelper.IS_NUMBER, "right");
+        this.right = checkNotNull(right, "right");
     }
 
     /**

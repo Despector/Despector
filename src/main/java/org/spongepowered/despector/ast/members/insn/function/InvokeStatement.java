@@ -24,7 +24,6 @@
  */
 package org.spongepowered.despector.ast.members.insn.function;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
@@ -41,7 +40,6 @@ public class InvokeStatement implements Statement {
     private Instruction inner;
 
     public InvokeStatement(Instruction inner) {
-        checkArgument(inner instanceof MethodInvoke || inner instanceof New);
         this.inner = checkNotNull(inner, "instruction");
     }
 

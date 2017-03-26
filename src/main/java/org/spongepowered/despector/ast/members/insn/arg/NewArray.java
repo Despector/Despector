@@ -24,7 +24,6 @@
  */
 package org.spongepowered.despector.ast.members.insn.arg;
 
-import static org.spongepowered.despector.util.TypeHelper.checkType;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
@@ -43,7 +42,7 @@ public class NewArray implements Instruction {
 
     public NewArray(String type, Instruction size, @Nullable Instruction[] values) {
         this.type = checkNotNull(type, "type");
-        this.size = checkType(size, "I", "size");
+        this.size = checkNotNull(size, "size");
         this.values = values;
     }
 
@@ -72,7 +71,7 @@ public class NewArray implements Instruction {
      * Gets the size of the new array, must type check as an integer.
      */
     public void setSize(Instruction size) {
-        this.size = checkType(size, "I", "size");
+        this.size = checkNotNull(size, "size");
     }
 
     /**

@@ -27,29 +27,22 @@ package org.spongepowered.test.util;
 import com.google.common.collect.Maps;
 import org.junit.Assert;
 import org.objectweb.asm.ClassReader;
-import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.ClassNode;
-import org.objectweb.asm.tree.MethodNode;
-import org.spongepowered.despector.ast.AccessModifier;
-import org.spongepowered.despector.ast.Locals;
 import org.spongepowered.despector.ast.SourceSet;
 import org.spongepowered.despector.ast.members.MethodEntry;
-import org.spongepowered.despector.ast.members.insn.StatementBlock;
-import org.spongepowered.despector.ast.type.ClassEntry;
 import org.spongepowered.despector.ast.type.TypeEntry;
 import org.spongepowered.despector.decompiler.Decompilers;
 import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.Emitters;
 import org.spongepowered.despector.emitter.format.EmitterFormat;
-import org.spongepowered.despector.util.AstUtil;
-import org.spongepowered.despector.util.SignatureParser;
 
-import java.io.*;
-import java.util.Iterator;
-import java.util.List;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.StringWriter;
 import java.util.Map;
-
-import static org.objectweb.asm.Opcodes.*;
 
 public class TestHelper {
 
@@ -120,7 +113,6 @@ public class TestHelper {
         return getAsString(type, method);
     }
 
-    @SuppressWarnings("unchecked")
     public static void check(Class<?> cls, String method_name, String expected) {
         TypeEntry type = get(cls);
         MethodEntry method = type.getMethodSafe(method_name);

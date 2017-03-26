@@ -31,6 +31,7 @@ import org.spongepowered.despector.decompiler.Decompiler;
 import org.spongepowered.despector.decompiler.Decompilers;
 import org.spongepowered.despector.decompiler.DirectoryWalker;
 import org.spongepowered.despector.decompiler.JarWalker;
+import org.spongepowered.despector.emitter.Emitter;
 import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.Emitters;
 import org.spongepowered.despector.emitter.format.EmitterFormat;
@@ -182,6 +183,8 @@ public class Despector {
             }
         }
 
+        Emitter emitter = Emitters.get(LANGUAGE);
+
         for (TypeEntry type : source.getAllClasses()) {
             if (type.isInnerClass() || type.isAnonType()) {
                 continue;
@@ -191,8 +194,8 @@ public class Despector {
                 Files.createDirectories(out.getParent());
             }
             try (FileWriter writer = new FileWriter(out.toFile())) {
-                EmitterContext emitter = new EmitterContext(writer, formatter);
-                emitter.emitOuterType(type);
+                EmitterContext ctx = new EmitterContext(writer, formatter);
+                emitter.emit(ctx, type);
             }
         }
 

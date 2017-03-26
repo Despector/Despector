@@ -139,7 +139,7 @@ public class KotlinMethodEntryEmitter extends MethodEntryEmitter {
                     // generic types from the method signature
                     generics.emitTypeSignature(ctx, sig.getParameters().get(i));
                 } else {
-                    KotlinEmitterUtil.emitType(ctx, method.getParamTypes().get(i));
+                    KotlinEmitterUtil.emitParamType(ctx, method.getParamTypes().get(i));
                 }
             } else {
                 Local local = block.getLocals().getLocal(param_index);
@@ -149,7 +149,7 @@ public class KotlinMethodEntryEmitter extends MethodEntryEmitter {
                 if (insn.getSignature() != null) {
                     generics.emitTypeSignature(ctx, insn.getSignature());
                 } else {
-                    KotlinEmitterUtil.emitType(ctx, method.getParamTypes().get(i));
+                    KotlinEmitterUtil.emitParamType(ctx, method.getParamTypes().get(i));
                 }
             }
             if (i < method.getParamTypes().size() - 1) {
