@@ -1,31 +1,22 @@
-buildscript {
-    repositories {
-        jcenter()
-        maven {
-            url "https://plugins.gradle.org/m2/"
-        }
-    }
-    dependencies {
-        classpath 'gradle.plugin.nl.javadude.gradle.plugins:license-gradle-plugin:0.12.1'
-        classpath 'com.github.jengelman.gradle.plugins:shadow:1.2.3'
-    }
-}
+plugins {
+    id 'java'
+    id 'maven'
 
-apply plugin: 'java'
-apply plugin: 'maven'
-// Plugins for IDE project generation
-apply plugin: 'eclipse'
-apply plugin: 'idea'
-apply plugin: 'com.github.johnrengelman.shadow'
+    id 'idea'
+    id 'eclipse'
+
+    id 'net.minecrell.licenser' version '0.3'
+    id 'com.github.johnrengelman.shadow' version '1.2.4'
+}
 
 defaultTasks 'clean', 'licenseFormat', 'build'
 
-group = 'org.spongepowered'
-archivesBaseName = 'despector'
-version = '0.1.0-SNAPSHOT'
-
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
+
+group = 'org.spongepowered'
+archivesBaseName = project.name.toLowerCase()
+version = '0.1.0-SNAPSHOT'
 
 repositories {
     mavenLocal()
@@ -43,6 +34,13 @@ dependencies {
     testCompile 'org.mockito:mockito-core:1.9.5'
 }
 
+// License header formatting
+license {
+    header file('LICENSE')
+    include '**/*.java'
+    newLine = false
+}
+
 // Source compiler configuration
 configure([compileJava, compileTestJava]) {
     options.compilerArgs += ['-Xlint:all', '-Xlint:-path']
@@ -50,8 +48,15 @@ configure([compileJava, compileTestJava]) {
     options.encoding = 'UTF-8'
 }
 
+processResources {
+    // Include LICENSE in final JAR
+    from 'LICENSE'
+}
+
 // Set manifest entries
 jar {
+    classifier 'base'
+
     manifest {
         attributes(
                 'Built-By': System.properties['user.name'],
@@ -59,6 +64,22 @@ jar {
                 'Main-Class': "org.spongepowered.despector.Despector"
         )
     }
+}
+
+shadowJar {
+    classifier ''
+
+    dependencies {
+        include(dependency('com.google.guava:guava'))
+        include(dependency('org.ow2.asm:asm-all'))
+        include(dependency('ninja.leaping.configurate:configurate-core'))
+        include(dependency('ninja.leaping.configurate:configurate-hocon'))
+    }
+}
+
+task sourceJar(type: Jar) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
 }
 
 javadoc {
@@ -76,49 +97,12 @@ task javadocJar(type: Jar, dependsOn: javadoc) {
     from javadoc.destinationDir
 }
 
-task sourceJar(type: Jar) {
-    classifier = 'sources'
-    from sourceSets.main.allSource
-}
-
 artifacts {
+    archives shadowJar
     archives sourceJar
     archives javadocJar
-    archives shadowJar
 }
 
-processResources {
-    // Include LICENSE in final JAR
-    from 'LICENSE'
-}
-
-apply plugin: "com.github.hierynomus.license"
-
-// License header formatting
-license {
-    header = file('LICENSE')
-    include '**/*.java'
-
-    ignoreFailures = false
-    strictCheck = true
-
-    mapping {
-        java = 'SLASHSTAR_STYLE'
-    }
-}
-
-shadowJar {
-    dependencies {
-        include(dependency('com.google.guava:guava:18.0'))
-        include(dependency('org.ow2.asm:asm-all:5.0.3'))
-        include(dependency('ninja.leaping.configurate:configurate-core:3.2'))
-        include(dependency('ninja.leaping.configurate:configurate-hocon:3.2'))
-    }
-}
-
-build.dependsOn shadowJar
-
-// Gradle version used for generating the Gradle wrapper
 task wrapper(type: Wrapper) {
     gradleVersion = '3.1'
 }
