@@ -21,7 +21,7 @@ apply plugin: 'com.github.johnrengelman.shadow'
 defaultTasks 'clean', 'licenseFormat', 'build'
 
 group = 'org.spongepowered'
-archivesBaseName = 'Despector'
+archivesBaseName = 'despector'
 version = '0.1.0-SNAPSHOT'
 
 sourceCompatibility = 1.8
@@ -65,7 +65,6 @@ javadoc {
     options.encoding = 'UTF-8'
     options.charSet = 'UTF-8'
     options.links(
-            'http://docs.guava-libraries.googlecode.com/git-history/v18.0/javadoc/',
             'https://docs.oracle.com/javase/8/docs/api/'
     )
     // Disable the crazy super-strict doclint tool in Java 8
