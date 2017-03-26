@@ -36,7 +36,7 @@ import javax.annotation.Nullable;
 public class TypeParameter {
 
     private String identifier;
-    private TypeSignature class_bound;
+    @Nullable private TypeSignature class_bound;
     private List<TypeSignature> interface_bounds = new ArrayList<>();
 
     public TypeParameter(String ident, @Nullable TypeSignature cl) {

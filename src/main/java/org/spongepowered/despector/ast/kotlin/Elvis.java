@@ -24,6 +24,8 @@
  */
 package org.spongepowered.despector.ast.kotlin;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
 import org.spongepowered.despector.ast.members.insn.arg.Instruction;
 
@@ -36,24 +38,36 @@ public class Elvis implements Instruction {
     private Instruction else_;
 
     public Elvis(Instruction left, Instruction else_) {
-        this.left = left;
-        this.else_ = else_;
+        this.left = checkNotNull(left, "left");
+        this.else_ = checkNotNull(else_, "else");
     }
 
+    /**
+     * Gets the argument of the elvis statement.
+     */
     public Instruction getArg() {
         return this.left;
     }
 
+    /**
+     * Sets the argument of the elvis statement.
+     */
     public void setArg(Instruction insn) {
-        this.left = insn;
+        this.left = checkNotNull(insn, "left");
     }
 
+    /**
+     * Gets the value if the arg is null or zero.
+     */
     public Instruction getElse() {
         return this.else_;
     }
 
+    /**
+     * Sets the value if the arg is null or zero.
+     */
     public void setElse(Instruction insn) {
-        this.else_ = insn;
+        this.else_ = checkNotNull(insn, "else");
     }
 
     @Override

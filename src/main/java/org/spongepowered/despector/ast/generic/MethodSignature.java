@@ -41,7 +41,11 @@ public class MethodSignature {
     private TypeSignature return_type;
 
     public MethodSignature() {
+        this.return_type = VoidTypeSignature.VOID;
+    }
 
+    public MethodSignature(TypeSignature sig) {
+        this.return_type = checkNotNull(sig, "sig");
     }
 
     /**

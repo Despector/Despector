@@ -39,4 +39,9 @@ public class VoidTypeSignature extends TypeSignature {
         return false;
     }
 
+    @Override
+    public String toString() {
+        return "void";
+    }
+
 }

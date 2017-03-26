@@ -24,10 +24,10 @@
  */
 package org.spongepowered.despector.ast.generic;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.annotation.Nullable;
 
 /**
  * A class signature containing information of generic types on the class and
@@ -36,7 +36,7 @@ import java.util.List;
 public class ClassSignature {
 
     private final List<TypeParameter> parameters = new ArrayList<>();
-    private ClassTypeSignature superclass;
+    @Nullable private ClassTypeSignature superclass;
     private final List<ClassTypeSignature> interfaces = new ArrayList<>();
 
     public ClassSignature() {
@@ -53,6 +53,7 @@ public class ClassSignature {
     /**
      * Gets the type signature of the direct superclass.
      */
+    @Nullable
     public ClassTypeSignature getSuperclassSignature() {
         return this.superclass;
     }
@@ -60,8 +61,8 @@ public class ClassSignature {
     /**
      * Sets the type signature of the direct superclass.
      */
-    public void setSuperclassSignature(ClassTypeSignature sig) {
-        this.superclass = checkNotNull(sig, "sig");
+    public void setSuperclassSignature(@Nullable ClassTypeSignature sig) {
+        this.superclass = sig;
     }
 
     /**

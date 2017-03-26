@@ -38,7 +38,7 @@ public class ClassTypeSignature extends TypeSignature {
     private List<TypeArgument> args = new ArrayList<>();
 
     public ClassTypeSignature(String type) {
-        this.type_name = type;
+        this.type_name = checkNotNull(type, "type");
     }
 
     /**
