@@ -24,6 +24,11 @@
  */
 package org.spongepowered.despector.decompiler.method;
 
+import static org.objectweb.asm.Opcodes.ALOAD;
+import static org.objectweb.asm.Opcodes.ASTORE;
+import static org.objectweb.asm.Opcodes.ILOAD;
+import static org.objectweb.asm.Opcodes.ISTORE;
+
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.objectweb.asm.Label;
@@ -32,6 +37,7 @@ import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.LabelNode;
 import org.objectweb.asm.tree.LocalVariableNode;
 import org.objectweb.asm.tree.MethodNode;
+import org.objectweb.asm.tree.VarInsnNode;
 import org.spongepowered.despector.ast.Locals;
 import org.spongepowered.despector.ast.Locals.Local;
 import org.spongepowered.despector.ast.Locals.LocalInstance;
@@ -55,6 +61,7 @@ import java.util.Comparator;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -120,6 +127,28 @@ public class MethodDecompiler {
                 }
             }
         }
+
+        Iterator<AbstractInsnNode> it = asm.instructions.iterator();
+        if (it.hasNext()) {
+            AbstractInsnNode last = it.next();
+            int i = 1;
+            while (it.hasNext()) {
+                AbstractInsnNode next = it.next();
+                if (next.getOpcode() >= ISTORE && next.getOpcode() <= ASTORE && last.getOpcode() >= ILOAD && last.getOpcode() <= ALOAD) {
+                    Local store_local = locals.getLocal(((VarInsnNode) next).var);
+                    LocalInstance store = store_local.getLVTInstance(i);
+                    LocalInstance load = locals.getLocal(((VarInsnNode) last).var).getLVTInstance(i);
+                    if (store == null && load != null) {
+                        LocalInstance new_insn = new LocalInstance(store_local, load.getLVN(), load.getName(),
+                                load.getType(), load.getStart(), load.getEnd());
+                        store_local.addInstance(new_insn);
+                    }
+                }
+                i++;
+            }
+
+        }
+
         return locals;
     }
 

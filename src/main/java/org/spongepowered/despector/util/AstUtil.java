@@ -545,10 +545,7 @@ public final class AstUtil {
             }
             required_stack += getStackDelta(next);
         }
-        if (required_stack == 0) {
-            return 0;
-        }
-        throw new IllegalStateException();
+        return 0;
     }
 
     /**

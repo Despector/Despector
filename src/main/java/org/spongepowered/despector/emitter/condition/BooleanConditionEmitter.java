@@ -25,7 +25,9 @@
 package org.spongepowered.despector.emitter.condition;
 
 import org.spongepowered.despector.ast.members.insn.arg.InstanceOf;
+import org.spongepowered.despector.ast.members.insn.arg.Instruction;
 import org.spongepowered.despector.ast.members.insn.arg.cst.IntConstant;
+import org.spongepowered.despector.ast.members.insn.branch.Ternary;
 import org.spongepowered.despector.ast.members.insn.branch.condition.BooleanCondition;
 import org.spongepowered.despector.emitter.ConditionEmitter;
 import org.spongepowered.despector.emitter.EmitterContext;
@@ -40,19 +42,24 @@ public class BooleanConditionEmitter implements ConditionEmitter<BooleanConditio
         if (bool.isInverse()) {
             ctx.printString("!");
         }
-        if (bool.isInverse() && bool.getConditionValue() instanceof InstanceOf) {
+        emit(ctx, bool.getConditionValue(), bool.isInverse());
+    }
+
+    protected void emit(EmitterContext ctx, Instruction val, boolean parens_needed) {
+        if (parens_needed && val instanceof InstanceOf) {
             ctx.printString("(");
-            ctx.emit(bool.getConditionValue(), "Z");
+            ctx.emit(val, "Z");
             ctx.printString(")");
         } else {
-            ctx.emit(bool.getConditionValue(), "Z");
+            ctx.emit(val, "Z");
         }
     }
 
     protected boolean checkConstant(EmitterContext ctx, BooleanCondition bool) {
-        if (bool.getConditionValue().inferType().equals("I")) {
-            if (bool.getConditionValue() instanceof IntConstant) {
-                IntConstant cst = (IntConstant) bool.getConditionValue();
+        Instruction val = bool.getConditionValue();
+        if (val.inferType().equals("I")) {
+            if (val instanceof IntConstant) {
+                IntConstant cst = (IntConstant) val;
                 if (cst.getConstant() == 0) {
                     ctx.printString("false");
                 } else {
@@ -60,7 +67,52 @@ public class BooleanConditionEmitter implements ConditionEmitter<BooleanConditio
                 }
                 return true;
             }
-            ctx.emit(bool.getConditionValue(), "I");
+            if (val instanceof Ternary) {
+                Ternary ternary = (Ternary) val;
+                if (ternary.getFalseValue() instanceof IntConstant && ternary.getFalseValue() instanceof IntConstant) {
+                    int tr = ((IntConstant) ternary.getTrueValue()).getConstant();
+                    int fl = ((IntConstant) ternary.getFalseValue()).getConstant();
+                    if (tr == 0 && fl == 0) {
+                        ctx.printString("false");
+                    } else if (tr == 0) {
+                        ctx.printString("!(");
+                        ctx.emit(ternary.getCondition());
+                        ctx.printString(")");
+                    } else if (fl == 0) {
+                        ctx.emit(ternary.getCondition());
+                    } else {
+                        ctx.printString("true");
+                    }
+                    return true;
+                } else if (ternary.getTrueValue() instanceof IntConstant) {
+                    if (((IntConstant) ternary.getTrueValue()).getConstant() == 0) {
+                        // !a && b
+                        ctx.printString("!(");
+                        ctx.emit(ternary.getCondition());
+                        ctx.printString(") && ");
+                        ctx.emit(ternary.getFalseValue(), "Z");
+                    } else {
+                        ctx.emit(ternary.getCondition());
+                        ctx.printString(" || ");
+                        ctx.emit(ternary.getFalseValue(), "Z");
+                    }
+                    return true;
+                } else if (ternary.getFalseValue() instanceof IntConstant) {
+                    if (((IntConstant) ternary.getFalseValue()).getConstant() == 0) {
+                        // !a && b
+                        ctx.printString("!(");
+                        ctx.emit(ternary.getCondition());
+                        ctx.printString(") || ");
+                        ctx.emit(ternary.getFalseValue(), "Z");
+                    } else {
+                        ctx.emit(ternary.getCondition());
+                        ctx.printString(" && ");
+                        ctx.emit(ternary.getFalseValue(), "Z");
+                    }
+                    return true;
+                }
+            }
+            ctx.emit(val, "I");
             if (bool.isInverse()) {
                 ctx.printString(" == 0");
             } else {

@@ -162,6 +162,18 @@ public class Locals {
             }
         }
 
+        public LocalInstance getLVTInstance(int index) {
+            if (this.parameter_instance != null) {
+                return this.parameter_instance;
+            }
+            for (LocalInstance insn : this.instances) {
+                if (index >= insn.getStart() - 1 && index <= insn.getEnd()) {
+                    return insn;
+                }
+            }
+            return null;
+        }
+
         public LocalInstance getInstance(int index) {
             if (this.parameter_instance != null) {
                 return this.parameter_instance;
@@ -177,6 +189,14 @@ public class Locals {
                 }
             }
             return null;
+        }
+
+        public void addInstance(LocalInstance insn) {
+            if (insn.getStart() == -1 && insn.getEnd() == -1) {
+                this.parameter_instance = insn;
+            } else {
+                this.instances.add(insn);
+            }
         }
 
         public LocalInstance getParameterInstance() {

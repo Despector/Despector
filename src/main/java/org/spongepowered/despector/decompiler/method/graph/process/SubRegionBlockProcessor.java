@@ -35,6 +35,7 @@ import org.spongepowered.despector.decompiler.method.graph.data.block.InlineBloc
 import org.spongepowered.despector.decompiler.method.graph.data.opcode.ConditionalOpcodeBlock;
 import org.spongepowered.despector.decompiler.method.graph.data.opcode.GotoOpcodeBlock;
 import org.spongepowered.despector.decompiler.method.graph.data.opcode.OpcodeBlock;
+import org.spongepowered.despector.decompiler.method.graph.data.opcode.ProcessedOpcodeBlock;
 import org.spongepowered.despector.decompiler.method.graph.data.opcode.TryCatchMarkerOpcodeBlock;
 import org.spongepowered.despector.util.AstUtil;
 
@@ -106,6 +107,15 @@ public class SubRegionBlockProcessor implements GraphProcessor {
         for (int o = i; o < end; o++) {
             region.add(blocks.get(o));
         }
+
+        OpcodeBlock first = region.get(0);
+        if (first instanceof ConditionalOpcodeBlock && AstUtil.hasStartingRequirement(first.getOpcodes())) {
+            OpcodeBlock prev = blocks.get(i - 1);
+            if (prev instanceof ProcessedOpcodeBlock) {
+                ((ConditionalOpcodeBlock) first).setPrefix(prev);
+            }
+        }
+
         // process the region down to a single block
         try {
             final_blocks.add(partial.getDecompiler().processRegion(partial, region, last, targeted_in_future ? 0 : 1));

@@ -73,18 +73,21 @@ public class ConditionBuilder {
 
         StatementBlock dummy = new StatementBlock(StatementBlock.Type.IF, locals);
         Deque<Instruction> dummy_stack = new ArrayDeque<>();
+        if (block.getPrefix() != null) {
+            block.getPrefix().toBlockSection().appendTo(dummy, dummy_stack);
+        }
         StatementBuilder.appendBlock(block, dummy, locals, dummy_stack);
 
         switch (block.getLast().getOpcode()) {
         case IFEQ: {
-            if (dummy_stack.size() != 1 || !dummy.getStatements().isEmpty()) {
+            if (dummy_stack.size() != 1) {
                 throw new IllegalStateException();
             }
             Instruction val = dummy_stack.pop();
             return new BooleanCondition(val, true);
         }
         case IFNE: {
-            if (dummy_stack.size() != 1 || !dummy.getStatements().isEmpty()) {
+            if (dummy_stack.size() != 1) {
                 throw new IllegalStateException();
             }
             Instruction val = dummy_stack.pop();
@@ -94,7 +97,7 @@ public class ConditionBuilder {
         case IFLE:
         case IFGT:
         case IFGE: {
-            if (dummy_stack.size() != 1 || !dummy.getStatements().isEmpty()) {
+            if (dummy_stack.size() != 1) {
                 throw new IllegalStateException();
             }
             Instruction val = dummy_stack.pop();
@@ -108,7 +111,7 @@ public class ConditionBuilder {
         case IF_ICMPGE:
         case IF_ACMPEQ:
         case IF_ACMPNE: {
-            if (dummy_stack.size() != 2 || !dummy.getStatements().isEmpty()) {
+            if (dummy_stack.size() != 2) {
                 throw new IllegalStateException();
             }
             Instruction b = dummy_stack.pop();
@@ -116,14 +119,14 @@ public class ConditionBuilder {
             return new CompareCondition(a, b, CompareCondition.fromOpcode(block.getLast().getOpcode()));
         }
         case IFNULL: {
-            if (dummy_stack.size() != 1 || !dummy.getStatements().isEmpty()) {
+            if (dummy_stack.size() != 1) {
                 throw new IllegalStateException();
             }
             Instruction val = dummy_stack.pop();
             return new CompareCondition(val, NullConstant.NULL, CompareCondition.CompareOperator.EQUAL);
         }
         case IFNONNULL: {
-            if (dummy_stack.size() != 1 || !dummy.getStatements().isEmpty()) {
+            if (dummy_stack.size() != 1) {
                 throw new IllegalStateException();
             }
             Instruction val = dummy_stack.pop();

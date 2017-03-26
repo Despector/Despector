@@ -29,6 +29,7 @@ import org.spongepowered.despector.decompiler.method.graph.data.block.BlockSecti
 public class ConditionalOpcodeBlock extends OpcodeBlock {
 
     private OpcodeBlock else_target;
+    private OpcodeBlock prefix;
 
     public ConditionalOpcodeBlock(int br) {
         super(br);
@@ -55,6 +56,14 @@ public class ConditionalOpcodeBlock extends OpcodeBlock {
      */
     public void setElseTarget(OpcodeBlock block) {
         this.else_target = block;
+    }
+
+    public OpcodeBlock getPrefix() {
+        return this.prefix;
+    }
+
+    public void setPrefix(OpcodeBlock block) {
+        this.prefix = block;
     }
 
     @Override
