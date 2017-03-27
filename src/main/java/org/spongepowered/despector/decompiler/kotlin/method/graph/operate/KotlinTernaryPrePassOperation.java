@@ -209,8 +209,14 @@ public class KotlinTernaryPrePassOperation implements GraphOperation {
         replacement.setTarget(consumer);
         start = blocks.indexOf(first);
         int removed = 0;
-        blocks.set(start, replacement);
-        GraphOperation.remap(blocks, first, replacement);
+        if (consumer instanceof ConditionalOpcodeBlock) {
+            ((ConditionalOpcodeBlock) consumer).setPrefix(replacement);
+            GraphOperation.remap(blocks, first, consumer);
+            start--;
+        } else {
+            blocks.set(start, replacement);
+            GraphOperation.remap(blocks, first, replacement);
+        }
         for (int i = end - 1; i >= start + 1; i--) {
             if (blocks.get(i) instanceof TryCatchMarkerOpcodeBlock) {
                 removed--;

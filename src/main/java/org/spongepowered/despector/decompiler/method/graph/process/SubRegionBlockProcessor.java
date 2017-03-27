@@ -136,6 +136,8 @@ public class SubRegionBlockProcessor implements GraphProcessor {
                     }
                 }
                 final_blocks.add(new CommentBlockSection(comment));
+                System.err.println("Error decompiling subregion of " + partial.getEntry());
+                e.printStackTrace();
             } else {
                 throw e;
             }
