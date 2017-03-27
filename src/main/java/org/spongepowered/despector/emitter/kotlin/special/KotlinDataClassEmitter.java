@@ -43,7 +43,7 @@ import java.util.Map;
 
 public class KotlinDataClassEmitter implements SpecialEmitter {
 
-    public boolean emit(EmitterContext ctx, ClassEntry type) {
+    public void emit(EmitterContext ctx, ClassEntry type) {
         ctx.printIndentation();
         ctx.printString("data class ");
         InnerClassInfo inner_info = null;
@@ -137,7 +137,6 @@ public class KotlinDataClassEmitter implements SpecialEmitter {
         ctx.printIndentation();
         ctx.printString(")");
         ctx.newLine();
-        return true;
     }
 
     private static class DataField {

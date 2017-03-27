@@ -33,15 +33,21 @@ import org.spongepowered.despector.ast.members.MethodEntry;
 import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
 import org.spongepowered.despector.ast.members.insn.Statement;
 import org.spongepowered.despector.ast.members.insn.StatementBlock;
+import org.spongepowered.despector.ast.members.insn.arg.Instruction;
 import org.spongepowered.despector.ast.members.insn.assign.LocalAssignment;
 import org.spongepowered.despector.ast.members.insn.assign.StaticFieldAssignment;
+import org.spongepowered.despector.ast.members.insn.branch.If;
 import org.spongepowered.despector.ast.members.insn.misc.Return;
+import org.spongepowered.despector.ast.type.TypeEntry;
+import org.spongepowered.despector.config.ConfigManager;
 import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.kotlin.KotlinEmitterUtil;
 import org.spongepowered.despector.emitter.special.GenericsEmitter;
 import org.spongepowered.despector.emitter.type.MethodEntryEmitter;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 public class KotlinMethodEntryEmitter extends MethodEntryEmitter {
@@ -57,7 +63,7 @@ public class KotlinMethodEntryEmitter extends MethodEntryEmitter {
     public boolean emit(EmitterContext ctx, MethodEntry method) {
 
         boolean nullable_return = false;
-        
+
         for (Annotation anno : method.getAnnotations()) {
             if ("Lorg/jetbrains/annotations/NotNull;".equals(anno.getType().getName())) {
                 continue;
@@ -86,7 +92,7 @@ public class KotlinMethodEntryEmitter extends MethodEntryEmitter {
                     start++;
                 }
                 // only need one less as we can ignore the return at the end
-                if (start == method.getInstructions().getStatements().size() - 1) {
+                if (start == method.getInstructions().getStatements().size() - 1 && !ConfigManager.getConfig().emitter.emit_synthetics) {
                     return false;
                 }
             }
@@ -108,7 +114,7 @@ public class KotlinMethodEntryEmitter extends MethodEntryEmitter {
             return true;
         }
         if ("<init>".equals(method.getName()) && method.getAccessModifier() == AccessModifier.PUBLIC && method.getParamTypes().isEmpty()
-                && method.getInstructions().getStatements().size() == 2) {
+                && method.getInstructions().getStatements().size() == 2 && !ConfigManager.getConfig().emitter.emit_synthetics) {
             return false;
         }
         ctx.printIndentation();
@@ -125,6 +131,7 @@ public class KotlinMethodEntryEmitter extends MethodEntryEmitter {
             ctx.printString("fun ");
             ctx.printString(method.getName());
         }
+        List<Instruction> defaults = findDefaultValues(ctx.getType(), method);
         ctx.printString("(");
         StatementBlock block = method.getInstructions();
         for (int i = 0; i < method.getParamTypes().size(); i++) {
@@ -153,6 +160,11 @@ public class KotlinMethodEntryEmitter extends MethodEntryEmitter {
                     KotlinEmitterUtil.emitParamType(ctx, method.getParamTypes().get(i));
                 }
             }
+            if (defaults != null) {
+                Instruction def = defaults.get(i);
+                ctx.printString(" = ");
+                ctx.emit(def, null);
+            }
             if (i < method.getParamTypes().size() - 1) {
                 ctx.printString(", ");
                 ctx.markWrapPoint();
@@ -180,7 +192,7 @@ public class KotlinMethodEntryEmitter extends MethodEntryEmitter {
             } else {
                 KotlinEmitterUtil.emitType(ctx, method.getReturnType());
             }
-            if(nullable_return) {
+            if (nullable_return) {
                 ctx.printString("?");
             }
         }
@@ -207,6 +219,22 @@ public class KotlinMethodEntryEmitter extends MethodEntryEmitter {
         }
         ctx.setMethod(null);
         return true;
+    }
+
+    private List<Instruction> findDefaultValues(TypeEntry type, MethodEntry method) {
+        MethodEntry defaults = type.getStaticMethodSafe(method.getName() + "$default");
+        if (defaults == null) {
+            return null;
+        }
+        List<Instruction> def = new ArrayList<>();
+        for (Statement stmt : defaults.getInstructions().getStatements()) {
+            if (!(stmt instanceof If)) {
+                continue;
+            }
+            LocalAssignment assign = (LocalAssignment) ((If) stmt).getIfBody().getStatement(0);
+            def.add(assign.getValue());
+        }
+        return def;
     }
 
     private static class LocalMutabilityVisitor extends InstructionVisitor {
