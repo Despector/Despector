@@ -81,16 +81,26 @@ public class KotlinTernaryPrePassOperation implements GraphOperation {
         if (end < 4) {
             return 0;
         }
+
+        // This is similar to the java ternary pre-pass operation except that
+        // it is generalized to support an arbitrary number of else-if cases in
+        // order to create a when statement if there is more than one
+
         OpcodeBlock consumer = blocks.get(end);
         int start = end - 1;
         List<OpcodeBlock> true_blocks = new ArrayList<>();
         OpcodeBlock tr = blocks.get(start--);
+        // if a ternary is at the end of a try-catch region then the end marker
+        // will be placed after the value of the ternary but before the consumer
+        // so we check for it and skip it if it is there
         if (tr instanceof TryCatchMarkerOpcodeBlock) {
             tr = blocks.get(start--);
         }
         true_blocks.add(0, tr);
         OpcodeBlock go = blocks.get(start--);
         while (!(go instanceof GotoOpcodeBlock) || go.getTarget() != consumer) {
+            // scan backwards until we reach a goto block targetting our
+            // consumer which will be the end of the last case
             true_blocks.add(0, go);
             go = blocks.get(start--);
         }
@@ -99,9 +109,13 @@ public class KotlinTernaryPrePassOperation implements GraphOperation {
         OpcodeBlock first = null;
         OpcodeBlock first_true = true_blocks.get(0);
         while (go instanceof GotoOpcodeBlock) {
+            // for so long as we have more cases the next block will be a goto
 
             List<OpcodeBlock> false_blocks = new ArrayList<>();
             OpcodeBlock fl = blocks.get(start--);
+            // collect the body of the next section so long as its not
+            // conditional or a goto and its not targeting the start of the next
+            // section.
             while ((!(fl instanceof GotoOpcodeBlock) && !(fl instanceof ConditionalOpcodeBlock)) || fl.getTarget() != first_true) {
                 false_blocks.add(0, fl);
                 fl = blocks.get(start--);
@@ -115,6 +129,9 @@ public class KotlinTernaryPrePassOperation implements GraphOperation {
             seen.add(go);
             List<OpcodeBlock> condition_blocks = new ArrayList<>();
             condition_blocks.add(fl);
+            // we go backwards through the conditional blocks until we we reach
+            // something that is not a condition or something that does not
+            // target a block we are expecting.
             for (; start >= 0; start--) {
                 OpcodeBlock next = blocks.get(start);
                 if (next instanceof GotoOpcodeBlock || !(next instanceof ConditionalOpcodeBlock) || !seen.contains(next.getTarget())) {
@@ -133,8 +150,7 @@ public class KotlinTernaryPrePassOperation implements GraphOperation {
         }
         OpcodeBlock replacement = null;
         if (conditions.size() > 1) {
-
-            // when statement
+            // If we have more than one case then its a when statement
             WhenBlockSection when = new WhenBlockSection();
             // TODO support nesting?
             for (OpcodeBlock t : true_blocks) {
@@ -159,6 +175,7 @@ public class KotlinTernaryPrePassOperation implements GraphOperation {
             }
             replacement = new ProcessedOpcodeBlock(first.getBreakpoint(), when);
         } else {
+            // with only a single case we have a ternary
             TernaryBlockSection ternary = new TernaryBlockSection(conditions.get(0).getCondition());
             if (true_blocks.size() > 1) {
                 true_blocks.add(consumer);
@@ -205,6 +222,10 @@ public class KotlinTernaryPrePassOperation implements GraphOperation {
         return removed;
     }
 
+    /**
+     * A temporary construct for holding the cases of a when/ternary in
+     * construction.
+     */
     public static class WhenBlock {
 
         private Condition condition;
