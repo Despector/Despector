@@ -35,6 +35,7 @@ import org.spongepowered.despector.ast.members.insn.function.New;
 import org.spongepowered.despector.ast.type.EnumEntry;
 import org.spongepowered.despector.ast.type.TypeEntry;
 import org.spongepowered.despector.ast.type.TypeEntry.InnerClassInfo;
+import org.spongepowered.despector.config.ConfigManager;
 import org.spongepowered.despector.emitter.AstEmitter;
 import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.kotlin.KotlinEmitterUtil;
@@ -206,7 +207,13 @@ public class KotlinEnumEntryEmitter implements AstEmitter<EnumEntry> {
             for (FieldEntry field : type.getStaticFields()) {
                 if (field.isSynthetic()) {
                     // Skip the values array.
-                    continue;
+                    if(ConfigManager.getConfig().emitter.emit_synthetics) {
+                        ctx.printIndentation();
+                        ctx.printString("// Synthetic");
+                        ctx.newLine();
+                    } else {
+                        continue;
+                    }
                 }
                 if (found.contains(field.getName())) {
                     // Skip the fields for any of the enum constants that we
@@ -247,7 +254,13 @@ public class KotlinEnumEntryEmitter implements AstEmitter<EnumEntry> {
                     // initializer
                     continue;
                 } else if (mth.isSynthetic()) {
-                    continue;
+                    if(ConfigManager.getConfig().emitter.emit_synthetics) {
+                        ctx.printIndentation();
+                        ctx.printString("// Synthetic");
+                        ctx.newLine();
+                    } else {
+                        continue;
+                    }
                 }
                 ctx.emit(mth);
                 ctx.newLine();
@@ -256,11 +269,14 @@ public class KotlinEnumEntryEmitter implements AstEmitter<EnumEntry> {
         }
         if (!type.getMethods().isEmpty()) {
             for (MethodEntry mth : type.getMethods()) {
-                if (mth.isSynthetic()) {
-                    continue;
-                }
-                if (mth.getName().equals("<init>")) {
-                    continue;
+                if (mth.isSynthetic() || mth.getName().equals("<init>")) {
+                    if(ConfigManager.getConfig().emitter.emit_synthetics) {
+                        ctx.printIndentation();
+                        ctx.printString("// Synthetic");
+                        ctx.newLine();
+                    } else {
+                        continue;
+                    }
                 }
                 ctx.emit(mth);
                 ctx.newLine();

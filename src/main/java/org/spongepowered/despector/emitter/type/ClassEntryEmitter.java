@@ -35,6 +35,7 @@ import org.spongepowered.despector.ast.members.insn.assign.StaticFieldAssignment
 import org.spongepowered.despector.ast.type.ClassEntry;
 import org.spongepowered.despector.ast.type.TypeEntry;
 import org.spongepowered.despector.ast.type.TypeEntry.InnerClassInfo;
+import org.spongepowered.despector.config.ConfigManager;
 import org.spongepowered.despector.emitter.AstEmitter;
 import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.special.GenericsEmitter;
@@ -169,7 +170,13 @@ public class ClassEntryEmitter implements AstEmitter<ClassEntry> {
             boolean at_least_one = false;
             for (FieldEntry field : type.getStaticFields()) {
                 if (field.isSynthetic()) {
-                    continue;
+                    if(ConfigManager.getConfig().emitter.emit_synthetics) {
+                        ctx.printIndentation();
+                        ctx.printString("// Synthetic");
+                        ctx.newLine();
+                    } else {
+                        continue;
+                    }
                 }
                 at_least_one = true;
                 ctx.printIndentation();
@@ -191,7 +198,13 @@ public class ClassEntryEmitter implements AstEmitter<ClassEntry> {
         if (!type.getStaticMethods().isEmpty()) {
             for (MethodEntry mth : type.getStaticMethods()) {
                 if (mth.isSynthetic()) {
-                    continue;
+                    if(ConfigManager.getConfig().emitter.emit_synthetics) {
+                        ctx.printIndentation();
+                        ctx.printString("// Synthetic");
+                        ctx.newLine();
+                    } else {
+                        continue;
+                    }
                 }
                 if (ctx.emit(mth)) {
                     ctx.newLine();
@@ -231,7 +244,13 @@ public class ClassEntryEmitter implements AstEmitter<ClassEntry> {
             boolean at_least_one = false;
             for (FieldEntry field : type.getFields()) {
                 if (field.isSynthetic()) {
-                    continue;
+                    if(ConfigManager.getConfig().emitter.emit_synthetics) {
+                        ctx.printIndentation();
+                        ctx.printString("// Synthetic");
+                        ctx.newLine();
+                    } else {
+                        continue;
+                    }
                 }
                 at_least_one = true;
                 ctx.printIndentation();
@@ -249,7 +268,13 @@ public class ClassEntryEmitter implements AstEmitter<ClassEntry> {
         if (!type.getMethods().isEmpty()) {
             for (MethodEntry mth : type.getMethods()) {
                 if (mth.isSynthetic()) {
-                    continue;
+                    if(ConfigManager.getConfig().emitter.emit_synthetics) {
+                        ctx.printIndentation();
+                        ctx.printString("// Synthetic");
+                        ctx.newLine();
+                    } else {
+                        continue;
+                    }
                 }
                 if (ctx.emit(mth)) {
                     ctx.newLine();

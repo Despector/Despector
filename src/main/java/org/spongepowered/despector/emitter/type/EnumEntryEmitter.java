@@ -36,6 +36,7 @@ import org.spongepowered.despector.ast.members.insn.function.New;
 import org.spongepowered.despector.ast.type.EnumEntry;
 import org.spongepowered.despector.ast.type.TypeEntry;
 import org.spongepowered.despector.ast.type.TypeEntry.InnerClassInfo;
+import org.spongepowered.despector.config.ConfigManager;
 import org.spongepowered.despector.emitter.AstEmitter;
 import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.util.TypeHelper;
@@ -156,7 +157,13 @@ public class EnumEntryEmitter implements AstEmitter<EnumEntry> {
             for (FieldEntry field : type.getStaticFields()) {
                 if (field.isSynthetic()) {
                     // Skip the values array.
-                    continue;
+                    if(ConfigManager.getConfig().emitter.emit_synthetics) {
+                        ctx.printIndentation();
+                        ctx.printString("// Synthetic");
+                        ctx.newLine();
+                    } else {
+                        continue;
+                    }
                 }
                 if (found.contains(field.getName())) {
                     // Skip the fields for any of the enum constants that we
@@ -197,7 +204,13 @@ public class EnumEntryEmitter implements AstEmitter<EnumEntry> {
                     // initializer
                     continue;
                 } else if (mth.isSynthetic()) {
-                    continue;
+                    if(ConfigManager.getConfig().emitter.emit_synthetics) {
+                        ctx.printIndentation();
+                        ctx.printString("// Synthetic");
+                        ctx.newLine();
+                    } else {
+                        continue;
+                    }
                 }
                 ctx.emit(mth);
                 ctx.newLine();
@@ -207,7 +220,13 @@ public class EnumEntryEmitter implements AstEmitter<EnumEntry> {
         if (!type.getFields().isEmpty()) {
             for (FieldEntry field : type.getFields()) {
                 if (field.isSynthetic()) {
-                    continue;
+                    if(ConfigManager.getConfig().emitter.emit_synthetics) {
+                        ctx.printIndentation();
+                        ctx.printString("// Synthetic");
+                        ctx.newLine();
+                    } else {
+                        continue;
+                    }
                 }
                 ctx.printIndentation();
                 ctx.emit(field);
@@ -219,7 +238,13 @@ public class EnumEntryEmitter implements AstEmitter<EnumEntry> {
         if (!type.getMethods().isEmpty()) {
             for (MethodEntry mth : type.getMethods()) {
                 if (mth.isSynthetic()) {
-                    continue;
+                    if(ConfigManager.getConfig().emitter.emit_synthetics) {
+                        ctx.printIndentation();
+                        ctx.printString("// Synthetic");
+                        ctx.newLine();
+                    } else {
+                        continue;
+                    }
                 }
                 if (mth.getName().equals("<init>") && mth.getInstructions().getStatements().size() == 2) {
                     // If the initializer contains only two statement (which

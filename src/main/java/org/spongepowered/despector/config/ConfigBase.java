@@ -57,6 +57,8 @@ public class ConfigBase {
         public String imports_path = "eclipse.importorder";
         @Setting(value = "formatting-type", comment = "One of: eclipse,intellij")
         public String formatting_type = "eclipse";
+        @Setting(value = "emit-synthetics", comment = "Whether to emit synthetic members")
+        public boolean emit_synthetics = false;
 
     }
 

@@ -34,6 +34,7 @@ import org.spongepowered.despector.ast.members.insn.assign.StaticFieldAssignment
 import org.spongepowered.despector.ast.type.ClassEntry;
 import org.spongepowered.despector.ast.type.TypeEntry;
 import org.spongepowered.despector.ast.type.TypeEntry.InnerClassInfo;
+import org.spongepowered.despector.config.ConfigManager;
 import org.spongepowered.despector.emitter.AstEmitter;
 import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.kotlin.special.KotlinCompanionClassEmitter;
@@ -182,11 +183,14 @@ public class KotlinClassEntryEmitter implements AstEmitter<ClassEntry> {
 
             boolean at_least_one = false;
             for (FieldEntry field : type.getStaticFields()) {
-                if (field.isSynthetic()) {
-                    continue;
-                }
-                if (field.getName().equals("Companion")) {
-                    continue;
+                if (field.isSynthetic() || field.getName().equals("Companion")) {
+                    if(ConfigManager.getConfig().emitter.emit_synthetics) {
+                        ctx.printIndentation();
+                        ctx.printString("// Synthetic");
+                        ctx.newLine();
+                    } else {
+                        continue;
+                    }
                 }
                 at_least_one = true;
                 ctx.printIndentation();
@@ -208,7 +212,13 @@ public class KotlinClassEntryEmitter implements AstEmitter<ClassEntry> {
         if (!type.getStaticMethods().isEmpty()) {
             for (MethodEntry mth : type.getStaticMethods()) {
                 if (mth.isSynthetic()) {
-                    continue;
+                    if(ConfigManager.getConfig().emitter.emit_synthetics) {
+                        ctx.printIndentation();
+                        ctx.printString("// Synthetic");
+                        ctx.newLine();
+                    } else {
+                        continue;
+                    }
                 }
                 if (ctx.emit(mth)) {
                     ctx.newLine();
@@ -248,7 +258,13 @@ public class KotlinClassEntryEmitter implements AstEmitter<ClassEntry> {
             boolean at_least_one = false;
             for (FieldEntry field : type.getFields()) {
                 if (field.isSynthetic()) {
-                    continue;
+                    if(ConfigManager.getConfig().emitter.emit_synthetics) {
+                        ctx.printIndentation();
+                        ctx.printString("// Synthetic");
+                        ctx.newLine();
+                    } else {
+                        continue;
+                    }
                 }
                 at_least_one = true;
                 ctx.printIndentation();
@@ -265,12 +281,14 @@ public class KotlinClassEntryEmitter implements AstEmitter<ClassEntry> {
     public void emitMethods(EmitterContext ctx, ClassEntry type) {
         if (!type.getMethods().isEmpty()) {
             for (MethodEntry mth : type.getMethods()) {
-                if (mth.isSynthetic()) {
-                    continue;
-                }
-                if (mth.getName().equals("<init>")) {
-                    // TODO
-                    continue;
+                if (mth.isSynthetic() || mth.getName().equals("<init>")) {
+                    if(ConfigManager.getConfig().emitter.emit_synthetics) {
+                        ctx.printIndentation();
+                        ctx.printString("// Synthetic");
+                        ctx.newLine();
+                    } else {
+                        continue;
+                    }
                 }
                 if (ctx.emit(mth)) {
                     ctx.newLine();
