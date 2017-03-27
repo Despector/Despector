@@ -34,12 +34,13 @@ public class WhileEmitter implements StatementEmitter<While> {
     public void emit(EmitterContext ctx, While loop, boolean semicolon) {
         ctx.printString("while (");
         ctx.emit(loop.getCondition());
-        ctx.printString(") {\n");
+        ctx.printString(") {");
+        ctx.newLine();
         if (!loop.getBody().getStatements().isEmpty()) {
             ctx.indent();
             ctx.emitBody(loop.getBody());
             ctx.dedent();
-            ctx.printString("\n");
+            ctx.newLine();
         }
         ctx.printIndentation();
         ctx.printString("}");

@@ -39,12 +39,13 @@ public class CommentEmitter implements StatementEmitter<Comment> {
             ctx.printString("// ");
             ctx.printString(stmt.getCommentText().get(0));
         } else {
-            ctx.printString("/*\n");
+            ctx.printString("/*");
+            ctx.newLine();
             for (String line : stmt.getCommentText()) {
                 ctx.printIndentation();
                 ctx.printString(" * ");
                 ctx.printString(line);
-                ctx.printString("\n");
+                ctx.newLine();
             }
             ctx.printIndentation();
             ctx.printString(" */");

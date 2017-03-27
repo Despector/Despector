@@ -58,6 +58,7 @@ public class KotlinLocalAssignmentEmitter extends LocalAssignmentEmitter {
             }
         }
         ctx.printString(" = ");
+        ctx.markWrapPoint();
         ctx.emit(insn.getValue(), insn.getLocal().getType());
     }
 

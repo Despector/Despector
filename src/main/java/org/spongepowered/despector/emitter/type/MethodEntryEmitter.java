@@ -47,7 +47,7 @@ public class MethodEntryEmitter implements AstEmitter<MethodEntry> {
         for (Annotation anno : method.getAnnotations()) {
             ctx.printIndentation();
             ctx.emit(anno);
-            ctx.printString("\n");
+            ctx.newLine();
         }
 
         ctx.setMethod(method);
@@ -70,7 +70,8 @@ public class MethodEntryEmitter implements AstEmitter<MethodEntry> {
                 }
             }
             ctx.printIndentation();
-            ctx.printString("static {\n");
+            ctx.printString("static {");
+            ctx.newLine();
             ctx.indent();
             if (method.getInstructions() == null) {
                 ctx.printIndentation();
@@ -79,7 +80,7 @@ public class MethodEntryEmitter implements AstEmitter<MethodEntry> {
             } else {
                 ctx.emitBody(method.getInstructions(), start);
             }
-            ctx.printString("\n");
+            ctx.newLine();
             ctx.dedent();
             ctx.printIndentation();
             ctx.printString("}");
@@ -165,11 +166,13 @@ public class MethodEntryEmitter implements AstEmitter<MethodEntry> {
             }
             if (i < method.getParamTypes().size() - 1) {
                 ctx.printString(", ");
+                ctx.markWrapPoint();
             }
         }
         ctx.printString(")");
         if (!method.isAbstract()) {
-            ctx.printString(" {\n");
+            ctx.printString(" {");
+            ctx.newLine();
             ctx.indent();
             if (block == null) {
                 ctx.printIndentation();
@@ -178,7 +181,7 @@ public class MethodEntryEmitter implements AstEmitter<MethodEntry> {
             } else {
                 ctx.emitBody(block);
             }
-            ctx.printString("\n");
+            ctx.newLine();
             ctx.dedent();
             ctx.printIndentation();
             ctx.printString("}");
@@ -194,7 +197,7 @@ public class MethodEntryEmitter implements AstEmitter<MethodEntry> {
         if (f == 'V') {
             return;
         }
-        ctx.printString("\n");
+        ctx.newLine();
         ctx.printIndentation();
         switch (f) {
         case 'I':

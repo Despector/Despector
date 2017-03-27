@@ -24,6 +24,8 @@
  */
 package org.spongepowered.despector.emitter;
 
+import static com.google.common.base.Preconditions.checkArgument;
+
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import org.spongepowered.despector.ast.Annotation;
@@ -74,6 +76,11 @@ public class EmitterContext {
     private int offs = 0;
 
     private boolean semicolons = true;
+
+    private int line_length = 0;
+    private int wrap_point = -1;
+    private StringBuilder line_buffer = new StringBuilder();
+    private boolean is_wrapped = false;
 
     public EmitterContext(Writer output, EmitterFormat format) {
         this.output = output;
@@ -186,11 +193,12 @@ public class EmitterContext {
         return state;
     }
 
-    public void emitBody(StatementBlock instructions) {
+    public EmitterContext emitBody(StatementBlock instructions) {
         emitBody(instructions, 0);
+        return this;
     }
 
-    public void emitBody(StatementBlock instructions, int start) {
+    public EmitterContext emitBody(StatementBlock instructions, int start) {
         this.defined_locals.clear();
         boolean last_success = false;
         boolean should_indent = true;
@@ -201,7 +209,7 @@ public class EmitterContext {
                 break;
             }
             if (last_success) {
-                printString("\n");
+                newLine();
             }
             last_success = true;
             if (should_indent) {
@@ -215,10 +223,11 @@ public class EmitterContext {
                 last_success = false;
             }
         }
+        return this;
     }
 
     @SuppressWarnings("unchecked")
-    public <T extends Statement> void emit(T obj, boolean semicolon) {
+    public <T extends Statement> EmitterContext emit(T obj, boolean semicolon) {
         StatementEmitter<T> emitter = (StatementEmitter<T>) this.set.getStatementEmitter(obj.getClass());
         if (emitter == null) {
             throw new IllegalArgumentException("No emitter for statement " + obj.getClass().getName());
@@ -227,10 +236,11 @@ public class EmitterContext {
         setStatement(obj);
         emitter.emit(this, obj, semicolon);
         setStatement(last);
+        return this;
     }
 
     @SuppressWarnings("unchecked")
-    public <T extends Instruction> void emit(T obj, String type) {
+    public <T extends Instruction> EmitterContext emit(T obj, String type) {
         InstructionEmitter<T> emitter = (InstructionEmitter<T>) this.set.getInstructionEmitter(obj.getClass());
         if (emitter == null) {
             throw new IllegalArgumentException("No emitter for instruction " + obj.getClass().getName());
@@ -241,34 +251,39 @@ public class EmitterContext {
         }
         emitter.emit(this, obj, type);
         this.insn_stack.pop();
+        return this;
     }
 
     @SuppressWarnings("unchecked")
-    public <T extends Condition> void emit(T condition) {
+    public <T extends Condition> EmitterContext emit(T condition) {
         ConditionEmitter<T> emitter = (ConditionEmitter<T>) this.set.getConditionEmitter(condition.getClass());
         if (emitter == null) {
             throw new IllegalArgumentException("No emitter for condition " + condition.getClass().getName());
         }
         emitter.emit(this, condition);
+        return this;
     }
 
-    public void emit(Annotation anno) {
+    public EmitterContext emit(Annotation anno) {
         AnnotationEmitter emitter = this.set.getSpecialEmitter(AnnotationEmitter.class);
         if (emitter == null) {
             throw new IllegalArgumentException("No emitter for annotations");
         }
         emitter.emit(this, anno);
+        return this;
     }
 
-    public void indent() {
+    public EmitterContext indent() {
         this.indentation++;
+        return this;
     }
 
-    public void dedent() {
+    public EmitterContext dedent() {
         this.indentation--;
+        return this;
     }
 
-    public void printIndentation() {
+    public EmitterContext printIndentation() {
         if (this.format.indent_with_spaces) {
             for (int i = 0; i < this.indentation * this.format.indentation_size; i++) {
                 printString(" ");
@@ -278,21 +293,24 @@ public class EmitterContext {
                 printString("\t");
             }
         }
+        return this;
     }
 
-    public void emitType(String name) {
+    public EmitterContext emitType(String name) {
         emitTypeClassName(TypeHelper.descToType(name).replace('/', '.'));
+        return this;
     }
 
-    public void emitTypeName(String name) {
+    public EmitterContext emitTypeName(String name) {
         emitTypeClassName(name.replace('/', '.'));
+        return this;
     }
 
-    public void emitTypeClassName(String name) {
+    public EmitterContext emitTypeClassName(String name) {
         if (name.endsWith("[]")) {
             emitTypeClassName(name.substring(0, name.length() - 2));
             printString("[]");
-            return;
+            return this;
         }
         if (name.indexOf('.') != -1) {
             if (name.startsWith("java.lang.")) {
@@ -315,19 +333,87 @@ public class EmitterContext {
             }
         }
         printString(name.replace('$', '.'));
+        return this;
     }
 
-    public void printString(String line) {
-        this.offs += line.length();
+    public EmitterContext printString(String line, boolean condition) {
+        if (condition) {
+            printString(line);
+        }
+        return this;
+    }
+
+    public EmitterContext newLine() {
+        __newLine();
+        if (this.is_wrapped) {
+            dedent();
+            dedent();
+            this.is_wrapped = false;
+        }
+        return this;
+    }
+
+    public void flush() {
         if (this.buffer == null) {
             try {
-                this.output.write(line);
+                this.output.write(this.line_buffer.toString());
             } catch (IOException e) {
                 e.printStackTrace();
             }
         } else {
-            this.buffer.append(line);
+            this.buffer.append(this.line_buffer.toString());
         }
+    }
+    
+    private void __newLine() {
+        flush();
+        this.offs += 1;
+        if (this.buffer == null) {
+            try {
+                this.output.write('\n');
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } else {
+            this.buffer.append('\n');
+        }
+        this.line_length = 0;
+        this.wrap_point = -1;
+        this.line_buffer.setLength(0);
+    }
+
+    public void newIndentedLine() {
+        newLine();
+        printIndentation();
+    }
+
+    public EmitterContext printString(String line) {
+        checkArgument(line.indexOf('\n') == -1);
+        this.offs += this.line_buffer.length();
+        this.line_length += line.length();
+        this.line_buffer.append(line);
+        if (this.line_length > this.format.line_split) {
+            if (this.wrap_point != -1) {
+                String existing = this.line_buffer.toString();
+                String next = existing.substring(this.wrap_point);
+                this.line_buffer.setLength(this.wrap_point);
+                this.wrap_point = -1;
+                newLine();
+                if (!this.is_wrapped) {
+                    this.is_wrapped = true;
+                    indent();
+                    indent();
+                }
+                printIndentation();
+                printString(next);
+            }
+        }
+        return this;
+    }
+
+    public EmitterContext markWrapPoint() {
+        this.wrap_point = this.line_length;
+        return this;
     }
 
     public boolean checkImport(String type) {
@@ -369,14 +455,13 @@ public class EmitterContext {
                 printString("import ");
                 printString(import_);
                 if (this.semicolons) {
-                    printString(";\n");
-                } else {
-                    printString("\n");
+                    printString(";");
                 }
+                newLine();
             }
             if (!group_imports.isEmpty() && i < this.format.import_order.size() - 1) {
                 for (int o = 0; o < this.format.blank_lines_between_import_groups; o++) {
-                    printString("\n");
+                    newLine();
                 }
             }
         }
@@ -393,34 +478,44 @@ public class EmitterContext {
         // then finally replay the buffer into the output.
 
         StringBuilder buf = this.buffer;
+        if (this.line_buffer.length() != 0) {
+            buf.append(this.line_buffer.toString());
+        }
         this.buffer = null;
         PackageEmitter pkg_emitter = this.set.getSpecialEmitter(PackageEmitter.class);
         String pkg = this.type.getName();
         int last = pkg.lastIndexOf('/');
         if (last != -1) {
             for (int i = 0; i < this.format.blank_lines_before_package; i++) {
-                printString("\n");
+                newLine();
             }
             pkg = pkg.substring(0, last).replace('/', '.');
             pkg_emitter.emitPackage(this, pkg);
-            printString("\n");
+            newLine();
         }
         int lines = Math.max(this.format.blank_lines_after_package, this.format.blank_lines_before_imports);
         for (int i = 0; i < lines; i++) {
-            printString("\n");
+            newLine();
         }
 
         emitImports();
 
         if (!this.imports.isEmpty()) {
             for (int i = 0; i < this.format.blank_lines_after_imports - 1; i++) {
-                printString("\n");
+                newLine();
             }
         }
 
+        String data = buf.toString();
+
         // Replay the buffer.
         try {
-            this.output.write(buf.toString());
+            this.output.write(data);
+            if (this.format.insert_new_line_at_end_of_file_if_missing) {
+                if (data.charAt(data.length() - 1) != '\n') {
+                    this.output.write('\n');
+                }
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }

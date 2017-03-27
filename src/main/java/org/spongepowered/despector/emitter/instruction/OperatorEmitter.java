@@ -33,6 +33,7 @@ public class OperatorEmitter implements InstructionEmitter<Operator> {
     @Override
     public void emit(EmitterContext ctx, Operator arg, String type) {
         ctx.emit(arg.getLeftOperand(), null);
+        ctx.markWrapPoint();
         ctx.printString(" " + arg.getOperator() + " ");
         ctx.emit(arg.getRightOperand(), null);
     }

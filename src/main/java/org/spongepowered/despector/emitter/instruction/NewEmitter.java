@@ -75,6 +75,7 @@ public class NewEmitter implements InstructionEmitter<New> {
         List<String> args = TypeHelper.splitSig(arg.getCtorDescription());
         for (int i = 0; i < arg.getParameters().length; i++) {
             Instruction param = arg.getParameters()[i];
+            ctx.markWrapPoint();
             ctx.emit(param, args.get(i));
             if (i < arg.getParameters().length - 1) {
                 ctx.printString(", ");

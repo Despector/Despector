@@ -35,6 +35,7 @@ public class OrConditionEmitter implements ConditionEmitter<OrCondition> {
         for (int i = 0; i < and.getOperands().size(); i++) {
             ctx.emit(and.getOperands().get(i));
             if (i < and.getOperands().size() - 1) {
+                ctx.markWrapPoint();
                 ctx.printString(" || ");
             }
         }

@@ -104,9 +104,11 @@ public class StringConcatEmitter implements SpecialMethodEmitter {
                         ctx.printString("$");
                         ctx.printString(((LocalAccess) next).getLocal().getName());
                     } else {
+                        ctx.markWrapPoint();
                         ctx.printString(" + ");
                         ctx.printString(((LocalAccess) next).getLocal().getName());
                         if (i < constants.size() - 1) {
+                            ctx.markWrapPoint();
                             ctx.printString(" + ");
                         }
                     }
@@ -118,6 +120,7 @@ public class StringConcatEmitter implements SpecialMethodEmitter {
                             if (i == 0) {
                                 ctx.printString("\"");
                             } else {
+                                ctx.markWrapPoint();
                                 ctx.printString(" + \"");
                             }
                             in_string = true;
@@ -133,11 +136,14 @@ public class StringConcatEmitter implements SpecialMethodEmitter {
                     }
                 }
                 if (in_string) {
-                    ctx.printString("\" + ");
+                    ctx.printString("\"");
+                    ctx.markWrapPoint();
+                    ctx.printString(" + ");
                     in_string = false;
                 }
                 ctx.emit(constants.get(i), "Ljava/lang/String;");
                 if (i < constants.size() - 1) {
+                    ctx.markWrapPoint();
                     ctx.printString(" + ");
                 }
             }

@@ -93,6 +93,7 @@ public class BooleanConditionEmitter implements ConditionEmitter<BooleanConditio
                         ctx.emit(ternary.getFalseValue(), "Z");
                     } else {
                         ctx.emit(ternary.getCondition());
+                        ctx.markWrapPoint();
                         ctx.printString(" || ");
                         ctx.emit(ternary.getFalseValue(), "Z");
                     }
@@ -106,6 +107,7 @@ public class BooleanConditionEmitter implements ConditionEmitter<BooleanConditio
                         ctx.emit(ternary.getFalseValue(), "Z");
                     } else {
                         ctx.emit(ternary.getCondition());
+                        ctx.markWrapPoint();
                         ctx.printString(" && ");
                         ctx.emit(ternary.getFalseValue(), "Z");
                     }

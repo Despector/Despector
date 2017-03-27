@@ -69,12 +69,10 @@ public class DynamicInvokeEmitter implements InstructionEmitter<DynamicInvokeHan
                 return;
             }
         }
-        ctx.printString("{\n");
-        ctx.indent();
+        ctx.printString("{");
+        ctx.newLine().indent();
         ctx.emitBody(block);
-        ctx.printString("\n");
-        ctx.dedent();
-        ctx.printIndentation();
+        ctx.newLine().dedent().printIndentation();
         ctx.printString("}");
 
     }

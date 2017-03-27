@@ -42,12 +42,13 @@ public class ForEmitter implements StatementEmitter<For> {
         if (loop.getIncr() != null) {
             ctx.emit(loop.getIncr(), false);
         }
-        ctx.printString(") {\n");
+        ctx.printString(") {");
+        ctx.newLine();
         if (!loop.getBody().getStatements().isEmpty()) {
             ctx.indent();
             ctx.emitBody(loop.getBody());
             ctx.dedent();
-            ctx.printString("\n");
+            ctx.newLine();
         }
         ctx.printIndentation();
         ctx.printString("}");

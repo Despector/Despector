@@ -38,12 +38,13 @@ public class KotlinForEachEmitter implements StatementEmitter<ForEach> {
         ctx.printString(local.getName());
         ctx.printString(" in ");
         ctx.emit(loop.getCollectionValue(), null);
-        ctx.printString(") {\n");
+        ctx.printString(") {");
+        ctx.newLine();
         if (!loop.getBody().getStatements().isEmpty()) {
             ctx.indent();
             ctx.emitBody(loop.getBody());
             ctx.dedent();
-            ctx.printString("\n");
+            ctx.newLine();
         }
         ctx.printIndentation();
         ctx.printString("}");

@@ -24,14 +24,10 @@
  */
 package org.spongepowered.despector.emitter.kotlin.instruction.method;
 
-import com.google.common.collect.Lists;
 import org.spongepowered.despector.ast.members.insn.arg.Instruction;
 import org.spongepowered.despector.ast.members.insn.arg.NewArray;
-import org.spongepowered.despector.ast.members.insn.arg.cst.StringConstant;
 import org.spongepowered.despector.ast.members.insn.arg.field.LocalAccess;
 import org.spongepowered.despector.ast.members.insn.function.InstanceMethodInvoke;
-import org.spongepowered.despector.ast.members.insn.function.New;
-import org.spongepowered.despector.ast.members.insn.function.StaticMethodInvoke;
 import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.instruction.InstanceMethodInvokeEmitter;
 import org.spongepowered.despector.util.TypeHelper;
@@ -106,6 +102,7 @@ public class KotlinInstanceMethodInvokeEmitter extends InstanceMethodInvokeEmitt
                     ctx.emit(varargs.getInitializer()[o], varargs.getType());
                     if (o < varargs.getInitializer().length - 1) {
                         ctx.printString(", ");
+                        ctx.markWrapPoint();
                     }
                 }
                 break;
@@ -113,6 +110,7 @@ public class KotlinInstanceMethodInvokeEmitter extends InstanceMethodInvokeEmitt
             ctx.emit(param, param_types.get(i));
             if (i < arg.getParams().length - 1) {
                 ctx.printString(", ");
+                ctx.markWrapPoint();
             }
         }
         ctx.printString(")");

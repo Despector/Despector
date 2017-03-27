@@ -34,6 +34,25 @@ import java.io.IOException;
 @SuppressWarnings("unused")
 public class OperatorsTest {
 
+    public OperatorsTest areallylongmethodnametotestwrapping() {
+        return this;
+    }
+
+    public void mth_wrapped() {
+        areallylongmethodnametotestwrapping().areallylongmethodnametotestwrapping().areallylongmethodnametotestwrapping()
+                .areallylongmethodnametotestwrapping();
+        areallylongmethodnametotestwrapping();
+    }
+
+    @Test
+    public void testWrapping() throws IOException {
+        String expected = "areallylongmethodnametotestwrapping().areallylongmethodnametotestwrapping().areallylongmethodnametotestwrapping()\n" + 
+                "        .areallylongmethodnametotestwrapping();\n"
+                + "areallylongmethodnametotestwrapping();";
+        check(getClass(), "mth_wrapped", expected);
+    }
+
+
     private void mth_intconstant() {
         int i = 65;
     }
@@ -51,7 +70,7 @@ public class OperatorsTest {
     public void testUnaryNegative() throws IOException {
         check(getClass(), "mth_neg", "int i = -(a + b);");
     }
-    
+
     private void mth_floatcmp(float a, float b) {
         boolean z = a <= b;
     }

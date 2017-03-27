@@ -53,7 +53,7 @@ public class EnumEntryEmitter implements AstEmitter<EnumEntry> {
         for (Annotation anno : type.getAnnotations()) {
             ctx.printIndentation();
             ctx.emit(anno);
-            ctx.printString("\n");
+            ctx.newLine();
         }
         ctx.printIndentation();
         ctx.printString(type.getAccessModifier().asString());
@@ -81,20 +81,17 @@ public class EnumEntryEmitter implements AstEmitter<EnumEntry> {
             for (int i = 0; i < type.getInterfaces().size(); i++) {
                 ctx.emitType(type.getInterfaces().get(i));
                 if (i < type.getInterfaces().size() - 1) {
-                    if (ctx.getFormat().insert_space_before_comma_in_superinterfaces) {
-                        ctx.printString(" ");
-                    }
+                    ctx.printString(" ", ctx.getFormat().insert_space_before_comma_in_superinterfaces);
                     ctx.printString(",");
-                    if (ctx.getFormat().insert_space_after_comma_in_superinterfaces) {
-                        ctx.printString(" ");
-                    }
+                    ctx.printString(" ", ctx.getFormat().insert_space_after_comma_in_superinterfaces);
+                    ctx.markWrapPoint();
                 }
             }
         }
-        if (ctx.getFormat().insert_space_before_opening_brace_in_type_declaration) {
-            ctx.printString(" ");
-        }
-        ctx.printString("{\n\n");
+        ctx.printString(" ", ctx.getFormat().insert_space_before_opening_brace_in_type_declaration);
+        ctx.printString("{");
+        ctx.newLine();
+        ctx.newLine();
         ctx.indent();
 
         // we look through the class initializer to find the enum constant
@@ -121,7 +118,8 @@ public class EnumEntryEmitter implements AstEmitter<EnumEntry> {
                     break;
                 }
                 if (!first) {
-                    ctx.printString(",\n");
+                    ctx.printString(",");
+                    ctx.newLine();
                 }
                 New val = (New) assign.getValue();
                 ctx.printIndentation();
@@ -141,7 +139,8 @@ public class EnumEntryEmitter implements AstEmitter<EnumEntry> {
                 first = false;
             }
             if (!first) {
-                ctx.printString(";\n");
+                ctx.printString(";");
+                ctx.newLine();
             }
             // We store any remaining statements to be emitted later
             while (initializers.hasNext()) {
@@ -149,7 +148,7 @@ public class EnumEntryEmitter implements AstEmitter<EnumEntry> {
             }
         }
         if (!found.isEmpty()) {
-            ctx.printString("\n");
+            ctx.newLine();
         }
 
         if (!type.getStaticFields().isEmpty()) {
@@ -166,27 +165,30 @@ public class EnumEntryEmitter implements AstEmitter<EnumEntry> {
                 }
                 ctx.printIndentation();
                 ctx.emit(field);
-                ctx.printString(";\n");
+                ctx.printString(";");
+                ctx.newLine();
                 at_least_one = true;
             }
             if (at_least_one) {
-                ctx.printString("\n");
+                ctx.newLine();
             }
         }
         if (!remaining.isEmpty()) {
             // if we found any additional statements in the class initializer
             // while looking for enum constants we emit them here
             ctx.printIndentation();
-            ctx.printString("static {\n");
+            ctx.printString("static {");
+            ctx.newLine();
             ctx.indent();
             for (Statement stmt : remaining) {
                 ctx.printIndentation();
                 ctx.emit(stmt, true);
-                ctx.printString("\n");
+                ctx.newLine();
             }
             ctx.dedent();
             ctx.printIndentation();
-            ctx.printString("}\n");
+            ctx.printString("}");
+            ctx.newLine();
         }
         if (!type.getStaticMethods().isEmpty()) {
             for (MethodEntry mth : type.getStaticMethods()) {
@@ -198,7 +200,8 @@ public class EnumEntryEmitter implements AstEmitter<EnumEntry> {
                     continue;
                 }
                 ctx.emit(mth);
-                ctx.printString("\n\n");
+                ctx.newLine();
+                ctx.newLine();
             }
         }
         if (!type.getFields().isEmpty()) {
@@ -208,9 +211,10 @@ public class EnumEntryEmitter implements AstEmitter<EnumEntry> {
                 }
                 ctx.printIndentation();
                 ctx.emit(field);
-                ctx.printString(";\n");
+                ctx.printString(";");
+                ctx.newLine();
             }
-            ctx.printString("\n");
+            ctx.newLine();
         }
         if (!type.getMethods().isEmpty()) {
             for (MethodEntry mth : type.getMethods()) {
@@ -225,7 +229,8 @@ public class EnumEntryEmitter implements AstEmitter<EnumEntry> {
                     continue;
                 }
                 ctx.emit(mth);
-                ctx.printString("\n\n");
+                ctx.newLine();
+                ctx.newLine();
             }
         }
 
@@ -236,7 +241,7 @@ public class EnumEntryEmitter implements AstEmitter<EnumEntry> {
             }
             ctx.setOuterType(type);
             TypeEntry inner_type = type.getSource().get(inner.getName());
-            ctx.printString("\n");
+            ctx.newLine();
             ctx.emit(inner_type);
             ctx.setType(type);
             ctx.setOuterType(null);
@@ -244,7 +249,8 @@ public class EnumEntryEmitter implements AstEmitter<EnumEntry> {
 
         ctx.dedent();
         ctx.printIndentation();
-        ctx.printString("}\n");
+        ctx.printString("}");
+        ctx.newLine();
         return true;
     }
 

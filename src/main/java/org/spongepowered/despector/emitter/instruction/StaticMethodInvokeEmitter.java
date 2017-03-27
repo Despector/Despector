@@ -67,6 +67,7 @@ public class StaticMethodInvokeEmitter implements InstructionEmitter<StaticMetho
                     ctx.emit(varargs.getInitializer()[o], varargs.getType());
                     if (o < varargs.getInitializer().length - 1) {
                         ctx.printString(", ");
+                        ctx.markWrapPoint();
                     }
                 }
                 break;
@@ -74,6 +75,7 @@ public class StaticMethodInvokeEmitter implements InstructionEmitter<StaticMetho
             ctx.emit(param, param_types.get(i));
             if (i < arg.getParams().length - 1) {
                 ctx.printString(", ");
+                ctx.markWrapPoint();
             }
         }
         ctx.printString(")");

@@ -92,7 +92,8 @@ public class SwitchEmitter implements StatementEmitter<Switch> {
         if (!synthetic) {
             ctx.emit(tswitch.getSwitchVar(), "I");
         }
-        ctx.printString(") {\n");
+        ctx.printString(") {");
+        ctx.newLine();
         for (Case cs : tswitch.getCases()) {
             for (int i = 0; i < cs.getIndices().size(); i++) {
                 ctx.printIndentation();
@@ -108,21 +109,23 @@ public class SwitchEmitter implements StatementEmitter<Switch> {
                 } else {
                     ctx.printString(String.valueOf(cs.getIndices().get(i)));
                 }
-                ctx.printString(":\n");
+                ctx.printString(":");
+                ctx.newLine();
             }
             if (cs.isDefault()) {
                 ctx.printIndentation();
-                ctx.printString("default:\n");
+                ctx.printString("default:");
+                ctx.newLine();
             }
             ctx.indent();
             ctx.emitBody(cs.getBody());
             if (!cs.getBody().getStatements().isEmpty()) {
-                ctx.printString("\n");
+                ctx.newLine();
             }
             if (cs.doesBreak()) {
                 ctx.printIndentation();
                 ctx.printString("break;");
-                ctx.printString("\n");
+                ctx.newLine();
             }
             ctx.dedent();
         }

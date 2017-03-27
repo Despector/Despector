@@ -57,7 +57,8 @@ public class AnonymousClassEmitter implements SpecialEmitter {
                 ctx.printString(", ");
             }
         }
-        ctx.printString(") {\n");
+        ctx.printString(") {");
+        ctx.newLine();
         ctx.indent();
         ctx.indent();
 
@@ -85,7 +86,8 @@ public class AnonymousClassEmitter implements SpecialEmitter {
                     continue;
                 }
                 if (ctx.emit(mth)) {
-                    ctx.printString("\n\n");
+                    ctx.newLine();
+                    ctx.newLine();
                 }
             }
         }

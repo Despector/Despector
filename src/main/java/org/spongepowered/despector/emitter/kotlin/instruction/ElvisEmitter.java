@@ -33,6 +33,7 @@ public class ElvisEmitter implements InstructionEmitter<Elvis> {
     @Override
     public void emit(EmitterContext ctx, Elvis arg, String type) {
         ctx.emit(arg.getArg(), type);
+        ctx.markWrapPoint();
         ctx.printString(" ?: ");
         ctx.emit(arg.getElse(), type);
     }

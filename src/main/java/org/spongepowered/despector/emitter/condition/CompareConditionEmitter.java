@@ -36,11 +36,13 @@ public class CompareConditionEmitter implements ConditionEmitter<CompareConditio
         if(compare.getLeft() instanceof NumberCompare) {
             NumberCompare cmp = (NumberCompare) compare.getLeft();
             ctx.emit(cmp.getLeftOperand(), null);
+            ctx.markWrapPoint();
             ctx.printString(compare.getOperator().asString());
             ctx.emit(cmp.getRightOperand(), null);
             return;
         }
         ctx.emit(compare.getLeft(), null);
+        ctx.markWrapPoint();
         ctx.printString(compare.getOperator().asString());
         ctx.emit(compare.getRight(), null);
     }

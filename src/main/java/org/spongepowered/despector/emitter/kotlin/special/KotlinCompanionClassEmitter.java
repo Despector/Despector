@@ -46,8 +46,8 @@ public class KotlinCompanionClassEmitter implements SpecialEmitter {
 
     public void emit(EmitterContext ctx, ClassEntry type) {
         ctx.printIndentation();
-        ctx.printString("companion object {\n");
-        ctx.indent();
+        ctx.printString("companion object {");
+        ctx.newLine().indent();
 
         Map<String, Field> fields = new HashMap<>();
 
@@ -100,7 +100,7 @@ public class KotlinCompanionClassEmitter implements SpecialEmitter {
             for (Annotation anno : fld.annotations) {
                 ctx.printIndentation();
                 ctx.emit(anno);
-                ctx.printString("\n");
+                ctx.newLine();
             }
             ctx.printIndentation();
             ctx.printString("val ");
@@ -108,7 +108,7 @@ public class KotlinCompanionClassEmitter implements SpecialEmitter {
             ctx.printString(": ");
             KotlinEmitterUtil.emitType(ctx, fld.type);
             if (fld.getter != null) {
-                ctx.printString("\n");
+                ctx.newLine();
                 ctx.indent();
                 ctx.printIndentation();
                 ctx.printString("get()");
@@ -120,24 +120,27 @@ public class KotlinCompanionClassEmitter implements SpecialEmitter {
                     } else {
                         ctx.emit(value, false);
                     }
-                    ctx.printString("\n");
+                    ctx.newLine();
                 } else {
-                    ctx.printString(" = {\n");
+                    ctx.printString(" = {");
+                    ctx.newLine();
                     ctx.indent();
                     for (Statement stmt : fld.getter.getStatements()) {
                         ctx.printIndentation();
                         ctx.emit(stmt, true);
-                        ctx.printString("\n");
+                        ctx.newLine();
                     }
                     ctx.dedent();
                     ctx.printIndentation();
-                    ctx.printString("}\n");
+                    ctx.printString("}");
+                    ctx.newLine();
                 }
             }
         }
         ctx.dedent();
         ctx.printIndentation();
-        ctx.printString("}\n");
+        ctx.printString("}");
+        ctx.newLine();
 
     }
 

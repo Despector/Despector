@@ -66,10 +66,12 @@ public class InstanceMethodInvokeEmitter implements InstructionEmitter<InstanceM
                     }
                 } else {
                     ctx.emit(local, null);
+                    ctx.markWrapPoint();
                     ctx.printString(".");
                 }
             } else {
                 ctx.emit(arg.getCallee(), arg.getOwner());
+                ctx.markWrapPoint();
                 ctx.printString(".");
             }
             ctx.printString(arg.getMethodName());
@@ -84,6 +86,7 @@ public class InstanceMethodInvokeEmitter implements InstructionEmitter<InstanceM
                     ctx.emit(varargs.getInitializer()[o], varargs.getType());
                     if (o < varargs.getInitializer().length - 1) {
                         ctx.printString(", ");
+                        ctx.markWrapPoint();
                     }
                 }
                 break;
@@ -91,6 +94,7 @@ public class InstanceMethodInvokeEmitter implements InstructionEmitter<InstanceM
             ctx.emit(param, param_types.get(i));
             if (i < arg.getParams().length - 1) {
                 ctx.printString(", ");
+                ctx.markWrapPoint();
             }
         }
         ctx.printString(")");
@@ -145,6 +149,7 @@ public class InstanceMethodInvokeEmitter implements InstructionEmitter<InstanceM
             for (int i = 0; i < constants.size(); i++) {
                 ctx.emit(constants.get(i), "Ljava/lang/String;");
                 if (i < constants.size() - 1) {
+                    ctx.markWrapPoint();
                     ctx.printString(" + ");
                 }
             }

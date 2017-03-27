@@ -44,6 +44,7 @@ public class AndConditionEmitter implements ConditionEmitter<AndCondition> {
                 ctx.emit(cond);
             }
             if (i < and.getOperands().size() - 1) {
+                ctx.markWrapPoint();
                 ctx.printString(" && ");
             }
         }

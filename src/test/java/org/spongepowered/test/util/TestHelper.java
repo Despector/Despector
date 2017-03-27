@@ -105,6 +105,7 @@ public class TestHelper {
         emitter.setMethod(method);
         emitter.setType(type);
         emitter.emitBody(method.getInstructions());
+        emitter.flush();
         return writer.toString();
     }
     public static String getAsString(Class<?> cls, String method_name) {

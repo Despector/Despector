@@ -45,7 +45,7 @@ public class InterfaceEntryEmitter implements AstEmitter<InterfaceEntry> {
         for (Annotation anno : type.getAnnotations()) {
             ctx.printIndentation();
             ctx.emit(anno);
-            ctx.printString("\n");
+            ctx.newLine();
         }
         ctx.printIndentation();
         InnerClassInfo inner_info = null;
@@ -79,20 +79,17 @@ public class InterfaceEntryEmitter implements AstEmitter<InterfaceEntry> {
             for (int i = 0; i < type.getInterfaces().size(); i++) {
                 ctx.emitType(type.getInterfaces().get(i));
                 if (i < type.getInterfaces().size() - 1) {
-                    if (ctx.getFormat().insert_space_before_comma_in_superinterfaces) {
-                        ctx.printString(" ");
-                    }
+                    ctx.printString(" ", ctx.getFormat().insert_space_before_comma_in_superinterfaces);
                     ctx.printString(",");
-                    if (ctx.getFormat().insert_space_after_comma_in_superinterfaces) {
-                        ctx.printString(" ");
-                    }
+                    ctx.printString(" ", ctx.getFormat().insert_space_after_comma_in_superinterfaces);
+                    ctx.markWrapPoint();
                 }
             }
         }
-        if (ctx.getFormat().insert_space_before_opening_brace_in_type_declaration) {
-            ctx.printString(" ");
-        }
-        ctx.printString("{\n\n");
+        ctx.printString(" ", ctx.getFormat().insert_space_before_opening_brace_in_type_declaration);
+        ctx.printString("{");
+        ctx.newLine();
+        ctx.newLine();
         ctx.indent();
         if (!type.getStaticFields().isEmpty()) {
             boolean at_least_one = false;
@@ -103,10 +100,11 @@ public class InterfaceEntryEmitter implements AstEmitter<InterfaceEntry> {
                 at_least_one = true;
                 ctx.printIndentation();
                 ctx.emit(field);
-                ctx.printString(";\n");
+                ctx.printString(";");
+                ctx.newLine();
             }
             if (at_least_one) {
-                ctx.printString("\n");
+                ctx.newLine();
             }
         }
         if (!type.getStaticMethods().isEmpty()) {
@@ -115,7 +113,8 @@ public class InterfaceEntryEmitter implements AstEmitter<InterfaceEntry> {
                     continue;
                 }
                 ctx.emit(mth);
-                ctx.printString("\n\n");
+                ctx.newLine();
+                ctx.newLine();
             }
         }
         if (!type.getMethods().isEmpty()) {
@@ -126,7 +125,8 @@ public class InterfaceEntryEmitter implements AstEmitter<InterfaceEntry> {
                 // TODO need something for emitting 'default' for default
                 // methods
                 ctx.emit(mth);
-                ctx.printString("\n\n");
+                ctx.newLine();
+                ctx.newLine();
             }
         }
 
@@ -137,14 +137,15 @@ public class InterfaceEntryEmitter implements AstEmitter<InterfaceEntry> {
             }
             ctx.setOuterType(type);
             TypeEntry inner_type = type.getSource().get(inner.getName());
-            ctx.printString("\n");
+            ctx.newLine();
             ctx.emit(inner_type);
             ctx.setType(type);
             ctx.setOuterType(null);
         }
         ctx.dedent();
         ctx.printIndentation();
-        ctx.printString("}\n");
+        ctx.printString("}");
+        ctx.newLine();
         return true;
     }
 

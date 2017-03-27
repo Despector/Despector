@@ -68,7 +68,7 @@ public class KotlinMethodEntryEmitter extends MethodEntryEmitter {
             }
             ctx.printIndentation();
             ctx.emit(anno);
-            ctx.printString("\n");
+            ctx.newLine();
         }
 
         ctx.setMethod(method);
@@ -91,7 +91,8 @@ public class KotlinMethodEntryEmitter extends MethodEntryEmitter {
                 }
             }
             ctx.printIndentation();
-            ctx.printString("static {\n");
+            ctx.printString("static {");
+            ctx.newLine();
             ctx.indent();
             if (method.getInstructions() == null) {
                 ctx.printIndentation();
@@ -100,7 +101,7 @@ public class KotlinMethodEntryEmitter extends MethodEntryEmitter {
             } else {
                 ctx.emitBody(method.getInstructions(), start);
             }
-            ctx.printString("\n");
+            ctx.newLine();
             ctx.dedent();
             ctx.printIndentation();
             ctx.printString("}");
@@ -154,6 +155,7 @@ public class KotlinMethodEntryEmitter extends MethodEntryEmitter {
             }
             if (i < method.getParamTypes().size() - 1) {
                 ctx.printString(", ");
+                ctx.markWrapPoint();
             }
         }
         ctx.printString(")");
@@ -184,7 +186,8 @@ public class KotlinMethodEntryEmitter extends MethodEntryEmitter {
         }
 
         if (!method.isAbstract()) {
-            ctx.printString(" {\n");
+            ctx.printString(" {");
+            ctx.newLine();
             ctx.indent();
             if (block == null) {
                 ctx.printIndentation();
@@ -195,7 +198,7 @@ public class KotlinMethodEntryEmitter extends MethodEntryEmitter {
                 block.accept(visitor);
                 ctx.emitBody(block);
             }
-            ctx.printString("\n");
+            ctx.newLine();
             ctx.dedent();
             ctx.printIndentation();
             ctx.printString("}");

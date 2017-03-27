@@ -37,12 +37,13 @@ public class IfEmitter implements StatementEmitter<If> {
     public void emit(EmitterContext ctx, If insn, boolean semicolon) {
         ctx.printString("if (");
         ctx.emit(insn.getCondition());
-        ctx.printString(") {\n");
+        ctx.printString(") {");
+        ctx.newLine();
         if (!insn.getIfBody().getStatements().isEmpty()) {
             ctx.indent();
             ctx.emitBody(insn.getIfBody());
             ctx.dedent();
-            ctx.printString("\n");
+            ctx.newLine();
         }
         ctx.printIndentation();
         Else else_ = insn.getElseBlock();
@@ -50,23 +51,25 @@ public class IfEmitter implements StatementEmitter<If> {
             Elif elif = insn.getElifBlocks().get(i);
             ctx.printString("} else if (");
             ctx.emit(elif.getCondition());
-            ctx.printString(") {\n");
+            ctx.printString(") {");
+            ctx.newLine();
             ctx.indent();
             ctx.emitBody(elif.getBody());
             ctx.dedent();
-            ctx.printString("\n");
+            ctx.newLine();
             ctx.printIndentation();
         }
         if (else_ == null) {
             ctx.printString("}");
         } else {
             StatementBlock else_block = else_.getElseBody();
-            ctx.printString("} else {\n");
+            ctx.printString("} else {");
+            ctx.newLine();
             if (!else_block.getStatements().isEmpty()) {
                 ctx.indent();
                 ctx.emitBody(else_block);
                 ctx.dedent();
-                ctx.printString("\n");
+                ctx.newLine();
             }
             ctx.printIndentation();
             ctx.printString("}");

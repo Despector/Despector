@@ -45,8 +45,10 @@ public class TernaryEmitter implements InstructionEmitter<Ternary> {
         } else {
             ctx.emit(ternary.getCondition());
         }
+        ctx.markWrapPoint();
         ctx.printString(" ? ");
         ctx.emit(ternary.getTrueValue(), type);
+        ctx.markWrapPoint();
         ctx.printString(" : ");
         ctx.emit(ternary.getFalseValue(), type);
     }

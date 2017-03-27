@@ -38,7 +38,7 @@ public class PackageInfoEmitter implements SpecialEmitter {
 
         for (Annotation anno : info.getAnnotations()) {
             emit(ctx, anno);
-            ctx.printString("\n");
+            ctx.newLine();
         }
 
         String pkg = info.getName();
@@ -47,7 +47,8 @@ public class PackageInfoEmitter implements SpecialEmitter {
             pkg = pkg.substring(0, last).replace('/', '.');
             ctx.printString("package ");
             ctx.printString(pkg);
-            ctx.printString(";\n");
+            ctx.printString(";");
+            ctx.newLine();
         }
     }
 

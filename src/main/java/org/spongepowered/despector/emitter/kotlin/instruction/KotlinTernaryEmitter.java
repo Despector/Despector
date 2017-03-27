@@ -43,7 +43,9 @@ public class KotlinTernaryEmitter extends TernaryEmitter {
             ctx.emit(ternary.getCondition());
         }
         ctx.printString(") ");
+        ctx.markWrapPoint();
         ctx.emit(ternary.getTrueValue(), type);
+        ctx.markWrapPoint();
         ctx.printString(" else ");
         ctx.emit(ternary.getFalseValue(), type);
     }

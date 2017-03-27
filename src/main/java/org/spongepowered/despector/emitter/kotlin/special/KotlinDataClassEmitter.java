@@ -61,7 +61,8 @@ public class KotlinDataClassEmitter implements SpecialEmitter {
             ctx.printString(name);
         }
 
-        ctx.printString("(\n");
+        ctx.printString("(");
+        ctx.newLine();
         ctx.indent();
 
         Map<String, DataField> fields = new LinkedHashMap<>();
@@ -119,11 +120,12 @@ public class KotlinDataClassEmitter implements SpecialEmitter {
             if (i != fields_ordered.length - 1) {
                 ctx.printString(",");
             }
-            ctx.printString("\n");
+            ctx.newLine();
         }
         ctx.dedent();
         ctx.printIndentation();
-        ctx.printString(")\n");
+        ctx.printString(")");
+        ctx.newLine();
     }
 
     private static class DataField {

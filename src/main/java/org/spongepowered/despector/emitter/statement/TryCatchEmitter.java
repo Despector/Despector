@@ -33,11 +33,12 @@ public class TryCatchEmitter implements StatementEmitter<TryCatch> {
 
     @Override
     public void emit(EmitterContext ctx, TryCatch try_block, boolean semicolon) {
-        ctx.printString("try {\n");
+        ctx.printString("try {");
+        ctx.newLine();
         ctx.indent();
         ctx.emitBody(try_block.getTryBlock());
         ctx.dedent();
-        ctx.printString("\n");
+        ctx.newLine();
         for (CatchBlock c : try_block.getCatchBlocks()) {
             ctx.printIndentation();
             ctx.printString("} catch (");
@@ -54,11 +55,12 @@ public class TryCatchEmitter implements StatementEmitter<TryCatch> {
             } else {
                 ctx.printString(c.getDummyName());
             }
-            ctx.printString(") {\n");
+            ctx.printString(") {");
+            ctx.newLine();
             ctx.indent();
             ctx.emitBody(c.getBlock());
             ctx.dedent();
-            ctx.printString("\n");
+            ctx.newLine();
         }
         ctx.printIndentation();
         ctx.printString("}");

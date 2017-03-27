@@ -80,7 +80,6 @@ public class EclipseFormatLoader implements FormatLoader {
         settings_handlers.put("org.eclipse.jdt.core.formatter.tabulation.size", noop);
         settings_handlers.put("org.eclipse.jdt.core.formatter.number_of_empty_lines_to_preserve", (f, v) -> f.number_of_empty_lines_to_preserve = Integer.parseInt(v));
         settings_handlers.put("org.eclipse.jdt.core.formatter.indent_empty_lines", (f, v) -> f.indent_empty_lines = v.equals("true"));
-        settings_handlers.put("org.eclipse.jdt.core.compiler.compliance", (f, v) -> f.source_compliance = v);
         settings_handlers.put("org.eclipse.jdt.core.formatter.insert_new_line_at_end_of_file_if_missing", (f, v) -> f.insert_new_line_at_end_of_file_if_missing = v.equals("insert"));
         settings_handlers.put("org.eclipse.jdt.core.compiler.codegen.inlineJsrBytecode", noop);
         settings_handlers.put("org.eclipse.jdt.core.compiler.codegen.targetPlatform", noop);

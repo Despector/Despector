@@ -32,12 +32,13 @@ public class DoWhileEmitter implements StatementEmitter<DoWhile> {
 
     @Override
     public void emit(EmitterContext ctx, DoWhile loop, boolean semicolon) {
-        ctx.printString("do {\n");
+        ctx.printString("do {");
+        ctx.newLine();
         if (!loop.getBody().getStatements().isEmpty()) {
             ctx.indent();
             ctx.emitBody(loop.getBody());
             ctx.dedent();
-            ctx.printString("\n");
+            ctx.newLine();
         }
         ctx.printIndentation();
         ctx.printString("} while (");

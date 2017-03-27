@@ -81,7 +81,7 @@ public class KotlinClassEntryEmitter implements AstEmitter<ClassEntry> {
                 }
                 ctx.printIndentation();
                 ctx.emit(anno);
-                ctx.printString("\n");
+                ctx.newLine();
             }
             ctx.printIndentation();
             InnerClassInfo inner_info = null;
@@ -118,22 +118,17 @@ public class KotlinClassEntryEmitter implements AstEmitter<ClassEntry> {
                     ctx.emitType(type.getInterfaces().get(i));
                     generics.emitTypeArguments(ctx, type.getSignature().getInterfaceSignatures().get(i).getArguments());
                     if (i < type.getInterfaces().size() - 1) {
-                        if (ctx.getFormat().insert_space_before_comma_in_superinterfaces) {
-                            ctx.printString(" ");
-                        }
+                        ctx.printString(" ", ctx.getFormat().insert_space_before_comma_in_superinterfaces);
                         ctx.printString(",");
-                        if (ctx.getFormat().insert_space_after_comma_in_superinterfaces) {
-                            ctx.printString(" ");
-                        }
+                        ctx.printString(" ", ctx.getFormat().insert_space_after_comma_in_superinterfaces);
                     }
                 }
             }
-            if (ctx.getFormat().insert_space_before_opening_brace_in_type_declaration) {
-                ctx.printString(" ");
-            }
-            ctx.printString("{\n");
+            ctx.printString(" ", ctx.getFormat().insert_space_before_opening_brace_in_type_declaration);
+            ctx.printString("{");
+            ctx.newLine();
             for (int i = 0; i < ctx.getFormat().blank_lines_before_first_class_body_declaration; i++) {
-                ctx.printString("\n");
+                ctx.newLine();
             }
 
             // Ordering is static fields -> static methods -> instance fields ->
@@ -153,14 +148,15 @@ public class KotlinClassEntryEmitter implements AstEmitter<ClassEntry> {
             ctx.setOuterType(type);
             TypeEntry inner_type = type.getSource().get(inner.getName());
             ctx.emit(inner_type);
-            ctx.printString("\n");
+            ctx.newLine();
             ctx.setType(type);
             ctx.setOuterType(null);
         }
         if (emit_class) {
             ctx.dedent();
             ctx.printIndentation();
-            ctx.printString("}\n");
+            ctx.printString("}");
+            ctx.newLine();
         }
         return true;
     }
@@ -199,10 +195,11 @@ public class KotlinClassEntryEmitter implements AstEmitter<ClassEntry> {
                     ctx.printString(" = ");
                     ctx.emit(static_initializers.get(field.getName()), field.getType());
                 }
-                ctx.printString(";\n");
+                ctx.printString(";");
+                ctx.newLine();
             }
             if (at_least_one) {
-                ctx.printString("\n");
+                ctx.newLine();
             }
         }
     }
@@ -214,7 +211,8 @@ public class KotlinClassEntryEmitter implements AstEmitter<ClassEntry> {
                     continue;
                 }
                 if (ctx.emit(mth)) {
-                    ctx.printString("\n\n");
+                    ctx.newLine();
+                    ctx.newLine();
                 }
             }
         }
@@ -255,10 +253,11 @@ public class KotlinClassEntryEmitter implements AstEmitter<ClassEntry> {
                 at_least_one = true;
                 ctx.printIndentation();
                 ctx.emit(field);
-                ctx.printString(";\n");
+                ctx.printString(";");
+                ctx.newLine();
             }
             if (at_least_one) {
-                ctx.printString("\n");
+                ctx.newLine();
             }
         }
     }
@@ -274,7 +273,8 @@ public class KotlinClassEntryEmitter implements AstEmitter<ClassEntry> {
                     continue;
                 }
                 if (ctx.emit(mth)) {
-                    ctx.printString("\n\n");
+                    ctx.newLine();
+                    ctx.newLine();
                 }
             }
         }
