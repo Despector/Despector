@@ -73,7 +73,8 @@ public class WhenEmitter implements InstructionEmitter<When> {
     public void emit(EmitterContext ctx, When arg, String type) {
         ctx.printString("when (");
         ctx.emit(arg.getArg(), null);
-        ctx.printString(") {\n");
+        ctx.printString(") {");
+        ctx.newLine();
         ctx.indent();
         ctx.printIndentation();
         for (Case cs : arg.getCases()) {
@@ -81,35 +82,39 @@ public class WhenEmitter implements InstructionEmitter<When> {
             ctx.printString(" -> ");
             if (cs.getBody().getStatementCount() == 0) {
                 ctx.emit(cs.getLast(), arg.inferType());
-                ctx.printString("\n");
+                ctx.newLine();
                 ctx.printIndentation();
             } else {
-                ctx.printString("{\n");
+                ctx.printString("{");
+                ctx.newLine();
                 ctx.indent();
                 ctx.printIndentation();
                 ctx.emitBody(cs.getBody());
                 ctx.emit(cs.getLast(), arg.inferType());
-                ctx.printString("\n");
+                ctx.newLine();
                 ctx.dedent();
                 ctx.printIndentation();
-                ctx.printString("}\n");
+                ctx.printString("}");
+                ctx.newLine();
                 ctx.printIndentation();
             }
         }
         ctx.printString("else -> ");
         if (arg.getElseBody().getStatementCount() == 0) {
             ctx.emit(arg.getElseBodyLast(), arg.inferType());
-            ctx.printString("\n");
+            ctx.newLine();
         } else {
-            ctx.printString("{\n");
+            ctx.printString("{");
+            ctx.newLine();
             ctx.indent();
             ctx.printIndentation();
             ctx.emitBody(arg.getElseBody());
             ctx.emit(arg.getElseBodyLast(), arg.inferType());
-            ctx.printString("\n");
+            ctx.newLine();
             ctx.dedent();
             ctx.printIndentation();
-            ctx.printString("}\n");
+            ctx.printString("}");
+            ctx.newLine();
         }
         ctx.dedent();
         ctx.printIndentation();

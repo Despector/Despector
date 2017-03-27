@@ -168,7 +168,8 @@ public class KotlinEnumEntryEmitter implements AstEmitter<EnumEntry> {
                     break;
                 }
                 if (!first) {
-                    ctx.printString(",\n");
+                    ctx.printString(",");
+                    ctx.newLine();
                 }
                 New val = (New) assign.getValue();
                 ctx.printIndentation();

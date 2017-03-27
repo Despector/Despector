@@ -37,7 +37,7 @@ public class FieldEntryEmitter implements AstEmitter<FieldEntry> {
 
         for (Annotation anno : ast.getAnnotations()) {
             ctx.emit(anno);
-            ctx.printString("\n");
+            ctx.newLine();
             ctx.printIndentation();
         }
 
