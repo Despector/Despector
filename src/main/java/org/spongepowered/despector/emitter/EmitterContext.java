@@ -236,6 +236,9 @@ public class EmitterContext {
             throw new IllegalArgumentException("No emitter for instruction " + obj.getClass().getName());
         }
         this.insn_stack.push(obj);
+        if (type == null) {
+            type = obj.inferType();
+        }
         emitter.emit(this, obj, type);
         this.insn_stack.pop();
     }
