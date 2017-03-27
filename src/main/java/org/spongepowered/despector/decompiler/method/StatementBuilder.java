@@ -26,12 +26,14 @@ package org.spongepowered.despector.decompiler.method;
 
 import static org.objectweb.asm.Opcodes.*;
 
+import org.objectweb.asm.Handle;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.FieldInsnNode;
 import org.objectweb.asm.tree.FrameNode;
 import org.objectweb.asm.tree.IincInsnNode;
 import org.objectweb.asm.tree.IntInsnNode;
+import org.objectweb.asm.tree.InvokeDynamicInsnNode;
 import org.objectweb.asm.tree.LabelNode;
 import org.objectweb.asm.tree.LdcInsnNode;
 import org.objectweb.asm.tree.LineNumberNode;
@@ -76,6 +78,7 @@ import org.spongepowered.despector.ast.members.insn.assign.FieldAssignment;
 import org.spongepowered.despector.ast.members.insn.assign.InstanceFieldAssignment;
 import org.spongepowered.despector.ast.members.insn.assign.LocalAssignment;
 import org.spongepowered.despector.ast.members.insn.assign.StaticFieldAssignment;
+import org.spongepowered.despector.ast.members.insn.function.DynamicInvokeHandle;
 import org.spongepowered.despector.ast.members.insn.function.InstanceMethodInvoke;
 import org.spongepowered.despector.ast.members.insn.function.InvokeStatement;
 import org.spongepowered.despector.ast.members.insn.function.New;
@@ -616,9 +619,15 @@ public class StatementBuilder {
                 }
                 break;
             }
-            case INVOKEDYNAMIC:
-                // TODO
+            case INVOKEDYNAMIC: {
+                InvokeDynamicInsnNode invoke = (InvokeDynamicInsnNode) next;
+                Handle lambda = (Handle) invoke.bsmArgs[1];
+                String type = invoke.desc.substring(2);
+                String method = invoke.name;
+                DynamicInvokeHandle handle = new DynamicInvokeHandle(lambda.getOwner(), lambda.getName(), lambda.getDesc(), type, method);
+                stack.push(handle);
                 break;
+            }
             case NEW: {
                 String type = ((TypeInsnNode) next).desc;
                 stack.push(new New("L" + type + ";", null, null));

@@ -297,6 +297,7 @@ public final class AstUtil {
         case JSR:
         case RET:
         case RETURN:
+        case INVOKEDYNAMIC:
             return 0;
         case INVOKESPECIAL:
         case INVOKEVIRTUAL:
@@ -311,7 +312,6 @@ public final class AstUtil {
             int count = TypeHelper.paramCount(method.desc);
             return count;
         }
-        case INVOKEDYNAMIC:
         case MONITORENTER:
         case MONITOREXIT:
         case MULTIANEWARRAY:
@@ -431,6 +431,7 @@ public final class AstUtil {
         case FCMPG:
         case DCMPL:
         case DCMPG:
+        case INVOKEDYNAMIC:
             return 1;
         case NOP:
         case IINC:
@@ -490,7 +491,6 @@ public final class AstUtil {
             }
             return 0;
         }
-        case INVOKEDYNAMIC:
         case MONITORENTER:
         case MONITOREXIT:
         case MULTIANEWARRAY:

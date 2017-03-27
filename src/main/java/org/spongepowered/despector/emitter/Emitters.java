@@ -76,6 +76,7 @@ import org.spongepowered.despector.ast.members.insn.branch.condition.BooleanCond
 import org.spongepowered.despector.ast.members.insn.branch.condition.CompareCondition;
 import org.spongepowered.despector.ast.members.insn.branch.condition.InverseCondition;
 import org.spongepowered.despector.ast.members.insn.branch.condition.OrCondition;
+import org.spongepowered.despector.ast.members.insn.function.DynamicInvokeHandle;
 import org.spongepowered.despector.ast.members.insn.function.InstanceMethodInvoke;
 import org.spongepowered.despector.ast.members.insn.function.InvokeStatement;
 import org.spongepowered.despector.ast.members.insn.function.New;
@@ -95,6 +96,7 @@ import org.spongepowered.despector.emitter.instruction.ArrayLoadEmitter;
 import org.spongepowered.despector.emitter.instruction.CastEmitter;
 import org.spongepowered.despector.emitter.instruction.CompareEmitter;
 import org.spongepowered.despector.emitter.instruction.DoubleConstantEmitter;
+import org.spongepowered.despector.emitter.instruction.DynamicInvokeEmitter;
 import org.spongepowered.despector.emitter.instruction.FieldEmitter;
 import org.spongepowered.despector.emitter.instruction.FloatConstantEmitter;
 import org.spongepowered.despector.emitter.instruction.InstanceMethodInvokeEmitter;
@@ -237,6 +239,7 @@ public class Emitters {
         JAVA_SET.setInstructionEmitter(Ternary.class, new TernaryEmitter());
         JAVA_SET.setInstructionEmitter(TypeConstant.class, new TypeConstantEmitter());
         JAVA_SET.setInstructionEmitter(StaticFieldAccess.class, fld);
+        JAVA_SET.setInstructionEmitter(DynamicInvokeHandle.class, new DynamicInvokeEmitter());
 
         JAVA_SET.setConditionEmitter(AndCondition.class, new AndConditionEmitter());
         JAVA_SET.setConditionEmitter(OrCondition.class, new OrConditionEmitter());
