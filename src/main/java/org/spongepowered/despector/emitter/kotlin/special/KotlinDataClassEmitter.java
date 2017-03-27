@@ -43,7 +43,7 @@ import java.util.Map;
 
 public class KotlinDataClassEmitter implements SpecialEmitter {
 
-    public void emit(EmitterContext ctx, ClassEntry type) {
+    public boolean emit(EmitterContext ctx, ClassEntry type) {
         ctx.printIndentation();
         ctx.printString("data class ");
         InnerClassInfo inner_info = null;
@@ -71,6 +71,7 @@ public class KotlinDataClassEmitter implements SpecialEmitter {
             DataField data = new DataField();
             data.name = fld.getName();
             data.type = fld.getType();
+            data.is_final = fld.isFinal();
             fields.put(data.name, data);
         }
 
@@ -88,6 +89,10 @@ public class KotlinDataClassEmitter implements SpecialEmitter {
             }
         }
 
+        if (ctor_smaller == null) {
+            ctor_smaller = ctor;
+        }
+
         for (Statement stmt : ctor_smaller.getInstructions().getStatements()) {
             if (!(stmt instanceof FieldAssignment)) {
                 continue;
@@ -98,18 +103,24 @@ public class KotlinDataClassEmitter implements SpecialEmitter {
             fields_ordered[local.getLocal().getIndex() - 1] = data;
         }
 
-        for (Statement stmt : ctor.getInstructions().getStatements()) {
-            if (!(stmt instanceof If)) {
-                continue;
+        if (ctor_smaller != ctor) {
+            for (Statement stmt : ctor.getInstructions().getStatements()) {
+                if (!(stmt instanceof If)) {
+                    continue;
+                }
+                LocalAssignment assign = (LocalAssignment) ((If) stmt).getIfBody().getStatement(0);
+                fields_ordered[assign.getLocal().getIndex() - 1].default_val = assign.getValue();
             }
-            LocalAssignment assign = (LocalAssignment) ((If) stmt).getIfBody().getStatement(0);
-            fields_ordered[assign.getLocal().getIndex() - 1].default_val = assign.getValue();
         }
 
         for (int i = 0; i < fields_ordered.length; i++) {
             DataField fld = fields_ordered[i];
             ctx.printIndentation();
-            ctx.printString("var ");
+            if(fld.is_final) {
+                ctx.printString("val ");
+            } else {
+                ctx.printString("var ");
+            }
             ctx.printString(fld.name);
             ctx.printString(": ");
             KotlinEmitterUtil.emitType(ctx, fld.type);
@@ -126,12 +137,14 @@ public class KotlinDataClassEmitter implements SpecialEmitter {
         ctx.printIndentation();
         ctx.printString(")");
         ctx.newLine();
+        return true;
     }
 
     private static class DataField {
 
         public String name;
         public String type;
+        public boolean is_final;
         public Instruction default_val;
 
         public DataField() {
