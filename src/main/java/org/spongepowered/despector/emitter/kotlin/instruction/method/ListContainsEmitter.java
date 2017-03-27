@@ -27,7 +27,7 @@ package org.spongepowered.despector.emitter.kotlin.instruction.method;
 import org.spongepowered.despector.ast.members.insn.function.InstanceMethodInvoke;
 import org.spongepowered.despector.emitter.EmitterContext;
 
-public class ListContainsEmitter implements SpecialMethodEmitter {
+public class ListContainsEmitter implements SpecialMethodEmitter<InstanceMethodInvoke> {
 
     @Override
     public boolean emit(EmitterContext ctx, InstanceMethodInvoke arg, String type) {

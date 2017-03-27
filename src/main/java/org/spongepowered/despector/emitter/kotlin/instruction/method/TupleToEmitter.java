@@ -24,11 +24,20 @@
  */
 package org.spongepowered.despector.emitter.kotlin.instruction.method;
 
-import org.spongepowered.despector.ast.members.insn.function.MethodInvoke;
+import org.spongepowered.despector.ast.members.insn.function.StaticMethodInvoke;
 import org.spongepowered.despector.emitter.EmitterContext;
 
-public interface SpecialMethodEmitter<T extends MethodInvoke> {
+public class TupleToEmitter implements SpecialMethodEmitter<StaticMethodInvoke> {
 
-    boolean emit(EmitterContext ctx, T arg, String type);
+    @Override
+    public boolean emit(EmitterContext ctx, StaticMethodInvoke arg, String type) {
+        if (arg.getParams().length != 2) {
+            return false;
+        }
+        ctx.emit(arg.getParams()[0], null);
+        ctx.printString(" to ");
+        ctx.emit(arg.getParams()[1], null);
+        return true;
+    }
 
 }

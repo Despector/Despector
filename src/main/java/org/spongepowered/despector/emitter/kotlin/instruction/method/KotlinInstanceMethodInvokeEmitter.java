@@ -42,7 +42,7 @@ public class KotlinInstanceMethodInvokeEmitter extends InstanceMethodInvokeEmitt
 
     private static final Set<String> NO_CALLEE = new HashSet<>();
     private static final Set<String> NO_PARAMS = new HashSet<>();
-    private static final Map<String, SpecialMethodEmitter> SPECIAL = new HashMap<>();
+    private static final Map<String, SpecialMethodEmitter<InstanceMethodInvoke>> SPECIAL = new HashMap<>();
 
     static {
         NO_CALLEE.add("Ljava/io/PrintStream;println");
@@ -56,7 +56,7 @@ public class KotlinInstanceMethodInvokeEmitter extends InstanceMethodInvokeEmitt
     @Override
     public void emit(EmitterContext ctx, InstanceMethodInvoke arg, String type) {
         String key = arg.getOwner() + arg.getMethodName();
-        SpecialMethodEmitter special = SPECIAL.get(key);
+        SpecialMethodEmitter<InstanceMethodInvoke> special = SPECIAL.get(key);
         if (special != null && special.emit(ctx, arg, type)) {
             return;
         }

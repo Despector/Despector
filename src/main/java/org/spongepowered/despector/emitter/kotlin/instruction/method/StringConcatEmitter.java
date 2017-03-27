@@ -35,7 +35,7 @@ import org.spongepowered.despector.emitter.EmitterContext;
 
 import java.util.List;
 
-public class StringConcatEmitter implements SpecialMethodEmitter {
+public class StringConcatEmitter implements SpecialMethodEmitter<InstanceMethodInvoke> {
 
     @Override
     public boolean emit(EmitterContext ctx, InstanceMethodInvoke arg, String type) {
@@ -100,6 +100,10 @@ public class StringConcatEmitter implements SpecialMethodEmitter {
                     ctx.printString(((StringConstant) next).getConstant());
                     continue;
                 } else if (next instanceof LocalAccess) {
+                    if (!in_string && i < constants.size() - 1 && constants.get(i + 1) instanceof StringConstant) {
+                        in_string = true;
+                        ctx.printString("\"");
+                    }
                     if (in_string) {
                         ctx.printString("$");
                         ctx.printString(((LocalAccess) next).getLocal().getName());

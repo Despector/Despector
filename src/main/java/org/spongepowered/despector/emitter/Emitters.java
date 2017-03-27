@@ -117,10 +117,10 @@ import org.spongepowered.despector.emitter.kotlin.condition.KotlinBooleanConditi
 import org.spongepowered.despector.emitter.kotlin.instruction.ElvisEmitter;
 import org.spongepowered.despector.emitter.kotlin.instruction.KotlinCastEmitter;
 import org.spongepowered.despector.emitter.kotlin.instruction.KotlinInstanceOfEmitter;
-import org.spongepowered.despector.emitter.kotlin.instruction.KotlinStaticMethodInvokeEmitter;
 import org.spongepowered.despector.emitter.kotlin.instruction.KotlinTernaryEmitter;
 import org.spongepowered.despector.emitter.kotlin.instruction.WhenEmitter;
 import org.spongepowered.despector.emitter.kotlin.instruction.method.KotlinInstanceMethodInvokeEmitter;
+import org.spongepowered.despector.emitter.kotlin.instruction.method.KotlinStaticMethodInvokeEmitter;
 import org.spongepowered.despector.emitter.kotlin.special.KotlinCompanionClassEmitter;
 import org.spongepowered.despector.emitter.kotlin.special.KotlinDataClassEmitter;
 import org.spongepowered.despector.emitter.kotlin.special.KotlinGenericsEmitter;
