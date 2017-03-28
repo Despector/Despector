@@ -25,16 +25,57 @@
 package org.spongepowered.despector.emitter.instruction;
 
 import org.spongepowered.despector.ast.members.insn.arg.cst.StringConstant;
+import org.spongepowered.despector.config.ConfigManager;
 import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.InstructionEmitter;
 
 public class StringConstantEmitter implements InstructionEmitter<StringConstant> {
 
+    public static String escape(String text) {
+        StringBuilder str = new StringBuilder();
+        for (int i = 0; i < text.length(); i++) {
+            char n = text.charAt(i);
+            if (n == '\n') {
+                str.append("\\n");
+            } else if (n == '\\') {
+                str.append("\\\\");
+            } else if (n == '\t') {
+                str.append("\\t");
+            } else if (n == '\r') {
+                str.append("\\r");
+            } else if (n == '\b') {
+                str.append("\\b");
+            } else if (n == '\f') {
+                str.append("\\f");
+            } else if (n == '\'') {
+                str.append("\\'");
+            } else if (n == '\"') {
+                str.append("\\\"");
+            } else if (n == '\0') {
+                str.append("\\0");
+            } else {
+                str.append(n);
+            }
+        }
+        return str.toString();
+    }
+
     @Override
     public void emit(EmitterContext ctx, StringConstant arg, String type) {
+        if (arg.getConstant().contains("\n") && ConfigManager.getConfig().kotlin.replace_mulit_line_strings) {
+            ctx.printString("\"\"\"");
+            String[] lines = arg.getConstant().split("\n");
+            for (int i = 0; i < lines.length; i++) {
+                ctx.printString(lines[i]);
+                if (i < lines.length - 1 || arg.getConstant().endsWith("\n")) {
+                    ctx.newLine();
+                }
+            }
+            ctx.printString("\"\"\"");
+            return;
+        }
         ctx.printString("\"");
-        // TODO escape string
-        ctx.printString(arg.getConstant());
+        ctx.printString(escape(arg.getConstant()));
         ctx.printString("\"");
     }
 

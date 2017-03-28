@@ -39,7 +39,9 @@ public class ConfigBase {
     public EmitterConfig emitter = new EmitterConfig();
     @Setting(comment = "Cleanup configuration")
     public CleanupConfig cleanup = new CleanupConfig();
-    
+    @Setting(comment = "Kotlin specific configuration")
+    public KotlinConfig kotlin = new KotlinConfig();
+
     @Setting(value = "emit-source-on-load", comment = "Emits source when loading classes (useful when debugging the decompiler).")
     public boolean emit_source_on_load = Boolean.valueOf(System.getProperty("despector.debug.emit", "false"));
     @Setting(value = "print-opcodes-on-error", comment = "Prints out opcodes of a method when it fails to decompile.")
@@ -70,7 +72,15 @@ public class ConfigBase {
 
         @Setting(value = "operations", comment = "Cleanup operations to apply before emitting")
         public List<String> operations = Lists.newArrayList();
-        
+
+    }
+
+    @ConfigSerializable
+    public static class KotlinConfig {
+
+        @Setting(value = "replace-multiline-strings", comment = "Whether to replace strings containing new lines with raw strings")
+        public boolean replace_mulit_line_strings = true;
+
     }
 
 }
