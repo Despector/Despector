@@ -40,18 +40,8 @@ import org.spongepowered.despector.ast.members.insn.arg.field.ArrayAccess;
 import org.spongepowered.despector.ast.members.insn.arg.field.InstanceFieldAccess;
 import org.spongepowered.despector.ast.members.insn.arg.field.LocalAccess;
 import org.spongepowered.despector.ast.members.insn.arg.field.StaticFieldAccess;
-import org.spongepowered.despector.ast.members.insn.arg.operator.AddOperator;
-import org.spongepowered.despector.ast.members.insn.arg.operator.DivideOperator;
-import org.spongepowered.despector.ast.members.insn.arg.operator.MultiplyOperator;
 import org.spongepowered.despector.ast.members.insn.arg.operator.NegativeOperator;
-import org.spongepowered.despector.ast.members.insn.arg.operator.RemainderOperator;
-import org.spongepowered.despector.ast.members.insn.arg.operator.ShiftLeftOperator;
-import org.spongepowered.despector.ast.members.insn.arg.operator.ShiftRightOperator;
-import org.spongepowered.despector.ast.members.insn.arg.operator.SubtractOperator;
-import org.spongepowered.despector.ast.members.insn.arg.operator.UnsignedShiftRightOperator;
-import org.spongepowered.despector.ast.members.insn.arg.operator.bitwise.AndOperator;
-import org.spongepowered.despector.ast.members.insn.arg.operator.bitwise.OrOperator;
-import org.spongepowered.despector.ast.members.insn.arg.operator.bitwise.XorOperator;
+import org.spongepowered.despector.ast.members.insn.arg.operator.Operator;
 import org.spongepowered.despector.ast.members.insn.assign.ArrayAssignment;
 import org.spongepowered.despector.ast.members.insn.assign.InstanceFieldAssignment;
 import org.spongepowered.despector.ast.members.insn.assign.LocalAssignment;
@@ -85,13 +75,7 @@ import org.spongepowered.despector.ast.members.insn.misc.Throw;
  */
 public abstract class InstructionVisitor {
 
-    public void visitAddOperatorArg(AddOperator addArg) {
-    }
-
     public void visitAndCondition(AndCondition andCondition) {
-    }
-
-    public void visitAndOperatorArg(AndOperator andArg) {
     }
 
     public void visitArrayAssign(ArrayAssignment arrayAssign) {
@@ -116,9 +100,6 @@ public abstract class InstructionVisitor {
     }
 
     public void visitCompareCondition(CompareCondition compareCondition) {
-    }
-
-    public void visitDivideOperatorArg(DivideOperator divideArg) {
     }
 
     public void visitDoubleConstantArg(DoubleConstant doubleConstantArg) {
@@ -178,9 +159,6 @@ public abstract class InstructionVisitor {
     public void visitLongConstantArg(LongConstant longConstantArg) {
     }
 
-    public void visitMultiplyOperatorArg(MultiplyOperator multiplyArg) {
-    }
-
     public void visitNegArg(NegativeOperator negArg) {
     }
 
@@ -196,16 +174,7 @@ public abstract class InstructionVisitor {
     public void visitOrCondition(OrCondition orCondition) {
     }
 
-    public void visitOrOperatorArg(OrOperator orArg) {
-    }
-
-    public void visitRemainderOperatorArg(RemainderOperator remainerArg) {
-    }
-
-    public void visitShiftLeftOperatorArg(ShiftLeftOperator shiftLeftArg) {
-    }
-
-    public void visitShiftRightOperatorArg(ShiftRightOperator shiftRightArg) {
+    public void visitOperatorArg(Operator orArg) {
     }
 
     public void visitStaticFieldArg(StaticFieldAccess staticFieldArg) {
@@ -218,9 +187,6 @@ public abstract class InstructionVisitor {
     }
 
     public void visitStringConstantArg(StringConstant stringConstantArg) {
-    }
-
-    public void visitSubtractOperatorArg(SubtractOperator subtractArg) {
     }
 
     public void visitSwitch(Switch tableSwitch) {
@@ -241,16 +207,10 @@ public abstract class InstructionVisitor {
     public void visitTypeConstantArg(TypeConstant typeConstantArg) {
     }
 
-    public void visitUnsignedRightShiftOperatorArg(UnsignedShiftRightOperator unsignedShiftRightArg) {
-    }
-
     public void visitValueReturn(Return returnValue) {
     }
 
     public void visitWhileLoop(While whileLoop) {
-    }
-
-    public void visitXorOperatorArg(XorOperator xorArg) {
     }
 
 }

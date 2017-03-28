@@ -24,27 +24,36 @@
  */
 package org.spongepowered.despector.ast.members.insn.arg.operator;
 
-import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
-import org.spongepowered.despector.ast.members.insn.arg.Instruction;
+public enum OperatorType {
 
-/**
- * The right bitshift operator.
- */
-public class ShiftRightOperator extends Operator {
+    ADD(11, "+"),
+    SUBTRACT(11, "-"),
+    MULTIPLY(12, "*"),
+    DIVIDE(12, "/"),
+    REMAINDER(12, "%"),
 
-    public ShiftRightOperator(Instruction left, Instruction right) {
-        super(left, right);
+    SHIFT_LEFT(10, "<<"),
+    SHIFT_RIGHT(10, ">>"),
+    UNSIGNED_SHIFT_RIGHT(10, ">>>"),
+
+    AND(7, "&"),
+    OR(5, "|"),
+    XOR(6, "^");
+
+    private final String symbol;
+    private final int precedence;
+
+    OperatorType(int p, String s) {
+        this.precedence = p;
+        this.symbol = s;
     }
 
-    @Override
-    public String getOperator() {
-        return ">>";
+    public String getSymbol() {
+        return this.symbol;
     }
 
-    @Override
-    public void accept(InstructionVisitor visitor) {
-        visitor.visitShiftRightOperatorArg(this);
-        super.accept(visitor);
+    public int getPrecedence() {
+        return this.precedence;
     }
 
 }

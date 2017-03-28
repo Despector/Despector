@@ -61,18 +61,9 @@ import org.spongepowered.despector.ast.members.insn.arg.field.FieldAccess;
 import org.spongepowered.despector.ast.members.insn.arg.field.InstanceFieldAccess;
 import org.spongepowered.despector.ast.members.insn.arg.field.LocalAccess;
 import org.spongepowered.despector.ast.members.insn.arg.field.StaticFieldAccess;
-import org.spongepowered.despector.ast.members.insn.arg.operator.AddOperator;
-import org.spongepowered.despector.ast.members.insn.arg.operator.DivideOperator;
-import org.spongepowered.despector.ast.members.insn.arg.operator.MultiplyOperator;
 import org.spongepowered.despector.ast.members.insn.arg.operator.NegativeOperator;
-import org.spongepowered.despector.ast.members.insn.arg.operator.RemainderOperator;
-import org.spongepowered.despector.ast.members.insn.arg.operator.ShiftLeftOperator;
-import org.spongepowered.despector.ast.members.insn.arg.operator.ShiftRightOperator;
-import org.spongepowered.despector.ast.members.insn.arg.operator.SubtractOperator;
-import org.spongepowered.despector.ast.members.insn.arg.operator.UnsignedShiftRightOperator;
-import org.spongepowered.despector.ast.members.insn.arg.operator.bitwise.AndOperator;
-import org.spongepowered.despector.ast.members.insn.arg.operator.bitwise.OrOperator;
-import org.spongepowered.despector.ast.members.insn.arg.operator.bitwise.XorOperator;
+import org.spongepowered.despector.ast.members.insn.arg.operator.Operator;
+import org.spongepowered.despector.ast.members.insn.arg.operator.OperatorType;
 import org.spongepowered.despector.ast.members.insn.assign.ArrayAssignment;
 import org.spongepowered.despector.ast.members.insn.assign.FieldAssignment;
 import org.spongepowered.despector.ast.members.insn.assign.InstanceFieldAssignment;
@@ -234,9 +225,9 @@ public class StatementBuilder {
                 Instruction val = stack.pop();
                 Instruction index_arg = stack.pop();
                 Instruction var = stack.pop();
-                if(var instanceof LocalAccess) {
+                if (var instanceof LocalAccess) {
                     LocalInstance local = ((LocalAccess) var).getLocal();
-                    if(local.getType() == null) {
+                    if (local.getType() == null) {
                         local.setType("[" + val.inferType());
                     }
                 }
@@ -334,7 +325,7 @@ public class StatementBuilder {
             case DADD: {
                 Instruction right = stack.pop();
                 Instruction left = stack.pop();
-                stack.push(new AddOperator(left, right));
+                stack.push(new Operator(OperatorType.ADD, left, right));
                 break;
             }
             case ISUB:
@@ -343,7 +334,7 @@ public class StatementBuilder {
             case DSUB: {
                 Instruction right = stack.pop();
                 Instruction left = stack.pop();
-                stack.push(new SubtractOperator(left, right));
+                stack.push(new Operator(OperatorType.SUBTRACT, left, right));
                 break;
             }
             case IMUL:
@@ -352,7 +343,7 @@ public class StatementBuilder {
             case DMUL: {
                 Instruction right = stack.pop();
                 Instruction left = stack.pop();
-                stack.push(new MultiplyOperator(left, right));
+                stack.push(new Operator(OperatorType.MULTIPLY, left, right));
                 break;
             }
             case IDIV:
@@ -361,7 +352,7 @@ public class StatementBuilder {
             case DDIV: {
                 Instruction right = stack.pop();
                 Instruction left = stack.pop();
-                stack.push(new DivideOperator(left, right));
+                stack.push(new Operator(OperatorType.DIVIDE, left, right));
                 break;
             }
             case IREM:
@@ -370,7 +361,7 @@ public class StatementBuilder {
             case DREM: {
                 Instruction right = stack.pop();
                 Instruction left = stack.pop();
-                stack.push(new RemainderOperator(left, right));
+                stack.push(new Operator(OperatorType.REMAINDER, left, right));
                 break;
             }
             case INEG:
@@ -385,42 +376,42 @@ public class StatementBuilder {
             case LSHL: {
                 Instruction right = stack.pop();
                 Instruction left = stack.pop();
-                stack.push(new ShiftLeftOperator(left, right));
+                stack.push(new Operator(OperatorType.SHIFT_LEFT, left, right));
                 break;
             }
             case ISHR:
             case LSHR: {
                 Instruction right = stack.pop();
                 Instruction left = stack.pop();
-                stack.push(new ShiftRightOperator(left, right));
+                stack.push(new Operator(OperatorType.SHIFT_RIGHT, left, right));
                 break;
             }
             case IUSHR:
             case LUSHR: {
                 Instruction right = stack.pop();
                 Instruction left = stack.pop();
-                stack.push(new UnsignedShiftRightOperator(left, right));
+                stack.push(new Operator(OperatorType.UNSIGNED_SHIFT_RIGHT, left, right));
                 break;
             }
             case IAND:
             case LAND: {
                 Instruction right = stack.pop();
                 Instruction left = stack.pop();
-                stack.push(new AndOperator(left, right));
+                stack.push(new Operator(OperatorType.AND, left, right));
                 break;
             }
             case IOR:
             case LOR: {
                 Instruction right = stack.pop();
                 Instruction left = stack.pop();
-                stack.push(new OrOperator(left, right));
+                stack.push(new Operator(OperatorType.OR, left, right));
                 break;
             }
             case IXOR:
             case LXOR: {
                 Instruction right = stack.pop();
                 Instruction left = stack.pop();
-                stack.push(new XorOperator(left, right));
+                stack.push(new Operator(OperatorType.XOR, left, right));
                 break;
             }
             case IINC: {

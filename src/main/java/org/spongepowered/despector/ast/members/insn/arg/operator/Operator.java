@@ -32,16 +32,26 @@ import org.spongepowered.despector.ast.members.insn.arg.Instruction;
 /**
  * An abstract instruction arg for binary operator.
  */
-public abstract class Operator implements Instruction {
+public class Operator implements Instruction {
 
     private static final String PRIMATIVE_ORDERING = "ZBCSIJFD";
 
+    protected OperatorType operator;
     protected Instruction left;
     protected Instruction right;
 
-    public Operator(Instruction left, Instruction right) {
+    public Operator(OperatorType type, Instruction left, Instruction right) {
+        this.operator = checkNotNull(type, "operator");
         this.left = checkNotNull(left, "left");
         this.right = checkNotNull(right, "right");
+    }
+
+    public OperatorType getOperator() {
+        return this.operator;
+    }
+
+    public void setOperator(OperatorType type) {
+        this.operator = checkNotNull(type, "operator");
     }
 
     /**
@@ -72,11 +82,6 @@ public abstract class Operator implements Instruction {
         this.right = checkNotNull(right, "right");
     }
 
-    /**
-     * Gets the operator representation.
-     */
-    public abstract String getOperator();
-
     @Override
     public void accept(InstructionVisitor visitor) {
         this.left.accept(visitor);
@@ -92,7 +97,7 @@ public abstract class Operator implements Instruction {
 
     @Override
     public String toString() {
-        return this.left.toString() + " " + getOperator() + " " + this.right.toString();
+        return this.left.toString() + " " + this.operator.getSymbol() + " " + this.right.toString();
     }
 
     @Override
@@ -104,7 +109,7 @@ public abstract class Operator implements Instruction {
             return false;
         }
         Operator insn = (Operator) obj;
-        return this.left.equals(insn.left) && this.right.equals(insn.right);
+        return this.left.equals(insn.left) && this.right.equals(insn.right) && this.operator == insn.operator;
     }
 
 }
