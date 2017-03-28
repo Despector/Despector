@@ -27,6 +27,7 @@ package org.spongepowered.despector.emitter.condition;
 import org.spongepowered.despector.ast.members.insn.arg.InstanceOf;
 import org.spongepowered.despector.ast.members.insn.arg.Instruction;
 import org.spongepowered.despector.ast.members.insn.arg.cst.IntConstant;
+import org.spongepowered.despector.ast.members.insn.arg.operator.Operator;
 import org.spongepowered.despector.ast.members.insn.branch.Ternary;
 import org.spongepowered.despector.ast.members.insn.branch.condition.BooleanCondition;
 import org.spongepowered.despector.emitter.ConditionEmitter;
@@ -114,7 +115,13 @@ public class BooleanConditionEmitter implements ConditionEmitter<BooleanConditio
                     return true;
                 }
             }
-            ctx.emit(val, "I");
+            if (val instanceof Operator) {
+                ctx.printString("(");
+                ctx.emit(val, "I");
+                ctx.printString(")");
+            } else {
+                ctx.emit(val, "I");
+            }
             if (bool.isInverse()) {
                 ctx.printString(" == 0");
             } else {

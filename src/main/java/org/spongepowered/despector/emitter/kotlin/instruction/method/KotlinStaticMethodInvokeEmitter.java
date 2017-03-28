@@ -26,6 +26,7 @@ package org.spongepowered.despector.emitter.kotlin.instruction.method;
 
 import org.spongepowered.despector.ast.members.insn.arg.Instruction;
 import org.spongepowered.despector.ast.members.insn.arg.NewArray;
+import org.spongepowered.despector.ast.members.insn.arg.cst.IntConstant;
 import org.spongepowered.despector.ast.members.insn.function.StaticMethodInvoke;
 import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.instruction.StaticMethodInvokeEmitter;
@@ -71,6 +72,10 @@ public class KotlinStaticMethodInvokeEmitter extends StaticMethodInvokeEmitter {
                 return;
             }
         }
+        if (arg.getMethodName().endsWith("$default")) {
+            callDefaultMethod(ctx, arg);
+            return;
+        }
         if (!NO_CALLEE.contains(arg.getOwner()) && (ctx.getType() == null || !owner.equals(ctx.getType().getName()))) {
             ctx.emitTypeName(owner);
             ctx.printString(".");
@@ -96,6 +101,43 @@ public class KotlinStaticMethodInvokeEmitter extends StaticMethodInvokeEmitter {
                 ctx.printString(", ");
                 ctx.markWrapPoint();
             }
+        }
+        ctx.printString(")");
+    }
+
+    public void callDefaultMethod(EmitterContext ctx, StaticMethodInvoke call) {
+        Instruction callee = call.getParams()[0];
+        int set = ((IntConstant) call.getParams()[call.getParams().length - 2]).getConstant();
+        int total_args = call.getParams().length - 3;
+
+        ctx.emit(callee, null);
+        ctx.printString(".");
+        ctx.printString(call.getMethodName().substring(0, call.getMethodName().length() - 8));
+        List<String> param_types = TypeHelper.splitSig(call.getMethodDescription());
+        ctx.printString("(");
+        boolean first = true;
+        for (int i = 0; i < total_args; i++) {
+            if ((set & (1 << i)) != 0) {
+                continue;
+            }
+            if (!first) {
+                first = false;
+                ctx.printString(", ");
+                ctx.markWrapPoint();
+            }
+            Instruction param = call.getParams()[i + 1];
+            if (i == total_args - 1 && param instanceof NewArray) {
+                NewArray varargs = (NewArray) param;
+                for (int o = 0; o < varargs.getInitializer().length; o++) {
+                    ctx.markWrapPoint();
+                    ctx.emit(varargs.getInitializer()[o], varargs.getType());
+                    if (o < varargs.getInitializer().length - 1) {
+                        ctx.printString(", ");
+                    }
+                }
+                break;
+            }
+            ctx.emit(param, param_types.get(i));
         }
         ctx.printString(")");
     }

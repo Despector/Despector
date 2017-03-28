@@ -160,7 +160,7 @@ public class KotlinMethodEntryEmitter extends MethodEntryEmitter {
                     KotlinEmitterUtil.emitParamType(ctx, method.getParamTypes().get(i));
                 }
             }
-            if (defaults != null) {
+            if (defaults != null && defaults.size() > i) {
                 Instruction def = defaults.get(i);
                 ctx.printString(" = ");
                 ctx.emit(def, null);
