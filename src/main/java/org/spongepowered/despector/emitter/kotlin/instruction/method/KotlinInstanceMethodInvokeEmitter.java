@@ -51,7 +51,13 @@ public class KotlinInstanceMethodInvokeEmitter extends InstanceMethodInvokeEmitt
 
         SPECIAL.put("Ljava/lang/StringBuilder;toString", new StringConcatEmitter());
         SPECIAL.put("Ljava/util/List;contains", new ListContainsEmitter());
-        SPECIAL.put("Ljava/util/Map;get", new MapGetEmitter());
+        MapGetEmitter map_get = new MapGetEmitter();
+        SPECIAL.put("Ljava/util/Map;get", map_get);
+        SPECIAL.put("Ljava/util/HashMap;get", map_get);
+        // TODO operator overloading, any get method can be simplified in this way
+        MapPutEmitter map_put = new MapPutEmitter();
+        SPECIAL.put("Ljava/util/Map;put", map_put);
+        SPECIAL.put("Ljava/util/HashMap;put", map_put);
     }
 
     @Override

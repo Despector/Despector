@@ -116,12 +116,12 @@ public class KotlinLocalsProcessor implements LocalsProcessor {
                     life = ops.size();
                 }
                 int reads = countReads(ops, i + 1, life, store.var);
-                if (reads == 1 || locals.getLocal(store.var).getLVT().isEmpty()) {
+                if (reads == 1 && locals.getLocal(store.var).getLVT().isEmpty()) {
                     List<AbstractInsnNode> val = new ArrayList<>();
                     int required = -1;
                     for (int o = i - 1; o >= 0; o--) {
                         AbstractInsnNode prev = ops.get(o);
-                        if (prev instanceof JumpInsnNode || prev instanceof LabelNode || prev instanceof FrameNode || prev instanceof LineNumberNode || prev instanceof MethodInsnNode) {
+                        if (prev instanceof JumpInsnNode || prev instanceof LabelNode || prev instanceof FrameNode || prev instanceof LineNumberNode) {
                             continue outer;
                         }
                         val.add(0, prev);
