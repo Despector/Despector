@@ -30,6 +30,7 @@ import static org.objectweb.asm.Opcodes.ILOAD;
 import static org.objectweb.asm.Opcodes.ISTORE;
 
 import com.google.common.collect.Lists;
+import org.objectweb.asm.Label;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.FrameNode;
 import org.objectweb.asm.tree.InsnList;
@@ -43,7 +44,9 @@ import org.spongepowered.despector.decompiler.method.special.LocalsProcessor;
 import org.spongepowered.despector.util.AstUtil;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class KotlinLocalsProcessor implements LocalsProcessor {
 
@@ -106,6 +109,20 @@ public class KotlinLocalsProcessor implements LocalsProcessor {
             }
         }
 
+        Map<Label, List<Integer>> label_targets = new HashMap<>();
+        for (int i = 0; i < ops.size(); i++) {
+            AbstractInsnNode next = ops.get(i);
+            if (next instanceof JumpInsnNode) {
+                JumpInsnNode jump = (JumpInsnNode) next;
+                List<Integer> target = label_targets.get(jump.label.getLabel());
+                if (target == null) {
+                    target = new ArrayList<>();
+                    label_targets.put(jump.label.getLabel(), target);
+                }
+                target.add(i);
+            }
+        }
+
         outer: for (int i = 0; i < ops.size(); i++) {
             AbstractInsnNode next = ops.get(i);
             if (next.getOpcode() >= ISTORE && next.getOpcode() <= ASTORE) {
@@ -114,13 +131,14 @@ public class KotlinLocalsProcessor implements LocalsProcessor {
                 if (life == -1) {
                     life = ops.size();
                 }
-                int reads = countReads(ops, i + 1, life, store.var);
+                int reads = countReads(ops, i + 1, life, store.var, label_targets);
                 if (reads == 1 && locals.getLocal(store.var).getLVT().isEmpty()) {
                     List<AbstractInsnNode> val = new ArrayList<>();
                     int required = -1;
                     for (int o = i - 1; o >= 0; o--) {
                         AbstractInsnNode prev = ops.get(o);
-                        if (prev instanceof JumpInsnNode || prev instanceof LabelNode || prev instanceof FrameNode || prev instanceof LineNumberNode) {
+                        if (prev instanceof JumpInsnNode || prev instanceof LabelNode || prev instanceof FrameNode
+                                || prev instanceof LineNumberNode) {
                             continue outer;
                         }
                         val.add(0, prev);
@@ -160,7 +178,7 @@ public class KotlinLocalsProcessor implements LocalsProcessor {
 
     }
 
-    public static int countReads(List<AbstractInsnNode> ops, int start, int end, int local) {
+    public static int countReads(List<AbstractInsnNode> ops, int start, int end, int local, Map<Label, List<Integer>> label_targets) {
         int count = 0;
         for (int i = end - 1; i >= start; i--) {
             AbstractInsnNode next = ops.get(i);
@@ -168,6 +186,20 @@ public class KotlinLocalsProcessor implements LocalsProcessor {
                 VarInsnNode node = (VarInsnNode) next;
                 if (node.var == local) {
                     count++;
+                }
+            } else if (next instanceof JumpInsnNode) {
+                int target = ops.indexOf(((JumpInsnNode) next).label);
+                if (target < start || target > end) {
+                    return -1;
+                }
+            } else if (next instanceof LabelNode) {
+                List<Integer> targets = label_targets.get(((LabelNode) next).getLabel());
+                if (targets != null) {
+                    for (int t : targets) {
+                        if (t < start || t > end) {
+                            return -1;
+                        }
+                    }
                 }
             }
         }
