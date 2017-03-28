@@ -51,6 +51,7 @@ public class KotlinInstanceMethodInvokeEmitter extends InstanceMethodInvokeEmitt
 
         SPECIAL.put("Ljava/lang/StringBuilder;toString", new StringConcatEmitter());
         SPECIAL.put("Ljava/util/List;contains", new ListContainsEmitter());
+        SPECIAL.put("Ljava/util/Map;get", new MapGetEmitter());
     }
 
     @Override
