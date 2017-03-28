@@ -28,7 +28,6 @@ import org.spongepowered.despector.ast.Locals.LocalInstance;
 import org.spongepowered.despector.ast.members.insn.Statement;
 import org.spongepowered.despector.ast.members.insn.StatementBlock;
 import org.spongepowered.despector.ast.members.insn.arg.Instruction;
-import org.spongepowered.despector.ast.members.insn.arg.field.LocalAccess;
 import org.spongepowered.despector.ast.members.insn.assign.LocalAssignment;
 import org.spongepowered.despector.ast.members.insn.branch.DoWhile;
 import org.spongepowered.despector.ast.members.insn.branch.For;
@@ -41,9 +40,9 @@ import org.spongepowered.despector.ast.members.insn.branch.TryCatch;
 import org.spongepowered.despector.ast.members.insn.branch.TryCatch.CatchBlock;
 import org.spongepowered.despector.ast.members.insn.branch.While;
 import org.spongepowered.despector.ast.members.insn.function.InstanceMethodInvoke;
-import org.spongepowered.despector.ast.members.insn.misc.Increment;
 import org.spongepowered.despector.transform.matcher.ConditionMatcher;
 import org.spongepowered.despector.transform.matcher.InstructionMatcher;
+import org.spongepowered.despector.transform.matcher.MatchContext;
 import org.spongepowered.despector.transform.matcher.StatementMatcher;
 import org.spongepowered.despector.util.AstUtil;
 
@@ -51,6 +50,64 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ForEachPostProcessor implements StatementPostProcessor {
+
+    private static final StatementMatcher<For> LIST_ITERATOR = StatementMatcher.forloop()
+            .init(MatchContext.storeLocal("list_iterator", StatementMatcher.localassign()
+                    .value(InstructionMatcher.instanceinvoke()
+                            .name("iterator")
+                            .desc("()Ljava/util/Iterator;")
+                            .build())
+                    .build()))
+            .condition(ConditionMatcher.bool()
+                    .value(InstructionMatcher.instanceinvoke()
+                            .name("hasNext")
+                            .callee(InstructionMatcher.localaccess()
+                                    .fromContext("list_iterator")
+                                    .build())
+                            .build())
+                    .build())
+            .incr(StatementMatcher.NONE)
+            .body(0, StatementMatcher.localassign()
+                    .value(InstructionMatcher.instanceinvoke()
+                            .name("next")
+                            .desc("()Ljava/lang/Object;")
+                            .callee(InstructionMatcher.localaccess()
+                                    .fromContext("list_iterator")
+                                    .build())
+                            .autoUnwrap()
+                            .build())
+                    .build())
+            .build();
+
+    private static final StatementMatcher<?> ARRAY_ITERATOR_ASSIGN = MatchContext.storeLocal("array", StatementMatcher.localassign().build());
+    private static final StatementMatcher<?> ARRAY_ITERATOR_SIZE = MatchContext.storeLocal("array_size", StatementMatcher.localassign()
+            .type("I")
+            .value(InstructionMatcher.instancefield()
+                    .name("length")
+                    .owner(InstructionMatcher.localaccess()
+                            .fromContext("array")
+                            .build())
+                    .build())
+            .build());
+    private static final StatementMatcher<?> ARRAY_ITERATOR = StatementMatcher.forloop()
+            .init(MatchContext.storeLocal("index", StatementMatcher.localassign()
+                    .value(InstructionMatcher.intconstant()
+                            .value(0)
+                            .build())
+                    .build()))
+            .incr(StatementMatcher.increment()
+                    .build())
+            .body(0, StatementMatcher.localassign()
+                    .value(InstructionMatcher.arrayaccess()
+                            .array(InstructionMatcher.localaccess()
+                                    .fromContext("array")
+                                    .build())
+                            .index(InstructionMatcher.localaccess()
+                                    .fromContext("index")
+                                    .build())
+                            .build())
+                    .build())
+            .build();
 
     @Override
     public void postprocess(StatementBlock block) {
@@ -95,57 +152,22 @@ public class ForEachPostProcessor implements StatementPostProcessor {
     }
 
     public boolean checkIterator(StatementBlock block, For ffor) {
-        if (ffor.getInit() == null || !(ffor.getInit() instanceof LocalAssignment)) {
+        if (!LIST_ITERATOR.matches(MatchContext.create(), ffor)) {
             return false;
         }
-        if (ffor.getIncr() != null) {
-            return false;
-        }
-        if (ffor.getBody().getStatementCount() == 0) {
-            return false;
-        }
-        LocalAssignment init = (LocalAssignment) ffor.getInit();
-        InstanceMethodInvoke init_invoke = InstructionMatcher.requireInstanceMethodInvoke(init.getValue(), "iterator", "()Ljava/util/Iterator;");
-        if (init_invoke == null) {
-            return false;
-        }
-        Instruction condition = ConditionMatcher.requireBooleanCondition(ffor.getCondition());
-        if (condition == null) {
-            return false;
-        }
-        InstanceMethodInvoke condition_invoke = InstructionMatcher.requireInstanceMethodInvoke(condition, "hasNext", "()Z");
-        if (condition_invoke == null) {
-            return false;
-        }
-        if (!InstructionMatcher.isLocalAccess(condition_invoke.getCallee(), init.getLocal())) {
-            return false;
-        }
-        LocalAssignment next_assign = StatementMatcher.requireLocalAssignment(ffor.getBody().getStatement(0));
-        if (next_assign == null) {
-            return false;
-        }
-        InstanceMethodInvoke next_invoke =
-                InstructionMatcher.requireInstanceMethodInvoke(InstructionMatcher.unwrapCast(next_assign.getValue()), "next", null);
-        if (next_invoke == null) {
-            return false;
-        }
-        if (!(next_invoke.getCallee() instanceof LocalAccess)) {
-            return false;
-        }
-        if (!((LocalAccess) next_invoke.getCallee()).getLocal().equals(init.getLocal())) {
-            return false;
-        }
+        LocalInstance local = ((LocalAssignment) ffor.getInit()).getLocal();
 
         for (int o = 1; o < ffor.getBody().getStatementCount(); o++) {
             Statement stmt = ffor.getBody().getStatement(o);
-            if (AstUtil.references(stmt, init.getLocal())) {
+            if (AstUtil.references(stmt, local)) {
                 return false;
             }
         }
+        LocalInstance next_assign = ((LocalAssignment) ffor.getBody().getStatement(0)).getLocal();
+        Instruction list = ((InstanceMethodInvoke) ((LocalAssignment) ffor.getInit()).getValue()).getCallee();
+        ffor.getBody().getStatements().remove(0);
 
-        ffor.getBody().getStatements().remove(next_assign);
-
-        ForEach foreach = new ForEach(init_invoke.getCallee(), next_assign.getLocal(), ffor.getBody());
+        ForEach foreach = new ForEach(list, next_assign, ffor.getBody());
         block.getStatements().set(block.getStatements().indexOf(ffor), foreach);
 
         return true;
@@ -159,62 +181,37 @@ public class ForEachPostProcessor implements StatementPostProcessor {
         if (ffor.getBody().getStatementCount() < 1) {
             return false;
         }
-        LocalAssignment array_assign = StatementMatcher.requireLocalAssignment(block.getStatement(i - 2));
-        if (array_assign == null) {
+        MatchContext ctx = MatchContext.create();
+
+        if (!ARRAY_ITERATOR_ASSIGN.matches(ctx, block.getStatement(i - 2))) {
             return false;
         }
+        LocalAssignment array_assign = (LocalAssignment) block.getStatement(i - 2);
         LocalInstance array = array_assign.getLocal();
         if (!array.getType().startsWith("[")) {
             return false;
         }
-        String value_type = array.getType().substring(1);
-        LocalAssignment size_assign = StatementMatcher.requireLocalAssignment(block.getStatement(i - 1));
-        if (size_assign == null) {
+        if (!ARRAY_ITERATOR_SIZE.matches(ctx, block.getStatement(i - 1))) {
             return false;
         }
-        LocalInstance size = size_assign.getLocal();
-        if (!"I".equals(size.getType())) {
-            return false;
-        }
-        if (!InstructionMatcher.isInstanceFieldAccess(size_assign.getValue(), "length", new LocalAccess(array))) {
-            return false;
-        }
-        LocalAssignment index_assign = StatementMatcher.requireLocalAssignment(ffor.getInit());
-        if (index_assign == null) {
-            return false;
-        }
-        LocalInstance index = index_assign.getLocal();
-        if (!InstructionMatcher.isIntConstant(index_assign.getValue(), 0)) {
-            return false;
-        }
-        Increment incr = StatementMatcher.requireIncrement(ffor.getIncr());
-        if (incr == null) {
-            return false;
-        }
-        LocalAssignment value_assign = StatementMatcher.requireLocalAssignment(ffor.getBody().getStatement(0));
-        if (value_assign == null) {
-            return false;
-        }
-        if (!InstructionMatcher.isArrayAccess(value_assign.getValue(), new LocalAccess(array), new LocalAccess(index))) {
-            return false;
-        }
-        LocalInstance value = value_assign.getLocal();
-        if (!value_type.equals(value.getType())) {
+
+        if (!ARRAY_ITERATOR.matches(ctx, ffor)) {
             return false;
         }
 
         for (int o = 1; o < ffor.getBody().getStatementCount(); o++) {
             Statement stmt = ffor.getBody().getStatement(o);
-            if (AstUtil.references(stmt, index) || AstUtil.references(stmt, size)) {
+            if (AstUtil.references(stmt, ((LocalAssignment) ffor.getIncr()).getLocal())
+                    || AstUtil.references(stmt, ((LocalAssignment) block.getStatement(i - 1)).getLocal())) {
                 return false;
             }
         }
 
-        to_remove.add(array_assign);
-        to_remove.add(size_assign);
-        ffor.getBody().getStatements().remove(value_assign);
+        to_remove.add(block.getStatement(i - 2));
+        to_remove.add(block.getStatement(i - 1));
+        ffor.getBody().getStatements().remove(0);
 
-        ForEach foreach = new ForEach(array_assign.getValue(), value, ffor.getBody());
+        ForEach foreach = new ForEach(array_assign.getValue(), ((LocalAssignment) ffor.getBody().getStatement(0)).getLocal(), ffor.getBody());
         block.getStatements().set(block.getStatements().indexOf(ffor), foreach);
 
         return true;

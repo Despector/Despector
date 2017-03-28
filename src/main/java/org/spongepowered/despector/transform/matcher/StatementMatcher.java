@@ -25,23 +25,69 @@
 package org.spongepowered.despector.transform.matcher;
 
 import org.spongepowered.despector.ast.members.insn.Statement;
-import org.spongepowered.despector.ast.members.insn.assign.LocalAssignment;
-import org.spongepowered.despector.ast.members.insn.misc.Increment;
+import org.spongepowered.despector.transform.matcher.statement.ForEachMatcher;
+import org.spongepowered.despector.transform.matcher.statement.ForLoopMatcher;
+import org.spongepowered.despector.transform.matcher.statement.IncrementMatcher;
+import org.spongepowered.despector.transform.matcher.statement.LocalAssignmentMatcher;
 
-public class StatementMatcher {
+public interface StatementMatcher<T extends Statement> {
 
-    public static LocalAssignment requireLocalAssignment(Statement stmt) {
-        if (!(stmt instanceof LocalAssignment)) {
-            return null;
-        }
-        return (LocalAssignment) stmt;
+    T match(MatchContext ctx, Statement stmt);
+
+    default T match(Statement stmt) {
+        return match(MatchContext.create(), stmt);
     }
 
-    public static Increment requireIncrement(Statement incr) {
-        if (!(incr instanceof Increment)) {
+    default boolean matches(MatchContext ctx, Statement stmt) {
+        return match(ctx, stmt) != null;
+    }
+
+    static final StatementMatcher<?> ANY = new Any();
+    static final StatementMatcher<?> NONE = new None();
+
+    static ForEachMatcher.Builder foreach() {
+        return new ForEachMatcher.Builder();
+    }
+
+    static ForLoopMatcher.Builder forloop() {
+        return new ForLoopMatcher.Builder();
+    }
+
+    static LocalAssignmentMatcher.Builder localassign() {
+        return new LocalAssignmentMatcher.Builder();
+    }
+
+    static IncrementMatcher.Builder increment() {
+        return new IncrementMatcher.Builder();
+    }
+
+    public static class Any implements StatementMatcher<Statement> {
+
+        Any() {
+        }
+
+        @Override
+        public Statement match(MatchContext ctx, Statement stmt) {
+            return stmt;
+        }
+
+    }
+
+    public static class None implements StatementMatcher<Statement> {
+
+        None() {
+        }
+
+        @Override
+        public Statement match(MatchContext ctx, Statement stmt) {
             return null;
         }
-        return (Increment) incr;
+
+        @Override
+        public boolean matches(MatchContext ctx, Statement stmt) {
+            return stmt == null;
+        }
+
     }
 
 }

@@ -46,6 +46,7 @@ public class KotlinInstanceMethodInvokeEmitter extends InstanceMethodInvokeEmitt
 
     static {
         NO_CALLEE.add("Ljava/io/PrintStream;println");
+        NO_CALLEE.add("Ljava/io/PrintStream;print");
 
         NO_PARAMS.add("Ljava/lang/String;length");
 
@@ -54,6 +55,7 @@ public class KotlinInstanceMethodInvokeEmitter extends InstanceMethodInvokeEmitt
         MapGetEmitter map_get = new MapGetEmitter();
         SPECIAL.put("Ljava/util/Map;get", map_get);
         SPECIAL.put("Ljava/util/HashMap;get", map_get);
+        SPECIAL.put("Ljava/lang/String;charAt", map_get);
         // TODO operator overloading, any get method can be simplified in this way
         MapPutEmitter map_put = new MapPutEmitter();
         SPECIAL.put("Ljava/util/Map;put", map_put);

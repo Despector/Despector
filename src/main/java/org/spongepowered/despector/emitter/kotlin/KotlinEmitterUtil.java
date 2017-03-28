@@ -55,8 +55,8 @@ public class KotlinEmitterUtil {
             ctx.printString("Double");
         } else if ("Z".equals(type)) {
             ctx.printString("Boolean");
-        } else if ("C".equals(type)) {
-            ctx.printString("Character");
+        } else if ("C".equals(type) || "Ljava/lang/Character;".equals(type)) {
+            ctx.printString("Char");
         } else {
             ctx.emitType(type);
         }

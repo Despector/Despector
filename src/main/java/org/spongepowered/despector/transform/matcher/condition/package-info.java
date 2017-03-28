@@ -22,39 +22,5 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.despector.transform.matcher;
-
-import org.spongepowered.despector.ast.members.insn.branch.condition.Condition;
-import org.spongepowered.despector.transform.matcher.condition.BooleanConditionMatcher;
-
-public interface ConditionMatcher<T extends Condition> {
-
-    T match(MatchContext ctx, Condition cond);
-
-    default T match(Condition cond) {
-        return match(MatchContext.create(), cond);
-    }
-
-    default boolean matches(MatchContext ctx, Condition cond) {
-        return match(ctx, cond) != null;
-    }
-
-    static final ConditionMatcher<?> ANY = new Any();
-
-    public static BooleanConditionMatcher.Builder bool() {
-        return new BooleanConditionMatcher.Builder();
-    }
-
-    public static class Any implements ConditionMatcher<Condition> {
-
-        Any() {
-        }
-
-        @Override
-        public Condition match(MatchContext ctx, Condition stmt) {
-            return stmt;
-        }
-
-    }
-
-}
+@org.spongepowered.despector.util.NonnullByDefault
+package org.spongepowered.despector.transform.matcher.condition;

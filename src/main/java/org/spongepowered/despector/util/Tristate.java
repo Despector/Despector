@@ -22,39 +22,22 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.despector.transform.matcher;
+package org.spongepowered.despector.util;
 
-import org.spongepowered.despector.ast.members.insn.branch.condition.Condition;
-import org.spongepowered.despector.transform.matcher.condition.BooleanConditionMatcher;
+public enum Tristate {
 
-public interface ConditionMatcher<T extends Condition> {
+    TRUE(true),
+    FALSE(false),
+    UNDEFINED(false);
 
-    T match(MatchContext ctx, Condition cond);
-
-    default T match(Condition cond) {
-        return match(MatchContext.create(), cond);
+    private final boolean bool;
+    
+    Tristate(boolean b) {
+        this.bool = b;
     }
-
-    default boolean matches(MatchContext ctx, Condition cond) {
-        return match(ctx, cond) != null;
+    
+    public boolean asBoolean() {
+        return this.bool;
     }
-
-    static final ConditionMatcher<?> ANY = new Any();
-
-    public static BooleanConditionMatcher.Builder bool() {
-        return new BooleanConditionMatcher.Builder();
-    }
-
-    public static class Any implements ConditionMatcher<Condition> {
-
-        Any() {
-        }
-
-        @Override
-        public Condition match(MatchContext ctx, Condition stmt) {
-            return stmt;
-        }
-
-    }
-
+    
 }

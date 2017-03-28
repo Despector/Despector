@@ -24,117 +24,93 @@
  */
 package org.spongepowered.despector.transform.matcher;
 
-import org.spongepowered.despector.ast.Locals.LocalInstance;
 import org.spongepowered.despector.ast.members.insn.arg.Cast;
 import org.spongepowered.despector.ast.members.insn.arg.Instruction;
-import org.spongepowered.despector.ast.members.insn.arg.cst.IntConstant;
-import org.spongepowered.despector.ast.members.insn.arg.field.ArrayAccess;
-import org.spongepowered.despector.ast.members.insn.arg.field.InstanceFieldAccess;
-import org.spongepowered.despector.ast.members.insn.arg.field.LocalAccess;
 import org.spongepowered.despector.ast.members.insn.function.InstanceMethodInvoke;
+import org.spongepowered.despector.transform.matcher.instruction.ArrayAccessMatcher;
+import org.spongepowered.despector.transform.matcher.instruction.InstanceFieldMatcher;
+import org.spongepowered.despector.transform.matcher.instruction.InstanceInvokeMatcher;
+import org.spongepowered.despector.transform.matcher.instruction.IntConstantMatcher;
+import org.spongepowered.despector.transform.matcher.instruction.LocalAccessMatcher;
+import org.spongepowered.despector.transform.matcher.instruction.StaticInvokeMatcher;
 
-public class InstructionMatcher {
+public interface InstructionMatcher<T extends Instruction> {
 
-    public static boolean isInstanceMethodInvoke(Instruction insn, String method_name, String method_desc) {
-        return isInstanceMethodInvoke(insn, method_name, method_desc, null);
+    T match(MatchContext ctx, Instruction insn);
+
+    default T match(Instruction insn) {
+        return match(MatchContext.create(), insn);
     }
 
-    public static boolean isInstanceMethodInvoke(Instruction insn, String method_name, String method_desc, String method_owner) {
-        if (!(insn instanceof InstanceMethodInvoke)) {
-            return false;
-        }
-        InstanceMethodInvoke invoke = (InstanceMethodInvoke) insn;
-        if (!invoke.getMethodName().equals(method_name)) {
-            return false;
-        }
-        if (method_owner != null && !invoke.getOwner().equals(method_owner)) {
-            return false;
-        }
-        return invoke.getMethodDescription().equals(method_desc);
+    default boolean matches(MatchContext ctx, Instruction insn) {
+        return match(ctx, insn) != null;
     }
 
-    public static InstanceMethodInvoke requireInstanceMethodInvoke(Instruction insn, String method_name, String method_desc) {
-        if (!(insn instanceof InstanceMethodInvoke)) {
-            return null;
-        }
-        InstanceMethodInvoke invoke = (InstanceMethodInvoke) insn;
-        if (method_name != null && !invoke.getMethodName().equals(method_name)) {
-            return null;
-        }
-        if (method_desc != null && !invoke.getMethodDescription().equals(method_desc)) {
-            return null;
-        }
-        return invoke;
+    static final InstructionMatcher<?> ANY = new Any();
+
+    public static StaticInvokeMatcher.Builder staticinvoke() {
+        return new StaticInvokeMatcher.Builder();
     }
 
-    public static boolean isLocalAccess(Instruction callee, LocalInstance local) {
-        if (!(callee instanceof LocalAccess)) {
-            return false;
-        }
-        if (!((LocalAccess) callee).getLocal().equals(local)) {
-            return false;
-        }
-        return true;
+    public static InstanceInvokeMatcher.Builder instanceinvoke() {
+        return new InstanceInvokeMatcher.Builder();
     }
 
-    public static Instruction unwrapCast(Instruction insn) {
+    public static LocalAccessMatcher.Builder localaccess() {
+        return new LocalAccessMatcher.Builder();
+    }
+
+    public static InstanceFieldMatcher.Builder instancefield() {
+        return new InstanceFieldMatcher.Builder();
+    }
+
+    public static IntConstantMatcher.Builder intconstant() {
+        return new IntConstantMatcher.Builder();
+    }
+
+    public static ArrayAccessMatcher.Builder arrayaccess() {
+        return new ArrayAccessMatcher.Builder();
+    }
+
+    public static class Any implements InstructionMatcher<Instruction> {
+
+        Any() {
+        }
+
+        @Override
+        public Instruction match(MatchContext ctx, Instruction stmt) {
+            return stmt;
+        }
+
+    }
+
+    static Instruction unwrapCast(Instruction insn) {
         if (insn instanceof Cast) {
             return unwrapCast(((Cast) insn).getValue());
         }
         if (insn instanceof InstanceMethodInvoke) {
             InstanceMethodInvoke invoke = (InstanceMethodInvoke) insn;
-            if (isInstanceMethodInvoke(invoke, "byteValue", "()B", "Ljava/lang/Number;")) {
+            String key = invoke.getOwner() + invoke.getMethodName() + invoke.getMethodDescription();
+            if ("Ljava/lang/Number;byteValue()B".equals(key)) {
                 return unwrapCast(invoke.getCallee());
             }
-            if (isInstanceMethodInvoke(invoke, "shortValue", "()S", "Ljava/lang/Number;")) {
+            if ("Ljava/lang/Number;shortValue()S".equals(key)) {
                 return unwrapCast(invoke.getCallee());
             }
-            if (isInstanceMethodInvoke(invoke, "intValue", "()I", "Ljava/lang/Number;")) {
+            if ("Ljava/lang/Number;intValue()I".equals(key)) {
                 return unwrapCast(invoke.getCallee());
             }
-            if (isInstanceMethodInvoke(invoke, "longValue", "()J", "Ljava/lang/Number;")) {
+            if ("Ljava/lang/Number;longValue()J".equals(key)) {
                 return unwrapCast(invoke.getCallee());
             }
-            if (isInstanceMethodInvoke(invoke, "floatValue", "()F", "Ljava/lang/Number;")) {
+            if ("Ljava/lang/Number;floatValue()F".equals(key)) {
                 return unwrapCast(invoke.getCallee());
             }
-            if (isInstanceMethodInvoke(invoke, "doubleValue", "()D", "Ljava/lang/Number;")) {
+            if ("Ljava/lang/Number;doubleValue()D".equals(key)) {
                 return unwrapCast(invoke.getCallee());
             }
         }
         return insn;
-    }
-
-    public static boolean isIntConstant(Instruction insn, int i) {
-        if (!(insn instanceof IntConstant)) {
-            return false;
-        }
-        return ((IntConstant) insn).getConstant() == i;
-    }
-
-    public static boolean isInstanceFieldAccess(Instruction insn, String field, Instruction obj) {
-        if (!(insn instanceof InstanceFieldAccess)) {
-            return false;
-        }
-        InstanceFieldAccess acc = (InstanceFieldAccess) insn;
-        if (!acc.getFieldName().equals(field)) {
-            return false;
-        }
-        return acc.getFieldOwner().equals(obj);
-    }
-
-    public static boolean isArrayAccess(Instruction value, LocalAccess array, LocalAccess index) {
-        if (!(value instanceof ArrayAccess)) {
-            return false;
-        }
-        ArrayAccess acc = (ArrayAccess) value;
-        if (!acc.getArrayVar().equals(array)) {
-            return false;
-        }
-        if (!acc.getIndex().equals(index)) {
-            return false;
-        }
-        return true;
     }
 
 }

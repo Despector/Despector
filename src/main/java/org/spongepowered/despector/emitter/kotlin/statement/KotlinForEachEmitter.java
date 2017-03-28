@@ -25,17 +25,44 @@
 package org.spongepowered.despector.emitter.kotlin.statement;
 
 import org.spongepowered.despector.ast.Locals.LocalInstance;
-import org.spongepowered.despector.ast.members.insn.Statement;
-import org.spongepowered.despector.ast.members.insn.arg.field.LocalAccess;
+import org.spongepowered.despector.ast.members.insn.arg.Instruction;
 import org.spongepowered.despector.ast.members.insn.assign.LocalAssignment;
 import org.spongepowered.despector.ast.members.insn.branch.ForEach;
 import org.spongepowered.despector.ast.members.insn.function.InstanceMethodInvoke;
 import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.StatementEmitter;
 import org.spongepowered.despector.transform.matcher.InstructionMatcher;
+import org.spongepowered.despector.transform.matcher.MatchContext;
 import org.spongepowered.despector.transform.matcher.StatementMatcher;
 
 public class KotlinForEachEmitter implements StatementEmitter<ForEach> {
+
+    private static final StatementMatcher<ForEach> MAP_ITERATOR = MatchContext.storeLocal("loop_value", StatementMatcher.foreach()
+            .value(InstructionMatcher.instanceinvoke()
+                    .name("entrySet")
+                    .desc("()Ljava/lang/Set;")
+                    .build())
+            .body(0, StatementMatcher.localassign()
+                    .value(InstructionMatcher.instanceinvoke()
+                            .name("getKey")
+                            .desc("()Ljava/lang/Object;")
+                            .callee(InstructionMatcher.localaccess()
+                                    .fromContext("loop_value")
+                                    .build())
+                            .autoUnwrap()
+                            .build())
+                    .build())
+            .body(1, StatementMatcher.localassign()
+                    .value(InstructionMatcher.instanceinvoke()
+                            .name("getValue")
+                            .desc("()Ljava/lang/Object;")
+                            .callee(InstructionMatcher.localaccess()
+                                    .fromContext("loop_value")
+                                    .build())
+                            .autoUnwrap()
+                            .build())
+                    .build())
+            .build());
 
     @Override
     public void emit(EmitterContext ctx, ForEach loop, boolean semicolon) {
@@ -60,35 +87,12 @@ public class KotlinForEachEmitter implements StatementEmitter<ForEach> {
     }
 
     public boolean checkMapIterator(EmitterContext ctx, ForEach loop) {
-        InstanceMethodInvoke map = InstructionMatcher.requireInstanceMethodInvoke(loop.getCollectionValue(), "entrySet", "()Ljava/util/Set;");
-        if (map == null) {
+        if (!MAP_ITERATOR.matches(MatchContext.create(), loop)) {
             return false;
         }
-        if (loop.getBody().getStatementCount() <= 2) {
-            return false;
-        }
-        Statement key = loop.getBody().getStatement(0);
-        Statement value = loop.getBody().getStatement(1);
-        LocalAssignment key_assign = StatementMatcher.requireLocalAssignment(key);
-        if (key_assign == null) {
-            return false;
-        }
-        LocalAssignment value_assign = StatementMatcher.requireLocalAssignment(value);
-        if (value_assign == null) {
-            return false;
-        }
-        InstanceMethodInvoke key_get = InstructionMatcher.requireInstanceMethodInvoke(InstructionMatcher.unwrapCast(key_assign.getValue()), "getKey",
-                "()Ljava/lang/Object;");
-        if (key_get == null || !(key_get.getCallee() instanceof LocalAccess)
-                || ((LocalAccess) key_get.getCallee()).getLocal() != loop.getValueAssignment()) {
-            return false;
-        }
-        InstanceMethodInvoke value_get = InstructionMatcher.requireInstanceMethodInvoke(InstructionMatcher.unwrapCast(value_assign.getValue()),
-                "getValue", "()Ljava/lang/Object;");
-        if (value_get == null || !(value_get.getCallee() instanceof LocalAccess)
-                || ((LocalAccess) value_get.getCallee()).getLocal() != loop.getValueAssignment()) {
-            return false;
-        }
+        LocalAssignment key_assign = (LocalAssignment) loop.getBody().getStatement(0);
+        LocalAssignment value_assign = (LocalAssignment) loop.getBody().getStatement(1);
+        Instruction collection = ((InstanceMethodInvoke) loop.getCollectionValue()).getCallee();
 
         ctx.printString("for ((");
         ctx.printString(key_assign.getLocal().getName());
@@ -96,7 +100,7 @@ public class KotlinForEachEmitter implements StatementEmitter<ForEach> {
         ctx.printString(value_assign.getLocal().getName());
 
         ctx.printString(") in ");
-        ctx.emit(map.getCallee(), null);
+        ctx.emit(collection, null);
         ctx.printString(") {");
         ctx.newLine();
         if (!loop.getBody().getStatements().isEmpty()) {
