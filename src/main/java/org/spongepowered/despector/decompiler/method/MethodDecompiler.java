@@ -52,6 +52,8 @@ import org.spongepowered.despector.decompiler.method.graph.data.block.BlockSecti
 import org.spongepowered.despector.decompiler.method.graph.data.opcode.BodyOpcodeBlock;
 import org.spongepowered.despector.decompiler.method.graph.data.opcode.OpcodeBlock;
 import org.spongepowered.despector.decompiler.method.postprocess.StatementPostProcessor;
+import org.spongepowered.despector.decompiler.method.special.LocalsProcessor;
+import org.spongepowered.despector.decompiler.method.special.SpecialMethodProcessor;
 import org.spongepowered.despector.util.SignatureParser;
 import org.spongepowered.despector.util.TypeHelper;
 
@@ -76,6 +78,7 @@ public class MethodDecompiler {
     private final List<GraphProcessor> processors = new ArrayList<>();
     private final List<RegionProcessor> region_processors = new ArrayList<>();
     private final List<StatementPostProcessor> post_processors = new ArrayList<>();
+    private final Map<Class<?>, SpecialMethodProcessor> special_processors = new HashMap<>();
 
     public void addGraphProducer(GraphProducerStep step) {
         this.graph_producers.add(step);
@@ -95,6 +98,15 @@ public class MethodDecompiler {
 
     public void addPostProcessor(StatementPostProcessor post) {
         this.post_processors.add(post);
+    }
+
+    public <T extends SpecialMethodProcessor> void setSpecialProcessor(Class<T> type, T processor) {
+        this.special_processors.put(type, processor);
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T extends SpecialMethodProcessor> T getSpecialProcessor(Class<T> type) {
+        return (T) this.special_processors.get(type);
     }
 
     @SuppressWarnings("unchecked")
@@ -126,6 +138,11 @@ public class MethodDecompiler {
                     insn.setGenericTypes(SignatureParser.parseFieldTypeSignature(lvt.signature));
                 }
             }
+        }
+
+        LocalsProcessor proc = getSpecialProcessor(LocalsProcessor.class);
+        if (proc != null) {
+            proc.process(asm, locals);
         }
 
         Iterator<AbstractInsnNode> it = asm.instructions.iterator();

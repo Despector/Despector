@@ -145,6 +145,8 @@ public final class AstUtil {
             return 0;
         }
         switch (next.getOpcode()) {
+        case -1:
+            return 0;
         case IASTORE:
         case LASTORE:
         case FASTORE:
@@ -328,6 +330,8 @@ public final class AstUtil {
             return 0;
         }
         switch (next.getOpcode()) {
+        case -1:
+            return 0;
         case DUP2:
         case DUP2_X1:
         case DUP2_X2:
