@@ -85,10 +85,20 @@ public class Despector {
         return decompile(input, source);
     }
 
+    public static String decompile(InputStream input, Language lang) throws IOException {
+        return decompile(input, new SourceSet(), lang);
+    }
+
     public static String decompile(InputStream input, SourceSet.Loader loader) throws IOException {
         SourceSet source = new SourceSet();
         source.setLoader(loader);
         return decompile(input, source);
+    }
+
+    public static String decompile(InputStream input, Language lang, SourceSet.Loader loader) throws IOException {
+        SourceSet source = new SourceSet();
+        source.setLoader(loader);
+        return decompile(input, source, lang);
     }
 
     public static String decompile(InputStream input, SourceSet source) throws IOException {
