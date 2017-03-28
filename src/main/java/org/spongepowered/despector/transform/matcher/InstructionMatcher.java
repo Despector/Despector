@@ -36,11 +36,18 @@ import org.spongepowered.despector.ast.members.insn.function.InstanceMethodInvok
 public class InstructionMatcher {
 
     public static boolean isInstanceMethodInvoke(Instruction insn, String method_name, String method_desc) {
+        return isInstanceMethodInvoke(insn, method_name, method_desc, null);
+    }
+
+    public static boolean isInstanceMethodInvoke(Instruction insn, String method_name, String method_desc, String method_owner) {
         if (!(insn instanceof InstanceMethodInvoke)) {
             return false;
         }
         InstanceMethodInvoke invoke = (InstanceMethodInvoke) insn;
         if (!invoke.getMethodName().equals(method_name)) {
+            return false;
+        }
+        if (method_owner != null && !invoke.getOwner().equals(method_owner)) {
             return false;
         }
         return invoke.getMethodDescription().equals(method_desc);
@@ -72,7 +79,28 @@ public class InstructionMatcher {
 
     public static Instruction unwrapCast(Instruction insn) {
         if (insn instanceof Cast) {
-            return ((Cast) insn).getValue();
+            return unwrapCast(((Cast) insn).getValue());
+        }
+        if (insn instanceof InstanceMethodInvoke) {
+            InstanceMethodInvoke invoke = (InstanceMethodInvoke) insn;
+            if (isInstanceMethodInvoke(invoke, "byteValue", "()B", "Ljava/lang/Number;")) {
+                return unwrapCast(invoke.getCallee());
+            }
+            if (isInstanceMethodInvoke(invoke, "shortValue", "()S", "Ljava/lang/Number;")) {
+                return unwrapCast(invoke.getCallee());
+            }
+            if (isInstanceMethodInvoke(invoke, "intValue", "()I", "Ljava/lang/Number;")) {
+                return unwrapCast(invoke.getCallee());
+            }
+            if (isInstanceMethodInvoke(invoke, "longValue", "()J", "Ljava/lang/Number;")) {
+                return unwrapCast(invoke.getCallee());
+            }
+            if (isInstanceMethodInvoke(invoke, "floatValue", "()F", "Ljava/lang/Number;")) {
+                return unwrapCast(invoke.getCallee());
+            }
+            if (isInstanceMethodInvoke(invoke, "doubleValue", "()D", "Ljava/lang/Number;")) {
+                return unwrapCast(invoke.getCallee());
+            }
         }
         return insn;
     }
