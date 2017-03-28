@@ -51,6 +51,7 @@ public class KotlinStaticMethodInvokeEmitter extends StaticMethodInvokeEmitter {
         NO_CALLEE.add("Lkotlin/collections/MapsKt;");
 
         SPECIAL.put("Lkotlin/TuplesKt;to", new TupleToEmitter());
+        SPECIAL.put("Lkotlin/jvm/internal/Intrinsics;areEqual", new EqualityEmitter());
     }
 
     @Override
