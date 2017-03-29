@@ -121,7 +121,7 @@ public class InstanceMethodInvokeEmitter implements InstructionEmitter<InstanceM
                 }
             } else if (callee instanceof New) {
                 New ref = (New) callee;
-                if ("Ljava/lang/StringBuilder;".equals(ref.getType())) {
+                if ("Ljava/lang/StringBuilder;".equals(ref.getType().getDescriptor())) {
                     if (ref.getParameters().length == 1) {
                         Instruction initial = ref.getParameters()[0];
                         if (initial instanceof StaticMethodInvoke) {
@@ -132,7 +132,7 @@ public class InstanceMethodInvokeEmitter implements InstructionEmitter<InstanceM
                                     initial = internal;
                                 } else if (internal instanceof LocalAccess) {
                                     LocalAccess local = (LocalAccess) internal;
-                                    if (local.getLocal().getType().equals("Ljava/lang/String;")) {
+                                    if (local.getLocal().getType() == ClassTypeSignature.STRING) {
                                         initial = local;
                                     }
                                 }
