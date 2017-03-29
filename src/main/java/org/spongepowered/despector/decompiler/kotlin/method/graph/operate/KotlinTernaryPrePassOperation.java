@@ -127,8 +127,8 @@ public class KotlinTernaryPrePassOperation implements GraphOperation {
             seen.add(first_false);
             seen.add(fl);
             seen.add(go);
-            List<OpcodeBlock> condition_blocks = new ArrayList<>();
-            condition_blocks.add(fl);
+            List<ConditionalOpcodeBlock> condition_blocks = new ArrayList<>();
+            condition_blocks.add((ConditionalOpcodeBlock) fl);
             // we go backwards through the conditional blocks until we we reach
             // something that is not a condition or something that does not
             // target a block we are expecting.
@@ -138,7 +138,7 @@ public class KotlinTernaryPrePassOperation implements GraphOperation {
                     break;
                 }
                 seen.add(next);
-                condition_blocks.add(0, next);
+                condition_blocks.add(0, (ConditionalOpcodeBlock) next);
             }
             Condition cond = ConditionBuilder.makeCondition(condition_blocks, locals, first_false, first_true);
             WhenBlock next_when = new WhenBlock(cond);

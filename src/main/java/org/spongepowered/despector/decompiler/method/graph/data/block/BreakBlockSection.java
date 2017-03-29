@@ -29,11 +29,17 @@ import org.spongepowered.despector.ast.members.insn.arg.Instruction;
 import org.spongepowered.despector.ast.members.insn.branch.Break;
 import org.spongepowered.despector.ast.members.insn.branch.Break.Breakable;
 import org.spongepowered.despector.ast.members.insn.branch.Break.Type;
+import org.spongepowered.despector.ast.members.insn.branch.If;
+import org.spongepowered.despector.ast.members.insn.branch.condition.Condition;
+import org.spongepowered.despector.decompiler.method.ConditionBuilder;
 import org.spongepowered.despector.decompiler.method.graph.data.opcode.BreakMarkerOpcodeBlock;
 import org.spongepowered.despector.decompiler.method.graph.data.opcode.BreakMarkerOpcodeBlock.MarkerType;
+import org.spongepowered.despector.decompiler.method.graph.data.opcode.ConditionalOpcodeBlock;
 import org.spongepowered.despector.decompiler.method.graph.data.opcode.OpcodeBlock;
 
+import java.util.ArrayList;
 import java.util.Deque;
+import java.util.List;
 
 /**
  * A block section that contains a single {@link OpcodeBlock}.
@@ -46,6 +52,8 @@ public class BreakBlockSection extends BlockSection {
     private boolean nested;
     private Breakable br;
     private Break final_break;
+
+    private final List<ConditionalOpcodeBlock> inlined = new ArrayList<>();
 
     public BreakBlockSection(BreakMarkerOpcodeBlock marker, MarkerType type) {
         this.marker = marker;
@@ -90,9 +98,22 @@ public class BreakBlockSection extends BlockSection {
         }
     }
 
+    public List<ConditionalOpcodeBlock> getInlinedConditions() {
+        return this.inlined;
+    }
+
     @Override
     public void appendTo(StatementBlock block, Deque<Instruction> stack) {
         this.final_break = new Break(this.br, this.type == MarkerType.BREAK ? Type.BREAK : Type.CONTINUE, this.nested);
+        if (!this.inlined.isEmpty()) {
+            ConditionalOpcodeBlock last = this.inlined.get(this.inlined.size() - 1);
+            Condition cond = ConditionBuilder.makeCondition(this.inlined, block.getLocals(), last.getTarget(), last.getElseTarget());
+            StatementBlock inner = new StatementBlock(StatementBlock.Type.IF, block.getLocals());
+            inner.append(this.final_break);
+            If ifblock = new If(cond, inner);
+            block.append(ifblock);
+            return;
+        }
         block.append(this.final_break);
     }
 }

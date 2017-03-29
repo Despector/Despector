@@ -51,11 +51,11 @@ public class IfBlockRegionProcessor implements RegionProcessor {
         OpcodeBlock start = region.get(0);
         // split the region into the condition and the body
         body_start = 1;
-        List<OpcodeBlock> condition_blocks = new ArrayList<>();
+        List<ConditionalOpcodeBlock> condition_blocks = new ArrayList<>();
         OpcodeBlock next = region.get(body_start);
-        condition_blocks.add(start);
+        condition_blocks.add((ConditionalOpcodeBlock) start);
         while (next instanceof ConditionalOpcodeBlock) {
-            condition_blocks.add(next);
+            condition_blocks.add((ConditionalOpcodeBlock) next);
             body_start++;
             next = region.get(body_start);
         }
@@ -98,12 +98,12 @@ public class IfBlockRegionProcessor implements RegionProcessor {
 
         while (region.contains(cond_ret)) {
             if (cond_ret instanceof ConditionalOpcodeBlock) {
-                List<OpcodeBlock> elif_condition = new ArrayList<>();
+                List<ConditionalOpcodeBlock> elif_condition = new ArrayList<>();
                 next = region.get(body_start);
-                elif_condition.add(cond_ret);
+                elif_condition.add((ConditionalOpcodeBlock) cond_ret);
                 body_start = region.indexOf(cond_ret) + 1;
                 while (next instanceof ConditionalOpcodeBlock) {
-                    elif_condition.add(next);
+                    elif_condition.add((ConditionalOpcodeBlock) next);
                     body_start++;
                     next = region.get(body_start);
                 }

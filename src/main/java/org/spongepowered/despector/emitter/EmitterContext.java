@@ -200,7 +200,9 @@ public class EmitterContext {
     }
 
     public EmitterContext emitBody(StatementBlock instructions, int start) {
-        this.defined_locals.clear();
+        if (instructions.getType() == StatementBlock.Type.METHOD) {
+            this.defined_locals.clear();
+        }
         boolean last_success = false;
         boolean should_indent = true;
         for (int i = start; i < instructions.getStatements().size(); i++) {
@@ -319,7 +321,7 @@ public class EmitterContext {
             return this;
         }
         if (name.indexOf('.') != -1) {
-            if (name.startsWith("java.lang.")) {
+            if (name.startsWith("java.lang.") && name.lastIndexOf('.') == 9) {
                 name = name.substring("java.lang.".length());
             } else if (this.type != null) {
                 String this_package = "";

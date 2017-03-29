@@ -172,7 +172,7 @@ public class ConditionBuilder {
     /**
      * Converts the given set of {@link OpcodeBlock}s to a condition.
      */
-    public static Condition makeCondition(List<OpcodeBlock> blocks, Locals locals, OpcodeBlock body, OpcodeBlock ret) {
+    public static Condition makeCondition(List<ConditionalOpcodeBlock> blocks, Locals locals, OpcodeBlock body, OpcodeBlock ret) {
         List<ConditionGraphNode> nodes = new ArrayList<>(blocks.size());
 
         ConditionGraphNode body_node = new ConditionGraphNode(null);
@@ -187,15 +187,12 @@ public class ConditionBuilder {
 
         for (int i = 0; i < blocks.size(); i++) {
             OpcodeBlock next = blocks.get(i);
-            if (!(next instanceof ConditionalOpcodeBlock)) {
-                throw new IllegalStateException();
-            }
             // make the nodes and compute the simple condition for each node.
             nodes.add(new ConditionGraphNode(makeSimpleCondition((ConditionalOpcodeBlock) next, locals)));
         }
 
         for (int i = 0; i < blocks.size(); i++) {
-            ConditionalOpcodeBlock next = (ConditionalOpcodeBlock) blocks.get(i);
+            ConditionalOpcodeBlock next = blocks.get(i);
             ConditionGraphNode node = nodes.get(i);
             // connect the nodes
             if (next.getTarget() == body) {

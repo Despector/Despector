@@ -24,16 +24,7 @@
  */
 package org.spongepowered.test.ast;
 
-import static org.objectweb.asm.Opcodes.GETSTATIC;
-import static org.objectweb.asm.Opcodes.GOTO;
-import static org.objectweb.asm.Opcodes.ICONST_0;
-import static org.objectweb.asm.Opcodes.ICONST_5;
-import static org.objectweb.asm.Opcodes.IFEQ;
-import static org.objectweb.asm.Opcodes.IF_ICMPGE;
-import static org.objectweb.asm.Opcodes.ILOAD;
-import static org.objectweb.asm.Opcodes.INVOKEVIRTUAL;
-import static org.objectweb.asm.Opcodes.ISTORE;
-import static org.objectweb.asm.Opcodes.RETURN;
+import static org.objectweb.asm.Opcodes.*;
 import static org.spongepowered.test.util.TestHelper.check;
 
 import org.junit.Assert;
@@ -673,6 +664,45 @@ public class BranchTest {
         String good = "for (i = 0; i < 5; i++) {\n"
                 + "    if (e) {\n"
                 + "        System.out.println(c);\n"
+                + "    }\n"
+                + "}";
+        Assert.assertEquals(good, insn);
+    }
+
+    @Test
+    public void testWhileDirectBreak() throws IOException {
+        TestMethodBuilder builder = new TestMethodBuilder("mth_inversefor", "(ILjava/lang/String;)V");
+        MethodVisitor mv = builder.getGenerator();
+        Label start_label = new Label();
+        mv.visitLabel(start_label);
+        mv.visitInsn(ICONST_0);
+        mv.visitVarInsn(ISTORE, 1);
+        Label loop_condition = new Label();
+        Label loop_body_start = new Label();
+        mv.visitLabel(loop_body_start);
+        mv.visitVarInsn(ILOAD, 1);
+        mv.visitInsn(ICONST_5);
+        mv.visitJumpInsn(IF_ICMPGE, loop_condition);
+        mv.visitFieldInsn(GETSTATIC, "java/lang/System", "out", "Ljava/io/PrintStream;");
+        mv.visitVarInsn(ILOAD, 2);
+        mv.visitMethodInsn(INVOKEVIRTUAL, "java/io/PrintStream", "println", "(Z)V", false);
+        mv.visitVarInsn(ILOAD, 1);
+        mv.visitInsn(ICONST_3);
+        mv.visitJumpInsn(IF_ICMPGT, loop_condition);
+        mv.visitIincInsn(1, 1);
+        mv.visitJumpInsn(GOTO, loop_body_start);
+        mv.visitLabel(loop_condition);
+        mv.visitInsn(RETURN);
+        Label end_label = new Label();
+        mv.visitLabel(end_label);
+        mv.visitLocalVariable("i", "I", null, start_label, end_label, 1);
+        mv.visitLocalVariable("c", "Z", null, start_label, end_label, 2);
+
+        String insn = TestHelper.getAsString(builder.finish(), "mth_inversefor");
+        String good = "for (i = 0; i < 5; i++) {\n"
+                + "    System.out.println(c);\n"
+                + "    if (i > 3) {\n"
+                + "        break;\n"
                 + "    }\n"
                 + "}";
         Assert.assertEquals(good, insn);

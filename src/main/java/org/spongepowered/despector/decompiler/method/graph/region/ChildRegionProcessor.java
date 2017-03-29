@@ -28,6 +28,8 @@ import org.spongepowered.despector.decompiler.method.PartialMethod;
 import org.spongepowered.despector.decompiler.method.graph.GraphOperation;
 import org.spongepowered.despector.decompiler.method.graph.RegionProcessor;
 import org.spongepowered.despector.decompiler.method.graph.data.block.BlockSection;
+import org.spongepowered.despector.decompiler.method.graph.data.block.BreakBlockSection;
+import org.spongepowered.despector.decompiler.method.graph.data.opcode.BreakMarkerOpcodeBlock;
 import org.spongepowered.despector.decompiler.method.graph.data.opcode.ConditionalOpcodeBlock;
 import org.spongepowered.despector.decompiler.method.graph.data.opcode.GotoOpcodeBlock;
 import org.spongepowered.despector.decompiler.method.graph.data.opcode.OpcodeBlock;
@@ -73,6 +75,42 @@ public class ChildRegionProcessor implements RegionProcessor {
                 region.add(ret);
                 end = RegionProcessor.getRegionEnd(region, i);
                 region.remove(ret);
+                if (end == region.size()) {
+                    OpcodeBlock last = region.get(region.size() - 1);
+                    boolean is_break = false;
+                    if (last instanceof GotoOpcodeBlock) {
+                        GotoOpcodeBlock last_goto = (GotoOpcodeBlock) last;
+                        if (last_goto.getTarget() == sstart) {
+                            // while loop and this is a break;
+                            is_break = true;
+                        }
+                    } else if (last instanceof ConditionalOpcodeBlock) {
+                        ConditionalOpcodeBlock cond = (ConditionalOpcodeBlock) last;
+                        if (cond.getTarget() == sstart) {
+                            is_break = true;
+                        }
+                    }
+                    if (is_break) {
+                        BreakBlockSection sec = null;
+                        if (region.get(i - 1) instanceof ProcessedOpcodeBlock) {
+                            BlockSection compiled = ((ProcessedOpcodeBlock) region.get(i - 1)).getPrecompiledSection();
+                            if (compiled instanceof BreakBlockSection) {
+                                sec = (BreakBlockSection) compiled;
+                            }
+                        }
+                        if (sec == null) {
+                            sec = new BreakBlockSection(new BreakMarkerOpcodeBlock(next.getBreakpoint(), BreakMarkerOpcodeBlock.MarkerType.BREAK),
+                                    BreakMarkerOpcodeBlock.MarkerType.BREAK);
+                            sec.getInlinedConditions().add((ConditionalOpcodeBlock) next);
+                            region.set(i, new ProcessedOpcodeBlock(next.getBreakpoint(), sec));
+                        } else {
+                            sec.getInlinedConditions().add((ConditionalOpcodeBlock) next);
+                            region.remove(i);
+                            i--;
+                        }
+                        continue;
+                    }
+                }
             } else {
                 end = RegionProcessor.getRegionEnd(region, i);
             }

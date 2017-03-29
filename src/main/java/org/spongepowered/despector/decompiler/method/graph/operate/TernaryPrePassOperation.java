@@ -107,8 +107,8 @@ public class TernaryPrePassOperation implements GraphOperation {
         seen.add(first_false);
         seen.add(fl);
         seen.add(go);
-        List<OpcodeBlock> condition_blocks = new ArrayList<>();
-        condition_blocks.add(fl);
+        List<ConditionalOpcodeBlock> condition_blocks = new ArrayList<>();
+        condition_blocks.add((ConditionalOpcodeBlock) fl);
         boolean has_more = false;
         for (; start >= 0; start--) {
             OpcodeBlock next = blocks.get(start);
@@ -122,7 +122,7 @@ public class TernaryPrePassOperation implements GraphOperation {
                 break;
             }
             seen.add(next);
-            condition_blocks.add(0, next);
+            condition_blocks.add(0, (ConditionalOpcodeBlock) next);
         }
         Condition cond = ConditionBuilder.makeCondition(condition_blocks, locals, first_false, first_true);
         TernaryBlockSection ternary = new TernaryBlockSection(cond);

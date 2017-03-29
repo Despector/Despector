@@ -51,11 +51,11 @@ public class DoWhileRegionProcessor implements RegionProcessor {
     public BlockSection process(PartialMethod partial, List<OpcodeBlock> region, OpcodeBlock ret, int body_start) {
         OpcodeBlock start = region.get(0);
         if (body_start == 0) {
-            List<OpcodeBlock> condition_blocks = new ArrayList<>();
+            List<ConditionalOpcodeBlock> condition_blocks = new ArrayList<>();
             int cond_start = region.size() - 1;
             OpcodeBlock next = region.get(cond_start);
             while (next instanceof ConditionalOpcodeBlock) {
-                condition_blocks.add(0, next);
+                condition_blocks.add(0, (ConditionalOpcodeBlock) next);
                 cond_start--;
                 next = region.get(cond_start);
             }

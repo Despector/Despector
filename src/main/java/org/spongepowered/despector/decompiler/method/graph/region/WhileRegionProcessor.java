@@ -56,12 +56,12 @@ public class WhileRegionProcessor implements RegionProcessor {
     public BlockSection process(PartialMethod partial, List<OpcodeBlock> region, OpcodeBlock ret, int body_start) {
         OpcodeBlock start = region.get(0);
         if (start instanceof GotoOpcodeBlock) {
-            List<OpcodeBlock> condition_blocks = new ArrayList<>();
+            List<ConditionalOpcodeBlock> condition_blocks = new ArrayList<>();
             OpcodeBlock next = start.getTarget();
             int pos = region.indexOf(next);
             int cond_start = pos;
             while (next instanceof ConditionalOpcodeBlock) {
-                condition_blocks.add(next);
+                condition_blocks.add((ConditionalOpcodeBlock) next);
                 pos++;
                 if (pos >= region.size()) {
                     break;
