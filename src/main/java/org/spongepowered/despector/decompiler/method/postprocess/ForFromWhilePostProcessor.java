@@ -27,6 +27,7 @@ package org.spongepowered.despector.decompiler.method.postprocess;
 import org.spongepowered.despector.ast.Locals.LocalInstance;
 import org.spongepowered.despector.ast.members.insn.Statement;
 import org.spongepowered.despector.ast.members.insn.StatementBlock;
+import org.spongepowered.despector.ast.members.insn.assign.LocalAssignment;
 import org.spongepowered.despector.ast.members.insn.branch.Break;
 import org.spongepowered.despector.ast.members.insn.branch.DoWhile;
 import org.spongepowered.despector.ast.members.insn.branch.For;
@@ -110,6 +111,12 @@ public class ForFromWhilePostProcessor implements StatementPostProcessor {
         }
         LocalInstance loop_val = ctx.getLocal("loop_val");
         for (int o = i + 1; o < block.getStatementCount(); o++) {
+            Statement n = block.getStatement(o);
+            if (n instanceof LocalAssignment) {
+                if (((LocalAssignment) n).getLocal() == loop_val) {
+                    break;
+                }
+            }
             if (AstUtil.references(block.getStatement(o), loop_val)) {
                 return;
             }
