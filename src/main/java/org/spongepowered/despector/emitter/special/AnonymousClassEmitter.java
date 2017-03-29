@@ -26,33 +26,54 @@ package org.spongepowered.despector.emitter.special;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
+import org.spongepowered.despector.ast.generic.ClassTypeSignature;
+import org.spongepowered.despector.ast.generic.TypeSignature;
+import org.spongepowered.despector.ast.members.FieldEntry;
 import org.spongepowered.despector.ast.members.MethodEntry;
 import org.spongepowered.despector.ast.members.insn.arg.Instruction;
 import org.spongepowered.despector.ast.members.insn.function.New;
 import org.spongepowered.despector.ast.type.ClassEntry;
 import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.type.ClassEntryEmitter;
+import org.spongepowered.despector.util.TypeHelper;
+
+import java.util.List;
 
 public class AnonymousClassEmitter implements SpecialEmitter {
 
     public void emit(EmitterContext ctx, ClassEntry type, New new_insn) {
         checkArgument(type.isAnonType());
 
-        String actual_type = null;
+        TypeSignature actual_type = null;
         if (type.getSuperclassName().equals("java/lang/Object")) {
-            actual_type = type.getInterfaces().get(0);
+            if (type.getSignature() != null) {
+                actual_type = type.getSignature().getInterfaceSignatures().get(0);
+            } else {
+                actual_type = ClassTypeSignature.of(type.getInterfaces().get(0));
+            }
         } else {
-            actual_type = type.getSuperclass();
+            if (type.getSignature() != null) {
+                actual_type = type.getSignature().getSuperclassSignature();
+            } else {
+                actual_type = ClassTypeSignature.of(type.getSuperclass());
+            }
         }
 
         ctx.printString("new ");
         ctx.emitType(actual_type);
 
+        int syn_field_count = 0;
+        for (FieldEntry fld : type.getFields()) {
+            if (fld.getName().startsWith("val$") && fld.isSynthetic()) {
+                syn_field_count++;
+            }
+        }
+
         ctx.printString("(");
-        // TODO get param types if we have the ast
-        for (int i = 0; i < new_insn.getParameters().length; i++) {
+        List<String> param_types = TypeHelper.splitSig(new_insn.getCtorDescription());
+        for (int i = 0; i < new_insn.getParameters().length - syn_field_count; i++) {
             Instruction param = new_insn.getParameters()[i];
-            ctx.emit(param, null);
+            ctx.emit(param, ClassTypeSignature.of(param_types.get(i)));
             if (i < new_insn.getParameters().length - 1) {
                 ctx.printString(", ");
             }

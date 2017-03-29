@@ -43,6 +43,7 @@ import org.spongepowered.despector.ast.type.InterfaceEntry;
 import org.spongepowered.despector.ast.type.TypeEntry;
 import org.spongepowered.despector.emitter.format.EmitterFormat;
 import org.spongepowered.despector.emitter.special.AnnotationEmitter;
+import org.spongepowered.despector.emitter.special.GenericsEmitter;
 import org.spongepowered.despector.emitter.special.PackageEmitter;
 import org.spongepowered.despector.emitter.special.PackageInfoEmitter;
 import org.spongepowered.despector.util.TypeHelper;
@@ -300,7 +301,8 @@ public class EmitterContext {
     }
 
     public EmitterContext emitType(TypeSignature sig) {
-        emitTypeClassName(sig.getName().replace('/', '.'));
+        GenericsEmitter generics = this.set.getSpecialEmitter(GenericsEmitter.class);
+        generics.emitTypeSignature(this, sig);
         return this;
     }
 

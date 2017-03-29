@@ -31,6 +31,7 @@ import org.spongepowered.despector.ast.members.insn.arg.field.InstanceFieldAcces
 import org.spongepowered.despector.ast.members.insn.arg.field.StaticFieldAccess;
 import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.InstructionEmitter;
+import org.spongepowered.despector.util.TypeHelper;
 
 public class FieldEmitter implements InstructionEmitter<FieldAccess> {
 
@@ -43,6 +44,10 @@ public class FieldEmitter implements InstructionEmitter<FieldAccess> {
             }
             ctx.printString(arg.getFieldName());
         } else if (arg instanceof InstanceFieldAccess) {
+            if (TypeHelper.isAnonClass(arg.getOwnerName()) && arg.getFieldName().startsWith("val$")) {
+                ctx.printString(arg.getFieldName().substring(4));
+                return;
+            }
             ctx.emit(((InstanceFieldAccess) arg).getFieldOwner(), ClassTypeSignature.of(arg.getOwnerType()));
             ctx.printString(".");
             ctx.printString(arg.getFieldName());
