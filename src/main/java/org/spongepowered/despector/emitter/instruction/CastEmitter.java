@@ -34,7 +34,7 @@ public class CastEmitter implements InstructionEmitter<Cast> {
 
     @Override
     public void emit(EmitterContext ctx, Cast arg, TypeSignature type) {
-        TypeSignature inferred = arg.inferType();
+        TypeSignature inferred = arg.getValue().inferType();
         if (inferred.equals(arg.getType())) {
             ctx.emit(arg.getValue(), arg.getType());
             return;

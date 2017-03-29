@@ -78,12 +78,24 @@ public class TernaryEmitter implements InstructionEmitter<Ternary> {
                 ctx.printString("!(");
                 ctx.emit(ternary.getCondition());
                 ctx.printString(") && ");
-                ctx.emit(ternary.getFalseValue(), ClassTypeSignature.BOOLEAN);
+                if(ternary.getFalseValue() instanceof Ternary) {
+                    ctx.printString("(");
+                    ctx.emit(ternary.getFalseValue(), ClassTypeSignature.BOOLEAN);
+                    ctx.printString(")");
+                } else {
+                    ctx.emit(ternary.getFalseValue(), ClassTypeSignature.BOOLEAN);
+                }
             } else {
                 ctx.emit(ternary.getCondition());
                 ctx.markWrapPoint();
                 ctx.printString(" || ");
-                ctx.emit(ternary.getFalseValue(), ClassTypeSignature.BOOLEAN);
+                if(ternary.getFalseValue() instanceof Ternary) {
+                    ctx.printString("(");
+                    ctx.emit(ternary.getFalseValue(), ClassTypeSignature.BOOLEAN);
+                    ctx.printString(")");
+                } else {
+                    ctx.emit(ternary.getFalseValue(), ClassTypeSignature.BOOLEAN);
+                }
             }
             return true;
         } else if (ternary.getFalseValue() instanceof IntConstant) {
@@ -91,13 +103,25 @@ public class TernaryEmitter implements InstructionEmitter<Ternary> {
                 // !a && b
                 ctx.printString("!(");
                 ctx.emit(ternary.getCondition());
-                ctx.printString(") || ");
-                ctx.emit(ternary.getFalseValue(), ClassTypeSignature.BOOLEAN);
+                ctx.printString(") && ");
+                if(ternary.getTrueValue() instanceof Ternary) {
+                    ctx.printString("(");
+                    ctx.emit(ternary.getTrueValue(), ClassTypeSignature.BOOLEAN);
+                    ctx.printString(")");
+                } else {
+                    ctx.emit(ternary.getTrueValue(), ClassTypeSignature.BOOLEAN);
+                }
             } else {
                 ctx.emit(ternary.getCondition());
                 ctx.markWrapPoint();
-                ctx.printString(" && ");
-                ctx.emit(ternary.getFalseValue(), ClassTypeSignature.BOOLEAN);
+                ctx.printString(" || ");
+                if(ternary.getTrueValue() instanceof Ternary) {
+                    ctx.printString("(");
+                    ctx.emit(ternary.getTrueValue(), ClassTypeSignature.BOOLEAN);
+                    ctx.printString(")");
+                } else {
+                    ctx.emit(ternary.getTrueValue(), ClassTypeSignature.BOOLEAN);
+                }
             }
             return true;
         }

@@ -205,7 +205,7 @@ public class MethodDecompiler {
             op.process(partial);
         }
 
-        if (partial.getEntry().getName().equals("cyclePropertyValue")) {
+        if (partial.getEntry().getName().equals("dropXpOnBlockBreak")) {
             System.out.println();
         }
 

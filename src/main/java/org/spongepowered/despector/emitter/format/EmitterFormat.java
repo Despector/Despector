@@ -37,7 +37,7 @@ public class EmitterFormat {
     // general
     // ========================================================================
     // max length of a line
-    public int line_split = 150;
+    public int line_split = 999;
     // size of a tab in spaces
     public int indentation_size = 4;
     // number of times indented when a line is continued

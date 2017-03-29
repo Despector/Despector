@@ -62,13 +62,14 @@ public class LocalAssignmentEmitter implements StatementEmitter<LocalAssignment>
         if (val instanceof Operator) {
             Instruction left = ((Operator) val).getLeftOperand();
             Instruction right = ((Operator) val).getRightOperand();
-            String op = " " + ((Operator) val).getOperator() + "= ";
+            String op = " " + ((Operator) val).getOperator().getSymbol() + "= ";
             if (left instanceof LocalAccess) {
                 LocalAccess left_field = (LocalAccess) left;
                 // If the field assign is of the form 'field = field + x'
                 // where + is any operator then we collapse it to the '+='
                 // form of the assignment.
                 if (left_field.getLocal().getIndex() == insn.getLocal().getIndex()) {
+                    ctx.printString(insn.getLocal().getName());
                     ctx.printString(op);
                     if ("Z".equals(insn.getLocal().getType())) {
                         if (val instanceof IntConstant) {

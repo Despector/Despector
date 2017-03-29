@@ -83,6 +83,8 @@ public class ChildRegionProcessor implements RegionProcessor {
                         if (last_goto.getTarget() == sstart) {
                             // while loop and this is a break;
                             is_break = true;
+                        } else if(last_goto.getTarget() == next) {
+                            is_first_condition = false;
                         }
                     } else if (last instanceof ConditionalOpcodeBlock) {
                         ConditionalOpcodeBlock cond = (ConditionalOpcodeBlock) last;

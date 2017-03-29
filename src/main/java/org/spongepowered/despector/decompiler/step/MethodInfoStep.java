@@ -97,6 +97,7 @@ public class MethodInfoStep implements DecompilerStep {
                 int i = m.isStatic() ? 0 : 1;
                 for (List<AnnotationNode> annos : mn.visibleParameterAnnotations) {
                     if (annos == null) {
+                        i++;
                         continue;
                     }
                     LocalInstance local = locals.getLocal(i).getParameterInstance();
@@ -105,13 +106,14 @@ public class MethodInfoStep implements DecompilerStep {
                         anno.getType().setRuntimeVisible(true);
                         local.getAnnotations().add(anno);
                     }
-
+                    i++;
                 }
             }
             if (mn.invisibleParameterAnnotations != null) {
                 int i = m.isStatic() ? 0 : 1;
                 for (List<AnnotationNode> annos : mn.invisibleParameterAnnotations) {
                     if (annos == null) {
+                        i++;
                         continue;
                     }
                     LocalInstance local = locals.getLocal(i).getParameterInstance();
@@ -120,7 +122,7 @@ public class MethodInfoStep implements DecompilerStep {
                         anno.getType().setRuntimeVisible(false);
                         local.getAnnotations().add(anno);
                     }
-
+                    i++;
                 }
             }
             // TODO: get non-parameter local variable annotations as well
