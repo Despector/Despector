@@ -33,6 +33,7 @@ import org.objectweb.asm.tree.MethodNode;
 import org.spongepowered.despector.ast.AccessModifier;
 import org.spongepowered.despector.ast.Annotation;
 import org.spongepowered.despector.ast.Locals;
+import org.spongepowered.despector.ast.Locals.LocalInstance;
 import org.spongepowered.despector.ast.members.MethodEntry;
 import org.spongepowered.despector.ast.members.insn.Comment;
 import org.spongepowered.despector.ast.members.insn.StatementBlock;
@@ -92,6 +93,37 @@ public class MethodInfoStep implements DecompilerStep {
                 }
             }
             Locals locals = this.method_decomp.createLocals(m, mn);
+            if (mn.visibleParameterAnnotations != null) {
+                int i = m.isStatic() ? 0 : 1;
+                for (List<AnnotationNode> annos : mn.visibleParameterAnnotations) {
+                    if (annos == null) {
+                        continue;
+                    }
+                    LocalInstance local = locals.getLocal(i).getParameterInstance();
+                    for (AnnotationNode an : annos) {
+                        Annotation anno = BaseDecompiler.createAnnotation(entry.getSource(), an);
+                        anno.getType().setRuntimeVisible(true);
+                        local.getAnnotations().add(anno);
+                    }
+
+                }
+            }
+            if (mn.invisibleParameterAnnotations != null) {
+                int i = m.isStatic() ? 0 : 1;
+                for (List<AnnotationNode> annos : mn.invisibleParameterAnnotations) {
+                    if (annos == null) {
+                        continue;
+                    }
+                    LocalInstance local = locals.getLocal(i).getParameterInstance();
+                    for (AnnotationNode an : annos) {
+                        Annotation anno = BaseDecompiler.createAnnotation(entry.getSource(), an);
+                        anno.getType().setRuntimeVisible(false);
+                        local.getAnnotations().add(anno);
+                    }
+
+                }
+            }
+            // TODO: get non-parameter local variable annotations as well
             try {
                 StatementBlock insns = this.method_decomp.decompile(m, mn, locals);
                 m.setInstructions(insns);

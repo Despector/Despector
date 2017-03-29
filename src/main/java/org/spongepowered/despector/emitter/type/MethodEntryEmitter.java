@@ -157,6 +157,10 @@ public class MethodEntryEmitter implements AstEmitter<MethodEntry> {
             } else {
                 Local local = block.getLocals().getLocal(param_index);
                 LocalInstance insn = local.getParameterInstance();
+                for (Annotation anno : insn.getAnnotations()) {
+                    ctx.emit(anno);
+                    ctx.printString(" ");
+                }
                 generics.emitTypeSignature(ctx, insn.getType());
                 ctx.printString(" ");
                 ctx.printString(insn.getName());

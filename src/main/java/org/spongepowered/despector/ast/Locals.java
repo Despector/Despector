@@ -31,6 +31,7 @@ import org.spongepowered.despector.ast.generic.ClassTypeSignature;
 import org.spongepowered.despector.ast.generic.TypeSignature;
 import org.spongepowered.despector.util.SignatureParser;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -237,6 +238,8 @@ public class Locals {
         private int end;
         private LocalVariableNode lvn;
         private boolean effectively_final = false;
+        
+        private final List<Annotation> annotations = new ArrayList<>();
 
         public LocalInstance(Local l, LocalVariableNode lvn, String n, TypeSignature t, int start, int end) {
             this.local = l;
@@ -296,6 +299,10 @@ public class Locals {
 
         public void setEffectivelyFinal(boolean state) {
             this.effectively_final = state;
+        }
+        
+        public List<Annotation> getAnnotations() {
+            return this.annotations;
         }
 
         @Override
