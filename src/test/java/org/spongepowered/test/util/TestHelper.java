@@ -30,6 +30,7 @@ import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.despector.ast.SourceSet;
 import org.spongepowered.despector.ast.members.MethodEntry;
+import org.spongepowered.despector.ast.reference.ReferenceSourceSet;
 import org.spongepowered.despector.ast.type.TypeEntry;
 import org.spongepowered.despector.decompiler.Decompilers;
 import org.spongepowered.despector.emitter.EmitterContext;
@@ -46,8 +47,10 @@ import java.util.Map;
 
 public class TestHelper {
 
+    public static final ReferenceSourceSet TEST_REFERENCE = new ReferenceSourceSet(Thread.currentThread().getContextClassLoader());
+
     private static final Map<Class<?>, TypeEntry> CACHED_TYPES = Maps.newHashMap();
-    private static final SourceSet DUMMY_SOURCE_SET = new SourceSet();
+    private static final SourceSet DUMMY_SOURCE_SET = new SourceSet(TEST_REFERENCE);
 
     static {
         DUMMY_SOURCE_SET.setLoader(new TestLoader(TestHelper.class.getProtectionDomain().getCodeSource().getLocation().getPath()));

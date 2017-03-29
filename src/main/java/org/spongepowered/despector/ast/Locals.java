@@ -238,7 +238,8 @@ public class Locals {
         private int end;
         private LocalVariableNode lvn;
         private boolean effectively_final = false;
-        
+        private boolean is_type_inferred = false;
+
         private final List<Annotation> annotations = new ArrayList<>();
 
         public LocalInstance(Local l, LocalVariableNode lvn, String n, TypeSignature t, int start, int end) {
@@ -300,7 +301,7 @@ public class Locals {
         public void setEffectivelyFinal(boolean state) {
             this.effectively_final = state;
         }
-        
+
         public List<Annotation> getAnnotations() {
             return this.annotations;
         }
@@ -308,6 +309,14 @@ public class Locals {
         @Override
         public String toString() {
             return this.name != null ? this.name : this.local.toString();
+        }
+
+        public void setTypeAsInferred(boolean state) {
+            this.is_type_inferred = state;
+        }
+
+        public boolean isTypeInferred() {
+            return this.is_type_inferred;
         }
 
     }

@@ -212,6 +212,7 @@ public class StatementBuilder {
                 LocalInstance instance = local.getInstance(label_index);
                 if (!local.isParameter() && local.getParameterInstance() != null) {
                     instance.setType(val.inferType());
+                    instance.setTypeAsInferred(true);
                 }
                 block.append(new LocalAssignment(instance, val));
                 break;

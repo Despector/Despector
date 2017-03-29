@@ -25,6 +25,7 @@
 package org.spongepowered.despector.emitter.statement;
 
 import org.spongepowered.despector.ast.Locals.LocalInstance;
+import org.spongepowered.despector.ast.generic.TypeSignature;
 import org.spongepowered.despector.ast.members.insn.arg.Instruction;
 import org.spongepowered.despector.ast.members.insn.arg.cst.IntConstant;
 import org.spongepowered.despector.ast.members.insn.arg.field.LocalAccess;
@@ -33,6 +34,7 @@ import org.spongepowered.despector.ast.members.insn.assign.LocalAssignment;
 import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.StatementEmitter;
 import org.spongepowered.despector.emitter.special.GenericsEmitter;
+import org.spongepowered.despector.util.TypeInferrer;
 
 public class LocalAssignmentEmitter implements StatementEmitter<LocalAssignment> {
 
@@ -41,7 +43,12 @@ public class LocalAssignmentEmitter implements StatementEmitter<LocalAssignment>
         if (!insn.getLocal().getLocal().isParameter() && !ctx.isDefined(insn.getLocal())) {
             LocalInstance local = insn.getLocal();
             GenericsEmitter generics = ctx.getEmitterSet().getSpecialEmitter(GenericsEmitter.class);
-            generics.emitTypeSignature(ctx, local.getType());
+            if (local.isTypeInferred() && ctx.getMethod() != null) {
+                TypeSignature inferred = TypeInferrer.infer(ctx.getMethod().getSource(), ctx.getMethod().getInstructions(), local);
+                generics.emitTypeSignature(ctx, inferred);
+            } else {
+                generics.emitTypeSignature(ctx, local.getType());
+            }
             ctx.printString(" ");
             ctx.markDefined(insn.getLocal());
         } else {

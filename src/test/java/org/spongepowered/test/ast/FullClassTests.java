@@ -35,6 +35,7 @@ import org.spongepowered.despector.decompiler.Decompilers;
 import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.Emitters;
 import org.spongepowered.despector.emitter.format.EmitterFormat;
+import org.spongepowered.test.util.TestHelper;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -65,7 +66,7 @@ public class FullClassTests {
         ClassReader cr = new ClassReader(compiled);
         ClassNode cn = new ClassNode();
         cr.accept(cn, 0);
-        SourceSet src = new SourceSet();
+        SourceSet src = new SourceSet(TestHelper.TEST_REFERENCE);
         TypeEntry type = Decompilers.get(lang).decompile(cn, src);
         StringWriter writer = new StringWriter();
         EmitterContext ctx = new EmitterContext(writer, EmitterFormat.defaults());

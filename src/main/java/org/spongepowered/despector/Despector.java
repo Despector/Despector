@@ -25,6 +25,7 @@
 package org.spongepowered.despector;
 
 import org.spongepowered.despector.ast.SourceSet;
+import org.spongepowered.despector.ast.reference.ReferenceSourceSet;
 import org.spongepowered.despector.ast.type.TypeEntry;
 import org.spongepowered.despector.config.ConfigBase.CleanupConfigSection;
 import org.spongepowered.despector.config.ConfigManager;
@@ -58,6 +59,7 @@ import java.util.function.Consumer;
 public class Despector {
 
     private static final Map<String, Consumer<String>> flags = new HashMap<>();
+    private static final ReferenceSourceSet DEFAULT_REFERENCE = new ReferenceSourceSet(Thread.currentThread().getContextClassLoader());
 
     public static Language LANGUAGE = Language.ANY;
 
@@ -84,22 +86,22 @@ public class Despector {
     }
 
     public static TypeEntry decompile(InputStream input) throws IOException {
-        SourceSet source = new SourceSet();
+        SourceSet source = new SourceSet(DEFAULT_REFERENCE);
         return decompile(input, source, Language.ANY);
     }
 
     public static TypeEntry decompile(InputStream input, Language lang) throws IOException {
-        return decompile(input, new SourceSet(), lang);
+        return decompile(input, new SourceSet(DEFAULT_REFERENCE), lang);
     }
 
     public static TypeEntry decompile(InputStream input, SourceSet.Loader loader) throws IOException {
-        SourceSet source = new SourceSet();
+        SourceSet source = new SourceSet(DEFAULT_REFERENCE);
         source.setLoader(loader);
         return decompile(input, source);
     }
 
     public static TypeEntry decompile(InputStream input, Language lang, SourceSet.Loader loader) throws IOException {
-        SourceSet source = new SourceSet();
+        SourceSet source = new SourceSet(DEFAULT_REFERENCE);
         source.setLoader(loader);
         return decompile(input, source, lang);
     }
@@ -157,7 +159,7 @@ public class Despector {
 
         Decompiler decompiler = Decompilers.get(LANGUAGE);
 
-        SourceSet source = new SourceSet();
+        SourceSet source = new SourceSet(DEFAULT_REFERENCE);
         for (String s : sources) {
             Path path = Paths.get(s);
             if (!Files.exists(path)) {

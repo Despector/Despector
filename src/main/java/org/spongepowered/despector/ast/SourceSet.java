@@ -27,6 +27,7 @@ package org.spongepowered.despector.ast;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.spongepowered.despector.Language;
+import org.spongepowered.despector.ast.reference.ReferenceSourceSet;
 import org.spongepowered.despector.ast.type.ArrayTypeEntry;
 import org.spongepowered.despector.ast.type.EnumEntry;
 import org.spongepowered.despector.ast.type.InterfaceEntry;
@@ -47,6 +48,7 @@ import java.util.Set;
 public class SourceSet {
 
     private Loader loader;
+    private final ReferenceSourceSet reference;
     private final Set<String> load_failed_cache = new HashSet<>();
 
     private final Map<String, TypeEntry> classes = new HashMap<>();
@@ -56,11 +58,16 @@ public class SourceSet {
 
     private final Map<String, AnnotationType> annotations = new HashMap<>();
 
-    public SourceSet() {
+    public SourceSet(ReferenceSourceSet ref) {
+        this.reference = ref;
     }
 
     public Loader getLoader() {
         return this.loader;
+    }
+
+    public ReferenceSourceSet getReference() {
+        return this.reference;
     }
 
     public void setLoader(Loader loader) {
