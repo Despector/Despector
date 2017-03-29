@@ -26,16 +26,10 @@ package org.spongepowered.despector.decompiler.method.graph.data.block;
 
 import static com.google.common.base.Preconditions.checkState;
 
-import org.spongepowered.despector.ast.Locals.LocalInstance;
-import org.spongepowered.despector.ast.members.insn.Statement;
 import org.spongepowered.despector.ast.members.insn.StatementBlock;
 import org.spongepowered.despector.ast.members.insn.arg.Instruction;
-import org.spongepowered.despector.ast.members.insn.assign.LocalAssignment;
-import org.spongepowered.despector.ast.members.insn.branch.For;
 import org.spongepowered.despector.ast.members.insn.branch.While;
 import org.spongepowered.despector.ast.members.insn.branch.condition.Condition;
-import org.spongepowered.despector.ast.members.insn.misc.Increment;
-import org.spongepowered.despector.util.AstUtil;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -93,32 +87,6 @@ public class WhileBlockSection extends BlockSection implements BreakableBlockSec
             body_section.appendTo(body, body_stack);
         }
         checkState(body_stack.isEmpty());
-        if (!block.getStatements().isEmpty()) {
-            Statement last = block.getStatements().get(block.getStatements().size() - 1);
-            if (last instanceof LocalAssignment) {
-                LocalAssignment assign = (LocalAssignment) last;
-                LocalInstance local = assign.getLocal();
-                if (AstUtil.references(this.condition, local)) {
-                    Increment increment = null;
-                    if (!body.getStatements().isEmpty()) {
-                        Statement body_last = body.getStatements().get(body.getStatements().size() - 1);
-                        if (body_last instanceof Increment && ((Increment) body_last).getLocal() == local) {
-                            increment = (Increment) body_last;
-                        }
-                    }
-                    block.getStatements().remove(last);
-                    if (increment != null) {
-                        body.getStatements().remove(increment);
-                    }
-                    For ffor = new For(last, this.condition, increment, body);
-                    for (BreakBlockSection bbreak : this.breaks) {
-                        bbreak.setBreakable(ffor);
-                    }
-                    block.append(ffor);
-                    return;
-                }
-            }
-        }
         block.append(wwhile);
     }
 }

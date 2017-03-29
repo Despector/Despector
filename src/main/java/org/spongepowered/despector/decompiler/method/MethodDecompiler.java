@@ -205,6 +205,10 @@ public class MethodDecompiler {
             op.process(partial);
         }
 
+        if (partial.getEntry().getName().equals("cyclePropertyValue")) {
+            System.out.println();
+        }
+
         // Performs a sequence of transformations to convert the graph into a
         // simple array of partially decompiled block sections.
         List<BlockSection> flat_graph = new ArrayList<>();

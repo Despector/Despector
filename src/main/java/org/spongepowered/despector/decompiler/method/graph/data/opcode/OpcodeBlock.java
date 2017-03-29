@@ -150,8 +150,7 @@ public abstract class OpcodeBlock {
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
-        builder.append(getClass().getSimpleName()).append(" breakpoint: ").append(this.break_point);
-        builder.append(" target: ").append(this.target != null ? this.target.break_point : -1).append("\n");
+        builder.append(getDebugHeader()).append("\n");
         for (AbstractInsnNode insn : this.opcodes) {
             builder.append("  ").append(AstUtil.insnToString(insn)).append("\n");
         }

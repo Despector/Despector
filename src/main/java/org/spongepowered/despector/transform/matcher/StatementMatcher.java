@@ -29,6 +29,7 @@ import org.spongepowered.despector.transform.matcher.statement.ForEachMatcher;
 import org.spongepowered.despector.transform.matcher.statement.ForLoopMatcher;
 import org.spongepowered.despector.transform.matcher.statement.IncrementMatcher;
 import org.spongepowered.despector.transform.matcher.statement.LocalAssignmentMatcher;
+import org.spongepowered.despector.transform.matcher.statement.WhileLoopMatcher;
 
 public interface StatementMatcher<T extends Statement> {
 
@@ -59,6 +60,10 @@ public interface StatementMatcher<T extends Statement> {
 
     static IncrementMatcher.Builder increment() {
         return new IncrementMatcher.Builder();
+    }
+
+    static WhileLoopMatcher.Builder whileloop() {
+        return new WhileLoopMatcher.Builder();
     }
 
     public static class Any implements StatementMatcher<Statement> {

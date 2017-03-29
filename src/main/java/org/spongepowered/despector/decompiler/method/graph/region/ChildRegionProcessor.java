@@ -102,7 +102,9 @@ public class ChildRegionProcessor implements RegionProcessor {
                             sec = new BreakBlockSection(new BreakMarkerOpcodeBlock(next.getBreakpoint(), BreakMarkerOpcodeBlock.MarkerType.BREAK),
                                     BreakMarkerOpcodeBlock.MarkerType.BREAK);
                             sec.getInlinedConditions().add((ConditionalOpcodeBlock) next);
-                            region.set(i, new ProcessedOpcodeBlock(next.getBreakpoint(), sec));
+                            OpcodeBlock replace = new ProcessedOpcodeBlock(next.getBreakpoint(), sec);
+                            region.set(i, replace);
+                            GraphOperation.remap(region, next, replace);
                         } else {
                             sec.getInlinedConditions().add((ConditionalOpcodeBlock) next);
                             region.remove(i);
@@ -111,6 +113,48 @@ public class ChildRegionProcessor implements RegionProcessor {
                         continue;
                     }
                 }
+            } else if(next.getTarget() == sstart) {
+                // this is a continue statement
+                boolean part_of_end = true;
+                for(int o = i + 1; o < region.size() - subregion_search_end; o++) {
+                    OpcodeBlock n = region.get(o);
+                    if(n instanceof ConditionalOpcodeBlock) {
+                        if(n.getTarget() == sstart || n.getTarget() == ret) {
+                            continue;
+                        }
+                    }
+                    part_of_end = false;
+                    break;
+                }
+                if(part_of_end) {
+                    return null;
+                }
+                BreakBlockSection sec = null;
+                if (region.get(i - 1) instanceof ProcessedOpcodeBlock) {
+                    BlockSection compiled = ((ProcessedOpcodeBlock) region.get(i - 1)).getPrecompiledSection();
+                    if (compiled instanceof BreakBlockSection) {
+                        sec = (BreakBlockSection) compiled;
+                    }
+                }
+                if (sec == null) {
+                    sec = new BreakBlockSection(new BreakMarkerOpcodeBlock(next.getBreakpoint(), BreakMarkerOpcodeBlock.MarkerType.CONTINUE),
+                            BreakMarkerOpcodeBlock.MarkerType.CONTINUE);
+                    sec.getInlinedConditions().add((ConditionalOpcodeBlock) next);
+                    OpcodeBlock replace = new ProcessedOpcodeBlock(next.getBreakpoint(), sec);
+                    region.set(i, replace);
+                    GraphOperation.remap(region, next, replace);
+                } else {
+                    sec.getInlinedConditions().add((ConditionalOpcodeBlock) next);
+                    region.remove(i);
+                    i--;
+                }
+                OpcodeBlock last = region.get(region.size() - 1);
+                if(!(last instanceof GotoOpcodeBlock) && sstart instanceof ConditionalOpcodeBlock) {
+                    GotoOpcodeBlock fakeLoop = new GotoOpcodeBlock(last.getBreakpoint());
+                    fakeLoop.setTarget(sstart);
+                    region.add(fakeLoop);
+                }
+                continue;
             } else {
                 end = RegionProcessor.getRegionEnd(region, i);
             }

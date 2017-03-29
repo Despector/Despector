@@ -144,6 +144,9 @@ public class InstanceMethodInvokeEmitter implements InstructionEmitter<InstanceM
                 }
                 valid = false;
                 break;
+            } else if (callee instanceof LocalAccess) {
+                valid = false;
+                break;
             }
             valid = false;
         }

@@ -47,6 +47,7 @@ import org.spongepowered.despector.decompiler.method.graph.region.DoWhileRegionP
 import org.spongepowered.despector.decompiler.method.graph.region.IfBlockRegionProcessor;
 import org.spongepowered.despector.decompiler.method.graph.region.WhileRegionProcessor;
 import org.spongepowered.despector.decompiler.method.postprocess.ForEachPostProcessor;
+import org.spongepowered.despector.decompiler.method.postprocess.ForFromWhilePostProcessor;
 import org.spongepowered.despector.decompiler.method.postprocess.IfCombiningPostProcessor;
 import org.spongepowered.despector.decompiler.method.special.LocalsProcessor;
 import org.spongepowered.despector.decompiler.step.ClassInfoStep;
@@ -95,6 +96,7 @@ public class Decompilers {
         JAVA_METHOD.addRegionProcessor(new WhileRegionProcessor());
         JAVA_METHOD.addRegionProcessor(new IfBlockRegionProcessor());
         JAVA_METHOD.addPostProcessor(new IfCombiningPostProcessor());
+        JAVA_METHOD.addPostProcessor(new ForFromWhilePostProcessor());
         JAVA_METHOD.addPostProcessor(new ForEachPostProcessor());
 
         KOTLIN_METHOD.addGraphProducer(new JumpGraphProducerStep());

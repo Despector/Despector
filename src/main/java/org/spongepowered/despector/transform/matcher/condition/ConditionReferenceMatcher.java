@@ -22,49 +22,42 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.despector.transform.matcher;
+package org.spongepowered.despector.transform.matcher.condition;
 
 import org.spongepowered.despector.ast.Locals.LocalInstance;
 import org.spongepowered.despector.ast.members.insn.branch.condition.Condition;
-import org.spongepowered.despector.transform.matcher.condition.BooleanConditionMatcher;
-import org.spongepowered.despector.transform.matcher.condition.ConditionReferenceMatcher;
+import org.spongepowered.despector.transform.matcher.ConditionMatcher;
+import org.spongepowered.despector.transform.matcher.MatchContext;
+import org.spongepowered.despector.util.AstUtil;
 
-public interface ConditionMatcher<T extends Condition> {
+public class ConditionReferenceMatcher implements ConditionMatcher<Condition> {
 
-    T match(MatchContext ctx, Condition cond);
+    private final LocalInstance local;
+    private final String ctx_local;
 
-    default T match(Condition cond) {
-        return match(MatchContext.create(), cond);
+    public ConditionReferenceMatcher(LocalInstance local) {
+        this.local = local;
+        this.ctx_local = null;
     }
 
-    default boolean matches(MatchContext ctx, Condition cond) {
-        return match(ctx, cond) != null;
+    public ConditionReferenceMatcher(String ctx) {
+        this.ctx_local = ctx;
+        this.local = null;
     }
 
-    static final ConditionMatcher<?> ANY = new Any();
-
-    static BooleanConditionMatcher.Builder bool() {
-        return new BooleanConditionMatcher.Builder();
-    }
-
-    static ConditionReferenceMatcher references(LocalInstance local) {
-        return new ConditionReferenceMatcher(local);
-    }
-
-    static ConditionReferenceMatcher references(String ctx) {
-        return new ConditionReferenceMatcher(ctx);
-    }
-
-    public static class Any implements ConditionMatcher<Condition> {
-
-        Any() {
+    @Override
+    public Condition match(MatchContext ctx, Condition cond) {
+        LocalInstance loc = this.local;
+        if (loc == null) {
+            loc = ctx.getLocal(this.ctx_local);
+            if (loc == null) {
+                return null;
+            }
         }
-
-        @Override
-        public Condition match(MatchContext ctx, Condition stmt) {
-            return stmt;
+        if (AstUtil.references(cond, loc)) {
+            return cond;
         }
-
+        return null;
     }
 
 }

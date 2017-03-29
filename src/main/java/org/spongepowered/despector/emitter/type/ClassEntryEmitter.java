@@ -103,7 +103,9 @@ public class ClassEntryEmitter implements AstEmitter<ClassEntry> {
             ctx.printString(" implements ");
             for (int i = 0; i < type.getInterfaces().size(); i++) {
                 ctx.emitType(type.getInterfaces().get(i));
-                generics.emitTypeArguments(ctx, type.getSignature().getInterfaceSignatures().get(i).getArguments());
+                if (type.getSignature() != null) {
+                    generics.emitTypeArguments(ctx, type.getSignature().getInterfaceSignatures().get(i).getArguments());
+                }
                 if (i < type.getInterfaces().size() - 1) {
                     ctx.printString(" ", ctx.getFormat().insert_space_before_comma_in_superinterfaces);
                     ctx.printString(",");
