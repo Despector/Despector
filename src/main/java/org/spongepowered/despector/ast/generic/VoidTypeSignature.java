@@ -40,8 +40,17 @@ public class VoidTypeSignature extends TypeSignature {
     }
 
     @Override
-    public String toString() {
+    public String getName() {
         return "void";
     }
 
+    @Override
+    public String getDescriptor() {
+        return "V";
+    }
+
+    @Override
+    public String toString() {
+        return "void";
+    }
 }

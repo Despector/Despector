@@ -33,6 +33,7 @@ import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.FieldNode;
 import org.spongepowered.despector.ast.AccessModifier;
 import org.spongepowered.despector.ast.Annotation;
+import org.spongepowered.despector.ast.generic.ClassTypeSignature;
 import org.spongepowered.despector.ast.generic.TypeSignature;
 import org.spongepowered.despector.ast.members.FieldEntry;
 import org.spongepowered.despector.ast.type.TypeEntry;
@@ -56,12 +57,11 @@ public class FieldInfoStep implements DecompilerStep {
             f.setOwner(cn.name);
             f.setStatic((fn.access & ACC_STATIC) != 0);
             f.setSynthetic((fn.access & ACC_SYNTHETIC) != 0);
-            f.setType(fn.desc);
-
+            TypeSignature sig = ClassTypeSignature.of(fn.desc);
             if (fn.signature != null) {
-                TypeSignature sig = SignatureParser.parseFieldTypeSignature(fn.signature);
-                f.setSignature(sig);
+                sig = SignatureParser.parseFieldTypeSignature(fn.signature);
             }
+            f.setType(sig);
 
             if (fn.visibleAnnotations != null) {
                 for (AnnotationNode an : (List<AnnotationNode>) fn.visibleAnnotations) {

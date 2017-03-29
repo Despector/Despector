@@ -36,12 +36,8 @@ public class ForEachEmitter implements StatementEmitter<ForEach> {
     public void emit(EmitterContext ctx, ForEach loop, boolean semicolon) {
         ctx.printString("for (");
         LocalInstance local = loop.getValueAssignment();
-        if (local.getSignature() != null) {
-            GenericsEmitter generics = ctx.getEmitterSet().getSpecialEmitter(GenericsEmitter.class);
-            generics.emitTypeSignature(ctx, local.getSignature());
-        } else {
-            ctx.emitTypeName(local.getTypeName());
-        }
+        GenericsEmitter generics = ctx.getEmitterSet().getSpecialEmitter(GenericsEmitter.class);
+        generics.emitTypeSignature(ctx, local.getType());
         ctx.printString(" ");
         ctx.printString(local.getName());
         ctx.printString(": ");

@@ -49,12 +49,8 @@ public class FieldEntryEmitter implements AstEmitter<FieldEntry> {
         if (ast.isFinal()) {
             ctx.printString("final ");
         }
-        if (ast.getSignature() != null) {
-            GenericsEmitter generics = ctx.getEmitterSet().getSpecialEmitter(GenericsEmitter.class);
-            generics.emitTypeSignature(ctx, ast.getSignature());
-        } else {
-            ctx.emitTypeName(ast.getTypeName());
-        }
+        GenericsEmitter generics = ctx.getEmitterSet().getSpecialEmitter(GenericsEmitter.class);
+        generics.emitTypeSignature(ctx, ast.getType());
         ctx.printString(" ");
         ctx.printString(ast.getName());
         if (ast.getInitializer() != null) {

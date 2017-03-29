@@ -24,10 +24,7 @@
  */
 package org.spongepowered.despector.decompiler.step;
 
-import static org.objectweb.asm.Opcodes.ACC_ABSTRACT;
-import static org.objectweb.asm.Opcodes.ACC_FINAL;
-import static org.objectweb.asm.Opcodes.ACC_STATIC;
-import static org.objectweb.asm.Opcodes.ACC_SYNTHETIC;
+import static org.objectweb.asm.Opcodes.*;
 
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.AnnotationNode;
@@ -74,6 +71,7 @@ public class MethodInfoStep implements DecompilerStep {
             m.setSignature(mn.desc);
             m.setStatic((mn.access & ACC_STATIC) != 0);
             m.setSynthetic((mn.access & ACC_SYNTHETIC) != 0);
+            m.setBridge((mn.access & ACC_BRIDGE) != 0);
 
             if (mn.signature != null) {
                 m.setMethodSignature(SignatureParser.parseMethod(mn.signature));

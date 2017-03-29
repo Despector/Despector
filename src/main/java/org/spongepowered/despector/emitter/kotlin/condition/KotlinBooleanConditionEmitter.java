@@ -24,6 +24,7 @@
  */
 package org.spongepowered.despector.emitter.kotlin.condition;
 
+import org.spongepowered.despector.ast.generic.ClassTypeSignature;
 import org.spongepowered.despector.ast.members.insn.arg.InstanceOf;
 import org.spongepowered.despector.ast.members.insn.branch.condition.BooleanCondition;
 import org.spongepowered.despector.emitter.EmitterContext;
@@ -48,10 +49,10 @@ public class KotlinBooleanConditionEmitter extends BooleanConditionEmitter {
         }
         if (bool.isInverse() && bool.getConditionValue() instanceof InstanceOf) {
             ctx.printString("(");
-            ctx.emit(bool.getConditionValue(), "Z");
+            ctx.emit(bool.getConditionValue(), ClassTypeSignature.BOOLEAN);
             ctx.printString(")");
         } else {
-            ctx.emit(bool.getConditionValue(), "Z");
+            ctx.emit(bool.getConditionValue(), ClassTypeSignature.BOOLEAN);
         }
     }
 

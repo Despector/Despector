@@ -43,6 +43,8 @@ import org.objectweb.asm.tree.VarInsnNode;
 import org.spongepowered.despector.ast.Locals;
 import org.spongepowered.despector.ast.Locals.Local;
 import org.spongepowered.despector.ast.Locals.LocalInstance;
+import org.spongepowered.despector.ast.generic.ClassTypeSignature;
+import org.spongepowered.despector.ast.generic.TypeSignature;
 import org.spongepowered.despector.ast.members.insn.StatementBlock;
 import org.spongepowered.despector.ast.members.insn.arg.Cast;
 import org.spongepowered.despector.ast.members.insn.arg.InstanceOf;
@@ -228,7 +230,7 @@ public class StatementBuilder {
                 if (var instanceof LocalAccess) {
                     LocalInstance local = ((LocalAccess) var).getLocal();
                     if (local.getType() == null) {
-                        local.setType("[" + val.inferType());
+                        local.setType(TypeSignature.arrayOf(val.inferType()));
                     }
                 }
                 if (var instanceof NewArray) {
@@ -424,31 +426,31 @@ public class StatementBuilder {
             case L2I:
             case F2I:
             case D2I:
-                stack.push(new Cast("I", stack.pop()));
+                stack.push(new Cast(ClassTypeSignature.INT, stack.pop()));
                 break;
             case I2L:
             case F2L:
             case D2L:
-                stack.push(new Cast("J", stack.pop()));
+                stack.push(new Cast(ClassTypeSignature.LONG, stack.pop()));
                 break;
             case I2F:
             case L2F:
             case D2F:
-                stack.push(new Cast("F", stack.pop()));
+                stack.push(new Cast(ClassTypeSignature.FLOAT, stack.pop()));
                 break;
             case I2D:
             case F2D:
             case L2D:
-                stack.push(new Cast("D", stack.pop()));
+                stack.push(new Cast(ClassTypeSignature.DOUBLE, stack.pop()));
                 break;
             case I2B:
-                stack.push(new Cast("B", stack.pop()));
+                stack.push(new Cast(ClassTypeSignature.BYTE, stack.pop()));
                 break;
             case I2C:
-                stack.push(new Cast("C", stack.pop()));
+                stack.push(new Cast(ClassTypeSignature.CHAR, stack.pop()));
                 break;
             case I2S:
-                stack.push(new Cast("S", stack.pop()));
+                stack.push(new Cast(ClassTypeSignature.SHORT, stack.pop()));
                 break;
             case LCMP:
             case FCMPL:
@@ -613,15 +615,15 @@ public class StatementBuilder {
             case INVOKEDYNAMIC: {
                 InvokeDynamicInsnNode invoke = (InvokeDynamicInsnNode) next;
                 Handle lambda = (Handle) invoke.bsmArgs[1];
-                String type = invoke.desc.substring(2);
+                TypeSignature type = ClassTypeSignature.of(invoke.desc);
                 String method = invoke.name;
                 DynamicInvokeHandle handle = new DynamicInvokeHandle(lambda.getOwner(), lambda.getName(), lambda.getDesc(), type, method);
                 stack.push(handle);
                 break;
             }
             case NEW: {
-                String type = ((TypeInsnNode) next).desc;
-                stack.push(new New("L" + type + ";", null, null));
+                TypeSignature type = ClassTypeSignature.of("L" + ((TypeInsnNode) next).desc + ";");
+                stack.push(new New(type, null, null));
                 break;
             }
             case NEWARRAY:
@@ -650,7 +652,7 @@ public class StatementBuilder {
                 if (!desc.startsWith("[")) {
                     desc = "L" + desc + ";";
                 }
-                stack.push(new Cast(desc, stack.pop()));
+                stack.push(new Cast(ClassTypeSignature.of(desc), stack.pop()));
                 break;
             }
             case INSTANCEOF: {

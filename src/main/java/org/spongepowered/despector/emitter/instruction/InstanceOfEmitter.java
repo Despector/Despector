@@ -24,6 +24,7 @@
  */
 package org.spongepowered.despector.emitter.instruction;
 
+import org.spongepowered.despector.ast.generic.TypeSignature;
 import org.spongepowered.despector.ast.members.insn.arg.InstanceOf;
 import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.InstructionEmitter;
@@ -31,7 +32,7 @@ import org.spongepowered.despector.emitter.InstructionEmitter;
 public class InstanceOfEmitter implements InstructionEmitter<InstanceOf> {
 
     @Override
-    public void emit(EmitterContext ctx, InstanceOf arg, String type) {
+    public void emit(EmitterContext ctx, InstanceOf arg, TypeSignature type) {
         ctx.emit(arg.getCheckedValue(), null);
         ctx.printString(" instanceof ");
         ctx.emitType(arg.getType());

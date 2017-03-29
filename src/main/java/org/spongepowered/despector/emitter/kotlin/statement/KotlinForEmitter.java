@@ -25,6 +25,7 @@
 package org.spongepowered.despector.emitter.kotlin.statement;
 
 import org.spongepowered.despector.ast.Locals.LocalInstance;
+import org.spongepowered.despector.ast.generic.ClassTypeSignature;
 import org.spongepowered.despector.ast.members.insn.arg.Instruction;
 import org.spongepowered.despector.ast.members.insn.assign.LocalAssignment;
 import org.spongepowered.despector.ast.members.insn.branch.For;
@@ -85,7 +86,7 @@ public class KotlinForEmitter extends ForEmitter {
         ctx.printString("for (");
         ctx.printString(local.getName());
         ctx.printString(" in ");
-        ctx.emit(InstructionMatcher.unwrapCast(str), "Ljava/lang/String;");
+        ctx.emit(InstructionMatcher.unwrapCast(str), ClassTypeSignature.STRING);
         ctx.printString(") {");
         ctx.newLine();
         ctx.indent();

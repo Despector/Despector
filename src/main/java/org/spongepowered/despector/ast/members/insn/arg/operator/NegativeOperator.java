@@ -26,6 +26,7 @@ package org.spongepowered.despector.ast.members.insn.arg.operator;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import org.spongepowered.despector.ast.generic.TypeSignature;
 import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
 import org.spongepowered.despector.ast.members.insn.arg.Instruction;
 
@@ -57,7 +58,7 @@ public class NegativeOperator implements Instruction {
     }
 
     @Override
-    public String inferType() {
+    public TypeSignature inferType() {
         return this.val.inferType();
     }
 

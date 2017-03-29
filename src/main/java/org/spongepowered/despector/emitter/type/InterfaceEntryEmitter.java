@@ -120,6 +120,9 @@ public class InterfaceEntryEmitter implements AstEmitter<InterfaceEntry> {
                     if(ConfigManager.getConfig().emitter.emit_synthetics) {
                         ctx.printIndentation();
                         ctx.printString("// Synthetic");
+                        if (mth.isBridge()) {
+                            ctx.printString(" - Bridge");
+                        }
                         ctx.newLine();
                     } else {
                         continue;
@@ -136,6 +139,9 @@ public class InterfaceEntryEmitter implements AstEmitter<InterfaceEntry> {
                     if(ConfigManager.getConfig().emitter.emit_synthetics) {
                         ctx.printIndentation();
                         ctx.printString("// Synthetic");
+                        if (mth.isBridge()) {
+                            ctx.printString(" - Bridge");
+                        }
                         ctx.newLine();
                     } else {
                         continue;

@@ -26,6 +26,8 @@ package org.spongepowered.despector.ast.members.insn.arg;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import org.spongepowered.despector.ast.generic.ClassTypeSignature;
+import org.spongepowered.despector.ast.generic.TypeSignature;
 import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
 import org.spongepowered.despector.util.TypeHelper;
 
@@ -90,8 +92,8 @@ public class NewArray implements Instruction {
     }
 
     @Override
-    public String inferType() {
-        return "[" + this.type;
+    public TypeSignature inferType() {
+        return ClassTypeSignature.of("[" + this.type);
     }
 
     @Override

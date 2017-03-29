@@ -26,8 +26,8 @@ package org.spongepowered.despector.ast.members.insn.arg;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import org.spongepowered.despector.ast.generic.TypeSignature;
 import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
-import org.spongepowered.despector.util.TypeHelper;
 
 /**
  * An instruction which casts the inner value to a specific type.
@@ -36,10 +36,10 @@ import org.spongepowered.despector.util.TypeHelper;
  */
 public class Cast implements Instruction {
 
-    private String type;
+    private TypeSignature type;
     private Instruction val;
 
-    public Cast(String type, Instruction val) {
+    public Cast(TypeSignature type, Instruction val) {
         this.type = checkNotNull(type, "type");
         this.val = checkNotNull(val, "val");
     }
@@ -47,14 +47,14 @@ public class Cast implements Instruction {
     /**
      * Gets the type which the valye is casted to.
      */
-    public String getType() {
+    public TypeSignature getType() {
         return this.type;
     }
 
     /**
      * Sets the type which the valye is casted to.
      */
-    public void setType(String type) {
+    public void setType(TypeSignature type) {
         this.type = checkNotNull(type, "type");
     }
 
@@ -73,7 +73,7 @@ public class Cast implements Instruction {
     }
 
     @Override
-    public String inferType() {
+    public TypeSignature inferType() {
         return this.type;
     }
 
@@ -85,7 +85,7 @@ public class Cast implements Instruction {
 
     @Override
     public String toString() {
-        return "((" + TypeHelper.descToType(this.type) + ") " + this.val + ")";
+        return "((" + this.type.getName() + ") " + this.val + ")";
     }
 
     @Override

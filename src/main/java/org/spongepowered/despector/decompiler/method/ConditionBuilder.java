@@ -119,7 +119,7 @@ public class ConditionBuilder {
             return new CompareCondition(a, b, CompareCondition.fromOpcode(block.getLast().getOpcode()));
         }
         case IFNULL: {
-            if (dummy_stack.size() != 1) {
+            if (dummy_stack.size() == 0) {
                 throw new IllegalStateException();
             }
             Instruction val = dummy_stack.pop();

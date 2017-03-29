@@ -27,6 +27,7 @@ package org.spongepowered.despector.ast.members.insn.arg.field;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.spongepowered.despector.ast.Locals.LocalInstance;
+import org.spongepowered.despector.ast.generic.TypeSignature;
 import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
 import org.spongepowered.despector.ast.members.insn.arg.Instruction;
 
@@ -56,7 +57,7 @@ public class LocalAccess implements Instruction {
     }
 
     @Override
-    public String inferType() {
+    public TypeSignature inferType() {
         return this.local.getType();
     }
 

@@ -24,6 +24,7 @@
  */
 package org.spongepowered.despector.emitter.kotlin.instruction;
 
+import org.spongepowered.despector.ast.generic.TypeSignature;
 import org.spongepowered.despector.ast.members.insn.arg.operator.Operator;
 import org.spongepowered.despector.ast.members.insn.arg.operator.OperatorType;
 import org.spongepowered.despector.emitter.EmitterContext;
@@ -77,7 +78,7 @@ public class KotlinOperatorEmitter implements InstructionEmitter<Operator> {
     }
 
     @Override
-    public void emit(EmitterContext ctx, Operator arg, String type) {
+    public void emit(EmitterContext ctx, Operator arg, TypeSignature type) {
         if (arg.getLeftOperand() instanceof Operator) {
             Operator right = (Operator) arg.getLeftOperand();
             if (arg.getOperator().getPrecedence() > right.getOperator().getPrecedence()) {

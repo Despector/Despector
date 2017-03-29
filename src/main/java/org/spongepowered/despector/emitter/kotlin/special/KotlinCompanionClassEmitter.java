@@ -25,6 +25,7 @@
 package org.spongepowered.despector.emitter.kotlin.special;
 
 import org.spongepowered.despector.ast.Annotation;
+import org.spongepowered.despector.ast.generic.TypeSignature;
 import org.spongepowered.despector.ast.members.MethodEntry;
 import org.spongepowered.despector.ast.members.insn.Statement;
 import org.spongepowered.despector.ast.members.insn.StatementBlock;
@@ -148,7 +149,7 @@ public class KotlinCompanionClassEmitter implements SpecialEmitter {
 
         public List<Annotation> annotations = new ArrayList<>();
         public String name;
-        public String type;
+        public TypeSignature type;
 
         public StatementBlock getter;
 

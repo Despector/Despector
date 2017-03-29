@@ -24,6 +24,7 @@
  */
 package org.spongepowered.despector.emitter.instruction;
 
+import org.spongepowered.despector.ast.generic.TypeSignature;
 import org.spongepowered.despector.ast.members.insn.arg.cst.LongConstant;
 import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.InstructionEmitter;
@@ -31,7 +32,7 @@ import org.spongepowered.despector.emitter.InstructionEmitter;
 public class LongConstantEmitter implements InstructionEmitter<LongConstant> {
 
     @Override
-    public void emit(EmitterContext ctx, LongConstant arg, String type) {
+    public void emit(EmitterContext ctx, LongConstant arg, TypeSignature type) {
         ctx.printString(String.valueOf(arg.getConstant()));
     }
 

@@ -35,4 +35,40 @@ public abstract class TypeSignature {
      */
     public abstract boolean hasArguments();
 
+    public abstract String getName();
+
+    public abstract String getDescriptor();
+
+    public boolean isArray() {
+        return false;
+    }
+
+    public static TypeSignature arrayOf(TypeSignature type) {
+        if (type instanceof ClassTypeSignature) {
+            ClassTypeSignature sig = (ClassTypeSignature) type;
+            ClassTypeSignature array = ClassTypeSignature.of("[" + sig.getType());
+            array.getArguments().addAll(sig.getArguments());
+            return array;
+        } else if (type instanceof TypeVariableSignature) {
+            TypeVariableSignature sig = (TypeVariableSignature) type;
+            TypeVariableSignature array = new TypeVariableSignature("[" + sig.getIdentifier());
+            return array;
+        }
+        throw new IllegalStateException();
+    }
+
+    public static TypeSignature getArrayComponent(TypeSignature type) {
+        if (type instanceof ClassTypeSignature) {
+            ClassTypeSignature sig = (ClassTypeSignature) type;
+            ClassTypeSignature array = ClassTypeSignature.of(sig.getType().substring(1));
+            array.getArguments().addAll(sig.getArguments());
+            return array;
+        } else if (type instanceof TypeVariableSignature) {
+            TypeVariableSignature sig = (TypeVariableSignature) type;
+            TypeVariableSignature array = new TypeVariableSignature(sig.getIdentifier().substring(1));
+            return array;
+        }
+        throw new IllegalStateException();
+    }
+
 }

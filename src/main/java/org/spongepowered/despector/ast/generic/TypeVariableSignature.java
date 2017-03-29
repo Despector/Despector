@@ -51,9 +51,28 @@ public class TypeVariableSignature extends TypeSignature {
         this.identifier = checkNotNull(ident, "identifier");
     }
 
+    public String getIdentifierName() {
+        return this.identifier.substring(1, this.identifier.length() - 1);
+    }
+
     @Override
     public boolean hasArguments() {
         return false;
+    }
+
+    @Override
+    public String getName() {
+        return getIdentifierName();
+    }
+
+    @Override
+    public String getDescriptor() {
+        return this.identifier;
+    }
+
+    @Override
+    public boolean isArray() {
+        return this.identifier.startsWith("[");
     }
 
     @Override

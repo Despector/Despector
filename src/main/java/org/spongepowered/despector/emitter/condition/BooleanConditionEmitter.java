@@ -24,6 +24,7 @@
  */
 package org.spongepowered.despector.emitter.condition;
 
+import org.spongepowered.despector.ast.generic.ClassTypeSignature;
 import org.spongepowered.despector.ast.members.insn.arg.InstanceOf;
 import org.spongepowered.despector.ast.members.insn.arg.Instruction;
 import org.spongepowered.despector.ast.members.insn.arg.cst.IntConstant;
@@ -51,16 +52,16 @@ public class BooleanConditionEmitter implements ConditionEmitter<BooleanConditio
     protected void emit(EmitterContext ctx, Instruction val, boolean parens_needed) {
         if (parens_needed && val instanceof InstanceOf) {
             ctx.printString("(");
-            ctx.emit(val, "Z");
+            ctx.emit(val, ClassTypeSignature.BOOLEAN);
             ctx.printString(")");
         } else {
-            ctx.emit(val, "Z");
+            ctx.emit(val, ClassTypeSignature.BOOLEAN);
         }
     }
 
     protected boolean checkConstant(EmitterContext ctx, BooleanCondition bool) {
         Instruction val = bool.getConditionValue();
-        if (val.inferType().equals("I")) {
+        if (val.inferType() == ClassTypeSignature.INT) {
             if (val instanceof IntConstant) {
                 IntConstant cst = (IntConstant) val;
                 if (cst.getConstant() == 0) {
@@ -81,10 +82,10 @@ public class BooleanConditionEmitter implements ConditionEmitter<BooleanConditio
             }
             if (val instanceof Operator) {
                 ctx.printString("(");
-                ctx.emit(val, "I");
+                ctx.emit(val, ClassTypeSignature.INT);
                 ctx.printString(")");
             } else {
-                ctx.emit(val, "I");
+                ctx.emit(val, ClassTypeSignature.INT);
             }
             if (bool.isInverse()) {
                 ctx.printString(" == 0");

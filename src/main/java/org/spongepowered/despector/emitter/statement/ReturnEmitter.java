@@ -24,6 +24,7 @@
  */
 package org.spongepowered.despector.emitter.statement;
 
+import org.spongepowered.despector.ast.generic.ClassTypeSignature;
 import org.spongepowered.despector.ast.members.insn.misc.Return;
 import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.StatementEmitter;
@@ -40,7 +41,7 @@ public class ReturnEmitter implements StatementEmitter<Return> {
                 type = TypeHelper.getRet(ctx.getMethod().getSignature());
             }
             ctx.printString(" ");
-            ctx.emit(insn.getValue().get(), type);
+            ctx.emit(insn.getValue().get(), ClassTypeSignature.of(type));
         }
         if(semicolon) ctx.printString(";");
     }

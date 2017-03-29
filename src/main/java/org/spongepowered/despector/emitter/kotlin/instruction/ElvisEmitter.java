@@ -24,6 +24,7 @@
  */
 package org.spongepowered.despector.emitter.kotlin.instruction;
 
+import org.spongepowered.despector.ast.generic.TypeSignature;
 import org.spongepowered.despector.ast.kotlin.Elvis;
 import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.InstructionEmitter;
@@ -31,7 +32,7 @@ import org.spongepowered.despector.emitter.InstructionEmitter;
 public class ElvisEmitter implements InstructionEmitter<Elvis> {
 
     @Override
-    public void emit(EmitterContext ctx, Elvis arg, String type) {
+    public void emit(EmitterContext ctx, Elvis arg, TypeSignature type) {
         ctx.emit(arg.getArg(), type);
         ctx.printString(" ?: ");
         ctx.markWrapPoint();

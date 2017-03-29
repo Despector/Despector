@@ -27,6 +27,7 @@ package org.spongepowered.despector.ast.kotlin;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.spongepowered.despector.ast.Locals.LocalInstance;
+import org.spongepowered.despector.ast.generic.TypeSignature;
 import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
 import org.spongepowered.despector.ast.members.insn.Statement;
 import org.spongepowered.despector.ast.members.insn.StatementBlock;
@@ -111,7 +112,8 @@ public class When implements Instruction {
     }
 
     @Override
-    public String inferType() {
+    public TypeSignature inferType() {
+        // TODO gather the most specific type of all cases
         return this.cases.get(0).getLast().inferType();
     }
 

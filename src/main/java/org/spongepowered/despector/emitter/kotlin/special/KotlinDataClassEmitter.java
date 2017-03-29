@@ -24,6 +24,7 @@
  */
 package org.spongepowered.despector.emitter.kotlin.special;
 
+import org.spongepowered.despector.ast.generic.TypeSignature;
 import org.spongepowered.despector.ast.members.FieldEntry;
 import org.spongepowered.despector.ast.members.MethodEntry;
 import org.spongepowered.despector.ast.members.insn.Statement;
@@ -142,7 +143,7 @@ public class KotlinDataClassEmitter implements SpecialEmitter {
     private static class DataField {
 
         public String name;
-        public String type;
+        public TypeSignature type;
         public boolean is_final;
         public Instruction default_val;
 

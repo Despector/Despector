@@ -24,6 +24,7 @@
  */
 package org.spongepowered.despector.emitter.statement;
 
+import org.spongepowered.despector.ast.generic.ClassTypeSignature;
 import org.spongepowered.despector.ast.members.insn.arg.Instruction;
 import org.spongepowered.despector.ast.members.insn.arg.cst.IntConstant;
 import org.spongepowered.despector.ast.members.insn.arg.field.InstanceFieldAccess;
@@ -48,7 +49,7 @@ public class FieldAssignmentEmitter implements StatementEmitter<FieldAssignment>
                 ctx.printString(".");
             }
         } else if (insn instanceof InstanceFieldAssignment) {
-            ctx.emit(((InstanceFieldAssignment) insn).getOwner(), insn.getOwnerType());
+            ctx.emit(((InstanceFieldAssignment) insn).getOwner(), ClassTypeSignature.of(insn.getOwnerType()));
             ctx.printString(".");
         }
 
@@ -58,7 +59,7 @@ public class FieldAssignmentEmitter implements StatementEmitter<FieldAssignment>
             return;
         }
         ctx.printString(" = ");
-        ctx.emit(val, insn.getFieldDescription());
+        ctx.emit(val, ClassTypeSignature.of(insn.getFieldDescription()));
         if (semicolon)
             ctx.printString(";");
     }
@@ -90,7 +91,7 @@ public class FieldAssignmentEmitter implements StatementEmitter<FieldAssignment>
                                 return true;
                             }
                         }
-                        ctx.emit(right, insn.getFieldDescription());
+                        ctx.emit(right, ClassTypeSignature.of(insn.getFieldDescription()));
                         if (semicolon)
                             ctx.printString(";");
                         return true;

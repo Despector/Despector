@@ -24,18 +24,19 @@
  */
 package org.spongepowered.despector.ast.members.insn.function;
 
+import org.spongepowered.despector.ast.generic.TypeSignature;
 import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
 import org.spongepowered.despector.ast.members.insn.arg.Instruction;
 
 public class DynamicInvokeHandle implements Instruction {
 
-    private String type;
+    private TypeSignature type;
     private String name;
     private String lambda_owner;
     private String lambda_method;
     private String lambda_desc;
 
-    public DynamicInvokeHandle(String owner, String method, String desc, String type, String name) {
+    public DynamicInvokeHandle(String owner, String method, String desc, TypeSignature type, String name) {
         this.lambda_owner = owner;
         this.lambda_method = method;
         this.lambda_desc = desc;
@@ -55,7 +56,7 @@ public class DynamicInvokeHandle implements Instruction {
         return this.lambda_desc;
     }
 
-    public String getType() {
+    public TypeSignature getType() {
         return this.type;
     }
 
@@ -64,8 +65,8 @@ public class DynamicInvokeHandle implements Instruction {
     }
 
     @Override
-    public String inferType() {
-        return null;
+    public TypeSignature inferType() {
+        return this.type;
     }
 
     @Override

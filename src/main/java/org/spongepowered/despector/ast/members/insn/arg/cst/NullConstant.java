@@ -24,6 +24,8 @@
  */
 package org.spongepowered.despector.ast.members.insn.arg.cst;
 
+import org.spongepowered.despector.ast.generic.ClassTypeSignature;
+import org.spongepowered.despector.ast.generic.TypeSignature;
 import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
 
 /**
@@ -37,8 +39,8 @@ public class NullConstant extends Constant {
     }
 
     @Override
-    public String inferType() {
-        return "Ljava/lang/Object;";
+    public TypeSignature inferType() {
+        return ClassTypeSignature.OBJECT;
     }
 
     @Override

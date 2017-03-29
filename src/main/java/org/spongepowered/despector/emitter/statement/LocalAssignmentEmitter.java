@@ -40,12 +40,8 @@ public class LocalAssignmentEmitter implements StatementEmitter<LocalAssignment>
     public void emit(EmitterContext ctx, LocalAssignment insn, boolean semicolon) {
         if (!insn.getLocal().getLocal().isParameter() && !ctx.isDefined(insn.getLocal())) {
             LocalInstance local = insn.getLocal();
-            if (local.getSignature() != null) {
-                GenericsEmitter generics = ctx.getEmitterSet().getSpecialEmitter(GenericsEmitter.class);
-                generics.emitTypeSignature(ctx, local.getSignature());
-            } else {
-                ctx.emitTypeName(local.getTypeName());
-            }
+            GenericsEmitter generics = ctx.getEmitterSet().getSpecialEmitter(GenericsEmitter.class);
+            generics.emitTypeSignature(ctx, local.getType());
             ctx.printString(" ");
             ctx.markDefined(insn.getLocal());
         } else {

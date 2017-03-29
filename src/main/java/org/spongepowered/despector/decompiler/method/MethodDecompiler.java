@@ -41,6 +41,8 @@ import org.objectweb.asm.tree.VarInsnNode;
 import org.spongepowered.despector.ast.Locals;
 import org.spongepowered.despector.ast.Locals.Local;
 import org.spongepowered.despector.ast.Locals.LocalInstance;
+import org.spongepowered.despector.ast.generic.ClassTypeSignature;
+import org.spongepowered.despector.ast.generic.TypeSignature;
 import org.spongepowered.despector.ast.members.MethodEntry;
 import org.spongepowered.despector.ast.members.insn.StatementBlock;
 import org.spongepowered.despector.ast.members.insn.arg.Instruction;
@@ -126,17 +128,20 @@ public class MethodDecompiler {
             local.setAsParameter();
             if (local.getLVT().isEmpty()) {
                 if (i < offs) {
-                    local.setParameterInstance(new LocalInstance(local, null, "this", entry.getOwner(), -1, -1));
+                    local.setParameterInstance(new LocalInstance(local, null, "this", ClassTypeSignature.of(entry.getOwner()), -1, -1));
                 } else {
-                    local.setParameterInstance(new LocalInstance(local, null, "param" + i, param_types.get(i - offs), -1, -1));
+                    local.setParameterInstance(new LocalInstance(local, null, "param" + i, ClassTypeSignature.of(param_types.get(i - offs)), -1, -1));
                 }
             } else {
                 LocalVariableNode lvt = local.getLVT().get(0);
-                LocalInstance insn = new LocalInstance(local, lvt, lvt.name, lvt.desc, -1, -1);
-                local.setParameterInstance(insn);
+                TypeSignature sig = null;
                 if (lvt.signature != null) {
-                    insn.setGenericTypes(SignatureParser.parseFieldTypeSignature(lvt.signature));
+                    sig = SignatureParser.parseFieldTypeSignature(lvt.signature);
+                } else {
+                    sig = ClassTypeSignature.of(lvt.desc);
                 }
+                LocalInstance insn = new LocalInstance(local, lvt, lvt.name, sig, -1, -1);
+                local.setParameterInstance(insn);
             }
         }
 

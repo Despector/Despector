@@ -27,6 +27,8 @@ package org.spongepowered.despector.emitter.kotlin.type;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import org.spongepowered.despector.ast.Annotation;
+import org.spongepowered.despector.ast.generic.ClassTypeSignature;
+import org.spongepowered.despector.ast.generic.TypeSignature;
 import org.spongepowered.despector.ast.members.FieldEntry;
 import org.spongepowered.despector.ast.members.MethodEntry;
 import org.spongepowered.despector.ast.members.insn.Statement;
@@ -180,7 +182,7 @@ public class KotlinEnumEntryEmitter implements AstEmitter<EnumEntry> {
                     ctx.printString("(");
                     List<String> args = TypeHelper.splitSig(val.getCtorDescription());
                     for (int i = 2; i < val.getParameters().length; i++) {
-                        ctx.emit(val.getParameters()[i], args.get(i));
+                        ctx.emit(val.getParameters()[i], ClassTypeSignature.of(args.get(i)));
                         if (i < val.getParameters().length - 1) {
                             ctx.printString(", ");
                         }
@@ -307,7 +309,7 @@ public class KotlinEnumEntryEmitter implements AstEmitter<EnumEntry> {
     private static class EnumField {
 
         public String name;
-        public String type;
+        public TypeSignature type;
         public boolean is_final;
         public boolean is_private;
 

@@ -26,6 +26,8 @@ package org.spongepowered.despector.ast.members.insn.arg.operator;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import org.spongepowered.despector.ast.generic.ClassTypeSignature;
+import org.spongepowered.despector.ast.generic.TypeSignature;
 import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
 import org.spongepowered.despector.ast.members.insn.arg.Instruction;
 
@@ -89,10 +91,10 @@ public class Operator implements Instruction {
     }
 
     @Override
-    public String inferType() {
-        int left_index = PRIMATIVE_ORDERING.indexOf(this.left.inferType().charAt(0));
-        int right_index = PRIMATIVE_ORDERING.indexOf(this.right.inferType().charAt(0));
-        return String.valueOf(PRIMATIVE_ORDERING.charAt(Math.max(left_index, right_index)));
+    public TypeSignature inferType() {
+        int left_index = PRIMATIVE_ORDERING.indexOf(this.left.inferType().toString().charAt(0));
+        int right_index = PRIMATIVE_ORDERING.indexOf(this.right.inferType().toString().charAt(0));
+        return ClassTypeSignature.of(String.valueOf(PRIMATIVE_ORDERING.charAt(Math.max(left_index, right_index))));
     }
 
     @Override

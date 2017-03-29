@@ -479,7 +479,7 @@ public class BranchTest {
                 + "    return false;\n"
                 + "}\n"
                 + "if (d && e) {\n"
-                + "    return !c;\n"
+                + "    return !(c);\n"
                 + "}\n"
                 + "return false;";
         check(getClass(), "mth_ifret", good);

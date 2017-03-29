@@ -27,9 +27,9 @@ package org.spongepowered.despector.ast;
 import com.google.common.collect.Lists;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.tree.LocalVariableNode;
+import org.spongepowered.despector.ast.generic.ClassTypeSignature;
 import org.spongepowered.despector.ast.generic.TypeSignature;
 import org.spongepowered.despector.util.SignatureParser;
-import org.spongepowered.despector.util.TypeHelper;
 
 import java.util.Arrays;
 import java.util.List;
@@ -148,16 +148,19 @@ public class Locals {
         public void bakeInstances(Map<Label, Integer> label_indices) {
             if (this.lvt.isEmpty()) {
                 if (this.index == 0) {
-                    this.instances.add(new LocalInstance(this, null, "this", "", -1, Short.MAX_VALUE));
+                    this.instances.add(new LocalInstance(this, null, "this", ClassTypeSignature.OBJECT, -1, Short.MAX_VALUE));
                 }
             }
             for (LocalVariableNode l : this.lvt) {
                 int start = label_indices.get(l.start.getLabel());
                 int end = label_indices.get(l.end.getLabel());
-                LocalInstance insn = new LocalInstance(this, l, l.name, l.desc, start - 1, end);
+                TypeSignature sig = null;
                 if (l.signature != null) {
-                    insn.setGenericTypes(SignatureParser.parseFieldTypeSignature(l.signature));
+                    sig = SignatureParser.parseFieldTypeSignature(l.signature);
+                } else {
+                    sig = ClassTypeSignature.of(l.desc);
                 }
+                LocalInstance insn = new LocalInstance(this, l, l.name, sig, start - 1, end);
                 this.instances.add(insn);
             }
         }
@@ -229,14 +232,13 @@ public class Locals {
 
         private final Local local;
         private String name;
-        private String type;
+        private TypeSignature type;
         private int start;
         private int end;
         private LocalVariableNode lvn;
-        private TypeSignature signature;
         private boolean effectively_final = false;
 
-        public LocalInstance(Local l, LocalVariableNode lvn, String n, String t, int start, int end) {
+        public LocalInstance(Local l, LocalVariableNode lvn, String n, TypeSignature t, int start, int end) {
             this.local = l;
             this.name = n;
             this.type = t;
@@ -268,15 +270,15 @@ public class Locals {
             this.name = name;
         }
 
-        public String getType() {
+        public TypeSignature getType() {
             return this.type;
         }
 
         public String getTypeName() {
-            return TypeHelper.descToType(this.type);
+            return this.type.getName();
         }
 
-        public void setType(String type) {
+        public void setType(TypeSignature type) {
             this.type = type;
         }
 
@@ -286,14 +288,6 @@ public class Locals {
 
         public int getEnd() {
             return this.end;
-        }
-
-        public TypeSignature getSignature() {
-            return this.signature;
-        }
-
-        public void setGenericTypes(TypeSignature sig) {
-            this.signature = sig;
         }
 
         public boolean isEffectivelyFinal() {

@@ -24,6 +24,8 @@
  */
 package org.spongepowered.despector.ast.members.insn.arg.cst;
 
+import org.spongepowered.despector.ast.generic.ClassTypeSignature;
+import org.spongepowered.despector.ast.generic.TypeSignature;
 import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
 
 /**
@@ -52,8 +54,8 @@ public class DoubleConstant extends Constant {
     }
 
     @Override
-    public String inferType() {
-        return "D";
+    public TypeSignature inferType() {
+        return ClassTypeSignature.DOUBLE;
     }
 
     @Override

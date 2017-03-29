@@ -24,6 +24,7 @@
  */
 package org.spongepowered.despector.emitter.instruction;
 
+import org.spongepowered.despector.ast.generic.TypeSignature;
 import org.spongepowered.despector.ast.members.insn.arg.cst.TypeConstant;
 import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.InstructionEmitter;
@@ -31,7 +32,7 @@ import org.spongepowered.despector.emitter.InstructionEmitter;
 public class TypeConstantEmitter implements InstructionEmitter<TypeConstant> {
 
     @Override
-    public void emit(EmitterContext ctx, TypeConstant arg, String type) {
+    public void emit(EmitterContext ctx, TypeConstant arg, TypeSignature type) {
         ctx.emitTypeClassName(arg.getConstant().getClassName());
         ctx.printString(".class");
     }

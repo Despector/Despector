@@ -26,9 +26,9 @@ package org.spongepowered.despector.ast.members.insn.function;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import org.spongepowered.despector.ast.generic.TypeSignature;
 import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
 import org.spongepowered.despector.ast.members.insn.arg.Instruction;
-import org.spongepowered.despector.util.TypeHelper;
 
 import java.util.Arrays;
 
@@ -37,11 +37,11 @@ import java.util.Arrays;
  */
 public class New implements Instruction {
 
-    private String type;
+    private TypeSignature type;
     private String ctor;
     private Instruction[] params;
 
-    public New(String type, String ctor_desc, Instruction[] args) {
+    public New(TypeSignature type, String ctor_desc, Instruction[] args) {
         this.type = checkNotNull(type, "type");
         this.ctor = ctor_desc;
         this.params = args;
@@ -64,14 +64,14 @@ public class New implements Instruction {
     /**
      * Gets the type description of the type being instanciated.
      */
-    public String getType() {
+    public TypeSignature getType() {
         return this.type;
     }
 
     /**
      * Sets the type description of the type being instanciated.
      */
-    public void setType(String type) {
+    public void setType(TypeSignature type) {
         this.type = checkNotNull(type, "type");
     }
 
@@ -90,7 +90,7 @@ public class New implements Instruction {
     }
 
     @Override
-    public String inferType() {
+    public TypeSignature inferType() {
         return this.type;
     }
 
@@ -111,7 +111,7 @@ public class New implements Instruction {
                 params.append(", ");
             }
         }
-        return "new " + TypeHelper.descToType(this.type) + "(" + params + ");";
+        return "new " + this.type.getName() + "(" + params + ");";
     }
 
     @Override

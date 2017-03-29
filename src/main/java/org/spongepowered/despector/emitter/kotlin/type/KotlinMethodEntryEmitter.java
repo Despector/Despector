@@ -154,11 +154,7 @@ public class KotlinMethodEntryEmitter extends MethodEntryEmitter {
                 LocalInstance insn = local.getParameterInstance();
                 ctx.printString(insn.getName());
                 ctx.printString(": ");
-                if (insn.getSignature() != null) {
-                    generics.emitTypeSignature(ctx, insn.getSignature());
-                } else {
-                    KotlinEmitterUtil.emitParamType(ctx, method.getParamTypes().get(i));
-                }
+                KotlinEmitterUtil.emitParamType(ctx, insn.getType());
             }
             if (defaults != null && defaults.size() > i) {
                 Instruction def = defaults.get(i);

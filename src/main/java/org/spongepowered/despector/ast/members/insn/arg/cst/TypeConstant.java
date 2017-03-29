@@ -25,7 +25,10 @@
 package org.spongepowered.despector.ast.members.insn.arg.cst;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+
 import org.objectweb.asm.Type;
+import org.spongepowered.despector.ast.generic.ClassTypeSignature;
+import org.spongepowered.despector.ast.generic.TypeSignature;
 import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
 
 /**
@@ -54,8 +57,8 @@ public class TypeConstant extends Constant {
     }
 
     @Override
-    public String inferType() {
-        return this.cst.getDescriptor();
+    public TypeSignature inferType() {
+        return ClassTypeSignature.of(this.cst.getDescriptor());
     }
 
     @Override

@@ -26,6 +26,7 @@ package org.spongepowered.despector.ast.members.insn.branch;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import org.spongepowered.despector.ast.generic.TypeSignature;
 import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
 import org.spongepowered.despector.ast.members.insn.arg.Instruction;
 import org.spongepowered.despector.ast.members.insn.branch.condition.Condition;
@@ -96,7 +97,7 @@ public class Ternary implements Instruction {
     }
 
     @Override
-    public String inferType() {
+    public TypeSignature inferType() {
         return this.true_val.inferType();
     }
 

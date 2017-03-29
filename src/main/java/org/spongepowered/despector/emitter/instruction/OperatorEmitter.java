@@ -24,6 +24,7 @@
  */
 package org.spongepowered.despector.emitter.instruction;
 
+import org.spongepowered.despector.ast.generic.TypeSignature;
 import org.spongepowered.despector.ast.members.insn.arg.operator.Operator;
 import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.InstructionEmitter;
@@ -31,7 +32,7 @@ import org.spongepowered.despector.emitter.InstructionEmitter;
 public class OperatorEmitter implements InstructionEmitter<Operator> {
 
     @Override
-    public void emit(EmitterContext ctx, Operator arg, String type) {
+    public void emit(EmitterContext ctx, Operator arg, TypeSignature type) {
         if (arg.getLeftOperand() instanceof Operator) {
             Operator left = (Operator) arg.getLeftOperand();
             if (arg.getOperator().getPrecedence() > left.getOperator().getPrecedence()) {

@@ -28,7 +28,6 @@ import org.spongepowered.despector.ast.Locals.LocalInstance;
 import org.spongepowered.despector.ast.members.insn.assign.LocalAssignment;
 import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.kotlin.KotlinEmitterUtil;
-import org.spongepowered.despector.emitter.special.GenericsEmitter;
 import org.spongepowered.despector.emitter.statement.LocalAssignmentEmitter;
 
 public class KotlinLocalAssignmentEmitter extends LocalAssignmentEmitter {
@@ -36,7 +35,7 @@ public class KotlinLocalAssignmentEmitter extends LocalAssignmentEmitter {
     @Override
     public void emit(EmitterContext ctx, LocalAssignment insn, boolean semicolon) {
         if (!insn.getLocal().getLocal().isParameter() && !ctx.isDefined(insn.getLocal())) {
-            if(insn.getLocal().isEffectivelyFinal()) {
+            if (insn.getLocal().isEffectivelyFinal()) {
                 ctx.printString("val ");
             } else {
                 ctx.printString("var ");
@@ -44,12 +43,7 @@ public class KotlinLocalAssignmentEmitter extends LocalAssignmentEmitter {
             ctx.printString(insn.getLocal().getName());
             ctx.printString(": ");
             LocalInstance local = insn.getLocal();
-            if (local.getSignature() != null) {
-                GenericsEmitter generics = ctx.getEmitterSet().getSpecialEmitter(GenericsEmitter.class);
-                generics.emitTypeSignature(ctx, local.getSignature());
-            } else {
-                KotlinEmitterUtil.emitType(ctx, local.getType());
-            }
+            KotlinEmitterUtil.emitType(ctx, local.getType());
             ctx.markDefined(insn.getLocal());
         } else {
             ctx.printString(insn.getLocal().getName());

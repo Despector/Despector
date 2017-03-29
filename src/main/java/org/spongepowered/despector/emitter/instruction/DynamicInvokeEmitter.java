@@ -26,6 +26,7 @@ package org.spongepowered.despector.emitter.instruction;
 
 import org.spongepowered.despector.ast.Locals.Local;
 import org.spongepowered.despector.ast.Locals.LocalInstance;
+import org.spongepowered.despector.ast.generic.TypeSignature;
 import org.spongepowered.despector.ast.members.MethodEntry;
 import org.spongepowered.despector.ast.members.insn.StatementBlock;
 import org.spongepowered.despector.ast.members.insn.function.DynamicInvokeHandle;
@@ -37,7 +38,7 @@ import org.spongepowered.despector.emitter.InstructionEmitter;
 public class DynamicInvokeEmitter implements InstructionEmitter<DynamicInvokeHandle> {
 
     @Override
-    public void emit(EmitterContext ctx, DynamicInvokeHandle arg, String type) {
+    public void emit(EmitterContext ctx, DynamicInvokeHandle arg, TypeSignature type) {
 
         TypeEntry owner = ctx.getType().getSource().get(arg.getLambdaOwner());
         MethodEntry method = owner.getStaticMethod(arg.getLambdaMethod());

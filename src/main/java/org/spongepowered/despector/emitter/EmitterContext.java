@@ -31,6 +31,7 @@ import com.google.common.collect.Sets;
 import org.spongepowered.despector.ast.Annotation;
 import org.spongepowered.despector.ast.AstEntry;
 import org.spongepowered.despector.ast.Locals.LocalInstance;
+import org.spongepowered.despector.ast.generic.TypeSignature;
 import org.spongepowered.despector.ast.members.FieldEntry;
 import org.spongepowered.despector.ast.members.MethodEntry;
 import org.spongepowered.despector.ast.members.insn.Statement;
@@ -240,7 +241,7 @@ public class EmitterContext {
     }
 
     @SuppressWarnings("unchecked")
-    public <T extends Instruction> EmitterContext emit(T obj, String type) {
+    public <T extends Instruction> EmitterContext emit(T obj, TypeSignature type) {
         InstructionEmitter<T> emitter = (InstructionEmitter<T>) this.set.getInstructionEmitter(obj.getClass());
         if (emitter == null) {
             throw new IllegalArgumentException("No emitter for instruction " + obj.getClass().getName());
@@ -293,6 +294,11 @@ public class EmitterContext {
                 printString("\t");
             }
         }
+        return this;
+    }
+
+    public EmitterContext emitType(TypeSignature sig) {
+        emitTypeClassName(sig.getName().replace('/', '.'));
         return this;
     }
 
@@ -364,7 +370,7 @@ public class EmitterContext {
             this.buffer.append(this.line_buffer.toString());
         }
     }
-    
+
     private void __newLine() {
         flush();
         this.offs += 1;

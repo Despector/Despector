@@ -25,6 +25,8 @@
 package org.spongepowered.despector.emitter.kotlin.instruction.method;
 
 import com.google.common.collect.Lists;
+import org.spongepowered.despector.ast.generic.ClassTypeSignature;
+import org.spongepowered.despector.ast.generic.TypeSignature;
 import org.spongepowered.despector.ast.members.insn.arg.Instruction;
 import org.spongepowered.despector.ast.members.insn.arg.cst.StringConstant;
 import org.spongepowered.despector.ast.members.insn.arg.field.LocalAccess;
@@ -38,7 +40,7 @@ import java.util.List;
 public class StringConcatEmitter implements SpecialMethodEmitter<InstanceMethodInvoke> {
 
     @Override
-    public boolean emit(EmitterContext ctx, InstanceMethodInvoke arg, String type) {
+    public boolean emit(EmitterContext ctx, InstanceMethodInvoke arg, TypeSignature type) {
         // We detect and collapse string builder chains used to perform
         // string concatentation into simple "foo" + "bar" form
         boolean valid = true;
@@ -130,11 +132,11 @@ public class StringConcatEmitter implements SpecialMethodEmitter<InstanceMethodI
                             in_string = true;
                         }
                         ctx.printString("${");
-                        ctx.emit(mth.getParams()[0], "Ljava/lang/String;");
+                        ctx.emit(mth.getParams()[0], ClassTypeSignature.STRING);
                         ctx.printString(".replace(");
-                        ctx.emit(mth.getParams()[1], "Ljava/lang/String;");
+                        ctx.emit(mth.getParams()[1], ClassTypeSignature.STRING);
                         ctx.printString(", ");
-                        ctx.emit(mth.getParams()[2], "Ljava/lang/String;");
+                        ctx.emit(mth.getParams()[2], ClassTypeSignature.STRING);
                         ctx.printString(")}");
                         continue;
                     }
@@ -145,7 +147,7 @@ public class StringConcatEmitter implements SpecialMethodEmitter<InstanceMethodI
                     ctx.printString(" + ");
                     in_string = false;
                 }
-                ctx.emit(constants.get(i), "Ljava/lang/String;");
+                ctx.emit(constants.get(i), ClassTypeSignature.STRING);
                 if (i < constants.size() - 1) {
                     ctx.markWrapPoint();
                     ctx.printString(" + ");

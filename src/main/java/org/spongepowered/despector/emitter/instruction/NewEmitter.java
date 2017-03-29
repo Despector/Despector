@@ -41,14 +41,14 @@ import java.util.List;
 public class NewEmitter implements InstructionEmitter<New> {
 
     @Override
-    public void emit(EmitterContext ctx, New arg, String type) {
+    public void emit(EmitterContext ctx, New arg, TypeSignature type) {
 
-        if (arg.getType().contains("$")) {
-            String last = TypeHelper.descToType(arg.getType());
+        if (arg.getType().getName().contains("$")) {
+            String last = arg.getType().getName();
             int last$ = last.indexOf('$');
             last = last.substring(last$ + 1);
             if (last.matches("[0-9]+")) {
-                TypeEntry anon_type = ctx.getType().getSource().get(TypeHelper.descToType(arg.getType()));
+                TypeEntry anon_type = ctx.getType().getSource().get(arg.getType().getName());
                 if (anon_type != null) {
                     AnonymousClassEmitter emitter = ctx.getEmitterSet().getSpecialEmitter(AnonymousClassEmitter.class);
                     emitter.emit(ctx, (ClassEntry) anon_type, arg);
@@ -61,11 +61,11 @@ public class NewEmitter implements InstructionEmitter<New> {
         ctx.printString("new ");
         ctx.emitType(arg.getType());
 
-        if (ctx.getField() != null && ctx.getField().getSignature() != null && ctx.getField().getSignature().hasArguments()) {
+        if (ctx.getField() != null && ctx.getField().getType().hasArguments()) {
             ctx.printString("<>");
         } else if (ctx.getStatement() != null && ctx.getStatement() instanceof LocalAssignment) {
             LocalAssignment assign = (LocalAssignment) ctx.getStatement();
-            TypeSignature sig = assign.getLocal().getSignature();
+            TypeSignature sig = assign.getLocal().getType();
             if (sig != null && sig instanceof ClassTypeSignature && !((ClassTypeSignature) sig).getArguments().isEmpty()) {
                 ctx.printString("<>");
             }
@@ -76,7 +76,7 @@ public class NewEmitter implements InstructionEmitter<New> {
         for (int i = 0; i < arg.getParameters().length; i++) {
             Instruction param = arg.getParameters()[i];
             ctx.markWrapPoint();
-            ctx.emit(param, args.get(i));
+            ctx.emit(param, ClassTypeSignature.of(args.get(i)));
             if (i < arg.getParameters().length - 1) {
                 ctx.printString(", ");
             }

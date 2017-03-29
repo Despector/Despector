@@ -25,6 +25,8 @@
 package org.spongepowered.despector.emitter.kotlin.instruction;
 
 import org.spongepowered.despector.ast.Locals.LocalInstance;
+import org.spongepowered.despector.ast.generic.ClassTypeSignature;
+import org.spongepowered.despector.ast.generic.TypeSignature;
 import org.spongepowered.despector.ast.kotlin.When;
 import org.spongepowered.despector.ast.kotlin.When.Case;
 import org.spongepowered.despector.ast.members.insn.arg.InstanceOf;
@@ -53,7 +55,7 @@ public class WhenEmitter implements InstructionEmitter<When> {
                 ctx.printString("is ");
                 KotlinEmitterUtil.emitType(ctx, ((InstanceOf) val).getType());
             } else {
-                ctx.emit(val, "Z");
+                ctx.emit(val, ClassTypeSignature.BOOLEAN);
             }
         } else if (cond instanceof OrCondition) {
             List<Condition> operands = ((OrCondition) cond).getOperands();
@@ -70,7 +72,7 @@ public class WhenEmitter implements InstructionEmitter<When> {
     }
 
     @Override
-    public void emit(EmitterContext ctx, When arg, String type) {
+    public void emit(EmitterContext ctx, When arg, TypeSignature type) {
         ctx.printString("when (");
         ctx.emit(arg.getArg(), null);
         ctx.printString(") {");

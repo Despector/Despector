@@ -24,6 +24,7 @@
  */
 package org.spongepowered.despector.emitter.instruction;
 
+import org.spongepowered.despector.ast.generic.TypeSignature;
 import org.spongepowered.despector.ast.members.insn.arg.cst.StringConstant;
 import org.spongepowered.despector.config.ConfigManager;
 import org.spongepowered.despector.emitter.EmitterContext;
@@ -61,7 +62,7 @@ public class StringConstantEmitter implements InstructionEmitter<StringConstant>
     }
 
     @Override
-    public void emit(EmitterContext ctx, StringConstant arg, String type) {
+    public void emit(EmitterContext ctx, StringConstant arg, TypeSignature type) {
         if (arg.getConstant().contains("\n") && ConfigManager.getConfig().kotlin.replace_mulit_line_strings) {
             ctx.printString("\"\"\"");
             String[] lines = arg.getConstant().split("\n");

@@ -24,6 +24,8 @@
  */
 package org.spongepowered.despector.emitter.instruction;
 
+import org.spongepowered.despector.ast.generic.ClassTypeSignature;
+import org.spongepowered.despector.ast.generic.TypeSignature;
 import org.spongepowered.despector.ast.members.insn.arg.field.ArrayAccess;
 import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.InstructionEmitter;
@@ -31,10 +33,10 @@ import org.spongepowered.despector.emitter.InstructionEmitter;
 public class ArrayLoadEmitter implements InstructionEmitter<ArrayAccess> {
 
     @Override
-    public void emit(EmitterContext ctx, ArrayAccess arg, String type) {
+    public void emit(EmitterContext ctx, ArrayAccess arg, TypeSignature type) {
         ctx.emit(arg.getArrayVar(), null);
         ctx.printString("[");
-        ctx.emit(arg.getIndex(), "I");
+        ctx.emit(arg.getIndex(), ClassTypeSignature.INT);
         ctx.printString("]");
     }
 

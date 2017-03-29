@@ -26,6 +26,8 @@ package org.spongepowered.despector.ast.members.insn.arg.cst;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import org.spongepowered.despector.ast.generic.ClassTypeSignature;
+import org.spongepowered.despector.ast.generic.TypeSignature;
 import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
 
 /**
@@ -54,8 +56,8 @@ public class StringConstant extends Constant {
     }
 
     @Override
-    public String inferType() {
-        return "Ljava/lang/String;";
+    public TypeSignature inferType() {
+        return ClassTypeSignature.STRING;
     }
 
     @Override

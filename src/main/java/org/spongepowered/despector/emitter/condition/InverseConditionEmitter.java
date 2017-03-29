@@ -24,6 +24,7 @@
  */
 package org.spongepowered.despector.emitter.condition;
 
+import org.spongepowered.despector.ast.generic.ClassTypeSignature;
 import org.spongepowered.despector.ast.members.insn.branch.condition.BooleanCondition;
 import org.spongepowered.despector.ast.members.insn.branch.condition.CompareCondition;
 import org.spongepowered.despector.ast.members.insn.branch.condition.Condition;
@@ -44,7 +45,7 @@ public class InverseConditionEmitter implements ConditionEmitter<InverseConditio
             if (!bool.isInverse()) {
                 ctx.printString("!");
             }
-            ctx.emit(bool.getConditionValue(), "Z");
+            ctx.emit(bool.getConditionValue(), ClassTypeSignature.BOOLEAN);
             return;
         } else if (cond instanceof CompareCondition) {
             CompareCondition compare = (CompareCondition) cond;

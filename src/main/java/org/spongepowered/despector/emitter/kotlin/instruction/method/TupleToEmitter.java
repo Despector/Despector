@@ -24,13 +24,14 @@
  */
 package org.spongepowered.despector.emitter.kotlin.instruction.method;
 
+import org.spongepowered.despector.ast.generic.TypeSignature;
 import org.spongepowered.despector.ast.members.insn.function.StaticMethodInvoke;
 import org.spongepowered.despector.emitter.EmitterContext;
 
 public class TupleToEmitter implements SpecialMethodEmitter<StaticMethodInvoke> {
 
     @Override
-    public boolean emit(EmitterContext ctx, StaticMethodInvoke arg, String type) {
+    public boolean emit(EmitterContext ctx, StaticMethodInvoke arg, TypeSignature type) {
         if (arg.getParams().length != 2) {
             return false;
         }

@@ -25,6 +25,9 @@
 package org.spongepowered.despector.ast.members.insn.arg.field;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+
+import org.spongepowered.despector.ast.generic.ClassTypeSignature;
+import org.spongepowered.despector.ast.generic.TypeSignature;
 import org.spongepowered.despector.ast.members.insn.arg.Instruction;
 import org.spongepowered.despector.util.TypeHelper;
 
@@ -36,6 +39,7 @@ public abstract class FieldAccess implements Instruction {
     protected String field_name;
     protected String field_desc;
     protected String owner_type;
+    protected TypeSignature signature;
 
     public FieldAccess(String name, String desc, String owner) {
         this.field_name = checkNotNull(name, "name");
@@ -69,6 +73,7 @@ public abstract class FieldAccess implements Instruction {
      */
     public void setTypeDescriptor(String desc) {
         this.field_desc = checkNotNull(desc, "desc");
+        this.signature = null;
     }
 
     /**
@@ -93,8 +98,11 @@ public abstract class FieldAccess implements Instruction {
     }
 
     @Override
-    public String inferType() {
-        return this.field_desc;
+    public TypeSignature inferType() {
+        if (this.signature == null) {
+            this.signature = ClassTypeSignature.of(this.field_desc);
+        }
+        return this.signature;
     }
 
 }

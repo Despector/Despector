@@ -24,21 +24,19 @@
  */
 package org.spongepowered.despector.emitter.instruction;
 
+import org.spongepowered.despector.ast.generic.ClassTypeSignature;
+import org.spongepowered.despector.ast.generic.TypeSignature;
 import org.spongepowered.despector.ast.members.insn.arg.cst.IntConstant;
 import org.spongepowered.despector.ast.members.insn.branch.Ternary;
 import org.spongepowered.despector.ast.members.insn.branch.condition.CompareCondition;
 import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.InstructionEmitter;
-import org.spongepowered.despector.util.ConditionUtil;
 
 public class TernaryEmitter implements InstructionEmitter<Ternary> {
 
     @Override
-    public void emit(EmitterContext ctx, Ternary ternary, String type) {
-        if (checkConstant(ctx, ternary, type)) {
-            return;
-        }
-        if (checkBooleanExpression(ctx, ternary)) {
+    public void emit(EmitterContext ctx, Ternary ternary, TypeSignature type) {
+        if (type == ClassTypeSignature.BOOLEAN && checkBooleanExpression(ctx, ternary)) {
             return;
         }
         if (ternary.getCondition() instanceof CompareCondition) {
@@ -57,11 +55,13 @@ public class TernaryEmitter implements InstructionEmitter<Ternary> {
     }
 
     public boolean checkBooleanExpression(EmitterContext ctx, Ternary ternary) {
-        if (ternary.getFalseValue() instanceof IntConstant && ternary.getFalseValue() instanceof IntConstant) {
+        if (ternary.getTrueValue() instanceof IntConstant && ternary.getFalseValue() instanceof IntConstant) {
             int tr = ((IntConstant) ternary.getTrueValue()).getConstant();
             int fl = ((IntConstant) ternary.getFalseValue()).getConstant();
             if (tr == 0 && fl == 0) {
                 ctx.printString("false");
+            } else if (tr == 1 && fl == 1) {
+                ctx.printString("true");
             } else if (tr == 0) {
                 ctx.printString("!(");
                 ctx.emit(ternary.getCondition());
@@ -69,7 +69,7 @@ public class TernaryEmitter implements InstructionEmitter<Ternary> {
             } else if (fl == 0) {
                 ctx.emit(ternary.getCondition());
             } else {
-                ctx.printString("true");
+                return false;
             }
             return true;
         } else if (ternary.getTrueValue() instanceof IntConstant) {
@@ -78,12 +78,12 @@ public class TernaryEmitter implements InstructionEmitter<Ternary> {
                 ctx.printString("!(");
                 ctx.emit(ternary.getCondition());
                 ctx.printString(") && ");
-                ctx.emit(ternary.getFalseValue(), "Z");
+                ctx.emit(ternary.getFalseValue(), ClassTypeSignature.BOOLEAN);
             } else {
                 ctx.emit(ternary.getCondition());
                 ctx.markWrapPoint();
                 ctx.printString(" || ");
-                ctx.emit(ternary.getFalseValue(), "Z");
+                ctx.emit(ternary.getFalseValue(), ClassTypeSignature.BOOLEAN);
             }
             return true;
         } else if (ternary.getFalseValue() instanceof IntConstant) {
@@ -92,31 +92,14 @@ public class TernaryEmitter implements InstructionEmitter<Ternary> {
                 ctx.printString("!(");
                 ctx.emit(ternary.getCondition());
                 ctx.printString(") || ");
-                ctx.emit(ternary.getFalseValue(), "Z");
+                ctx.emit(ternary.getFalseValue(), ClassTypeSignature.BOOLEAN);
             } else {
                 ctx.emit(ternary.getCondition());
                 ctx.markWrapPoint();
                 ctx.printString(" && ");
-                ctx.emit(ternary.getFalseValue(), "Z");
+                ctx.emit(ternary.getFalseValue(), ClassTypeSignature.BOOLEAN);
             }
             return true;
-        }
-        return false;
-    }
-
-    protected boolean checkConstant(EmitterContext ctx, Ternary ternary, String type) {
-        if ("Z".equals(type) && ternary.getTrueValue() instanceof IntConstant && ternary.getFalseValue() instanceof IntConstant) {
-            // if the ternary contains simple boolean constants on both sides
-            // then we can simplify it to simply be the condition
-            IntConstant true_value = (IntConstant) ternary.getTrueValue();
-            IntConstant false_value = (IntConstant) ternary.getFalseValue();
-            if (true_value.getConstant() == 1 && false_value.getConstant() == 0) {
-                ctx.emit(ternary.getCondition());
-                return true;
-            } else if (true_value.getConstant() == 0 && false_value.getConstant() == 1) {
-                ctx.emit(ConditionUtil.inverse(ternary.getCondition()));
-                return true;
-            }
         }
         return false;
     }

@@ -24,6 +24,7 @@
  */
 package org.spongepowered.despector.ast.members.insn.arg;
 
+import org.spongepowered.despector.ast.generic.TypeSignature;
 import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
 
 /**
@@ -34,7 +35,7 @@ public interface Instruction {
     /**
      * Gets the inferred type description of this instruction.
      */
-    String inferType();
+    TypeSignature inferType();
 
     /**
      * Passes itself and any child nodes to the given visitor.

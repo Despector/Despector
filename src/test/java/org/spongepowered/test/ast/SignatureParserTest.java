@@ -25,6 +25,7 @@
 package org.spongepowered.test.ast;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 import org.spongepowered.despector.ast.generic.ClassSignature;
@@ -64,7 +65,7 @@ public class SignatureParserTest {
         assertEquals(2, cls.getParameters().size());
         TypeParameter param1 = cls.getParameters().get(0);
         assertEquals("T", param1.getIdentifier());
-        assertEquals(ClassTypeSignature.class, param1.getClassBound().getClass());
+        assertTrue(param1.getClassBound() instanceof ClassTypeSignature);
         ClassTypeSignature param1_classbound = (ClassTypeSignature) param1.getClassBound();
         assertEquals("Ljava/lang/Object;", param1_classbound.getType());
     }

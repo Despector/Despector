@@ -24,6 +24,8 @@
  */
 package org.spongepowered.despector.emitter.instruction;
 
+import org.spongepowered.despector.ast.generic.ClassTypeSignature;
+import org.spongepowered.despector.ast.generic.TypeSignature;
 import org.spongepowered.despector.ast.members.insn.arg.NumberCompare;
 import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.InstructionEmitter;
@@ -31,8 +33,8 @@ import org.spongepowered.despector.emitter.InstructionEmitter;
 public class CompareEmitter implements InstructionEmitter<NumberCompare> {
 
     @Override
-    public void emit(EmitterContext ctx, NumberCompare arg, String type) {
-        if (arg.getRightOperand().inferType().equals("I") && arg.getLeftOperand().inferType().equals("I")) {
+    public void emit(EmitterContext ctx, NumberCompare arg, TypeSignature type) {
+        if (arg.getRightOperand().inferType().equals(ClassTypeSignature.INT) && arg.getLeftOperand().inferType().equals(ClassTypeSignature.INT)) {
             ctx.printString("Integer.signum(");
             ctx.emit(arg.getRightOperand(), arg.inferType());
             ctx.printString(" - ");

@@ -49,7 +49,7 @@ public class FieldEntry extends AstEntry {
     protected AccessModifier access = AccessModifier.PACKAGE_PRIVATE;
 
     protected String owner;
-    protected String type;
+    protected TypeSignature type;
     protected String name;
 
     protected boolean is_final;
@@ -59,8 +59,6 @@ public class FieldEntry extends AstEntry {
     protected Instruction init;
 
     protected final Map<AnnotationType, Annotation> annotations = new LinkedHashMap<>();
-
-    protected TypeSignature signature;
 
     public FieldEntry(SourceSet source) {
         super(source);
@@ -92,21 +90,6 @@ public class FieldEntry extends AstEntry {
      */
     public void setName(String name) {
         this.name = name;
-    }
-
-    /**
-     * Gets the generic signature of this field.
-     */
-    @Nullable
-    public TypeSignature getSignature() {
-        return this.signature;
-    }
-
-    /**
-     * Sets the generic signature of this field.
-     */
-    public void setSignature(@Nullable TypeSignature sig) {
-        this.signature = sig;
     }
 
     /**
@@ -190,7 +173,7 @@ public class FieldEntry extends AstEntry {
     /**
      * Gets the type description of this field.
      */
-    public String getType() {
+    public TypeSignature getType() {
         return this.type;
     }
 
@@ -198,14 +181,14 @@ public class FieldEntry extends AstEntry {
      * Gets the internal name of the type of this field.
      */
     public String getTypeName() {
-        return TypeHelper.descToType(this.type);
+        return this.type.getName();
     }
 
     /**
      * Sets the type of this field.
      */
-    public void setType(String type) {
-        this.type = checkNotNull(type);
+    public void setType(TypeSignature type) {
+        this.type = checkNotNull(type, "type");
     }
 
     /**

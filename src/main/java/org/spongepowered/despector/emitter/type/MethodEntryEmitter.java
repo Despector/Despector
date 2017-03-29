@@ -29,6 +29,7 @@ import org.spongepowered.despector.ast.Annotation;
 import org.spongepowered.despector.ast.Locals.Local;
 import org.spongepowered.despector.ast.Locals.LocalInstance;
 import org.spongepowered.despector.ast.generic.MethodSignature;
+import org.spongepowered.despector.ast.generic.TypeSignature;
 import org.spongepowered.despector.ast.members.MethodEntry;
 import org.spongepowered.despector.ast.members.insn.Statement;
 import org.spongepowered.despector.ast.members.insn.StatementBlock;
@@ -156,11 +157,7 @@ public class MethodEntryEmitter implements AstEmitter<MethodEntry> {
             } else {
                 Local local = block.getLocals().getLocal(param_index);
                 LocalInstance insn = local.getParameterInstance();
-                if (insn.getSignature() != null) {
-                    generics.emitTypeSignature(ctx, insn.getSignature());
-                } else {
-                    ctx.emitType(method.getParamTypes().get(i));
-                }
+                generics.emitTypeSignature(ctx, insn.getType());
                 ctx.printString(" ");
                 ctx.printString(insn.getName());
             }
@@ -192,8 +189,8 @@ public class MethodEntryEmitter implements AstEmitter<MethodEntry> {
         return true;
     }
 
-    protected static void printReturn(EmitterContext ctx, String type) {
-        char f = type.charAt(0);
+    protected static void printReturn(EmitterContext ctx, TypeSignature type) {
+        char f = type.getDescriptor().charAt(0);
         if (f == 'V') {
             return;
         }

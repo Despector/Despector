@@ -25,6 +25,8 @@
 package org.spongepowered.despector.transform.matcher.statement;
 
 import org.spongepowered.despector.ast.members.insn.Statement;
+import org.spongepowered.despector.ast.members.insn.arg.Cast;
+import org.spongepowered.despector.ast.members.insn.arg.Instruction;
 import org.spongepowered.despector.ast.members.insn.assign.LocalAssignment;
 import org.spongepowered.despector.transform.matcher.InstructionMatcher;
 import org.spongepowered.despector.transform.matcher.MatchContext;
@@ -33,11 +35,13 @@ import org.spongepowered.despector.transform.matcher.StatementMatcher;
 public class LocalAssignmentMatcher implements StatementMatcher<LocalAssignment> {
 
     private InstructionMatcher<?> value;
+    private boolean unwrap;
     private String type;
 
-    LocalAssignmentMatcher(InstructionMatcher<?> value, String type) {
+    LocalAssignmentMatcher(InstructionMatcher<?> value, String type, boolean unwrap) {
         this.value = value == null ? InstructionMatcher.ANY : value;
         this.type = type;
+        this.unwrap = unwrap;
     }
 
     @Override
@@ -46,7 +50,11 @@ public class LocalAssignmentMatcher implements StatementMatcher<LocalAssignment>
             return null;
         }
         LocalAssignment assign = (LocalAssignment) stmt;
-        if (!this.value.matches(ctx, assign.getValue())) {
+        Instruction val = assign.getValue();
+        if (this.unwrap && val instanceof Cast) {
+            val = ((Cast) val).getValue();
+        }
+        if (!this.value.matches(ctx, val)) {
             return null;
         }
         if (this.type != null && !this.type.equals(assign.getLocal().getType())) {
@@ -59,6 +67,7 @@ public class LocalAssignmentMatcher implements StatementMatcher<LocalAssignment>
 
         private InstructionMatcher<?> value;
         private String type;
+        private boolean unwrap;
 
         public Builder() {
             reset();
@@ -74,14 +83,20 @@ public class LocalAssignmentMatcher implements StatementMatcher<LocalAssignment>
             return this;
         }
 
+        public Builder autoUnwrap() {
+            this.unwrap = true;
+            return this;
+        }
+
         public Builder reset() {
             this.value = null;
             this.type = null;
+            this.unwrap = false;
             return this;
         }
 
         public LocalAssignmentMatcher build() {
-            return new LocalAssignmentMatcher(this.value, this.type);
+            return new LocalAssignmentMatcher(this.value, this.type, this.unwrap);
         }
 
     }

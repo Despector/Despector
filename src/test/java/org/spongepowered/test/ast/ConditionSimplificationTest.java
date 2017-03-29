@@ -27,6 +27,8 @@ package org.spongepowered.test.ast;
 import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
+import org.spongepowered.despector.ast.generic.ClassTypeSignature;
+import org.spongepowered.despector.ast.generic.TypeSignature;
 import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
 import org.spongepowered.despector.ast.members.insn.arg.Instruction;
 import org.spongepowered.despector.ast.members.insn.branch.condition.AndCondition;
@@ -150,8 +152,8 @@ public class ConditionSimplificationTest {
         }
 
         @Override
-        public String inferType() {
-            return "I";
+        public TypeSignature inferType() {
+            return ClassTypeSignature.INT;
         }
 
         @Override

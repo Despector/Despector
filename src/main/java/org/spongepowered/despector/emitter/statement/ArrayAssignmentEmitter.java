@@ -24,6 +24,7 @@
  */
 package org.spongepowered.despector.emitter.statement;
 
+import org.spongepowered.despector.ast.generic.ClassTypeSignature;
 import org.spongepowered.despector.ast.members.insn.assign.ArrayAssignment;
 import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.StatementEmitter;
@@ -34,7 +35,7 @@ public class ArrayAssignmentEmitter implements StatementEmitter<ArrayAssignment>
     public void emit(EmitterContext ctx, ArrayAssignment insn, boolean semicolon) {
         ctx.emit(insn.getArray(), null);
         ctx.printString("[");
-        ctx.emit(insn.getIndex(), "I");
+        ctx.emit(insn.getIndex(), ClassTypeSignature.INT);
         ctx.printString("] = ");
         ctx.emit(insn.getValue(), null);
         if(semicolon) ctx.printString(";");

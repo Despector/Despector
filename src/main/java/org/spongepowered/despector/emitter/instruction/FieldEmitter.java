@@ -24,6 +24,8 @@
  */
 package org.spongepowered.despector.emitter.instruction;
 
+import org.spongepowered.despector.ast.generic.ClassTypeSignature;
+import org.spongepowered.despector.ast.generic.TypeSignature;
 import org.spongepowered.despector.ast.members.insn.arg.field.FieldAccess;
 import org.spongepowered.despector.ast.members.insn.arg.field.InstanceFieldAccess;
 import org.spongepowered.despector.ast.members.insn.arg.field.StaticFieldAccess;
@@ -33,7 +35,7 @@ import org.spongepowered.despector.emitter.InstructionEmitter;
 public class FieldEmitter implements InstructionEmitter<FieldAccess> {
 
     @Override
-    public void emit(EmitterContext ctx, FieldAccess arg, String type) {
+    public void emit(EmitterContext ctx, FieldAccess arg, TypeSignature type) {
         if (arg instanceof StaticFieldAccess) {
             if (ctx.getType() == null || !((StaticFieldAccess) arg).getOwnerName().equals(ctx.getType().getName())) {
                 ctx.emitTypeName(((StaticFieldAccess) arg).getOwnerName());
@@ -41,7 +43,7 @@ public class FieldEmitter implements InstructionEmitter<FieldAccess> {
             }
             ctx.printString(arg.getFieldName());
         } else if (arg instanceof InstanceFieldAccess) {
-            ctx.emit(((InstanceFieldAccess) arg).getFieldOwner(), arg.getOwnerType());
+            ctx.emit(((InstanceFieldAccess) arg).getFieldOwner(), ClassTypeSignature.of(arg.getOwnerType()));
             ctx.printString(".");
             ctx.printString(arg.getFieldName());
         } else {

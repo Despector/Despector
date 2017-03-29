@@ -26,6 +26,7 @@ package org.spongepowered.despector.ast.kotlin;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import org.spongepowered.despector.ast.generic.TypeSignature;
 import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
 import org.spongepowered.despector.ast.members.insn.arg.Instruction;
 
@@ -71,8 +72,9 @@ public class Elvis implements Instruction {
     }
 
     @Override
-    public String inferType() {
-        return this.else_.inferType();
+    public TypeSignature inferType() {
+        // TODO gather the most specific of each case
+        return this.left.inferType();
     }
 
     @Override

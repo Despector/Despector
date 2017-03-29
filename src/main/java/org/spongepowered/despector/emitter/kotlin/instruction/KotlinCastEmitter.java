@@ -24,6 +24,7 @@
  */
 package org.spongepowered.despector.emitter.kotlin.instruction;
 
+import org.spongepowered.despector.ast.generic.TypeSignature;
 import org.spongepowered.despector.ast.members.insn.arg.Cast;
 import org.spongepowered.despector.ast.members.insn.arg.operator.Operator;
 import org.spongepowered.despector.emitter.EmitterContext;
@@ -32,7 +33,7 @@ import org.spongepowered.despector.emitter.InstructionEmitter;
 public class KotlinCastEmitter implements InstructionEmitter<Cast> {
 
     @Override
-    public void emit(EmitterContext ctx, Cast arg, String type) {
+    public void emit(EmitterContext ctx, Cast arg, TypeSignature type) {
         if (type.equals(arg.inferType())) {
             ctx.emit(arg.getValue(), type);
             return;

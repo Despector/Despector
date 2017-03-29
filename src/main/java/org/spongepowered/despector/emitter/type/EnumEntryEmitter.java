@@ -28,6 +28,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import org.spongepowered.despector.ast.AccessModifier;
 import org.spongepowered.despector.ast.Annotation;
+import org.spongepowered.despector.ast.generic.ClassTypeSignature;
 import org.spongepowered.despector.ast.members.FieldEntry;
 import org.spongepowered.despector.ast.members.MethodEntry;
 import org.spongepowered.despector.ast.members.insn.Statement;
@@ -129,7 +130,7 @@ public class EnumEntryEmitter implements AstEmitter<EnumEntry> {
                     ctx.printString("(");
                     List<String> args = TypeHelper.splitSig(val.getCtorDescription());
                     for (int i = 2; i < val.getParameters().length; i++) {
-                        ctx.emit(val.getParameters()[i], args.get(i));
+                        ctx.emit(val.getParameters()[i], ClassTypeSignature.of(args.get(i)));
                         if (i < val.getParameters().length - 1) {
                             ctx.printString(", ");
                         }
@@ -206,6 +207,9 @@ public class EnumEntryEmitter implements AstEmitter<EnumEntry> {
                     if(ConfigManager.getConfig().emitter.emit_synthetics) {
                         ctx.printIndentation();
                         ctx.printString("// Synthetic");
+                        if (mth.isBridge()) {
+                            ctx.printString(" - Bridge");
+                        }
                         ctx.newLine();
                     } else {
                         continue;
@@ -240,6 +244,9 @@ public class EnumEntryEmitter implements AstEmitter<EnumEntry> {
                     if(ConfigManager.getConfig().emitter.emit_synthetics) {
                         ctx.printIndentation();
                         ctx.printString("// Synthetic");
+                        if (mth.isBridge()) {
+                            ctx.printString(" - Bridge");
+                        }
                         ctx.newLine();
                     } else {
                         continue;

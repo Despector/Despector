@@ -170,7 +170,7 @@ public class ClassEntryEmitter implements AstEmitter<ClassEntry> {
             boolean at_least_one = false;
             for (FieldEntry field : type.getStaticFields()) {
                 if (field.isSynthetic()) {
-                    if(ConfigManager.getConfig().emitter.emit_synthetics) {
+                    if (ConfigManager.getConfig().emitter.emit_synthetics) {
                         ctx.printIndentation();
                         ctx.printString("// Synthetic");
                         ctx.newLine();
@@ -198,9 +198,12 @@ public class ClassEntryEmitter implements AstEmitter<ClassEntry> {
         if (!type.getStaticMethods().isEmpty()) {
             for (MethodEntry mth : type.getStaticMethods()) {
                 if (mth.isSynthetic()) {
-                    if(ConfigManager.getConfig().emitter.emit_synthetics) {
+                    if (ConfigManager.getConfig().emitter.emit_synthetics) {
                         ctx.printIndentation();
                         ctx.printString("// Synthetic");
+                        if (mth.isBridge()) {
+                            ctx.printString(" - Bridge");
+                        }
                         ctx.newLine();
                     } else {
                         continue;
@@ -244,7 +247,7 @@ public class ClassEntryEmitter implements AstEmitter<ClassEntry> {
             boolean at_least_one = false;
             for (FieldEntry field : type.getFields()) {
                 if (field.isSynthetic()) {
-                    if(ConfigManager.getConfig().emitter.emit_synthetics) {
+                    if (ConfigManager.getConfig().emitter.emit_synthetics) {
                         ctx.printIndentation();
                         ctx.printString("// Synthetic");
                         ctx.newLine();
@@ -268,9 +271,12 @@ public class ClassEntryEmitter implements AstEmitter<ClassEntry> {
         if (!type.getMethods().isEmpty()) {
             for (MethodEntry mth : type.getMethods()) {
                 if (mth.isSynthetic()) {
-                    if(ConfigManager.getConfig().emitter.emit_synthetics) {
+                    if (ConfigManager.getConfig().emitter.emit_synthetics) {
                         ctx.printIndentation();
                         ctx.printString("// Synthetic");
+                        if (mth.isBridge()) {
+                            ctx.printString(" - Bridge");
+                        }
                         ctx.newLine();
                     } else {
                         continue;

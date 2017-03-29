@@ -26,6 +26,7 @@ package org.spongepowered.despector.ast.members.insn.arg.field;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import org.spongepowered.despector.ast.generic.TypeSignature;
 import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
 import org.spongepowered.despector.ast.members.insn.arg.Instruction;
 
@@ -38,6 +39,7 @@ public class ArrayAccess implements Instruction {
 
     private Instruction array;
     private Instruction index;
+    private TypeSignature component = null;
 
     public ArrayAccess(Instruction array, Instruction index) {
         this.array = checkNotNull(array, "array");
@@ -56,6 +58,7 @@ public class ArrayAccess implements Instruction {
      */
     public void setArrayVar(Instruction array) {
         this.array = checkNotNull(array, "array");
+        this.component = null;
     }
 
     /**
@@ -73,8 +76,11 @@ public class ArrayAccess implements Instruction {
     }
 
     @Override
-    public String inferType() {
-        return this.array.inferType().substring(1);
+    public TypeSignature inferType() {
+        if (this.component == null) {
+            this.component = TypeSignature.getArrayComponent(this.array.inferType());
+        }
+        return this.component;
     }
 
     @Override

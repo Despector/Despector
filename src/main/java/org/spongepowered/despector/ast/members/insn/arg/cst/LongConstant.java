@@ -24,6 +24,8 @@
  */
 package org.spongepowered.despector.ast.members.insn.arg.cst;
 
+import org.spongepowered.despector.ast.generic.ClassTypeSignature;
+import org.spongepowered.despector.ast.generic.TypeSignature;
 import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
 
 /**
@@ -52,8 +54,8 @@ public class LongConstant extends Constant {
     }
 
     @Override
-    public String inferType() {
-        return "L";
+    public TypeSignature inferType() {
+        return ClassTypeSignature.LONG;
     }
 
     @Override

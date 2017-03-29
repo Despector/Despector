@@ -104,7 +104,7 @@ public class SignatureParser {
         char next = parser.peek();
         if (VALID_PRIM.indexOf(next) != -1) {
             parser.skip(1);
-            return new ClassTypeSignature(TypeHelper.descToType(next + ""));
+            return ClassTypeSignature.of(String.valueOf(next));
         }
         return parseFieldTypeSignature(parser);
     }
@@ -118,7 +118,7 @@ public class SignatureParser {
         if (ident.length() > 0) {
             if (VALID_PRIM.indexOf(next) != -1) {
                 ident.append(next);
-                return new ClassTypeSignature(TypeHelper.descToType(ident.toString()));
+                return ClassTypeSignature.of(ident.toString());
             }
         }
         if (next == 'T') {
@@ -149,7 +149,7 @@ public class SignatureParser {
             ident.append(parser.nextIdentifier());
         }
         ident.append(";");
-        ClassTypeSignature sig = new ClassTypeSignature(ident.toString());
+        ClassTypeSignature sig = ClassTypeSignature.of(ident.toString(), parser.peek() == '<');
         if (parser.check('<')) {
             while (!parser.check('>')) {
                 char wild = parser.peek();

@@ -25,6 +25,8 @@
 package org.spongepowered.despector.emitter.instruction;
 
 import com.google.common.collect.Lists;
+import org.spongepowered.despector.ast.generic.ClassTypeSignature;
+import org.spongepowered.despector.ast.generic.TypeSignature;
 import org.spongepowered.despector.ast.members.insn.arg.Instruction;
 import org.spongepowered.despector.ast.members.insn.arg.NewArray;
 import org.spongepowered.despector.ast.members.insn.arg.cst.StringConstant;
@@ -41,7 +43,7 @@ import java.util.List;
 public class InstanceMethodInvokeEmitter implements InstructionEmitter<InstanceMethodInvoke> {
 
     @Override
-    public void emit(EmitterContext ctx, InstanceMethodInvoke arg, String type) {
+    public void emit(EmitterContext ctx, InstanceMethodInvoke arg, TypeSignature type) {
         if (arg.getOwner().equals("Ljava/lang/StringBuilder;") && arg.getMethodName().equals("toString")) {
             if (replaceStringConcat(ctx, arg)) {
                 return;
@@ -70,7 +72,7 @@ public class InstanceMethodInvokeEmitter implements InstructionEmitter<InstanceM
                     ctx.printString(".");
                 }
             } else {
-                ctx.emit(arg.getCallee(), arg.getOwner());
+                ctx.emit(arg.getCallee(), ClassTypeSignature.of(arg.getOwner()));
                 ctx.markWrapPoint();
                 ctx.printString(".");
             }
@@ -83,7 +85,7 @@ public class InstanceMethodInvokeEmitter implements InstructionEmitter<InstanceM
             if (arg.getParams().length == 1 && param instanceof NewArray) {
                 NewArray varargs = (NewArray) param;
                 for (int o = 0; o < varargs.getInitializer().length; o++) {
-                    ctx.emit(varargs.getInitializer()[o], varargs.getType());
+                    ctx.emit(varargs.getInitializer()[o], ClassTypeSignature.of(varargs.getType()));
                     if (o < varargs.getInitializer().length - 1) {
                         ctx.printString(", ");
                         ctx.markWrapPoint();
@@ -91,7 +93,7 @@ public class InstanceMethodInvokeEmitter implements InstructionEmitter<InstanceM
                 }
                 break;
             }
-            ctx.emit(param, param_types.get(i));
+            ctx.emit(param, ClassTypeSignature.of(param_types.get(i)));
             if (i < arg.getParams().length - 1) {
                 ctx.printString(", ");
                 ctx.markWrapPoint();
@@ -147,7 +149,7 @@ public class InstanceMethodInvokeEmitter implements InstructionEmitter<InstanceM
         }
         if (valid) {
             for (int i = 0; i < constants.size(); i++) {
-                ctx.emit(constants.get(i), "Ljava/lang/String;");
+                ctx.emit(constants.get(i), ClassTypeSignature.STRING);
                 if (i < constants.size() - 1) {
                     ctx.markWrapPoint();
                     ctx.printString(" + ");

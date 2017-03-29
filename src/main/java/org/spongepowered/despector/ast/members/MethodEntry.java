@@ -32,7 +32,9 @@ import org.spongepowered.despector.ast.Annotation;
 import org.spongepowered.despector.ast.AnnotationType;
 import org.spongepowered.despector.ast.AstEntry;
 import org.spongepowered.despector.ast.SourceSet;
+import org.spongepowered.despector.ast.generic.ClassTypeSignature;
 import org.spongepowered.despector.ast.generic.MethodSignature;
+import org.spongepowered.despector.ast.generic.TypeSignature;
 import org.spongepowered.despector.ast.members.insn.StatementBlock;
 import org.spongepowered.despector.util.TypeHelper;
 
@@ -62,8 +64,9 @@ public class MethodEntry extends AstEntry {
     protected boolean is_final;
     protected boolean is_static;
     protected boolean is_synthetic;
+    protected boolean is_bridge;
 
-    protected String return_type;
+    protected TypeSignature return_type;
     protected final List<String> param_types = Lists.newArrayList();
 
     protected StatementBlock instructions = null;
@@ -142,16 +145,24 @@ public class MethodEntry extends AstEntry {
         this.is_synthetic = state;
     }
 
+    public boolean isBridge() {
+        return this.is_bridge;
+    }
+
+    public void setBridge(boolean state) {
+        this.is_bridge = state;
+    }
+
     /**
      * Gets the return type of this method. Will never be null but may represent
      * void.
      */
-    public String getReturnType() {
+    public TypeSignature getReturnType() {
         return this.return_type;
     }
 
     public String getReturnTypeName() {
-        return TypeHelper.descToType(this.return_type);
+        return this.return_type.getName();
     }
 
     /**
@@ -163,7 +174,7 @@ public class MethodEntry extends AstEntry {
 
     public void setSignature(String signature) {
         this.signature = signature;
-        this.return_type = TypeHelper.getRet(signature);
+        this.return_type = ClassTypeSignature.of(TypeHelper.getRet(signature));
         this.param_types.clear();
         this.param_types.addAll(TypeHelper.splitSig(signature));
     }

@@ -25,6 +25,7 @@
 package org.spongepowered.despector.emitter.statement;
 
 import com.google.common.collect.Maps;
+import org.spongepowered.despector.ast.generic.ClassTypeSignature;
 import org.spongepowered.despector.ast.members.MethodEntry;
 import org.spongepowered.despector.ast.members.insn.Statement;
 import org.spongepowered.despector.ast.members.insn.arg.cst.IntConstant;
@@ -74,23 +75,23 @@ public class SwitchEmitter implements StatementEmitter<Switch> {
                     MethodEntry mth = ctx.getType().getStaticMethod(arg.getMethodName(), arg.getMethodDescription());
                     table = buildSwitchTable(mth);
                     String enum_type = arg.getMethodName().substring("$SWITCH_TABLE$".length()).replace('$', '/');
-                    ctx.emit(((InstanceMethodInvoke) var.getIndex()).getCallee(), "L" + enum_type + ";");
+                    ctx.emit(((InstanceMethodInvoke) var.getIndex()).getCallee(), ClassTypeSignature.of("L" + enum_type + ";"));
                     synthetic = true;
                 }
-            } else if(var.getArrayVar() instanceof StaticFieldAccess) {
+            } else if (var.getArrayVar() instanceof StaticFieldAccess) {
                 StaticFieldAccess arg = (StaticFieldAccess) var.getArrayVar();
-                if(arg.getFieldName().startsWith("$SwitchMap") && ctx.getType() != null) {
+                if (arg.getFieldName().startsWith("$SwitchMap") && ctx.getType() != null) {
                     TypeEntry owner = ctx.getType().getSource().get(arg.getOwnerName());
                     MethodEntry mth = owner.getStaticMethod("<clinit>");
                     table = buildSwitchTable(mth);
                     String enum_type = arg.getFieldName().substring("$SwitchMap/".length()).replace('$', '/');
-                    ctx.emit(((InstanceMethodInvoke) var.getIndex()).getCallee(), "L" + enum_type + ";");
+                    ctx.emit(((InstanceMethodInvoke) var.getIndex()).getCallee(), ClassTypeSignature.of("L" + enum_type + ";"));
                     synthetic = true;
                 }
             }
         }
         if (!synthetic) {
-            ctx.emit(tswitch.getSwitchVar(), "I");
+            ctx.emit(tswitch.getSwitchVar(), ClassTypeSignature.INT);
         }
         ctx.printString(") {");
         ctx.newLine();

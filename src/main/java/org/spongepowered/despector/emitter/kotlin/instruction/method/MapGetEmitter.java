@@ -24,13 +24,14 @@
  */
 package org.spongepowered.despector.emitter.kotlin.instruction.method;
 
+import org.spongepowered.despector.ast.generic.TypeSignature;
 import org.spongepowered.despector.ast.members.insn.function.InstanceMethodInvoke;
 import org.spongepowered.despector.emitter.EmitterContext;
 
 public class MapGetEmitter implements SpecialMethodEmitter<InstanceMethodInvoke> {
 
     @Override
-    public boolean emit(EmitterContext ctx, InstanceMethodInvoke arg, String type) {
+    public boolean emit(EmitterContext ctx, InstanceMethodInvoke arg, TypeSignature type) {
         if (arg.getParams().length != 1) {
             return false;
         }
