@@ -80,36 +80,40 @@ public class Despector {
         });
     }
 
-    public static String decompile(InputStream input) throws IOException {
+    public static TypeEntry decompile(InputStream input) throws IOException {
         SourceSet source = new SourceSet();
-        return decompile(input, source);
+        return decompile(input, source, Language.ANY);
     }
 
-    public static String decompile(InputStream input, Language lang) throws IOException {
+    public static TypeEntry decompile(InputStream input, Language lang) throws IOException {
         return decompile(input, new SourceSet(), lang);
     }
 
-    public static String decompile(InputStream input, SourceSet.Loader loader) throws IOException {
+    public static TypeEntry decompile(InputStream input, SourceSet.Loader loader) throws IOException {
         SourceSet source = new SourceSet();
         source.setLoader(loader);
         return decompile(input, source);
     }
 
-    public static String decompile(InputStream input, Language lang, SourceSet.Loader loader) throws IOException {
+    public static TypeEntry decompile(InputStream input, Language lang, SourceSet.Loader loader) throws IOException {
         SourceSet source = new SourceSet();
         source.setLoader(loader);
         return decompile(input, source, lang);
     }
 
-    public static String decompile(InputStream input, SourceSet source) throws IOException {
+    public static TypeEntry decompile(InputStream input, SourceSet source) throws IOException {
         return decompile(input, source, Language.ANY);
     }
 
-    public static String decompile(InputStream input, SourceSet source, Language lang) throws IOException {
+    public static TypeEntry decompile(InputStream input, SourceSet source, Language lang) throws IOException {
         TypeEntry type = Decompilers.get(lang).decompile(input, source);
+        return type;
+    }
+
+    public static String emitToString(TypeEntry type) {
         StringWriter writer = new StringWriter();
         EmitterContext ctx = new EmitterContext(writer, EmitterFormat.defaults());
-        Emitters.get(lang).emit(ctx, type);
+        Emitters.get(type.getLanguage()).emit(ctx, type);
         return writer.toString();
     }
 
