@@ -57,7 +57,7 @@ public class Throw implements Statement {
 
     @Override
     public void accept(InstructionVisitor visitor) {
-        visitor.visitThrowException(this);
+        visitor.visitThrow(this);
         this.ex.accept(visitor);
     }
 

@@ -84,7 +84,7 @@ public class DoWhile implements Statement, Breakable {
 
     @Override
     public void accept(InstructionVisitor visitor) {
-        visitor.visitDoWhileLoop(this);
+        visitor.visitDoWhile(this);
         this.condition.accept(visitor);
         for (Statement stmt : this.body.getStatements()) {
             stmt.accept(visitor);

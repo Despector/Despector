@@ -24,6 +24,8 @@
  */
 package org.spongepowered.despector.ast.members.insn.arg.cst;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
 
 /**
@@ -32,6 +34,7 @@ import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
 public class IntConstant extends Constant {
 
     private int cst;
+    private IntFormat format = IntFormat.DECIMAL;
 
     public IntConstant(int val) {
         this.cst = val;
@@ -51,6 +54,14 @@ public class IntConstant extends Constant {
         this.cst = cst;
     }
 
+    public IntFormat getFormat() {
+        return this.format;
+    }
+
+    public void setFormat(IntFormat format) {
+        this.format = checkNotNull(format, "format");
+    }
+
     @Override
     public String inferType() {
         return "I";
@@ -58,7 +69,7 @@ public class IntConstant extends Constant {
 
     @Override
     public void accept(InstructionVisitor visitor) {
-        visitor.visitIntConstantArg(this);
+        visitor.visitIntConstant(this);
     }
 
     @Override
@@ -76,6 +87,13 @@ public class IntConstant extends Constant {
         }
         IntConstant cast = (IntConstant) obj;
         return this.cst == cast.cst;
+    }
+
+    public static enum IntFormat {
+        BINARY,
+        OCTAL,
+        DECIMAL,
+        HEXADECIMAL
     }
 
 }

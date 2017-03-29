@@ -39,7 +39,7 @@ public class StaticFieldAssignment extends FieldAssignment {
 
     @Override
     public void accept(InstructionVisitor visitor) {
-        visitor.visitStaticFieldAssign(this);
+        visitor.visitStaticFieldAssignment(this);
         this.val.accept(visitor);
     }
 

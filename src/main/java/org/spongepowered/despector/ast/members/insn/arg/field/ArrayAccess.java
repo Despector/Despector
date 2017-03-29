@@ -79,7 +79,7 @@ public class ArrayAccess implements Instruction {
 
     @Override
     public void accept(InstructionVisitor visitor) {
-        visitor.visitArrayLoadArg(this);
+        visitor.visitArrayAccess(this);
         this.array.accept(visitor);
         this.index.accept(visitor);
     }

@@ -66,7 +66,6 @@ public class EnumEntryEmitter implements AstEmitter<EnumEntry> {
         if (type.isInnerClass() && ctx.getOuterType() != null) {
             inner_info = ctx.getOuterType().getInnerClassInfo(type.getName());
         }
-        ctx.printString("class ");
         if (inner_info != null) {
             ctx.printString(inner_info.getSimpleName());
         } else {

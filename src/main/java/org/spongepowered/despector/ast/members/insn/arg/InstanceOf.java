@@ -84,7 +84,7 @@ public class InstanceOf implements Instruction {
 
     @Override
     public void accept(InstructionVisitor visitor) {
-        visitor.visitInstanceOfArg(this);
+        visitor.visitInstanceOf(this);
         this.check.accept(visitor);
     }
 

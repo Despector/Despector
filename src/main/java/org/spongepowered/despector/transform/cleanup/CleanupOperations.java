@@ -38,6 +38,7 @@ public class CleanupOperations {
 
     static {
         operations.put("private_final_utility_classes", new UtilityClassNoInstance());
+        operations.put("convert_large_constants_to_hex", new HexConstantsTransformer());
     }
 
     /**

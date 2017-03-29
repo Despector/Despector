@@ -57,7 +57,7 @@ public class InstanceFieldAccess extends FieldAccess {
 
     @Override
     public void accept(InstructionVisitor visitor) {
-        visitor.visitInstanceFieldArg(this);
+        visitor.visitInstanceFieldAccess(this);
         this.owner.accept(visitor);
     }
 

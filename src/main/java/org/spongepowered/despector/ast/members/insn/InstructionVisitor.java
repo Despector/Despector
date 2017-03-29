@@ -78,10 +78,10 @@ public abstract class InstructionVisitor {
     public void visitAndCondition(AndCondition andCondition) {
     }
 
-    public void visitArrayAssign(ArrayAssignment arrayAssign) {
+    public void visitArrayAssignment(ArrayAssignment arrayAssign) {
     }
 
-    public void visitArrayLoadArg(ArrayAccess arrayLoadArg) {
+    public void visitArrayAccess(ArrayAccess arrayLoadArg) {
     }
 
     public void visitBooleanCondition(BooleanCondition booleanCondition) {
@@ -90,103 +90,103 @@ public abstract class InstructionVisitor {
     public void visitBreak(Break breakStatement) {
     }
 
-    public void visitCastArg(Cast castArg) {
+    public void visitCast(Cast castArg) {
     }
 
     public void visitCatchBlock(CatchBlock catchBlock) {
     }
 
-    public void visitCompareArg(NumberCompare compareArg) {
+    public void visitNumberCompare(NumberCompare compareArg) {
     }
 
     public void visitCompareCondition(CompareCondition compareCondition) {
     }
 
-    public void visitDoubleConstantArg(DoubleConstant doubleConstantArg) {
+    public void visitDoubleConstant(DoubleConstant doubleConstantArg) {
     }
 
-    public void visitDoWhileLoop(DoWhile doWhileLoop) {
+    public void visitDoWhile(DoWhile doWhileLoop) {
     }
 
-    public void visitElifBlock(Elif elseBlock) {
+    public void visitElif(Elif elseBlock) {
     }
 
-    public void visitElseBlock(Else elseBlock) {
+    public void visitElse(Else elseBlock) {
     }
 
-    public void visitFloatConstantArg(FloatConstant floatConstantArg) {
+    public void visitFloatConstant(FloatConstant floatConstantArg) {
     }
 
-    public void visitForEachLoop(ForEach forLoop) {
+    public void visitForEach(ForEach forLoop) {
     }
 
-    public void visitForLoop(For forLoop) {
+    public void visitFor(For forLoop) {
     }
 
-    public void visitIfBlock(If ifBlock) {
+    public void visitIf(If ifBlock) {
     }
 
     public void visitIncrement(Increment incrementStatement) {
     }
 
-    public void visitInstanceFieldArg(InstanceFieldAccess instanceFieldArg) {
+    public void visitInstanceFieldAccess(InstanceFieldAccess instanceFieldArg) {
     }
 
-    public void visitInstanceFieldAssign(InstanceFieldAssignment instanceFieldAssign) {
+    public void visitInstanceFieldAssignment(InstanceFieldAssignment instanceFieldAssign) {
     }
 
-    public void visitInstanceMethodCall(InstanceMethodInvoke instanceMethodCall) {
+    public void visitInstanceMethodInvoke(InstanceMethodInvoke instanceMethodCall) {
     }
 
-    public void visitInstanceOfArg(InstanceOf instanceOfArg) {
+    public void visitInstanceOf(InstanceOf instanceOfArg) {
     }
 
-    public void visitIntConstantArg(IntConstant intConstantArg) {
+    public void visitIntConstant(IntConstant intConstantArg) {
     }
 
     public void visitInverseCondition(InverseCondition inverseCondition) {
     }
 
-    public void visitLocal(LocalInstance local) {
+    public void visitLocalInstance(LocalInstance local) {
     }
 
-    public void visitLocalArg(LocalAccess localArg) {
+    public void visitLocalAccess(LocalAccess localArg) {
     }
 
-    public void visitLocalAssign(LocalAssignment localAssign) {
+    public void visitLocalAssignment(LocalAssignment localAssign) {
     }
 
-    public void visitLongConstantArg(LongConstant longConstantArg) {
+    public void visitLongConstant(LongConstant longConstantArg) {
     }
 
-    public void visitNegArg(NegativeOperator negArg) {
+    public void visitNegativeOperator(NegativeOperator negArg) {
     }
 
-    public void visitNewArrayArg(NewArray newArrayArg) {
+    public void visitNewArray(NewArray newArrayArg) {
     }
 
-    public void visitNewInstance(New newInstance) {
+    public void visitNew(New newInstance) {
     }
 
-    public void visitNullConstantArg(NullConstant nullConstantArg) {
+    public void visitNullConstant(NullConstant nullConstantArg) {
     }
 
     public void visitOrCondition(OrCondition orCondition) {
     }
 
-    public void visitOperatorArg(Operator orArg) {
+    public void visitOperator(Operator orArg) {
     }
 
-    public void visitStaticFieldArg(StaticFieldAccess staticFieldArg) {
+    public void visitStaticFieldAccess(StaticFieldAccess staticFieldArg) {
     }
 
-    public void visitStaticFieldAssign(StaticFieldAssignment staticFieldAssign) {
+    public void visitStaticFieldAssignment(StaticFieldAssignment staticFieldAssign) {
     }
 
-    public void visitStaticMethodCall(StaticMethodInvoke staticMethodCall) {
+    public void visitStaticMethodInvoke(StaticMethodInvoke staticMethodCall) {
     }
 
-    public void visitStringConstantArg(StringConstant stringConstantArg) {
+    public void visitStringConstant(StringConstant stringConstantArg) {
     }
 
     public void visitSwitch(Switch tableSwitch) {
@@ -198,19 +198,19 @@ public abstract class InstructionVisitor {
     public void visitTernary(Ternary ternary) {
     }
 
-    public void visitThrowException(Throw throwException) {
+    public void visitThrow(Throw throwException) {
     }
 
-    public void visitTryBlock(TryCatch tryBlock) {
+    public void visitTryCatch(TryCatch tryBlock) {
     }
 
-    public void visitTypeConstantArg(TypeConstant typeConstantArg) {
+    public void visitTypeConstant(TypeConstant typeConstantArg) {
     }
 
-    public void visitValueReturn(Return returnValue) {
+    public void visitReturn(Return returnValue) {
     }
 
-    public void visitWhileLoop(While whileLoop) {
+    public void visitWhile(While whileLoop) {
     }
 
 }

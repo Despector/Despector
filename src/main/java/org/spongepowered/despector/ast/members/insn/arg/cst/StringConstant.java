@@ -60,7 +60,7 @@ public class StringConstant extends Constant {
 
     @Override
     public void accept(InstructionVisitor visitor) {
-        visitor.visitStringConstantArg(this);
+        visitor.visitStringConstant(this);
     }
 
     @Override

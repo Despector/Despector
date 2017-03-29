@@ -120,7 +120,7 @@ public class For implements Statement, Breakable {
 
     @Override
     public void accept(InstructionVisitor visitor) {
-        visitor.visitForLoop(this);
+        visitor.visitFor(this);
         if (this.init != null) {
             this.init.accept(visitor);
         }

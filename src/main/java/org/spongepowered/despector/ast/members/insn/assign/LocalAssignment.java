@@ -58,8 +58,8 @@ public class LocalAssignment extends Assignment {
 
     @Override
     public void accept(InstructionVisitor visitor) {
-        visitor.visitLocal(this.local);
-        visitor.visitLocalAssign(this);
+        visitor.visitLocalInstance(this.local);
+        visitor.visitLocalAssignment(this);
         this.val.accept(visitor);
     }
 

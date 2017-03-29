@@ -62,8 +62,8 @@ public class LocalAccess implements Instruction {
 
     @Override
     public void accept(InstructionVisitor visitor) {
-        visitor.visitLocal(this.local);
-        visitor.visitLocalArg(this);
+        visitor.visitLocalInstance(this.local);
+        visitor.visitLocalAccess(this);
     }
 
     @Override

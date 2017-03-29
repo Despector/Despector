@@ -59,7 +59,7 @@ public class InstanceMethodInvoke extends MethodInvoke {
 
     @Override
     public void accept(InstructionVisitor visitor) {
-        visitor.visitInstanceMethodCall(this);
+        visitor.visitInstanceMethodInvoke(this);
         this.callee.accept(visitor);
         super.accept(visitor);
     }

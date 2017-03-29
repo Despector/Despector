@@ -26,6 +26,7 @@ package org.spongepowered.despector;
 
 import org.spongepowered.despector.ast.SourceSet;
 import org.spongepowered.despector.ast.type.TypeEntry;
+import org.spongepowered.despector.config.ConfigBase.CleanupConfigSection;
 import org.spongepowered.despector.config.ConfigManager;
 import org.spongepowered.despector.decompiler.Decompiler;
 import org.spongepowered.despector.decompiler.Decompilers;
@@ -48,8 +49,10 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Consumer;
 
 public class Despector {
@@ -182,21 +185,43 @@ public class Despector {
             return;
         }
 
-        if (!ConfigManager.getConfig().cleanup.operations.isEmpty()) {
-            List<TypeTransformer> transformers = new ArrayList<>();
-            for (String operation : ConfigManager.getConfig().cleanup.operations) {
+        List<TypeTransformer> transformers = new ArrayList<>();
+        for (String operation : ConfigManager.getConfig().cleanup.operations) {
+            TypeTransformer transformer = CleanupOperations.getOperation(operation);
+            if (transformer == null) {
+                System.err.println("Unknown cleanup operation: " + operation);
+            } else {
+                transformers.add(transformer);
+            }
+        }
+        Map<String, Set<TypeTransformer>> targeted_transformers = new HashMap<>();
+        for (CleanupConfigSection section : ConfigManager.getConfig().cleanup_sections) {
+            List<TypeTransformer> trans = new ArrayList<>();
+            for (String operation : section.operations) {
                 TypeTransformer transformer = CleanupOperations.getOperation(operation);
                 if (transformer == null) {
                     System.err.println("Unknown cleanup operation: " + operation);
                 } else {
-                    transformers.add(transformer);
+                    trans.add(transformer);
                 }
             }
-            if (!transformers.isEmpty()) {
-                for (TypeEntry type : source.getAllClasses()) {
-                    for (TypeTransformer transformer : transformers) {
-                        transformer.transform(type);
-                    }
+            for (String target : section.targets) {
+                Set<TypeTransformer> target_trans = targeted_transformers.get(target);
+                if (target_trans == null) {
+                    target_trans = new HashSet<>();
+                    targeted_transformers.put(target, target_trans);
+                }
+                target_trans.addAll(trans);
+            }
+        }
+        if (!transformers.isEmpty() || !targeted_transformers.isEmpty()) {
+            for (TypeEntry type : source.getAllClasses()) {
+                for (TypeTransformer transformer : transformers) {
+                    transformer.transform(type);
+                }
+                Set<TypeTransformer> targetted = targeted_transformers.get(type.getName());
+                for (TypeTransformer transformer : targetted) {
+                    transformer.transform(type);
                 }
             }
         }

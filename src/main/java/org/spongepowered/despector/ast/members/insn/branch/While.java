@@ -84,7 +84,7 @@ public class While implements Statement, Breakable {
 
     @Override
     public void accept(InstructionVisitor visitor) {
-        visitor.visitWhileLoop(this);
+        visitor.visitWhile(this);
         this.condition.accept(visitor);
         for (Statement stmt : this.body.getStatements()) {
             stmt.accept(visitor);

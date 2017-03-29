@@ -58,7 +58,7 @@ public class DoubleConstant extends Constant {
 
     @Override
     public void accept(InstructionVisitor visitor) {
-        visitor.visitDoubleConstantArg(this);
+        visitor.visitDoubleConstant(this);
     }
 
     @Override

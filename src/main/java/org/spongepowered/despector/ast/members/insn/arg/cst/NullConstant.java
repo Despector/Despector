@@ -43,7 +43,7 @@ public class NullConstant extends Constant {
 
     @Override
     public void accept(InstructionVisitor visitor) {
-        visitor.visitNullConstantArg(this);
+        visitor.visitNullConstant(this);
     }
 
     @Override

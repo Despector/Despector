@@ -59,7 +59,29 @@ public class IntConstantEmitter implements InstructionEmitter<IntConstant> {
                 return;
             }
         }
-        ctx.printString(String.valueOf(cst));
+        switch (arg.getFormat()) {
+        case BINARY: {
+            ctx.printString("0b");
+            ctx.printString(Integer.toBinaryString(cst));
+            break;
+        }
+        case OCTAL:
+            ctx.printString("0");
+            ctx.printString(Integer.toOctalString(cst));
+            break;
+        case HEXADECIMAL:
+            ctx.printString("0x");
+            String str = Integer.toHexString(cst);
+            for (int i = str.length(); i < 8; i++) {
+                ctx.printString("0");
+            }
+            ctx.printString(str);
+            break;
+        default:
+        case DECIMAL:
+            ctx.printString(String.valueOf(cst));
+            break;
+        }
     }
 
 }

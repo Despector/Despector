@@ -611,7 +611,7 @@ public final class AstUtil {
         }
 
         @Override
-        public void visitLocal(LocalInstance local) {
+        public void visitLocalInstance(LocalInstance local) {
             if (this.local == local || (this.local == null && local.getIndex() > 0)) {
                 this.found = true;
             }

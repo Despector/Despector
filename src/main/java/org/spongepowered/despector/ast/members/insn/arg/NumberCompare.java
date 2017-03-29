@@ -71,7 +71,7 @@ public class NumberCompare implements Instruction {
 
     @Override
     public void accept(InstructionVisitor visitor) {
-        visitor.visitCompareArg(this);
+        visitor.visitNumberCompare(this);
         this.left.accept(visitor);
         this.right.accept(visitor);
     }

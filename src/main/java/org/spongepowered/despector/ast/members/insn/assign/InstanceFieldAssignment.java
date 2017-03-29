@@ -57,7 +57,7 @@ public class InstanceFieldAssignment extends FieldAssignment {
 
     @Override
     public void accept(InstructionVisitor visitor) {
-        visitor.visitInstanceFieldAssign(this);
+        visitor.visitInstanceFieldAssignment(this);
         this.owner.accept(visitor);
         this.val.accept(visitor);
     }

@@ -22,60 +22,40 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.despector.ast.members.insn.arg.cst;
+package org.spongepowered.despector.transform.cleanup;
 
+import org.spongepowered.despector.ast.members.MethodEntry;
 import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
+import org.spongepowered.despector.ast.members.insn.arg.cst.IntConstant;
+import org.spongepowered.despector.ast.members.insn.arg.cst.IntConstant.IntFormat;
+import org.spongepowered.despector.ast.type.TypeEntry;
+import org.spongepowered.despector.transform.TypeTransformer;
 
-/**
- * A constant long value.
- */
-public class LongConstant extends Constant {
-
-    private long cst;
-
-    public LongConstant(long val) {
-        this.cst = val;
-    }
-
-    /**
-     * Gets the constant value.
-     */
-    public long getConstant() {
-        return this.cst;
-    }
-
-    /**
-     * Sets the constant value.
-     */
-    public void setConstant(long cst) {
-        this.cst = cst;
-    }
+public class HexConstantsTransformer implements TypeTransformer {
 
     @Override
-    public String inferType() {
-        return "L";
-    }
-
-    @Override
-    public void accept(InstructionVisitor visitor) {
-        visitor.visitLongConstant(this);
-    }
-
-    @Override
-    public String toString() {
-        return String.valueOf(this.cst);
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (obj == this) {
-            return true;
+    public void transform(TypeEntry type) {
+        Walker walker = new Walker();
+        for (MethodEntry mth : type.getMethods()) {
+            mth.getInstructions().accept(walker);
         }
-        if (!(obj instanceof LongConstant)) {
-            return false;
+        for (MethodEntry mth : type.getStaticMethods()) {
+            mth.getInstructions().accept(walker);
         }
-        LongConstant cast = (LongConstant) obj;
-        return this.cst == cast.cst;
+    }
+
+    private static class Walker extends InstructionVisitor {
+
+        public Walker() {
+        }
+
+        @Override
+        public void visitIntConstant(IntConstant arg) {
+            if (arg.getConstant() > 10000 && !String.valueOf(arg.getConstant()).endsWith("000")) {
+                arg.setFormat(IntFormat.HEXADECIMAL);
+            }
+        }
+
     }
 
 }

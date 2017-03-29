@@ -110,7 +110,7 @@ public class If implements Statement {
 
     @Override
     public void accept(InstructionVisitor visitor) {
-        visitor.visitIfBlock(this);
+        visitor.visitIf(this);
         this.condition.accept(visitor);
         for (Statement stmt : this.block.getStatements()) {
             stmt.accept(visitor);
@@ -200,7 +200,7 @@ public class If implements Statement {
         }
 
         public void accept(InstructionVisitor visitor) {
-            visitor.visitElifBlock(this);
+            visitor.visitElif(this);
             for (Statement stmt : this.block.getStatements()) {
                 stmt.accept(visitor);
             }
@@ -259,7 +259,7 @@ public class If implements Statement {
         }
 
         public void accept(InstructionVisitor visitor) {
-            visitor.visitElseBlock(this);
+            visitor.visitElse(this);
             for (Statement stmt : this.block.getStatements()) {
                 stmt.accept(visitor);
             }

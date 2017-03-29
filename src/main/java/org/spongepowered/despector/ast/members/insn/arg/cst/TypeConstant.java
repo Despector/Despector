@@ -60,7 +60,7 @@ public class TypeConstant extends Constant {
 
     @Override
     public void accept(InstructionVisitor visitor) {
-        visitor.visitTypeConstantArg(this);
+        visitor.visitTypeConstant(this);
     }
 
     @Override

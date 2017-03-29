@@ -246,7 +246,7 @@ public class KotlinMethodEntryEmitter extends MethodEntryEmitter {
         }
 
         @Override
-        public void visitLocalAssign(LocalAssignment assign) {
+        public void visitLocalAssignment(LocalAssignment assign) {
             LocalInstance local = assign.getLocal();
             if (this.defined.contains(local)) {
                 local.setEffectivelyFinal(false);

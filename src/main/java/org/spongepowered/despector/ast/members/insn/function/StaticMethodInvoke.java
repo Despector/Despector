@@ -41,7 +41,7 @@ public class StaticMethodInvoke extends MethodInvoke {
 
     @Override
     public void accept(InstructionVisitor visitor) {
-        visitor.visitStaticMethodCall(this);
+        visitor.visitStaticMethodInvoke(this);
         super.accept(visitor);
     }
 

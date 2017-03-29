@@ -63,7 +63,7 @@ public class NegativeOperator implements Instruction {
 
     @Override
     public void accept(InstructionVisitor visitor) {
-        visitor.visitNegArg(this);
+        visitor.visitNegativeOperator(this);
         this.val.accept(visitor);
     }
 

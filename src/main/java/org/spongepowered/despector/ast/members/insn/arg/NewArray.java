@@ -96,7 +96,7 @@ public class NewArray implements Instruction {
 
     @Override
     public void accept(InstructionVisitor visitor) {
-        visitor.visitNewArrayArg(this);
+        visitor.visitNewArray(this);
         this.size.accept(visitor);
         if (this.values != null) {
             for (Instruction value : this.values) {

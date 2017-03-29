@@ -96,7 +96,7 @@ public class New implements Instruction {
 
     @Override
     public void accept(InstructionVisitor visitor) {
-        visitor.visitNewInstance(this);
+        visitor.visitNew(this);
         for (Instruction insn : this.params) {
             insn.accept(visitor);
         }

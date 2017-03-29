@@ -24,10 +24,10 @@
  */
 package org.spongepowered.despector.config;
 
-import com.google.common.collect.Lists;
 import ninja.leaping.configurate.objectmapping.Setting;
 import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -41,6 +41,9 @@ public class ConfigBase {
     public CleanupConfig cleanup = new CleanupConfig();
     @Setting(comment = "Kotlin specific configuration")
     public KotlinConfig kotlin = new KotlinConfig();
+
+    @Setting(comment = "Targeted cleanup iperations")
+    public List<CleanupConfigSection> cleanup_sections = new ArrayList<>();
 
     @Setting(value = "emit-source-on-load", comment = "Emits source when loading classes (useful when debugging the decompiler).")
     public boolean emit_source_on_load = Boolean.valueOf(System.getProperty("despector.debug.emit", "false"));
@@ -71,7 +74,18 @@ public class ConfigBase {
     public static class CleanupConfig {
 
         @Setting(value = "operations", comment = "Cleanup operations to apply before emitting")
-        public List<String> operations = Lists.newArrayList();
+        public List<String> operations = new ArrayList<>();
+
+    }
+
+    @ConfigSerializable
+    public static class CleanupConfigSection {
+
+        @Setting(value = "operations", comment = "Cleanup operations to apply before emitting")
+        public List<String> operations = new ArrayList<>();
+
+        @Setting(value = "targets", comment = "Class targets to apply this cleanup to")
+        public List<String> targets = new ArrayList<>();
 
     }
 

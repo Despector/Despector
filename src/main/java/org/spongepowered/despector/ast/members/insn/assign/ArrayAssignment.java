@@ -75,7 +75,7 @@ public class ArrayAssignment extends Assignment {
 
     @Override
     public void accept(InstructionVisitor visitor) {
-        visitor.visitArrayAssign(this);
+        visitor.visitArrayAssignment(this);
         this.array.accept(visitor);
         this.index.accept(visitor);
         this.val.accept(visitor);

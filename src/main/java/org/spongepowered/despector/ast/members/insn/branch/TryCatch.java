@@ -71,7 +71,7 @@ public class TryCatch implements Statement {
 
     @Override
     public void accept(InstructionVisitor visitor) {
-        visitor.visitTryBlock(this);
+        visitor.visitTryCatch(this);
         for (Statement stmt : this.block.getStatements()) {
             stmt.accept(visitor);
         }

@@ -38,7 +38,7 @@ public class StaticFieldAccess extends FieldAccess {
 
     @Override
     public void accept(InstructionVisitor visitor) {
-        visitor.visitStaticFieldArg(this);
+        visitor.visitStaticFieldAccess(this);
     }
 
     @Override

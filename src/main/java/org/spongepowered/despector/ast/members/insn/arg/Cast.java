@@ -79,7 +79,7 @@ public class Cast implements Instruction {
 
     @Override
     public void accept(InstructionVisitor visitor) {
-        visitor.visitCastArg(this);
+        visitor.visitCast(this);
         this.val.accept(visitor);
     }
 

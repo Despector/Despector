@@ -58,7 +58,7 @@ public class FloatConstant extends Constant {
 
     @Override
     public void accept(InstructionVisitor visitor) {
-        visitor.visitFloatConstantArg(this);
+        visitor.visitFloatConstant(this);
     }
 
     @Override

@@ -101,8 +101,8 @@ public class ForEach implements Statement, Breakable {
 
     @Override
     public void accept(InstructionVisitor visitor) {
-        visitor.visitForEachLoop(this);
-        visitor.visitLocal(this.val);
+        visitor.visitForEach(this);
+        visitor.visitLocalInstance(this.val);
         this.collection.accept(visitor);
         for (Statement stmt : this.body.getStatements()) {
             stmt.accept(visitor);
