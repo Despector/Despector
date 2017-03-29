@@ -220,8 +220,10 @@ public class Despector {
                     transformer.transform(type);
                 }
                 Set<TypeTransformer> targetted = targeted_transformers.get(type.getName());
-                for (TypeTransformer transformer : targetted) {
-                    transformer.transform(type);
+                if (targetted != null) {
+                    for (TypeTransformer transformer : targetted) {
+                        transformer.transform(type);
+                    }
                 }
             }
         }

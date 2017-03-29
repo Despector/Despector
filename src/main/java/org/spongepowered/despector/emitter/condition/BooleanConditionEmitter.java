@@ -32,6 +32,8 @@ import org.spongepowered.despector.ast.members.insn.branch.Ternary;
 import org.spongepowered.despector.ast.members.insn.branch.condition.BooleanCondition;
 import org.spongepowered.despector.emitter.ConditionEmitter;
 import org.spongepowered.despector.emitter.EmitterContext;
+import org.spongepowered.despector.emitter.InstructionEmitter;
+import org.spongepowered.despector.emitter.instruction.TernaryEmitter;
 
 public class BooleanConditionEmitter implements ConditionEmitter<BooleanCondition> {
 
@@ -70,49 +72,11 @@ public class BooleanConditionEmitter implements ConditionEmitter<BooleanConditio
             }
             if (val instanceof Ternary) {
                 Ternary ternary = (Ternary) val;
-                if (ternary.getFalseValue() instanceof IntConstant && ternary.getFalseValue() instanceof IntConstant) {
-                    int tr = ((IntConstant) ternary.getTrueValue()).getConstant();
-                    int fl = ((IntConstant) ternary.getFalseValue()).getConstant();
-                    if (tr == 0 && fl == 0) {
-                        ctx.printString("false");
-                    } else if (tr == 0) {
-                        ctx.printString("!(");
-                        ctx.emit(ternary.getCondition());
-                        ctx.printString(")");
-                    } else if (fl == 0) {
-                        ctx.emit(ternary.getCondition());
-                    } else {
-                        ctx.printString("true");
+                InstructionEmitter<Ternary> emitter = ctx.getEmitterSet().getInstructionEmitter(Ternary.class);
+                if (emitter instanceof TernaryEmitter) {
+                    if (((TernaryEmitter) emitter).checkBooleanExpression(ctx, ternary)) {
+                        return true;
                     }
-                    return true;
-                } else if (ternary.getTrueValue() instanceof IntConstant) {
-                    if (((IntConstant) ternary.getTrueValue()).getConstant() == 0) {
-                        // !a && b
-                        ctx.printString("!(");
-                        ctx.emit(ternary.getCondition());
-                        ctx.printString(") && ");
-                        ctx.emit(ternary.getFalseValue(), "Z");
-                    } else {
-                        ctx.emit(ternary.getCondition());
-                        ctx.markWrapPoint();
-                        ctx.printString(" || ");
-                        ctx.emit(ternary.getFalseValue(), "Z");
-                    }
-                    return true;
-                } else if (ternary.getFalseValue() instanceof IntConstant) {
-                    if (((IntConstant) ternary.getFalseValue()).getConstant() == 0) {
-                        // !a && b
-                        ctx.printString("!(");
-                        ctx.emit(ternary.getCondition());
-                        ctx.printString(") || ");
-                        ctx.emit(ternary.getFalseValue(), "Z");
-                    } else {
-                        ctx.emit(ternary.getCondition());
-                        ctx.markWrapPoint();
-                        ctx.printString(" && ");
-                        ctx.emit(ternary.getFalseValue(), "Z");
-                    }
-                    return true;
                 }
             }
             if (val instanceof Operator) {
