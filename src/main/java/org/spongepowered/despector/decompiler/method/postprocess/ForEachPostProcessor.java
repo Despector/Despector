@@ -25,6 +25,7 @@
 package org.spongepowered.despector.decompiler.method.postprocess;
 
 import org.spongepowered.despector.ast.Locals.LocalInstance;
+import org.spongepowered.despector.ast.generic.ClassTypeSignature;
 import org.spongepowered.despector.ast.members.insn.Statement;
 import org.spongepowered.despector.ast.members.insn.StatementBlock;
 import org.spongepowered.despector.ast.members.insn.arg.Instruction;
@@ -82,7 +83,7 @@ public class ForEachPostProcessor implements StatementPostProcessor {
 
     private static final StatementMatcher<?> ARRAY_ITERATOR_ASSIGN = MatchContext.storeLocal("array", StatementMatcher.localassign().build());
     private static final StatementMatcher<?> ARRAY_ITERATOR_SIZE = MatchContext.storeLocal("array_size", StatementMatcher.localassign()
-            .type("I")
+            .type(ClassTypeSignature.INT)
             .value(InstructionMatcher.instancefield()
                     .name("length")
                     .owner(InstructionMatcher.localaccess()
@@ -202,7 +203,7 @@ public class ForEachPostProcessor implements StatementPostProcessor {
 
         for (int o = 1; o < ffor.getBody().getStatementCount(); o++) {
             Statement stmt = ffor.getBody().getStatement(o);
-            if (AstUtil.references(stmt, ((LocalAssignment) ffor.getIncr()).getLocal())
+            if (AstUtil.references(stmt, ((LocalAssignment) ffor.getInit()).getLocal())
                     || AstUtil.references(stmt, ((LocalAssignment) block.getStatement(i - 1)).getLocal())) {
                 return false;
             }
@@ -210,9 +211,10 @@ public class ForEachPostProcessor implements StatementPostProcessor {
 
         to_remove.add(block.getStatement(i - 2));
         to_remove.add(block.getStatement(i - 1));
+        LocalInstance local = ((LocalAssignment) ffor.getBody().getStatement(0)).getLocal();
         ffor.getBody().getStatements().remove(0);
 
-        ForEach foreach = new ForEach(array_assign.getValue(), ((LocalAssignment) ffor.getBody().getStatement(0)).getLocal(), ffor.getBody());
+        ForEach foreach = new ForEach(array_assign.getValue(), local, ffor.getBody());
         block.getStatements().set(block.getStatements().indexOf(ffor), foreach);
 
         return true;

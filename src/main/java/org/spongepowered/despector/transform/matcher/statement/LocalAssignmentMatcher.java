@@ -24,6 +24,7 @@
  */
 package org.spongepowered.despector.transform.matcher.statement;
 
+import org.spongepowered.despector.ast.generic.TypeSignature;
 import org.spongepowered.despector.ast.members.insn.Statement;
 import org.spongepowered.despector.ast.members.insn.arg.Cast;
 import org.spongepowered.despector.ast.members.insn.arg.Instruction;
@@ -36,9 +37,9 @@ public class LocalAssignmentMatcher implements StatementMatcher<LocalAssignment>
 
     private InstructionMatcher<?> value;
     private boolean unwrap;
-    private String type;
+    private TypeSignature type;
 
-    LocalAssignmentMatcher(InstructionMatcher<?> value, String type, boolean unwrap) {
+    LocalAssignmentMatcher(InstructionMatcher<?> value, TypeSignature type, boolean unwrap) {
         this.value = value == null ? InstructionMatcher.ANY : value;
         this.type = type;
         this.unwrap = unwrap;
@@ -66,7 +67,7 @@ public class LocalAssignmentMatcher implements StatementMatcher<LocalAssignment>
     public static class Builder {
 
         private InstructionMatcher<?> value;
-        private String type;
+        private TypeSignature type;
         private boolean unwrap;
 
         public Builder() {
@@ -78,7 +79,7 @@ public class LocalAssignmentMatcher implements StatementMatcher<LocalAssignment>
             return this;
         }
 
-        public Builder type(String type) {
+        public Builder type(TypeSignature type) {
             this.type = type;
             return this;
         }
