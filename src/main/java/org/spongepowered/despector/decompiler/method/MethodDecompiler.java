@@ -75,7 +75,7 @@ import java.util.Set;
  */
 public class MethodDecompiler {
 
-    public static final String targeted_breakpoint = "";
+    public static final String targeted_breakpoint = "neighborChanged";
 
     private final List<GraphProducerStep> graph_producers = new ArrayList<>();
     private final List<GraphOperation> cleanup_operations = new ArrayList<>();

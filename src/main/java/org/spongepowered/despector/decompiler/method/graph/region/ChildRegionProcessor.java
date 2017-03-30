@@ -49,7 +49,7 @@ public class ChildRegionProcessor implements RegionProcessor {
     public BlockSection process(PartialMethod partial, List<OpcodeBlock> region, OpcodeBlock ret, int body_start) {
 
         if (partial.getEntry().getName().equals(MethodDecompiler.targeted_breakpoint)) {
-            System.out.println();
+            System.out.println("Searching for child region in range " + region.get(body_start).getBreakpoint() + " to " + ret.getBreakpoint());
         }
 
         // The first step is to find any points within the region that are sub
@@ -122,7 +122,7 @@ public class ChildRegionProcessor implements RegionProcessor {
                     for (OpcodeBlock targeting : ret.getTargettedBy()) {
                         if (targeting instanceof GotoOpcodeBlock) {
                             GotoOpcodeBlock ggoto = (GotoOpcodeBlock) targeting;
-                            if (ggoto.getBreakpoint() > next.getBreakpoint() && (pos == null || ggoto.getBreakpoint() < pos.getBreakpoint())) {
+                            if (ggoto.getBreakpoint() < sstart.getTarget().getBreakpoint() && ggoto.getBreakpoint() > next.getBreakpoint() && (pos == null || ggoto.getBreakpoint() < pos.getBreakpoint())) {
                                 pos = ggoto;
                             }
                         }
@@ -179,6 +179,9 @@ public class ChildRegionProcessor implements RegionProcessor {
             }
 
             if (end != -1) {
+                if (partial.getEntry().getName().equals(MethodDecompiler.targeted_breakpoint)) {
+                    System.out.println("Child region found from " + next.getBreakpoint() + " to " + region.get(end - 1).getBreakpoint());
+                }
                 boolean hasgoto = false;
                 List<OpcodeBlock> subregion = new ArrayList<>();
                 for (int o = i; o < end; o++) {
