@@ -26,6 +26,7 @@ package org.spongepowered.despector.decompiler.method.graph;
 
 import org.spongepowered.despector.decompiler.method.PartialMethod;
 import org.spongepowered.despector.decompiler.method.graph.data.block.BlockSection;
+import org.spongepowered.despector.decompiler.method.graph.data.opcode.BreakMarkerOpcodeBlock;
 import org.spongepowered.despector.decompiler.method.graph.data.opcode.ConditionalOpcodeBlock;
 import org.spongepowered.despector.decompiler.method.graph.data.opcode.GotoOpcodeBlock;
 import org.spongepowered.despector.decompiler.method.graph.data.opcode.OpcodeBlock;
@@ -179,6 +180,12 @@ public interface RegionProcessor {
                         int alt_end = o;
                         for (OpcodeBlock block : target.getTargettedBy()) {
                             if (block instanceof GotoOpcodeBlock) {
+                                int block_index = blocks.indexOf(block);
+                                if (block_index > start && block_index < end && block_index > alt_end) {
+                                    alt_end = block_index;
+                                    alt = block;
+                                }
+                            } else if(block instanceof BreakMarkerOpcodeBlock) {
                                 int block_index = blocks.indexOf(block);
                                 if (block_index > start && block_index < end && block_index > alt_end) {
                                     alt_end = block_index;

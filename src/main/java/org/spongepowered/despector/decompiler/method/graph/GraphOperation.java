@@ -54,6 +54,10 @@ public interface GraphOperation {
             if (other.getTarget() == from) {
                 other.setTarget(to);
             }
+            if (other.getTargettedBy().contains(from)) {
+                other.getTargettedBy().remove(from);
+                other.getTargettedBy().add(to);
+            }
             if (other instanceof SwitchOpcodeBlock) {
                 SwitchOpcodeBlock sswitch = (SwitchOpcodeBlock) other;
                 for (Map.Entry<Label, OpcodeBlock> e : sswitch.getAdditionalTargets().entrySet()) {

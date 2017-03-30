@@ -164,12 +164,19 @@ public class ChildRegionProcessor implements RegionProcessor {
                         continue;
                     }
                 } else if (end == -1 && next instanceof ConditionalOpcodeBlock) {
-                    GotoOpcodeBlock pos = null;
+                    OpcodeBlock pos = null;
                     for (OpcodeBlock targeting : ret.getTargettedBy()) {
                         if (targeting instanceof GotoOpcodeBlock) {
                             GotoOpcodeBlock ggoto = (GotoOpcodeBlock) targeting;
-                            if (ggoto.getBreakpoint() < sstart.getTarget().getBreakpoint() && ggoto.getBreakpoint() > next.getBreakpoint() && (pos == null || ggoto.getBreakpoint() < pos.getBreakpoint())) {
+                            if (ggoto.getBreakpoint() < sstart.getTarget().getBreakpoint() && ggoto.getBreakpoint() > next.getBreakpoint()
+                                    && (pos == null || ggoto.getBreakpoint() < pos.getBreakpoint())) {
                                 pos = ggoto;
+                            }
+                        } else if (targeting instanceof BreakMarkerOpcodeBlock) {
+                            BreakMarkerOpcodeBlock bbreak = (BreakMarkerOpcodeBlock) targeting;
+                            if (bbreak.getBreakpoint() < sstart.getTarget().getBreakpoint() && bbreak.getBreakpoint() > next.getBreakpoint()
+                                    && (pos == null || bbreak.getBreakpoint() < pos.getBreakpoint())) {
+                                pos = bbreak;
                             }
                         }
                     }
