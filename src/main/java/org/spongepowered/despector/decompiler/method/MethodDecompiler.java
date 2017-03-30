@@ -75,7 +75,7 @@ import java.util.Set;
  */
 public class MethodDecompiler {
 
-    public static final String targeted_breakpoint = "onBlockActivated";
+    public static final String targeted_breakpoint = "";
 
     private final List<GraphProducerStep> graph_producers = new ArrayList<>();
     private final List<GraphOperation> cleanup_operations = new ArrayList<>();
@@ -202,6 +202,10 @@ public class MethodDecompiler {
 
         List<OpcodeBlock> graph = makeGraph(partial);
         partial.setGraph(graph);
+
+        if (partial.getEntry().getName().equals(targeted_breakpoint)) {
+            System.out.println();
+        }
 
         for (GraphOperation op : this.cleanup_operations) {
             op.process(partial);

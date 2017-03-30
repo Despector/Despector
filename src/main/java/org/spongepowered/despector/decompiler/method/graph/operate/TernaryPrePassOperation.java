@@ -99,6 +99,9 @@ public class TernaryPrePassOperation implements GraphOperation {
                 }
             }
             true_blocks.add(0, go);
+            if (start < 0) {
+                return 0;
+            }
             go = blocks.get(start--);
         }
         checkState(!true_blocks.isEmpty());
@@ -107,6 +110,9 @@ public class TernaryPrePassOperation implements GraphOperation {
         OpcodeBlock first_true = true_blocks.get(0);
         while ((!(go instanceof GotoOpcodeBlock) && !(go instanceof ConditionalOpcodeBlock)) || fl.getTarget() != first_true) {
             false_blocks.add(0, fl);
+            if (start < 0) {
+                return 0;
+            }
             fl = blocks.get(start--);
         }
         checkState(!false_blocks.isEmpty());
