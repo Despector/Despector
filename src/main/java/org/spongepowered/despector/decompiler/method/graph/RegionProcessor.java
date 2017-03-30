@@ -30,6 +30,7 @@ import org.spongepowered.despector.decompiler.method.graph.data.opcode.Condition
 import org.spongepowered.despector.decompiler.method.graph.data.opcode.GotoOpcodeBlock;
 import org.spongepowered.despector.decompiler.method.graph.data.opcode.OpcodeBlock;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -42,7 +43,11 @@ public interface RegionProcessor {
      */
     BlockSection process(PartialMethod partial, List<OpcodeBlock> region, OpcodeBlock ret, int body_start);
 
-    static int getRegionEnd(List<OpcodeBlock> blocks, int start) {
+    static int getRegionEnd(List<OpcodeBlock> blk, OpcodeBlock ret, int start) {
+        List<OpcodeBlock> blocks = new ArrayList<>(blk);
+        if (ret != null) {
+            blocks.add(ret);
+        }
         OpcodeBlock region_start = blocks.get(start);
         // if the target is behind the start then we break as this is likely the
         // condition of a do-while
@@ -61,17 +66,17 @@ public interface RegionProcessor {
             int end_a = blocks.indexOf(cond.getTarget());
             if (cond.getTarget().getBreakpoint() <= region_start.getBreakpoint()) {
                 boolean found = false;
-                if(cond.getTarget() instanceof ConditionalOpcodeBlock) {
+                if (cond.getTarget() instanceof ConditionalOpcodeBlock) {
                     ConditionalOpcodeBlock target = (ConditionalOpcodeBlock) cond.getTarget();
-                    for(OpcodeBlock op: target.getTargettedBy()) {
-                        if(op instanceof GotoOpcodeBlock && op.getBreakpoint() > cond.getBreakpoint()) {
+                    for (OpcodeBlock op : target.getTargettedBy()) {
+                        if (op instanceof GotoOpcodeBlock && op.getBreakpoint() > cond.getBreakpoint()) {
                             end_a = blocks.indexOf(op);
                             found = true;
                             break;
                         }
                     }
                 }
-                if(!found) {
+                if (!found) {
                     return -1;
                 }
             }
@@ -83,30 +88,22 @@ public interface RegionProcessor {
                         end_a = blocks.indexOf(cond_target.getTarget());
                     }
                 }
-            } else if (end_a == -1) {
-                end_a = blocks.size();
             }
-            if(end_a < start && cond.getTarget() instanceof ConditionalOpcodeBlock) {
+            if (end_a < start && cond.getTarget() instanceof ConditionalOpcodeBlock) {
                 ConditionalOpcodeBlock target = (ConditionalOpcodeBlock) cond.getTarget();
-                for(OpcodeBlock op: target.getTargettedBy()) {
-                    if(op instanceof GotoOpcodeBlock && op.getBreakpoint() > cond.getBreakpoint()) {
+                for (OpcodeBlock op : target.getTargettedBy()) {
+                    if (op instanceof GotoOpcodeBlock && op.getBreakpoint() > cond.getBreakpoint()) {
                         end_a = blocks.indexOf(op);
                         break;
                     }
                 }
             }
             int end_b = blocks.indexOf(cond.getElseTarget());
-            if (end_b == -1) {
-                end_b = blocks.size();
-            }
             // Use the target of the start node as a starting point for our
             // search
             end = Math.max(end_a, end_b);
         } else {
             end = blocks.indexOf(region_start.getTarget());
-            if (end == -1) {
-                end = blocks.size();
-            }
         }
         boolean isGoto = region_start instanceof GotoOpcodeBlock;
         return getRegionEnd(blocks, start, end, isGoto);
@@ -124,15 +121,9 @@ public interface RegionProcessor {
             for (int o = 0; o < start; o++) {
                 OpcodeBlock next = blocks.get(o);
                 end_a = blocks.indexOf(next.getTarget());
-                if (end_a == -1 && next.hasTarget()) {
-                    end_a = blocks.size();
-                }
                 if (next instanceof ConditionalOpcodeBlock) {
                     ConditionalOpcodeBlock cond = (ConditionalOpcodeBlock) next;
                     end_b = blocks.indexOf(cond.getTarget());
-                    if (end_b == -1 && cond.hasElseTarget()) {
-                        end_b = blocks.size();
-                    }
                 } else {
                     end_b = -1;
                 }
@@ -145,14 +136,11 @@ public interface RegionProcessor {
             for (int o = start + 1; o < end; o++) {
                 OpcodeBlock next = blocks.get(o);
                 end_a = blocks.indexOf(next.getTarget());
-                if (end_a == -1 && next.hasTarget()) {
-                    end_a = blocks.size();
-                }
                 if (next instanceof ConditionalOpcodeBlock) {
-                    if(end_a < o && next.getTarget() instanceof ConditionalOpcodeBlock) {
+                    if (end_a < o && next.getTarget() instanceof ConditionalOpcodeBlock) {
                         ConditionalOpcodeBlock target = (ConditionalOpcodeBlock) next.getTarget();
-                        for(OpcodeBlock op: target.getTargettedBy()) {
-                            if(op instanceof GotoOpcodeBlock && op.getBreakpoint() > next.getBreakpoint()) {
+                        for (OpcodeBlock op : target.getTargettedBy()) {
+                            if (op instanceof GotoOpcodeBlock && op.getBreakpoint() > next.getBreakpoint()) {
                                 end_a = blocks.indexOf(op);
                                 break;
                             }
@@ -160,9 +148,6 @@ public interface RegionProcessor {
                     }
                     ConditionalOpcodeBlock cond = (ConditionalOpcodeBlock) next;
                     end_b = blocks.indexOf(cond.getTarget());
-                    if (end_b == -1 && cond.hasElseTarget()) {
-                        end_b = blocks.size();
-                    }
                 } else {
                     end_b = -1;
                 }
@@ -215,15 +200,9 @@ public interface RegionProcessor {
             for (int o = end + end_extension; o < blocks.size(); o++) {
                 OpcodeBlock next = blocks.get(o);
                 end_a = blocks.indexOf(next.getTarget());
-                if (end_a == -1 && next.hasTarget()) {
-                    end_a = blocks.size();
-                }
                 if (next instanceof ConditionalOpcodeBlock) {
                     ConditionalOpcodeBlock cond = (ConditionalOpcodeBlock) next;
                     end_b = blocks.indexOf(cond.getTarget());
-                    if (end_b == -1 && cond.hasElseTarget()) {
-                        end_b = blocks.size();
-                    }
                 } else {
                     end_b = -1;
                 }

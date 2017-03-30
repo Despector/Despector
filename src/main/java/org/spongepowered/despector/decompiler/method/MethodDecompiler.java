@@ -75,6 +75,8 @@ import java.util.Set;
  */
 public class MethodDecompiler {
 
+    public static final String targeted_breakpoint = "mth_if5";
+
     private final List<GraphProducerStep> graph_producers = new ArrayList<>();
     private final List<GraphOperation> cleanup_operations = new ArrayList<>();
     private final List<GraphProcessor> processors = new ArrayList<>();
@@ -205,7 +207,10 @@ public class MethodDecompiler {
             op.process(partial);
         }
 
-        if (partial.getEntry().getName().equals("mth_if15")) {
+        if (partial.getEntry().getName().equals(targeted_breakpoint)) {
+            for (OpcodeBlock g : graph) {
+                System.out.println(g.toString());
+            }
             System.out.println();
         }
 

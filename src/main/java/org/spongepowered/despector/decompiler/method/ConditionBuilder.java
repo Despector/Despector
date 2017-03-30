@@ -79,61 +79,61 @@ public class ConditionBuilder {
         StatementBuilder.appendBlock(block, dummy, locals, dummy_stack);
 
         switch (block.getLast().getOpcode()) {
-        case IFEQ: {
-            if (dummy_stack.size() != 1) {
-                throw new IllegalStateException();
+            case IFEQ: {
+                if (dummy_stack.size() != 1) {
+                    throw new IllegalStateException();
+                }
+                Instruction val = dummy_stack.pop();
+                return new BooleanCondition(val, true);
             }
-            Instruction val = dummy_stack.pop();
-            return new BooleanCondition(val, true);
-        }
-        case IFNE: {
-            if (dummy_stack.size() != 1) {
-                throw new IllegalStateException();
+            case IFNE: {
+                if (dummy_stack.size() != 1) {
+                    throw new IllegalStateException();
+                }
+                Instruction val = dummy_stack.pop();
+                return new BooleanCondition(val, false);
             }
-            Instruction val = dummy_stack.pop();
-            return new BooleanCondition(val, false);
-        }
-        case IFLT:
-        case IFLE:
-        case IFGT:
-        case IFGE: {
-            if (dummy_stack.size() != 1) {
-                throw new IllegalStateException();
+            case IFLT:
+            case IFLE:
+            case IFGT:
+            case IFGE: {
+                if (dummy_stack.size() != 1) {
+                    throw new IllegalStateException();
+                }
+                Instruction val = dummy_stack.pop();
+                return new CompareCondition(val, new IntConstant(0), CompareCondition.fromOpcode(block.getLast().getOpcode()));
             }
-            Instruction val = dummy_stack.pop();
-            return new CompareCondition(val, new IntConstant(0), CompareCondition.fromOpcode(block.getLast().getOpcode()));
-        }
-        case IF_ICMPEQ:
-        case IF_ICMPNE:
-        case IF_ICMPLT:
-        case IF_ICMPLE:
-        case IF_ICMPGT:
-        case IF_ICMPGE:
-        case IF_ACMPEQ:
-        case IF_ACMPNE: {
-            if (dummy_stack.size() != 2) {
-                throw new IllegalStateException();
+            case IF_ICMPEQ:
+            case IF_ICMPNE:
+            case IF_ICMPLT:
+            case IF_ICMPLE:
+            case IF_ICMPGT:
+            case IF_ICMPGE:
+            case IF_ACMPEQ:
+            case IF_ACMPNE: {
+                if (dummy_stack.size() != 2) {
+                    throw new IllegalStateException();
+                }
+                Instruction b = dummy_stack.pop();
+                Instruction a = dummy_stack.pop();
+                return new CompareCondition(a, b, CompareCondition.fromOpcode(block.getLast().getOpcode()));
             }
-            Instruction b = dummy_stack.pop();
-            Instruction a = dummy_stack.pop();
-            return new CompareCondition(a, b, CompareCondition.fromOpcode(block.getLast().getOpcode()));
-        }
-        case IFNULL: {
-            if (dummy_stack.size() == 0) {
-                throw new IllegalStateException();
+            case IFNULL: {
+                if (dummy_stack.size() == 0) {
+                    throw new IllegalStateException();
+                }
+                Instruction val = dummy_stack.pop();
+                return new CompareCondition(val, NullConstant.NULL, CompareCondition.CompareOperator.EQUAL);
             }
-            Instruction val = dummy_stack.pop();
-            return new CompareCondition(val, NullConstant.NULL, CompareCondition.CompareOperator.EQUAL);
-        }
-        case IFNONNULL: {
-            if (dummy_stack.size() != 1) {
-                throw new IllegalStateException();
+            case IFNONNULL: {
+                if (dummy_stack.size() != 1) {
+                    throw new IllegalStateException();
+                }
+                Instruction val = dummy_stack.pop();
+                return new CompareCondition(val, NullConstant.NULL, CompareCondition.CompareOperator.NOT_EQUAL);
             }
-            Instruction val = dummy_stack.pop();
-            return new CompareCondition(val, NullConstant.NULL, CompareCondition.CompareOperator.NOT_EQUAL);
-        }
-        default:
-            throw new IllegalStateException("Unsupported conditional jump opcode " + block.getLast().getOpcode());
+            default:
+                throw new IllegalStateException("Unsupported conditional jump opcode " + block.getLast().getOpcode());
         }
     }
 
@@ -201,6 +201,9 @@ public class ConditionBuilder {
                 node.setTarget(ret_node);
             } else {
                 int target = blocks.indexOf(next.getTarget());
+                if (target == -1) {
+                    System.err.println("Condition target was unknown block " + next.getTarget().getBreakpoint());
+                }
                 node.setTarget(nodes.get(target));
             }
             if (next.getElseTarget() == body) {

@@ -87,7 +87,7 @@ public class SubRegionBlockProcessor implements GraphProcessor {
             }
         }
         if (end == -1) {
-            end = RegionProcessor.getRegionEnd(blocks, i);
+            end = RegionProcessor.getRegionEnd(blocks, null, i);
         } else if (end != blocks.size() - 1) {
             end++;
         }

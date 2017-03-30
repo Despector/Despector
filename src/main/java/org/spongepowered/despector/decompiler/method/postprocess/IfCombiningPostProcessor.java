@@ -79,6 +79,7 @@ public class IfCombiningPostProcessor implements StatementPostProcessor {
                     for (Statement stmt : inner.getIfBody().getStatements()) {
                         block.append(stmt);
                     }
+                    check(ifblock);
                 }
             }
         }

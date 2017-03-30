@@ -24,6 +24,7 @@
  */
 package org.spongepowered.despector.decompiler.method.graph.region;
 
+import org.spongepowered.despector.decompiler.method.MethodDecompiler;
 import org.spongepowered.despector.decompiler.method.PartialMethod;
 import org.spongepowered.despector.decompiler.method.graph.GraphOperation;
 import org.spongepowered.despector.decompiler.method.graph.RegionProcessor;
@@ -46,6 +47,10 @@ public class ChildRegionProcessor implements RegionProcessor {
 
     @Override
     public BlockSection process(PartialMethod partial, List<OpcodeBlock> region, OpcodeBlock ret, int body_start) {
+
+        if (partial.getEntry().getName().equals(MethodDecompiler.targeted_breakpoint)) {
+            System.out.println();
+        }
 
         // The first step is to find any points within the region that are sub
         // regions (eg. both dominate and post-domintate the rest of the graph
@@ -72,9 +77,7 @@ public class ChildRegionProcessor implements RegionProcessor {
             // region.
             int end = -1;
             if (next.getTarget() == ret) {
-                region.add(ret);
-                end = RegionProcessor.getRegionEnd(region, i);
-                region.remove(ret);
+                end = RegionProcessor.getRegionEnd(region, ret, i);
                 if (end == region.size()) {
                     OpcodeBlock last = region.get(region.size() - 1);
                     boolean is_break = false;
@@ -172,14 +175,25 @@ public class ChildRegionProcessor implements RegionProcessor {
                 }
                 continue;
             } else {
-                end = RegionProcessor.getRegionEnd(region, i);
+                end = RegionProcessor.getRegionEnd(region, ret, i);
             }
 
-            if (end != -1 && (!is_first_condition || end < region.size())) {
-
+            if (end != -1) {
+                boolean hasgoto = false;
                 List<OpcodeBlock> subregion = new ArrayList<>();
                 for (int o = i; o < end; o++) {
-                    subregion.add(region.get(o));
+                    OpcodeBlock n = region.get(o);
+                    if (n instanceof GotoOpcodeBlock) {
+                        GotoOpcodeBlock g = (GotoOpcodeBlock) n;
+                        if (g.getTarget() == ret) {
+                            hasgoto = true;
+                        }
+                    }
+                    subregion.add(n);
+                }
+
+                if (is_first_condition && !hasgoto && end >= region.size()) {
+
                 }
 
                 OpcodeBlock sub_ret = end >= region.size() ? ret : region.get(end);

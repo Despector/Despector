@@ -286,6 +286,34 @@ public class BranchTest {
         check(getClass(), "mth_if14", good);
     }
 
+    public void mth_ifnest3(int i, boolean a, boolean b, boolean c, boolean d, boolean e, boolean f) {
+        if (a) {
+            if (b) {
+                if (c) {
+                    System.out.println(d);
+                } else {
+                    System.out.println(a);
+                }
+            }
+            System.out.println(e);
+        }
+    }
+
+    @Test
+    public void testIfWithNesting3() throws IOException {
+        String good = "if (a) {\n"
+                + "    if (b) {\n"
+                + "        if (c) {\n"
+                + "            System.out.println(d);\n"
+                + "        } else {\n"
+                + "            System.out.println(a);\n"
+                + "        }\n"
+                + "    }\n"
+                + "    System.out.println(e);\n"
+                + "}";
+        check(getClass(), "mth_ifnest3", good);
+    }
+
     public void mth_if15(int i, boolean a, boolean b, boolean c, boolean d, boolean e, boolean f) {
         if (a) {
             System.out.println(a);
@@ -397,14 +425,14 @@ public class BranchTest {
 
     public void mth_lookupswitch(int i, TestEnum ie, boolean a, boolean c, boolean d) {
         switch (ie) {
-        case ONE:
-            System.out.println(a);
-            break;
-        case EIGHT:
-            System.out.println(c);
-            break;
-        default:
-            System.out.println(d);
+            case ONE:
+                System.out.println(a);
+                break;
+            case EIGHT:
+                System.out.println(c);
+                break;
+            default:
+                System.out.println(d);
         }
     }
 
@@ -426,14 +454,14 @@ public class BranchTest {
 
     public void mth_tableswitch(int i, TestEnum ie, boolean a, boolean c, boolean d) {
         switch (ie) {
-        case ONE:
-            System.out.println(a);
-            break;
-        case TWO:
-            System.out.println(c);
-            break;
-        default:
-            System.out.println(d);
+            case ONE:
+                System.out.println(a);
+                break;
+            case TWO:
+                System.out.println(c);
+                break;
+            default:
+                System.out.println(d);
         }
 
     }
@@ -456,12 +484,12 @@ public class BranchTest {
 
     public int mth_returnswitch(int i, TestEnum ie, boolean a, boolean c, boolean d) {
         switch (ie) {
-        case ONE:
-            return 1;
-        case TWO:
-            return 2;
-        default:
-            return 3;
+            case ONE:
+                return 1;
+            case TWO:
+                return 2;
+            default:
+                return 3;
         }
 
     }
