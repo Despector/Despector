@@ -526,7 +526,15 @@ public final class AstUtil {
     }
 
     public static boolean hasStartingRequirement(List<AbstractInsnNode> opcodes) {
-        return getStackRequirementsSize(getFirstOpcode(opcodes)) > 0;
+        int size = 0;
+        for (int i = 0; i < opcodes.size(); i++) {
+            AbstractInsnNode next = opcodes.get(i);
+            size += getStackDelta(next);
+            if (size < 0) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**

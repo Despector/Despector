@@ -111,7 +111,9 @@ public class IfBlockSection extends BlockSection {
         for (BlockSection body_section : this.body) {
             body_section.appendTo(body, body_stack);
         }
-        checkState(body_stack.isEmpty());
+        if (!body_stack.isEmpty()) {
+            throw new IllegalStateException();
+        }
         If iff = new If(this.condition, body);
         for (ElifBlockSection elif : this.elif) {
             StatementBlock elif_body = new StatementBlock(StatementBlock.Type.IF, block.getLocals());
