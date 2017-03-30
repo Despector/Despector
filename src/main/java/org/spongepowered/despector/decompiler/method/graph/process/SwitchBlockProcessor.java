@@ -99,6 +99,9 @@ public class SwitchBlockProcessor implements GraphProcessor {
                     while (!sblock.getAdditionalTargets().containsValue(block) && block != end) {
                         case_region.add(block);
                         start++;
+                        if (start >= blocks.size()) {
+                            break;
+                        }
                         block = blocks.get(start);
                     }
                 }
@@ -146,6 +149,9 @@ public class SwitchBlockProcessor implements GraphProcessor {
                     while (!sblock.getAdditionalTargets().containsValue(block) && block != end) {
                         case_region.add(block);
                         start++;
+                        if (start >= blocks.size()) {
+                            break;
+                        }
                         block = blocks.get(start);
                     }
                 }
