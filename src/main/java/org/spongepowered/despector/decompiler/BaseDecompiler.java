@@ -38,6 +38,7 @@ import org.spongepowered.despector.ast.type.ClassEntry;
 import org.spongepowered.despector.ast.type.EnumEntry;
 import org.spongepowered.despector.ast.type.InterfaceEntry;
 import org.spongepowered.despector.ast.type.TypeEntry;
+import org.spongepowered.despector.config.LibraryConfiguration;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -84,7 +85,9 @@ public class BaseDecompiler implements Decompiler {
 
     @Override
     public TypeEntry decompile(ClassNode cn, SourceSet source) {
-        System.out.println("Decompiling class " + cn.name);
+        if (!LibraryConfiguration.quiet) {
+            System.out.println("Decompiling class " + cn.name);
+        }
         int acc = cn.access;
         TypeEntry entry = null;
         if ((acc & ACC_ENUM) != 0) {
