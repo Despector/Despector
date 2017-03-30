@@ -29,6 +29,7 @@ import static com.google.common.base.Preconditions.checkState;
 import org.spongepowered.despector.ast.members.insn.StatementBlock;
 import org.spongepowered.despector.ast.members.insn.arg.Instruction;
 import org.spongepowered.despector.ast.members.insn.branch.If;
+import org.spongepowered.despector.ast.members.insn.branch.If.Elif;
 import org.spongepowered.despector.ast.members.insn.branch.condition.Condition;
 
 import java.util.ArrayDeque;
@@ -135,6 +136,9 @@ public class IfBlockSection extends BlockSection {
             if (else_body.getStatements().size() == 1 && else_body.getStatements().get(0) instanceof If) {
                 If internal_if = (If) else_body.getStatements().get(0);
                 iff.new Elif(internal_if.getCondition(), internal_if.getIfBody());
+                for (Elif el : internal_if.getElifBlocks()) {
+                    iff.new Elif(el.getCondition(), el.getBody());
+                }
                 if (internal_if.getElseBlock() != null) {
                     iff.new Else(internal_if.getElseBlock().getElseBody());
                 }
