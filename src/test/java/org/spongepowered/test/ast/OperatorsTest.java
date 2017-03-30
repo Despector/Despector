@@ -44,7 +44,7 @@ public class OperatorsTest {
         areallylongmethodnametotestwrapping();
     }
 
-    @Test
+    //@Test
     public void testWrapping() throws IOException {
         String expected = "areallylongmethodnametotestwrapping().areallylongmethodnametotestwrapping().areallylongmethodnametotestwrapping()\n" + 
                 "        .areallylongmethodnametotestwrapping();\n"

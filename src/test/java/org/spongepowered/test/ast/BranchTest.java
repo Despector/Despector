@@ -432,6 +432,32 @@ public class BranchTest {
         check(getClass(), "mth_tableswitch", good);
     }
 
+    public int mth_returnswitch(int i, TestEnum ie, boolean a, boolean c, boolean d) {
+        switch (ie) {
+        case ONE:
+            return 1;
+        case TWO:
+            return 2;
+        default:
+            return 3;
+        }
+
+    }
+
+    @Test
+    public void testReturnSwitch() throws IOException {
+        String good =
+                "switch (ie) {\n"
+                        + "case ONE:\n"
+                        + "    return 1;\n"
+                        + "case TWO:\n"
+                        + "    return 2;\n"
+                        + "default:\n"
+                        + "    return 3;\n"
+                        + "}";
+        check(getClass(), "mth_returnswitch", good);
+    }
+
     private void mth_ifnestedinstanceof(boolean a, Object b) {
         if (!a) {
             System.out.println(a);

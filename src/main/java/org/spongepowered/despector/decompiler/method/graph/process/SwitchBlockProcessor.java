@@ -24,6 +24,8 @@
  */
 package org.spongepowered.despector.decompiler.method.graph.process;
 
+import static org.mockito.asm.Opcodes.*;
+
 import org.objectweb.asm.Label;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.LabelNode;
@@ -36,6 +38,7 @@ import org.spongepowered.despector.decompiler.method.graph.data.block.BlockSecti
 import org.spongepowered.despector.decompiler.method.graph.data.block.CommentBlockSection;
 import org.spongepowered.despector.decompiler.method.graph.data.block.SwitchBlockSection;
 import org.spongepowered.despector.decompiler.method.graph.data.block.SwitchBlockSection.SwitchCaseBlockSection;
+import org.spongepowered.despector.decompiler.method.graph.data.opcode.BodyOpcodeBlock;
 import org.spongepowered.despector.decompiler.method.graph.data.opcode.GotoOpcodeBlock;
 import org.spongepowered.despector.decompiler.method.graph.data.opcode.OpcodeBlock;
 import org.spongepowered.despector.decompiler.method.graph.data.opcode.SwitchOpcodeBlock;
@@ -78,6 +81,8 @@ public class SwitchBlockProcessor implements GraphProcessor {
             Map<Label, SwitchCaseBlockSection> cases = new HashMap<>();
             int index = 0;
             OpcodeBlock end = null;
+            OpcodeBlock fartherst = null;
+            int farthest_break = 0;
             for (LabelNode l : labels) {
                 SwitchCaseBlockSection cs = cases.get(l.getLabel());
                 if (cs != null) {
@@ -92,14 +97,20 @@ public class SwitchBlockProcessor implements GraphProcessor {
                 OpcodeBlock block = sblock.getAdditionalTargets().get(l.getLabel());
                 case_region.add(block);
                 int start = blocks.indexOf(block) + 1;
-                block = blocks.get(start);
-                while (!sblock.getAdditionalTargets().containsValue(block) && block != end) {
-                    case_region.add(block);
-                    start++;
+                if (start < blocks.size()) {
                     block = blocks.get(start);
+                    while (!sblock.getAdditionalTargets().containsValue(block) && block != end) {
+                        case_region.add(block);
+                        start++;
+                        block = blocks.get(start);
+                    }
                 }
 
                 OpcodeBlock last = case_region.get(case_region.size() - 1);
+                if (last.getBreakpoint() > farthest_break) {
+                    fartherst = last;
+                    farthest_break = last.getBreakpoint();
+                }
                 if (last instanceof GotoOpcodeBlock) {
                     end = last.getTarget();
                     case_region.remove(last);
@@ -125,7 +136,6 @@ public class SwitchBlockProcessor implements GraphProcessor {
             SwitchCaseBlockSection cs = cases.get(dflt.getLabel());
             if (cs != null) {
                 cs.setDefault(true);
-                cs.getTargets().add(index);
             } else {
                 cs = sswitch.new SwitchCaseBlockSection();
                 cases.put(dflt.getLabel(), cs);
@@ -134,11 +144,18 @@ public class SwitchBlockProcessor implements GraphProcessor {
                 OpcodeBlock block = sblock.getAdditionalTargets().get(dflt.getLabel());
                 case_region.add(block);
                 int start = blocks.indexOf(block) + 1;
-                block = blocks.get(start);
-                while (!sblock.getAdditionalTargets().containsValue(block) && block != end) {
-                    case_region.add(block);
-                    start++;
+                if (start < blocks.size()) {
                     block = blocks.get(start);
+                    while (!sblock.getAdditionalTargets().containsValue(block) && block != end) {
+                        case_region.add(block);
+                        start++;
+                        block = blocks.get(start);
+                    }
+                }
+                OpcodeBlock last = case_region.get(case_region.size() - 1);
+                if (last.getBreakpoint() > farthest_break) {
+                    fartherst = last;
+                    farthest_break = last.getBreakpoint();
                 }
                 cs.setDefault(true);
                 try {
@@ -157,6 +174,9 @@ public class SwitchBlockProcessor implements GraphProcessor {
                         throw e;
                     }
                 }
+            }
+            if (end == null) {
+                return blocks.indexOf(fartherst);
             }
             return blocks.indexOf(end) - 1;
         }
