@@ -37,7 +37,7 @@ public class InvokeEmitter implements StatementEmitter<InvokeStatement> {
         Instruction i = insn.getInstruction();
         if (i instanceof InstanceMethodInvoke) {
             InstanceMethodInvoke mth = (InstanceMethodInvoke) i;
-            if (mth.getMethodName().equals("<init>") && mth.getParams().length == 0) {
+            if (mth.getMethodName().equals("<init>") && (mth.getParams().length == 0 || mth.getOwner().equals("Ljava/lang/Enum;"))) {
                 return;
             }
         }
