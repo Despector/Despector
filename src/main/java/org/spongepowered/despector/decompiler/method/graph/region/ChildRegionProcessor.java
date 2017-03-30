@@ -83,7 +83,7 @@ public class ChildRegionProcessor implements RegionProcessor {
                         if (last_goto.getTarget() == sstart) {
                             // while loop and this is a break;
                             is_break = true;
-                        } else if(last_goto.getTarget() == next) {
+                        } else if (last_goto.getTarget() == next) {
                             is_first_condition = false;
                         }
                     } else if (last instanceof ConditionalOpcodeBlock) {
@@ -114,21 +114,35 @@ public class ChildRegionProcessor implements RegionProcessor {
                         }
                         continue;
                     }
+                } else if (end == -1 && next instanceof ConditionalOpcodeBlock) {
+                    GotoOpcodeBlock pos = null;
+                    for (OpcodeBlock targeting : ret.getTargettedBy()) {
+                        if (targeting instanceof GotoOpcodeBlock) {
+                            GotoOpcodeBlock ggoto = (GotoOpcodeBlock) targeting;
+                            if (ggoto.getBreakpoint() > next.getBreakpoint() && (pos == null || ggoto.getBreakpoint() < pos.getBreakpoint())) {
+                                pos = ggoto;
+                            }
+                        }
+                    }
+                    if (pos != null) {
+                        next.setTarget(pos);
+                        end = region.indexOf(pos);
+                    }
                 }
-            } else if(next.getTarget() == sstart) {
+            } else if (next.getTarget() == sstart) {
                 // this is a continue statement
                 boolean part_of_end = true;
-                for(int o = i + 1; o < region.size() - subregion_search_end; o++) {
+                for (int o = i + 1; o < region.size() - subregion_search_end; o++) {
                     OpcodeBlock n = region.get(o);
-                    if(n instanceof ConditionalOpcodeBlock) {
-                        if(n.getTarget() == sstart || n.getTarget() == ret) {
+                    if (n instanceof ConditionalOpcodeBlock) {
+                        if (n.getTarget() == sstart || n.getTarget() == ret) {
                             continue;
                         }
                     }
                     part_of_end = false;
                     break;
                 }
-                if(part_of_end) {
+                if (part_of_end) {
                     return null;
                 }
                 BreakBlockSection sec = null;
@@ -151,7 +165,7 @@ public class ChildRegionProcessor implements RegionProcessor {
                     i--;
                 }
                 OpcodeBlock last = region.get(region.size() - 1);
-                if(!(last instanceof GotoOpcodeBlock) && sstart instanceof ConditionalOpcodeBlock) {
+                if (!(last instanceof GotoOpcodeBlock) && sstart instanceof ConditionalOpcodeBlock) {
                     GotoOpcodeBlock fakeLoop = new GotoOpcodeBlock(last.getBreakpoint());
                     fakeLoop.setTarget(sstart);
                     region.add(fakeLoop);

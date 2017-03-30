@@ -264,6 +264,28 @@ public class BranchTest {
         check(getClass(), "mth_if13", good);
     }
 
+    public void mth_if14(int i, boolean a, boolean b, boolean c, boolean d, boolean e, boolean f) {
+        if (a) {
+            if (b) {
+                System.out.println(e);
+            }
+        } else {
+            System.out.println(d);
+        }
+    }
+
+    @Test
+    public void testIfWithNesting2() throws IOException {
+        String good = "if (a) {\n"
+                + "    if (b) {\n"
+                + "        System.out.println(e);\n"
+                + "    }\n"
+                + "} else {\n"
+                + "    System.out.println(d);\n"
+                + "}";
+        check(getClass(), "mth_if14", good);
+    }
+
     public void mth_if15(int i, boolean a, boolean b, boolean c, boolean d, boolean e, boolean f) {
         if (a) {
             System.out.println(a);
