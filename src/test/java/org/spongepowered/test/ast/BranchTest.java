@@ -313,6 +313,31 @@ public class BranchTest {
                 + "}";
         check(getClass(), "mth_ifnest3", good);
     }
+    public void mth_ifnest4(int i, boolean a, boolean b, boolean c, boolean d, boolean e, boolean f) {
+        if (a) {
+            if (b) {
+                System.out.println(e);
+            } else if(c) {
+                System.out.println(c);
+            }
+        } else if(f) {
+            System.out.println(f);
+        }
+    }
+
+    @Test
+    public void testIfWithNesting4() throws IOException {
+        String good = "if (a) {\n"
+                + "    if (b) {\n"
+                + "        System.out.println(e);\n"
+                + "    } else if (c) {\n"
+                + "        System.out.println(c);\n"
+                + "    }\n"
+                + "} else if (f) {\n"
+                + "    System.out.println(f);\n"
+                + "}";
+        check(getClass(), "mth_ifnest4", good);
+    }
 
     public void mth_if15(int i, boolean a, boolean b, boolean c, boolean d, boolean e, boolean f) {
         if (a) {

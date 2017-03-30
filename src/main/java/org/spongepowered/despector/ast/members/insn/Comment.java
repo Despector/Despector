@@ -32,11 +32,17 @@ public class Comment implements Statement {
     private final List<String> comment_text = new ArrayList<>();
 
     public Comment(String text) {
-        this.comment_text.add(text);
+        for (String line : text.split("\n")) {
+            this.comment_text.add(line);
+        }
     }
 
-    public Comment(List<String> text) {
-        this.comment_text.addAll(text);
+    public Comment(List<String> texts) {
+        for (String text : texts) {
+            for (String line : text.split("\n")) {
+                this.comment_text.add(line);
+            }
+        }
     }
 
     public List<String> getCommentText() {

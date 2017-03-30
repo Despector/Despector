@@ -106,10 +106,10 @@ public interface RegionProcessor {
             end = blocks.indexOf(region_start.getTarget());
         }
         boolean isGoto = region_start instanceof GotoOpcodeBlock;
-        return getRegionEnd(blocks, start, end, isGoto);
+        return getRegionEnd(blocks, start, end, isGoto, ret);
     }
 
-    static int getRegionEnd(List<OpcodeBlock> blocks, int start, int end, boolean isGoto) {
+    static int getRegionEnd(List<OpcodeBlock> blocks, int start, int end, boolean isGoto, OpcodeBlock ret) {
 
         // This is a rather brute force search for the next node after the start
         // node which post-dominates the preceding nodes.
@@ -171,6 +171,24 @@ public interface RegionProcessor {
                         if (alt != next) {
                             end = Math.max(end, alt_end);
                             ((GotoOpcodeBlock) next).setTarget(alt);
+                            continue;
+                        }
+                    } else {
+                        OpcodeBlock target = next.getTarget();
+                        OpcodeBlock alt = next;
+                        int alt_end = o;
+                        for (OpcodeBlock block : target.getTargettedBy()) {
+                            if (block instanceof GotoOpcodeBlock) {
+                                int block_index = blocks.indexOf(block);
+                                if (block_index > start && block_index < end && block_index > alt_end) {
+                                    alt_end = block_index;
+                                    alt = block;
+                                }
+                            }
+                        }
+                        if (alt != next) {
+                            end = Math.max(end, alt_end);
+                            next.setTarget(alt);
                             continue;
                         }
                     }
