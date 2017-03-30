@@ -45,7 +45,7 @@ public class NewEmitter implements InstructionEmitter<New> {
 
         if (arg.getType().getName().contains("$")) {
             String last = arg.getType().getName();
-            int last$ = last.indexOf('$');
+            int last$ = last.lastIndexOf('$');
             last = last.substring(last$ + 1);
             if (last.matches("[0-9]+")) {
                 TypeEntry anon_type = ctx.getType().getSource().get(arg.getType().getName());

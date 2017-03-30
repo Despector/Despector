@@ -64,7 +64,7 @@ public class AnonymousClassEmitter implements SpecialEmitter {
 
         int syn_field_count = 0;
         for (FieldEntry fld : type.getFields()) {
-            if (fld.getName().startsWith("val$") && fld.isSynthetic()) {
+            if ((fld.getName().startsWith("val$") || fld.getName().startsWith("this$")) && fld.isSynthetic()) {
                 syn_field_count++;
             }
         }
@@ -74,7 +74,7 @@ public class AnonymousClassEmitter implements SpecialEmitter {
         for (int i = 0; i < new_insn.getParameters().length - syn_field_count; i++) {
             Instruction param = new_insn.getParameters()[i];
             ctx.emit(param, ClassTypeSignature.of(param_types.get(i)));
-            if (i < new_insn.getParameters().length - 1) {
+            if (i < new_insn.getParameters().length - 1 - syn_field_count) {
                 ctx.printString(", ");
             }
         }
