@@ -335,6 +335,10 @@ public final class AstUtil {
         case DUP2:
         case DUP2_X1:
         case DUP2_X2:
+            return 3;
+        case DUP:
+        case DUP_X1:
+        case DUP_X2:
             return 2;
         case ACONST_NULL:
         case ICONST_M1:
@@ -359,9 +363,6 @@ public final class AstUtil {
         case FLOAD:
         case DLOAD:
         case ALOAD:
-        case DUP:
-        case DUP_X1:
-        case DUP_X2:
         case GETSTATIC:
         case NEW:
         case SWAP:
@@ -525,6 +526,21 @@ public final class AstUtil {
         return null;
     }
 
+    public static AbstractInsnNode getLastOpcode(List<AbstractInsnNode> opcodes) {
+        for (int index = opcodes.size() - 1; index >= 0; index--) {
+            AbstractInsnNode next = opcodes.get(index);
+            if (next instanceof LabelNode) {
+                continue;
+            } else if (next instanceof FrameNode) {
+                continue;
+            } else if (next instanceof LineNumberNode) {
+                continue;
+            }
+            return next;
+        }
+        return null;
+    }
+
     public static boolean hasStartingRequirement(List<AbstractInsnNode> opcodes) {
         int size = 0;
         for (int i = 0; i < opcodes.size(); i++) {
@@ -556,6 +572,7 @@ public final class AstUtil {
                 continue;
             }
             required_stack += getStackDelta(next);
+//            System.out.println(AstUtil.insnToString(next) + " now " + required_stack);
         }
         return 0;
     }

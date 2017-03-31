@@ -24,6 +24,7 @@
  */
 package org.spongepowered.despector.decompiler.method.graph.process;
 
+import static org.mockito.asm.Opcodes.*;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.LabelNode;
@@ -36,6 +37,7 @@ import org.spongepowered.despector.decompiler.method.graph.data.block.BlockSecti
 import org.spongepowered.despector.decompiler.method.graph.data.block.CommentBlockSection;
 import org.spongepowered.despector.decompiler.method.graph.data.block.SwitchBlockSection;
 import org.spongepowered.despector.decompiler.method.graph.data.block.SwitchBlockSection.SwitchCaseBlockSection;
+import org.spongepowered.despector.decompiler.method.graph.data.opcode.BodyOpcodeBlock;
 import org.spongepowered.despector.decompiler.method.graph.data.opcode.GotoOpcodeBlock;
 import org.spongepowered.despector.decompiler.method.graph.data.opcode.OpcodeBlock;
 import org.spongepowered.despector.decompiler.method.graph.data.opcode.SwitchOpcodeBlock;
@@ -80,6 +82,7 @@ public class SwitchBlockProcessor implements GraphProcessor {
             OpcodeBlock end = null;
             OpcodeBlock fartherst = null;
             int farthest_break = 0;
+            boolean all_return = true;
             for (LabelNode l : labels) {
                 SwitchCaseBlockSection cs = cases.get(l.getLabel());
                 if (cs != null) {
@@ -111,6 +114,14 @@ public class SwitchBlockProcessor implements GraphProcessor {
                     fartherst = last;
                     farthest_break = last.getBreakpoint();
                 }
+                if (last instanceof BodyOpcodeBlock) {
+                    int op = AstUtil.getLastOpcode(last.getOpcodes()).getOpcode();
+                    if (op < IRETURN || op > RETURN) {
+                        all_return = false;
+                    }
+                } else {
+                    all_return = false;
+                }
                 if (last instanceof GotoOpcodeBlock) {
                     end = last.getTarget();
                     case_region.remove(last);
@@ -136,7 +147,7 @@ public class SwitchBlockProcessor implements GraphProcessor {
             SwitchCaseBlockSection cs = cases.get(dflt.getLabel());
             if (cs != null) {
                 cs.setDefault(true);
-            } else {
+            } else if (!all_return) {
                 cs = sswitch.new SwitchCaseBlockSection();
                 cases.put(dflt.getLabel(), cs);
                 sswitch.addCase(cs);

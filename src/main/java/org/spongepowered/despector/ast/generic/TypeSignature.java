@@ -60,7 +60,7 @@ public abstract class TypeSignature {
     public static TypeSignature getArrayComponent(TypeSignature type) {
         if (type instanceof ClassTypeSignature) {
             ClassTypeSignature sig = (ClassTypeSignature) type;
-            ClassTypeSignature array = ClassTypeSignature.of(sig.getType().substring(1));
+            ClassTypeSignature array = ClassTypeSignature.of(sig.getType().substring(1), true);
             array.getArguments().addAll(sig.getArguments());
             return array;
         } else if (type instanceof TypeVariableSignature) {
