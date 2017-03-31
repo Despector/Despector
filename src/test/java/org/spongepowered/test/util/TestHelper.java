@@ -94,7 +94,7 @@ public class TestHelper {
         ClassNode cn = new ClassNode();
         cr.accept(cn, 0);
         TypeEntry type = Decompilers.WILD.decompile(cn, DUMMY_SOURCE_SET);
-        MethodEntry method = type.getMethodSafe(method_name);
+        MethodEntry method = type.getStaticMethodSafe(method_name);
         return getAsString(type, method);
     }
 

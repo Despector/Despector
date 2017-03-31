@@ -22,49 +22,46 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.test.util;
+package org.spongepowered.test.decompile;
 
-import static org.objectweb.asm.Opcodes.ACC_PUBLIC;
-import static org.objectweb.asm.Opcodes.ACC_STATIC;
-import static org.objectweb.asm.Opcodes.ACC_SUPER;
-import static org.objectweb.asm.Opcodes.V1_8;
+import static org.objectweb.asm.Opcodes.*;
 
-import org.objectweb.asm.ClassWriter;
+import org.junit.Assert;
+import org.junit.Test;
+import org.objectweb.asm.Label;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.GeneratorAdapter;
 import org.objectweb.asm.commons.Method;
+import org.spongepowered.test.util.TestHelper;
+import org.spongepowered.test.util.TestMethodBuilder;
 
-public class TestMethodBuilder {
+public class IfTests {
 
-    private ClassWriter cw;
-    private GeneratorAdapter generator;
+    private static final Type THIS_TYPE = Type.getType(IfTests.class);
 
-    public TestMethodBuilder(String name, String sig) {
-        this.cw = new ClassWriter(ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES);
-        this.cw.visit(V1_8, ACC_PUBLIC | ACC_SUPER, name + "_Class", null, "java/lang/Object", null);
-
-        Method m = Method.getMethod("void <init> ()");
-        GeneratorAdapter mg = new GeneratorAdapter(ACC_PUBLIC, m, null, null, this.cw);
-        mg.loadThis();
-        mg.invokeConstructor(Type.getType(Object.class), m);
-        mg.returnValue();
-        mg.endMethod();
-
-        m = Method.getMethod(sig);
-        mg = new GeneratorAdapter(ACC_PUBLIC + ACC_STATIC, m, null, null, this.cw);
-        this.generator = mg;
-        this.cw.visitEnd();
+    public static void body() {
 
     }
 
-    public GeneratorAdapter getGenerator() {
-        return this.generator;
-    }
+    @Test
+    public void testSimple() {
+        TestMethodBuilder builder = new TestMethodBuilder("test_mth", "void test_mth (boolean)");
+        GeneratorAdapter mv = builder.getGenerator();
+        Label start = mv.newLabel();
+        mv.visitLabel(start);
+        Label end = mv.newLabel();
+        mv.loadArg(0);
+        mv.ifZCmp(GeneratorAdapter.EQ, end);
+        mv.invokeStatic(THIS_TYPE, Method.getMethod("void body ()"));
+        mv.visitLabel(end);
+        mv.visitInsn(RETURN);
+        mv.visitLocalVariable("a", "Z", null, start, end, 0);
 
-    public byte[] finish() {
-        this.generator.endMethod();
-        this.cw.visitEnd();
-        return this.cw.toByteArray();
+        String insn = TestHelper.getAsString(builder.finish(), "test_mth");
+        String good = "if (a) {\n"
+                + "    IfTests.body();\n"
+                + "}";
+        Assert.assertEquals(good, insn);
     }
 
 }
