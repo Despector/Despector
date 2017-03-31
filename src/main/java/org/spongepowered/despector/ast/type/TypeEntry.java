@@ -23,6 +23,7 @@
  * THE SOFTWARE.
  */
 package org.spongepowered.despector.ast.type;
+
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.objectweb.asm.Opcodes.ACC_ABSTRACT;
@@ -77,7 +78,8 @@ public abstract class TypeEntry extends AstEntry {
     protected final Map<AnnotationType, Annotation> annotations = new LinkedHashMap<>();
     protected final Map<String, InnerClassInfo> inner_classes = new LinkedHashMap<>();
 
-    @Nullable protected ClassSignature signature;
+    @Nullable
+    protected ClassSignature signature;
 
     public TypeEntry(SourceSet source, Language lang, String name) {
         super(source);

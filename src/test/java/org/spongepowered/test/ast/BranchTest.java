@@ -41,66 +41,6 @@ import java.io.IOException;
 @SuppressWarnings("unused")
 public class BranchTest {
 
-    public void mth_for(int i, boolean c) {
-        for (i = 0; i < 5; i++) {
-            System.out.println(c);
-        }
-    }
-
-    @Test
-    public void testBasicFor() throws IOException {
-        String good = "for (i = 0; i < 5; i++) {\n"
-                + "    System.out.println(c);\n"
-                + "}";
-        check(getClass(), "mth_for", good);
-    }
-
-    public void mth_for2(int i, boolean d, boolean e, boolean f) {
-        for (; e && d;) {
-            System.out.println(f);
-        }
-    }
-
-    @Test
-    public void testForThatLooksLikeAWhile() throws IOException {
-        String good = "while (e && d) {\n"
-                + "    System.out.println(f);\n"
-                + "}";
-        check(getClass(), "mth_for2", good);
-    }
-
-    public void mth_while(int i, boolean a, boolean d, boolean e) {
-        while (a ^ d) {
-            System.out.println(e);
-        }
-    }
-
-    @Test
-    public void testBasicWhile() throws IOException {
-        String good = "while (a ^ d) {\n"
-                + "    System.out.println(e);\n"
-                + "}";
-        check(getClass(), "mth_while", good);
-    }
-
-    public void mth_while2(int i, boolean a, boolean d, boolean e) {
-        while (a ^ d) {
-            if (e) {
-                System.out.println(e);
-            }
-        }
-    }
-
-    @Test
-    public void testBasicWhileWithNesting() throws IOException {
-        String good = "while (a ^ d) {\n"
-                + "    if (e) {\n"
-                + "        System.out.println(e);\n"
-                + "    }\n"
-                + "}";
-        check(getClass(), "mth_while2", good);
-    }
-
     public void mth_dowhile(int i, boolean d, boolean e, boolean f) {
         do {
             System.out.println(d);
