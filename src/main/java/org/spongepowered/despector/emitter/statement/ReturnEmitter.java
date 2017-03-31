@@ -25,6 +25,7 @@
 package org.spongepowered.despector.emitter.statement;
 
 import org.spongepowered.despector.ast.generic.ClassTypeSignature;
+import org.spongepowered.despector.ast.generic.TypeSignature;
 import org.spongepowered.despector.ast.members.insn.misc.Return;
 import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.StatementEmitter;
@@ -36,14 +37,15 @@ public class ReturnEmitter implements StatementEmitter<Return> {
     public void emit(EmitterContext ctx, Return insn, boolean semicolon) {
         ctx.printString("return");
         if (insn.getValue().isPresent()) {
-            String type = null;
+            TypeSignature type = null;
             if (ctx.getMethod() != null) {
-                type = TypeHelper.getRet(ctx.getMethod().getSignature());
+                type = ClassTypeSignature.of(TypeHelper.getRet(ctx.getMethod().getSignature()));
             }
             ctx.printString(" ");
-            ctx.emit(insn.getValue().get(), ClassTypeSignature.of(type));
+            ctx.emit(insn.getValue().get(), type);
         }
-        if(semicolon) ctx.printString(";");
+        if (semicolon)
+            ctx.printString(";");
     }
 
 }
