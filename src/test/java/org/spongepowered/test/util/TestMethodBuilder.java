@@ -53,7 +53,6 @@ public class TestMethodBuilder {
         m = Method.getMethod(sig);
         mg = new GeneratorAdapter(ACC_PUBLIC + ACC_STATIC, m, null, null, this.cw);
         this.generator = mg;
-        this.cw.visitEnd();
 
     }
 

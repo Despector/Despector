@@ -624,4 +624,100 @@ public class IfTests {
         Assert.assertEquals(good, insn);
     }
 
+    @Test
+    public void testNestedInstanceOf() {
+        TestMethodBuilder builder = new TestMethodBuilder("test_mth", "void test_mth (boolean, Object)");
+        GeneratorAdapter mv = builder.getGenerator();
+        Label start = mv.newLabel();
+        mv.visitLabel(start);
+        Label l1 = mv.newLabel();
+        Label end = mv.newLabel();
+        mv.loadArg(0);
+        mv.ifZCmp(EQ, end);
+        mv.invokeStatic(THIS_TYPE, Method.getMethod("void body ()"));
+        mv.loadArg(1);
+        mv.instanceOf(THIS_TYPE);
+        mv.ifZCmp(EQ, l1);
+        mv.invokeStatic(THIS_TYPE, Method.getMethod("void body ()"));
+        mv.visitLabel(l1);
+        mv.visitLabel(end);
+        mv.visitInsn(RETURN);
+        mv.visitLocalVariable("a", "Z", null, start, end, 0);
+        mv.visitLocalVariable("b", "Ljava/lang/Object;", null, start, end, 1);
+
+        String insn = TestHelper.getAsString(builder.finish(), "test_mth");
+        String good = "if (a) {\n"
+                + "    IfTests.body();\n"
+                + "    if (b instanceof IfTests) {\n"
+                + "        IfTests.body();\n"
+                + "    }\n"
+                + "}";
+        Assert.assertEquals(good, insn);
+    }
+
+    @Test
+    public void testNestedInstanceOfOptimized() {
+        TestMethodBuilder builder = new TestMethodBuilder("test_mth", "void test_mth (boolean, Object)");
+        GeneratorAdapter mv = builder.getGenerator();
+        Label start = mv.newLabel();
+        mv.visitLabel(start);
+        Label end = mv.newLabel();
+        mv.loadArg(0);
+        mv.ifZCmp(EQ, end);
+        mv.invokeStatic(THIS_TYPE, Method.getMethod("void body ()"));
+        mv.loadArg(1);
+        mv.instanceOf(THIS_TYPE);
+        mv.ifZCmp(EQ, end);
+        mv.invokeStatic(THIS_TYPE, Method.getMethod("void body ()"));
+        mv.visitLabel(end);
+        mv.visitInsn(RETURN);
+        mv.visitLocalVariable("a", "Z", null, start, end, 0);
+        mv.visitLocalVariable("b", "Ljava/lang/Object;", null, start, end, 1);
+
+        String insn = TestHelper.getAsString(builder.finish(), "test_mth");
+        String good = "if (a) {\n"
+                + "    IfTests.body();\n"
+                + "    if (b instanceof IfTests) {\n"
+                + "        IfTests.body();\n"
+                + "    }\n"
+                + "}";
+        Assert.assertEquals(good, insn);
+    }
+
+    @Test
+    public void testIfReturns() {
+        TestMethodBuilder builder = new TestMethodBuilder("test_mth", "void test_mth (boolean, boolean)");
+        GeneratorAdapter mv = builder.getGenerator();
+        Label start = mv.newLabel();
+        mv.visitLabel(start);
+        Label l1 = mv.newLabel();
+        Label end = mv.newLabel();
+        mv.loadArg(0);
+        mv.ifZCmp(EQ, l1);
+        mv.invokeStatic(THIS_TYPE, Method.getMethod("void body ()"));
+        mv.visitInsn(RETURN);
+        mv.visitLabel(l1);
+        mv.loadArg(1);
+        mv.ifZCmp(EQ, end);
+        mv.invokeStatic(THIS_TYPE, Method.getMethod("void body ()"));
+        mv.visitInsn(RETURN);
+        mv.visitLabel(end);
+        mv.invokeStatic(THIS_TYPE, Method.getMethod("void body ()"));
+        mv.visitInsn(RETURN);
+        mv.visitLocalVariable("a", "Z", null, start, end, 0);
+        mv.visitLocalVariable("b", "Z", null, start, end, 1);
+
+        String insn = TestHelper.getAsString(builder.finish(), "test_mth");
+        String good = "if (a) {\n"
+                + "    IfTests.body();\n"
+                + "    return;\n"
+                + "}\n"
+                + "if (b) {\n"
+                + "    IfTests.body();\n"
+                + "    return;\n"
+                + "}\n"
+                + "IfTests.body();";
+        Assert.assertEquals(good, insn);
+    }
+
 }

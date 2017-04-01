@@ -64,7 +64,7 @@ public class WhileTests {
 
         String insn = TestHelper.getAsString(builder.finish(), "test_mth");
         String good = "while (i < 5) {\n"
-                + "    LoopTests.body();\n"
+                + "    WhileTests.body();\n"
                 + "}";
         Assert.assertEquals(good, insn);
     }
@@ -91,7 +91,7 @@ public class WhileTests {
 
         String insn = TestHelper.getAsString(builder.finish(), "test_mth");
         String good = "while (i < 5) {\n"
-                + "    LoopTests.body();\n"
+                + "    WhileTests.body();\n"
                 + "}";
         Assert.assertEquals(good, insn);
     }
@@ -119,7 +119,7 @@ public class WhileTests {
 
         String insn = TestHelper.getAsString(builder.finish(), "test_mth");
         String good = "for (i = 0; i < 5; i++) {\n"
-                + "    LoopTests.body();\n"
+                + "    WhileTests.body();\n"
                 + "}";
         Assert.assertEquals(good, insn);
     }
@@ -149,7 +149,7 @@ public class WhileTests {
 
         String insn = TestHelper.getAsString(builder.finish(), "test_mth");
         String good = "for (i = 0; i < 5; i++) {\n"
-                + "    LoopTests.body();\n"
+                + "    WhileTests.body();\n"
                 + "}";
         Assert.assertEquals(good, insn);
     }
@@ -176,7 +176,7 @@ public class WhileTests {
 
         String insn = TestHelper.getAsString(builder.finish(), "test_mth");
         String good = "while (a && b) {\n"
-                + "    LoopTests.body();\n"
+                + "    WhileTests.body();\n"
                 + "}";
         Assert.assertEquals(good, insn);
     }
@@ -205,7 +205,7 @@ public class WhileTests {
 
         String insn = TestHelper.getAsString(builder.finish(), "test_mth");
         String good = "while (a && b) {\n"
-                + "    LoopTests.body();\n"
+                + "    WhileTests.body();\n"
                 + "}";
         Assert.assertEquals(good, insn);
     }
@@ -236,9 +236,9 @@ public class WhileTests {
         String insn = TestHelper.getAsString(builder.finish(), "test_mth");
         String good = "while (a) {\n"
                 + "    if (b) {\n"
-                + "        LoopTests.body();\n"
+                + "        WhileTests.body();\n"
                 + "    }\n"
-                + "    LoopTests.body();\n"
+                + "    WhileTests.body();\n"
                 + "}";
         Assert.assertEquals(good, insn);
     }
@@ -271,9 +271,219 @@ public class WhileTests {
         String insn = TestHelper.getAsString(builder.finish(), "test_mth");
         String good = "while (a) {\n"
                 + "    if (b) {\n"
-                + "        LoopTests.body();\n"
+                + "        WhileTests.body();\n"
                 + "    }\n"
-                + "    LoopTests.body();\n"
+                + "    WhileTests.body();\n"
+                + "}";
+        Assert.assertEquals(good, insn);
+    }
+
+    @Test
+    public void testWhileBreak() {
+        TestMethodBuilder builder = new TestMethodBuilder("test_mth", "void test_mth (int, boolean)");
+        GeneratorAdapter mv = builder.getGenerator();
+        Label start = mv.newLabel();
+        mv.visitLabel(start);
+        Label l1 = mv.newLabel();
+        Label l2 = mv.newLabel();
+        Label end = mv.newLabel();
+        mv.visitLabel(l1);
+        mv.loadArg(0);
+        mv.push(5);
+        mv.ifICmp(GE, end);
+        mv.invokeStatic(THIS_TYPE, Method.getMethod("void body ()"));
+        mv.loadArg(1);
+        mv.ifZCmp(EQ, l2);
+        mv.goTo(end);
+        mv.visitLabel(l2);
+        mv.goTo(l1);
+        mv.visitLabel(end);
+        mv.visitInsn(RETURN);
+        mv.visitLocalVariable("i", "I", null, start, end, 0);
+        mv.visitLocalVariable("a", "Z", null, start, end, 1);
+
+        String insn = TestHelper.getAsString(builder.finish(), "test_mth");
+        String good = "while (i < 5) {\n"
+                + "    WhileTests.body();\n"
+                + "    if (a) {\n"
+                + "        break;\n"
+                + "    }\n"
+                + "}";
+        Assert.assertEquals(good, insn);
+    }
+
+    @Test
+    public void testWhileBreakInverse() {
+        TestMethodBuilder builder = new TestMethodBuilder("test_mth", "void test_mth (int, boolean)");
+        GeneratorAdapter mv = builder.getGenerator();
+        Label start = mv.newLabel();
+        mv.visitLabel(start);
+        Label l1 = mv.newLabel();
+        Label l2 = mv.newLabel();
+        Label end = mv.newLabel();
+        mv.goTo(l2);
+        mv.visitLabel(l1);
+        mv.invokeStatic(THIS_TYPE, Method.getMethod("void body ()"));
+        mv.loadArg(1);
+        mv.ifZCmp(EQ, l2);
+        mv.goTo(end);
+        mv.visitLabel(l2);
+        mv.loadArg(0);
+        mv.push(5);
+        mv.ifICmp(LT, l1);
+        mv.visitLabel(end);
+        mv.visitInsn(RETURN);
+        mv.visitLocalVariable("i", "I", null, start, end, 0);
+        mv.visitLocalVariable("a", "Z", null, start, end, 1);
+
+        String insn = TestHelper.getAsString(builder.finish(), "test_mth");
+        String good = "while (i < 5) {\n"
+                + "    WhileTests.body();\n"
+                + "    if (a) {\n"
+                + "        break;\n"
+                + "    }\n"
+                + "}";
+        Assert.assertEquals(good, insn);
+    }
+
+    @Test
+    public void testWhileContinue() {
+        TestMethodBuilder builder = new TestMethodBuilder("test_mth", "void test_mth (int, boolean)");
+        GeneratorAdapter mv = builder.getGenerator();
+        Label start = mv.newLabel();
+        mv.visitLabel(start);
+        Label l1 = mv.newLabel();
+        Label l2 = mv.newLabel();
+        Label end = mv.newLabel();
+        mv.visitLabel(l1);
+        mv.loadArg(0);
+        mv.push(5);
+        mv.ifICmp(GE, end);
+        mv.invokeStatic(THIS_TYPE, Method.getMethod("void body ()"));
+        mv.loadArg(1);
+        mv.ifZCmp(EQ, l2);
+        mv.goTo(l1);
+        mv.visitLabel(l2);
+        mv.goTo(l1);
+        mv.visitLabel(end);
+        mv.visitInsn(RETURN);
+        mv.visitLocalVariable("i", "I", null, start, end, 0);
+        mv.visitLocalVariable("a", "Z", null, start, end, 1);
+
+        String insn = TestHelper.getAsString(builder.finish(), "test_mth");
+        String good = "while (i < 5) {\n"
+                + "    WhileTests.body();\n"
+                + "    if (a) {\n"
+                + "        continue;\n"
+                + "    }\n"
+                + "}";
+        Assert.assertEquals(good, insn);
+    }
+
+    @Test
+    public void testWhileContinueInverse() {
+        TestMethodBuilder builder = new TestMethodBuilder("test_mth", "void test_mth (int, boolean)");
+        GeneratorAdapter mv = builder.getGenerator();
+        Label start = mv.newLabel();
+        mv.visitLabel(start);
+        Label l1 = mv.newLabel();
+        Label l2 = mv.newLabel();
+        Label l3 = mv.newLabel();
+        Label end = mv.newLabel();
+        mv.goTo(l3);
+        mv.visitLabel(l1);
+        mv.invokeStatic(THIS_TYPE, Method.getMethod("void body ()"));
+        mv.loadArg(1);
+        mv.ifZCmp(EQ, l2);
+        mv.goTo(l3);
+        mv.visitLabel(l2);
+        mv.invokeStatic(THIS_TYPE, Method.getMethod("void body ()"));
+        mv.visitLabel(l3);
+        mv.loadArg(0);
+        mv.push(5);
+        mv.ifICmp(LT, l1);
+        mv.visitLabel(end);
+        mv.visitInsn(RETURN);
+        mv.visitLocalVariable("i", "I", null, start, end, 0);
+        mv.visitLocalVariable("a", "Z", null, start, end, 1);
+
+        String insn = TestHelper.getAsString(builder.finish(), "test_mth");
+        String good = "while (i < 5) {\n"
+                + "    WhileTests.body();\n"
+                + "    if (a) {\n"
+                + "        continue;\n"
+                + "    }\n"
+                + "    WhileTests.body();\n"
+                + "}";
+        Assert.assertEquals(good, insn);
+    }
+
+    @Test
+    public void testIfThenWhileInverse() {
+        // the target of an if preceeding a while which has been made in the
+        // inverse manner will be optimized to point to the condition of the
+        // while loop rather than the start of the while loop
+        TestMethodBuilder builder = new TestMethodBuilder("test_mth", "void test_mth (int, boolean)");
+        GeneratorAdapter mv = builder.getGenerator();
+        Label start = mv.newLabel();
+        mv.visitLabel(start);
+        Label l1 = mv.newLabel();
+        Label l2 = mv.newLabel();
+        Label end = mv.newLabel();
+        mv.loadArg(1);
+        mv.ifZCmp(EQ, l2);
+        mv.visitInsn(RETURN);
+        mv.visitLabel(l1);
+        mv.invokeStatic(THIS_TYPE, Method.getMethod("void body ()"));
+        mv.visitLabel(l2);
+        mv.loadArg(0);
+        mv.push(5);
+        mv.ifICmp(LT, l1);
+        mv.visitLabel(end);
+        mv.visitInsn(RETURN);
+        mv.visitLocalVariable("i", "I", null, start, end, 0);
+        mv.visitLocalVariable("a", "Z", null, start, end, 1);
+
+        String insn = TestHelper.getAsString(builder.finish(), "test_mth");
+        String good = "if (a) {\n"
+                + "    return;\n"
+                + "}\n"
+                + "while (i < 5) {\n"
+                + "    WhileTests.body();\n"
+                + "}";
+        Assert.assertEquals(good, insn);
+    }
+
+    @Test
+    public void testWhileDirectBreak() {
+        // if the break is the only thing in a condition it will sometimes be
+        // optimized so that the inverse of the condition targets the outside of
+        // the loop rather than having a goto inside the condition
+        TestMethodBuilder builder = new TestMethodBuilder("test_mth", "void test_mth (int, boolean)");
+        GeneratorAdapter mv = builder.getGenerator();
+        Label start = mv.newLabel();
+        mv.visitLabel(start);
+        Label l1 = mv.newLabel();
+        Label end = mv.newLabel();
+        mv.visitLabel(l1);
+        mv.loadArg(0);
+        mv.push(5);
+        mv.ifICmp(GE, end);
+        mv.invokeStatic(THIS_TYPE, Method.getMethod("void body ()"));
+        mv.loadArg(1);
+        mv.ifZCmp(NE, end);
+        mv.goTo(l1);
+        mv.visitLabel(end);
+        mv.visitInsn(RETURN);
+        mv.visitLocalVariable("i", "I", null, start, end, 0);
+        mv.visitLocalVariable("a", "Z", null, start, end, 1);
+
+        String insn = TestHelper.getAsString(builder.finish(), "test_mth");
+        String good = "while (i < 5) {\n"
+                + "    WhileTests.body();\n"
+                + "    if (a) {\n"
+                + "        break;\n"
+                + "    }\n"
                 + "}";
         Assert.assertEquals(good, insn);
     }
