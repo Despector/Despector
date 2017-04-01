@@ -143,10 +143,16 @@ public class ChildRegionProcessor implements RegionProcessor {
                     }
                     if (is_break) {
                         BreakBlockSection sec = null;
-                        if (region.get(i - 1) instanceof ProcessedOpcodeBlock) {
-                            BlockSection compiled = ((ProcessedOpcodeBlock) region.get(i - 1)).getPrecompiledSection();
+                        OpcodeBlock prev = region.get(i - 1);
+                        if (prev instanceof ProcessedOpcodeBlock) {
+                            BlockSection compiled = ((ProcessedOpcodeBlock) prev).getPrecompiledSection();
                             if (compiled instanceof BreakBlockSection) {
                                 sec = (BreakBlockSection) compiled;
+                            }
+                        } else if(prev instanceof ConditionalOpcodeBlock) {
+                            ConditionalOpcodeBlock prev_cond = (ConditionalOpcodeBlock) prev;
+                            if(prev_cond.getTarget() == ret) {
+                                continue;
                             }
                         }
                         if (sec == null) {

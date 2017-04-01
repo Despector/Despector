@@ -243,9 +243,8 @@ public class SwitchTests {
                 + "case EIGHT:\n"
                 + "    SwitchTests.body();\n"
                 + "    return;\n"
-                + "default:\n"
-                + "    SwitchTests.body();\n"
-                + "}";
+                + "}\n"
+                + "SwitchTests.body();";
         Assert.assertEquals(good, insn);
     }
 
