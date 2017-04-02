@@ -24,7 +24,7 @@
  */
 package org.spongepowered.despector.decompiler.method.graph.process;
 
-import static org.mockito.asm.Opcodes.*;
+import static org.objectweb.asm.Opcodes.*;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.LabelNode;
