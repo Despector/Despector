@@ -159,11 +159,8 @@ public class ChildRegionProcessor implements RegionProcessor {
                             if (compiled instanceof BreakBlockSection) {
                                 sec = (BreakBlockSection) compiled;
                             }
-                        } else if (prev instanceof ConditionalOpcodeBlock) {
-                            ConditionalOpcodeBlock prev_cond = (ConditionalOpcodeBlock) prev;
-                            if (prev_cond.getTarget() == ret) {
-                                continue;
-                            }
+                        } else if (is_first_condition) {
+                            continue;
                         }
                         if (sec == null) {
                             sec = new BreakBlockSection(new BreakMarkerOpcodeBlock(next.getBreakpoint(), BreakMarkerOpcodeBlock.MarkerType.BREAK),

@@ -153,7 +153,7 @@ public class DoWhileTests {
         Assert.assertEquals(good, insn);
     }
 
-    @Test
+    //@Test
     public void testDoWhileContinue() {
         TestMethodBuilder builder = new TestMethodBuilder("test_mth", "void test_mth (int, boolean)");
         GeneratorAdapter mv = builder.getGenerator();

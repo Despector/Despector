@@ -28,7 +28,6 @@ import static org.spongepowered.test.util.TestHelper.check;
 
 import org.junit.Test;
 
-import java.io.IOException;
 import java.util.concurrent.Callable;
 import java.util.function.Consumer;
 
@@ -40,7 +39,7 @@ public class LambdaTest {
     }
 
     @Test
-    public void testLambda() throws IOException {
+    public void testLambda() {
         String good = "Runnable r = () -> System.out.println(\"Hello World\");\n"
                 + "r.run();";
         check(getClass(), "test_lambda", good);
@@ -52,7 +51,7 @@ public class LambdaTest {
     }
 
     @Test
-    public void testConsumer() throws IOException {
+    public void testConsumer() {
         String good = "Consumer<Object> r = (obj) -> System.out.println(\"Hello World\");\n"
                 + "r.accept(null);";
         check(getClass(), "test_consumer", good);
@@ -64,7 +63,7 @@ public class LambdaTest {
     }
 
     @Test
-    public void testProducer() throws IOException {
+    public void testProducer() {
         String good = "Callable<Object> r = () -> null;\n"
                 + "r.call();";
         check(getClass(), "test_producer", good);

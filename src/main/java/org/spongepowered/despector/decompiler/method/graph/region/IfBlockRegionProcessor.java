@@ -93,6 +93,18 @@ public class IfBlockRegionProcessor implements RegionProcessor {
         // Append the body
         for (int i = body_start; i < else_start; i++) {
             next = region.get(i);
+            if (next instanceof ConditionalOpcodeBlock) {
+                List<OpcodeBlock> subregion = new ArrayList<>();
+                for (int o = i; o < else_start; o++) {
+                    OpcodeBlock n = region.get(o);
+                    subregion.add(n);
+                }
+
+                OpcodeBlock sub_ret = else_start >= region.size() ? ret : region.get(else_start);
+                BlockSection s = partial.getDecompiler().processRegion(partial, subregion, sub_ret, 1);
+                section.appendBody(s);
+                break;
+            }
             section.appendBody(next.toBlockSection());
         }
 

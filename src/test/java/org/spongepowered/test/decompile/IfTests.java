@@ -720,4 +720,38 @@ public class IfTests {
         Assert.assertEquals(good, insn);
     }
 
+    @Test
+    public void testIfElseReturns() {
+        TestMethodBuilder builder = new TestMethodBuilder("test_mth", "void test_mth (boolean, boolean)");
+        GeneratorAdapter mv = builder.getGenerator();
+        Label start = mv.newLabel();
+        mv.visitLabel(start);
+        Label l1 = mv.newLabel();
+        Label l2 = mv.newLabel();
+        Label end = mv.newLabel();
+        mv.loadArg(0);
+        mv.ifZCmp(EQ, l1);
+        mv.invokeStatic(THIS_TYPE, Method.getMethod("void body ()"));
+        mv.loadArg(1);
+        mv.ifZCmp(EQ, l2);
+        mv.visitInsn(RETURN);
+        mv.visitLabel(l1);
+        mv.invokeStatic(THIS_TYPE, Method.getMethod("void body ()"));
+        mv.visitLabel(l2);
+        mv.visitInsn(RETURN);
+        mv.visitLocalVariable("a", "Z", null, start, end, 0);
+        mv.visitLocalVariable("b", "Z", null, start, end, 1);
+
+        String insn = TestHelper.getAsString(builder.finish(), "test_mth");
+        String good = "if (a) {\n"
+                + "    IfTests.body();\n"
+                + "    if (b) {\n"
+                + "        return;\n"
+                + "    }\n"
+                + "} else {\n"
+                + "    IfTests.body();\n"
+                + "}";
+        Assert.assertEquals(good, insn);
+    }
+
 }
