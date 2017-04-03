@@ -27,6 +27,10 @@ package org.spongepowered.despector.ast.members.insn.arg.cst;
 import org.spongepowered.despector.ast.generic.ClassTypeSignature;
 import org.spongepowered.despector.ast.generic.TypeSignature;
 import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
+import org.spongepowered.despector.util.serialization.AstSerializer;
+import org.spongepowered.despector.util.serialization.MessagePacker;
+
+import java.io.IOException;
 
 /**
  * A constant double value.
@@ -61,6 +65,13 @@ public class DoubleConstant extends Constant {
     @Override
     public void accept(InstructionVisitor visitor) {
         visitor.visitDoubleConstant(this);
+    }
+
+    @Override
+    public void writeTo(MessagePacker pack) throws IOException {
+        pack.startMap(2);
+        pack.writeString("id").writeInt(AstSerializer.STATEMENT_ID_DOUBLE_CONSTANT);
+        pack.writeString("cst").writeDouble(this.cst);
     }
 
     @Override

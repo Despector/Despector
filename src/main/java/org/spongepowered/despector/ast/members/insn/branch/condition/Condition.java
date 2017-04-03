@@ -25,6 +25,9 @@
 package org.spongepowered.despector.ast.members.insn.branch.condition;
 
 import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
+import org.spongepowered.despector.util.serialization.MessagePacker;
+
+import java.io.IOException;
 
 /**
  * A boolean condition of arbitrary complexity.
@@ -41,5 +44,7 @@ public abstract class Condition {
 
     @Override
     public abstract boolean equals(Object o);
+
+    public abstract void writeTo(MessagePacker pack) throws IOException;
 
 }

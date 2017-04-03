@@ -30,6 +30,10 @@ import org.spongepowered.despector.ast.generic.ClassTypeSignature;
 import org.spongepowered.despector.ast.generic.TypeSignature;
 import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
 import org.spongepowered.despector.ast.members.insn.arg.Instruction;
+import org.spongepowered.despector.util.serialization.AstSerializer;
+import org.spongepowered.despector.util.serialization.MessagePacker;
+
+import java.io.IOException;
 
 /**
  * An abstract instruction arg for binary operator.
@@ -95,6 +99,17 @@ public class Operator implements Instruction {
         int left_index = PRIMATIVE_ORDERING.indexOf(this.left.inferType().toString().charAt(0));
         int right_index = PRIMATIVE_ORDERING.indexOf(this.right.inferType().toString().charAt(0));
         return ClassTypeSignature.of(String.valueOf(PRIMATIVE_ORDERING.charAt(Math.max(left_index, right_index))));
+    }
+
+    @Override
+    public void writeTo(MessagePacker pack) throws IOException {
+        pack.startMap(4);
+        pack.writeString("id").writeInt(AstSerializer.STATEMENT_ID_OPERATOR);
+        pack.writeString("left");
+        this.left.writeTo(pack);
+        pack.writeString("right");
+        this.right.writeTo(pack);
+        pack.writeString("operator").writeInt(this.operator.ordinal());
     }
 
     @Override

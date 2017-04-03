@@ -28,7 +28,10 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.objectweb.asm.Type;
+import org.spongepowered.despector.util.serialization.AstSerializer;
+import org.spongepowered.despector.util.serialization.MessagePacker;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -95,6 +98,46 @@ public class Annotation {
 
     public Set<String> getKeys() {
         return this.values.keySet();
+    }
+
+    private void writeObj(Object o, MessagePacker pack) throws IOException {
+        if (o instanceof Integer) {
+            pack.writeInt(((Integer) o).intValue());
+        } else if (o instanceof Byte) {
+            pack.writeInt(((Byte) o).byteValue());
+        } else if (o instanceof Short) {
+            pack.writeInt(((Short) o).shortValue());
+        } else if (o instanceof Long) {
+            pack.writeInt(((Long) o).longValue());
+        } else if (o instanceof Float) {
+            pack.writeFloat(((Float) o).floatValue());
+        } else if (o instanceof Double) {
+            pack.writeDouble(((Double) o).doubleValue());
+        } else if (o instanceof String) {
+            pack.writeString(((String) o));
+        } else if (o instanceof Class) {
+            pack.startMap(2);
+            pack.writeString("id").writeInt(AstSerializer.ENTRY_ID_CLASS);
+            pack.writeString("class").writeString(((Class<?>) o).getName());
+        }
+        throw new IllegalStateException("Cannot pack " + o.getClass().getSimpleName());
+    }
+
+    public void writeTo(MessagePacker pack) throws IOException {
+        pack.startMap(4);
+        pack.writeString("id").writeInt(AstSerializer.ENTRY_ID_ANNOTATION);
+        pack.writeString("typename").writeString(this.type.getName());
+        pack.writeString("values").startArray(this.values.size());
+        for (String key : this.values.keySet()) {
+            pack.startMap(4);
+            pack.writeString("name").writeString(key);
+            pack.writeString("type").writeString(this.type.getType(key).getName());
+            pack.writeString("default");
+            writeObj(this.type.getDefaultValue(key), pack);
+            pack.writeString("value");
+            writeObj(this.values.get(key), pack);
+        }
+        pack.writeString("runtime").writeBool(this.type.isRuntimeVisible());
     }
 
 }

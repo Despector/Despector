@@ -29,6 +29,10 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
 import org.spongepowered.despector.ast.members.insn.Statement;
 import org.spongepowered.despector.ast.members.insn.arg.Instruction;
+import org.spongepowered.despector.util.serialization.AstSerializer;
+import org.spongepowered.despector.util.serialization.MessagePacker;
+
+import java.io.IOException;
 
 /**
  * A statement throwing an exception type.
@@ -59,6 +63,14 @@ public class Throw implements Statement {
     public void accept(InstructionVisitor visitor) {
         visitor.visitThrow(this);
         this.ex.accept(visitor);
+    }
+
+    @Override
+    public void writeTo(MessagePacker pack) throws IOException {
+        pack.startMap(2);
+        pack.writeString("id").writeInt(AstSerializer.STATEMENT_ID_THROW);
+        pack.writeString("ex");
+        this.ex.writeTo(pack);
     }
 
     @Override

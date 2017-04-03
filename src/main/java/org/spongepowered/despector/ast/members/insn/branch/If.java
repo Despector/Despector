@@ -30,7 +30,10 @@ import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
 import org.spongepowered.despector.ast.members.insn.Statement;
 import org.spongepowered.despector.ast.members.insn.StatementBlock;
 import org.spongepowered.despector.ast.members.insn.branch.condition.Condition;
+import org.spongepowered.despector.util.serialization.AstSerializer;
+import org.spongepowered.despector.util.serialization.MessagePacker;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -44,7 +47,7 @@ public class If implements Statement {
     private Condition condition;
     private StatementBlock block;
     private final List<Elif> elif_blocks = new ArrayList<>();
-    private Else else_block;
+    @Nullable private Else else_block;
 
     public If(Condition condition, StatementBlock insn) {
         this.condition = checkNotNull(condition, "condition");
@@ -117,6 +120,28 @@ public class If implements Statement {
         }
         if (this.else_block != null) {
             this.else_block.accept(visitor);
+        }
+    }
+
+    @Override
+    public void writeTo(MessagePacker pack) throws IOException {
+        pack.startMap(this.else_block != null ? 5 : 4);
+        pack.writeString("id").writeInt(AstSerializer.STATEMENT_ID_IF);
+        pack.writeString("condition");
+        this.condition.writeTo(pack);
+        pack.writeString("body");
+        this.block.writeTo(pack);
+        pack.writeString("elif").startArray(this.elif_blocks.size());
+        for (Elif elif : this.elif_blocks) {
+            pack.startMap(2);
+            pack.writeString("condition");
+            elif.getCondition().writeTo(pack);
+            pack.writeString("body");
+            elif.getBody().writeTo(pack);
+        }
+        if (this.else_block != null) {
+            pack.writeString("else");
+            this.else_block.getElseBody().writeTo(pack);
         }
     }
 

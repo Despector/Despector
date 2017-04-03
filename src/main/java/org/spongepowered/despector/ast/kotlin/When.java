@@ -33,7 +33,9 @@ import org.spongepowered.despector.ast.members.insn.Statement;
 import org.spongepowered.despector.ast.members.insn.StatementBlock;
 import org.spongepowered.despector.ast.members.insn.arg.Instruction;
 import org.spongepowered.despector.ast.members.insn.branch.condition.Condition;
+import org.spongepowered.despector.util.serialization.MessagePacker;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -120,6 +122,11 @@ public class When implements Instruction {
     @Override
     public void accept(InstructionVisitor visitor) {
         // TODO
+    }
+
+    @Override
+    public void writeTo(MessagePacker pack) throws IOException {
+        //TODO
     }
 
     @Override

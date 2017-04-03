@@ -27,6 +27,10 @@ package org.spongepowered.despector.ast.members.insn.function;
 import org.spongepowered.despector.ast.generic.TypeSignature;
 import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
 import org.spongepowered.despector.ast.members.insn.arg.Instruction;
+import org.spongepowered.despector.util.serialization.AstSerializer;
+import org.spongepowered.despector.util.serialization.MessagePacker;
+
+import java.io.IOException;
 
 public class DynamicInvokeHandle implements Instruction {
 
@@ -71,6 +75,18 @@ public class DynamicInvokeHandle implements Instruction {
 
     @Override
     public void accept(InstructionVisitor visitor) {
+    }
+
+    @Override
+    public void writeTo(MessagePacker pack) throws IOException {
+        pack.startMap(6);
+        pack.writeString("id").writeInt(AstSerializer.STATEMENT_ID_DYNAMIC_INVOKE);
+        pack.writeString("type");
+        this.type.writeTo(pack);
+        pack.writeString("name").writeString(this.name);
+        pack.writeString("owner").writeString(this.lambda_owner);
+        pack.writeString("method").writeString(this.lambda_method);
+        pack.writeString("desc").writeString(this.lambda_desc);
     }
 
 }

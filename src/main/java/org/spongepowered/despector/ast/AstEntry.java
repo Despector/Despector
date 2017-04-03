@@ -24,6 +24,10 @@
  */
 package org.spongepowered.despector.ast;
 
+import org.spongepowered.despector.util.serialization.MessagePacker;
+
+import java.io.IOException;
+
 /**
  * The base of any element in the AST.
  */
@@ -41,5 +45,7 @@ public abstract class AstEntry {
     public SourceSet getSource() {
         return this.source;
     }
+
+    public abstract void writeTo(MessagePacker pack) throws IOException;
 
 }

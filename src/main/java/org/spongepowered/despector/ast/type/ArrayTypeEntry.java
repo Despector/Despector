@@ -26,6 +26,10 @@ package org.spongepowered.despector.ast.type;
 
 import org.spongepowered.despector.Language;
 import org.spongepowered.despector.ast.SourceSet;
+import org.spongepowered.despector.util.serialization.AstSerializer;
+import org.spongepowered.despector.util.serialization.MessagePacker;
+
+import java.io.IOException;
 
 /**
  * Represents an array type.
@@ -47,6 +51,13 @@ public class ArrayTypeEntry extends TypeEntry {
      */
     public String getComponentName() {
         return this.component_type;
+    }
+
+    @Override
+    public void writeTo(MessagePacker pack) throws IOException {
+        super.writeTo(pack, 1, AstSerializer.ENTRY_ID_ARRAY);
+        pack.writeString("component_type").writeString(this.component_type);
+
     }
 
 }

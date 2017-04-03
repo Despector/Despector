@@ -26,6 +26,10 @@ package org.spongepowered.despector.ast.generic;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import org.spongepowered.despector.util.serialization.AstSerializer;
+import org.spongepowered.despector.util.serialization.MessagePacker;
+
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -81,6 +85,25 @@ public class MethodSignature {
      */
     public List<TypeSignature> getThrowsSignature() {
         return this.exceptions;
+    }
+
+    public void writeTo(MessagePacker pack) throws IOException {
+        pack.startMap(5);
+        pack.writeString("id").writeInt(AstSerializer.SIGNATURE_ID_METHOD);
+        pack.writeString("type_parameters").startArray(this.type_parameters.size());
+        for (TypeParameter param : this.type_parameters) {
+            param.writeTo(pack);
+        }
+        pack.writeString("parameters").startArray(this.parameters.size());
+        for (TypeSignature sig : this.parameters) {
+            sig.writeTo(pack);
+        }
+        pack.writeString("exceptions").startArray(this.exceptions.size());
+        for (TypeSignature sig : this.exceptions) {
+            sig.writeTo(pack);
+        }
+        pack.writeString("returntype");
+        this.return_type.writeTo(pack);
     }
 
 }

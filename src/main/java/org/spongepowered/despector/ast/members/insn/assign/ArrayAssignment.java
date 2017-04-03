@@ -28,6 +28,10 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
 import org.spongepowered.despector.ast.members.insn.arg.Instruction;
+import org.spongepowered.despector.util.serialization.AstSerializer;
+import org.spongepowered.despector.util.serialization.MessagePacker;
+
+import java.io.IOException;
 
 /**
  * An array assignment statement.
@@ -79,6 +83,18 @@ public class ArrayAssignment extends Assignment {
         this.array.accept(visitor);
         this.index.accept(visitor);
         this.val.accept(visitor);
+    }
+
+    @Override
+    public void writeTo(MessagePacker pack) throws IOException {
+        pack.startMap(4);
+        pack.writeString("id").writeInt(AstSerializer.STATEMENT_ID_ARRAY_ASSIGN);
+        pack.writeString("array");
+        this.array.writeTo(pack);
+        pack.writeString("index");
+        this.index.writeTo(pack);
+        pack.writeString("val");
+        this.val.writeTo(pack);
     }
 
     @Override

@@ -26,7 +26,10 @@ package org.spongepowered.despector.ast.members.insn.branch;
 
 import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
 import org.spongepowered.despector.ast.members.insn.Statement;
+import org.spongepowered.despector.util.serialization.AstSerializer;
+import org.spongepowered.despector.util.serialization.MessagePacker;
 
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -91,6 +94,15 @@ public class Break implements Statement {
     @Override
     public void accept(InstructionVisitor visitor) {
         visitor.visitBreak(this);
+    }
+
+    @Override
+    public void writeTo(MessagePacker pack) throws IOException {
+        pack.startMap(4);
+        pack.writeString("id").writeInt(AstSerializer.STATEMENT_ID_BREAK);
+        pack.writeString("type").writeInt(this.type.ordinal());
+        pack.writeString("nested").writeBool(this.nested);
+        pack.writeString("break_id").writeInt(((Object) this).hashCode());
     }
 
     /**

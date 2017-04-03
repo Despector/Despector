@@ -26,6 +26,11 @@ package org.spongepowered.despector.ast.generic;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import org.spongepowered.despector.util.serialization.AstSerializer;
+import org.spongepowered.despector.util.serialization.MessagePacker;
+
+import java.io.IOException;
+
 /**
  * A type signature referencing a type variable.
  */
@@ -73,6 +78,13 @@ public class TypeVariableSignature extends TypeSignature {
     @Override
     public boolean isArray() {
         return this.identifier.startsWith("[");
+    }
+
+    @Override
+    public void writeTo(MessagePacker pack) throws IOException {
+        pack.startMap(2);
+        pack.writeString("id").writeInt(AstSerializer.SIGNATURE_ID_TYPEVAR);
+        pack.writeString(this.identifier);
     }
 
     @Override

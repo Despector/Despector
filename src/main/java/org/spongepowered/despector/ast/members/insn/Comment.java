@@ -24,6 +24,10 @@
  */
 package org.spongepowered.despector.ast.members.insn;
 
+import org.spongepowered.despector.util.serialization.AstSerializer;
+import org.spongepowered.despector.util.serialization.MessagePacker;
+
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -51,6 +55,16 @@ public class Comment implements Statement {
 
     @Override
     public void accept(InstructionVisitor visitor) {
+    }
+
+    @Override
+    public void writeTo(MessagePacker pack) throws IOException {
+        pack.startMap(2);
+        pack.writeString("id").writeInt(AstSerializer.STATEMENT_ID_COMMENT);
+        pack.writeString("comment").startArray(this.comment_text.size());
+        for (String line : this.comment_text) {
+            pack.writeString(line);
+        }
     }
 
     @Override

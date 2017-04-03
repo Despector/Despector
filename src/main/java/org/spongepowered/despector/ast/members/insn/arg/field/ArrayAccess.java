@@ -29,6 +29,10 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import org.spongepowered.despector.ast.generic.TypeSignature;
 import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
 import org.spongepowered.despector.ast.members.insn.arg.Instruction;
+import org.spongepowered.despector.util.serialization.AstSerializer;
+import org.spongepowered.despector.util.serialization.MessagePacker;
+
+import java.io.IOException;
 
 /**
  * Loads an array value from a value.
@@ -88,6 +92,18 @@ public class ArrayAccess implements Instruction {
         visitor.visitArrayAccess(this);
         this.array.accept(visitor);
         this.index.accept(visitor);
+    }
+
+    @Override
+    public void writeTo(MessagePacker pack) throws IOException {
+        pack.startMap(4);
+        pack.writeString("id").writeInt(AstSerializer.STATEMENT_ID_ARRAY_ACCESS);
+        pack.writeString("array");
+        this.array.writeTo(pack);
+        pack.writeString("index");
+        this.index.writeTo(pack);
+        pack.writeString("signature");
+        inferType().writeTo(pack);
     }
 
     @Override

@@ -43,7 +43,9 @@ import org.spongepowered.despector.ast.generic.ClassSignature;
 import org.spongepowered.despector.ast.members.FieldEntry;
 import org.spongepowered.despector.ast.members.MethodEntry;
 import org.spongepowered.despector.util.TypeHelper;
+import org.spongepowered.despector.util.serialization.MessagePacker;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
@@ -78,8 +80,7 @@ public abstract class TypeEntry extends AstEntry {
     protected final Map<AnnotationType, Annotation> annotations = new LinkedHashMap<>();
     protected final Map<String, InnerClassInfo> inner_classes = new LinkedHashMap<>();
 
-    @Nullable
-    protected ClassSignature signature;
+    @Nullable protected ClassSignature signature;
 
     public TypeEntry(SourceSet source, Language lang, String name) {
         super(source);
@@ -414,6 +415,53 @@ public abstract class TypeEntry extends AstEntry {
         return "Class " + this.name;
     }
 
+    public void writeTo(MessagePacker pack, int extra, int id) throws IOException {
+        int len = 15 + extra;
+        if (this.signature != null) {
+            len++;
+        }
+        pack.startMap(len);
+        pack.writeString("id").writeInt(id);
+        pack.writeString("language").writeInt(this.lang.ordinal());
+        pack.writeString("access").writeInt(this.access.ordinal());
+        pack.writeString("synthetic").writeBool(this.is_synthetic);
+        pack.writeString("final").writeBool(this.is_final);
+        pack.writeString("innerclass").writeBool(isInnerClass());
+        pack.writeString("name").writeString(this.name);
+        pack.writeString("interfaces").startArray(this.interfaces.size());
+        for (String inter : this.interfaces) {
+            pack.writeString(inter);
+        }
+        pack.writeString("staticfields").startArray(this.static_fields.size());
+        for (FieldEntry fld : this.static_fields.values()) {
+            fld.writeTo(pack);
+        }
+        pack.writeString("fields").startArray(this.fields.size());
+        for (FieldEntry fld : this.fields.values()) {
+            fld.writeTo(pack);
+        }
+        pack.writeString("staticmethods").startArray(this.static_methods.size());
+        for (MethodEntry mth : this.static_methods.values()) {
+            mth.writeTo(pack);
+        }
+        pack.writeString("methods").startArray(this.methods.size());
+        for (MethodEntry mth : this.methods.values()) {
+            mth.writeTo(pack);
+        }
+        if (this.signature != null) {
+            pack.writeString("signature");
+            this.signature.writeTo(pack);
+        }
+        pack.writeString("annotations").startArray(this.annotations.size());
+        for (Annotation anno : this.annotations.values()) {
+            anno.writeTo(pack);
+        }
+        pack.writeString("inner_classes").startArray(this.inner_classes.size());
+        for (InnerClassInfo info : this.inner_classes.values()) {
+            info.writeTo(pack);
+        }
+    }
+
     public static class InnerClassInfo {
 
         private String name;
@@ -434,6 +482,18 @@ public abstract class TypeEntry extends AstEntry {
             this.is_abstract = (acc & ACC_ABSTRACT) != 0;
             this.is_synthetic = (acc & ACC_SYNTHETIC) != 0;
             this.access = AccessModifier.fromModifiers(acc);
+        }
+
+        public void writeTo(MessagePacker pack) throws IOException {
+            pack.startMap(8);
+            pack.writeString("name").writeString(this.name);
+            pack.writeString("simple_name").writeString(this.simple_name);
+            pack.writeString("outer_name").writeString(this.outer_name);
+            pack.writeString("static").writeBool(this.is_static);
+            pack.writeString("final").writeBool(this.is_final);
+            pack.writeString("abstract").writeBool(this.is_abstract);
+            pack.writeString("synthetic").writeBool(this.is_synthetic);
+            pack.writeString("access").writeInt(this.access.ordinal());
         }
 
         public String getName() {

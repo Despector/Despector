@@ -27,6 +27,10 @@ package org.spongepowered.despector.ast.members.insn.branch.condition;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
+import org.spongepowered.despector.util.serialization.AstSerializer;
+import org.spongepowered.despector.util.serialization.MessagePacker;
+
+import java.io.IOException;
 
 /**
  * A condition based off of a simple boolean value.
@@ -57,6 +61,14 @@ public class InverseCondition extends Condition {
     public void accept(InstructionVisitor visitor) {
         visitor.visitInverseCondition(this);
         this.value.accept(visitor);
+    }
+
+    @Override
+    public void writeTo(MessagePacker pack) throws IOException {
+        pack.startMap(2);
+        pack.writeString("id").writeInt(AstSerializer.CONDITION_ID_INVERSE);
+        pack.writeString("val");
+        this.value.writeTo(pack);
     }
 
     @Override

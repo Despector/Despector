@@ -26,6 +26,10 @@ package org.spongepowered.despector.ast.type;
 
 import org.spongepowered.despector.Language;
 import org.spongepowered.despector.ast.SourceSet;
+import org.spongepowered.despector.util.serialization.AstSerializer;
+import org.spongepowered.despector.util.serialization.MessagePacker;
+
+import java.io.IOException;
 
 /**
  * Represents an interface type.
@@ -39,6 +43,11 @@ public class InterfaceEntry extends TypeEntry {
     @Override
     public String toString() {
         return "Interface " + this.name;
+    }
+
+    @Override
+    public void writeTo(MessagePacker pack) throws IOException {
+        super.writeTo(pack, 0, AstSerializer.ENTRY_ID_INTERFACE);
     }
 
 }

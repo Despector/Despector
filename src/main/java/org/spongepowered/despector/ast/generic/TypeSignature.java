@@ -24,6 +24,10 @@
  */
 package org.spongepowered.despector.ast.generic;
 
+import org.spongepowered.despector.util.serialization.MessagePacker;
+
+import java.io.IOException;
+
 /**
  * A type signature which can be either a type variable or a concrete class or
  * void.
@@ -42,6 +46,8 @@ public abstract class TypeSignature {
     public boolean isArray() {
         return false;
     }
+
+    public abstract void writeTo(MessagePacker pack) throws IOException;
 
     public static TypeSignature arrayOf(TypeSignature type) {
         if (type instanceof ClassTypeSignature) {

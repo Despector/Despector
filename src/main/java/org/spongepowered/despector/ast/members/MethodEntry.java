@@ -37,7 +37,10 @@ import org.spongepowered.despector.ast.generic.MethodSignature;
 import org.spongepowered.despector.ast.generic.TypeSignature;
 import org.spongepowered.despector.ast.members.insn.StatementBlock;
 import org.spongepowered.despector.util.TypeHelper;
+import org.spongepowered.despector.util.serialization.AstSerializer;
+import org.spongepowered.despector.util.serialization.MessagePacker;
 
+import java.io.IOException;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -215,6 +218,35 @@ public class MethodEntry extends AstEntry {
 
     public void addAnnotation(Annotation anno) {
         this.annotations.put(anno.getType(), anno);
+    }
+
+    @Override
+    public void writeTo(MessagePacker pack) throws IOException {
+        pack.startMap(15);
+        pack.writeString("id").writeInt(AstSerializer.ENTRY_ID_METHOD);
+        pack.writeString("access").writeInt(this.access.ordinal());
+        pack.writeString("owner").writeString(this.owner);
+        pack.writeString("name").writeString(this.name);
+        pack.writeString("signature").writeString(this.signature);
+        pack.writeString("abstract").writeBool(this.is_abstract);
+        pack.writeString("final").writeBool(this.is_final);
+        pack.writeString("static").writeBool(this.is_static);
+        pack.writeString("synthetic").writeBool(this.is_synthetic);
+        pack.writeString("bridge").writeBool(this.is_bridge);
+        pack.writeString("returntype");
+        this.return_type.writeTo(pack);
+        pack.writeString("paramtypes").startArray(this.param_types.size());
+        for (String param : this.param_types) {
+            pack.writeString(param);
+        }
+        pack.writeString("methodsignature");
+        this.sig.writeTo(pack);
+        pack.writeString("instructions");
+        this.instructions.writeTo(pack);
+        pack.writeString("annotations").startArray(this.annotations.size());
+        for (Annotation anno : this.annotations.values()) {
+            anno.writeTo(pack);
+        }
     }
 
     @Override

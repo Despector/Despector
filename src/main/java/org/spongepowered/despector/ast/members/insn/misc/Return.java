@@ -29,7 +29,10 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
 import org.spongepowered.despector.ast.members.insn.Statement;
 import org.spongepowered.despector.ast.members.insn.arg.Instruction;
+import org.spongepowered.despector.util.serialization.AstSerializer;
+import org.spongepowered.despector.util.serialization.MessagePacker;
 
+import java.io.IOException;
 import java.util.Optional;
 
 import javax.annotation.Nullable;
@@ -39,7 +42,7 @@ import javax.annotation.Nullable;
  */
 public class Return implements Statement {
 
-    private Instruction value;
+    @Nullable private Instruction value;
 
     public Return() {
         this.value = null;
@@ -68,6 +71,16 @@ public class Return implements Statement {
         visitor.visitReturn(this);
         if (this.value != null) {
             this.value.accept(visitor);
+        }
+    }
+
+    @Override
+    public void writeTo(MessagePacker pack) throws IOException {
+        pack.startMap(this.value != null ? 2 : 1);
+        pack.writeString("id").writeInt(AstSerializer.STATEMENT_ID_RETURN);
+        if (this.value != null) {
+            pack.writeString("value");
+            this.value.writeTo(pack);
         }
     }
 

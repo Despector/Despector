@@ -29,6 +29,10 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import org.spongepowered.despector.ast.generic.TypeSignature;
 import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
 import org.spongepowered.despector.ast.members.insn.arg.Instruction;
+import org.spongepowered.despector.util.serialization.AstSerializer;
+import org.spongepowered.despector.util.serialization.MessagePacker;
+
+import java.io.IOException;
 
 /**
  * An instruction which negates the current value on the stack
@@ -66,6 +70,14 @@ public class NegativeOperator implements Instruction {
     public void accept(InstructionVisitor visitor) {
         visitor.visitNegativeOperator(this);
         this.val.accept(visitor);
+    }
+
+    @Override
+    public void writeTo(MessagePacker pack) throws IOException {
+        pack.startMap(2);
+        pack.writeString("id").writeInt(AstSerializer.STATEMENT_ID_NEGATIVE_OPERATOR);
+        pack.writeString("val");
+        this.val.writeTo(pack);
     }
 
     @Override

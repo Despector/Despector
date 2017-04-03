@@ -30,6 +30,10 @@ import org.spongepowered.despector.ast.generic.TypeSignature;
 import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
 import org.spongepowered.despector.ast.members.insn.arg.Instruction;
 import org.spongepowered.despector.ast.members.insn.branch.condition.Condition;
+import org.spongepowered.despector.util.serialization.AstSerializer;
+import org.spongepowered.despector.util.serialization.MessagePacker;
+
+import java.io.IOException;
 
 /**
  * A ternary instruction.
@@ -99,6 +103,18 @@ public class Ternary implements Instruction {
     @Override
     public TypeSignature inferType() {
         return this.true_val.inferType();
+    }
+
+    @Override
+    public void writeTo(MessagePacker pack) throws IOException {
+        pack.startMap(4);
+        pack.writeString("id").writeInt(AstSerializer.STATEMENT_ID_TERNARY);
+        pack.writeString("condition");
+        this.condition.writeTo(pack);
+        pack.writeString("true");
+        this.true_val.writeTo(pack);
+        pack.writeString("false");
+        this.false_val.writeTo(pack);
     }
 
     @Override

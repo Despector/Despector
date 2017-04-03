@@ -29,7 +29,10 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.Lists;
 import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
+import org.spongepowered.despector.util.serialization.AstSerializer;
+import org.spongepowered.despector.util.serialization.MessagePacker;
 
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -61,6 +64,16 @@ public class AndCondition extends Condition {
         visitor.visitAndCondition(this);
         for (Condition c : this.args) {
             c.accept(visitor);
+        }
+    }
+
+    @Override
+    public void writeTo(MessagePacker pack) throws IOException {
+        pack.startMap(2);
+        pack.writeString("id").writeInt(AstSerializer.CONDITION_ID_AND);
+        pack.writeString("args").startArray(this.args.size());
+        for (Condition arg : this.args) {
+            arg.writeTo(pack);
         }
     }
 

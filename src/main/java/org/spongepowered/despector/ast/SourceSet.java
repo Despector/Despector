@@ -32,6 +32,8 @@ import org.spongepowered.despector.ast.type.EnumEntry;
 import org.spongepowered.despector.ast.type.InterfaceEntry;
 import org.spongepowered.despector.ast.type.TypeEntry;
 import org.spongepowered.despector.decompiler.Decompilers;
+import org.spongepowered.despector.util.serialization.AstSerializer;
+import org.spongepowered.despector.util.serialization.MessagePacker;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -157,6 +159,16 @@ public class SourceSet {
 
     public Collection<AnnotationType> getAllAnnotations() {
         return this.annotations.values();
+    }
+
+    public void writeTo(MessagePacker pack) throws IOException {
+        pack.startMap(2);
+        pack.writeString("version").writeInt(AstSerializer.VERSION);
+        pack.writeString("classes");
+        pack.startArray(this.classes.size());
+        for (TypeEntry type : this.classes.values()) {
+            type.writeTo(pack);
+        }
     }
 
     public static interface Loader {

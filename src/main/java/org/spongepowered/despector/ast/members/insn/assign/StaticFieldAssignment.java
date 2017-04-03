@@ -27,6 +27,10 @@ package org.spongepowered.despector.ast.members.insn.assign;
 import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
 import org.spongepowered.despector.ast.members.insn.arg.Instruction;
 import org.spongepowered.despector.util.TypeHelper;
+import org.spongepowered.despector.util.serialization.AstSerializer;
+import org.spongepowered.despector.util.serialization.MessagePacker;
+
+import java.io.IOException;
 
 /**
  * An assignment to a static field.
@@ -41,6 +45,17 @@ public class StaticFieldAssignment extends FieldAssignment {
     public void accept(InstructionVisitor visitor) {
         visitor.visitStaticFieldAssignment(this);
         this.val.accept(visitor);
+    }
+
+    @Override
+    public void writeTo(MessagePacker pack) throws IOException {
+        pack.startMap(5);
+        pack.writeString("id").writeInt(AstSerializer.STATEMENT_ID_STATIC_FIELD_ASSIGN);
+        pack.writeString("name").writeString(this.field_name);
+        pack.writeString("type").writeString(this.type_desc);
+        pack.writeString("owner").writeString(this.owner_type);
+        pack.writeString("val");
+        this.val.writeTo(pack);
     }
 
     @Override

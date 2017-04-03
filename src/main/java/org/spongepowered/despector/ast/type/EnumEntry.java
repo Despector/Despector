@@ -29,7 +29,10 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.common.collect.Lists;
 import org.spongepowered.despector.Language;
 import org.spongepowered.despector.ast.SourceSet;
+import org.spongepowered.despector.util.serialization.AstSerializer;
+import org.spongepowered.despector.util.serialization.MessagePacker;
 
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -60,6 +63,15 @@ public class EnumEntry extends TypeEntry {
     @Override
     public String toString() {
         return "Enum " + this.name;
+    }
+
+    @Override
+    public void writeTo(MessagePacker pack) throws IOException {
+        super.writeTo(pack, 1, AstSerializer.ENTRY_ID_ENUM);
+        pack.writeString("enumconstants").startArray(this.enum_constants.size());
+        for (String cst : this.enum_constants) {
+            pack.writeString(cst);
+        }
     }
 
 }

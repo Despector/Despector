@@ -29,6 +29,10 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import org.spongepowered.despector.ast.generic.ClassTypeSignature;
 import org.spongepowered.despector.ast.generic.TypeSignature;
 import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
+import org.spongepowered.despector.util.serialization.AstSerializer;
+import org.spongepowered.despector.util.serialization.MessagePacker;
+
+import java.io.IOException;
 
 /**
  * A constant int value.
@@ -72,6 +76,13 @@ public class IntConstant extends Constant {
     @Override
     public void accept(InstructionVisitor visitor) {
         visitor.visitIntConstant(this);
+    }
+
+    @Override
+    public void writeTo(MessagePacker pack) throws IOException {
+        pack.startMap(2);
+        pack.writeString("id").writeInt(AstSerializer.STATEMENT_ID_INT_CONSTANT);
+        pack.writeString("cst").writeInt(this.cst);
     }
 
     @Override

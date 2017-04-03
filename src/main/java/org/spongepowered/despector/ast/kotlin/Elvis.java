@@ -29,6 +29,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import org.spongepowered.despector.ast.generic.TypeSignature;
 import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
 import org.spongepowered.despector.ast.members.insn.arg.Instruction;
+import org.spongepowered.despector.util.serialization.MessagePacker;
+
+import java.io.IOException;
 
 /**
  * An elvis ?: instruction.
@@ -80,6 +83,11 @@ public class Elvis implements Instruction {
     @Override
     public void accept(InstructionVisitor visitor) {
         // TODO how to handle visitors for kotlin specific instructions
+    }
+
+    @Override
+    public void writeTo(MessagePacker pack) throws IOException {
+        //TODO
     }
 
     @Override

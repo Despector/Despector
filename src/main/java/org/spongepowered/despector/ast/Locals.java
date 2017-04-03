@@ -30,7 +30,9 @@ import org.objectweb.asm.tree.LocalVariableNode;
 import org.spongepowered.despector.ast.generic.ClassTypeSignature;
 import org.spongepowered.despector.ast.generic.TypeSignature;
 import org.spongepowered.despector.util.SignatureParser;
+import org.spongepowered.despector.util.serialization.MessagePacker;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -109,6 +111,22 @@ public class Locals {
             }
         }
         return null;
+    }
+
+    public void writeTo(MessagePacker pack) throws IOException {
+        pack.startArray(this.locals.length);
+        for (Local loc : this.locals) {
+            pack.startMap(loc.isParameter() ? 3 : 2);
+            pack.writeString("index").writeInt(loc.getIndex());
+            if (loc.isParameter()) {
+                pack.writeString("parameter");
+                loc.getParameterInstance().writeTo(pack);
+            }
+            pack.writeString("instances").startArray(loc.getInstances().size());
+            for (LocalInstance insn : loc.getInstances()) {
+                insn.writeTo(pack);
+            }
+        }
     }
 
     /**
@@ -222,6 +240,10 @@ public class Locals {
             return null;
         }
 
+        public List<LocalInstance> getInstances() {
+            return this.instances;
+        }
+
         @Override
         public String toString() {
             return "Local" + this.index;
@@ -238,7 +260,7 @@ public class Locals {
         private int end;
         private LocalVariableNode lvn;
         private boolean effectively_final = false;
-        
+
         private final List<Annotation> annotations = new ArrayList<>();
 
         public LocalInstance(Local l, LocalVariableNode lvn, String n, TypeSignature t, int start, int end) {
@@ -300,9 +322,30 @@ public class Locals {
         public void setEffectivelyFinal(boolean state) {
             this.effectively_final = state;
         }
-        
+
         public List<Annotation> getAnnotations() {
             return this.annotations;
+        }
+
+        public void writeToSimple(MessagePacker pack) throws IOException {
+            pack.startMap(3);
+            pack.writeString("local").writeInt(this.local.getIndex());
+            pack.writeString("start").writeInt(this.start);
+            pack.writeString("end").writeInt(this.end);
+        }
+
+        public void writeTo(MessagePacker pack) throws IOException {
+            pack.startMap(6);
+            pack.writeString("name").writeString(this.name);
+            pack.writeString("type");
+            this.type.writeTo(pack);
+            pack.writeString("start").writeInt(this.start);
+            pack.writeString("end").writeInt(this.end);
+            pack.writeString("final").writeBool(this.effectively_final);
+            pack.writeString("annotations").startArray(this.annotations.size());
+            for (Annotation anno : this.annotations) {
+                anno.writeTo(pack);
+            }
         }
 
         @Override

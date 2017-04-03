@@ -28,6 +28,10 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.spongepowered.despector.ast.generic.TypeSignature;
 import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
+import org.spongepowered.despector.util.serialization.AstSerializer;
+import org.spongepowered.despector.util.serialization.MessagePacker;
+
+import java.io.IOException;
 
 /**
  * An instruction performing a comparison between two numerical values.
@@ -75,6 +79,16 @@ public class NumberCompare implements Instruction {
         visitor.visitNumberCompare(this);
         this.left.accept(visitor);
         this.right.accept(visitor);
+    }
+
+    @Override
+    public void writeTo(MessagePacker pack) throws IOException {
+        pack.startMap(3);
+        pack.writeString("id").writeInt(AstSerializer.STATEMENT_ID_NUMBER_COMPARE);
+        pack.writeString("left");
+        this.left.writeTo(pack);
+        pack.writeString("right");
+        this.right.writeTo(pack);
     }
 
     @Override

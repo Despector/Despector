@@ -24,6 +24,10 @@
  */
 package org.spongepowered.despector.ast.members.insn;
 
+import org.spongepowered.despector.util.serialization.MessagePacker;
+
+import java.io.IOException;
+
 /**
  * Abstract type for a statement.
  */
@@ -33,6 +37,8 @@ public interface Statement {
      * Accepts the given visitor.
      */
     void accept(InstructionVisitor visitor);
+
+    void writeTo(MessagePacker pack) throws IOException;
 
     @Override
     String toString();

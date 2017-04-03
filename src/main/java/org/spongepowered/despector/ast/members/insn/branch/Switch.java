@@ -31,7 +31,10 @@ import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
 import org.spongepowered.despector.ast.members.insn.Statement;
 import org.spongepowered.despector.ast.members.insn.StatementBlock;
 import org.spongepowered.despector.ast.members.insn.arg.Instruction;
+import org.spongepowered.despector.util.serialization.AstSerializer;
+import org.spongepowered.despector.util.serialization.MessagePacker;
 
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -73,6 +76,26 @@ public class Switch implements Statement {
         this.variable.accept(visitor);
         for (Case cs : this.cases) {
             cs.accept(visitor);
+        }
+    }
+
+    @Override
+    public void writeTo(MessagePacker pack) throws IOException {
+        pack.startMap(3);
+        pack.writeString("id").writeInt(AstSerializer.STATEMENT_ID_SWITCH);
+        pack.writeString("var");
+        this.variable.writeTo(pack);
+        pack.writeString("cases").startArray(this.cases.size());
+        for (Case cs : this.cases) {
+            pack.startMap(4);
+            pack.writeString("body");
+            cs.getBody().writeTo(pack);
+            pack.writeString("breaks").writeBool(cs.doesBreak());
+            pack.writeString("default").writeBool(cs.isDefault());
+            pack.writeString("indices").startArray(cs.getIndices().size());
+            for (Integer index : cs.getIndices()) {
+                pack.writeInt(index);
+            }
         }
     }
 

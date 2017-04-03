@@ -30,6 +30,10 @@ import org.spongepowered.despector.ast.generic.ClassTypeSignature;
 import org.spongepowered.despector.ast.generic.TypeSignature;
 import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
 import org.spongepowered.despector.util.TypeHelper;
+import org.spongepowered.despector.util.serialization.AstSerializer;
+import org.spongepowered.despector.util.serialization.MessagePacker;
+
+import java.io.IOException;
 
 import javax.annotation.Nullable;
 
@@ -104,6 +108,19 @@ public class NewArray implements Instruction {
             for (Instruction value : this.values) {
                 value.accept(visitor);
             }
+        }
+    }
+
+    @Override
+    public void writeTo(MessagePacker pack) throws IOException {
+        pack.startMap(4);
+        pack.writeString("id").writeInt(AstSerializer.STATEMENT_ID_NEW_ARRAY);
+        pack.writeString("type").writeString(this.type);
+        pack.writeString("size");
+        this.size.writeTo(pack);
+        pack.writeString("values").startArray(this.values.length);
+        for (Instruction insn : this.values) {
+            insn.writeTo(pack);
         }
     }
 

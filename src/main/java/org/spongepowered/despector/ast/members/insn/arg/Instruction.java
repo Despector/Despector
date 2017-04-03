@@ -26,6 +26,9 @@ package org.spongepowered.despector.ast.members.insn.arg;
 
 import org.spongepowered.despector.ast.generic.TypeSignature;
 import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
+import org.spongepowered.despector.util.serialization.MessagePacker;
+
+import java.io.IOException;
 
 /**
  * The abstract instruction type.
@@ -47,4 +50,6 @@ public interface Instruction {
 
     @Override
     boolean equals(Object obj);
+
+    void writeTo(MessagePacker pack) throws IOException;
 }

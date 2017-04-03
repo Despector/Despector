@@ -28,6 +28,10 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
 import org.spongepowered.despector.ast.members.insn.arg.Instruction;
+import org.spongepowered.despector.util.serialization.AstSerializer;
+import org.spongepowered.despector.util.serialization.MessagePacker;
+
+import java.io.IOException;
 
 /**
  * An assignment to an instance field.
@@ -60,6 +64,19 @@ public class InstanceFieldAssignment extends FieldAssignment {
         visitor.visitInstanceFieldAssignment(this);
         this.owner.accept(visitor);
         this.val.accept(visitor);
+    }
+
+    @Override
+    public void writeTo(MessagePacker pack) throws IOException {
+        pack.startMap(6);
+        pack.writeString("id").writeInt(AstSerializer.STATEMENT_ID_INSTANCE_FIELD_ASSIGN);
+        pack.writeString("name").writeString(this.field_name);
+        pack.writeString("type").writeString(this.type_desc);
+        pack.writeString("owner").writeString(this.owner_type);
+        pack.writeString("owner_val");
+        this.owner.writeTo(pack);
+        pack.writeString("val");
+        this.val.writeTo(pack);
     }
 
     @Override

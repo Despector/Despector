@@ -29,6 +29,10 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import org.spongepowered.despector.ast.Locals.LocalInstance;
 import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
 import org.spongepowered.despector.ast.members.insn.arg.Instruction;
+import org.spongepowered.despector.util.serialization.AstSerializer;
+import org.spongepowered.despector.util.serialization.MessagePacker;
+
+import java.io.IOException;
 
 /**
  * An assignment statement for assigning a value to a local.
@@ -61,6 +65,16 @@ public class LocalAssignment extends Assignment {
         visitor.visitLocalInstance(this.local);
         visitor.visitLocalAssignment(this);
         this.val.accept(visitor);
+    }
+
+    @Override
+    public void writeTo(MessagePacker pack) throws IOException {
+        pack.startMap(3);
+        pack.writeString("id").writeInt(AstSerializer.STATEMENT_ID_LOCAL_ASSIGN);
+        pack.writeString("local");
+        this.local.writeToSimple(pack);
+        pack.writeString("val");
+        this.val.writeTo(pack);
     }
 
     @Override

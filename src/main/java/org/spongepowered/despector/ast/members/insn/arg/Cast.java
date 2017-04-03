@@ -28,6 +28,10 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.spongepowered.despector.ast.generic.TypeSignature;
 import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
+import org.spongepowered.despector.util.serialization.AstSerializer;
+import org.spongepowered.despector.util.serialization.MessagePacker;
+
+import java.io.IOException;
 
 /**
  * An instruction which casts the inner value to a specific type.
@@ -81,6 +85,16 @@ public class Cast implements Instruction {
     public void accept(InstructionVisitor visitor) {
         visitor.visitCast(this);
         this.val.accept(visitor);
+    }
+
+    @Override
+    public void writeTo(MessagePacker pack) throws IOException {
+        pack.startMap(3);
+        pack.writeString("id").writeInt(AstSerializer.STATEMENT_ID_CAST);
+        pack.writeString("value");
+        this.val.writeTo(pack);
+        pack.writeString("type");
+        this.type.writeTo(pack);
     }
 
     @Override

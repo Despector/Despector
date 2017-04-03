@@ -27,7 +27,10 @@ package org.spongepowered.despector.ast.members.insn.function;
 import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
 import org.spongepowered.despector.ast.members.insn.arg.Instruction;
 import org.spongepowered.despector.util.TypeHelper;
+import org.spongepowered.despector.util.serialization.AstSerializer;
+import org.spongepowered.despector.util.serialization.MessagePacker;
 
+import java.io.IOException;
 import java.util.Arrays;
 
 /**
@@ -55,6 +58,19 @@ public class StaticMethodInvoke extends MethodInvoke {
             }
         }
         return TypeHelper.descToType(this.method_owner) + "." + this.method_name + "(" + params + ");";
+    }
+
+    @Override
+    public void writeTo(MessagePacker pack) throws IOException {
+        pack.startMap(5);
+        pack.writeString("id").writeInt(AstSerializer.STATEMENT_ID_STATIC_INVOKE);
+        pack.writeString("name").writeString(this.method_name);
+        pack.writeString("owner").writeString(this.method_owner);
+        pack.writeString("desc").writeString(this.method_desc);
+        pack.writeString("params").startArray(this.params.length);
+        for (Instruction insn : this.params) {
+            insn.writeTo(pack);
+        }
     }
 
     @Override

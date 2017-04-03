@@ -28,7 +28,10 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
 import org.spongepowered.despector.ast.members.insn.arg.Instruction;
+import org.spongepowered.despector.util.serialization.AstSerializer;
+import org.spongepowered.despector.util.serialization.MessagePacker;
 
+import java.io.IOException;
 import java.util.Arrays;
 
 /**
@@ -62,6 +65,21 @@ public class InstanceMethodInvoke extends MethodInvoke {
         visitor.visitInstanceMethodInvoke(this);
         this.callee.accept(visitor);
         super.accept(visitor);
+    }
+
+    @Override
+    public void writeTo(MessagePacker pack) throws IOException {
+        pack.startMap(6);
+        pack.writeString("id").writeInt(AstSerializer.STATEMENT_ID_INSTANCE_INVOKE);
+        pack.writeString("name").writeString(this.method_name);
+        pack.writeString("owner").writeString(this.method_owner);
+        pack.writeString("desc").writeString(this.method_desc);
+        pack.writeString("params").startArray(this.params.length);
+        for (Instruction insn : this.params) {
+            insn.writeTo(pack);
+        }
+        pack.writeString("callee");
+        this.callee.writeTo(pack);
     }
 
     @Override

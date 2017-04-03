@@ -31,6 +31,10 @@ import org.spongepowered.despector.ast.generic.ClassTypeSignature;
 import org.spongepowered.despector.ast.generic.TypeSignature;
 import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
 import org.spongepowered.despector.util.TypeHelper;
+import org.spongepowered.despector.util.serialization.AstSerializer;
+import org.spongepowered.despector.util.serialization.MessagePacker;
+
+import java.io.IOException;
 
 /**
  * An instruction that checks if a value is of a certain instance.
@@ -88,6 +92,15 @@ public class InstanceOf implements Instruction {
     public void accept(InstructionVisitor visitor) {
         visitor.visitInstanceOf(this);
         this.check.accept(visitor);
+    }
+
+    @Override
+    public void writeTo(MessagePacker pack) throws IOException {
+        pack.startMap(3);
+        pack.writeString("id").writeInt(AstSerializer.STATEMENT_ID_INSTANCE_OF);
+        pack.writeString("val");
+        this.check.writeTo(pack);
+        pack.writeString("type").writeString(this.type);
     }
 
     @Override

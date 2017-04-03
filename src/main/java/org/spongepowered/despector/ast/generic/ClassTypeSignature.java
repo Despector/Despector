@@ -28,7 +28,10 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableList;
 import org.spongepowered.despector.util.TypeHelper;
+import org.spongepowered.despector.util.serialization.AstSerializer;
+import org.spongepowered.despector.util.serialization.MessagePacker;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -144,6 +147,17 @@ public class ClassTypeSignature extends TypeSignature {
     @Override
     public boolean isArray() {
         return this.type_name.startsWith("[");
+    }
+
+    @Override
+    public void writeTo(MessagePacker pack) throws IOException {
+        pack.startMap(3);
+        pack.writeString("id").writeInt(AstSerializer.SIGNATURE_ID_TYPECLASS);
+        pack.writeString("type").writeString(this.type_name);
+        pack.writeString("args").startArray(this.args.size());
+        for (TypeArgument arg : this.args) {
+            arg.writeTo(pack);
+        }
     }
 
     @Override

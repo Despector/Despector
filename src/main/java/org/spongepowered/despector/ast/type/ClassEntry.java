@@ -27,6 +27,10 @@ package org.spongepowered.despector.ast.type;
 import org.spongepowered.despector.Language;
 import org.spongepowered.despector.ast.SourceSet;
 import org.spongepowered.despector.util.TypeHelper;
+import org.spongepowered.despector.util.serialization.AstSerializer;
+import org.spongepowered.despector.util.serialization.MessagePacker;
+
+import java.io.IOException;
 
 /**
  * Represents a class type.
@@ -58,6 +62,12 @@ public class ClassEntry extends TypeEntry {
      */
     public void setSuperclass(String c) {
         this.superclass = c;
+    }
+
+    @Override
+    public void writeTo(MessagePacker pack) throws IOException {
+        super.writeTo(pack, 1, AstSerializer.ENTRY_ID_CLASS);
+        pack.writeString("supername").writeString(this.superclass);
     }
 
 }

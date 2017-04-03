@@ -24,6 +24,11 @@
  */
 package org.spongepowered.despector.ast.generic;
 
+import org.spongepowered.despector.util.serialization.AstSerializer;
+import org.spongepowered.despector.util.serialization.MessagePacker;
+
+import java.io.IOException;
+
 /**
  * The void type signature.
  */
@@ -47,6 +52,12 @@ public class VoidTypeSignature extends TypeSignature {
     @Override
     public String getDescriptor() {
         return "V";
+    }
+
+    @Override
+    public void writeTo(MessagePacker pack) throws IOException {
+        pack.startMap(1);
+        pack.writeString("id").writeInt(AstSerializer.SIGNATURE_ID_TYPEVOID);
     }
 
     @Override

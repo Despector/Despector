@@ -27,6 +27,10 @@ package org.spongepowered.despector.ast.members.insn.arg.cst;
 import org.spongepowered.despector.ast.generic.ClassTypeSignature;
 import org.spongepowered.despector.ast.generic.TypeSignature;
 import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
+import org.spongepowered.despector.util.serialization.AstSerializer;
+import org.spongepowered.despector.util.serialization.MessagePacker;
+
+import java.io.IOException;
 
 /**
  * A constant float value.
@@ -61,6 +65,13 @@ public class FloatConstant extends Constant {
     @Override
     public void accept(InstructionVisitor visitor) {
         visitor.visitFloatConstant(this);
+    }
+
+    @Override
+    public void writeTo(MessagePacker pack) throws IOException {
+        pack.startMap(2);
+        pack.writeString("id").writeInt(AstSerializer.STATEMENT_ID_FLOAT_CONSTANT);
+        pack.writeString("cst").writeFloat(this.cst);
     }
 
     @Override

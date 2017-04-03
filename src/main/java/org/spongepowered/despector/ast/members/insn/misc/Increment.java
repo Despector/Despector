@@ -29,6 +29,10 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import org.spongepowered.despector.ast.Locals.LocalInstance;
 import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
 import org.spongepowered.despector.ast.members.insn.Statement;
+import org.spongepowered.despector.util.serialization.AstSerializer;
+import org.spongepowered.despector.util.serialization.MessagePacker;
+
+import java.io.IOException;
 
 /**
  * An increment statement. Example {@code var += increment_value;}.
@@ -80,6 +84,15 @@ public class Increment implements Statement {
     @Override
     public String toString() {
         return this.local + " += " + this.val + ";";
+    }
+
+    @Override
+    public void writeTo(MessagePacker pack) throws IOException {
+        pack.startMap(3);
+        pack.writeString("id").writeInt(AstSerializer.STATEMENT_ID_INCREMENT);
+        pack.writeString("local");
+        this.local.writeToSimple(pack);
+        pack.writeString("increment").writeInt(this.val);
     }
 
     @Override

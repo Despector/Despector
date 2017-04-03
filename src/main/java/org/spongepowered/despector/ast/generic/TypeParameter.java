@@ -25,6 +25,11 @@
 package org.spongepowered.despector.ast.generic;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+
+import org.spongepowered.despector.util.serialization.AstSerializer;
+import org.spongepowered.despector.util.serialization.MessagePacker;
+
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -78,6 +83,24 @@ public class TypeParameter {
      */
     public List<TypeSignature> getInterfaceBounds() {
         return this.interface_bounds;
+    }
+
+    public void writeTo(MessagePacker pack) throws IOException {
+        int len = 3;
+        if (this.class_bound != null) {
+            len++;
+        }
+        pack.startMap(len);
+        pack.writeString("id").writeInt(AstSerializer.SIGNATURE_ID_PARAM);
+        pack.writeString("identifier").writeString(this.identifier);
+        if (this.class_bound != null) {
+            pack.writeString("classbound");
+            this.class_bound.writeTo(pack);
+        }
+        pack.writeString("interfacebounds").startArray(this.interface_bounds.size());
+        for (TypeSignature sig : this.interface_bounds) {
+            sig.writeTo(pack);
+        }
     }
 
     @Override

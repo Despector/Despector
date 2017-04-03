@@ -31,7 +31,10 @@ import org.spongepowered.despector.ast.members.insn.Statement;
 import org.spongepowered.despector.ast.members.insn.StatementBlock;
 import org.spongepowered.despector.ast.members.insn.branch.Break.Breakable;
 import org.spongepowered.despector.ast.members.insn.branch.condition.Condition;
+import org.spongepowered.despector.util.serialization.AstSerializer;
+import org.spongepowered.despector.util.serialization.MessagePacker;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -130,6 +133,32 @@ public class For implements Statement, Breakable {
         }
         for (Statement stmt : this.body.getStatements()) {
             stmt.accept(visitor);
+        }
+    }
+
+    @Override
+    public void writeTo(MessagePacker pack) throws IOException {
+        pack.startMap(6);
+        pack.writeString("id").writeInt(AstSerializer.STATEMENT_ID_FOR);
+        pack.writeString("init");
+        if (this.init != null) {
+            this.init.writeTo(pack);
+        } else {
+            pack.writeNil();
+        }
+        pack.writeString("condition");
+        this.condition.writeTo(pack);
+        pack.writeString("incr");
+        if (this.incr != null) {
+            this.incr.writeTo(pack);
+        } else {
+            pack.writeNil();
+        }
+        pack.writeString("body");
+        this.body.writeTo(pack);
+        pack.writeString("breakpoints").startArray(this.breaks.size());
+        for (Break br : this.breaks) {
+            pack.writeInt(((Object) br).hashCode());
         }
     }
 

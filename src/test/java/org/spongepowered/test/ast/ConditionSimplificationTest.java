@@ -36,6 +36,9 @@ import org.spongepowered.despector.ast.members.insn.branch.condition.BooleanCond
 import org.spongepowered.despector.ast.members.insn.branch.condition.Condition;
 import org.spongepowered.despector.ast.members.insn.branch.condition.OrCondition;
 import org.spongepowered.despector.util.ConditionUtil;
+import org.spongepowered.despector.util.serialization.MessagePacker;
+
+import java.io.IOException;
 
 public class ConditionSimplificationTest {
 
@@ -163,6 +166,10 @@ public class ConditionSimplificationTest {
         @Override
         public String toString() {
             return this.c + "";
+        }
+
+        @Override
+        public void writeTo(MessagePacker pack) throws IOException {
         }
 
     }

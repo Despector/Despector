@@ -31,7 +31,10 @@ import org.spongepowered.despector.ast.Locals.LocalInstance;
 import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
 import org.spongepowered.despector.ast.members.insn.Statement;
 import org.spongepowered.despector.ast.members.insn.StatementBlock;
+import org.spongepowered.despector.util.serialization.AstSerializer;
+import org.spongepowered.despector.util.serialization.MessagePacker;
 
+import java.io.IOException;
 import java.util.List;
 
 import javax.annotation.Nullable;
@@ -77,6 +80,30 @@ public class TryCatch implements Statement {
         }
         for (CatchBlock catch_block : this.catch_blocks) {
             catch_block.accept(visitor);
+        }
+    }
+
+    @Override
+    public void writeTo(MessagePacker pack) throws IOException {
+        pack.startMap(3);
+        pack.writeString("id").writeInt(AstSerializer.STATEMENT_ID_TRY_CATCH);
+        pack.writeString("body");
+        this.block.writeTo(pack);
+        pack.writeString("catch").startArray(this.catch_blocks.size());
+        for (CatchBlock cat : this.catch_blocks) {
+            pack.startMap(3);
+            pack.writeString("exceptions").startArray(cat.getExceptions().size());
+            for (String ex : cat.getExceptions()) {
+                pack.writeString(ex);
+            }
+            pack.writeString("block");
+            cat.getBlock().writeTo(pack);
+            if (cat.getExceptionLocal() != null) {
+                pack.writeString("local");
+                cat.getExceptionLocal().writeToSimple(pack);
+            } else {
+                pack.writeString("dummy_name").writeString(cat.getDummyName());
+            }
         }
     }
 

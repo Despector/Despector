@@ -26,6 +26,11 @@ package org.spongepowered.despector.ast.generic;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import org.spongepowered.despector.util.serialization.AstSerializer;
+import org.spongepowered.despector.util.serialization.MessagePacker;
+
+import java.io.IOException;
+
 import javax.annotation.Nullable;
 
 /**
@@ -68,6 +73,20 @@ public class TypeArgument {
      */
     public void setSignature(@Nullable TypeSignature sig) {
         this.sig = sig;
+    }
+
+    public void writeTo(MessagePacker pack) throws IOException {
+        int len = 2;
+        if (this.sig != null) {
+            len++;
+        }
+        pack.startMap(len);
+        pack.writeString("id").writeInt(AstSerializer.SIGNATURE_ID_ARG);
+        pack.writeString("wildcard").writeInt(this.wildcard.ordinal());
+        if (this.sig != null) {
+            pack.writeString("signature");
+            this.sig.writeTo(pack);
+        }
     }
 
     @Override

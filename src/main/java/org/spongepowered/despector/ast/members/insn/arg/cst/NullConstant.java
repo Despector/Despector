@@ -27,6 +27,10 @@ package org.spongepowered.despector.ast.members.insn.arg.cst;
 import org.spongepowered.despector.ast.generic.ClassTypeSignature;
 import org.spongepowered.despector.ast.generic.TypeSignature;
 import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
+import org.spongepowered.despector.util.serialization.AstSerializer;
+import org.spongepowered.despector.util.serialization.MessagePacker;
+
+import java.io.IOException;
 
 /**
  * A constant null value.
@@ -46,6 +50,12 @@ public class NullConstant extends Constant {
     @Override
     public void accept(InstructionVisitor visitor) {
         visitor.visitNullConstant(this);
+    }
+
+    @Override
+    public void writeTo(MessagePacker pack) throws IOException {
+        pack.startMap(1);
+        pack.writeString("id").writeInt(AstSerializer.STATEMENT_ID_NULL_CONSTANT);
     }
 
     @Override

@@ -26,6 +26,10 @@ package org.spongepowered.despector.ast.members.insn.arg.field;
 
 import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
 import org.spongepowered.despector.util.TypeHelper;
+import org.spongepowered.despector.util.serialization.AstSerializer;
+import org.spongepowered.despector.util.serialization.MessagePacker;
+
+import java.io.IOException;
 
 /**
  * An instruction for accessing a static field.
@@ -39,6 +43,17 @@ public class StaticFieldAccess extends FieldAccess {
     @Override
     public void accept(InstructionVisitor visitor) {
         visitor.visitStaticFieldAccess(this);
+    }
+
+    @Override
+    public void writeTo(MessagePacker pack) throws IOException {
+        pack.startMap(5);
+        pack.writeString("id").writeInt(AstSerializer.STATEMENT_ID_STATIC_FIELD_ACCESS);
+        pack.writeString("name").writeString(this.field_name);
+        pack.writeString("desc").writeString(this.field_desc);
+        pack.writeString("owner").writeString(this.owner_type);
+        pack.writeString("signature");
+        this.signature.writeTo(pack);
     }
 
     @Override

@@ -24,6 +24,10 @@
  */
 package org.spongepowered.despector.ast.generic;
 
+import org.spongepowered.despector.util.serialization.AstSerializer;
+import org.spongepowered.despector.util.serialization.MessagePacker;
+
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -71,6 +75,27 @@ public class ClassSignature {
      */
     public List<ClassTypeSignature> getInterfaceSignatures() {
         return this.interfaces;
+    }
+
+    public void writeTo(MessagePacker pack) throws IOException {
+        int len = 3;
+        if (this.superclass != null) {
+            len++;
+        }
+        pack.startMap(len);
+        pack.writeString("id").writeInt(AstSerializer.SIGNATURE_ID_CLASS);
+        pack.writeString("parameters").startArray(this.parameters.size());
+        for (TypeParameter param : this.parameters) {
+            param.writeTo(pack);
+        }
+        if (this.superclass != null) {
+            pack.writeString("superclass");
+            this.superclass.writeTo(pack);
+        }
+        pack.writeString("interfaces").startArray(this.interfaces.size());
+        for (ClassTypeSignature sig : this.interfaces) {
+            sig.writeTo(pack);
+        }
     }
 
     @Override

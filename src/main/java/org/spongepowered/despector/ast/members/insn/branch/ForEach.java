@@ -32,7 +32,10 @@ import org.spongepowered.despector.ast.members.insn.Statement;
 import org.spongepowered.despector.ast.members.insn.StatementBlock;
 import org.spongepowered.despector.ast.members.insn.arg.Instruction;
 import org.spongepowered.despector.ast.members.insn.branch.Break.Breakable;
+import org.spongepowered.despector.util.serialization.AstSerializer;
+import org.spongepowered.despector.util.serialization.MessagePacker;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -106,6 +109,22 @@ public class ForEach implements Statement, Breakable {
         this.collection.accept(visitor);
         for (Statement stmt : this.body.getStatements()) {
             stmt.accept(visitor);
+        }
+    }
+
+    @Override
+    public void writeTo(MessagePacker pack) throws IOException {
+        pack.startMap(5);
+        pack.writeString("id").writeInt(AstSerializer.STATEMENT_ID_FOREACH);
+        pack.writeString("local");
+        this.val.writeToSimple(pack);
+        pack.writeString("collection");
+        this.collection.writeTo(pack);
+        pack.writeString("body");
+        this.body.writeTo(pack);
+        pack.writeString("breakpoints").startArray(this.breaks.size());
+        for (Break br : this.breaks) {
+            pack.writeInt(((Object) br).hashCode());
         }
     }
 

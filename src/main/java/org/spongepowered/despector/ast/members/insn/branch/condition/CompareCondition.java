@@ -29,6 +29,10 @@ import static org.objectweb.asm.Opcodes.*;
 
 import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
 import org.spongepowered.despector.ast.members.insn.arg.Instruction;
+import org.spongepowered.despector.util.serialization.AstSerializer;
+import org.spongepowered.despector.util.serialization.MessagePacker;
+
+import java.io.IOException;
 
 /**
  * A condition which compares two object or numerical values.
@@ -164,6 +168,17 @@ public class CompareCondition extends Condition {
         visitor.visitCompareCondition(this);
         this.left.accept(visitor);
         this.right.accept(visitor);
+    }
+
+    @Override
+    public void writeTo(MessagePacker pack) throws IOException {
+        pack.startMap(4);
+        pack.writeString("id").writeInt(AstSerializer.CONDITION_ID_COMPARE);
+        pack.writeString("left");
+        this.left.writeTo(pack);
+        pack.writeString("right");
+        this.right.writeTo(pack);
+        pack.writeString("op").writeInt(this.op.ordinal());
     }
 
     @Override

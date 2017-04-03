@@ -30,6 +30,10 @@ import org.spongepowered.despector.ast.Locals.LocalInstance;
 import org.spongepowered.despector.ast.generic.TypeSignature;
 import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
 import org.spongepowered.despector.ast.members.insn.arg.Instruction;
+import org.spongepowered.despector.util.serialization.AstSerializer;
+import org.spongepowered.despector.util.serialization.MessagePacker;
+
+import java.io.IOException;
 
 /**
  * An instruction for accessing a local.
@@ -65,6 +69,14 @@ public class LocalAccess implements Instruction {
     public void accept(InstructionVisitor visitor) {
         visitor.visitLocalInstance(this.local);
         visitor.visitLocalAccess(this);
+    }
+
+    @Override
+    public void writeTo(MessagePacker pack) throws IOException {
+        pack.startMap(2);
+        pack.writeString("id").writeInt(AstSerializer.STATEMENT_ID_LOCAL_ACCESS);
+        pack.writeString("local");
+        this.local.writeToSimple(pack);
     }
 
     @Override

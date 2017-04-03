@@ -34,7 +34,10 @@ import org.spongepowered.despector.ast.SourceSet;
 import org.spongepowered.despector.ast.generic.TypeSignature;
 import org.spongepowered.despector.ast.members.insn.arg.Instruction;
 import org.spongepowered.despector.util.TypeHelper;
+import org.spongepowered.despector.util.serialization.AstSerializer;
+import org.spongepowered.despector.util.serialization.MessagePacker;
 
+import java.io.IOException;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -56,7 +59,7 @@ public class FieldEntry extends AstEntry {
     protected boolean is_static;
     protected boolean is_synthetic;
 
-    protected Instruction init;
+    @Nullable protected Instruction init;
 
     protected final Map<AnnotationType, Annotation> annotations = new LinkedHashMap<>();
 
@@ -145,8 +148,8 @@ public class FieldEntry extends AstEntry {
     /**
      * Sets the initializer value of this field.
      */
-    public void setInitializer(Instruction insn) {
-        this.init = checkNotNull(insn, "initializer");
+    public void setInitializer(@Nullable Instruction insn) {
+        this.init = insn;
     }
 
     /**
@@ -216,5 +219,30 @@ public class FieldEntry extends AstEntry {
     @Override
     public String toString() {
         return (this.is_static ? "Static " : "") + "Field " + this.type + " " + this.name;
+    }
+
+    @Override
+    public void writeTo(MessagePacker pack) throws IOException {
+        int len = 8;
+        if (this.init != null) {
+            len++;
+        }
+        pack.startMap(len);
+        pack.writeString("id").writeInt(AstSerializer.ENTRY_ID_FIELD);
+        pack.writeString("access").writeInt(this.access.ordinal());
+        pack.writeString("name").writeString(this.name);
+        pack.writeString("type");
+        this.type.writeTo(pack);
+        pack.writeString("final").writeBool(this.is_final);
+        pack.writeString("static").writeBool(this.is_static);
+        pack.writeString("synthetic").writeBool(this.is_synthetic);
+        if (this.init != null) {
+            pack.writeString("initializer");
+            this.init.writeTo(pack);
+        }
+        pack.writeString("annotations").startArray(this.annotations.size());
+        for (Annotation anno : this.annotations.values()) {
+            anno.writeTo(pack);
+        }
     }
 }
