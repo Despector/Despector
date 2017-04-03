@@ -127,10 +127,7 @@ public class KotlinClassEntryEmitter implements AstEmitter<ClassEntry> {
             }
             ctx.printString(" ", ctx.getFormat().insert_space_before_opening_brace_in_type_declaration);
             ctx.printString("{");
-            ctx.newLine();
-            for (int i = 0; i < ctx.getFormat().blank_lines_before_first_class_body_declaration; i++) {
-                ctx.newLine();
-            }
+            ctx.newLine(ctx.getFormat().blank_lines_before_first_class_body_declaration + 1);
 
             // Ordering is static fields -> static methods -> instance fields ->
             // instance methods

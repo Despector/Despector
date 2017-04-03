@@ -91,8 +91,7 @@ public class EnumEntryEmitter implements AstEmitter<EnumEntry> {
         }
         ctx.printString(" ", ctx.getFormat().insert_space_before_opening_brace_in_type_declaration);
         ctx.printString("{");
-        ctx.newLine();
-        ctx.newLine();
+        ctx.newLine(ctx.getFormat().blank_lines_before_first_class_body_declaration + 1);
         ctx.indent();
 
         // we look through the class initializer to find the enum constant

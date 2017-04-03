@@ -93,7 +93,9 @@ public class ClassEntryEmitter implements AstEmitter<ClassEntry> {
         }
 
         if (!type.getSuperclass().equals("Ljava/lang/Object;")) {
-            ctx.printString(" extends ");
+            ctx.printString(" ");
+            ctx.markWrapPoint(ctx.getFormat().alignment_for_superclass_in_type_declaration, 0);
+            ctx.printString("extends ");
             ctx.emitTypeName(type.getSuperclassName());
             if (type.getSignature() != null && type.getSignature().getSuperclassSignature() != null) {
                 generics.emitTypeArguments(ctx, type.getSignature().getSuperclassSignature().getArguments());
@@ -116,10 +118,7 @@ public class ClassEntryEmitter implements AstEmitter<ClassEntry> {
         }
         ctx.printString(" ", ctx.getFormat().insert_space_before_opening_brace_in_type_declaration);
         ctx.printString("{");
-        ctx.newLine();
-        for (int i = 0; i < ctx.getFormat().blank_lines_before_first_class_body_declaration; i++) {
-            ctx.newLine();
-        }
+        ctx.newLine(ctx.getFormat().blank_lines_before_first_class_body_declaration + 1);
 
         // Ordering is static fields -> static methods -> instance fields ->
         // instance methods

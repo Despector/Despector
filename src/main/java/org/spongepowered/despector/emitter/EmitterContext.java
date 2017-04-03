@@ -42,6 +42,7 @@ import org.spongepowered.despector.ast.members.insn.misc.Return;
 import org.spongepowered.despector.ast.type.InterfaceEntry;
 import org.spongepowered.despector.ast.type.TypeEntry;
 import org.spongepowered.despector.emitter.format.EmitterFormat;
+import org.spongepowered.despector.emitter.format.EmitterFormat.WrappingStyle;
 import org.spongepowered.despector.emitter.special.AnnotationEmitter;
 import org.spongepowered.despector.emitter.special.GenericsEmitter;
 import org.spongepowered.despector.emitter.special.PackageEmitter;
@@ -353,6 +354,13 @@ public class EmitterContext {
         return this;
     }
 
+    public EmitterContext newLine(int count) {
+        for (int i = 0; i < count; i++) {
+            newLine();
+        }
+        return this;
+    }
+
     public EmitterContext newLine() {
         __newLine();
         if (this.is_wrapped) {
@@ -422,6 +430,11 @@ public class EmitterContext {
     }
 
     public EmitterContext markWrapPoint() {
+        markWrapPoint(WrappingStyle.WRAP_WHEN_NEEDED, 0);
+        return this;
+    }
+
+    public EmitterContext markWrapPoint(WrappingStyle style, int index) {
         this.wrap_point = this.line_length;
         return this;
     }

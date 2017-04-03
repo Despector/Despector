@@ -89,8 +89,7 @@ public class InterfaceEntryEmitter implements AstEmitter<InterfaceEntry> {
         }
         ctx.printString(" ", ctx.getFormat().insert_space_before_opening_brace_in_type_declaration);
         ctx.printString("{");
-        ctx.newLine();
-        ctx.newLine();
+        ctx.newLine(ctx.getFormat().blank_lines_before_first_class_body_declaration + 1);
         ctx.indent();
         if (!type.getStaticFields().isEmpty()) {
             boolean at_least_one = false;
