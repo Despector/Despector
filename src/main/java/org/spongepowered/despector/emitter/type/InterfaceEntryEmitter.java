@@ -33,22 +33,20 @@ import org.spongepowered.despector.ast.type.TypeEntry;
 import org.spongepowered.despector.ast.type.TypeEntry.InnerClassInfo;
 import org.spongepowered.despector.config.ConfigManager;
 import org.spongepowered.despector.emitter.AstEmitter;
-import org.spongepowered.despector.emitter.EmitterContext;
-import org.spongepowered.despector.emitter.special.GenericsEmitter;
+import org.spongepowered.despector.emitter.output.EmitterOutput;
+import org.spongepowered.despector.emitter.output.EmitterToken;
+import org.spongepowered.despector.emitter.output.TokenType;
 
 import java.util.Collection;
 
 public class InterfaceEntryEmitter implements AstEmitter<InterfaceEntry> {
 
     @Override
-    public boolean emit(EmitterContext ctx, InterfaceEntry type) {
+    public boolean emit(EmitterOutput ctx, InterfaceEntry type) {
 
         for (Annotation anno : type.getAnnotations()) {
-            ctx.printIndentation();
             ctx.emit(anno);
-            ctx.newLine();
         }
-        ctx.printIndentation();
         InnerClassInfo inner_info = null;
         if (type.isInnerClass() && ctx.getOuterType() != null) {
             inner_info = ctx.getOuterType().getInnerClassInfo(type.getName());
@@ -64,93 +62,64 @@ public class InterfaceEntryEmitter implements AstEmitter<InterfaceEntry> {
             name = name.replace('$', '.');
         }
         if (!(name.contains(".") && inner_info == null && type.getAccessModifier() == AccessModifier.PUBLIC)) {
-            ctx.printString(type.getAccessModifier().asString());
-            if (type.getAccessModifier() != AccessModifier.PACKAGE_PRIVATE) {
-                ctx.printString(" ");
-            }
+            ctx.append(new EmitterToken(TokenType.ACCESS, type.getAccessModifier()));
         }
-        ctx.printString("interface ");
-        ctx.printString(name);
-        GenericsEmitter generics = ctx.getEmitterSet().getSpecialEmitter(GenericsEmitter.class);
+        ctx.append(new EmitterToken(TokenType.SPECIAL, "interface"));
+        ctx.append(new EmitterToken(TokenType.NAME, name));
         if (type.getSignature() != null) {
-            generics.emitTypeParameters(ctx, type.getSignature().getParameters());
+            ctx.append(new EmitterToken(TokenType.GENERIC_PARAMS, type.getSignature().getParameters()));
         }
         if (!type.getInterfaces().isEmpty()) {
-            ctx.printString(" extends ");
+            ctx.append(new EmitterToken(TokenType.SPECIAL, "extends"));
             for (int i = 0; i < type.getInterfaces().size(); i++) {
-                ctx.emitType(type.getInterfaces().get(i));
-                if (i < type.getInterfaces().size() - 1) {
-                    ctx.printString(" ", ctx.getFormat().insert_space_before_comma_in_superinterfaces);
-                    ctx.printString(",");
-                    ctx.printString(" ", ctx.getFormat().insert_space_after_comma_in_superinterfaces);
-                    ctx.markWrapPoint();
-                }
+                ctx.append(new EmitterToken(TokenType.TYPE, type.getInterfaces().get(i)));
             }
         }
-        ctx.printString(" ", ctx.getFormat().insert_space_before_opening_brace_in_type_declaration);
-        ctx.printString("{");
-        ctx.newLine(ctx.getFormat().blank_lines_before_first_class_body_declaration + 1);
-        ctx.indent();
+        ctx.append(new EmitterToken(TokenType.BLOCK_START, "{"));
         if (!type.getStaticFields().isEmpty()) {
-            boolean at_least_one = false;
             for (FieldEntry field : type.getStaticFields()) {
                 if (field.isSynthetic()) {
-                    if(ConfigManager.getConfig().emitter.emit_synthetics) {
-                        ctx.printIndentation();
-                        ctx.printString("// Synthetic");
-                        ctx.newLine();
+                    if (ConfigManager.getConfig().emitter.emit_synthetics) {
+                        ctx.append(new EmitterToken(TokenType.COMMENT, "Synthetic"));
                     } else {
                         continue;
                     }
                 }
-                at_least_one = true;
-                ctx.printIndentation();
-                ctx.emit(field);
-                ctx.printString(";");
-                ctx.newLine();
-            }
-            if (at_least_one) {
-                ctx.newLine();
+                ctx.emitField(field);
             }
         }
         if (!type.getStaticMethods().isEmpty()) {
             for (MethodEntry mth : type.getStaticMethods()) {
                 if (mth.isSynthetic()) {
-                    if(ConfigManager.getConfig().emitter.emit_synthetics) {
-                        ctx.printIndentation();
-                        ctx.printString("// Synthetic");
+                    if (ConfigManager.getConfig().emitter.emit_synthetics) {
                         if (mth.isBridge()) {
-                            ctx.printString(" - Bridge");
+                            ctx.append(new EmitterToken(TokenType.COMMENT, "Synthetic - Bridge"));
+                        } else {
+                            ctx.append(new EmitterToken(TokenType.COMMENT, "Synthetic"));
                         }
-                        ctx.newLine();
                     } else {
                         continue;
                     }
                 }
-                ctx.emit(mth);
-                ctx.newLine();
-                ctx.newLine();
+                ctx.emitMethod(mth);
             }
         }
         if (!type.getMethods().isEmpty()) {
             for (MethodEntry mth : type.getMethods()) {
                 if (mth.isSynthetic()) {
-                    if(ConfigManager.getConfig().emitter.emit_synthetics) {
-                        ctx.printIndentation();
-                        ctx.printString("// Synthetic");
+                    if (ConfigManager.getConfig().emitter.emit_synthetics) {
                         if (mth.isBridge()) {
-                            ctx.printString(" - Bridge");
+                            ctx.append(new EmitterToken(TokenType.COMMENT, "Synthetic - Bridge"));
+                        } else {
+                            ctx.append(new EmitterToken(TokenType.COMMENT, "Synthetic"));
                         }
-                        ctx.newLine();
                     } else {
                         continue;
                     }
                 }
                 // TODO need something for emitting 'default' for default
                 // methods
-                ctx.emit(mth);
-                ctx.newLine();
-                ctx.newLine();
+                ctx.emitMethod(mth);
             }
         }
 
@@ -159,17 +128,10 @@ public class InterfaceEntryEmitter implements AstEmitter<InterfaceEntry> {
             if (inner.getOuterName() == null || !inner.getOuterName().equals(type.getName())) {
                 continue;
             }
-            ctx.setOuterType(type);
             TypeEntry inner_type = type.getSource().get(inner.getName());
-            ctx.newLine();
-            ctx.emit(inner_type);
-            ctx.setType(type);
-            ctx.setOuterType(null);
+            ctx.emitType(inner_type);
         }
-        ctx.dedent();
-        ctx.printIndentation();
-        ctx.printString("}");
-        ctx.newLine();
+        ctx.append(new EmitterToken(TokenType.BLOCK_END, "}"));
         return true;
     }
 

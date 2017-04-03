@@ -22,13 +22,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.despector.emitter;
+package org.spongepowered.despector.emitter.output;
 
-import org.spongepowered.despector.ast.members.insn.Statement;
-import org.spongepowered.despector.emitter.output.EmitterOutput;
+public class EmitterToken {
 
-public interface StatementEmitter<T extends Statement> {
+    private final TokenType type;
+    private final Object token;
 
-    void emit(EmitterOutput ctx, T stmt);
+    public EmitterToken(TokenType type, Object token) {
+        this.type = type;
+        this.token = token;
+    }
+
+    public TokenType getType() {
+        return this.type;
+    }
+
+    public Object getToken() {
+        return this.token;
+    }
 
 }

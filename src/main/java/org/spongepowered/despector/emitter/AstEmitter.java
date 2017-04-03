@@ -25,9 +25,10 @@
 package org.spongepowered.despector.emitter;
 
 import org.spongepowered.despector.ast.AstEntry;
+import org.spongepowered.despector.emitter.output.EmitterOutput;
 
 public interface AstEmitter<T extends AstEntry> {
 
-    boolean emit(EmitterContext ctx, T ast);
+    boolean emit(EmitterOutput ctx, T ast);
 
 }

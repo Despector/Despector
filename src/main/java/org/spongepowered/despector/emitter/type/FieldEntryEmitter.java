@@ -27,35 +27,31 @@ package org.spongepowered.despector.emitter.type;
 import org.spongepowered.despector.ast.Annotation;
 import org.spongepowered.despector.ast.members.FieldEntry;
 import org.spongepowered.despector.emitter.AstEmitter;
-import org.spongepowered.despector.emitter.EmitterContext;
-import org.spongepowered.despector.emitter.special.GenericsEmitter;
+import org.spongepowered.despector.emitter.output.EmitterOutput;
+import org.spongepowered.despector.emitter.output.EmitterToken;
+import org.spongepowered.despector.emitter.output.TokenType;
 
 public class FieldEntryEmitter implements AstEmitter<FieldEntry> {
 
     @Override
-    public boolean emit(EmitterContext ctx, FieldEntry ast) {
+    public boolean emit(EmitterOutput ctx, FieldEntry ast) {
 
         for (Annotation anno : ast.getAnnotations()) {
             ctx.emit(anno);
-            ctx.newLine();
-            ctx.printIndentation();
         }
 
-        ctx.printString(ast.getAccessModifier().asString());
-        ctx.printString(" ");
+        ctx.append(new EmitterToken(TokenType.ACCESS, ast.getAccessModifier()));
         if (ast.isStatic()) {
-            ctx.printString("static ");
+            ctx.append(new EmitterToken(TokenType.MODIFIER, "static"));
         }
         if (ast.isFinal()) {
-            ctx.printString("final ");
+            ctx.append(new EmitterToken(TokenType.MODIFIER, "final"));
         }
-        GenericsEmitter generics = ctx.getEmitterSet().getSpecialEmitter(GenericsEmitter.class);
-        generics.emitTypeSignature(ctx, ast.getType());
-        ctx.printString(" ");
-        ctx.printString(ast.getName());
+        ctx.append(new EmitterToken(TokenType.TYPE, ast.getType()));
+        ctx.append(new EmitterToken(TokenType.NAME, ast.getName()));
         if (ast.getInitializer() != null) {
-            ctx.printString(" = ");
-            ctx.emit(ast.getInitializer(), ast.getType());
+            ctx.append(new EmitterToken(TokenType.FIELD_INITIALIZER, null));
+            ctx.emitInstruction(ast.getInitializer(), ast.getType());
         }
         return true;
     }

@@ -25,9 +25,12 @@
 package org.spongepowered.despector.emitter;
 
 import org.spongepowered.despector.ast.type.TypeEntry;
+import org.spongepowered.despector.emitter.format.EmitterFormat;
+
+import java.io.Writer;
 
 public interface Emitter {
 
-    void emit(EmitterContext ctx, TypeEntry type);
-    
+    void emit(Writer output, EmitterFormat format, TypeEntry type);
+
 }

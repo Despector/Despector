@@ -25,22 +25,37 @@
 package org.spongepowered.despector.emitter;
 
 import org.spongepowered.despector.ast.type.TypeEntry;
+import org.spongepowered.despector.emitter.format.EmitterFormat;
+import org.spongepowered.despector.emitter.output.EmitterOutput;
+import org.spongepowered.despector.emitter.output.EmitterToken;
+import org.spongepowered.despector.emitter.output.FormattedTokenEmitter;
+
+import java.io.Writer;
+import java.util.List;
 
 public class BaseEmitter implements Emitter {
 
     private final EmitterSet set;
+    private final FormattedTokenEmitter tokenemitter;
 
     public BaseEmitter(EmitterSet set) {
         this.set = set;
+        this.tokenemitter = new FormattedTokenEmitter(this.set);
     }
 
     @Override
-    public void emit(EmitterContext ctx, TypeEntry type) {
-        if(this.set == Emitters.KOTLIN_SET) {
-            ctx.setSemicolons(false);
-        }
-        ctx.setEmitterSet(this.set);
-        ctx.emitOuterType(type);
+    public void emit(Writer output, EmitterFormat format, TypeEntry type) {
+        
+        EmitterOutput out = new EmitterOutput(this.set);
+        
+        out.emitType(type);
+        
+        List<EmitterToken> tokens = out.getTokens();
+        
+        this.tokenemitter.setFormat(format);
+        this.tokenemitter.emit(output, tokens);
+        
+        
     }
 
 }

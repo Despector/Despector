@@ -24,10 +24,14 @@
  */
 package org.spongepowered.test.formatting;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class FormattingTestClass {
 
     public int afield;
     public String anotherField;
+    private List<String> alist = new ArrayList<>();
 
     public int foo() {
         return 0;

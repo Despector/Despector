@@ -22,13 +22,32 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.despector.emitter;
+package org.spongepowered.despector.emitter.output;
 
-import org.spongepowered.despector.ast.members.insn.Statement;
-import org.spongepowered.despector.emitter.output.EmitterOutput;
+import org.spongepowered.despector.emitter.EmitterSet;
+import org.spongepowered.despector.emitter.format.EmitterFormat;
 
-public interface StatementEmitter<T extends Statement> {
+import java.io.Writer;
+import java.util.List;
 
-    void emit(EmitterOutput ctx, T stmt);
+public class FormattedTokenEmitter {
+
+    private final EmitterSet set;
+    private EmitterFormat format = EmitterFormat.defaults();
+
+    public FormattedTokenEmitter(EmitterSet set) {
+        this.set = set;
+    }
+
+    public EmitterFormat getFormat() {
+        return this.format;
+    }
+
+    public void setFormat(EmitterFormat format) {
+        this.format = format;
+    }
+
+    public void emit(Writer output, List<EmitterToken> tokens) {
+    }
 
 }

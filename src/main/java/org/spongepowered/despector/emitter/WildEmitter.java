@@ -26,15 +26,18 @@ package org.spongepowered.despector.emitter;
 
 import org.spongepowered.despector.Language;
 import org.spongepowered.despector.ast.type.TypeEntry;
+import org.spongepowered.despector.emitter.format.EmitterFormat;
+
+import java.io.Writer;
 
 public class WildEmitter implements Emitter {
 
     @Override
-    public void emit(EmitterContext ctx, TypeEntry type) {
+    public void emit(Writer output, EmitterFormat format, TypeEntry type) {
         if(type.getLanguage() == Language.KOTLIN) {
-            Emitters.KOTLIN.emit(ctx, type);
+            Emitters.KOTLIN.emit(output, format, type);
         }
-        Emitters.JAVA.emit(ctx, type);
+        Emitters.JAVA.emit(output, format, type);
     }
 
 }

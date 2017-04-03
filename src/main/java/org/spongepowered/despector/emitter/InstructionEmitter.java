@@ -26,9 +26,10 @@ package org.spongepowered.despector.emitter;
 
 import org.spongepowered.despector.ast.generic.TypeSignature;
 import org.spongepowered.despector.ast.members.insn.arg.Instruction;
+import org.spongepowered.despector.emitter.output.EmitterOutput;
 
 public interface InstructionEmitter<T extends Instruction> {
 
-    void emit(EmitterContext ctx, T arg, TypeSignature type);
+    void emit(EmitterOutput ctx, T arg, TypeSignature type);
 
 }

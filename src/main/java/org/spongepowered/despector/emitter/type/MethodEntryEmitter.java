@@ -37,21 +37,20 @@ import org.spongepowered.despector.ast.members.insn.assign.StaticFieldAssignment
 import org.spongepowered.despector.ast.type.EnumEntry;
 import org.spongepowered.despector.ast.type.InterfaceEntry;
 import org.spongepowered.despector.emitter.AstEmitter;
-import org.spongepowered.despector.emitter.EmitterContext;
+import org.spongepowered.despector.emitter.output.EmitterOutput;
+import org.spongepowered.despector.emitter.output.EmitterToken;
+import org.spongepowered.despector.emitter.output.TokenType;
 import org.spongepowered.despector.emitter.special.GenericsEmitter;
 
 public class MethodEntryEmitter implements AstEmitter<MethodEntry> {
 
     @Override
-    public boolean emit(EmitterContext ctx, MethodEntry method) {
+    public boolean emit(EmitterOutput ctx, MethodEntry method) {
 
         for (Annotation anno : method.getAnnotations()) {
-            ctx.printIndentation();
             ctx.emit(anno);
-            ctx.newLine();
         }
 
-        ctx.setMethod(method);
         if (method.getName().equals("<clinit>")) {
             int start = 0;
             if (method.getInstructions() != null) {
@@ -70,21 +69,14 @@ public class MethodEntryEmitter implements AstEmitter<MethodEntry> {
                     return false;
                 }
             }
-            ctx.printIndentation();
-            ctx.printString("static {");
-            ctx.newLine();
-            ctx.indent();
+            ctx.append(new EmitterToken(TokenType.SPECIAL, "static"));
             if (method.getInstructions() == null) {
-                ctx.printIndentation();
-                ctx.printString("// Error decompiling block");
+                ctx.append(new EmitterToken(TokenType.COMMENT, "Error decompiling block"));
                 printReturn(ctx, method.getReturnType());
             } else {
                 ctx.emitBody(method.getInstructions(), start);
             }
-            ctx.newLine();
-            ctx.dedent();
-            ctx.printIndentation();
-            ctx.printString("}");
+            ctx.append(new EmitterToken(TokenType.BLOCK_END, "}"));
             return true;
         }
         if ("<init>".equals(method.getName()) && method.getAccessModifier() == AccessModifier.PUBLIC && method.getParamTypes().isEmpty()
@@ -93,22 +85,17 @@ public class MethodEntryEmitter implements AstEmitter<MethodEntry> {
             // constants to the super ctor
             return false;
         }
-        ctx.printIndentation();
         if (!(ctx.getType() instanceof InterfaceEntry) && !(ctx.getType() instanceof EnumEntry && method.getName().equals("<init>"))) {
-            ctx.printString(method.getAccessModifier().asString());
-            if (method.getAccessModifier() != AccessModifier.PACKAGE_PRIVATE) {
-                ctx.printString(" ");
-            }
+            ctx.append(new EmitterToken(TokenType.ACCESS, method.getAccessModifier()));
         }
-        GenericsEmitter generics = ctx.getEmitterSet().getSpecialEmitter(GenericsEmitter.class);
         MethodSignature sig = method.getMethodSignature();
         if ("<init>".equals(method.getName())) {
             String name = method.getOwnerName();
             name = name.substring(Math.max(name.lastIndexOf('/'), name.lastIndexOf('$')) + 1);
-            ctx.printString(name);
+            ctx.append(new EmitterToken(TokenType.NAME, name));
         } else {
             if (method.isStatic()) {
-                ctx.printString("static ");
+                ctx.append(new EmitterToken(TokenType.MODIFIER, "static"));
             }
             if (method.isFinal()) {
                 ctx.printString("final ");
@@ -193,34 +180,38 @@ public class MethodEntryEmitter implements AstEmitter<MethodEntry> {
         return true;
     }
 
-    protected static void printReturn(EmitterContext ctx, TypeSignature type) {
+    protected static void printReturn(EmitterOutput ctx, TypeSignature type) {
         char f = type.getDescriptor().charAt(0);
         if (f == 'V') {
             return;
         }
-        ctx.newLine();
-        ctx.printIndentation();
         switch (f) {
         case 'I':
         case 'S':
         case 'B':
         case 'C':
-            ctx.printString("return 0;");
+            ctx.append(new EmitterToken(TokenType.KEYWORD, "return"));
+            ctx.append(new EmitterToken(TokenType.INT, 0));
             break;
         case 'J':
-            ctx.printString("return 0L;");
+            ctx.append(new EmitterToken(TokenType.KEYWORD, "return"));
+            ctx.append(new EmitterToken(TokenType.LONG, 0));
             break;
         case 'F':
-            ctx.printString("return 0.0f;");
+            ctx.append(new EmitterToken(TokenType.KEYWORD, "return"));
+            ctx.append(new EmitterToken(TokenType.FLOAT, 0));
             break;
         case 'D':
-            ctx.printString("return 0.0;");
+            ctx.append(new EmitterToken(TokenType.KEYWORD, "return"));
+            ctx.append(new EmitterToken(TokenType.DOUBLE, 0));
             break;
         case 'Z':
-            ctx.printString("return false;");
+            ctx.append(new EmitterToken(TokenType.KEYWORD, "return"));
+            ctx.append(new EmitterToken(TokenType.BOOLEAN, false));
             break;
         case 'L':
-            ctx.printString("return null;");
+            ctx.append(new EmitterToken(TokenType.KEYWORD, "return"));
+            ctx.append(new EmitterToken(TokenType.KEYWORD, "null"));
             break;
         default:
             throw new IllegalStateException("Malformed return type " + type);

@@ -24,12 +24,10 @@
  */
 package org.spongepowered.despector.emitter.type;
 
-import org.spongepowered.despector.ast.AccessModifier;
 import org.spongepowered.despector.ast.Annotation;
 import org.spongepowered.despector.ast.members.FieldEntry;
 import org.spongepowered.despector.ast.members.MethodEntry;
 import org.spongepowered.despector.ast.members.insn.Statement;
-import org.spongepowered.despector.ast.members.insn.arg.Instruction;
 import org.spongepowered.despector.ast.members.insn.assign.FieldAssignment;
 import org.spongepowered.despector.ast.members.insn.assign.StaticFieldAssignment;
 import org.spongepowered.despector.ast.type.ClassEntry;
@@ -37,92 +35,69 @@ import org.spongepowered.despector.ast.type.TypeEntry;
 import org.spongepowered.despector.ast.type.TypeEntry.InnerClassInfo;
 import org.spongepowered.despector.config.ConfigManager;
 import org.spongepowered.despector.emitter.AstEmitter;
-import org.spongepowered.despector.emitter.EmitterContext;
-import org.spongepowered.despector.emitter.special.GenericsEmitter;
+import org.spongepowered.despector.emitter.output.EmitterOutput;
+import org.spongepowered.despector.emitter.output.EmitterToken;
+import org.spongepowered.despector.emitter.output.TokenType;
 import org.spongepowered.despector.util.AstUtil;
 
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 public class ClassEntryEmitter implements AstEmitter<ClassEntry> {
 
     @Override
-    public boolean emit(EmitterContext ctx, ClassEntry type) {
+    public boolean emit(EmitterOutput ctx, ClassEntry type) {
 
         for (Annotation anno : type.getAnnotations()) {
-            ctx.printIndentation();
             ctx.emit(anno);
-            ctx.newLine();
         }
-        ctx.printIndentation();
         InnerClassInfo inner_info = null;
         if (type.isInnerClass() && ctx.getOuterType() != null) {
             inner_info = ctx.getOuterType().getInnerClassInfo(type.getName());
         }
-        ctx.printString(type.getAccessModifier().asString());
-        if (type.getAccessModifier() != AccessModifier.PACKAGE_PRIVATE) {
-            ctx.printString(" ");
-        }
+        ctx.append(new EmitterToken(TokenType.ACCESS, type.getAccessModifier()));
         if (inner_info != null && inner_info.isStatic()) {
-            ctx.printString("static ");
+            ctx.append(new EmitterToken(TokenType.MODIFIER, "static"));
         }
         if ((inner_info != null && inner_info.isFinal()) || type.isFinal()) {
-            ctx.printString("final ");
+            ctx.append(new EmitterToken(TokenType.MODIFIER, "final"));
         }
         if (inner_info != null && inner_info.isAbstract()) {
-            ctx.printString("abstract ");
+            ctx.append(new EmitterToken(TokenType.MODIFIER, "abstract"));
         }
-        ctx.printString("class ");
+        ctx.append(new EmitterToken(TokenType.SPECIAL, "class"));
         if (inner_info != null) {
-            ctx.printString(inner_info.getSimpleName());
+            ctx.append(new EmitterToken(TokenType.NAME, inner_info.getSimpleName()));
         } else {
             String name = type.getName().replace('/', '.');
             if (name.indexOf('.') != -1) {
                 name = name.substring(name.lastIndexOf('.') + 1, name.length());
             }
             name = name.replace('$', '.');
-            ctx.printString(name);
+            ctx.append(new EmitterToken(TokenType.NAME, name));
         }
 
-        GenericsEmitter generics = ctx.getEmitterSet().getSpecialEmitter(GenericsEmitter.class);
-        if (type.getSignature() != null) {
-            generics.emitTypeParameters(ctx, type.getSignature().getParameters());
-        }
+        ctx.append(new EmitterToken(TokenType.GENERIC_PARAMS, type.getSignature().getParameters()));
 
         if (!type.getSuperclass().equals("Ljava/lang/Object;")) {
-            ctx.printString(" ");
-            ctx.markWrapPoint(ctx.getFormat().alignment_for_superclass_in_type_declaration, 0);
-            ctx.printString("extends ");
-            ctx.emitTypeName(type.getSuperclassName());
+            ctx.append(new EmitterToken(TokenType.SPECIAL, "extends"));
+            ctx.append(new EmitterToken(TokenType.SUPERCLASS, type.getSuperclassName()));
             if (type.getSignature() != null && type.getSignature().getSuperclassSignature() != null) {
-                generics.emitTypeArguments(ctx, type.getSignature().getSuperclassSignature().getArguments());
+                ctx.append(new EmitterToken(TokenType.GENERIC_PARAMS, type.getSignature().getSuperclassSignature().getArguments()));
             }
         }
         if (!type.getInterfaces().isEmpty()) {
-            ctx.printString(" implements ");
+            ctx.append(new EmitterToken(TokenType.SPECIAL, "implements"));
             for (int i = 0; i < type.getInterfaces().size(); i++) {
-                ctx.emitType(type.getInterfaces().get(i));
+                ctx.append(new EmitterToken(TokenType.INTERFACE, type.getInterfaces().get(i)));
                 if (type.getSignature() != null) {
-                    generics.emitTypeArguments(ctx, type.getSignature().getInterfaceSignatures().get(i).getArguments());
-                }
-                if (i < type.getInterfaces().size() - 1) {
-                    ctx.printString(" ", ctx.getFormat().insert_space_before_comma_in_superinterfaces);
-                    ctx.printString(",");
-                    ctx.printString(" ", ctx.getFormat().insert_space_after_comma_in_superinterfaces);
-                    ctx.markWrapPoint();
+                    ctx.append(new EmitterToken(TokenType.GENERIC_PARAMS, type.getSignature().getInterfaceSignatures().get(i).getArguments()));
                 }
             }
         }
-        ctx.printString(" ", ctx.getFormat().insert_space_before_opening_brace_in_type_declaration);
-        ctx.printString("{");
-        ctx.newLine(ctx.getFormat().blank_lines_before_first_class_body_declaration + 1);
 
-        // Ordering is static fields -> static methods -> instance fields ->
-        // instance methods
-        ctx.indent();
+        ctx.append(new EmitterToken(TokenType.BLOCK_START, "{"));
 
         emitStaticFields(ctx, type);
         emitStaticMethods(ctx, type);
@@ -134,26 +109,17 @@ public class ClassEntryEmitter implements AstEmitter<ClassEntry> {
             if (inner.getOuterName() == null || !inner.getOuterName().equals(type.getName())) {
                 continue;
             }
-            ctx.setOuterType(type);
             TypeEntry inner_type = type.getSource().get(inner.getName());
-            ctx.newLine();
-            ctx.emit(inner_type);
-            ctx.setType(type);
-            ctx.setOuterType(null);
+            ctx.emitType(inner_type);
         }
 
-        ctx.dedent();
-        ctx.printIndentation();
-        ctx.printString("}");
-        ctx.newLine();
+        ctx.append(new EmitterToken(TokenType.BLOCK_END, "}"));
         return true;
     }
 
-    public void emitStaticFields(EmitterContext ctx, ClassEntry type) {
+    public void emitStaticFields(EmitterOutput ctx, ClassEntry type) {
         if (!type.getStaticFields().isEmpty()) {
-
-            Map<String, Instruction> static_initializers = new HashMap<>();
-
+            // TODO move this to a decompiling post-process step
             MethodEntry static_init = type.getStaticMethodSafe("<clinit>");
             if (static_init != null && static_init.getInstructions() != null) {
                 for (Statement stmt : static_init.getInstructions().getStatements()) {
@@ -164,61 +130,43 @@ public class ClassEntryEmitter implements AstEmitter<ClassEntry> {
                     if (!assign.getOwnerName().equals(type.getName())) {
                         break;
                     }
-                    static_initializers.put(assign.getFieldName(), assign.getValue());
+                    type.getStaticField(assign.getFieldName()).setInitializer(assign.getValue());
                 }
             }
 
-            boolean at_least_one = false;
             for (FieldEntry field : type.getStaticFields()) {
                 if (field.isSynthetic()) {
                     if (ConfigManager.getConfig().emitter.emit_synthetics) {
-                        ctx.printIndentation();
-                        ctx.printString("// Synthetic");
-                        ctx.newLine();
+                        ctx.append(new EmitterToken(TokenType.COMMENT, "Synthetic"));
                     } else {
                         continue;
                     }
                 }
-                at_least_one = true;
-                ctx.printIndentation();
-                ctx.emit(field);
-                if (static_initializers.containsKey(field.getName())) {
-                    ctx.printString(" = ");
-                    ctx.emit(static_initializers.get(field.getName()), field.getType());
-                }
-                ctx.printString(";");
-                ctx.newLine();
-            }
-            if (at_least_one) {
-                ctx.newLine();
+                ctx.emitField(field);
             }
         }
     }
 
-    public void emitStaticMethods(EmitterContext ctx, ClassEntry type) {
+    public void emitStaticMethods(EmitterOutput ctx, ClassEntry type) {
         if (!type.getStaticMethods().isEmpty()) {
             for (MethodEntry mth : type.getStaticMethods()) {
                 if (mth.isSynthetic()) {
                     if (ConfigManager.getConfig().emitter.emit_synthetics) {
-                        ctx.printIndentation();
-                        ctx.printString("// Synthetic");
                         if (mth.isBridge()) {
-                            ctx.printString(" - Bridge");
+                            ctx.append(new EmitterToken(TokenType.COMMENT, "Synthetic - Bridge"));
+                        } else {
+                            ctx.append(new EmitterToken(TokenType.COMMENT, "Synthetic"));
                         }
-                        ctx.newLine();
                     } else {
                         continue;
                     }
                 }
-                if (ctx.emit(mth)) {
-                    ctx.newLine();
-                    ctx.newLine();
-                }
+                ctx.emitMethod(mth);
             }
         }
     }
 
-    public void emitFields(EmitterContext ctx, ClassEntry type) {
+    public void emitFields(EmitterOutput ctx, ClassEntry type) {
         if (!type.getFields().isEmpty()) {
 
             List<MethodEntry> inits = type.getMethods().stream().filter((m) -> m.getName().equals("<init>")).collect(Collectors.toList());
@@ -226,6 +174,7 @@ public class ClassEntryEmitter implements AstEmitter<ClassEntry> {
             if (inits.size() == 1) {
                 main = inits.get(0);
             }
+            // TODO move this to a decompiler post-process step
             if (main != null && main.getInstructions() != null) {
                 for (int i = 1; i < main.getInstructions().getStatements().size(); i++) {
                     Statement next = main.getInstructions().getStatements().get(i);
@@ -245,48 +194,34 @@ public class ClassEntryEmitter implements AstEmitter<ClassEntry> {
                 }
             }
 
-            boolean at_least_one = false;
             for (FieldEntry field : type.getFields()) {
                 if (field.isSynthetic()) {
                     if (ConfigManager.getConfig().emitter.emit_synthetics) {
-                        ctx.printIndentation();
-                        ctx.printString("// Synthetic");
-                        ctx.newLine();
+                        ctx.append(new EmitterToken(TokenType.COMMENT, "Synthetic"));
                     } else {
                         continue;
                     }
                 }
-                at_least_one = true;
-                ctx.printIndentation();
-                ctx.emit(field);
-                ctx.printString(";");
-                ctx.newLine();
-            }
-            if (at_least_one) {
-                ctx.newLine();
+                ctx.emitField(field);
             }
         }
     }
 
-    public void emitMethods(EmitterContext ctx, ClassEntry type) {
+    public void emitMethods(EmitterOutput ctx, ClassEntry type) {
         if (!type.getMethods().isEmpty()) {
             for (MethodEntry mth : type.getMethods()) {
                 if (mth.isSynthetic()) {
                     if (ConfigManager.getConfig().emitter.emit_synthetics) {
-                        ctx.printIndentation();
-                        ctx.printString("// Synthetic");
                         if (mth.isBridge()) {
-                            ctx.printString(" - Bridge");
+                            ctx.append(new EmitterToken(TokenType.COMMENT, "Synthetic - Bridge"));
+                        } else {
+                            ctx.append(new EmitterToken(TokenType.COMMENT, "Synthetic"));
                         }
-                        ctx.newLine();
                     } else {
                         continue;
                     }
                 }
-                if (ctx.emit(mth)) {
-                    ctx.newLine();
-                    ctx.newLine();
-                }
+                ctx.emitMethod(mth);
             }
         }
     }

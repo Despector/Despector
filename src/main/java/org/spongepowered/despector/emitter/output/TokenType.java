@@ -22,13 +22,38 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.despector.emitter;
+package org.spongepowered.despector.emitter.output;
 
-import org.spongepowered.despector.ast.members.insn.Statement;
-import org.spongepowered.despector.emitter.output.EmitterOutput;
+public enum TokenType {
 
-public interface StatementEmitter<T extends Statement> {
+    NAME,
+    ACCESS,
+    SPECIAL,
+    MODIFIER,
+    TYPE,
+    SUPERCLASS,
+    INTERFACE,
+    KEYWORD,
 
-    void emit(EmitterOutput ctx, T stmt);
+    GENERIC_PARAMS,
+    BLOCK_START,
+    BLOCK_END,
+    LEFT_PAREN,
+    RIGHT_PAREN,
+    ARG_START,
+
+    ENUM_CONSTANT,
+
+    COMMENT,
+    BLOCK_COMMENT,
+
+    FIELD_INITIALIZER,
+
+    INT,
+    LONG,
+    FLOAT,
+    DOUBLE,
+    STRING,
+    BOOLEAN,
 
 }

@@ -25,9 +25,10 @@
 package org.spongepowered.despector.emitter;
 
 import org.spongepowered.despector.ast.members.insn.branch.condition.Condition;
+import org.spongepowered.despector.emitter.output.EmitterOutput;
 
 public interface ConditionEmitter<T extends Condition> {
 
-    void emit(EmitterContext ctx, T condition);
+    void emit(EmitterOutput ctx, T condition);
 
 }
