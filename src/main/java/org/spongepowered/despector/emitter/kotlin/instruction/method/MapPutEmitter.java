@@ -26,20 +26,23 @@ package org.spongepowered.despector.emitter.kotlin.instruction.method;
 
 import org.spongepowered.despector.ast.generic.TypeSignature;
 import org.spongepowered.despector.ast.members.insn.function.InstanceMethodInvoke;
-import org.spongepowered.despector.emitter.EmitterContext;
+import org.spongepowered.despector.emitter.output.EmitterOutput;
+import org.spongepowered.despector.emitter.output.EmitterToken;
+import org.spongepowered.despector.emitter.output.TokenType;
 
 public class MapPutEmitter implements SpecialMethodEmitter<InstanceMethodInvoke> {
 
     @Override
-    public boolean emit(EmitterContext ctx, InstanceMethodInvoke arg, TypeSignature type) {
+    public boolean emit(EmitterOutput ctx, InstanceMethodInvoke arg, TypeSignature type) {
         if (arg.getParams().length != 2) {
             return false;
         }
-        ctx.emit(arg.getCallee(), null);
-        ctx.printString("[");
-        ctx.emit(arg.getParams()[0], null);
-        ctx.printString("] = ");
-        ctx.emit(arg.getParams()[1], null);
+        ctx.emitInstruction(arg.getCallee(), null);
+        ctx.append(new EmitterToken(TokenType.LEFT_BRACKET, "["));
+        ctx.emitInstruction(arg.getParams()[0], null);
+        ctx.append(new EmitterToken(TokenType.RIGHT_BRACKET, "]"));
+        ctx.append(new EmitterToken(TokenType.EQUALS, "="));
+        ctx.emitInstruction(arg.getParams()[1], null);
         return true;
     }
 

@@ -34,8 +34,9 @@ import org.spongepowered.despector.ast.members.insn.function.InvokeStatement;
 import org.spongepowered.despector.ast.members.insn.function.StaticMethodInvoke;
 import org.spongepowered.despector.ast.members.insn.misc.Return;
 import org.spongepowered.despector.ast.type.ClassEntry;
-import org.spongepowered.despector.emitter.EmitterContext;
-import org.spongepowered.despector.emitter.kotlin.KotlinEmitterUtil;
+import org.spongepowered.despector.emitter.output.EmitterOutput;
+import org.spongepowered.despector.emitter.output.EmitterToken;
+import org.spongepowered.despector.emitter.output.TokenType;
 import org.spongepowered.despector.emitter.special.SpecialEmitter;
 
 import java.util.ArrayList;
@@ -45,10 +46,9 @@ import java.util.Map;
 
 public class KotlinCompanionClassEmitter implements SpecialEmitter {
 
-    public void emit(EmitterContext ctx, ClassEntry type) {
-        ctx.printIndentation();
-        ctx.printString("companion object {");
-        ctx.newLine().indent();
+    public void emit(EmitterOutput ctx, ClassEntry type) {
+        ctx.append(new EmitterToken(TokenType.SPECIAL, "companion object"));
+        ctx.append(new EmitterToken(TokenType.BLOCK_START, "{"));
 
         Map<String, Field> fields = new HashMap<>();
 
@@ -99,49 +99,35 @@ public class KotlinCompanionClassEmitter implements SpecialEmitter {
         for (Field fld : fields.values()) {
 
             for (Annotation anno : fld.annotations) {
-                ctx.printIndentation();
                 ctx.emit(anno);
-                ctx.newLine();
             }
-            ctx.printIndentation();
-            ctx.printString("val ");
-            ctx.printString(fld.name);
-            ctx.printString(": ");
-            KotlinEmitterUtil.emitType(ctx, fld.type);
+            ctx.append(new EmitterToken(TokenType.SPECIAL, "val"));
+            ctx.append(new EmitterToken(TokenType.NAME, fld.name));
+            ctx.append(new EmitterToken(TokenType.SPECIAL, ":"));
+            ctx.append(new EmitterToken(TokenType.TYPE, fld.type));
             if (fld.getter != null) {
-                ctx.newLine();
-                ctx.indent();
-                ctx.printIndentation();
-                ctx.printString("get()");
+                ctx.append(new EmitterToken(TokenType.NAME, "get"));
+                ctx.append(new EmitterToken(TokenType.LEFT_PAREN, "("));
+                ctx.append(new EmitterToken(TokenType.RIGHT_PAREN, ")"));
                 if (fld.getter.getStatementCount() == 1) {
-                    ctx.printString(" = ");
+                    ctx.append(new EmitterToken(TokenType.EQUALS, "="));
                     Statement value = fld.getter.getStatement(0);
                     if (value instanceof Return) {
-                        ctx.emit(((Return) value).getValue().get(), fld.type);
+                        ctx.emitInstruction(((Return) value).getValue().get(), fld.type);
                     } else {
-                        ctx.emit(value, false);
+                        ctx.emitStatement(value);
                     }
-                    ctx.newLine();
                 } else {
-                    ctx.printString(" = {");
-                    ctx.newLine();
-                    ctx.indent();
+                    ctx.append(new EmitterToken(TokenType.EQUALS, "="));
+                    ctx.append(new EmitterToken(TokenType.BLOCK_START, "{"));
                     for (Statement stmt : fld.getter.getStatements()) {
-                        ctx.printIndentation();
-                        ctx.emit(stmt, true);
-                        ctx.newLine();
+                        ctx.emitStatement(stmt);
                     }
-                    ctx.dedent();
-                    ctx.printIndentation();
-                    ctx.printString("}");
-                    ctx.newLine();
+                    ctx.append(new EmitterToken(TokenType.BLOCK_END, "}"));
                 }
             }
         }
-        ctx.dedent();
-        ctx.printIndentation();
-        ctx.printString("}");
-        ctx.newLine();
+        ctx.append(new EmitterToken(TokenType.BLOCK_END, "}"));
 
     }
 

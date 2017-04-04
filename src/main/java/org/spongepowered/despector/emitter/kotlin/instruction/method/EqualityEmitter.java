@@ -26,18 +26,20 @@ package org.spongepowered.despector.emitter.kotlin.instruction.method;
 
 import org.spongepowered.despector.ast.generic.TypeSignature;
 import org.spongepowered.despector.ast.members.insn.function.StaticMethodInvoke;
-import org.spongepowered.despector.emitter.EmitterContext;
+import org.spongepowered.despector.emitter.output.EmitterOutput;
+import org.spongepowered.despector.emitter.output.EmitterToken;
+import org.spongepowered.despector.emitter.output.TokenType;
 
 public class EqualityEmitter implements SpecialMethodEmitter<StaticMethodInvoke> {
 
     @Override
-    public boolean emit(EmitterContext ctx, StaticMethodInvoke arg, TypeSignature type) {
+    public boolean emit(EmitterOutput ctx, StaticMethodInvoke arg, TypeSignature type) {
         if (arg.getParams().length != 2) {
             return false;
         }
-        ctx.emit(arg.getParams()[0], null);
-        ctx.printString(" == ");
-        ctx.emit(arg.getParams()[1], null);
+        ctx.emitInstruction(arg.getParams()[0], null);
+        ctx.append(new EmitterToken(TokenType.OPERATOR, "=="));
+        ctx.emitInstruction(arg.getParams()[1], null);
         return true;
     }
 

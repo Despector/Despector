@@ -28,32 +28,32 @@ import org.spongepowered.despector.ast.members.insn.arg.NumberCompare;
 import org.spongepowered.despector.ast.members.insn.branch.condition.CompareCondition;
 import org.spongepowered.despector.ast.members.insn.branch.condition.CompareCondition.CompareOperator;
 import org.spongepowered.despector.emitter.ConditionEmitter;
-import org.spongepowered.despector.emitter.EmitterContext;
+import org.spongepowered.despector.emitter.output.EmitterOutput;
+import org.spongepowered.despector.emitter.output.EmitterToken;
+import org.spongepowered.despector.emitter.output.TokenType;
 
 public class KotlinCompareConditionEmitter implements ConditionEmitter<CompareCondition> {
 
     @Override
-    public void emit(EmitterContext ctx, CompareCondition compare) {
+    public void emit(EmitterOutput ctx, CompareCondition compare) {
         if (compare.getLeft() instanceof NumberCompare) {
             NumberCompare cmp = (NumberCompare) compare.getLeft();
-            ctx.emit(cmp.getLeftOperand(), null);
-            ctx.markWrapPoint();
+            ctx.emitInstruction(cmp.getLeftOperand(), null);
             if (compare.getOperator() == CompareOperator.EQUAL) {
-                ctx.printString(" === ");
+                ctx.append(new EmitterToken(TokenType.OPERATOR, "==="));
             } else {
-                ctx.printString(compare.getOperator().asString());
+                ctx.append(new EmitterToken(TokenType.OPERATOR, compare.getOperator().asString()));
             }
-            ctx.emit(cmp.getRightOperand(), null);
+            ctx.emitInstruction(cmp.getRightOperand(), null);
             return;
         }
-        ctx.emit(compare.getLeft(), null);
-        ctx.markWrapPoint();
+        ctx.emitInstruction(compare.getLeft(), null);
         if (compare.getOperator() == CompareOperator.EQUAL) {
-            ctx.printString(" === ");
+            ctx.append(new EmitterToken(TokenType.OPERATOR, "==="));
         } else {
-            ctx.printString(compare.getOperator().asString());
+            ctx.append(new EmitterToken(TokenType.OPERATOR, compare.getOperator().asString()));
         }
-        ctx.emit(compare.getRight(), null);
+        ctx.emitInstruction(compare.getRight(), null);
     }
 
 }

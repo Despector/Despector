@@ -32,7 +32,6 @@ import org.spongepowered.despector.ast.SourceSet;
 import org.spongepowered.despector.ast.members.MethodEntry;
 import org.spongepowered.despector.ast.type.TypeEntry;
 import org.spongepowered.despector.decompiler.Decompilers;
-import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.Emitters;
 import org.spongepowered.despector.emitter.format.EmitterFormat;
 
@@ -100,12 +99,7 @@ public class TestHelper {
 
     public static String getAsString(TypeEntry type, MethodEntry method) {
         StringWriter writer = new StringWriter();
-        EmitterContext emitter = new EmitterContext(writer, EmitterFormat.defaults());
-        emitter.setEmitterSet(Emitters.JAVA_SET);
-        emitter.setMethod(method);
-        emitter.setType(type);
-        emitter.emitBody(method.getInstructions());
-        emitter.flush();
+        Emitters.JAVA.emitBody(writer, EmitterFormat.defaults(), type, method, method.getInstructions());
         return writer.toString();
     }
     public static String getAsString(Class<?> cls, String method_name) {

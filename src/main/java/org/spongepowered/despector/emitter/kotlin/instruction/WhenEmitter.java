@@ -35,92 +35,71 @@ import org.spongepowered.despector.ast.members.insn.branch.condition.BooleanCond
 import org.spongepowered.despector.ast.members.insn.branch.condition.Condition;
 import org.spongepowered.despector.ast.members.insn.branch.condition.OrCondition;
 import org.spongepowered.despector.ast.members.insn.function.StaticMethodInvoke;
-import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.InstructionEmitter;
-import org.spongepowered.despector.emitter.kotlin.KotlinEmitterUtil;
+import org.spongepowered.despector.emitter.output.EmitterOutput;
+import org.spongepowered.despector.emitter.output.EmitterToken;
+import org.spongepowered.despector.emitter.output.TokenType;
 
 import java.util.List;
 
 public class WhenEmitter implements InstructionEmitter<When> {
 
-    private void emit(EmitterContext ctx, Condition cond, LocalInstance local) {
+    private void emit(EmitterOutput ctx, Condition cond, LocalInstance local) {
         if (cond instanceof BooleanCondition) {
             Instruction val = ((BooleanCondition) cond).getConditionValue();
             if (val instanceof StaticMethodInvoke) {
                 StaticMethodInvoke mth = (StaticMethodInvoke) val;
                 if (mth.getMethodName().equals("areEqual") && mth.getOwner().equals("Lkotlin/jvm/internal/Intrinsics;")) {
-                    ctx.emit(mth.getParams()[1], null);
+                    ctx.emitInstruction(mth.getParams()[1], null);
                 }
-            } else if(val instanceof InstanceOf) {
-                ctx.printString("is ");
-                KotlinEmitterUtil.emitType(ctx, ((InstanceOf) val).getType());
+            } else if (val instanceof InstanceOf) {
+                ctx.append(new EmitterToken(TokenType.SPECIAL, "is"));
+                ctx.append(new EmitterToken(TokenType.TYPE, ((InstanceOf) val).getType()));
             } else {
-                ctx.emit(val, ClassTypeSignature.BOOLEAN);
+                ctx.emitInstruction(val, ClassTypeSignature.BOOLEAN);
             }
         } else if (cond instanceof OrCondition) {
             List<Condition> operands = ((OrCondition) cond).getOperands();
             for (int i = 0; i < operands.size(); i++) {
                 Condition arg = operands.get(i);
+                ctx.append(new EmitterToken(TokenType.ARG_START, null));
                 emit(ctx, arg, local);
-                if (i < operands.size() - 1) {
-                    ctx.printString(", ");
-                }
             }
         } else {
-            ctx.emit(cond);
+            ctx.emitCondition(cond);
         }
     }
 
     @Override
-    public void emit(EmitterContext ctx, When arg, TypeSignature type) {
-        ctx.printString("when (");
-        ctx.emit(arg.getArg(), null);
-        ctx.printString(") {");
-        ctx.newLine();
-        ctx.indent();
-        ctx.printIndentation();
+    public void emit(EmitterOutput ctx, When arg, TypeSignature type) {
+        ctx.append(new EmitterToken(TokenType.SPECIAL, "when"));
+        ctx.append(new EmitterToken(TokenType.LEFT_PAREN, "("));
+        ctx.emitInstruction(arg.getArg(), null);
+        ctx.append(new EmitterToken(TokenType.RIGHT_PAREN, ")"));
+        ctx.append(new EmitterToken(TokenType.BLOCK_START, "{"));
         for (Case cs : arg.getCases()) {
             emit(ctx, cs.getCondition(), arg.getLocal());
-            ctx.printString(" -> ");
+            ctx.append(new EmitterToken(TokenType.WHEN_CASE, "->"));
             if (cs.getBody().getStatementCount() == 0) {
-                ctx.emit(cs.getLast(), arg.inferType());
-                ctx.newLine();
-                ctx.printIndentation();
+                ctx.emitInstruction(cs.getLast(), arg.inferType());
             } else {
-                ctx.printString("{");
-                ctx.newLine();
-                ctx.indent();
-                ctx.printIndentation();
-                ctx.emitBody(cs.getBody());
-                ctx.emit(cs.getLast(), arg.inferType());
-                ctx.newLine();
-                ctx.dedent();
-                ctx.printIndentation();
-                ctx.printString("}");
-                ctx.newLine();
-                ctx.printIndentation();
+                ctx.append(new EmitterToken(TokenType.BLOCK_START, "{"));
+                ctx.emitBody(cs.getBody(), 0);
+                ctx.emitInstruction(cs.getLast(), arg.inferType());
+                ctx.append(new EmitterToken(TokenType.BLOCK_END, "}"));
             }
         }
-        ctx.printString("else -> ");
+        ctx.append(new EmitterToken(TokenType.SPECIAL, "else"));
+        ctx.append(new EmitterToken(TokenType.WHEN_CASE, "->"));
         if (arg.getElseBody().getStatementCount() == 0) {
-            ctx.emit(arg.getElseBodyLast(), arg.inferType());
-            ctx.newLine();
+            ctx.emitInstruction(arg.getElseBodyLast(), arg.inferType());
         } else {
-            ctx.printString("{");
-            ctx.newLine();
-            ctx.indent();
-            ctx.printIndentation();
-            ctx.emitBody(arg.getElseBody());
-            ctx.emit(arg.getElseBodyLast(), arg.inferType());
-            ctx.newLine();
-            ctx.dedent();
-            ctx.printIndentation();
-            ctx.printString("}");
-            ctx.newLine();
+            ctx.append(new EmitterToken(TokenType.BLOCK_START, "{"));
+            ctx.emitBody(arg.getElseBody(), 0);
+            ctx.emitInstruction(arg.getElseBodyLast(), arg.inferType());
+            ctx.append(new EmitterToken(TokenType.BLOCK_END, "}"));
         }
-        ctx.dedent();
-        ctx.printIndentation();
-        ctx.printString("}");
+        ctx.append(new EmitterToken(TokenType.BLOCK_END, "}"));
     }
 
 }

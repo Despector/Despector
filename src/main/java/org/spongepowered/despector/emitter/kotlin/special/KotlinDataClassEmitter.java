@@ -35,8 +35,9 @@ import org.spongepowered.despector.ast.members.insn.assign.LocalAssignment;
 import org.spongepowered.despector.ast.members.insn.branch.If;
 import org.spongepowered.despector.ast.type.ClassEntry;
 import org.spongepowered.despector.ast.type.TypeEntry.InnerClassInfo;
-import org.spongepowered.despector.emitter.EmitterContext;
-import org.spongepowered.despector.emitter.kotlin.KotlinEmitterUtil;
+import org.spongepowered.despector.emitter.output.EmitterOutput;
+import org.spongepowered.despector.emitter.output.EmitterToken;
+import org.spongepowered.despector.emitter.output.TokenType;
 import org.spongepowered.despector.emitter.special.SpecialEmitter;
 
 import java.util.LinkedHashMap;
@@ -44,27 +45,23 @@ import java.util.Map;
 
 public class KotlinDataClassEmitter implements SpecialEmitter {
 
-    public void emit(EmitterContext ctx, ClassEntry type) {
-        ctx.printIndentation();
-        ctx.printString("data class ");
+    public void emit(EmitterOutput ctx, ClassEntry type) {
+        ctx.append(new EmitterToken(TokenType.SPECIAL, "data class"));
         InnerClassInfo inner_info = null;
         if (type.isInnerClass() && ctx.getOuterType() != null) {
             inner_info = ctx.getOuterType().getInnerClassInfo(type.getName());
         }
         if (inner_info != null) {
-            ctx.printString(inner_info.getSimpleName());
+            ctx.append(new EmitterToken(TokenType.NAME, inner_info.getSimpleName()));
         } else {
             String name = type.getName().replace('/', '.');
             if (name.indexOf('.') != -1) {
                 name = name.substring(name.lastIndexOf('.') + 1, name.length());
             }
             name = name.replace('$', '.');
-            ctx.printString(name);
+            ctx.append(new EmitterToken(TokenType.NAME, name));
         }
-
-        ctx.printString("(");
-        ctx.newLine();
-        ctx.indent();
+        ctx.append(new EmitterToken(TokenType.LEFT_PAREN, "("));
 
         Map<String, DataField> fields = new LinkedHashMap<>();
 
@@ -115,29 +112,22 @@ public class KotlinDataClassEmitter implements SpecialEmitter {
         }
 
         for (int i = 0; i < fields_ordered.length; i++) {
+            ctx.append(new EmitterToken(TokenType.ARG_START, null));
             DataField fld = fields_ordered[i];
-            ctx.printIndentation();
-            if(fld.is_final) {
-                ctx.printString("val ");
+            if (fld.is_final) {
+                ctx.append(new EmitterToken(TokenType.SPECIAL, "val"));
             } else {
-                ctx.printString("var ");
+                ctx.append(new EmitterToken(TokenType.SPECIAL, "var"));
             }
-            ctx.printString(fld.name);
-            ctx.printString(": ");
-            KotlinEmitterUtil.emitType(ctx, fld.type);
+            ctx.append(new EmitterToken(TokenType.NAME, fld.name));
+            ctx.append(new EmitterToken(TokenType.SPECIAL, ":"));
+            ctx.append(new EmitterToken(TokenType.TYPE, fld.type));
             if (fld.default_val != null) {
-                ctx.printString(" = ");
-                ctx.emit(fld.default_val, fld.type);
+                ctx.append(new EmitterToken(TokenType.EQUALS, "="));
+                ctx.emitInstruction(fld.default_val, fld.type);
             }
-            if (i != fields_ordered.length - 1) {
-                ctx.printString(",");
-            }
-            ctx.newLine();
         }
-        ctx.dedent();
-        ctx.printIndentation();
-        ctx.printString(")");
-        ctx.newLine();
+        ctx.append(new EmitterToken(TokenType.RIGHT_PAREN, ")"));
     }
 
     private static class DataField {

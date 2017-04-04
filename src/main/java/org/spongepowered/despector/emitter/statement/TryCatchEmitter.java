@@ -26,44 +26,37 @@ package org.spongepowered.despector.emitter.statement;
 
 import org.spongepowered.despector.ast.members.insn.branch.TryCatch;
 import org.spongepowered.despector.ast.members.insn.branch.TryCatch.CatchBlock;
-import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.StatementEmitter;
+import org.spongepowered.despector.emitter.output.EmitterOutput;
+import org.spongepowered.despector.emitter.output.EmitterToken;
+import org.spongepowered.despector.emitter.output.TokenType;
 
 public class TryCatchEmitter implements StatementEmitter<TryCatch> {
 
     @Override
-    public void emit(EmitterContext ctx, TryCatch try_block, boolean semicolon) {
-        ctx.printString("try {");
-        ctx.newLine();
-        ctx.indent();
-        ctx.emitBody(try_block.getTryBlock());
-        ctx.dedent();
-        ctx.newLine();
+    public void emit(EmitterOutput ctx, TryCatch try_block) {
+        ctx.append(new EmitterToken(TokenType.SPECIAL, "try"));
+        ctx.append(new EmitterToken(TokenType.BLOCK_START, "{"));
+        ctx.emitBody(try_block.getTryBlock(), 0);
+        ctx.append(new EmitterToken(TokenType.BLOCK_END, "}"));
         for (CatchBlock c : try_block.getCatchBlocks()) {
-            ctx.printIndentation();
-            ctx.printString("} catch (");
+            ctx.append(new EmitterToken(TokenType.SPECIAL, "catch"));
+            ctx.append(new EmitterToken(TokenType.LEFT_PAREN, "("));
             for (int i = 0; i < c.getExceptions().size(); i++) {
-                ctx.emitType(c.getExceptions().get(i));
-                if (i < c.getExceptions().size() - 1) {
-                    ctx.printString(" | ");
-                }
+                ctx.append(new EmitterToken(TokenType.TYPE, c.getExceptions().get(i)));
+                ctx.append(new EmitterToken(TokenType.OPERATOR, "|"));
             }
-            ctx.printString(" ");
             if (c.getExceptionLocal() != null) {
-                ctx.printString(c.getExceptionLocal().getName());
-                ctx.isDefined(c.getExceptionLocal());
+                ctx.append(new EmitterToken(TokenType.NAME, c.getExceptionLocal().getName()));
+                ctx.markDefined(c.getExceptionLocal());
             } else {
-                ctx.printString(c.getDummyName());
+                ctx.append(new EmitterToken(TokenType.NAME, c.getDummyName()));
             }
-            ctx.printString(") {");
-            ctx.newLine();
-            ctx.indent();
-            ctx.emitBody(c.getBlock());
-            ctx.dedent();
-            ctx.newLine();
+            ctx.append(new EmitterToken(TokenType.RIGHT_PAREN, ")"));
+            ctx.append(new EmitterToken(TokenType.BLOCK_START, "{"));
+            ctx.emitBody(c.getBlock(), 0);
+            ctx.append(new EmitterToken(TokenType.BLOCK_END, "}"));
         }
-        ctx.printIndentation();
-        ctx.printString("}");
     }
 
 }

@@ -27,61 +27,63 @@ package org.spongepowered.despector.emitter.instruction;
 import org.spongepowered.despector.ast.generic.ClassTypeSignature;
 import org.spongepowered.despector.ast.generic.TypeSignature;
 import org.spongepowered.despector.ast.members.insn.arg.cst.IntConstant;
-import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.InstructionEmitter;
+import org.spongepowered.despector.emitter.output.EmitterOutput;
+import org.spongepowered.despector.emitter.output.EmitterToken;
+import org.spongepowered.despector.emitter.output.TokenType;
 
 public class IntConstantEmitter implements InstructionEmitter<IntConstant> {
 
     @Override
-    public void emit(EmitterContext ctx, IntConstant arg, TypeSignature type) {
+    public void emit(EmitterOutput ctx, IntConstant arg, TypeSignature type) {
         // Some basic constant replacement, TODO should probably make this
         // better
         int cst = arg.getConstant();
         if (cst == Integer.MAX_VALUE) {
-            ctx.printString("Integer.MAX_VALUE");
+            ctx.append(new EmitterToken(TokenType.RAW, "Integer.MAX_VALUE"));
             return;
         } else if (cst == Integer.MIN_VALUE) {
-            ctx.printString("Integer.MIN_VALUE");
+            ctx.append(new EmitterToken(TokenType.RAW, "Integer.MIN_VALUE"));
             return;
         }
         if (type == ClassTypeSignature.BOOLEAN) {
             if (cst == 0) {
-                ctx.printString("false");
+                ctx.append(new EmitterToken(TokenType.BOOLEAN, false));
             } else {
-                ctx.printString("true");
+                ctx.append(new EmitterToken(TokenType.BOOLEAN, true));
             }
             return;
         } else if (type == ClassTypeSignature.CHAR) {
             char c = (char) cst;
             if (c < 127 && c > 31) {
-                ctx.printString("'" + c + "'");
+                ctx.append(new EmitterToken(TokenType.CHAR, c));
                 return;
             } else if (c >= 127) {
-                ctx.printString("'\\u" + Integer.toHexString(cst).toLowerCase() + "'");
+                ctx.append(new EmitterToken(TokenType.CHAR, "'\\u" + Integer.toHexString(cst).toLowerCase() + "'"));
                 return;
             }
         }
         switch (arg.getFormat()) {
         case BINARY: {
-            ctx.printString("0b");
-            ctx.printString(Integer.toBinaryString(cst));
+            ctx.append(new EmitterToken(TokenType.INT, "0b" + Integer.toBinaryString(cst)));
             break;
         }
         case OCTAL:
-            ctx.printString("0");
-            ctx.printString(Integer.toOctalString(cst));
+            ctx.append(new EmitterToken(TokenType.INT, "0" + Integer.toOctalString(cst)));
             break;
         case HEXADECIMAL:
-            ctx.printString("0x");
+            StringBuilder s = new StringBuilder();
+            s.append("0x");
             String str = Integer.toHexString(cst);
             for (int i = str.length(); i < 8; i++) {
-                ctx.printString("0");
+                s.append("0");
             }
-            ctx.printString(str);
+            s.append(str);
+            ctx.append(new EmitterToken(TokenType.INT, s.toString()));
             break;
         default:
         case DECIMAL:
-            ctx.printString(String.valueOf(cst));
+            ctx.append(new EmitterToken(TokenType.INT, cst));
             break;
         }
     }

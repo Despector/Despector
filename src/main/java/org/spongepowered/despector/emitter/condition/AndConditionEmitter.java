@@ -28,24 +28,25 @@ import org.spongepowered.despector.ast.members.insn.branch.condition.AndConditio
 import org.spongepowered.despector.ast.members.insn.branch.condition.Condition;
 import org.spongepowered.despector.ast.members.insn.branch.condition.OrCondition;
 import org.spongepowered.despector.emitter.ConditionEmitter;
-import org.spongepowered.despector.emitter.EmitterContext;
+import org.spongepowered.despector.emitter.output.EmitterOutput;
+import org.spongepowered.despector.emitter.output.EmitterToken;
+import org.spongepowered.despector.emitter.output.TokenType;
 
 public class AndConditionEmitter implements ConditionEmitter<AndCondition> {
 
     @Override
-    public void emit(EmitterContext ctx, AndCondition and) {
+    public void emit(EmitterOutput ctx, AndCondition and) {
         for (int i = 0; i < and.getOperands().size(); i++) {
             Condition cond = and.getOperands().get(i);
             if (cond instanceof OrCondition) {
-                ctx.printString("(");
-                ctx.emit(cond);
-                ctx.printString(")");
+                ctx.append(new EmitterToken(TokenType.LEFT_PAREN, "("));
+                ctx.emitCondition(cond);
+                ctx.append(new EmitterToken(TokenType.RIGHT_PAREN, ")"));
             } else {
-                ctx.emit(cond);
+                ctx.emitCondition(cond);
             }
             if (i < and.getOperands().size() - 1) {
-                ctx.markWrapPoint();
-                ctx.printString(" && ");
+                ctx.append(new EmitterToken(TokenType.OPERATOR, "&&"));
             }
         }
     }

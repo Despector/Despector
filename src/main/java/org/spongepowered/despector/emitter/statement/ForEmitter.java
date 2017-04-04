@@ -25,33 +25,32 @@
 package org.spongepowered.despector.emitter.statement;
 
 import org.spongepowered.despector.ast.members.insn.branch.For;
-import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.StatementEmitter;
+import org.spongepowered.despector.emitter.output.EmitterOutput;
+import org.spongepowered.despector.emitter.output.EmitterToken;
+import org.spongepowered.despector.emitter.output.TokenType;
 
 public class ForEmitter implements StatementEmitter<For> {
 
     @Override
-    public void emit(EmitterContext ctx, For loop, boolean semicolon) {
-        ctx.printString("for (");
+    public void emit(EmitterOutput ctx, For loop) {
+        ctx.append(new EmitterToken(TokenType.SPECIAL, "for"));
+        ctx.append(new EmitterToken(TokenType.LEFT_PAREN, "("));
         if (loop.getInit() != null) {
-            ctx.emit(loop.getInit(), false);
+            ctx.emitStatement(loop.getInit());
         }
-        ctx.printString("; ");
-        ctx.emit(loop.getCondition());
-        ctx.printString("; ");
+        ctx.append(new EmitterToken(TokenType.FOR_SEPARATOR, ";"));
+        ctx.emitCondition(loop.getCondition());
+        ctx.append(new EmitterToken(TokenType.FOR_SEPARATOR, ";"));
         if (loop.getIncr() != null) {
-            ctx.emit(loop.getIncr(), false);
+            ctx.emitStatement(loop.getIncr());
         }
-        ctx.printString(") {");
-        ctx.newLine();
+        ctx.append(new EmitterToken(TokenType.RIGHT_PAREN, "("));
+        ctx.append(new EmitterToken(TokenType.BLOCK_START, "{"));
         if (!loop.getBody().getStatements().isEmpty()) {
-            ctx.indent();
-            ctx.emitBody(loop.getBody());
-            ctx.dedent();
-            ctx.newLine();
+            ctx.emitBody(loop.getBody(), 0);
         }
-        ctx.printIndentation();
-        ctx.printString("}");
+        ctx.append(new EmitterToken(TokenType.BLOCK_END, "}"));
     }
 
 }

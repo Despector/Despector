@@ -32,13 +32,15 @@ import org.spongepowered.despector.ast.members.insn.StatementBlock;
 import org.spongepowered.despector.ast.members.insn.function.DynamicInvokeHandle;
 import org.spongepowered.despector.ast.members.insn.misc.Return;
 import org.spongepowered.despector.ast.type.TypeEntry;
-import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.InstructionEmitter;
+import org.spongepowered.despector.emitter.output.EmitterOutput;
+import org.spongepowered.despector.emitter.output.EmitterToken;
+import org.spongepowered.despector.emitter.output.TokenType;
 
 public class DynamicInvokeEmitter implements InstructionEmitter<DynamicInvokeHandle> {
 
     @Override
-    public void emit(EmitterContext ctx, DynamicInvokeHandle arg, TypeSignature type) {
+    public void emit(EmitterOutput ctx, DynamicInvokeHandle arg, TypeSignature type) {
 
         TypeEntry owner = ctx.getType().getSource().get(arg.getLambdaOwner());
         MethodEntry method = owner.getStaticMethodSafe(arg.getLambdaMethod());
@@ -50,37 +52,34 @@ public class DynamicInvokeEmitter implements InstructionEmitter<DynamicInvokeHan
         }
         StatementBlock block = method.getInstructions();
 
-        ctx.printString("(");
+        ctx.append(new EmitterToken(TokenType.LEFT_PAREN, "("));
 
         for (int i = 0; i < method.getParamTypes().size(); i++) {
+            ctx.append(new EmitterToken(TokenType.ARG_START, null));
             if (block == null) {
-                ctx.printString("local" + i);
+                ctx.append(new EmitterToken(TokenType.NAME, "local" + i));
             } else {
                 Local local = block.getLocals().getLocal(i);
                 LocalInstance insn = local.getParameterInstance();
-                ctx.printString(insn.getName());
-            }
-            if (i < method.getParamTypes().size() - 1) {
-                ctx.printString(", ");
+                ctx.append(new EmitterToken(TokenType.NAME, insn.getName()));
             }
         }
 
-        ctx.printString(") -> ");
+        ctx.append(new EmitterToken(TokenType.RIGHT_PAREN, ")"));
+        ctx.append(new EmitterToken(TokenType.LAMBDA, "->"));
         if (block.getStatementCount() == 1) {
             Return ret = (Return) block.getStatement(0);
-            ctx.emit(ret.getValue().get(), method.getReturnType());
+            ctx.emitInstruction(ret.getValue().get(), method.getReturnType());
             return;
         } else if (block.getStatementCount() == 2) {
             if (block.getStatement(1) instanceof Return && !((Return) block.getStatement(1)).getValue().isPresent()) {
-                ctx.emit(block.getStatement(0), false);
+                ctx.emitStatement(block.getStatement(0));
                 return;
             }
         }
-        ctx.printString("{");
-        ctx.newLine().indent();
-        ctx.emitBody(block);
-        ctx.newLine().dedent().printIndentation();
-        ctx.printString("}");
+        ctx.append(new EmitterToken(TokenType.BLOCK_START, "{"));
+        ctx.emitBody(block, 0);
+        ctx.append(new EmitterToken(TokenType.BLOCK_END, "}"));
 
     }
 

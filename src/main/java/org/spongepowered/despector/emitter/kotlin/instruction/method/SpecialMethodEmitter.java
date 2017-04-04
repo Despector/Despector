@@ -26,10 +26,10 @@ package org.spongepowered.despector.emitter.kotlin.instruction.method;
 
 import org.spongepowered.despector.ast.generic.TypeSignature;
 import org.spongepowered.despector.ast.members.insn.function.MethodInvoke;
-import org.spongepowered.despector.emitter.EmitterContext;
+import org.spongepowered.despector.emitter.output.EmitterOutput;
 
 public interface SpecialMethodEmitter<T extends MethodInvoke> {
 
-    boolean emit(EmitterContext ctx, T arg, TypeSignature type);
+    boolean emit(EmitterOutput ctx, T arg, TypeSignature type);
 
 }

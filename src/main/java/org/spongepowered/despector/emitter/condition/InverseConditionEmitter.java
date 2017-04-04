@@ -30,34 +30,36 @@ import org.spongepowered.despector.ast.members.insn.branch.condition.CompareCond
 import org.spongepowered.despector.ast.members.insn.branch.condition.Condition;
 import org.spongepowered.despector.ast.members.insn.branch.condition.InverseCondition;
 import org.spongepowered.despector.emitter.ConditionEmitter;
-import org.spongepowered.despector.emitter.EmitterContext;
+import org.spongepowered.despector.emitter.output.EmitterOutput;
+import org.spongepowered.despector.emitter.output.EmitterToken;
+import org.spongepowered.despector.emitter.output.TokenType;
 
 public class InverseConditionEmitter implements ConditionEmitter<InverseCondition> {
 
     @Override
-    public void emit(EmitterContext ctx, InverseCondition inv) {
+    public void emit(EmitterOutput ctx, InverseCondition inv) {
         Condition cond = inv.getConditionValue();
         if (cond instanceof InverseCondition) {
-            ctx.emit(((InverseCondition) cond).getConditionValue());
+            ctx.emitCondition(((InverseCondition) cond).getConditionValue());
             return;
         } else if (cond instanceof BooleanCondition) {
             BooleanCondition bool = (BooleanCondition) cond;
             if (!bool.isInverse()) {
-                ctx.printString("!");
+                ctx.append(new EmitterToken(TokenType.OPERATOR, "!"));
             }
-            ctx.emit(bool.getConditionValue(), ClassTypeSignature.BOOLEAN);
+            ctx.emitInstruction(bool.getConditionValue(), ClassTypeSignature.BOOLEAN);
             return;
         } else if (cond instanceof CompareCondition) {
             CompareCondition compare = (CompareCondition) cond;
-            ctx.emit(compare.getLeft(), null);
-            ctx.printString(compare.getOperator().inverse().asString());
-            ctx.emit(compare.getRight(), null);
+            ctx.emitInstruction(compare.getLeft(), null);
+            ctx.append(new EmitterToken(TokenType.OPERATOR, compare.getOperator().inverse().asString()));
+            ctx.emitInstruction(compare.getRight(), null);
             return;
         }
-        ctx.printString("!");
-        ctx.printString("(");
-        ctx.emit(cond);
-        ctx.printString(")");
+        ctx.append(new EmitterToken(TokenType.OPERATOR, "!"));
+        ctx.append(new EmitterToken(TokenType.LEFT_PAREN, "("));
+        ctx.emitCondition(cond);
+        ctx.append(new EmitterToken(TokenType.RIGHT_PAREN, ")"));
     }
 
 }

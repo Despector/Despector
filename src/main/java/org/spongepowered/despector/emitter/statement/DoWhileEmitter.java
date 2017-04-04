@@ -25,26 +25,26 @@
 package org.spongepowered.despector.emitter.statement;
 
 import org.spongepowered.despector.ast.members.insn.branch.DoWhile;
-import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.StatementEmitter;
+import org.spongepowered.despector.emitter.output.EmitterOutput;
+import org.spongepowered.despector.emitter.output.EmitterToken;
+import org.spongepowered.despector.emitter.output.TokenType;
 
 public class DoWhileEmitter implements StatementEmitter<DoWhile> {
 
     @Override
-    public void emit(EmitterContext ctx, DoWhile loop, boolean semicolon) {
-        ctx.printString("do {");
-        ctx.newLine();
+    public void emit(EmitterOutput ctx, DoWhile loop) {
+        ctx.append(new EmitterToken(TokenType.SPECIAL, "do"));
+        ctx.append(new EmitterToken(TokenType.BLOCK_START, "{"));
         if (!loop.getBody().getStatements().isEmpty()) {
-            ctx.indent();
-            ctx.emitBody(loop.getBody());
-            ctx.dedent();
-            ctx.newLine();
+            ctx.emitBody(loop.getBody(), 0);
         }
-        ctx.printIndentation();
-        ctx.printString("} while (");
-        ctx.emit(loop.getCondition());
-        ctx.printString(")");
-        if(semicolon) ctx.printString(";");
+        ctx.append(new EmitterToken(TokenType.BLOCK_END, "}"));
+        ctx.append(new EmitterToken(TokenType.SPECIAL, "while"));
+        ctx.append(new EmitterToken(TokenType.LEFT_PAREN, "("));
+        ctx.emitCondition(loop.getCondition());
+        ctx.append(new EmitterToken(TokenType.RIGHT_PAREN, ")"));
+        ctx.append(new EmitterToken(TokenType.STATEMENT_END, ";"));
     }
 
 }

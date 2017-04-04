@@ -27,32 +27,35 @@ package org.spongepowered.despector.emitter.kotlin.condition;
 import org.spongepowered.despector.ast.generic.ClassTypeSignature;
 import org.spongepowered.despector.ast.members.insn.arg.InstanceOf;
 import org.spongepowered.despector.ast.members.insn.branch.condition.BooleanCondition;
-import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.condition.BooleanConditionEmitter;
+import org.spongepowered.despector.emitter.output.EmitterOutput;
+import org.spongepowered.despector.emitter.output.EmitterToken;
+import org.spongepowered.despector.emitter.output.TokenType;
 
 public class KotlinBooleanConditionEmitter extends BooleanConditionEmitter {
 
     @Override
-    public void emit(EmitterContext ctx, BooleanCondition bool) {
+    public void emit(EmitterOutput ctx, BooleanCondition bool) {
         if (checkConstant(ctx, bool)) {
             return;
         }
         if (bool.getConditionValue() instanceof InstanceOf) {
             InstanceOf arg = (InstanceOf) bool.getConditionValue();
-            ctx.emit(arg.getCheckedValue(), null);
-            ctx.printString(" !is ");
-            ctx.emitType(arg.getType());
+            ctx.emitInstruction(arg.getCheckedValue(), null);
+            ctx.append(new EmitterToken(TokenType.OPERATOR, "!"));
+            ctx.append(new EmitterToken(TokenType.SPECIAL, "is"));
+            ctx.append(new EmitterToken(TokenType.TYPE, arg.getType()));
             return;
         }
         if (bool.isInverse()) {
-            ctx.printString("!");
+            ctx.append(new EmitterToken(TokenType.OPERATOR, "!"));
         }
         if (bool.isInverse() && bool.getConditionValue() instanceof InstanceOf) {
-            ctx.printString("(");
-            ctx.emit(bool.getConditionValue(), ClassTypeSignature.BOOLEAN);
-            ctx.printString(")");
+            ctx.append(new EmitterToken(TokenType.LEFT_PAREN, "("));
+            ctx.emitInstruction(bool.getConditionValue(), ClassTypeSignature.BOOLEAN);
+            ctx.append(new EmitterToken(TokenType.RIGHT_PAREN, ")"));
         } else {
-            ctx.emit(bool.getConditionValue(), ClassTypeSignature.BOOLEAN);
+            ctx.emitInstruction(bool.getConditionValue(), ClassTypeSignature.BOOLEAN);
         }
     }
 

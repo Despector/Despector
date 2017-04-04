@@ -33,7 +33,6 @@ import org.spongepowered.despector.decompiler.Decompilers;
 import org.spongepowered.despector.decompiler.DirectoryWalker;
 import org.spongepowered.despector.decompiler.JarWalker;
 import org.spongepowered.despector.emitter.Emitter;
-import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.Emitters;
 import org.spongepowered.despector.emitter.format.EmitterFormat;
 import org.spongepowered.despector.emitter.format.FormatLoader;
@@ -115,8 +114,7 @@ public class Despector {
 
     public static String emitToString(TypeEntry type) {
         StringWriter writer = new StringWriter();
-        EmitterContext ctx = new EmitterContext(writer, EmitterFormat.defaults());
-        Emitters.get(type.getLanguage()).emit(ctx, type);
+        Emitters.get(type.getLanguage()).emit(writer, EmitterFormat.defaults(), type);
         return writer.toString();
     }
 
@@ -239,8 +237,7 @@ public class Despector {
                 Files.createDirectories(out.getParent());
             }
             try (FileWriter writer = new FileWriter(out.toFile())) {
-                EmitterContext ctx = new EmitterContext(writer, formatter);
-                emitter.emit(ctx, type);
+                emitter.emit(writer, formatter, type);
             }
         }
 

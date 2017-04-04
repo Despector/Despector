@@ -27,25 +27,25 @@ package org.spongepowered.despector.emitter.statement;
 import org.spongepowered.despector.ast.generic.ClassTypeSignature;
 import org.spongepowered.despector.ast.generic.TypeSignature;
 import org.spongepowered.despector.ast.members.insn.misc.Return;
-import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.StatementEmitter;
+import org.spongepowered.despector.emitter.output.EmitterOutput;
+import org.spongepowered.despector.emitter.output.EmitterToken;
+import org.spongepowered.despector.emitter.output.TokenType;
 import org.spongepowered.despector.util.TypeHelper;
 
 public class ReturnEmitter implements StatementEmitter<Return> {
 
     @Override
-    public void emit(EmitterContext ctx, Return insn, boolean semicolon) {
-        ctx.printString("return");
+    public void emit(EmitterOutput ctx, Return insn) {
+        ctx.append(new EmitterToken(TokenType.SPECIAL, "return"));
         if (insn.getValue().isPresent()) {
             TypeSignature type = null;
             if (ctx.getMethod() != null) {
                 type = ClassTypeSignature.of(TypeHelper.getRet(ctx.getMethod().getSignature()));
             }
-            ctx.printString(" ");
-            ctx.emit(insn.getValue().get(), type);
+            ctx.emitInstruction(insn.getValue().get(), type);
         }
-        if (semicolon)
-            ctx.printString(";");
+        ctx.append(new EmitterToken(TokenType.STATEMENT_END, ";"));
     }
 
 }

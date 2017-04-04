@@ -24,37 +24,32 @@
  */
 package org.spongepowered.despector.emitter.kotlin.special;
 
-import org.spongepowered.despector.ast.generic.ClassTypeSignature;
-import org.spongepowered.despector.ast.generic.TypeSignature;
-import org.spongepowered.despector.ast.generic.TypeVariableSignature;
-import org.spongepowered.despector.ast.generic.VoidTypeSignature;
-import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.special.GenericsEmitter;
 
 public class KotlinGenericsEmitter extends GenericsEmitter {
 
-    @Override
-    public void emitTypeSignature(EmitterContext ctx, TypeSignature sig) {
-        if (sig instanceof TypeVariableSignature) {
-            String desc = ((TypeVariableSignature) sig).getIdentifier();
-            ctx.printString(desc.substring(1, desc.length() - 1));
-        } else if (sig instanceof ClassTypeSignature) {
-            ClassTypeSignature cls = (ClassTypeSignature) sig;
-            int array_depth = 0;
-            String type = cls.getType();
-            while(type.startsWith("[")) {
-                array_depth++;
-                type = type.substring(1);
-                ctx.printString("Array<");
-            }
-            ctx.emitType(type);
-            emitTypeArguments(ctx, cls.getArguments());
-            for(int i = 0; i < array_depth; i++) {
-                ctx.printString(">");
-            }
-        } else if (sig instanceof VoidTypeSignature) {
-            ctx.printString("void");
-        }
-    }
+//    @Override
+//    public void emitTypeSignature(EmitterContext ctx, TypeSignature sig) {
+//        if (sig instanceof TypeVariableSignature) {
+//            String desc = ((TypeVariableSignature) sig).getIdentifier();
+//            ctx.printString(desc.substring(1, desc.length() - 1));
+//        } else if (sig instanceof ClassTypeSignature) {
+//            ClassTypeSignature cls = (ClassTypeSignature) sig;
+//            int array_depth = 0;
+//            String type = cls.getType();
+//            while(type.startsWith("[")) {
+//                array_depth++;
+//                type = type.substring(1);
+//                ctx.printString("Array<");
+//            }
+//            ctx.emitType(type);
+//            emitTypeArguments(ctx, cls.getArguments());
+//            for(int i = 0; i < array_depth; i++) {
+//                ctx.printString(">");
+//            }
+//        } else if (sig instanceof VoidTypeSignature) {
+//            ctx.printString("void");
+//        }
+//    }
 
 }

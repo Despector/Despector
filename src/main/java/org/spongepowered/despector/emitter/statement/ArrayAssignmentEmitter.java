@@ -26,19 +26,22 @@ package org.spongepowered.despector.emitter.statement;
 
 import org.spongepowered.despector.ast.generic.ClassTypeSignature;
 import org.spongepowered.despector.ast.members.insn.assign.ArrayAssignment;
-import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.StatementEmitter;
+import org.spongepowered.despector.emitter.output.EmitterOutput;
+import org.spongepowered.despector.emitter.output.EmitterToken;
+import org.spongepowered.despector.emitter.output.TokenType;
 
 public class ArrayAssignmentEmitter implements StatementEmitter<ArrayAssignment> {
 
     @Override
-    public void emit(EmitterContext ctx, ArrayAssignment insn, boolean semicolon) {
-        ctx.emit(insn.getArray(), null);
-        ctx.printString("[");
-        ctx.emit(insn.getIndex(), ClassTypeSignature.INT);
-        ctx.printString("] = ");
-        ctx.emit(insn.getValue(), null);
-        if(semicolon) ctx.printString(";");
+    public void emit(EmitterOutput ctx, ArrayAssignment insn) {
+        ctx.emitInstruction(insn.getArray(), null);
+        ctx.append(new EmitterToken(TokenType.LEFT_BRACKET, "["));
+        ctx.emitInstruction(insn.getIndex(), ClassTypeSignature.INT);
+        ctx.append(new EmitterToken(TokenType.RIGHT_BRACKET, "]"));
+        ctx.append(new EmitterToken(TokenType.EQUALS, "="));
+        ctx.emitInstruction(insn.getValue(), null);
+        ctx.append(new EmitterToken(TokenType.STATEMENT_END, ";"));
     }
 
 }

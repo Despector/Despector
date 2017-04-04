@@ -28,51 +28,43 @@ import org.spongepowered.despector.ast.members.insn.StatementBlock;
 import org.spongepowered.despector.ast.members.insn.branch.If;
 import org.spongepowered.despector.ast.members.insn.branch.If.Elif;
 import org.spongepowered.despector.ast.members.insn.branch.If.Else;
-import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.StatementEmitter;
+import org.spongepowered.despector.emitter.output.EmitterOutput;
+import org.spongepowered.despector.emitter.output.EmitterToken;
+import org.spongepowered.despector.emitter.output.TokenType;
 
 public class IfEmitter implements StatementEmitter<If> {
 
     @Override
-    public void emit(EmitterContext ctx, If insn, boolean semicolon) {
-        ctx.printString("if (");
-        ctx.emit(insn.getCondition());
-        ctx.printString(") {");
-        ctx.newLine();
+    public void emit(EmitterOutput ctx, If insn) {
+        ctx.append(new EmitterToken(TokenType.SPECIAL, "if"));
+        ctx.append(new EmitterToken(TokenType.LEFT_PAREN, "("));
+        ctx.emitCondition(insn.getCondition());
+        ctx.append(new EmitterToken(TokenType.RIGHT_PAREN, ")"));
+        ctx.append(new EmitterToken(TokenType.BLOCK_START, "{"));
         if (!insn.getIfBody().getStatements().isEmpty()) {
-            ctx.indent();
-            ctx.emitBody(insn.getIfBody());
-            ctx.dedent();
-            ctx.newLine();
+            ctx.emitBody(insn.getIfBody(), 0);
         }
-        ctx.printIndentation();
+        ctx.append(new EmitterToken(TokenType.BLOCK_END, "}"));
         Else else_ = insn.getElseBlock();
         for (int i = 0; i < insn.getElifBlocks().size(); i++) {
             Elif elif = insn.getElifBlocks().get(i);
-            ctx.printString("} else if (");
-            ctx.emit(elif.getCondition());
-            ctx.printString(") {");
-            ctx.newLine();
-            ctx.indent();
-            ctx.emitBody(elif.getBody());
-            ctx.dedent();
-            ctx.newLine();
-            ctx.printIndentation();
+            ctx.append(new EmitterToken(TokenType.SPECIAL, "else if"));
+            ctx.append(new EmitterToken(TokenType.LEFT_PAREN, "("));
+            ctx.emitCondition(elif.getCondition());
+            ctx.append(new EmitterToken(TokenType.RIGHT_PAREN, ")"));
+            ctx.append(new EmitterToken(TokenType.BLOCK_START, "{"));
+            ctx.emitBody(elif.getBody(), 0);
+            ctx.append(new EmitterToken(TokenType.BLOCK_END, "}"));
         }
-        if (else_ == null) {
-            ctx.printString("}");
-        } else {
+        if (else_ != null) {
             StatementBlock else_block = else_.getElseBody();
-            ctx.printString("} else {");
-            ctx.newLine();
+            ctx.append(new EmitterToken(TokenType.SPECIAL, "else"));
+            ctx.append(new EmitterToken(TokenType.BLOCK_START, "{"));
             if (!else_block.getStatements().isEmpty()) {
-                ctx.indent();
-                ctx.emitBody(else_block);
-                ctx.dedent();
-                ctx.newLine();
+                ctx.emitBody(else_block, 0);
             }
-            ctx.printIndentation();
-            ctx.printString("}");
+            ctx.append(new EmitterToken(TokenType.BLOCK_END, "}"));
         }
     }
 

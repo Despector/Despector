@@ -24,18 +24,8 @@
  */
 package org.spongepowered.despector.emitter.special;
 
-import org.spongepowered.despector.ast.generic.ClassTypeSignature;
-import org.spongepowered.despector.ast.generic.TypeArgument;
-import org.spongepowered.despector.ast.generic.TypeParameter;
-import org.spongepowered.despector.ast.generic.TypeSignature;
-import org.spongepowered.despector.ast.generic.TypeVariableSignature;
-import org.spongepowered.despector.ast.generic.VoidTypeSignature;
-import org.spongepowered.despector.emitter.EmitterContext;
-
-import java.util.List;
-
 public class GenericsEmitter implements SpecialEmitter {
-
+/*
     public void emitTypeParameter(EmitterContext ctx, TypeParameter param) {
         ctx.printString(param.getIdentifier());
         boolean had_superclass = false;
@@ -134,6 +124,6 @@ public class GenericsEmitter implements SpecialEmitter {
             emitTypeArgument(ctx, param);
         }
         ctx.printString(">");
-    }
+    }*/
 
 }

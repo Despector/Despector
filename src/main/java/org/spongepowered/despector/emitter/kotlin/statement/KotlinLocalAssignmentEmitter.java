@@ -26,34 +26,34 @@ package org.spongepowered.despector.emitter.kotlin.statement;
 
 import org.spongepowered.despector.ast.Locals.LocalInstance;
 import org.spongepowered.despector.ast.members.insn.assign.LocalAssignment;
-import org.spongepowered.despector.emitter.EmitterContext;
-import org.spongepowered.despector.emitter.kotlin.KotlinEmitterUtil;
+import org.spongepowered.despector.emitter.output.EmitterOutput;
+import org.spongepowered.despector.emitter.output.EmitterToken;
+import org.spongepowered.despector.emitter.output.TokenType;
 import org.spongepowered.despector.emitter.statement.LocalAssignmentEmitter;
 
 public class KotlinLocalAssignmentEmitter extends LocalAssignmentEmitter {
 
     @Override
-    public void emit(EmitterContext ctx, LocalAssignment insn, boolean semicolon) {
+    public void emit(EmitterOutput ctx, LocalAssignment insn) {
         if (!insn.getLocal().getLocal().isParameter() && !ctx.isDefined(insn.getLocal())) {
             if (insn.getLocal().isEffectivelyFinal()) {
-                ctx.printString("val ");
+                ctx.append(new EmitterToken(TokenType.SPECIAL, "val"));
             } else {
-                ctx.printString("var ");
+                ctx.append(new EmitterToken(TokenType.SPECIAL, "var"));
             }
-            ctx.printString(insn.getLocal().getName());
-            ctx.printString(": ");
+            ctx.append(new EmitterToken(TokenType.NAME, insn.getLocal().getName()));
+            ctx.append(new EmitterToken(TokenType.SPECIAL, ":"));
             LocalInstance local = insn.getLocal();
-            KotlinEmitterUtil.emitType(ctx, local.getType());
+            ctx.append(new EmitterToken(TokenType.TYPE, local.getType()));
             ctx.markDefined(insn.getLocal());
         } else {
-            ctx.printString(insn.getLocal().getName());
-            if (checkOperator(ctx, insn, insn.getValue(), semicolon)) {
+            ctx.append(new EmitterToken(TokenType.NAME, insn.getLocal().getName()));
+            if (checkOperator(ctx, insn, insn.getValue())) {
                 return;
             }
         }
-        ctx.printString(" = ");
-        ctx.markWrapPoint();
-        ctx.emit(insn.getValue(), insn.getLocal().getType());
+        ctx.append(new EmitterToken(TokenType.EQUALS, "="));
+        ctx.emitInstruction(insn.getValue(), insn.getLocal().getType());
     }
 
 }

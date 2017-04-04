@@ -78,7 +78,9 @@ public class ClassEntryEmitter implements AstEmitter<ClassEntry> {
             ctx.append(new EmitterToken(TokenType.NAME, name));
         }
 
-        ctx.append(new EmitterToken(TokenType.GENERIC_PARAMS, type.getSignature().getParameters()));
+        if (type.getSignature() != null) {
+            ctx.append(new EmitterToken(TokenType.GENERIC_PARAMS, type.getSignature().getParameters()));
+        }
 
         if (!type.getSuperclass().equals("Ljava/lang/Object;")) {
             ctx.append(new EmitterToken(TokenType.SPECIAL, "extends"));

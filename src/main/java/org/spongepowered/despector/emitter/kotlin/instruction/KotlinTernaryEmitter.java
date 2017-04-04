@@ -27,29 +27,25 @@ package org.spongepowered.despector.emitter.kotlin.instruction;
 import org.spongepowered.despector.ast.generic.ClassTypeSignature;
 import org.spongepowered.despector.ast.generic.TypeSignature;
 import org.spongepowered.despector.ast.members.insn.branch.Ternary;
-import org.spongepowered.despector.ast.members.insn.branch.condition.CompareCondition;
-import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.instruction.TernaryEmitter;
+import org.spongepowered.despector.emitter.output.EmitterOutput;
+import org.spongepowered.despector.emitter.output.EmitterToken;
+import org.spongepowered.despector.emitter.output.TokenType;
 
 public class KotlinTernaryEmitter extends TernaryEmitter {
 
     @Override
-    public void emit(EmitterContext ctx, Ternary ternary, TypeSignature type) {
+    public void emit(EmitterOutput ctx, Ternary ternary, TypeSignature type) {
         if (type == ClassTypeSignature.BOOLEAN && checkBooleanExpression(ctx, ternary)) {
             return;
         }
-        ctx.printString("if (");
-        if (ternary.getCondition() instanceof CompareCondition) {
-            ctx.emit(ternary.getCondition());
-        } else {
-            ctx.emit(ternary.getCondition());
-        }
-        ctx.printString(") ");
-        ctx.markWrapPoint();
-        ctx.emit(ternary.getTrueValue(), type);
-        ctx.markWrapPoint();
-        ctx.printString(" else ");
-        ctx.emit(ternary.getFalseValue(), type);
+        ctx.append(new EmitterToken(TokenType.SPECIAL, "if"));
+        ctx.append(new EmitterToken(TokenType.LEFT_PAREN, "("));
+        ctx.emitCondition(ternary.getCondition());
+        ctx.append(new EmitterToken(TokenType.RIGHT_PAREN, ")"));
+        ctx.emitInstruction(ternary.getTrueValue(), type);
+        ctx.append(new EmitterToken(TokenType.SPECIAL, "else"));
+        ctx.emitInstruction(ternary.getFalseValue(), type);
     }
 
 }

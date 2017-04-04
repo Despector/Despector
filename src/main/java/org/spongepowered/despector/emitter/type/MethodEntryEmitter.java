@@ -40,7 +40,6 @@ import org.spongepowered.despector.emitter.AstEmitter;
 import org.spongepowered.despector.emitter.output.EmitterOutput;
 import org.spongepowered.despector.emitter.output.EmitterToken;
 import org.spongepowered.despector.emitter.output.TokenType;
-import org.spongepowered.despector.emitter.special.GenericsEmitter;
 
 public class MethodEntryEmitter implements AstEmitter<MethodEntry> {
 
@@ -98,26 +97,24 @@ public class MethodEntryEmitter implements AstEmitter<MethodEntry> {
                 ctx.append(new EmitterToken(TokenType.MODIFIER, "static"));
             }
             if (method.isFinal()) {
-                ctx.printString("final ");
+                ctx.append(new EmitterToken(TokenType.MODIFIER, "final"));
             }
             if (method.isAbstract() && !(ctx.getType() instanceof InterfaceEntry)) {
-                ctx.printString("abstract ");
+                ctx.append(new EmitterToken(TokenType.MODIFIER, "abstract"));
             }
 
             if (sig != null) {
                 if (!sig.getTypeParameters().isEmpty()) {
-                    generics.emitTypeParameters(ctx, sig.getTypeParameters());
-                    ctx.printString(" ");
+                    ctx.append(new EmitterToken(TokenType.GENERIC_PARAMS, sig.getTypeParameters()));
                 }
-                generics.emitTypeSignature(ctx, sig.getReturnType());
+                ctx.append(new EmitterToken(TokenType.TYPE, sig.getReturnType()));
             } else {
-                ctx.emitType(method.getReturnType());
+                ctx.append(new EmitterToken(TokenType.TYPE, method.getReturnType()));
             }
 
-            ctx.printString(" ");
-            ctx.printString(method.getName());
+            ctx.append(new EmitterToken(TokenType.NAME, method.getName()));
         }
-        ctx.printString("(");
+        ctx.append(new EmitterToken(TokenType.LEFT_PAREN, "("));
         StatementBlock block = method.getInstructions();
         int start = 0;
         if ("<init>".equals(method.getName()) && ctx.getType() instanceof EnumEntry) {
@@ -131,52 +128,37 @@ public class MethodEntryEmitter implements AstEmitter<MethodEntry> {
             if (!method.isStatic()) {
                 param_index++;
             }
+            ctx.append(new EmitterToken(TokenType.ARG_START, null));
             if (block == null) {
                 if (sig != null) {
                     // interfaces have no lvt for parameters, need to get
                     // generic types from the method signature
-                    generics.emitTypeSignature(ctx, sig.getParameters().get(i));
+                    ctx.append(new EmitterToken(TokenType.TYPE, sig.getParameters().get(i)));
                 } else {
-                    ctx.emitType(method.getParamTypes().get(i));
+                    ctx.append(new EmitterToken(TokenType.TYPE, method.getParamTypes().get(i)));
                 }
-                ctx.printString(" ");
-                ctx.printString("local" + param_index);
+                ctx.append(new EmitterToken(TokenType.NAME, "local" + param_index));
             } else {
                 Local local = block.getLocals().getLocal(param_index);
                 LocalInstance insn = local.getParameterInstance();
                 for (Annotation anno : insn.getAnnotations()) {
                     ctx.emit(anno);
-                    ctx.printString(" ");
                 }
-                generics.emitTypeSignature(ctx, insn.getType());
-                ctx.printString(" ");
-                ctx.printString(insn.getName());
-            }
-            if (i < method.getParamTypes().size() - 1) {
-                ctx.printString(", ");
-                ctx.markWrapPoint();
+                ctx.append(new EmitterToken(TokenType.TYPE, insn.getType()));
+                ctx.append(new EmitterToken(TokenType.NAME, insn.getName()));
             }
         }
-        ctx.printString(")");
+        ctx.append(new EmitterToken(TokenType.RIGHT_PAREN, ")"));
         if (!method.isAbstract()) {
-            ctx.printString(" {");
-            ctx.newLine();
-            ctx.indent();
+            ctx.append(new EmitterToken(TokenType.BLOCK_START, "{"));
             if (block == null) {
-                ctx.printIndentation();
-                ctx.printString("// Error decompiling block");
+                ctx.append(new EmitterToken(TokenType.COMMENT, "Error decompiling block"));
                 printReturn(ctx, method.getReturnType());
             } else {
-                ctx.emitBody(block);
+                ctx.emitBody(block, 0);
             }
-            ctx.newLine();
-            ctx.dedent();
-            ctx.printIndentation();
-            ctx.printString("}");
-        } else {
-            ctx.printString(";");
+            ctx.append(new EmitterToken(TokenType.BLOCK_END, "}"));
         }
-        ctx.setMethod(null);
         return true;
     }
 

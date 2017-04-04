@@ -29,8 +29,10 @@ import org.spongepowered.despector.ast.members.insn.arg.Instruction;
 import org.spongepowered.despector.ast.members.insn.assign.LocalAssignment;
 import org.spongepowered.despector.ast.members.insn.branch.ForEach;
 import org.spongepowered.despector.ast.members.insn.function.InstanceMethodInvoke;
-import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.StatementEmitter;
+import org.spongepowered.despector.emitter.output.EmitterOutput;
+import org.spongepowered.despector.emitter.output.EmitterToken;
+import org.spongepowered.despector.emitter.output.TokenType;
 import org.spongepowered.despector.transform.matcher.InstructionMatcher;
 import org.spongepowered.despector.transform.matcher.MatchContext;
 import org.spongepowered.despector.transform.matcher.StatementMatcher;
@@ -65,28 +67,25 @@ public class KotlinForEachEmitter implements StatementEmitter<ForEach> {
             .build());
 
     @Override
-    public void emit(EmitterContext ctx, ForEach loop, boolean semicolon) {
+    public void emit(EmitterOutput ctx, ForEach loop) {
         if (checkMapIterator(ctx, loop)) {
             return;
         }
-        ctx.printString("for (");
+        ctx.append(new EmitterToken(TokenType.SPECIAL, "for"));
+        ctx.append(new EmitterToken(TokenType.LEFT_PAREN, "("));
         LocalInstance local = loop.getValueAssignment();
-        ctx.printString(local.getName());
-        ctx.printString(" in ");
-        ctx.emit(loop.getCollectionValue(), null);
-        ctx.printString(") {");
-        ctx.newLine();
+        ctx.append(new EmitterToken(TokenType.NAME, local.getName()));
+        ctx.append(new EmitterToken(TokenType.SPECIAL, "in"));
+        ctx.emitInstruction(loop.getCollectionValue(), null);
+        ctx.append(new EmitterToken(TokenType.RIGHT_PAREN, ")"));
+        ctx.append(new EmitterToken(TokenType.BLOCK_START, "{"));
         if (!loop.getBody().getStatements().isEmpty()) {
-            ctx.indent();
-            ctx.emitBody(loop.getBody());
-            ctx.dedent();
-            ctx.newLine();
+            ctx.emitBody(loop.getBody(), 0);
         }
-        ctx.printIndentation();
-        ctx.printString("}");
+        ctx.append(new EmitterToken(TokenType.BLOCK_END, "}"));
     }
 
-    public boolean checkMapIterator(EmitterContext ctx, ForEach loop) {
+    public boolean checkMapIterator(EmitterOutput ctx, ForEach loop) {
         if (!MAP_ITERATOR.matches(MatchContext.create(), loop)) {
             return false;
         }
@@ -94,23 +93,22 @@ public class KotlinForEachEmitter implements StatementEmitter<ForEach> {
         LocalAssignment value_assign = (LocalAssignment) loop.getBody().getStatement(1);
         Instruction collection = ((InstanceMethodInvoke) loop.getCollectionValue()).getCallee();
 
-        ctx.printString("for ((");
-        ctx.printString(key_assign.getLocal().getName());
-        ctx.printString(", ");
-        ctx.printString(value_assign.getLocal().getName());
-
-        ctx.printString(") in ");
-        ctx.emit(collection, null);
-        ctx.printString(") {");
-        ctx.newLine();
+        ctx.append(new EmitterToken(TokenType.SPECIAL, "for"));
+        ctx.append(new EmitterToken(TokenType.LEFT_PAREN, "("));
+        ctx.append(new EmitterToken(TokenType.LEFT_PAREN, "("));
+        ctx.append(new EmitterToken(TokenType.ARG_START, null));
+        ctx.append(new EmitterToken(TokenType.NAME, key_assign.getLocal().getName()));
+        ctx.append(new EmitterToken(TokenType.ARG_START, null));
+        ctx.append(new EmitterToken(TokenType.NAME, value_assign.getLocal().getName()));
+        ctx.append(new EmitterToken(TokenType.RIGHT_PAREN, ")"));
+        ctx.append(new EmitterToken(TokenType.SPECIAL, "in"));
+        ctx.emitInstruction(collection, null);
+        ctx.append(new EmitterToken(TokenType.RIGHT_PAREN, ")"));
+        ctx.append(new EmitterToken(TokenType.BLOCK_START, "{"));
         if (!loop.getBody().getStatements().isEmpty()) {
-            ctx.indent();
             ctx.emitBody(loop.getBody(), 2);
-            ctx.dedent();
-            ctx.newLine();
         }
-        ctx.printIndentation();
-        ctx.printString("}");
+        ctx.append(new EmitterToken(TokenType.BLOCK_END, "}"));
 
         return true;
     }

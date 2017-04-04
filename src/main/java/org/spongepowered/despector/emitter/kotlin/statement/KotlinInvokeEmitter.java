@@ -28,13 +28,13 @@ import org.spongepowered.despector.ast.members.insn.arg.Instruction;
 import org.spongepowered.despector.ast.members.insn.function.InstanceMethodInvoke;
 import org.spongepowered.despector.ast.members.insn.function.InvokeStatement;
 import org.spongepowered.despector.ast.members.insn.function.StaticMethodInvoke;
-import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.StatementEmitter;
+import org.spongepowered.despector.emitter.output.EmitterOutput;
 
 public class KotlinInvokeEmitter implements StatementEmitter<InvokeStatement> {
 
     @Override
-    public void emit(EmitterContext ctx, InvokeStatement insn, boolean semicolon) {
+    public void emit(EmitterOutput ctx, InvokeStatement insn) {
         Instruction i = insn.getInstruction();
         if (i instanceof InstanceMethodInvoke) {
             InstanceMethodInvoke mth = (InstanceMethodInvoke) i;
@@ -47,7 +47,7 @@ public class KotlinInvokeEmitter implements StatementEmitter<InvokeStatement> {
                 return;
             }
         }
-        ctx.emit(i, null);
+        ctx.emitInstruction(i, null);
     }
 
 }

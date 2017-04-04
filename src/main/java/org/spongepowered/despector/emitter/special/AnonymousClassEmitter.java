@@ -33,7 +33,9 @@ import org.spongepowered.despector.ast.members.MethodEntry;
 import org.spongepowered.despector.ast.members.insn.arg.Instruction;
 import org.spongepowered.despector.ast.members.insn.function.New;
 import org.spongepowered.despector.ast.type.ClassEntry;
-import org.spongepowered.despector.emitter.EmitterContext;
+import org.spongepowered.despector.emitter.output.EmitterOutput;
+import org.spongepowered.despector.emitter.output.EmitterToken;
+import org.spongepowered.despector.emitter.output.TokenType;
 import org.spongepowered.despector.emitter.type.ClassEntryEmitter;
 import org.spongepowered.despector.util.TypeHelper;
 
@@ -41,7 +43,7 @@ import java.util.List;
 
 public class AnonymousClassEmitter implements SpecialEmitter {
 
-    public void emit(EmitterContext ctx, ClassEntry type, New new_insn) {
+    public void emit(EmitterOutput ctx, ClassEntry type, New new_insn) {
         checkArgument(type.isAnonType());
 
         TypeSignature actual_type = null;
@@ -59,8 +61,8 @@ public class AnonymousClassEmitter implements SpecialEmitter {
             }
         }
 
-        ctx.printString("new ");
-        ctx.emitType(actual_type);
+        ctx.append(new EmitterToken(TokenType.SPECIAL, "new"));
+        ctx.append(new EmitterToken(TokenType.TYPE, actual_type));
 
         int syn_field_count = 0;
         for (FieldEntry fld : type.getFields()) {
@@ -69,19 +71,15 @@ public class AnonymousClassEmitter implements SpecialEmitter {
             }
         }
 
-        ctx.printString("(");
+        ctx.append(new EmitterToken(TokenType.LEFT_PAREN, "("));
         List<String> param_types = TypeHelper.splitSig(new_insn.getCtorDescription());
         for (int i = 0; i < new_insn.getParameters().length - syn_field_count; i++) {
             Instruction param = new_insn.getParameters()[i];
-            ctx.emit(param, ClassTypeSignature.of(param_types.get(i)));
-            if (i < new_insn.getParameters().length - 1 - syn_field_count) {
-                ctx.printString(", ");
-            }
+            ctx.append(new EmitterToken(TokenType.ARG_START, null));
+            ctx.emitInstruction(param, ClassTypeSignature.of(param_types.get(i)));
         }
-        ctx.printString(") {");
-        ctx.newLine();
-        ctx.indent();
-        ctx.indent();
+        ctx.append(new EmitterToken(TokenType.RIGHT_PAREN, ")"));
+        ctx.append(new EmitterToken(TokenType.BLOCK_START, "{"));
 
         ClassEntryEmitter emitter = (ClassEntryEmitter) ctx.getEmitterSet().getAstEmitter(ClassEntry.class);
         emitter.emitStaticFields(ctx, type);
@@ -89,13 +87,10 @@ public class AnonymousClassEmitter implements SpecialEmitter {
         emitter.emitFields(ctx, type);
         emitMethods(ctx, type);
 
-        ctx.dedent();
-        ctx.dedent();
-        ctx.printIndentation();
-        ctx.printString("}");
+        ctx.append(new EmitterToken(TokenType.BLOCK_END, "}"));
     }
 
-    public void emitMethods(EmitterContext ctx, ClassEntry type) {
+    public void emitMethods(EmitterOutput ctx, ClassEntry type) {
         if (!type.getMethods().isEmpty()) {
             for (MethodEntry mth : type.getMethods()) {
                 if (mth.isSynthetic()) {
@@ -106,10 +101,7 @@ public class AnonymousClassEmitter implements SpecialEmitter {
                     // need to be emitted?
                     continue;
                 }
-                if (ctx.emit(mth)) {
-                    ctx.newLine();
-                    ctx.newLine();
-                }
+                ctx.emitMethod(mth);
             }
         }
     }

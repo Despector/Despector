@@ -26,17 +26,18 @@ package org.spongepowered.despector.emitter.condition;
 
 import org.spongepowered.despector.ast.members.insn.branch.condition.OrCondition;
 import org.spongepowered.despector.emitter.ConditionEmitter;
-import org.spongepowered.despector.emitter.EmitterContext;
+import org.spongepowered.despector.emitter.output.EmitterOutput;
+import org.spongepowered.despector.emitter.output.EmitterToken;
+import org.spongepowered.despector.emitter.output.TokenType;
 
 public class OrConditionEmitter implements ConditionEmitter<OrCondition> {
 
     @Override
-    public void emit(EmitterContext ctx, OrCondition and) {
+    public void emit(EmitterOutput ctx, OrCondition and) {
         for (int i = 0; i < and.getOperands().size(); i++) {
-            ctx.emit(and.getOperands().get(i));
+            ctx.emitCondition(and.getOperands().get(i));
             if (i < and.getOperands().size() - 1) {
-                ctx.markWrapPoint();
-                ctx.printString(" || ");
+                ctx.append(new EmitterToken(TokenType.OPERATOR, "||"));
             }
         }
     }

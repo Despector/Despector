@@ -27,29 +27,31 @@ package org.spongepowered.despector.emitter.kotlin.instruction;
 import org.spongepowered.despector.ast.generic.TypeSignature;
 import org.spongepowered.despector.ast.members.insn.arg.Cast;
 import org.spongepowered.despector.ast.members.insn.arg.operator.Operator;
-import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.InstructionEmitter;
+import org.spongepowered.despector.emitter.output.EmitterOutput;
+import org.spongepowered.despector.emitter.output.EmitterToken;
+import org.spongepowered.despector.emitter.output.TokenType;
 
 public class KotlinCastEmitter implements InstructionEmitter<Cast> {
 
     @Override
-    public void emit(EmitterContext ctx, Cast arg, TypeSignature type) {
+    public void emit(EmitterOutput ctx, Cast arg, TypeSignature type) {
         if (type.equals(arg.inferType())) {
-            ctx.emit(arg.getValue(), type);
+            ctx.emitInstruction(arg.getValue(), type);
             return;
         }
         boolean operator = arg.getValue() instanceof Operator;
-        ctx.printString("(");
+        ctx.append(new EmitterToken(TokenType.LEFT_PAREN, "("));
         if (!operator) {
-            ctx.printString("(");
+            ctx.append(new EmitterToken(TokenType.LEFT_PAREN, "("));
         }
-        ctx.emitType(arg.getType());
-        ctx.printString(") ");
+        ctx.append(new EmitterToken(TokenType.TYPE, arg.getType()));
+        ctx.append(new EmitterToken(TokenType.RIGHT_PAREN, ")"));
         if (operator) {
-            ctx.printString("(");
+            ctx.append(new EmitterToken(TokenType.LEFT_PAREN, "("));
         }
-        ctx.emit(arg.getValue(), null);
-        ctx.printString(")");
+        ctx.emitInstruction(arg.getValue(), null);
+        ctx.append(new EmitterToken(TokenType.RIGHT_PAREN, ")"));
     }
 
 }

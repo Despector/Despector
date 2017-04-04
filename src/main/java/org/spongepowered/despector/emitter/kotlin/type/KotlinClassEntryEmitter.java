@@ -36,10 +36,11 @@ import org.spongepowered.despector.ast.type.TypeEntry;
 import org.spongepowered.despector.ast.type.TypeEntry.InnerClassInfo;
 import org.spongepowered.despector.config.ConfigManager;
 import org.spongepowered.despector.emitter.AstEmitter;
-import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.kotlin.special.KotlinCompanionClassEmitter;
 import org.spongepowered.despector.emitter.kotlin.special.KotlinDataClassEmitter;
-import org.spongepowered.despector.emitter.special.GenericsEmitter;
+import org.spongepowered.despector.emitter.output.EmitterOutput;
+import org.spongepowered.despector.emitter.output.EmitterToken;
+import org.spongepowered.despector.emitter.output.TokenType;
 import org.spongepowered.despector.util.AstUtil;
 
 import java.util.Collection;
@@ -59,7 +60,7 @@ public class KotlinClassEntryEmitter implements AstEmitter<ClassEntry> {
     }
 
     @Override
-    public boolean emit(EmitterContext ctx, ClassEntry type) {
+    public boolean emit(EmitterOutput ctx, ClassEntry type) {
 
         if (type.getStaticMethodSafe("copy$default") != null) {
             KotlinDataClassEmitter data_emitter = ctx.getEmitterSet().getSpecialEmitter(KotlinDataClassEmitter.class);
@@ -80,58 +81,46 @@ public class KotlinClassEntryEmitter implements AstEmitter<ClassEntry> {
                 if (HIDDEN_ANNOTATIONS.contains(anno.getType().getName())) {
                     continue;
                 }
-                ctx.printIndentation();
                 ctx.emit(anno);
-                ctx.newLine();
             }
-            ctx.printIndentation();
             InnerClassInfo inner_info = null;
             if (type.isInnerClass() && ctx.getOuterType() != null) {
                 inner_info = ctx.getOuterType().getInnerClassInfo(type.getName());
             }
-            ctx.printString("class ");
+            ctx.append(new EmitterToken(TokenType.SPECIAL, "class"));
             if (inner_info != null) {
-                ctx.printString(inner_info.getSimpleName());
+                ctx.append(new EmitterToken(TokenType.NAME, inner_info.getSimpleName()));
             } else {
                 String name = type.getName().replace('/', '.');
                 if (name.indexOf('.') != -1) {
                     name = name.substring(name.lastIndexOf('.') + 1, name.length());
                 }
                 name = name.replace('$', '.');
-                ctx.printString(name);
+                ctx.append(new EmitterToken(TokenType.NAME, name));
             }
 
-            GenericsEmitter generics = ctx.getEmitterSet().getSpecialEmitter(GenericsEmitter.class);
             if (type.getSignature() != null) {
-                generics.emitTypeParameters(ctx, type.getSignature().getParameters());
+                ctx.append(new EmitterToken(TokenType.GENERIC_PARAMS, type.getSignature().getParameters()));
             }
 
             if (!type.getSuperclass().equals("Ljava/lang/Object;")) {
-                ctx.printString(" extends ");
-                ctx.emitTypeName(type.getSuperclassName());
+                ctx.append(new EmitterToken(TokenType.SPECIAL, "extends"));
+                ctx.append(new EmitterToken(TokenType.TYPE, type.getSuperclass()));
                 if (type.getSignature() != null && type.getSignature().getSuperclassSignature() != null) {
-                    generics.emitTypeArguments(ctx, type.getSignature().getSuperclassSignature().getArguments());
+                    ctx.append(new EmitterToken(TokenType.GENERIC_PARAMS, type.getSignature().getSuperclassSignature().getArguments()));
                 }
             }
             if (!type.getInterfaces().isEmpty()) {
-                ctx.printString(" : ");
+                ctx.append(new EmitterToken(TokenType.SPECIAL, ":"));
                 for (int i = 0; i < type.getInterfaces().size(); i++) {
-                    ctx.emitType(type.getInterfaces().get(i));
-                    generics.emitTypeArguments(ctx, type.getSignature().getInterfaceSignatures().get(i).getArguments());
-                    if (i < type.getInterfaces().size() - 1) {
-                        ctx.printString(" ", ctx.getFormat().insert_space_before_comma_in_superinterfaces);
-                        ctx.printString(",");
-                        ctx.printString(" ", ctx.getFormat().insert_space_after_comma_in_superinterfaces);
-                    }
+                    ctx.append(new EmitterToken(TokenType.TYPE, type.getInterfaces().get(i)));
+                    ctx.append(new EmitterToken(TokenType.GENERIC_PARAMS, type.getSignature().getInterfaceSignatures().get(i).getArguments()));
                 }
             }
-            ctx.printString(" ", ctx.getFormat().insert_space_before_opening_brace_in_type_declaration);
-            ctx.printString("{");
-            ctx.newLine(ctx.getFormat().blank_lines_before_first_class_body_declaration + 1);
+            ctx.append(new EmitterToken(TokenType.BLOCK_START, "{"));
 
             // Ordering is static fields -> static methods -> instance fields ->
             // instance methods
-            ctx.indent();
         }
         emitStaticFields(ctx, type);
         emitStaticMethods(ctx, type);
@@ -143,23 +132,16 @@ public class KotlinClassEntryEmitter implements AstEmitter<ClassEntry> {
             if (inner.getOuterName() == null || !inner.getOuterName().equals(type.getName())) {
                 continue;
             }
-            ctx.setOuterType(type);
             TypeEntry inner_type = type.getSource().get(inner.getName());
-            ctx.emit(inner_type);
-            ctx.newLine();
-            ctx.setType(type);
-            ctx.setOuterType(null);
+            ctx.emitType(inner_type);
         }
         if (emit_class) {
-            ctx.dedent();
-            ctx.printIndentation();
-            ctx.printString("}");
-            ctx.newLine();
+            ctx.append(new EmitterToken(TokenType.BLOCK_END, "}"));
         }
         return true;
     }
 
-    public void emitStaticFields(EmitterContext ctx, ClassEntry type) {
+    public void emitStaticFields(EmitterOutput ctx, ClassEntry type) {
         if (!type.getStaticFields().isEmpty()) {
 
             Map<String, Instruction> static_initializers = new HashMap<>();
@@ -178,54 +160,40 @@ public class KotlinClassEntryEmitter implements AstEmitter<ClassEntry> {
                 }
             }
 
-            boolean at_least_one = false;
             for (FieldEntry field : type.getStaticFields()) {
                 if (field.isSynthetic() || field.getName().equals("Companion")) {
-                    if(ConfigManager.getConfig().emitter.emit_synthetics) {
-                        ctx.printIndentation();
-                        ctx.printString("// Synthetic");
-                        ctx.newLine();
+                    if (ConfigManager.getConfig().emitter.emit_synthetics) {
+                        ctx.append(new EmitterToken(TokenType.COMMENT, "Synthetic"));
                     } else {
                         continue;
                     }
                 }
-                at_least_one = true;
-                ctx.printIndentation();
-                ctx.emit(field);
+                ctx.emitField(field);
                 if (static_initializers.containsKey(field.getName())) {
-                    ctx.printString(" = ");
-                    ctx.emit(static_initializers.get(field.getName()), field.getType());
+                    ctx.append(new EmitterToken(TokenType.EQUALS, "="));
+                    ctx.emitInstruction(static_initializers.get(field.getName()), field.getType());
                 }
-                ctx.printString(";");
-                ctx.newLine();
-            }
-            if (at_least_one) {
-                ctx.newLine();
+                ctx.append(new EmitterToken(TokenType.STATEMENT_END, ";"));
             }
         }
     }
 
-    public void emitStaticMethods(EmitterContext ctx, ClassEntry type) {
+    public void emitStaticMethods(EmitterOutput ctx, ClassEntry type) {
         if (!type.getStaticMethods().isEmpty()) {
             for (MethodEntry mth : type.getStaticMethods()) {
                 if (mth.isSynthetic()) {
-                    if(ConfigManager.getConfig().emitter.emit_synthetics) {
-                        ctx.printIndentation();
-                        ctx.printString("// Synthetic");
-                        ctx.newLine();
+                    if (ConfigManager.getConfig().emitter.emit_synthetics) {
+                        ctx.append(new EmitterToken(TokenType.COMMENT, "Synthetic"));
                     } else {
                         continue;
                     }
                 }
-                if (ctx.emit(mth)) {
-                    ctx.newLine();
-                    ctx.newLine();
-                }
+                ctx.emitMethod(mth);
             }
         }
     }
 
-    public void emitFields(EmitterContext ctx, ClassEntry type) {
+    public void emitFields(EmitterOutput ctx, ClassEntry type) {
         if (!type.getFields().isEmpty()) {
 
             List<MethodEntry> inits = type.getMethods().stream().filter((m) -> m.getName().equals("<init>")).collect(Collectors.toList());
@@ -252,45 +220,31 @@ public class KotlinClassEntryEmitter implements AstEmitter<ClassEntry> {
                 }
             }
 
-            boolean at_least_one = false;
             for (FieldEntry field : type.getFields()) {
                 if (field.isSynthetic()) {
-                    if(ConfigManager.getConfig().emitter.emit_synthetics) {
-                        ctx.printIndentation();
-                        ctx.printString("// Synthetic");
-                        ctx.newLine();
+                    if (ConfigManager.getConfig().emitter.emit_synthetics) {
+                        ctx.append(new EmitterToken(TokenType.COMMENT, "Synthetic"));
                     } else {
                         continue;
                     }
                 }
-                at_least_one = true;
-                ctx.printIndentation();
-                ctx.emit(field);
-                ctx.printString(";");
-                ctx.newLine();
-            }
-            if (at_least_one) {
-                ctx.newLine();
+                ctx.emitField(field);
+                ctx.append(new EmitterToken(TokenType.STATEMENT_END, ";"));
             }
         }
     }
 
-    public void emitMethods(EmitterContext ctx, ClassEntry type) {
+    public void emitMethods(EmitterOutput ctx, ClassEntry type) {
         if (!type.getMethods().isEmpty()) {
             for (MethodEntry mth : type.getMethods()) {
                 if (mth.isSynthetic() || mth.getName().equals("<init>")) {
-                    if(ConfigManager.getConfig().emitter.emit_synthetics) {
-                        ctx.printIndentation();
-                        ctx.printString("// Synthetic");
-                        ctx.newLine();
+                    if (ConfigManager.getConfig().emitter.emit_synthetics) {
+                        ctx.append(new EmitterToken(TokenType.COMMENT, "Synthetic"));
                     } else {
                         continue;
                     }
                 }
-                if (ctx.emit(mth)) {
-                    ctx.newLine();
-                    ctx.newLine();
-                }
+                ctx.emitMethod(mth);
             }
         }
     }

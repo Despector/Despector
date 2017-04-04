@@ -25,17 +25,17 @@
 package org.spongepowered.despector.emitter.statement;
 
 import org.spongepowered.despector.ast.members.insn.branch.Break;
-import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.StatementEmitter;
+import org.spongepowered.despector.emitter.output.EmitterOutput;
+import org.spongepowered.despector.emitter.output.EmitterToken;
+import org.spongepowered.despector.emitter.output.TokenType;
 
 public class BreakEmitter implements StatementEmitter<Break> {
 
     @Override
-    public void emit(EmitterContext ctx, Break stmt, boolean semicolon) {
-        ctx.printString(stmt.getType().getKeyword());
-        if (semicolon) {
-            ctx.printString(";");
-        }
+    public void emit(EmitterOutput ctx, Break stmt) {
+        ctx.append(new EmitterToken(TokenType.SPECIAL, stmt.getType().getKeyword()));
+        ctx.append(new EmitterToken(TokenType.STATEMENT_END, ";"));
     }
 
 }

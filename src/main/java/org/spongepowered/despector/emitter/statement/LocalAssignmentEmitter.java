@@ -30,35 +30,32 @@ import org.spongepowered.despector.ast.members.insn.arg.cst.IntConstant;
 import org.spongepowered.despector.ast.members.insn.arg.field.LocalAccess;
 import org.spongepowered.despector.ast.members.insn.arg.operator.Operator;
 import org.spongepowered.despector.ast.members.insn.assign.LocalAssignment;
-import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.StatementEmitter;
-import org.spongepowered.despector.emitter.special.GenericsEmitter;
+import org.spongepowered.despector.emitter.output.EmitterOutput;
+import org.spongepowered.despector.emitter.output.EmitterToken;
+import org.spongepowered.despector.emitter.output.TokenType;
 
 public class LocalAssignmentEmitter implements StatementEmitter<LocalAssignment> {
 
     @Override
-    public void emit(EmitterContext ctx, LocalAssignment insn, boolean semicolon) {
+    public void emit(EmitterOutput ctx, LocalAssignment insn) {
         if (!insn.getLocal().getLocal().isParameter() && !ctx.isDefined(insn.getLocal())) {
             LocalInstance local = insn.getLocal();
-            GenericsEmitter generics = ctx.getEmitterSet().getSpecialEmitter(GenericsEmitter.class);
-            generics.emitTypeSignature(ctx, local.getType());
-            ctx.printString(" ");
+            ctx.append(new EmitterToken(TokenType.TYPE, local.getType()));
             ctx.markDefined(insn.getLocal());
         } else {
             Instruction val = insn.getValue();
-            if (checkOperator(ctx, insn, val, semicolon)) {
+            if (checkOperator(ctx, insn, val)) {
                 return;
             }
         }
-        ctx.printString(insn.getLocal().getName());
-        ctx.printString(" = ");
-        ctx.emit(insn.getValue(), insn.getLocal().getType());
-        if (semicolon) {
-            ctx.printString(";");
-        }
+        ctx.append(new EmitterToken(TokenType.NAME, insn.getLocal().getName()));
+        ctx.append(new EmitterToken(TokenType.EQUALS, "="));
+        ctx.emitInstruction(insn.getValue(), insn.getLocal().getType());
+        ctx.append(new EmitterToken(TokenType.STATEMENT_END, ";"));
     }
 
-    protected boolean checkOperator(EmitterContext ctx, LocalAssignment insn, Instruction val, boolean semicolon) {
+    protected boolean checkOperator(EmitterOutput ctx, LocalAssignment insn, Instruction val) {
         if (val instanceof Operator) {
             Instruction left = ((Operator) val).getLeftOperand();
             Instruction right = ((Operator) val).getRightOperand();
@@ -69,26 +66,22 @@ public class LocalAssignmentEmitter implements StatementEmitter<LocalAssignment>
                 // where + is any operator then we collapse it to the '+='
                 // form of the assignment.
                 if (left_field.getLocal().getIndex() == insn.getLocal().getIndex()) {
-                    ctx.printString(insn.getLocal().getName());
-                    ctx.printString(op);
+                    ctx.append(new EmitterToken(TokenType.NAME, insn.getLocal().getName()));
+                    ctx.append(new EmitterToken(TokenType.OPERATOR_EQUALS, op));
                     if ("Z".equals(insn.getLocal().getType())) {
                         if (val instanceof IntConstant) {
                             IntConstant cst = (IntConstant) insn.getValue();
                             if (cst.getConstant() == 1) {
-                                ctx.printString("true");
+                                ctx.append(new EmitterToken(TokenType.BOOLEAN, true));
                             } else {
-                                ctx.printString("false");
+                                ctx.append(new EmitterToken(TokenType.BOOLEAN, false));
                             }
-                            if (semicolon) {
-                                ctx.printString(";");
-                            }
+                            ctx.append(new EmitterToken(TokenType.STATEMENT_END, ";"));
                             return true;
                         }
                     }
-                    ctx.emit(right, insn.getLocal().getType());
-                    if (semicolon) {
-                        ctx.printString(";");
-                    }
+                    ctx.emitInstruction(right, insn.getLocal().getType());
+                    ctx.append(new EmitterToken(TokenType.STATEMENT_END, ";"));
                     return true;
                 }
             }

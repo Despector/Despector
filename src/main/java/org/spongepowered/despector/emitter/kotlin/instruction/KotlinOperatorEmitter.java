@@ -27,8 +27,10 @@ package org.spongepowered.despector.emitter.kotlin.instruction;
 import org.spongepowered.despector.ast.generic.TypeSignature;
 import org.spongepowered.despector.ast.members.insn.arg.operator.Operator;
 import org.spongepowered.despector.ast.members.insn.arg.operator.OperatorType;
-import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.InstructionEmitter;
+import org.spongepowered.despector.emitter.output.EmitterOutput;
+import org.spongepowered.despector.emitter.output.EmitterToken;
+import org.spongepowered.despector.emitter.output.TokenType;
 
 public class KotlinOperatorEmitter implements InstructionEmitter<Operator> {
 
@@ -51,60 +53,58 @@ public class KotlinOperatorEmitter implements InstructionEmitter<Operator> {
         }
     }
 
-    public void emitOp(EmitterContext ctx, OperatorType op) {
+    public void emitOp(EmitterOutput ctx, OperatorType op) {
         switch (op) {
         case AND:
-            ctx.printString(" and ");
+            ctx.append(new EmitterToken(TokenType.OPERATOR, "and"));
             break;
         case OR:
-            ctx.printString(" or ");
+            ctx.append(new EmitterToken(TokenType.OPERATOR, "or"));
             break;
         case XOR:
-            ctx.printString(" xor ");
+            ctx.append(new EmitterToken(TokenType.OPERATOR, "xor"));
             break;
         case SHIFT_LEFT:
-            ctx.printString(" shl ");
+            ctx.append(new EmitterToken(TokenType.OPERATOR, "shl"));
             break;
         case SHIFT_RIGHT:
-            ctx.printString(" shr ");
+            ctx.append(new EmitterToken(TokenType.OPERATOR, "shr"));
             break;
         case UNSIGNED_SHIFT_RIGHT:
-            ctx.printString(" ushr ");
+            ctx.append(new EmitterToken(TokenType.OPERATOR, "ushr"));
             break;
         default:
-            ctx.printString(" " + op.getSymbol() + " ");
+            ctx.append(new EmitterToken(TokenType.OPERATOR, op.getSymbol()));
             break;
         }
     }
 
     @Override
-    public void emit(EmitterContext ctx, Operator arg, TypeSignature type) {
+    public void emit(EmitterOutput ctx, Operator arg, TypeSignature type) {
         if (arg.getLeftOperand() instanceof Operator) {
             Operator right = (Operator) arg.getLeftOperand();
             if (arg.getOperator().getPrecedence() > right.getOperator().getPrecedence()) {
-                ctx.printString("(");
+                ctx.append(new EmitterToken(TokenType.LEFT_PAREN, "("));
             }
-            ctx.emit(arg.getLeftOperand(), null);
+            ctx.emitInstruction(arg.getLeftOperand(), null);
             if (arg.getOperator().getPrecedence() > right.getOperator().getPrecedence()) {
-                ctx.printString(")");
+                ctx.append(new EmitterToken(TokenType.RIGHT_PAREN, ")"));
             }
         } else {
-            ctx.emit(arg.getLeftOperand(), null);
+            ctx.emitInstruction(arg.getLeftOperand(), null);
         }
-        ctx.markWrapPoint();
-
         emitOp(ctx, arg.getOperator());
         if (arg.getRightOperand() instanceof Operator) {
             Operator right = (Operator) arg.getRightOperand();
             if (arg.getOperator().getPrecedence() > right.getOperator().getPrecedence()) {
-                ctx.printString("(");
+                ctx.append(new EmitterToken(TokenType.LEFT_PAREN, "("));
             }
-            ctx.emit(arg.getRightOperand(), null);
+            ctx.emitInstruction(arg.getRightOperand(), null);
             if (arg.getOperator().getPrecedence() > right.getOperator().getPrecedence()) {
-                ctx.printString(")");
+                ctx.append(new EmitterToken(TokenType.RIGHT_PAREN, ")"));
             }
         } else {
-            ctx.emit(arg.getRightOperand(), null);
+            ctx.emitInstruction(arg.getRightOperand(), null);
         }
     }
 }

@@ -32,42 +32,44 @@ import org.spongepowered.despector.ast.members.insn.arg.operator.Operator;
 import org.spongepowered.despector.ast.members.insn.branch.Ternary;
 import org.spongepowered.despector.ast.members.insn.branch.condition.BooleanCondition;
 import org.spongepowered.despector.emitter.ConditionEmitter;
-import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.InstructionEmitter;
 import org.spongepowered.despector.emitter.instruction.TernaryEmitter;
+import org.spongepowered.despector.emitter.output.EmitterOutput;
+import org.spongepowered.despector.emitter.output.EmitterToken;
+import org.spongepowered.despector.emitter.output.TokenType;
 
 public class BooleanConditionEmitter implements ConditionEmitter<BooleanCondition> {
 
     @Override
-    public void emit(EmitterContext ctx, BooleanCondition bool) {
+    public void emit(EmitterOutput ctx, BooleanCondition bool) {
         if (checkConstant(ctx, bool)) {
             return;
         }
         if (bool.isInverse()) {
-            ctx.printString("!");
+            ctx.append(new EmitterToken(TokenType.OPERATOR, "!"));
         }
         emit(ctx, bool.getConditionValue(), bool.isInverse());
     }
 
-    protected void emit(EmitterContext ctx, Instruction val, boolean parens_needed) {
+    protected void emit(EmitterOutput ctx, Instruction val, boolean parens_needed) {
         if (parens_needed && val instanceof InstanceOf) {
-            ctx.printString("(");
-            ctx.emit(val, ClassTypeSignature.BOOLEAN);
-            ctx.printString(")");
+            ctx.append(new EmitterToken(TokenType.LEFT_PAREN, "("));
+            ctx.emitInstruction(val, ClassTypeSignature.BOOLEAN);
+            ctx.append(new EmitterToken(TokenType.RIGHT_PAREN, ")"));
         } else {
-            ctx.emit(val, ClassTypeSignature.BOOLEAN);
+            ctx.emitInstruction(val, ClassTypeSignature.BOOLEAN);
         }
     }
 
-    protected boolean checkConstant(EmitterContext ctx, BooleanCondition bool) {
+    protected boolean checkConstant(EmitterOutput ctx, BooleanCondition bool) {
         Instruction val = bool.getConditionValue();
         if (val.inferType() == ClassTypeSignature.INT) {
             if (val instanceof IntConstant) {
                 IntConstant cst = (IntConstant) val;
                 if (cst.getConstant() == 0) {
-                    ctx.printString("false");
+                    ctx.append(new EmitterToken(TokenType.BOOLEAN, false));
                 } else {
-                    ctx.printString("true");
+                    ctx.append(new EmitterToken(TokenType.BOOLEAN, true));
                 }
                 return true;
             }
@@ -81,16 +83,18 @@ public class BooleanConditionEmitter implements ConditionEmitter<BooleanConditio
                 }
             }
             if (val instanceof Operator) {
-                ctx.printString("(");
-                ctx.emit(val, ClassTypeSignature.INT);
-                ctx.printString(")");
+                ctx.append(new EmitterToken(TokenType.LEFT_PAREN, "("));
+                ctx.emitInstruction(val, ClassTypeSignature.INT);
+                ctx.append(new EmitterToken(TokenType.RIGHT_PAREN, ")"));
             } else {
-                ctx.emit(val, ClassTypeSignature.INT);
+                ctx.emitInstruction(val, ClassTypeSignature.INT);
             }
             if (bool.isInverse()) {
-                ctx.printString(" == 0");
+                ctx.append(new EmitterToken(TokenType.OPERATOR, "=="));
+                ctx.append(new EmitterToken(TokenType.INT, 0));
             } else {
-                ctx.printString(" != 0");
+                ctx.append(new EmitterToken(TokenType.OPERATOR, "!="));
+                ctx.append(new EmitterToken(TokenType.INT, 0));
             }
             return true;
         }

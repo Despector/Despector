@@ -30,7 +30,9 @@ import org.spongepowered.despector.ast.members.insn.arg.Instruction;
 import org.spongepowered.despector.ast.members.insn.assign.LocalAssignment;
 import org.spongepowered.despector.ast.members.insn.branch.For;
 import org.spongepowered.despector.ast.members.insn.function.StaticMethodInvoke;
-import org.spongepowered.despector.emitter.EmitterContext;
+import org.spongepowered.despector.emitter.output.EmitterOutput;
+import org.spongepowered.despector.emitter.output.EmitterToken;
+import org.spongepowered.despector.emitter.output.TokenType;
 import org.spongepowered.despector.emitter.statement.ForEmitter;
 import org.spongepowered.despector.transform.matcher.ConditionMatcher;
 import org.spongepowered.despector.transform.matcher.InstructionMatcher;
@@ -70,31 +72,28 @@ public class KotlinForEmitter extends ForEmitter {
             .build();
 
     @Override
-    public void emit(EmitterContext ctx, For loop, boolean semicolon) {
+    public void emit(EmitterOutput ctx, For loop) {
         if (checkCharIterator(ctx, loop)) {
             return;
         }
-        super.emit(ctx, loop, semicolon);
+        super.emit(ctx, loop);
     }
 
-    public boolean checkCharIterator(EmitterContext ctx, For loop) {
+    public boolean checkCharIterator(EmitterOutput ctx, For loop) {
         if (!CHAR_ITERATOR.matches(MatchContext.create(), loop)) {
             return false;
         }
         LocalInstance local = ((LocalAssignment) loop.getBody().getStatement(0)).getLocal();
         Instruction str = ((StaticMethodInvoke) ((LocalAssignment) loop.getInit()).getValue()).getParams()[0];
-        ctx.printString("for (");
-        ctx.printString(local.getName());
-        ctx.printString(" in ");
-        ctx.emit(InstructionMatcher.unwrapCast(str), ClassTypeSignature.STRING);
-        ctx.printString(") {");
-        ctx.newLine();
-        ctx.indent();
+        ctx.append(new EmitterToken(TokenType.SPECIAL, "for"));
+        ctx.append(new EmitterToken(TokenType.RIGHT_PAREN, "("));
+        ctx.append(new EmitterToken(TokenType.NAME, local.getName()));
+        ctx.append(new EmitterToken(TokenType.SPECIAL, "in"));
+        ctx.emitInstruction(InstructionMatcher.unwrapCast(str), ClassTypeSignature.STRING);
+        ctx.append(new EmitterToken(TokenType.RIGHT_PAREN, ")"));
+        ctx.append(new EmitterToken(TokenType.BLOCK_START, "{"));
         ctx.emitBody(loop.getBody(), 1);
-        ctx.dedent();
-        ctx.newLine();
-        ctx.printIndentation();
-        ctx.printString("}");
+        ctx.append(new EmitterToken(TokenType.BLOCK_END, "}"));
         return true;
     }
 

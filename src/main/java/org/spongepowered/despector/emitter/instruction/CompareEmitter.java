@@ -27,25 +27,31 @@ package org.spongepowered.despector.emitter.instruction;
 import org.spongepowered.despector.ast.generic.ClassTypeSignature;
 import org.spongepowered.despector.ast.generic.TypeSignature;
 import org.spongepowered.despector.ast.members.insn.arg.NumberCompare;
-import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.InstructionEmitter;
+import org.spongepowered.despector.emitter.output.EmitterOutput;
+import org.spongepowered.despector.emitter.output.EmitterToken;
+import org.spongepowered.despector.emitter.output.TokenType;
 
 public class CompareEmitter implements InstructionEmitter<NumberCompare> {
 
     @Override
-    public void emit(EmitterContext ctx, NumberCompare arg, TypeSignature type) {
+    public void emit(EmitterOutput ctx, NumberCompare arg, TypeSignature type) {
         if (arg.getRightOperand().inferType().equals(ClassTypeSignature.INT) && arg.getLeftOperand().inferType().equals(ClassTypeSignature.INT)) {
-            ctx.printString("Integer.signum(");
-            ctx.emit(arg.getRightOperand(), arg.inferType());
-            ctx.printString(" - ");
-            ctx.emit(arg.getLeftOperand(), arg.inferType());
-            ctx.printString(")");
+            ctx.append(new EmitterToken(TokenType.NAME, "Integer.signum"));
+            ctx.append(new EmitterToken(TokenType.LEFT_PAREN, "("));
+            ctx.append(new EmitterToken(TokenType.ARG_START, null));
+            ctx.emitInstruction(arg.getRightOperand(), arg.inferType());
+            ctx.append(new EmitterToken(TokenType.OPERATOR, "-"));
+            ctx.emitInstruction(arg.getLeftOperand(), arg.inferType());
+            ctx.append(new EmitterToken(TokenType.RIGHT_PAREN, ")"));
         } else {
-            ctx.printString("Float.compare(");
-            ctx.emit(arg.getRightOperand(), arg.inferType());
-            ctx.printString(", ");
-            ctx.emit(arg.getLeftOperand(), arg.inferType());
-            ctx.printString(")");
+            ctx.append(new EmitterToken(TokenType.NAME, "Float.compare"));
+            ctx.append(new EmitterToken(TokenType.LEFT_PAREN, "("));
+            ctx.append(new EmitterToken(TokenType.ARG_START, null));
+            ctx.emitInstruction(arg.getRightOperand(), arg.inferType());
+            ctx.append(new EmitterToken(TokenType.ARG_START, null));
+            ctx.emitInstruction(arg.getLeftOperand(), arg.inferType());
+            ctx.append(new EmitterToken(TokenType.RIGHT_PAREN, ")"));
         }
     }
 

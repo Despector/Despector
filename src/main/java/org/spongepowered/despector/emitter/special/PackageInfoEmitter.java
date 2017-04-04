@@ -27,79 +27,74 @@ package org.spongepowered.despector.emitter.special;
 import org.objectweb.asm.Type;
 import org.spongepowered.despector.ast.Annotation;
 import org.spongepowered.despector.ast.type.InterfaceEntry;
-import org.spongepowered.despector.emitter.EmitterContext;
+import org.spongepowered.despector.emitter.output.EmitterOutput;
+import org.spongepowered.despector.emitter.output.EmitterToken;
+import org.spongepowered.despector.emitter.output.TokenType;
 import org.spongepowered.despector.util.TypeHelper;
 
 import java.util.List;
 
 public class PackageInfoEmitter implements SpecialEmitter {
 
-    public void emit(EmitterContext ctx, InterfaceEntry info) {
+    public void emit(EmitterOutput ctx, InterfaceEntry info) {
 
         for (Annotation anno : info.getAnnotations()) {
             emit(ctx, anno);
-            ctx.newLine();
         }
 
         String pkg = info.getName();
         int last = pkg.lastIndexOf('/');
         if (last != -1) {
             pkg = pkg.substring(0, last).replace('/', '.');
-            ctx.printString("package ");
-            ctx.printString(pkg);
-            ctx.printString(";");
-            ctx.newLine();
+            ctx.append(new EmitterToken(TokenType.SPECIAL, "package"));
+            ctx.append(new EmitterToken(TokenType.NAME, pkg));
+            ctx.append(new EmitterToken(TokenType.STATEMENT_END, ";"));
         }
     }
 
     // TODO add some settings to the annotation emitter / emitter context to
     // disable import tracking
 
-    private void emitValue(EmitterContext ctx, Object value) {
+    private void emitValue(EmitterOutput ctx, Object value) {
         if (value instanceof List) {
             List<?> list = (List<?>) value;
             if (list.isEmpty()) {
-                ctx.printString("{}");
+                ctx.append(new EmitterToken(TokenType.ARRAY_INITIALIZER_START, "{"));
+                ctx.append(new EmitterToken(TokenType.ARRAY_INITIALIZER_END, "}"));
             } else if (list.size() == 1) {
                 emitValue(ctx, list.get(0));
             } else {
                 for (int i = 0; i < list.size(); i++) {
-                    if (i != 0) {
-                        ctx.printString(", ");
-                    }
+                    ctx.append(new EmitterToken(TokenType.ARG_START, null));
                     emitValue(ctx, list.get(i));
                 }
             }
         } else if (value instanceof Type) {
-            ctx.printString(((Type) value).getInternalName().replace('/', '.'));
+            ctx.append(new EmitterToken(TokenType.NAME, ((Type) value).getInternalName().replace('/', '.')));
         } else {
-            throw new IllegalStateException("Unknown annotation value type in emitter: " + value.getClass().getName());
+            AnnotationEmitter.emitValue(ctx, value);
         }
     }
 
-    public void emit(EmitterContext ctx, Annotation annotation) {
-        ctx.printString("@");
-        ctx.printString(TypeHelper.descToType(annotation.getType().getName()).replace('/', '.'));
+    public void emit(EmitterOutput ctx, Annotation annotation) {
+        ctx.append(new EmitterToken(TokenType.SPECIAL, "@"));
+        ctx.append(new EmitterToken(TokenType.NAME, TypeHelper.descToType(annotation.getType().getName()).replace('/', '.')));
         if (annotation.getKeys().isEmpty()) {
             return;
         } else if (annotation.getKeys().size() == 1 && "value".equals(annotation.getKeys().iterator().next())) {
-            ctx.printString("(");
+            ctx.append(new EmitterToken(TokenType.LEFT_PAREN, "("));
             emitValue(ctx, annotation.getValue("value"));
-            ctx.printString(")");
+            ctx.append(new EmitterToken(TokenType.RIGHT_PAREN, ")"));
         } else {
-            ctx.printString("(");
-            boolean first = true;
+            ctx.append(new EmitterToken(TokenType.LEFT_PAREN, "("));
             for (String key : annotation.getKeys()) {
-                if (first) {
-                    first = false;
-                    ctx.printString(", ");
-                }
-                ctx.printString(key);
-                ctx.printString(" = ");
+                ctx.append(new EmitterToken(TokenType.ARG_START, null));
+                ctx.append(new EmitterToken(TokenType.NAME, key));
+                ctx.append(new EmitterToken(TokenType.EQUALS, "="));
                 Object value = annotation.getValue(key);
                 emitValue(ctx, value);
             }
-            ctx.printString(")");
+            ctx.append(new EmitterToken(TokenType.RIGHT_PAREN, ")"));
         }
     }
 

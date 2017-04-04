@@ -26,32 +26,28 @@ package org.spongepowered.despector.emitter.statement;
 
 import org.spongepowered.despector.ast.Locals.LocalInstance;
 import org.spongepowered.despector.ast.members.insn.branch.ForEach;
-import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.StatementEmitter;
-import org.spongepowered.despector.emitter.special.GenericsEmitter;
+import org.spongepowered.despector.emitter.output.EmitterOutput;
+import org.spongepowered.despector.emitter.output.EmitterToken;
+import org.spongepowered.despector.emitter.output.TokenType;
 
 public class ForEachEmitter implements StatementEmitter<ForEach> {
 
     @Override
-    public void emit(EmitterContext ctx, ForEach loop, boolean semicolon) {
-        ctx.printString("for (");
+    public void emit(EmitterOutput ctx, ForEach loop) {
+        ctx.append(new EmitterToken(TokenType.SPECIAL, "for"));
+        ctx.append(new EmitterToken(TokenType.LEFT_PAREN, "("));
         LocalInstance local = loop.getValueAssignment();
-        GenericsEmitter generics = ctx.getEmitterSet().getSpecialEmitter(GenericsEmitter.class);
-        generics.emitTypeSignature(ctx, local.getType());
-        ctx.printString(" ");
-        ctx.printString(local.getName());
-        ctx.printString(": ");
-        ctx.emit(loop.getCollectionValue(), null);
-        ctx.printString(") {");
-        ctx.newLine();
+        ctx.append(new EmitterToken(TokenType.TYPE, local.getType()));
+        ctx.append(new EmitterToken(TokenType.NAME, local.getName()));
+        ctx.append(new EmitterToken(TokenType.FOR_EACH, ":"));
+        ctx.emitInstruction(loop.getCollectionValue(), null);
+        ctx.append(new EmitterToken(TokenType.RIGHT_PAREN, ")"));
+        ctx.append(new EmitterToken(TokenType.BLOCK_START, "{"));
         if (!loop.getBody().getStatements().isEmpty()) {
-            ctx.indent();
-            ctx.emitBody(loop.getBody());
-            ctx.dedent();
-            ctx.newLine();
+            ctx.emitBody(loop.getBody(), 0);
         }
-        ctx.printIndentation();
-        ctx.printString("}");
+        ctx.append(new EmitterToken(TokenType.BLOCK_END, "}"));
     }
 
 }

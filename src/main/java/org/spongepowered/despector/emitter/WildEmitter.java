@@ -25,6 +25,8 @@
 package org.spongepowered.despector.emitter;
 
 import org.spongepowered.despector.Language;
+import org.spongepowered.despector.ast.members.MethodEntry;
+import org.spongepowered.despector.ast.members.insn.StatementBlock;
 import org.spongepowered.despector.ast.type.TypeEntry;
 import org.spongepowered.despector.emitter.format.EmitterFormat;
 
@@ -34,10 +36,18 @@ public class WildEmitter implements Emitter {
 
     @Override
     public void emit(Writer output, EmitterFormat format, TypeEntry type) {
-        if(type.getLanguage() == Language.KOTLIN) {
+        if (type.getLanguage() == Language.KOTLIN) {
             Emitters.KOTLIN.emit(output, format, type);
         }
         Emitters.JAVA.emit(output, format, type);
+    }
+
+    @Override
+    public void emitBody(Writer output, EmitterFormat format, TypeEntry type, MethodEntry method, StatementBlock body) {
+        if (type.getLanguage() == Language.KOTLIN) {
+            Emitters.KOTLIN.emitBody(output, format, type, method, body);
+        }
+        Emitters.JAVA.emitBody(output, format, type, method, body);
     }
 
 }

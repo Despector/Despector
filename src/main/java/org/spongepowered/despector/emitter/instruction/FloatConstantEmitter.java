@@ -26,14 +26,16 @@ package org.spongepowered.despector.emitter.instruction;
 
 import org.spongepowered.despector.ast.generic.TypeSignature;
 import org.spongepowered.despector.ast.members.insn.arg.cst.FloatConstant;
-import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.InstructionEmitter;
+import org.spongepowered.despector.emitter.output.EmitterOutput;
+import org.spongepowered.despector.emitter.output.EmitterToken;
+import org.spongepowered.despector.emitter.output.TokenType;
 
 public class FloatConstantEmitter implements InstructionEmitter<FloatConstant> {
 
     @Override
-    public void emit(EmitterContext ctx, FloatConstant arg, TypeSignature type) {
-        ctx.printString(String.valueOf(arg.getConstant()) + "F");
+    public void emit(EmitterOutput ctx, FloatConstant arg, TypeSignature type) {
+        ctx.append(new EmitterToken(TokenType.FLOAT, arg.getConstant()));
     }
 
 }

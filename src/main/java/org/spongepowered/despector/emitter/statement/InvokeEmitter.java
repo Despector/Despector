@@ -27,13 +27,15 @@ package org.spongepowered.despector.emitter.statement;
 import org.spongepowered.despector.ast.members.insn.arg.Instruction;
 import org.spongepowered.despector.ast.members.insn.function.InstanceMethodInvoke;
 import org.spongepowered.despector.ast.members.insn.function.InvokeStatement;
-import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.StatementEmitter;
+import org.spongepowered.despector.emitter.output.EmitterOutput;
+import org.spongepowered.despector.emitter.output.EmitterToken;
+import org.spongepowered.despector.emitter.output.TokenType;
 
 public class InvokeEmitter implements StatementEmitter<InvokeStatement> {
 
     @Override
-    public void emit(EmitterContext ctx, InvokeStatement insn, boolean semicolon) {
+    public void emit(EmitterOutput ctx, InvokeStatement insn) {
         Instruction i = insn.getInstruction();
         if (i instanceof InstanceMethodInvoke) {
             InstanceMethodInvoke mth = (InstanceMethodInvoke) i;
@@ -41,10 +43,8 @@ public class InvokeEmitter implements StatementEmitter<InvokeStatement> {
                 return;
             }
         }
-        ctx.emit(i, null);
-        if (semicolon) {
-            ctx.printString(";");
-        }
+        ctx.emitInstruction(i, null);
+        ctx.append(new EmitterToken(TokenType.STATEMENT_END, ";"));
     }
 
 }

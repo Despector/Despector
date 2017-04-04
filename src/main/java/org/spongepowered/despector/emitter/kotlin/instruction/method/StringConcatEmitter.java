@@ -33,14 +33,17 @@ import org.spongepowered.despector.ast.members.insn.arg.field.LocalAccess;
 import org.spongepowered.despector.ast.members.insn.function.InstanceMethodInvoke;
 import org.spongepowered.despector.ast.members.insn.function.New;
 import org.spongepowered.despector.ast.members.insn.function.StaticMethodInvoke;
-import org.spongepowered.despector.emitter.EmitterContext;
+import org.spongepowered.despector.emitter.instruction.StringConstantEmitter;
+import org.spongepowered.despector.emitter.output.EmitterOutput;
+import org.spongepowered.despector.emitter.output.EmitterToken;
+import org.spongepowered.despector.emitter.output.TokenType;
 
 import java.util.List;
 
 public class StringConcatEmitter implements SpecialMethodEmitter<InstanceMethodInvoke> {
 
     @Override
-    public boolean emit(EmitterContext ctx, InstanceMethodInvoke arg, TypeSignature type) {
+    public boolean emit(EmitterOutput ctx, InstanceMethodInvoke arg, TypeSignature type) {
         // We detect and collapse string builder chains used to perform
         // string concatentation into simple "foo" + "bar" form
         boolean valid = true;
@@ -87,74 +90,69 @@ public class StringConcatEmitter implements SpecialMethodEmitter<InstanceMethodI
         }
         if (valid) {
             boolean in_string = false;
+            StringBuilder str = new StringBuilder();
             for (int i = 0; i < constants.size(); i++) {
                 Instruction next = constants.get(i);
                 if (next instanceof StringConstant) {
                     if (!in_string) {
-                        if (i == 0) {
-                            ctx.printString("\"");
-                        } else {
-                            ctx.printString(" + \"");
+                        if (i != 0) {
+                            ctx.append(new EmitterToken(TokenType.OPERATOR, "+"));
                         }
                         in_string = true;
+                        str.setLength(0);
                     }
                     // TODO escape string
-                    ctx.printString(((StringConstant) next).getConstant());
+                    str.append(StringConstantEmitter.escape(((StringConstant) next).getConstant()));
                     continue;
                 } else if (next instanceof LocalAccess) {
                     if (!in_string && i < constants.size() - 1 && constants.get(i + 1) instanceof StringConstant) {
                         in_string = true;
-                        ctx.printString("\"");
+                        str.setLength(0);
                     }
                     if (in_string) {
-                        ctx.printString("$");
-                        ctx.printString(((LocalAccess) next).getLocal().getName());
+                        str.append("$");
+                        str.append(((LocalAccess) next).getLocal().getName());
                     } else {
-                        ctx.markWrapPoint();
-                        ctx.printString(" + ");
-                        ctx.printString(((LocalAccess) next).getLocal().getName());
+                        ctx.append(new EmitterToken(TokenType.OPERATOR, "+"));
+                        ctx.append(new EmitterToken(TokenType.NAME, ((LocalAccess) next).getLocal().getName()));
                         if (i < constants.size() - 1) {
-                            ctx.markWrapPoint();
-                            ctx.printString(" + ");
+                            ctx.append(new EmitterToken(TokenType.OPERATOR, "+"));
                         }
                     }
                     continue;
                 } else if (next instanceof StaticMethodInvoke) {
                     StaticMethodInvoke mth = (StaticMethodInvoke) next;
                     if ("Lkotlin/text/StringsKt;".equals(mth.getOwner()) && "replace$default".equals(mth.getMethodName())) {
-                        if (!in_string) {
-                            if (i == 0) {
-                                ctx.printString("\"");
-                            } else {
-                                ctx.markWrapPoint();
-                                ctx.printString(" + \"");
-                            }
-                            in_string = true;
-                        }
-                        ctx.printString("${");
-                        ctx.emit(mth.getParams()[0], ClassTypeSignature.STRING);
-                        ctx.printString(".replace(");
-                        ctx.emit(mth.getParams()[1], ClassTypeSignature.STRING);
-                        ctx.printString(", ");
-                        ctx.emit(mth.getParams()[2], ClassTypeSignature.STRING);
-                        ctx.printString(")}");
-                        continue;
+//                        if (!in_string) {
+//                            if (i != 0) {
+//                                ctx.append(new EmitterToken(TokenType.OPERATOR, "+"));
+//                            }
+//                            in_string = true;
+//                            str.setLength(0);
+//                        }
+                        // TODO
+//                        ctx.printString("${");
+//                        ctx.emit(mth.getParams()[0], ClassTypeSignature.STRING);
+//                        ctx.printString(".replace(");
+//                        ctx.emit(mth.getParams()[1], ClassTypeSignature.STRING);
+//                        ctx.printString(", ");
+//                        ctx.emit(mth.getParams()[2], ClassTypeSignature.STRING);
+//                        ctx.printString(")}");
+//                        continue;
                     }
                 }
                 if (in_string) {
-                    ctx.printString("\"");
-                    ctx.markWrapPoint();
-                    ctx.printString(" + ");
+                    ctx.append(new EmitterToken(TokenType.STRING, str.toString()));
+                    ctx.append(new EmitterToken(TokenType.OPERATOR, "+"));
                     in_string = false;
                 }
-                ctx.emit(constants.get(i), ClassTypeSignature.STRING);
+                ctx.emitInstruction(constants.get(i), ClassTypeSignature.STRING);
                 if (i < constants.size() - 1) {
-                    ctx.markWrapPoint();
-                    ctx.printString(" + ");
+                    ctx.append(new EmitterToken(TokenType.OPERATOR, "+"));
                 }
             }
             if (in_string) {
-                ctx.printString("\"");
+                ctx.append(new EmitterToken(TokenType.STRING, str.toString()));
             }
             return true;
         }

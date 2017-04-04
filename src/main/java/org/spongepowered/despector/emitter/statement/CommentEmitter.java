@@ -25,30 +25,22 @@
 package org.spongepowered.despector.emitter.statement;
 
 import org.spongepowered.despector.ast.members.insn.Comment;
-import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.StatementEmitter;
+import org.spongepowered.despector.emitter.output.EmitterOutput;
+import org.spongepowered.despector.emitter.output.EmitterToken;
+import org.spongepowered.despector.emitter.output.TokenType;
 
 public class CommentEmitter implements StatementEmitter<Comment> {
 
     @Override
-    public void emit(EmitterContext ctx, Comment stmt, boolean semicolon) {
+    public void emit(EmitterOutput ctx, Comment stmt) {
         if (stmt.getCommentText().isEmpty()) {
             return;
         }
         if (stmt.getCommentText().size() == 1) {
-            ctx.printString("// ");
-            ctx.printString(stmt.getCommentText().get(0));
+            ctx.append(new EmitterToken(TokenType.COMMENT, stmt.getCommentText().get(0)));
         } else {
-            ctx.printString("/*");
-            ctx.newLine();
-            for (String line : stmt.getCommentText()) {
-                ctx.printIndentation();
-                ctx.printString(" * ");
-                ctx.printString(line);
-                ctx.newLine();
-            }
-            ctx.printIndentation();
-            ctx.printString(" */");
+            ctx.append(new EmitterToken(TokenType.BLOCK_COMMENT, stmt.getCommentText()));
         }
     }
 

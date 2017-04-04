@@ -38,8 +38,10 @@ import org.spongepowered.despector.ast.members.insn.assign.StaticFieldAssignment
 import org.spongepowered.despector.ast.members.insn.function.StaticMethodInvoke;
 import org.spongepowered.despector.ast.members.insn.misc.Return;
 import org.spongepowered.despector.ast.type.TypeEntry;
-import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.InstructionEmitter;
+import org.spongepowered.despector.emitter.output.EmitterOutput;
+import org.spongepowered.despector.emitter.output.EmitterToken;
+import org.spongepowered.despector.emitter.output.TokenType;
 import org.spongepowered.despector.util.TypeHelper;
 
 import java.util.List;
@@ -47,7 +49,7 @@ import java.util.List;
 public class StaticMethodInvokeEmitter implements InstructionEmitter<StaticMethodInvoke> {
 
     @Override
-    public void emit(EmitterContext ctx, StaticMethodInvoke arg, TypeSignature type) {
+    public void emit(EmitterOutput ctx, StaticMethodInvoke arg, TypeSignature type) {
         String owner = TypeHelper.descToType(arg.getOwner());
         if (arg.getMethodName().startsWith("access$") && ctx.getType() != null) {
             if (replaceSyntheticAccessor(ctx, arg, owner)) {
@@ -55,35 +57,29 @@ public class StaticMethodInvokeEmitter implements InstructionEmitter<StaticMetho
             }
         }
         if (ctx.getType() == null || !owner.equals(ctx.getType().getName())) {
-            ctx.emitTypeName(owner);
-            ctx.printString(".");
+            ctx.append(new EmitterToken(TokenType.TYPE, arg.getOwner()));
+            ctx.append(new EmitterToken(TokenType.DOT, "."));
         }
-        ctx.printString(arg.getMethodName());
+        ctx.append(new EmitterToken(TokenType.NAME, arg.getMethodName()));
         List<String> param_types = TypeHelper.splitSig(arg.getMethodDescription());
-        ctx.printString("(");
+        ctx.append(new EmitterToken(TokenType.LEFT_PAREN, "("));
         for (int i = 0; i < arg.getParams().length; i++) {
             Instruction param = arg.getParams()[i];
             if (arg.getParams().length == 1 && param instanceof NewArray) {
                 NewArray varargs = (NewArray) param;
                 for (int o = 0; o < varargs.getInitializer().length; o++) {
-                    ctx.emit(varargs.getInitializer()[o], ClassTypeSignature.of(varargs.getType()));
-                    if (o < varargs.getInitializer().length - 1) {
-                        ctx.printString(", ");
-                        ctx.markWrapPoint();
-                    }
+                    ctx.append(new EmitterToken(TokenType.ARG_START, null));
+                    ctx.emitInstruction(varargs.getInitializer()[o], ClassTypeSignature.of(varargs.getType()));
                 }
                 break;
             }
-            ctx.emit(param, ClassTypeSignature.of(param_types.get(i)));
-            if (i < arg.getParams().length - 1) {
-                ctx.printString(", ");
-                ctx.markWrapPoint();
-            }
+            ctx.append(new EmitterToken(TokenType.ARG_START, null));
+            ctx.emitInstruction(param, ClassTypeSignature.of(param_types.get(i)));
         }
-        ctx.printString(")");
+        ctx.append(new EmitterToken(TokenType.RIGHT_PAREN, ")"));
     }
 
-    protected boolean replaceSyntheticAccessor(EmitterContext ctx, StaticMethodInvoke arg, String owner) {
+    protected boolean replaceSyntheticAccessor(EmitterOutput ctx, StaticMethodInvoke arg, String owner) {
         // synthetic accessor
         // we resolve these to the field that they are accessing directly
         TypeEntry owner_type = ctx.getType().getSource().get(owner);
@@ -100,7 +96,7 @@ public class StaticMethodInvokeEmitter implements InstructionEmitter<StaticMetho
                     replacement = new StaticFieldAssignment(assign.getFieldName(), assign.getFieldDescription(), assign.getOwnerType(),
                             arg.getParams()[0]);
                 }
-                ctx.emit(replacement, true);
+                ctx.emitStatement(replacement);
                 return true;
             }
             // getter
@@ -112,7 +108,7 @@ public class StaticMethodInvokeEmitter implements InstructionEmitter<StaticMetho
             } else {
                 replacement = new StaticFieldAccess(getter.getFieldName(), getter.getTypeDescriptor(), getter.getOwnerType());
             }
-            ctx.emit(replacement, null);
+            ctx.emitInstruction(replacement, null);
             return true;
         }
         return false;

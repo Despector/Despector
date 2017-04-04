@@ -33,38 +33,39 @@ import org.spongepowered.despector.ast.members.insn.arg.operator.Operator;
 import org.spongepowered.despector.ast.members.insn.assign.FieldAssignment;
 import org.spongepowered.despector.ast.members.insn.assign.InstanceFieldAssignment;
 import org.spongepowered.despector.ast.members.insn.assign.StaticFieldAssignment;
-import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.StatementEmitter;
+import org.spongepowered.despector.emitter.output.EmitterOutput;
+import org.spongepowered.despector.emitter.output.EmitterToken;
+import org.spongepowered.despector.emitter.output.TokenType;
 
 public class FieldAssignmentEmitter implements StatementEmitter<FieldAssignment> {
 
     @Override
-    public void emit(EmitterContext ctx, FieldAssignment insn, boolean semicolon) {
+    public void emit(EmitterOutput ctx, FieldAssignment insn) {
         if (insn.isInitializer()) {
             return;
         }
         if (insn instanceof StaticFieldAssignment) {
             if (ctx.getType() != null && !((StaticFieldAssignment) insn).getOwnerType().equals(ctx.getType().getDescriptor())) {
-                ctx.emitTypeName(((StaticFieldAssignment) insn).getOwnerName());
-                ctx.printString(".");
+                ctx.append(new EmitterToken(TokenType.TYPE, ((StaticFieldAssignment) insn).getOwnerName()));
+                ctx.append(new EmitterToken(TokenType.DOT, "."));
             }
         } else if (insn instanceof InstanceFieldAssignment) {
-            ctx.emit(((InstanceFieldAssignment) insn).getOwner(), ClassTypeSignature.of(insn.getOwnerType()));
-            ctx.printString(".");
+            ctx.emitInstruction(((InstanceFieldAssignment) insn).getOwner(), ClassTypeSignature.of(insn.getOwnerType()));
+            ctx.append(new EmitterToken(TokenType.DOT, "."));
         }
 
-        ctx.printString(insn.getFieldName());
+        ctx.append(new EmitterToken(TokenType.NAME, insn.getFieldName()));
         Instruction val = insn.getValue();
-        if (checkOperator(ctx, insn, val, semicolon)) {
+        if (checkOperator(ctx, insn, val)) {
             return;
         }
-        ctx.printString(" = ");
-        ctx.emit(val, ClassTypeSignature.of(insn.getFieldDescription()));
-        if (semicolon)
-            ctx.printString(";");
+        ctx.append(new EmitterToken(TokenType.EQUALS, "="));
+        ctx.emitInstruction(val, ClassTypeSignature.of(insn.getFieldDescription()));
+        ctx.append(new EmitterToken(TokenType.STATEMENT_END, ";"));
     }
 
-    protected boolean checkOperator(EmitterContext ctx, FieldAssignment insn, Instruction val, boolean semicolon) {
+    protected boolean checkOperator(EmitterOutput ctx, FieldAssignment insn, Instruction val) {
         if (val instanceof Operator) {
             Instruction left = ((Operator) val).getLeftOperand();
             Instruction right = ((Operator) val).getRightOperand();
@@ -77,23 +78,21 @@ public class FieldAssignmentEmitter implements StatementEmitter<FieldAssignment>
                     // where + is any operator then we collapse it to the '+='
                     // form of the assignment.
                     if (left_field.getFieldName().equals(insn.getFieldName())) {
-                        ctx.printString(op);
+                        ctx.append(new EmitterToken(TokenType.OPERATOR_EQUALS, op));
                         if (insn.getFieldDescription().equals("Z")) {
                             if (val instanceof IntConstant) {
                                 IntConstant cst = (IntConstant) insn.getValue();
                                 if (cst.getConstant() == 1) {
-                                    ctx.printString("true");
+                                    ctx.append(new EmitterToken(TokenType.BOOLEAN, true));
                                 } else {
-                                    ctx.printString("false");
+                                    ctx.append(new EmitterToken(TokenType.BOOLEAN, false));
                                 }
-                                if (semicolon)
-                                    ctx.printString(";");
+                                ctx.append(new EmitterToken(TokenType.STATEMENT_END, ";"));
                                 return true;
                             }
                         }
-                        ctx.emit(right, ClassTypeSignature.of(insn.getFieldDescription()));
-                        if (semicolon)
-                            ctx.printString(";");
+                        ctx.emitInstruction(right, ClassTypeSignature.of(insn.getFieldDescription()));
+                        ctx.append(new EmitterToken(TokenType.STATEMENT_END, ";"));
                         return true;
                     }
                 }

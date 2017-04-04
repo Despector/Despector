@@ -31,8 +31,10 @@ import org.spongepowered.despector.ast.members.insn.assign.LocalAssignment;
 import org.spongepowered.despector.ast.members.insn.function.New;
 import org.spongepowered.despector.ast.type.ClassEntry;
 import org.spongepowered.despector.ast.type.TypeEntry;
-import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.InstructionEmitter;
+import org.spongepowered.despector.emitter.output.EmitterOutput;
+import org.spongepowered.despector.emitter.output.EmitterToken;
+import org.spongepowered.despector.emitter.output.TokenType;
 import org.spongepowered.despector.emitter.special.AnonymousClassEmitter;
 import org.spongepowered.despector.util.TypeHelper;
 
@@ -41,7 +43,7 @@ import java.util.List;
 public class NewEmitter implements InstructionEmitter<New> {
 
     @Override
-    public void emit(EmitterContext ctx, New arg, TypeSignature type) {
+    public void emit(EmitterOutput ctx, New arg, TypeSignature type) {
 
         if (arg.getType().getName().contains("$")) {
             String last = arg.getType().getName();
@@ -57,31 +59,27 @@ public class NewEmitter implements InstructionEmitter<New> {
                 System.err.println("Missing TypeEntry for anon type " + arg.getType());
             }
         }
-
-        ctx.printString("new ");
-        ctx.emitType(arg.getType());
+        ctx.append(new EmitterToken(TokenType.SPECIAL, "new"));
+        ctx.append(new EmitterToken(TokenType.TYPE, arg.getType()));
 
         if (ctx.getField() != null && ctx.getField().getType().hasArguments()) {
-            ctx.printString("<>");
+            ctx.append(new EmitterToken(TokenType.RAW, "<>"));
         } else if (ctx.getStatement() != null && ctx.getStatement() instanceof LocalAssignment) {
             LocalAssignment assign = (LocalAssignment) ctx.getStatement();
             TypeSignature sig = assign.getLocal().getType();
             if (sig != null && sig instanceof ClassTypeSignature && !((ClassTypeSignature) sig).getArguments().isEmpty()) {
-                ctx.printString("<>");
+                ctx.append(new EmitterToken(TokenType.RAW, "<>"));
             }
         }
 
-        ctx.printString("(");
+        ctx.append(new EmitterToken(TokenType.LEFT_PAREN, "("));
         List<String> args = TypeHelper.splitSig(arg.getCtorDescription());
         for (int i = 0; i < arg.getParameters().length; i++) {
+            ctx.append(new EmitterToken(TokenType.ARG_START, null));
             Instruction param = arg.getParameters()[i];
-            ctx.markWrapPoint();
-            ctx.emit(param, ClassTypeSignature.of(args.get(i)));
-            if (i < arg.getParameters().length - 1) {
-                ctx.printString(", ");
-            }
+            ctx.emitInstruction(param, ClassTypeSignature.of(args.get(i)));
         }
-        ctx.printString(")");
+        ctx.append(new EmitterToken(TokenType.RIGHT_PAREN, ")"));
     }
 
 }

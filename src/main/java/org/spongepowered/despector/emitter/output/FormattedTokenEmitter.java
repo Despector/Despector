@@ -27,6 +27,7 @@ package org.spongepowered.despector.emitter.output;
 import org.spongepowered.despector.emitter.EmitterSet;
 import org.spongepowered.despector.emitter.format.EmitterFormat;
 
+import java.io.IOException;
 import java.io.Writer;
 import java.util.List;
 
@@ -47,7 +48,10 @@ public class FormattedTokenEmitter {
         this.format = format;
     }
 
-    public void emit(Writer output, List<EmitterToken> tokens) {
+    public void emit(Writer output, List<EmitterToken> tokens) throws IOException {
+        for (EmitterToken token : tokens) {
+            output.write(token.getType().name() + " " + token.getToken() + "\n");
+        }
     }
 
 }

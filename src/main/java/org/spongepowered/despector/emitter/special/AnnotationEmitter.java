@@ -26,7 +26,10 @@ package org.spongepowered.despector.emitter.special;
 
 import org.objectweb.asm.Type;
 import org.spongepowered.despector.ast.Annotation;
-import org.spongepowered.despector.emitter.EmitterContext;
+import org.spongepowered.despector.emitter.instruction.StringConstantEmitter;
+import org.spongepowered.despector.emitter.output.EmitterOutput;
+import org.spongepowered.despector.emitter.output.EmitterToken;
+import org.spongepowered.despector.emitter.output.TokenType;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -36,79 +39,68 @@ import java.util.function.BiConsumer;
 
 public class AnnotationEmitter implements SpecialEmitter {
 
-    private static final Map<Class<?>, BiConsumer<EmitterContext, Object>> value_emitters = new HashMap<>();
+    private static final Map<Class<?>, BiConsumer<EmitterOutput, Object>> value_emitters = new HashMap<>();
 
     static {
-        value_emitters.put(Boolean.class, (ctx, value) -> ctx.printString(String.valueOf(value)));
-        value_emitters.put(Integer.class, (ctx, value) -> ctx.printString(String.valueOf(value)));
+        value_emitters.put(Boolean.class, (ctx, value) -> ctx.append(new EmitterToken(TokenType.BOOLEAN, value)));
+        value_emitters.put(Integer.class, (ctx, value) -> ctx.append(new EmitterToken(TokenType.INT, value)));
         value_emitters.put(int[].class, (ctx, value) -> {
             int[] values = (int[]) value;
-            ctx.printString("{");
+            ctx.append(new EmitterToken(TokenType.ARRAY_INITIALIZER_START, "{"));
             for (int i = 0; i < values.length; i++) {
-                if (i > 0) {
-                    ctx.printString(", ");
-                }
-                ctx.printString(String.valueOf(values[i]));
+                ctx.append(new EmitterToken(TokenType.ARG_START, null));
+                ctx.append(new EmitterToken(TokenType.INT, values[i]));
             }
-            ctx.printString("}");
+            ctx.append(new EmitterToken(TokenType.ARRAY_INITIALIZER_END, "}"));
         });
         value_emitters.put(ArrayList.class, (ctx, value) -> {
             List<?> list = (List<?>) value;
             if (list.isEmpty()) {
-                ctx.printString("{}");
+                ctx.append(new EmitterToken(TokenType.ARRAY_INITIALIZER_START, "{"));
+                ctx.append(new EmitterToken(TokenType.ARRAY_INITIALIZER_END, "}"));
             } else if (list.size() == 1) {
                 emitValue(ctx, list.get(0));
             } else {
-                ctx.printString("{");
+                ctx.append(new EmitterToken(TokenType.ARRAY_INITIALIZER_START, "{"));
                 for (int i = 0; i < list.size(); i++) {
-                    if (i != 0) {
-                        ctx.printString(", ");
-                    }
+                    ctx.append(new EmitterToken(TokenType.ARG_START, null));
                     emitValue(ctx, list.get(i));
                 }
-                ctx.printString("}");
+                ctx.append(new EmitterToken(TokenType.ARRAY_INITIALIZER_END, "}"));
             }
         });
         value_emitters.put(String.class, (ctx, value) -> {
-            ctx.printString("\"");
-            // TODO escape string
-            ctx.printString((String) value);
-            ctx.printString("\"");
+            ctx.append(new EmitterToken(TokenType.STRING, StringConstantEmitter.escape((String) value)));
         });
-        value_emitters.put(Type.class, (ctx, value) -> ctx.emitTypeName(((Type) value).getInternalName()));
+        value_emitters.put(Type.class, (ctx, value) -> ctx.append(new EmitterToken(TokenType.TYPE, ((Type) value).getDescriptor())));
     }
 
-    private static void emitValue(EmitterContext ctx, Object value) {
-        BiConsumer<EmitterContext, Object> emitter = value_emitters.get(value.getClass());
+    public static void emitValue(EmitterOutput ctx, Object value) {
+        BiConsumer<EmitterOutput, Object> emitter = value_emitters.get(value.getClass());
         if (emitter == null) {
             throw new IllegalStateException("Unknown annotation value type in emitter: " + value.getClass().getName());
         }
         emitter.accept(ctx, value);
     }
 
-    public void emit(EmitterContext ctx, Annotation annotation) {
-        ctx.printString("@");
-        ctx.emitType(annotation.getType().getName());
+    public void emit(EmitterOutput ctx, Annotation annotation) {
+        ctx.append(new EmitterToken(TokenType.SPECIAL, "@"));
+        ctx.append(new EmitterToken(TokenType.TYPE, annotation.getType().getName()));
         if (annotation.getKeys().isEmpty()) {
             return;
         } else if (annotation.getKeys().size() == 1 && "value".equals(annotation.getKeys().iterator().next())) {
-            ctx.printString("(");
+            ctx.append(new EmitterToken(TokenType.LEFT_PAREN, "("));
             emitValue(ctx, annotation.getValue("value"));
-            ctx.printString(")");
+            ctx.append(new EmitterToken(TokenType.RIGHT_PAREN, ")"));
         } else {
-            ctx.printString("(");
-            boolean first = true;
+            ctx.append(new EmitterToken(TokenType.LEFT_PAREN, "("));
             for (String key : annotation.getKeys()) {
-                if (!first) {
-                    ctx.printString(", ");
-                }
-                first = false;
-                ctx.printString(key);
-                ctx.printString(" = ");
-                Object value = annotation.getValue(key);
-                emitValue(ctx, value);
+                ctx.append(new EmitterToken(TokenType.ARG_START, null));
+                ctx.append(new EmitterToken(TokenType.NAME, key));
+                ctx.append(new EmitterToken(TokenType.EQUALS, "="));
+                emitValue(ctx, annotation.getValue(key));
             }
-            ctx.printString(")");
+            ctx.append(new EmitterToken(TokenType.RIGHT_PAREN, ")"));
         }
     }
 

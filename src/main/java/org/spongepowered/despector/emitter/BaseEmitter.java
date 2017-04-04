@@ -24,12 +24,15 @@
  */
 package org.spongepowered.despector.emitter;
 
+import org.spongepowered.despector.ast.members.MethodEntry;
+import org.spongepowered.despector.ast.members.insn.StatementBlock;
 import org.spongepowered.despector.ast.type.TypeEntry;
 import org.spongepowered.despector.emitter.format.EmitterFormat;
 import org.spongepowered.despector.emitter.output.EmitterOutput;
 import org.spongepowered.despector.emitter.output.EmitterToken;
 import org.spongepowered.despector.emitter.output.FormattedTokenEmitter;
 
+import java.io.IOException;
 import java.io.Writer;
 import java.util.List;
 
@@ -45,17 +48,40 @@ public class BaseEmitter implements Emitter {
 
     @Override
     public void emit(Writer output, EmitterFormat format, TypeEntry type) {
-        
+
         EmitterOutput out = new EmitterOutput(this.set);
-        
-        out.emitType(type);
-        
+
+        out.emitOuterType(type);
+
         List<EmitterToken> tokens = out.getTokens();
-        
+
         this.tokenemitter.setFormat(format);
-        this.tokenemitter.emit(output, tokens);
-        
-        
+        try {
+            this.tokenemitter.emit(output, tokens);
+        } catch (IOException e) {
+            System.err.println("Error emitting type to output");
+            e.printStackTrace();
+        }
+
+    }
+
+    @Override
+    public void emitBody(Writer output, EmitterFormat format, TypeEntry type, MethodEntry method, StatementBlock body) {
+
+        EmitterOutput out = new EmitterOutput(this.set);
+        out.setType(type);
+        out.setMethod(method);
+        out.emitBody(body, 0);
+
+        List<EmitterToken> tokens = out.getTokens();
+
+        this.tokenemitter.setFormat(format);
+        try {
+            this.tokenemitter.emit(output, tokens);
+        } catch (IOException e) {
+            System.err.println("Error emitting type to output");
+            e.printStackTrace();
+        }
     }
 
 }

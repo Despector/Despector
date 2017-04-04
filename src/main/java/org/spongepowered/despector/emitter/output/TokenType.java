@@ -26,6 +26,7 @@ package org.spongepowered.despector.emitter.output;
 
 public enum TokenType {
 
+    RAW,
     NAME,
     ACCESS,
     SPECIAL,
@@ -41,6 +42,8 @@ public enum TokenType {
     LEFT_PAREN,
     RIGHT_PAREN,
     ARG_START,
+    LEFT_BRACKET,
+    RIGHT_BRACKET,
 
     ENUM_CONSTANT,
 
@@ -48,6 +51,19 @@ public enum TokenType {
     BLOCK_COMMENT,
 
     FIELD_INITIALIZER,
+    ARRAY_INITIALIZER_START,
+    ARRAY_INITIALIZER_END,
+
+    STATEMENT_END,
+    DOT,
+    EQUALS,
+    OPERATOR_EQUALS,
+    OPERATOR,
+    FOR_EACH,
+    FOR_SEPARATOR,
+    TERNARY_IF,
+    TERNARY_ELSE,
+    LAMBDA,
 
     INT,
     LONG,
@@ -55,5 +71,8 @@ public enum TokenType {
     DOUBLE,
     STRING,
     BOOLEAN,
+    CHAR,
+
+    WHEN_CASE,
 
 }

@@ -30,8 +30,10 @@ import org.spongepowered.despector.ast.members.insn.arg.Instruction;
 import org.spongepowered.despector.ast.members.insn.arg.NewArray;
 import org.spongepowered.despector.ast.members.insn.arg.field.LocalAccess;
 import org.spongepowered.despector.ast.members.insn.function.InstanceMethodInvoke;
-import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.instruction.InstanceMethodInvokeEmitter;
+import org.spongepowered.despector.emitter.output.EmitterOutput;
+import org.spongepowered.despector.emitter.output.EmitterToken;
+import org.spongepowered.despector.emitter.output.TokenType;
 import org.spongepowered.despector.util.TypeHelper;
 
 import java.util.HashMap;
@@ -58,28 +60,25 @@ public class KotlinInstanceMethodInvokeEmitter extends InstanceMethodInvokeEmitt
         SPECIAL.put("Ljava/util/Map;get", map_get);
         SPECIAL.put("Ljava/util/HashMap;get", map_get);
         SPECIAL.put("Ljava/lang/String;charAt", map_get);
-        // TODO operator overloading, any get method can be simplified in this way
+        // TODO operator overloading, any get method can be simplified in this
+        // way
         MapPutEmitter map_put = new MapPutEmitter();
         SPECIAL.put("Ljava/util/Map;put", map_put);
         SPECIAL.put("Ljava/util/HashMap;put", map_put);
     }
 
     @Override
-    public void emit(EmitterContext ctx, InstanceMethodInvoke arg, TypeSignature type) {
+    public void emit(EmitterOutput ctx, InstanceMethodInvoke arg, TypeSignature type) {
         String key = arg.getOwner() + arg.getMethodName();
         SpecialMethodEmitter<InstanceMethodInvoke> special = SPECIAL.get(key);
         if (special != null && special.emit(ctx, arg, type)) {
             return;
         }
         if (arg.getMethodName().equals("<init>")) {
-            if (ctx.getType() != null) {
-                if (arg.getOwnerType().equals(ctx.getType().getName())) {
-                    ctx.printString("this");
-                } else {
-                    ctx.printString("super");
-                }
+            if (ctx.getType() != null && arg.getOwnerType().equals(ctx.getType().getName())) {
+                ctx.append(new EmitterToken(TokenType.SPECIAL, "this"));
             } else {
-                ctx.printString("super");
+                ctx.append(new EmitterToken(TokenType.SPECIAL, "super"));
             }
         } else {
             if (!NO_CALLEE.contains(key)) {
@@ -87,44 +86,39 @@ public class KotlinInstanceMethodInvokeEmitter extends InstanceMethodInvokeEmitt
                     LocalAccess local = (LocalAccess) arg.getCallee();
                     if (local.getLocal().getIndex() == 0) {
                         if (ctx.getType() != null && !arg.getOwnerType().equals(ctx.getType().getName())) {
-                            ctx.printString("super.");
+                            ctx.append(new EmitterToken(TokenType.SPECIAL, "super"));
+                            ctx.append(new EmitterToken(TokenType.DOT, "."));
                         }
                     } else {
-                        ctx.emit(local, null);
-                        ctx.printString(".");
+                        ctx.emitInstruction(local, null);
+                        ctx.append(new EmitterToken(TokenType.DOT, "."));
                     }
                 } else {
-                    ctx.emit(arg.getCallee(), ClassTypeSignature.of(arg.getOwner()));
-                    ctx.printString(".");
+                    ctx.emitInstruction(arg.getCallee(), ClassTypeSignature.of(arg.getOwner()));
+                    ctx.append(new EmitterToken(TokenType.DOT, "."));
                 }
             }
-            ctx.printString(arg.getMethodName());
+            ctx.append(new EmitterToken(TokenType.NAME, arg.getMethodName()));
         }
         if (NO_PARAMS.contains(key)) {
             return;
         }
-        ctx.printString("(");
+        ctx.append(new EmitterToken(TokenType.LEFT_PAREN, ")"));
         List<String> param_types = TypeHelper.splitSig(arg.getMethodDescription());
         for (int i = 0; i < arg.getParams().length; i++) {
             Instruction param = arg.getParams()[i];
             if (i == arg.getParams().length - 1 && param instanceof NewArray) {
                 NewArray varargs = (NewArray) param;
                 for (int o = 0; o < varargs.getInitializer().length; o++) {
-                    ctx.emit(varargs.getInitializer()[o], ClassTypeSignature.of(varargs.getType()));
-                    if (o < varargs.getInitializer().length - 1) {
-                        ctx.printString(", ");
-                        ctx.markWrapPoint();
-                    }
+                    ctx.append(new EmitterToken(TokenType.ARG_START, null));
+                    ctx.emitInstruction(varargs.getInitializer()[o], ClassTypeSignature.of(varargs.getType()));
                 }
                 break;
             }
-            ctx.emit(param, ClassTypeSignature.of(param_types.get(i)));
-            if (i < arg.getParams().length - 1) {
-                ctx.printString(", ");
-                ctx.markWrapPoint();
-            }
+            ctx.append(new EmitterToken(TokenType.ARG_START, null));
+            ctx.emitInstruction(param, ClassTypeSignature.of(param_types.get(i)));
         }
-        ctx.printString(")");
+        ctx.append(new EmitterToken(TokenType.RIGHT_PAREN, ")"));
     }
 
 }

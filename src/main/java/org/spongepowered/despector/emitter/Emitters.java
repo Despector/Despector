@@ -116,7 +116,6 @@ import org.spongepowered.despector.emitter.kotlin.instruction.method.KotlinStati
 import org.spongepowered.despector.emitter.kotlin.special.KotlinCompanionClassEmitter;
 import org.spongepowered.despector.emitter.kotlin.special.KotlinDataClassEmitter;
 import org.spongepowered.despector.emitter.kotlin.special.KotlinGenericsEmitter;
-import org.spongepowered.despector.emitter.kotlin.special.KotlinPackageEmitter;
 import org.spongepowered.despector.emitter.kotlin.statement.KotlinForEachEmitter;
 import org.spongepowered.despector.emitter.kotlin.statement.KotlinForEmitter;
 import org.spongepowered.despector.emitter.kotlin.statement.KotlinInvokeEmitter;
@@ -127,7 +126,6 @@ import org.spongepowered.despector.emitter.kotlin.type.KotlinMethodEntryEmitter;
 import org.spongepowered.despector.emitter.special.AnnotationEmitter;
 import org.spongepowered.despector.emitter.special.AnonymousClassEmitter;
 import org.spongepowered.despector.emitter.special.GenericsEmitter;
-import org.spongepowered.despector.emitter.special.PackageEmitter;
 import org.spongepowered.despector.emitter.special.PackageInfoEmitter;
 import org.spongepowered.despector.emitter.statement.ArrayAssignmentEmitter;
 import org.spongepowered.despector.emitter.statement.BreakEmitter;
@@ -170,7 +168,6 @@ public class Emitters {
         JAVA_SET.setSpecialEmitter(GenericsEmitter.class, new GenericsEmitter());
         JAVA_SET.setSpecialEmitter(AnonymousClassEmitter.class, new AnonymousClassEmitter());
         JAVA_SET.setSpecialEmitter(PackageInfoEmitter.class, new PackageInfoEmitter());
-        JAVA_SET.setSpecialEmitter(PackageEmitter.class, new PackageEmitter());
 
         JAVA_SET.setAstEmitter(ClassEntry.class, new ClassEntryEmitter());
         JAVA_SET.setAstEmitter(EnumEntry.class, new EnumEntryEmitter());
@@ -238,7 +235,6 @@ public class Emitters {
 
         KOTLIN_SET.setSpecialEmitter(KotlinDataClassEmitter.class, new KotlinDataClassEmitter());
         KOTLIN_SET.setSpecialEmitter(KotlinCompanionClassEmitter.class, new KotlinCompanionClassEmitter());
-        KOTLIN_SET.setSpecialEmitter(PackageEmitter.class, new KotlinPackageEmitter());
         KOTLIN_SET.setSpecialEmitter(GenericsEmitter.class, new KotlinGenericsEmitter());
 
         KOTLIN_SET.setStatementEmitter(InvokeStatement.class, new KotlinInvokeEmitter());

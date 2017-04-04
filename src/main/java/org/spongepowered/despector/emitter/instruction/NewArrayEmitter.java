@@ -27,28 +27,30 @@ package org.spongepowered.despector.emitter.instruction;
 import org.spongepowered.despector.ast.generic.ClassTypeSignature;
 import org.spongepowered.despector.ast.generic.TypeSignature;
 import org.spongepowered.despector.ast.members.insn.arg.NewArray;
-import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.InstructionEmitter;
+import org.spongepowered.despector.emitter.output.EmitterOutput;
+import org.spongepowered.despector.emitter.output.EmitterToken;
+import org.spongepowered.despector.emitter.output.TokenType;
 
 public class NewArrayEmitter implements InstructionEmitter<NewArray> {
 
     @Override
-    public void emit(EmitterContext ctx, NewArray arg, TypeSignature type) {
-        ctx.printString("new ");
-        ctx.emitType(arg.getType());
+    public void emit(EmitterOutput ctx, NewArray arg, TypeSignature type) {
+        ctx.append(new EmitterToken(TokenType.SPECIAL, "new"));
+        ctx.append(new EmitterToken(TokenType.TYPE, arg.getType()));
         if (arg.getInitializer() == null || arg.getInitializer().length == 0) {
-            ctx.printString("[");
-            ctx.emit(arg.getSize(), ClassTypeSignature.INT);
-            ctx.printString("]");
+            ctx.append(new EmitterToken(TokenType.LEFT_BRACKET, "["));
+            ctx.emitInstruction(arg.getSize(), ClassTypeSignature.INT);
+            ctx.append(new EmitterToken(TokenType.RIGHT_BRACKET, "]"));
         } else {
-            ctx.printString("[] {");
+            ctx.append(new EmitterToken(TokenType.LEFT_BRACKET, "["));
+            ctx.append(new EmitterToken(TokenType.RIGHT_BRACKET, "]"));
+            ctx.append(new EmitterToken(TokenType.BLOCK_START, "{"));
             for (int i = 0; i < arg.getInitializer().length; i++) {
-                ctx.emit(arg.getInitializer()[i], ClassTypeSignature.of(arg.getType()));
-                if (i < arg.getInitializer().length - 1) {
-                    ctx.printString(", ");
-                }
+                ctx.append(new EmitterToken(TokenType.ARG_START, null));
+                ctx.emitInstruction(arg.getInitializer()[i], ClassTypeSignature.of(arg.getType()));
             }
-            ctx.printString("}");
+            ctx.append(new EmitterToken(TokenType.BLOCK_END, "}"));
         }
     }
 

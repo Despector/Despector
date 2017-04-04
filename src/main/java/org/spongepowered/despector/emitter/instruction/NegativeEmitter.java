@@ -27,20 +27,22 @@ package org.spongepowered.despector.emitter.instruction;
 import org.spongepowered.despector.ast.generic.TypeSignature;
 import org.spongepowered.despector.ast.members.insn.arg.operator.NegativeOperator;
 import org.spongepowered.despector.ast.members.insn.arg.operator.Operator;
-import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.InstructionEmitter;
+import org.spongepowered.despector.emitter.output.EmitterOutput;
+import org.spongepowered.despector.emitter.output.EmitterToken;
+import org.spongepowered.despector.emitter.output.TokenType;
 
 public class NegativeEmitter implements InstructionEmitter<NegativeOperator> {
 
     @Override
-    public void emit(EmitterContext ctx, NegativeOperator arg, TypeSignature type) {
-        ctx.printString("-");
+    public void emit(EmitterOutput ctx, NegativeOperator arg, TypeSignature type) {
+        ctx.append(new EmitterToken(TokenType.OPERATOR, "-"));
         if (arg.getOperand() instanceof Operator) {
-            ctx.printString("(");
-            ctx.emit(arg.getOperand(), null);
-            ctx.printString(")");
+            ctx.append(new EmitterToken(TokenType.LEFT_PAREN, "("));
+            ctx.emitInstruction(arg.getOperand(), null);
+            ctx.append(new EmitterToken(TokenType.RIGHT_PAREN, ")"));
         } else {
-            ctx.emit(arg.getOperand(), null);
+            ctx.emitInstruction(arg.getOperand(), null);
         }
     }
 

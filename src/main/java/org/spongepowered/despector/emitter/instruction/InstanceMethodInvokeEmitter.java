@@ -34,8 +34,10 @@ import org.spongepowered.despector.ast.members.insn.arg.field.LocalAccess;
 import org.spongepowered.despector.ast.members.insn.function.InstanceMethodInvoke;
 import org.spongepowered.despector.ast.members.insn.function.New;
 import org.spongepowered.despector.ast.members.insn.function.StaticMethodInvoke;
-import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.InstructionEmitter;
+import org.spongepowered.despector.emitter.output.EmitterOutput;
+import org.spongepowered.despector.emitter.output.EmitterToken;
+import org.spongepowered.despector.emitter.output.TokenType;
 import org.spongepowered.despector.util.TypeHelper;
 
 import java.util.List;
@@ -43,66 +45,55 @@ import java.util.List;
 public class InstanceMethodInvokeEmitter implements InstructionEmitter<InstanceMethodInvoke> {
 
     @Override
-    public void emit(EmitterContext ctx, InstanceMethodInvoke arg, TypeSignature type) {
+    public void emit(EmitterOutput ctx, InstanceMethodInvoke arg, TypeSignature type) {
         if (arg.getOwner().equals("Ljava/lang/StringBuilder;") && arg.getMethodName().equals("toString")) {
             if (replaceStringConcat(ctx, arg)) {
                 return;
             }
         }
         if (arg.getMethodName().equals("<init>")) {
-            if (ctx.getType() != null) {
-                if (arg.getOwnerType().equals(ctx.getType().getName())) {
-                    ctx.printString("this");
-                } else {
-                    ctx.printString("super");
-                }
+            if (ctx.getType() != null && arg.getOwnerType().equals(ctx.getType().getName())) {
+                ctx.append(new EmitterToken(TokenType.SPECIAL, "this"));
             } else {
-                ctx.printString("super");
+                ctx.append(new EmitterToken(TokenType.SPECIAL, "super"));
             }
         } else {
             if (arg.getCallee() instanceof LocalAccess && ctx.getMethod() != null && !ctx.getMethod().isStatic()) {
                 LocalAccess local = (LocalAccess) arg.getCallee();
                 if (local.getLocal().getIndex() == 0) {
                     if (ctx.getType() != null && !arg.getOwnerType().equals(ctx.getType().getName())) {
-                        ctx.printString("super.");
+                        ctx.append(new EmitterToken(TokenType.SPECIAL, "super"));
+                        ctx.append(new EmitterToken(TokenType.DOT, "."));
                     }
                 } else {
-                    ctx.emit(local, null);
-                    ctx.markWrapPoint();
-                    ctx.printString(".");
+                    ctx.emitInstruction(local, null);
+                    ctx.append(new EmitterToken(TokenType.DOT, "."));
                 }
             } else {
-                ctx.emit(arg.getCallee(), ClassTypeSignature.of(arg.getOwner()));
-                ctx.markWrapPoint();
-                ctx.printString(".");
+                ctx.emitInstruction(arg.getCallee(), ClassTypeSignature.of(arg.getOwner()));
+                ctx.append(new EmitterToken(TokenType.DOT, "."));
             }
-            ctx.printString(arg.getMethodName());
+            ctx.append(new EmitterToken(TokenType.NAME, arg.getMethodName()));
         }
-        ctx.printString("(");
+        ctx.append(new EmitterToken(TokenType.LEFT_PAREN, "("));
         List<String> param_types = TypeHelper.splitSig(arg.getMethodDescription());
         for (int i = 0; i < arg.getParams().length; i++) {
             Instruction param = arg.getParams()[i];
             if (arg.getParams().length == 1 && param instanceof NewArray) {
                 NewArray varargs = (NewArray) param;
                 for (int o = 0; o < varargs.getInitializer().length; o++) {
-                    ctx.emit(varargs.getInitializer()[o], ClassTypeSignature.of(varargs.getType()));
-                    if (o < varargs.getInitializer().length - 1) {
-                        ctx.printString(", ");
-                        ctx.markWrapPoint();
-                    }
+                    ctx.append(new EmitterToken(TokenType.ARG_START, null));
+                    ctx.emitInstruction(varargs.getInitializer()[o], ClassTypeSignature.of(varargs.getType()));
                 }
                 break;
             }
-            ctx.emit(param, ClassTypeSignature.of(param_types.get(i)));
-            if (i < arg.getParams().length - 1) {
-                ctx.printString(", ");
-                ctx.markWrapPoint();
-            }
+            ctx.append(new EmitterToken(TokenType.ARG_START, null));
+            ctx.emitInstruction(param, ClassTypeSignature.of(param_types.get(i)));
         }
-        ctx.printString(")");
+        ctx.append(new EmitterToken(TokenType.RIGHT_PAREN, ")"));
     }
 
-    protected boolean replaceStringConcat(EmitterContext ctx, InstanceMethodInvoke arg) {
+    protected boolean replaceStringConcat(EmitterOutput ctx, InstanceMethodInvoke arg) {
         // We detect and collapse string builder chains used to perform
         // string concatentation into simple "foo" + "bar" form
         boolean valid = true;
@@ -152,10 +143,9 @@ public class InstanceMethodInvokeEmitter implements InstructionEmitter<InstanceM
         }
         if (valid) {
             for (int i = 0; i < constants.size(); i++) {
-                ctx.emit(constants.get(i), ClassTypeSignature.STRING);
+                ctx.emitInstruction(constants.get(i), ClassTypeSignature.STRING);
                 if (i < constants.size() - 1) {
-                    ctx.markWrapPoint();
-                    ctx.printString(" + ");
+                    ctx.append(new EmitterToken(TokenType.OPERATOR, "+"));
                 }
             }
             return true;

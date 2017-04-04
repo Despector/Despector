@@ -29,28 +29,30 @@ import org.spongepowered.despector.ast.generic.TypeSignature;
 import org.spongepowered.despector.ast.members.insn.arg.field.FieldAccess;
 import org.spongepowered.despector.ast.members.insn.arg.field.InstanceFieldAccess;
 import org.spongepowered.despector.ast.members.insn.arg.field.StaticFieldAccess;
-import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.InstructionEmitter;
+import org.spongepowered.despector.emitter.output.EmitterOutput;
+import org.spongepowered.despector.emitter.output.EmitterToken;
+import org.spongepowered.despector.emitter.output.TokenType;
 import org.spongepowered.despector.util.TypeHelper;
 
 public class FieldEmitter implements InstructionEmitter<FieldAccess> {
 
     @Override
-    public void emit(EmitterContext ctx, FieldAccess arg, TypeSignature type) {
+    public void emit(EmitterOutput ctx, FieldAccess arg, TypeSignature type) {
         if (arg instanceof StaticFieldAccess) {
             if (ctx.getType() == null || !((StaticFieldAccess) arg).getOwnerName().equals(ctx.getType().getName())) {
-                ctx.emitTypeName(((StaticFieldAccess) arg).getOwnerName());
-                ctx.printString(".");
+                ctx.append(new EmitterToken(TokenType.TYPE, ((StaticFieldAccess) arg).getOwnerType()));
+                ctx.append(new EmitterToken(TokenType.DOT, "."));
             }
-            ctx.printString(arg.getFieldName());
+            ctx.append(new EmitterToken(TokenType.NAME, arg.getFieldName()));
         } else if (arg instanceof InstanceFieldAccess) {
             if (TypeHelper.isAnonClass(arg.getOwnerName()) && arg.getFieldName().startsWith("val$")) {
-                ctx.printString(arg.getFieldName().substring(4));
+                ctx.append(new EmitterToken(TokenType.NAME, arg.getFieldName().substring(4)));
                 return;
             }
-            ctx.emit(((InstanceFieldAccess) arg).getFieldOwner(), ClassTypeSignature.of(arg.getOwnerType()));
-            ctx.printString(".");
-            ctx.printString(arg.getFieldName());
+            ctx.emitInstruction(((InstanceFieldAccess) arg).getFieldOwner(), ClassTypeSignature.of(arg.getOwnerType()));
+            ctx.append(new EmitterToken(TokenType.DOT, "."));
+            ctx.append(new EmitterToken(TokenType.NAME, arg.getFieldName()));
         } else {
             throw new UnsupportedOperationException();
         }

@@ -39,8 +39,10 @@ import org.spongepowered.despector.ast.members.insn.branch.TryCatch;
 import org.spongepowered.despector.ast.members.insn.function.InstanceMethodInvoke;
 import org.spongepowered.despector.ast.members.insn.function.StaticMethodInvoke;
 import org.spongepowered.despector.ast.type.TypeEntry;
-import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.StatementEmitter;
+import org.spongepowered.despector.emitter.output.EmitterOutput;
+import org.spongepowered.despector.emitter.output.EmitterToken;
+import org.spongepowered.despector.emitter.output.TokenType;
 
 import java.util.Map;
 
@@ -71,9 +73,10 @@ public class SwitchEmitter implements StatementEmitter<Switch> {
     }
 
     @Override
-    public void emit(EmitterContext ctx, Switch tswitch, boolean semicolon) {
+    public void emit(EmitterOutput ctx, Switch tswitch) {
         Map<Integer, String> table = null;
-        ctx.printString("switch (");
+        ctx.append(new EmitterToken(TokenType.SPECIAL, "switch"));
+        ctx.append(new EmitterToken(TokenType.LEFT_PAREN, "("));
         boolean synthetic = false;
         if (tswitch.getSwitchVar() instanceof ArrayAccess) {
             ArrayAccess var = (ArrayAccess) tswitch.getSwitchVar();
@@ -83,7 +86,7 @@ public class SwitchEmitter implements StatementEmitter<Switch> {
                     MethodEntry mth = ctx.getType().getStaticMethod(arg.getMethodName(), arg.getMethodDescription());
                     table = buildSwitchTable(mth, null);
                     String enum_type = arg.getMethodName().substring("$SWITCH_TABLE$".length()).replace('$', '/');
-                    ctx.emit(((InstanceMethodInvoke) var.getIndex()).getCallee(), ClassTypeSignature.of("L" + enum_type + ";"));
+                    ctx.emitInstruction(((InstanceMethodInvoke) var.getIndex()).getCallee(), ClassTypeSignature.of("L" + enum_type + ";"));
                     synthetic = true;
                 }
             } else if (var.getArrayVar() instanceof StaticFieldAccess) {
@@ -93,53 +96,41 @@ public class SwitchEmitter implements StatementEmitter<Switch> {
                     MethodEntry mth = owner.getStaticMethod("<clinit>");
                     table = buildSwitchTable(mth, arg.getFieldName());
                     String enum_type = arg.getFieldName().substring("$SwitchMap/".length()).replace('$', '/');
-                    ctx.emit(((InstanceMethodInvoke) var.getIndex()).getCallee(), ClassTypeSignature.of("L" + enum_type + ";"));
+                    ctx.emitInstruction(((InstanceMethodInvoke) var.getIndex()).getCallee(), ClassTypeSignature.of("L" + enum_type + ";"));
                     synthetic = true;
                 }
             }
         }
         if (!synthetic) {
-            ctx.emit(tswitch.getSwitchVar(), ClassTypeSignature.INT);
+            ctx.emitInstruction(tswitch.getSwitchVar(), ClassTypeSignature.INT);
         }
-        ctx.printString(") {");
-        ctx.newLine();
+        ctx.append(new EmitterToken(TokenType.RIGHT_PAREN, ")"));
+        ctx.append(new EmitterToken(TokenType.BLOCK_START, "{"));
         for (Case cs : tswitch.getCases()) {
             for (int i = 0; i < cs.getIndices().size(); i++) {
-                ctx.printIndentation();
-                ctx.printString("case ");
+                ctx.append(new EmitterToken(TokenType.SPECIAL, "case"));
                 int index = cs.getIndices().get(i);
                 if (table != null) {
                     String label = table.get(index);
                     if (label == null) {
-                        ctx.printString(String.valueOf(index));
+                        ctx.append(new EmitterToken(TokenType.NAME, String.valueOf(index)));
                     } else {
-                        ctx.printString(label);
+                        ctx.append(new EmitterToken(TokenType.NAME, label));
                     }
                 } else {
-                    ctx.printString(String.valueOf(cs.getIndices().get(i)));
+                    ctx.append(new EmitterToken(TokenType.NAME, String.valueOf(cs.getIndices().get(i))));
                 }
-                ctx.printString(":");
-                ctx.newLine();
+                ctx.append(new EmitterToken(TokenType.SPECIAL, ":"));
             }
             if (cs.isDefault()) {
-                ctx.printIndentation();
-                ctx.printString("default:");
-                ctx.newLine();
+                ctx.append(new EmitterToken(TokenType.SPECIAL, "default:"));
             }
-            ctx.indent();
-            ctx.emitBody(cs.getBody());
-            if (!cs.getBody().getStatements().isEmpty()) {
-                ctx.newLine();
-            }
+            ctx.emitBody(cs.getBody(), 0);
             if (cs.doesBreak()) {
-                ctx.printIndentation();
-                ctx.printString("break;");
-                ctx.newLine();
+                ctx.append(new EmitterToken(TokenType.SPECIAL, "break;"));
             }
-            ctx.dedent();
         }
-        ctx.printIndentation();
-        ctx.printString("}");
+        ctx.append(new EmitterToken(TokenType.BLOCK_END, "}"));
     }
 
 }

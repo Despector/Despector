@@ -25,26 +25,25 @@
 package org.spongepowered.despector.emitter.statement;
 
 import org.spongepowered.despector.ast.members.insn.misc.Increment;
-import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.StatementEmitter;
+import org.spongepowered.despector.emitter.output.EmitterOutput;
+import org.spongepowered.despector.emitter.output.EmitterToken;
+import org.spongepowered.despector.emitter.output.TokenType;
 
 public class IncrementEmitter implements StatementEmitter<Increment> {
 
     @Override
-    public void emit(EmitterContext ctx, Increment insn, boolean semicolon) {
-        ctx.printString(insn.getLocal().getName());
+    public void emit(EmitterOutput ctx, Increment insn) {
+        ctx.append(new EmitterToken(TokenType.NAME, insn.getLocal().getName()));
         if (insn.getIncrementValue() == 1) {
-            ctx.printString("++");
-            if(semicolon) ctx.printString(";");
-            return;
+            ctx.append(new EmitterToken(TokenType.OPERATOR, "++"));
         } else if (insn.getIncrementValue() == -1) {
-            ctx.printString("--");
-            if(semicolon) ctx.printString(";");
-            return;
+            ctx.append(new EmitterToken(TokenType.OPERATOR, "--"));
+        } else {
+            ctx.append(new EmitterToken(TokenType.OPERATOR_EQUALS, "+="));
+            ctx.append(new EmitterToken(TokenType.INT, insn.getIncrementValue()));
         }
-        ctx.printString(" += ");
-        ctx.printString(String.valueOf(insn.getIncrementValue()));
-        if(semicolon) ctx.printString(";");
+        ctx.append(new EmitterToken(TokenType.STATEMENT_END, ";"));
     }
 
 }

@@ -26,14 +26,16 @@ package org.spongepowered.despector.emitter.instruction;
 
 import org.spongepowered.despector.ast.generic.TypeSignature;
 import org.spongepowered.despector.ast.members.insn.arg.field.LocalAccess;
-import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.InstructionEmitter;
+import org.spongepowered.despector.emitter.output.EmitterOutput;
+import org.spongepowered.despector.emitter.output.EmitterToken;
+import org.spongepowered.despector.emitter.output.TokenType;
 
 public class LocalEmitter implements InstructionEmitter<LocalAccess>{
 
     @Override
-    public void emit(EmitterContext ctx, LocalAccess arg, TypeSignature type) {
-        ctx.printString(arg.getLocal().getName());
+    public void emit(EmitterOutput ctx, LocalAccess arg, TypeSignature type) {
+        ctx.append(new EmitterToken(TokenType.NAME, arg.getLocal().getName()));
     }
 
 }

@@ -26,16 +26,18 @@ package org.spongepowered.despector.emitter.kotlin.instruction;
 
 import org.spongepowered.despector.ast.generic.TypeSignature;
 import org.spongepowered.despector.ast.members.insn.arg.InstanceOf;
-import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.InstructionEmitter;
+import org.spongepowered.despector.emitter.output.EmitterOutput;
+import org.spongepowered.despector.emitter.output.EmitterToken;
+import org.spongepowered.despector.emitter.output.TokenType;
 
 public class KotlinInstanceOfEmitter implements InstructionEmitter<InstanceOf> {
 
     @Override
-    public void emit(EmitterContext ctx, InstanceOf arg, TypeSignature type) {
-        ctx.emit(arg.getCheckedValue(), null);
-        ctx.printString(" is ");
-        ctx.emitType(arg.getType());
+    public void emit(EmitterOutput ctx, InstanceOf arg, TypeSignature type) {
+        ctx.emitInstruction(arg.getCheckedValue(), null);
+        ctx.append(new EmitterToken(TokenType.SPECIAL, "is"));
+        ctx.append(new EmitterToken(TokenType.TYPE, arg.getType()));
     }
 
 }

@@ -26,19 +26,21 @@ package org.spongepowered.despector.emitter.kotlin.instruction.method;
 
 import org.spongepowered.despector.ast.generic.TypeSignature;
 import org.spongepowered.despector.ast.members.insn.function.InstanceMethodInvoke;
-import org.spongepowered.despector.emitter.EmitterContext;
+import org.spongepowered.despector.emitter.output.EmitterOutput;
+import org.spongepowered.despector.emitter.output.EmitterToken;
+import org.spongepowered.despector.emitter.output.TokenType;
 
 public class ListContainsEmitter implements SpecialMethodEmitter<InstanceMethodInvoke> {
 
     @Override
-    public boolean emit(EmitterContext ctx, InstanceMethodInvoke arg, TypeSignature type) {
+    public boolean emit(EmitterOutput ctx, InstanceMethodInvoke arg, TypeSignature type) {
         if (arg.getParams().length != 1) {
             return false;
         }
 
-        ctx.emit(arg.getParams()[0], null);
-        ctx.printString(" in ");
-        ctx.emit(arg.getCallee(), null);
+        ctx.emitInstruction(arg.getParams()[0], null);
+        ctx.append(new EmitterToken(TokenType.SPECIAL, "in"));
+        ctx.emitInstruction(arg.getCallee(), null);
 
         return true;
     }

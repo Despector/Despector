@@ -40,9 +40,9 @@ import org.spongepowered.despector.ast.members.insn.branch.If;
 import org.spongepowered.despector.ast.members.insn.misc.Return;
 import org.spongepowered.despector.ast.type.TypeEntry;
 import org.spongepowered.despector.config.ConfigManager;
-import org.spongepowered.despector.emitter.EmitterContext;
-import org.spongepowered.despector.emitter.kotlin.KotlinEmitterUtil;
-import org.spongepowered.despector.emitter.special.GenericsEmitter;
+import org.spongepowered.despector.emitter.output.EmitterOutput;
+import org.spongepowered.despector.emitter.output.EmitterToken;
+import org.spongepowered.despector.emitter.output.TokenType;
 import org.spongepowered.despector.emitter.type.MethodEntryEmitter;
 
 import java.util.ArrayList;
@@ -60,7 +60,7 @@ public class KotlinMethodEntryEmitter extends MethodEntryEmitter {
     }
 
     @Override
-    public boolean emit(EmitterContext ctx, MethodEntry method) {
+    public boolean emit(EmitterOutput ctx, MethodEntry method) {
 
         boolean nullable_return = false;
 
@@ -72,12 +72,9 @@ public class KotlinMethodEntryEmitter extends MethodEntryEmitter {
                 nullable_return = true;
                 continue;
             }
-            ctx.printIndentation();
             ctx.emit(anno);
-            ctx.newLine();
         }
 
-        ctx.setMethod(method);
         if (method.getName().equals("<clinit>")) {
             int start = 0;
             if (method.getInstructions() != null) {
@@ -96,124 +93,105 @@ public class KotlinMethodEntryEmitter extends MethodEntryEmitter {
                     return false;
                 }
             }
-            ctx.printIndentation();
-            ctx.printString("static {");
-            ctx.newLine();
-            ctx.indent();
+            ctx.append(new EmitterToken(TokenType.SPECIAL, "static"));
+            ctx.append(new EmitterToken(TokenType.BLOCK_START, "{"));
             if (method.getInstructions() == null) {
-                ctx.printIndentation();
-                ctx.printString("// Error decompiling block");
+                ctx.append(new EmitterToken(TokenType.COMMENT, "Error decompiling block"));
                 printReturn(ctx, method.getReturnType());
             } else {
                 ctx.emitBody(method.getInstructions(), start);
             }
-            ctx.newLine();
-            ctx.dedent();
-            ctx.printIndentation();
-            ctx.printString("}");
+            ctx.append(new EmitterToken(TokenType.BLOCK_END, "}"));
             return true;
         }
         if ("<init>".equals(method.getName()) && method.getAccessModifier() == AccessModifier.PUBLIC && method.getParamTypes().isEmpty()
                 && method.getInstructions().getStatements().size() == 2 && !ConfigManager.getConfig().emitter.emit_synthetics) {
             return false;
         }
-        ctx.printIndentation();
-        GenericsEmitter generics = ctx.getEmitterSet().getSpecialEmitter(GenericsEmitter.class);
         MethodSignature sig = method.getMethodSignature();
         if ("<init>".equals(method.getName())) {
             String name = method.getOwnerName();
             name = name.substring(Math.max(name.lastIndexOf('/'), name.lastIndexOf('$')) + 1);
-            ctx.printString(name);
+            ctx.append(new EmitterToken(TokenType.NAME, name));
         } else {
             if (isOverriden(method)) {
-                ctx.printString("override ");
+                ctx.append(new EmitterToken(TokenType.SPECIAL, "override"));
             }
-            ctx.printString("fun ");
-            ctx.printString(method.getName());
+            ctx.append(new EmitterToken(TokenType.SPECIAL, "fun"));
+            ctx.append(new EmitterToken(TokenType.NAME, method.getName()));
         }
         List<Instruction> defaults = findDefaultValues(ctx.getType(), method);
-        ctx.printString("(");
+        ctx.append(new EmitterToken(TokenType.LEFT_PAREN, "("));
         StatementBlock block = method.getInstructions();
         for (int i = 0; i < method.getParamTypes().size(); i++) {
+            ctx.append(new EmitterToken(TokenType.ARG_START, null));
             int param_index = i;
             if (!method.isStatic()) {
                 param_index++;
             }
             if (block == null) {
-                ctx.printString("local" + param_index);
-                ctx.printString(": ");
+                ctx.append(new EmitterToken(TokenType.NAME, "local" + param_index));
+                ctx.append(new EmitterToken(TokenType.SPECIAL, ":"));
                 if (sig != null) {
                     // interfaces have no lvt for parameters, need to get
                     // generic types from the method signature
-                    generics.emitTypeSignature(ctx, sig.getParameters().get(i));
+                    ctx.append(new EmitterToken(TokenType.TYPE, sig.getParameters().get(i)));
                 } else {
-                    KotlinEmitterUtil.emitParamType(ctx, method.getParamTypes().get(i));
+                    ctx.append(new EmitterToken(TokenType.TYPE, method.getParamTypes().get(i)));
                 }
             } else {
                 Local local = block.getLocals().getLocal(param_index);
                 LocalInstance insn = local.getParameterInstance();
-                ctx.printString(insn.getName());
-                ctx.printString(": ");
-                KotlinEmitterUtil.emitParamType(ctx, insn.getType());
+                ctx.append(new EmitterToken(TokenType.NAME, insn.getName()));
+                ctx.append(new EmitterToken(TokenType.SPECIAL, ":"));
+                ctx.append(new EmitterToken(TokenType.TYPE, insn.getType()));
             }
             if (defaults != null && defaults.size() > i) {
                 Instruction def = defaults.get(i);
-                ctx.printString(" = ");
-                ctx.emit(def, null);
-            }
-            if (i < method.getParamTypes().size() - 1) {
-                ctx.printString(", ");
-                ctx.markWrapPoint();
+                ctx.append(new EmitterToken(TokenType.EQUALS, "="));
+                ctx.emitInstruction(def, null);
             }
         }
-        ctx.printString(")");
+        ctx.append(new EmitterToken(TokenType.RIGHT_PAREN, ")"));
 
         if (method.getInstructions() != null && method.getInstructions().getStatementCount() == 1) {
             Statement stmt = method.getInstructions().getStatement(0);
             if (stmt instanceof Return && ((Return) stmt).getValue().isPresent()) {
-                ctx.printString(" = ");
-                ctx.emit(((Return) stmt).getValue().get(), method.getReturnType());
+                ctx.append(new EmitterToken(TokenType.EQUALS, "="));
+                ctx.emitInstruction(((Return) stmt).getValue().get(), method.getReturnType());
                 return true;
             }
         }
 
         if (!method.getReturnType().equals("V")) {
-            ctx.printString(": ");
+            ctx.append(new EmitterToken(TokenType.SPECIAL, ":"));
             if (sig != null) {
                 if (!sig.getTypeParameters().isEmpty()) {
-                    generics.emitTypeParameters(ctx, sig.getTypeParameters());
-                    ctx.printString(" ");
+                    ctx.append(new EmitterToken(TokenType.GENERIC_PARAMS, sig.getTypeParameters()));
                 }
-                generics.emitTypeSignature(ctx, sig.getReturnType());
+                ctx.append(new EmitterToken(TokenType.TYPE, sig.getReturnType()));
             } else {
-                KotlinEmitterUtil.emitType(ctx, method.getReturnType());
+                ctx.append(new EmitterToken(TokenType.TYPE, method.getReturnType()));
             }
             if (nullable_return) {
-                ctx.printString("?");
+                ctx.append(new EmitterToken(TokenType.SPECIAL, "?"));
             }
         }
 
         if (!method.isAbstract()) {
-            ctx.printString(" {");
-            ctx.newLine();
-            ctx.indent();
+            ctx.append(new EmitterToken(TokenType.BLOCK_START, "{"));
             if (block == null) {
-                ctx.printIndentation();
-                ctx.printString("// Error decompiling block");
+                ctx.append(new EmitterToken(TokenType.COMMENT, "Error decompiling block"));
                 printReturn(ctx, method.getReturnType());
             } else {
                 LocalMutabilityVisitor visitor = new LocalMutabilityVisitor();
                 block.accept(visitor);
-                ctx.emitBody(block);
+                ctx.emitBody(block, 0);
             }
-            ctx.newLine();
-            ctx.dedent();
-            ctx.printIndentation();
-            ctx.printString("}");
+            ctx.append(new EmitterToken(TokenType.BLOCK_END, "}"));
         } else {
-            ctx.printString(";");
+            ctx.append(new EmitterToken(TokenType.STATEMENT_END, ";"));
         }
-        ctx.setMethod(null);
         return true;
     }
 

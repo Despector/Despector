@@ -26,9 +26,10 @@ package org.spongepowered.despector.emitter.instruction;
 
 import org.spongepowered.despector.ast.generic.TypeSignature;
 import org.spongepowered.despector.ast.members.insn.arg.cst.StringConstant;
-import org.spongepowered.despector.config.ConfigManager;
-import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.InstructionEmitter;
+import org.spongepowered.despector.emitter.output.EmitterOutput;
+import org.spongepowered.despector.emitter.output.EmitterToken;
+import org.spongepowered.despector.emitter.output.TokenType;
 
 public class StringConstantEmitter implements InstructionEmitter<StringConstant> {
 
@@ -62,22 +63,8 @@ public class StringConstantEmitter implements InstructionEmitter<StringConstant>
     }
 
     @Override
-    public void emit(EmitterContext ctx, StringConstant arg, TypeSignature type) {
-        if (arg.getConstant().contains("\n") && ConfigManager.getConfig().kotlin.replace_mulit_line_strings) {
-            ctx.printString("\"\"\"");
-            String[] lines = arg.getConstant().split("\n");
-            for (int i = 0; i < lines.length; i++) {
-                ctx.printString(lines[i]);
-                if (i < lines.length - 1 || arg.getConstant().endsWith("\n")) {
-                    ctx.newLine();
-                }
-            }
-            ctx.printString("\"\"\"");
-            return;
-        }
-        ctx.printString("\"");
-        ctx.printString(escape(arg.getConstant()));
-        ctx.printString("\"");
+    public void emit(EmitterOutput ctx, StringConstant arg, TypeSignature type) {
+        ctx.append(new EmitterToken(TokenType.STRING, escape(arg.getConstant())));
     }
 
 }
