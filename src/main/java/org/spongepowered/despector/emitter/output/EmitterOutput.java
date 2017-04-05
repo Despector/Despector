@@ -74,7 +74,8 @@ public class EmitterOutput {
 
     public void emitOuterType(TypeEntry type) {
         this.outer_type = type;
-
+        append(new EmitterToken(TokenType.PACKAGE, type.getName()));
+        append(new EmitterToken(TokenType.INSERT_IMPORTS, null));
         emitType(type);
 
         this.outer_type = null;

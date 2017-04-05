@@ -40,6 +40,7 @@ import org.spongepowered.despector.config.ConfigManager;
 import org.spongepowered.despector.emitter.AstEmitter;
 import org.spongepowered.despector.emitter.output.EmitterOutput;
 import org.spongepowered.despector.emitter.output.EmitterToken;
+import org.spongepowered.despector.emitter.output.TokenEmitterType;
 import org.spongepowered.despector.emitter.output.TokenType;
 import org.spongepowered.despector.util.TypeHelper;
 
@@ -52,6 +53,7 @@ public class EnumEntryEmitter implements AstEmitter<EnumEntry> {
 
     @Override
     public boolean emit(EmitterOutput ctx, EnumEntry type) {
+        ctx.append(new EmitterToken(TokenType.PUSH_EMITTER_TYPE, TokenEmitterType.ENUM));
 
         for (Annotation anno : type.getAnnotations()) {
             ctx.emit(anno);
@@ -215,6 +217,7 @@ public class EnumEntryEmitter implements AstEmitter<EnumEntry> {
             ctx.emitType(inner_type);
         }
         ctx.append(new EmitterToken(TokenType.BLOCK_END, "}"));
+        ctx.append(new EmitterToken(TokenType.POP_EMITTER_TYPE, null));
         return true;
     }
 

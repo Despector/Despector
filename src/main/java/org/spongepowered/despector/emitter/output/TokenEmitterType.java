@@ -24,60 +24,12 @@
  */
 package org.spongepowered.despector.emitter.output;
 
-public enum TokenType {
+public enum TokenEmitterType {
 
-    RAW,
-    NAME,
-    ACCESS,
-    SPECIAL,
-    MODIFIER,
-    TYPE,
-    SUPERCLASS,
+    CLASS,
+    ENUM,
     INTERFACE,
-    KEYWORD,
-    PACKAGE,
-
-    GENERIC_PARAMS,
-    BLOCK_START,
-    BLOCK_END,
-    LEFT_PAREN,
-    RIGHT_PAREN,
-    ARG_START,
-    LEFT_BRACKET,
-    RIGHT_BRACKET,
-
-    ENUM_CONSTANT,
-
-    COMMENT,
-    BLOCK_COMMENT,
-
-    FIELD_INITIALIZER,
-    ARRAY_INITIALIZER_START,
-    ARRAY_INITIALIZER_END,
-
-    STATEMENT_END,
-    DOT,
-    EQUALS,
-    OPERATOR_EQUALS,
-    OPERATOR,
-    FOR_EACH,
-    FOR_SEPARATOR,
-    TERNARY_IF,
-    TERNARY_ELSE,
-    LAMBDA,
-
-    INT,
-    LONG,
-    FLOAT,
-    DOUBLE,
-    STRING,
-    BOOLEAN,
-    CHAR,
-
-    WHEN_CASE,
-
-    PUSH_EMITTER_TYPE,
-    POP_EMITTER_TYPE,
-    INSERT_IMPORTS,
+    METHOD,
+    FIELD,
 
 }

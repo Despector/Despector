@@ -37,6 +37,7 @@ import org.spongepowered.despector.config.ConfigManager;
 import org.spongepowered.despector.emitter.AstEmitter;
 import org.spongepowered.despector.emitter.output.EmitterOutput;
 import org.spongepowered.despector.emitter.output.EmitterToken;
+import org.spongepowered.despector.emitter.output.TokenEmitterType;
 import org.spongepowered.despector.emitter.output.TokenType;
 import org.spongepowered.despector.util.AstUtil;
 
@@ -48,7 +49,7 @@ public class ClassEntryEmitter implements AstEmitter<ClassEntry> {
 
     @Override
     public boolean emit(EmitterOutput ctx, ClassEntry type) {
-
+        ctx.append(new EmitterToken(TokenType.PUSH_EMITTER_TYPE, TokenEmitterType.CLASS));
         for (Annotation anno : type.getAnnotations()) {
             ctx.emit(anno);
         }
@@ -116,6 +117,7 @@ public class ClassEntryEmitter implements AstEmitter<ClassEntry> {
         }
 
         ctx.append(new EmitterToken(TokenType.BLOCK_END, "}"));
+        ctx.append(new EmitterToken(TokenType.POP_EMITTER_TYPE, null));
         return true;
     }
 

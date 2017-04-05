@@ -39,12 +39,14 @@ import org.spongepowered.despector.ast.type.InterfaceEntry;
 import org.spongepowered.despector.emitter.AstEmitter;
 import org.spongepowered.despector.emitter.output.EmitterOutput;
 import org.spongepowered.despector.emitter.output.EmitterToken;
+import org.spongepowered.despector.emitter.output.TokenEmitterType;
 import org.spongepowered.despector.emitter.output.TokenType;
 
 public class MethodEntryEmitter implements AstEmitter<MethodEntry> {
 
     @Override
     public boolean emit(EmitterOutput ctx, MethodEntry method) {
+        ctx.append(new EmitterToken(TokenType.PUSH_EMITTER_TYPE, TokenEmitterType.METHOD));
 
         for (Annotation anno : method.getAnnotations()) {
             ctx.emit(anno);
@@ -159,6 +161,7 @@ public class MethodEntryEmitter implements AstEmitter<MethodEntry> {
             }
             ctx.append(new EmitterToken(TokenType.BLOCK_END, "}"));
         }
+        ctx.append(new EmitterToken(TokenType.POP_EMITTER_TYPE, null));
         return true;
     }
 
