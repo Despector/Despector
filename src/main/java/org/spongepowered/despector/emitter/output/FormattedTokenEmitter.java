@@ -24,19 +24,21 @@
  */
 package org.spongepowered.despector.emitter.output;
 
+import org.spongepowered.despector.ast.AccessModifier;
 import org.spongepowered.despector.ast.generic.ClassTypeSignature;
 import org.spongepowered.despector.ast.generic.TypeArgument;
 import org.spongepowered.despector.ast.generic.TypeParameter;
 import org.spongepowered.despector.ast.generic.TypeSignature;
 import org.spongepowered.despector.ast.generic.TypeVariableSignature;
 import org.spongepowered.despector.ast.generic.VoidTypeSignature;
-import org.spongepowered.despector.emitter.EmitterSet;
+import org.spongepowered.despector.ast.type.TypeEntry;
 import org.spongepowered.despector.emitter.format.EmitterFormat;
 import org.spongepowered.despector.util.TypeHelper;
 
 import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.Deque;
 import java.util.HashSet;
 import java.util.List;
@@ -44,18 +46,20 @@ import java.util.Set;
 
 public class FormattedTokenEmitter {
 
-    private final EmitterSet set;
     private EmitterFormat format = EmitterFormat.defaults();
 
     private Writer writer;
+    private TypeEntry type;
     private TokenEmitterType state = TokenEmitterType.CLASS;
+    private IndentationState indentation_state;
     private Deque<TokenEmitterType> state_stack = new ArrayDeque<>();
+    private List<String> implicit_imports = new ArrayList<>();
     private Set<String> imports = new HashSet<>();
 
     private int indentation;
 
-    public FormattedTokenEmitter(EmitterSet set) {
-        this.set = set;
+    public FormattedTokenEmitter() {
+        this.implicit_imports.add("java/lang/");
     }
 
     public EmitterFormat getFormat() {
@@ -66,12 +70,16 @@ public class FormattedTokenEmitter {
         this.format = format;
     }
 
-    public void emit(Writer output, List<EmitterToken> tokens) throws IOException {
+    public void emit(Writer output, List<EmitterToken> tokens, TypeEntry type) {
         this.writer = output;
         this.state = TokenEmitterType.CLASS;
         this.state_stack.clear();
+        this.type = type;
+        this.indentation_state = IndentationState.NEW_LINE;
 
-        for (EmitterToken token : tokens) {
+        for (int i = 0; i < tokens.size(); i++) {
+            EmitterToken token = tokens.get(i);
+            EmitterToken next = i < tokens.size() - 1 ? tokens.get(i + 1) : null;
             switch (token.getType()) {
             case PACKAGE:
                 printString("package ");
@@ -80,9 +88,142 @@ public class FormattedTokenEmitter {
                 printString(pkg);
                 printString(";");
                 newLine();
+                newLine();
+                break;
+            case ACCESS:
+                AccessModifier acc = (AccessModifier) token.getToken();
+                printString(acc.asString());
+                if (!acc.asString().isEmpty()) {
+                    printString(" ");
+                }
+                break;
+            case SPECIAL:
+            case MODIFIER:
+                printString((String) token.getToken());
+                printString(" ");
+                break;
+            case SUPERCLASS:
+                printType((String) token.getToken());
+                printString(" ");
+                break;
+            case INTERFACE:
+                EmitterToken prev = i > 0 ? tokens.get(i - 1) : null;
+                if (checkType(prev, TokenType.INTERFACE)) {
+                    printString(", ");
+                }
+                printType((String) token.getToken());
+                if (checkType(next, TokenType.BLOCK_START)) {
+                    printString(" ");
+                }
+                break;
+            case TYPE:
+                if (token.getToken() instanceof String) {
+                    printType((String) token.getToken());
+                } else if (token.getToken() instanceof TypeSignature) {
+                    emitTypeSignature((TypeSignature) token.getToken());
+                } else {
+                    throw new IllegalStateException(token.getToken().toString());
+                }
+                if (!checkType(next, TokenType.LEFT_PAREN)) {
+                    printString(" ");
+                }
+                break;
+            case NAME:
+                printString((String) token.getToken());
+                if (!checkType(next, TokenType.LEFT_PAREN) && !checkType(next, TokenType.DOT) && !checkType(next, TokenType.LEFT_BRACKET)) {
+                    printString(" ");
+                }
+                break;
+            case RETURN:
+                printString((String) token.getToken());
+                if (!checkType(next, TokenType.STATEMENT_END)) {
+                    printString(" ");
+                }
+                break;
+            case BLOCK_START:
+                printString("{");
+                newLine();
+                if (this.state == TokenEmitterType.CLASS || this.state == TokenEmitterType.ENUM || this.state == TokenEmitterType.INTERFACE) {
+                    newLine();
+                }
+                indent();
+                if (next.getType() != TokenType.BLOCK_END) {
+                    printIndentation();
+                }
+                break;
+            case BLOCK_END:
+                dedent();
+                printIndentation();
+                printString("}");
+                newLine();
+                newLine();
+                break;
+            case LEFT_PAREN:
+            case LEFT_BRACKET:
+            case DOT:
+            case RAW:
+            case RIGHT_BRACKET:
+                printString((String) token.getToken());
+                break;
+            case RIGHT_PAREN:
+                printString((String) token.getToken());
+                if (checkType(next, TokenType.BLOCK_START)) {
+                    printString(" ");
+                }
+                break;
+            case ARG_SEPARATOR:
+                printString(",");
+                printString(' ');
+                break;
+            case STATEMENT_END:
+                printString((String) token.getToken());
+                newLine();
+                EmitterToken far = i < tokens.size() - 2 ? tokens.get(i + 2) : null;
+                if (checkType(far, TokenType.PUSH_EMITTER_TYPE) && ((TokenEmitterType) far.getToken()) == TokenEmitterType.METHOD) {
+                    newLine();
+                }
+                if (!checkType(next, TokenType.BLOCK_END)) {
+                    printIndentation();
+                }
+                break;
+            case EQUALS:
+                if (this.indentation_state != IndentationState.AFTER_SPACE) {
+                    printString(" ");
+                }
+                printString((String) token.getToken());
+                printString(" ");
+                break;
+            case DOUBLE:
+            case BOOLEAN:
+            case INT:
+                printString(token.getToken().toString());
+                break;
+            case LONG:
+                printString(token.getToken().toString());
+                printString('L');
+                break;
+            case FLOAT:
+                printString(token.getToken().toString());
+                printString('F');
+                break;
+            case STRING:
+                printString('"');
+                printString((String) token.getToken());
+                printString('"');
+                break;
+            case CHAR:
+                printString(' ');
+                printString(((Character) token.getToken()).charValue());
+                printString(' ');
                 break;
             case PUSH_EMITTER_TYPE:
                 pushState((TokenEmitterType) token.getToken());
+                if (this.indentation_state == IndentationState.END_OF_LINE) {
+                    newLine();
+                    printIndentation();
+                } else if (this.indentation_state == IndentationState.NEW_LINE) {
+                    printIndentation();
+                }
                 break;
             case POP_EMITTER_TYPE:
                 popState();
@@ -96,33 +237,15 @@ public class FormattedTokenEmitter {
                     printString(";");
                     newLine();
                 }
+                newLine();
                 break;
-            case RAW:
-            case NAME:
-            case ACCESS:
-            case SPECIAL:
-            case MODIFIER:
-            case TYPE:
-            case SUPERCLASS:
-            case INTERFACE:
             case KEYWORD:
             case GENERIC_PARAMS:
-            case BLOCK_START:
-            case BLOCK_END:
-            case LEFT_PAREN:
-            case RIGHT_PAREN:
-            case ARG_START:
-            case LEFT_BRACKET:
-            case RIGHT_BRACKET:
             case ENUM_CONSTANT:
             case COMMENT:
             case BLOCK_COMMENT:
-            case FIELD_INITIALIZER:
             case ARRAY_INITIALIZER_START:
             case ARRAY_INITIALIZER_END:
-            case STATEMENT_END:
-            case DOT:
-            case EQUALS:
             case OPERATOR_EQUALS:
             case OPERATOR:
             case FOR_EACH:
@@ -130,19 +253,17 @@ public class FormattedTokenEmitter {
             case TERNARY_IF:
             case TERNARY_ELSE:
             case LAMBDA:
-            case INT:
-            case LONG:
-            case FLOAT:
-            case DOUBLE:
-            case STRING:
-            case BOOLEAN:
-            case CHAR:
             case WHEN_CASE:
+            default:
                 printString(token.getType().name() + " " + token.getToken() + "\n");
                 printIndentation();
                 break;
             }
         }
+    }
+
+    private boolean checkType(EmitterToken token, TokenType type) {
+        return token != null && token.getType() == type;
     }
 
     private void indent() {
@@ -157,13 +278,34 @@ public class FormattedTokenEmitter {
         for (int i = 0; i < this.indentation; i++) {
             printString("    ");
         }
+        this.indentation_state = IndentationState.NEW_LINE_INDENTED;
     }
 
     private void newLine() {
         printString("\n");
+        this.indentation_state = IndentationState.NEW_LINE;
+    }
+
+    private void printString(char str) {
+        if (str == ' ') {
+            this.indentation_state = IndentationState.AFTER_SPACE;
+        } else {
+            this.indentation_state = IndentationState.END_OF_LINE;
+        }
+        try {
+            this.writer.write(str);
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.exit(1);
+        }
     }
 
     private void printString(String str) {
+        if (str.endsWith(" ")) {
+            this.indentation_state = IndentationState.AFTER_SPACE;
+        } else {
+            this.indentation_state = IndentationState.END_OF_LINE;
+        }
         try {
             this.writer.write(str);
         } catch (IOException e) {
@@ -183,14 +325,21 @@ public class FormattedTokenEmitter {
 
     private void printType(String desc) {
         String type = TypeHelper.descToType(desc);
-        if (type.indexOf('/') != -1) {
-            String pkg = type.substring(0, type.lastIndexOf('/'));
-            if (this.imports.contains(pkg)) {
-                printString(type.substring(pkg.length() + 1));
+        if (this.imports.contains(type) || type.equals(this.type.getName())) {
+            printString(type.substring(type.lastIndexOf('/') + 1).replace('$', '.'));
+            return;
+        }
+        if (type.startsWith(this.type.getName() + "$")) {
+            printString(type.substring(type.lastIndexOf('$') + 1));
+            return;
+        }
+        for (String implicit : this.implicit_imports) {
+            if (type.startsWith(implicit)) {
+                printString(type.substring(type.lastIndexOf('/') + 1).replace('$', '.'));
                 return;
             }
         }
-        printString(type.replace('/', '.'));
+        printString(type.replace('/', '.').replace('$', '.'));
     }
 
     private void addImport(Object obj) {
@@ -200,27 +349,48 @@ public class FormattedTokenEmitter {
                 addImport(type.substring(1));
                 return;
             }
-            if (type.indexOf('/') != -1) {
-                String pkg = type.substring(0, type.lastIndexOf('/'));
-                this.imports.add(pkg);
+            if (!type.startsWith("L")) {
+                return;
             }
-        } else if (obj instanceof VoidTypeSignature) {
-            return;
+            String name = TypeHelper.descToType(type);
+            if (name.equals(this.type.getName())) {
+                return;
+            }
+            if (name.startsWith(this.type.getName() + "$")) {
+                return;
+            }
+            for (String implicit : this.implicit_imports) {
+                if (name.startsWith(implicit)) {
+                    return;
+                }
+            }
+            if (name.indexOf('$') != -1) {
+                String pkg = name.substring(0, name.indexOf('$'));
+                this.imports.add(pkg);
+            } else {
+                this.imports.add(name);
+            }
+        } else if (obj instanceof ClassTypeSignature) {
+            ClassTypeSignature type = (ClassTypeSignature) obj;
+            addImport(type.getDescriptor());
+            for (TypeArgument arg : type.getArguments()) {
+                addImport(arg.getSignature());
+            }
         } else if (obj instanceof Iterable) {
             for (Object o : (Iterable<?>) obj) {
                 addImport(o);
             }
+        } else if (obj instanceof VoidTypeSignature || obj instanceof TypeVariableSignature) {
+            return;
         } else {
             throw new IllegalStateException(obj.getClass().getSimpleName());
         }
     }
 
     private void generateImports(List<EmitterToken> tokens) {
-        // TODO skip implicit imports
         for (EmitterToken token : tokens) {
-            if (token.getType() == TokenType.TYPE) {
-                addImport(token.getToken());
-            } else if (token.getType() == TokenType.GENERIC_PARAMS) {
+            if (token.getType() == TokenType.TYPE || token.getType() == TokenType.GENERIC_PARAMS || token.getType() == TokenType.INTERFACE
+                    || token.getType() == TokenType.SUPERCLASS) {
                 addImport(token.getToken());
             }
         }
@@ -324,6 +494,13 @@ public class FormattedTokenEmitter {
             emitTypeArgument(param);
         }
         printString(">");
+    }
+
+    private static enum IndentationState {
+        END_OF_LINE,
+        AFTER_SPACE,
+        NEW_LINE,
+        NEW_LINE_INDENTED,
     }
 
 }

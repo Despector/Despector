@@ -47,7 +47,9 @@ public class NewArrayEmitter implements InstructionEmitter<NewArray> {
             ctx.append(new EmitterToken(TokenType.RIGHT_BRACKET, "]"));
             ctx.append(new EmitterToken(TokenType.BLOCK_START, "{"));
             for (int i = 0; i < arg.getInitializer().length; i++) {
-                ctx.append(new EmitterToken(TokenType.ARG_START, null));
+                if (i > 0) {
+                    ctx.append(new EmitterToken(TokenType.ARG_SEPARATOR, null));
+                }
                 ctx.emitInstruction(arg.getInitializer()[i], ClassTypeSignature.of(arg.getType()));
             }
             ctx.append(new EmitterToken(TokenType.BLOCK_END, "}"));

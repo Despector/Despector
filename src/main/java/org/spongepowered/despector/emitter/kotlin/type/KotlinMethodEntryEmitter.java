@@ -124,7 +124,9 @@ public class KotlinMethodEntryEmitter extends MethodEntryEmitter {
         ctx.append(new EmitterToken(TokenType.LEFT_PAREN, "("));
         StatementBlock block = method.getInstructions();
         for (int i = 0; i < method.getParamTypes().size(); i++) {
-            ctx.append(new EmitterToken(TokenType.ARG_START, null));
+            if (i > 0) {
+                ctx.append(new EmitterToken(TokenType.ARG_SEPARATOR, null));
+            }
             int param_index = i;
             if (!method.isStatic()) {
                 param_index++;

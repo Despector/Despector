@@ -42,4 +42,9 @@ public class EmitterToken {
         return this.token;
     }
 
+    @Override
+    public String toString() {
+        return this.type.name() + " " + this.token + "\n";
+    }
+
 }

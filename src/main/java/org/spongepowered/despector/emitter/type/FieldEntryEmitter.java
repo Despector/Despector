@@ -52,9 +52,10 @@ public class FieldEntryEmitter implements AstEmitter<FieldEntry> {
         ctx.append(new EmitterToken(TokenType.TYPE, ast.getType()));
         ctx.append(new EmitterToken(TokenType.NAME, ast.getName()));
         if (ast.getInitializer() != null) {
-            ctx.append(new EmitterToken(TokenType.FIELD_INITIALIZER, null));
+            ctx.append(new EmitterToken(TokenType.EQUALS, "="));
             ctx.emitInstruction(ast.getInitializer(), ast.getType());
         }
+        ctx.append(new EmitterToken(TokenType.STATEMENT_END, ";"));
         ctx.append(new EmitterToken(TokenType.POP_EMITTER_TYPE, null));
         return true;
     }

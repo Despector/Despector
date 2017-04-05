@@ -61,8 +61,10 @@ public class WhenEmitter implements InstructionEmitter<When> {
         } else if (cond instanceof OrCondition) {
             List<Condition> operands = ((OrCondition) cond).getOperands();
             for (int i = 0; i < operands.size(); i++) {
+                if (i > 0) {
+                    ctx.append(new EmitterToken(TokenType.ARG_SEPARATOR, null));
+                }
                 Condition arg = operands.get(i);
-                ctx.append(new EmitterToken(TokenType.ARG_START, null));
                 emit(ctx, arg, local);
             }
         } else {

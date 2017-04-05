@@ -65,7 +65,9 @@ public class PackageInfoEmitter implements SpecialEmitter {
                 emitValue(ctx, list.get(0));
             } else {
                 for (int i = 0; i < list.size(); i++) {
-                    ctx.append(new EmitterToken(TokenType.ARG_START, null));
+                    if (i > 0) {
+                        ctx.append(new EmitterToken(TokenType.ARG_SEPARATOR, null));
+                    }
                     emitValue(ctx, list.get(i));
                 }
             }
@@ -87,8 +89,13 @@ public class PackageInfoEmitter implements SpecialEmitter {
             ctx.append(new EmitterToken(TokenType.RIGHT_PAREN, ")"));
         } else {
             ctx.append(new EmitterToken(TokenType.LEFT_PAREN, "("));
+            boolean first = true;
             for (String key : annotation.getKeys()) {
-                ctx.append(new EmitterToken(TokenType.ARG_START, null));
+                if (!first) {
+                    ctx.append(new EmitterToken(TokenType.ARG_SEPARATOR, null));
+                } else {
+                    first = false;
+                }
                 ctx.append(new EmitterToken(TokenType.NAME, key));
                 ctx.append(new EmitterToken(TokenType.EQUALS, "="));
                 Object value = annotation.getValue(key);

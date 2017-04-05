@@ -74,7 +74,7 @@ public class InterfaceEntryEmitter implements AstEmitter<InterfaceEntry> {
         if (!type.getInterfaces().isEmpty()) {
             ctx.append(new EmitterToken(TokenType.SPECIAL, "extends"));
             for (int i = 0; i < type.getInterfaces().size(); i++) {
-                ctx.append(new EmitterToken(TokenType.TYPE, type.getInterfaces().get(i)));
+                ctx.append(new EmitterToken(TokenType.TYPE, "L" + type.getInterfaces().get(i) + ";"));
             }
         }
         ctx.append(new EmitterToken(TokenType.BLOCK_START, "{"));

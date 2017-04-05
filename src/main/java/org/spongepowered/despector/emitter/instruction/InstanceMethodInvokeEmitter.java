@@ -82,12 +82,16 @@ public class InstanceMethodInvokeEmitter implements InstructionEmitter<InstanceM
             if (arg.getParams().length == 1 && param instanceof NewArray) {
                 NewArray varargs = (NewArray) param;
                 for (int o = 0; o < varargs.getInitializer().length; o++) {
-                    ctx.append(new EmitterToken(TokenType.ARG_START, null));
+                    if (i > 0 || o > 0) {
+                        ctx.append(new EmitterToken(TokenType.ARG_SEPARATOR, null));
+                    }
                     ctx.emitInstruction(varargs.getInitializer()[o], ClassTypeSignature.of(varargs.getType()));
                 }
                 break;
             }
-            ctx.append(new EmitterToken(TokenType.ARG_START, null));
+            if (i > 0) {
+                ctx.append(new EmitterToken(TokenType.ARG_SEPARATOR, null));
+            }
             ctx.emitInstruction(param, ClassTypeSignature.of(param_types.get(i)));
         }
         ctx.append(new EmitterToken(TokenType.RIGHT_PAREN, ")"));

@@ -112,7 +112,9 @@ public class KotlinDataClassEmitter implements SpecialEmitter {
         }
 
         for (int i = 0; i < fields_ordered.length; i++) {
-            ctx.append(new EmitterToken(TokenType.ARG_START, null));
+            if (i > 0) {
+                ctx.append(new EmitterToken(TokenType.ARG_SEPARATOR, null));
+            }
             DataField fld = fields_ordered[i];
             if (fld.is_final) {
                 ctx.append(new EmitterToken(TokenType.SPECIAL, "val"));

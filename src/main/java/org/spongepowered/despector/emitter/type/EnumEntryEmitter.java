@@ -77,7 +77,7 @@ public class EnumEntryEmitter implements AstEmitter<EnumEntry> {
         if (!type.getInterfaces().isEmpty()) {
             ctx.append(new EmitterToken(TokenType.SPECIAL, "implements"));
             for (int i = 0; i < type.getInterfaces().size(); i++) {
-                ctx.append(new EmitterToken(TokenType.INTERFACE, type.getInterfaces().get(i)));
+                ctx.append(new EmitterToken(TokenType.INTERFACE, "L" + type.getInterfaces().get(i) + ";"));
             }
         }
         ctx.append(new EmitterToken(TokenType.BLOCK_START, "{"));
@@ -111,7 +111,9 @@ public class EnumEntryEmitter implements AstEmitter<EnumEntry> {
                     ctx.append(new EmitterToken(TokenType.LEFT_PAREN, "("));
                     List<String> args = TypeHelper.splitSig(val.getCtorDescription());
                     for (int i = 2; i < val.getParameters().length; i++) {
-                        ctx.append(new EmitterToken(TokenType.ARG_START, null));
+                        if (i > 2) {
+                            ctx.append(new EmitterToken(TokenType.ARG_SEPARATOR, null));
+                        }
                         ctx.emitInstruction(val.getParameters()[i], ClassTypeSignature.of(args.get(i)));
                     }
                     ctx.append(new EmitterToken(TokenType.RIGHT_PAREN, ")"));

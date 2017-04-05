@@ -94,12 +94,16 @@ public class KotlinStaticMethodInvokeEmitter extends StaticMethodInvokeEmitter {
             if (i == arg.getParams().length - 1 && param instanceof NewArray) {
                 NewArray varargs = (NewArray) param;
                 for (int o = 0; o < varargs.getInitializer().length; o++) {
-                    ctx.append(new EmitterToken(TokenType.ARG_START, null));
+                    if (i > 0 || o > 0) {
+                        ctx.append(new EmitterToken(TokenType.ARG_SEPARATOR, null));
+                    }
                     ctx.emitInstruction(varargs.getInitializer()[o], ClassTypeSignature.of(varargs.getType()));
                 }
                 break;
             }
-            ctx.append(new EmitterToken(TokenType.ARG_START, null));
+            if (i > 0) {
+                ctx.append(new EmitterToken(TokenType.ARG_SEPARATOR, null));
+            }
             ctx.emitInstruction(param, ClassTypeSignature.of(param_types.get(i)));
         }
         ctx.append(new EmitterToken(TokenType.RIGHT_PAREN, ")"));
@@ -119,15 +123,19 @@ public class KotlinStaticMethodInvokeEmitter extends StaticMethodInvokeEmitter {
             if ((set & (1 << i)) != 0) {
                 continue;
             }
-            ctx.append(new EmitterToken(TokenType.ARG_START, null));
             Instruction param = call.getParams()[i + 1];
             if (i == total_args - 1 && param instanceof NewArray) {
                 NewArray varargs = (NewArray) param;
                 for (int o = 0; o < varargs.getInitializer().length; o++) {
-                    ctx.append(new EmitterToken(TokenType.ARG_START, null));
+                    if (i > 0 || o > 0) {
+                        ctx.append(new EmitterToken(TokenType.ARG_SEPARATOR, null));
+                    }
                     ctx.emitInstruction(varargs.getInitializer()[o], ClassTypeSignature.of(varargs.getType()));
                 }
                 break;
+            }
+            if (i > 0) {
+                ctx.append(new EmitterToken(TokenType.ARG_SEPARATOR, null));
             }
             ctx.emitInstruction(param, ClassTypeSignature.of(param_types.get(i)));
         }

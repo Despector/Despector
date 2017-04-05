@@ -42,7 +42,7 @@ public enum TokenType {
     BLOCK_END,
     LEFT_PAREN,
     RIGHT_PAREN,
-    ARG_START,
+    ARG_SEPARATOR,
     LEFT_BRACKET,
     RIGHT_BRACKET,
 
@@ -51,7 +51,6 @@ public enum TokenType {
     COMMENT,
     BLOCK_COMMENT,
 
-    FIELD_INITIALIZER,
     ARRAY_INITIALIZER_START,
     ARRAY_INITIALIZER_END,
 
@@ -65,6 +64,7 @@ public enum TokenType {
     TERNARY_IF,
     TERNARY_ELSE,
     LAMBDA,
+    RETURN,
 
     INT,
     LONG,

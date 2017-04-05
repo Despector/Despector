@@ -38,7 +38,7 @@ public class FormattingTestClass {
     }
 
     public void bar(String... args) {
-
+        this.alist.add(args[0]);
     }
 
     public static void main(String[] args) {

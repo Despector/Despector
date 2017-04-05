@@ -113,7 +113,9 @@ public class KotlinEnumEntryEmitter implements AstEmitter<EnumEntry> {
         if (fields != null) {
             ctx.append(new EmitterToken(TokenType.LEFT_PAREN, "("));
             for (int i = 0; i < fields.size(); i++) {
-                ctx.append(new EmitterToken(TokenType.ARG_START, null));
+                if (i > 0) {
+                    ctx.append(new EmitterToken(TokenType.ARG_SEPARATOR, null));
+                }
                 EnumField fld = fields.get(i);
                 if (fld.is_private) {
                     ctx.append(new EmitterToken(TokenType.MODIFIER, "private"));
@@ -140,6 +142,7 @@ public class KotlinEnumEntryEmitter implements AstEmitter<EnumEntry> {
         Set<String> found = Sets.newHashSet();
         if (clinit != null && clinit.getInstructions() != null) {
             Iterator<Statement> initializers = clinit.getInstructions().getStatements().iterator();
+            boolean first = true;
             while (initializers.hasNext()) {
                 Statement next = initializers.next();
                 if (!(next instanceof StaticFieldAssignment)) {
@@ -153,7 +156,11 @@ public class KotlinEnumEntryEmitter implements AstEmitter<EnumEntry> {
                     remaining.add(assign);
                     break;
                 }
-                ctx.append(new EmitterToken(TokenType.ARG_START, null));
+                if (!first) {
+                    ctx.append(new EmitterToken(TokenType.ARG_SEPARATOR, null));
+                } else {
+                    first = false;
+                }
                 New val = (New) assign.getValue();
                 ctx.append(new EmitterToken(TokenType.NAME, assign.getFieldName()));
                 found.add(assign.getFieldName());
@@ -161,7 +168,9 @@ public class KotlinEnumEntryEmitter implements AstEmitter<EnumEntry> {
                     ctx.append(new EmitterToken(TokenType.LEFT_PAREN, "("));
                     List<String> args = TypeHelper.splitSig(val.getCtorDescription());
                     for (int i = 2; i < val.getParameters().length; i++) {
-                        ctx.append(new EmitterToken(TokenType.ARG_START, null));
+                        if (i > 2) {
+                            ctx.append(new EmitterToken(TokenType.ARG_SEPARATOR, null));
+                        }
                         ctx.emitInstruction(val.getParameters()[i], ClassTypeSignature.of(args.get(i)));
                     }
                     ctx.append(new EmitterToken(TokenType.RIGHT_PAREN, ")"));

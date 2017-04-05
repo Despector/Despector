@@ -48,7 +48,9 @@ public class AnnotationEmitter implements SpecialEmitter {
             int[] values = (int[]) value;
             ctx.append(new EmitterToken(TokenType.ARRAY_INITIALIZER_START, "{"));
             for (int i = 0; i < values.length; i++) {
-                ctx.append(new EmitterToken(TokenType.ARG_START, null));
+                if (i > 0) {
+                    ctx.append(new EmitterToken(TokenType.ARG_SEPARATOR, null));
+                }
                 ctx.append(new EmitterToken(TokenType.INT, values[i]));
             }
             ctx.append(new EmitterToken(TokenType.ARRAY_INITIALIZER_END, "}"));
@@ -63,7 +65,9 @@ public class AnnotationEmitter implements SpecialEmitter {
             } else {
                 ctx.append(new EmitterToken(TokenType.ARRAY_INITIALIZER_START, "{"));
                 for (int i = 0; i < list.size(); i++) {
-                    ctx.append(new EmitterToken(TokenType.ARG_START, null));
+                    if (i > 0) {
+                        ctx.append(new EmitterToken(TokenType.ARG_SEPARATOR, null));
+                    }
                     emitValue(ctx, list.get(i));
                 }
                 ctx.append(new EmitterToken(TokenType.ARRAY_INITIALIZER_END, "}"));
@@ -94,8 +98,13 @@ public class AnnotationEmitter implements SpecialEmitter {
             ctx.append(new EmitterToken(TokenType.RIGHT_PAREN, ")"));
         } else {
             ctx.append(new EmitterToken(TokenType.LEFT_PAREN, "("));
+            boolean first = true;
             for (String key : annotation.getKeys()) {
-                ctx.append(new EmitterToken(TokenType.ARG_START, null));
+                if (!first) {
+                    ctx.append(new EmitterToken(TokenType.ARG_SEPARATOR, null));
+                } else {
+                    first = false;
+                }
                 ctx.append(new EmitterToken(TokenType.NAME, key));
                 ctx.append(new EmitterToken(TokenType.EQUALS, "="));
                 emitValue(ctx, annotation.getValue(key));

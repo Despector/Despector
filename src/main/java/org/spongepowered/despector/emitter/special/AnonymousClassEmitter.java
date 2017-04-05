@@ -74,8 +74,10 @@ public class AnonymousClassEmitter implements SpecialEmitter {
         ctx.append(new EmitterToken(TokenType.LEFT_PAREN, "("));
         List<String> param_types = TypeHelper.splitSig(new_insn.getCtorDescription());
         for (int i = 0; i < new_insn.getParameters().length - syn_field_count; i++) {
+            if (i > 0) {
+                ctx.append(new EmitterToken(TokenType.ARG_SEPARATOR, null));
+            }
             Instruction param = new_insn.getParameters()[i];
-            ctx.append(new EmitterToken(TokenType.ARG_START, null));
             ctx.emitInstruction(param, ClassTypeSignature.of(param_types.get(i)));
         }
         ctx.append(new EmitterToken(TokenType.RIGHT_PAREN, ")"));

@@ -55,7 +55,9 @@ public class DynamicInvokeEmitter implements InstructionEmitter<DynamicInvokeHan
         ctx.append(new EmitterToken(TokenType.LEFT_PAREN, "("));
 
         for (int i = 0; i < method.getParamTypes().size(); i++) {
-            ctx.append(new EmitterToken(TokenType.ARG_START, null));
+            if (i > 0) {
+                ctx.append(new EmitterToken(TokenType.ARG_SEPARATOR, null));
+            }
             if (block == null) {
                 ctx.append(new EmitterToken(TokenType.NAME, "local" + i));
             } else {

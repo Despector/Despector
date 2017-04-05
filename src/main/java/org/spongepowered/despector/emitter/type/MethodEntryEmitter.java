@@ -46,11 +46,6 @@ public class MethodEntryEmitter implements AstEmitter<MethodEntry> {
 
     @Override
     public boolean emit(EmitterOutput ctx, MethodEntry method) {
-        ctx.append(new EmitterToken(TokenType.PUSH_EMITTER_TYPE, TokenEmitterType.METHOD));
-
-        for (Annotation anno : method.getAnnotations()) {
-            ctx.emit(anno);
-        }
 
         if (method.getName().equals("<clinit>")) {
             int start = 0;
@@ -70,6 +65,10 @@ public class MethodEntryEmitter implements AstEmitter<MethodEntry> {
                     return false;
                 }
             }
+            ctx.append(new EmitterToken(TokenType.PUSH_EMITTER_TYPE, TokenEmitterType.METHOD));
+            for (Annotation anno : method.getAnnotations()) {
+                ctx.emit(anno);
+            }
             ctx.append(new EmitterToken(TokenType.SPECIAL, "static"));
             if (method.getInstructions() == null) {
                 ctx.append(new EmitterToken(TokenType.COMMENT, "Error decompiling block"));
@@ -85,6 +84,10 @@ public class MethodEntryEmitter implements AstEmitter<MethodEntry> {
             // TODO this could omit somewhere the ctor is purely passing
             // constants to the super ctor
             return false;
+        }
+        ctx.append(new EmitterToken(TokenType.PUSH_EMITTER_TYPE, TokenEmitterType.METHOD));
+        for (Annotation anno : method.getAnnotations()) {
+            ctx.emit(anno);
         }
         if (!(ctx.getType() instanceof InterfaceEntry) && !(ctx.getType() instanceof EnumEntry && method.getName().equals("<init>"))) {
             ctx.append(new EmitterToken(TokenType.ACCESS, method.getAccessModifier()));
@@ -130,7 +133,9 @@ public class MethodEntryEmitter implements AstEmitter<MethodEntry> {
             if (!method.isStatic()) {
                 param_index++;
             }
-            ctx.append(new EmitterToken(TokenType.ARG_START, null));
+            if (i > start) {
+                ctx.append(new EmitterToken(TokenType.ARG_SEPARATOR, null));
+            }
             if (block == null) {
                 if (sig != null) {
                     // interfaces have no lvt for parameters, need to get

@@ -39,7 +39,6 @@ public class CompareEmitter implements InstructionEmitter<NumberCompare> {
         if (arg.getRightOperand().inferType().equals(ClassTypeSignature.INT) && arg.getLeftOperand().inferType().equals(ClassTypeSignature.INT)) {
             ctx.append(new EmitterToken(TokenType.NAME, "Integer.signum"));
             ctx.append(new EmitterToken(TokenType.LEFT_PAREN, "("));
-            ctx.append(new EmitterToken(TokenType.ARG_START, null));
             ctx.emitInstruction(arg.getRightOperand(), arg.inferType());
             ctx.append(new EmitterToken(TokenType.OPERATOR, "-"));
             ctx.emitInstruction(arg.getLeftOperand(), arg.inferType());
@@ -47,9 +46,8 @@ public class CompareEmitter implements InstructionEmitter<NumberCompare> {
         } else {
             ctx.append(new EmitterToken(TokenType.NAME, "Float.compare"));
             ctx.append(new EmitterToken(TokenType.LEFT_PAREN, "("));
-            ctx.append(new EmitterToken(TokenType.ARG_START, null));
             ctx.emitInstruction(arg.getRightOperand(), arg.inferType());
-            ctx.append(new EmitterToken(TokenType.ARG_START, null));
+            ctx.append(new EmitterToken(TokenType.ARG_SEPARATOR, null));
             ctx.emitInstruction(arg.getLeftOperand(), arg.inferType());
             ctx.append(new EmitterToken(TokenType.RIGHT_PAREN, ")"));
         }

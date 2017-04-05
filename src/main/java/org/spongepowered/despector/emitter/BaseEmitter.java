@@ -32,7 +32,6 @@ import org.spongepowered.despector.emitter.output.EmitterOutput;
 import org.spongepowered.despector.emitter.output.EmitterToken;
 import org.spongepowered.despector.emitter.output.FormattedTokenEmitter;
 
-import java.io.IOException;
 import java.io.Writer;
 import java.util.List;
 
@@ -43,7 +42,7 @@ public class BaseEmitter implements Emitter {
 
     public BaseEmitter(EmitterSet set) {
         this.set = set;
-        this.tokenemitter = new FormattedTokenEmitter(this.set);
+        this.tokenemitter = new FormattedTokenEmitter();
     }
 
     @Override
@@ -56,12 +55,7 @@ public class BaseEmitter implements Emitter {
         List<EmitterToken> tokens = out.getTokens();
 
         this.tokenemitter.setFormat(format);
-        try {
-            this.tokenemitter.emit(output, tokens);
-        } catch (IOException e) {
-            System.err.println("Error emitting type to output");
-            e.printStackTrace();
-        }
+        this.tokenemitter.emit(output, tokens, type);
 
     }
 
@@ -76,12 +70,7 @@ public class BaseEmitter implements Emitter {
         List<EmitterToken> tokens = out.getTokens();
 
         this.tokenemitter.setFormat(format);
-        try {
-            this.tokenemitter.emit(output, tokens);
-        } catch (IOException e) {
-            System.err.println("Error emitting type to output");
-            e.printStackTrace();
-        }
+        this.tokenemitter.emit(output, tokens, type);
     }
 
 }

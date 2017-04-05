@@ -37,7 +37,7 @@ public class ReturnEmitter implements StatementEmitter<Return> {
 
     @Override
     public void emit(EmitterOutput ctx, Return insn) {
-        ctx.append(new EmitterToken(TokenType.SPECIAL, "return"));
+        ctx.append(new EmitterToken(TokenType.RETURN, "return"));
         if (insn.getValue().isPresent()) {
             TypeSignature type = null;
             if (ctx.getMethod() != null) {

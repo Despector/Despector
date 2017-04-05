@@ -85,7 +85,7 @@ public class ClassEntryEmitter implements AstEmitter<ClassEntry> {
 
         if (!type.getSuperclass().equals("Ljava/lang/Object;")) {
             ctx.append(new EmitterToken(TokenType.SPECIAL, "extends"));
-            ctx.append(new EmitterToken(TokenType.SUPERCLASS, type.getSuperclassName()));
+            ctx.append(new EmitterToken(TokenType.SUPERCLASS, type.getSuperclass()));
             if (type.getSignature() != null && type.getSignature().getSuperclassSignature() != null) {
                 ctx.append(new EmitterToken(TokenType.GENERIC_PARAMS, type.getSignature().getSuperclassSignature().getArguments()));
             }
@@ -93,7 +93,7 @@ public class ClassEntryEmitter implements AstEmitter<ClassEntry> {
         if (!type.getInterfaces().isEmpty()) {
             ctx.append(new EmitterToken(TokenType.SPECIAL, "implements"));
             for (int i = 0; i < type.getInterfaces().size(); i++) {
-                ctx.append(new EmitterToken(TokenType.INTERFACE, type.getInterfaces().get(i)));
+                ctx.append(new EmitterToken(TokenType.INTERFACE, "L" + type.getInterfaces().get(i) + ";"));
                 if (type.getSignature() != null) {
                     ctx.append(new EmitterToken(TokenType.GENERIC_PARAMS, type.getSignature().getInterfaceSignatures().get(i).getArguments()));
                 }

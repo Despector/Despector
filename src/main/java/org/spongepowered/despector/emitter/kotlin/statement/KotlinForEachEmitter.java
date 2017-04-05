@@ -96,9 +96,8 @@ public class KotlinForEachEmitter implements StatementEmitter<ForEach> {
         ctx.append(new EmitterToken(TokenType.SPECIAL, "for"));
         ctx.append(new EmitterToken(TokenType.LEFT_PAREN, "("));
         ctx.append(new EmitterToken(TokenType.LEFT_PAREN, "("));
-        ctx.append(new EmitterToken(TokenType.ARG_START, null));
         ctx.append(new EmitterToken(TokenType.NAME, key_assign.getLocal().getName()));
-        ctx.append(new EmitterToken(TokenType.ARG_START, null));
+        ctx.append(new EmitterToken(TokenType.ARG_SEPARATOR, null));
         ctx.append(new EmitterToken(TokenType.NAME, value_assign.getLocal().getName()));
         ctx.append(new EmitterToken(TokenType.RIGHT_PAREN, ")"));
         ctx.append(new EmitterToken(TokenType.SPECIAL, "in"));

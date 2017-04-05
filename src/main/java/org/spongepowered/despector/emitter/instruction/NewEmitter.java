@@ -75,7 +75,9 @@ public class NewEmitter implements InstructionEmitter<New> {
         ctx.append(new EmitterToken(TokenType.LEFT_PAREN, "("));
         List<String> args = TypeHelper.splitSig(arg.getCtorDescription());
         for (int i = 0; i < arg.getParameters().length; i++) {
-            ctx.append(new EmitterToken(TokenType.ARG_START, null));
+            if (i > 0) {
+                ctx.append(new EmitterToken(TokenType.ARG_SEPARATOR, null));
+            }
             Instruction param = arg.getParameters()[i];
             ctx.emitInstruction(param, ClassTypeSignature.of(args.get(i)));
         }
