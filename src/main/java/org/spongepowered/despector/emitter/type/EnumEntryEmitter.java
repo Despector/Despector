@@ -40,7 +40,6 @@ import org.spongepowered.despector.config.ConfigManager;
 import org.spongepowered.despector.emitter.AstEmitter;
 import org.spongepowered.despector.emitter.output.EmitterOutput;
 import org.spongepowered.despector.emitter.output.EmitterToken;
-import org.spongepowered.despector.emitter.output.TokenEmitterType;
 import org.spongepowered.despector.emitter.output.TokenType;
 import org.spongepowered.despector.util.TypeHelper;
 
@@ -53,8 +52,6 @@ public class EnumEntryEmitter implements AstEmitter<EnumEntry> {
 
     @Override
     public boolean emit(EmitterOutput ctx, EnumEntry type) {
-        ctx.append(new EmitterToken(TokenType.PUSH_EMITTER_TYPE, TokenEmitterType.ENUM));
-
         for (Annotation anno : type.getAnnotations()) {
             ctx.emit(anno);
         }
@@ -80,7 +77,7 @@ public class EnumEntryEmitter implements AstEmitter<EnumEntry> {
                 ctx.append(new EmitterToken(TokenType.INTERFACE, "L" + type.getInterfaces().get(i) + ";"));
             }
         }
-        ctx.append(new EmitterToken(TokenType.BLOCK_START, "{"));
+        ctx.append(new EmitterToken(TokenType.CLASS_START, "{"));
 
         // we look through the class initializer to find the enum constant
         // initializers so that we can emit those specially before the rest of
@@ -91,13 +88,14 @@ public class EnumEntryEmitter implements AstEmitter<EnumEntry> {
         Set<String> found = Sets.newHashSet();
         if (clinit != null && clinit.getInstructions() != null) {
             Iterator<Statement> initializers = clinit.getInstructions().getStatements().iterator();
+            boolean first = true;
             while (initializers.hasNext()) {
                 Statement next = initializers.next();
                 if (!(next instanceof StaticFieldAssignment)) {
                     break;
                 }
                 StaticFieldAssignment assign = (StaticFieldAssignment) next;
-                if (assign.getFieldName().equals("$VALUES")) {
+                if (assign.getFieldName().contains("$VALUES")) {
                     continue;
                 }
                 if (!TypeHelper.descToType(assign.getOwnerType()).equals(type.getName()) || !(assign.getValue() instanceof New)) {
@@ -105,6 +103,11 @@ public class EnumEntryEmitter implements AstEmitter<EnumEntry> {
                     break;
                 }
                 New val = (New) assign.getValue();
+                if (!first) {
+                    ctx.append(new EmitterToken(TokenType.ARG_SEPARATOR, null));
+                } else {
+                    first = false;
+                }
                 ctx.append(new EmitterToken(TokenType.ENUM_CONSTANT, assign.getFieldName()));
                 found.add(assign.getFieldName());
                 if (val.getParameters().length != 2) {
@@ -118,6 +121,9 @@ public class EnumEntryEmitter implements AstEmitter<EnumEntry> {
                     }
                     ctx.append(new EmitterToken(TokenType.RIGHT_PAREN, ")"));
                 }
+            }
+            if(!first) {
+                ctx.append(new EmitterToken(TokenType.STATEMENT_END, ";"));
             }
             // We store any remaining statements to be emitted later
             while (initializers.hasNext()) {
@@ -148,11 +154,11 @@ public class EnumEntryEmitter implements AstEmitter<EnumEntry> {
             // while looking for enum constants we emit them here
 
             ctx.append(new EmitterToken(TokenType.SPECIAL, "static"));
-            ctx.append(new EmitterToken(TokenType.BLOCK_START, "{"));
+            ctx.append(new EmitterToken(TokenType.METHOD_START, "{"));
             for (Statement stmt : remaining) {
                 ctx.emitStatement(stmt);
             }
-            ctx.append(new EmitterToken(TokenType.BLOCK_END, "}"));
+            ctx.append(new EmitterToken(TokenType.METHOD_END, "}"));
         }
         if (!type.getStaticMethods().isEmpty()) {
             for (MethodEntry mth : type.getStaticMethods()) {
@@ -218,8 +224,7 @@ public class EnumEntryEmitter implements AstEmitter<EnumEntry> {
             TypeEntry inner_type = type.getSource().get(inner.getName());
             ctx.emitType(inner_type);
         }
-        ctx.append(new EmitterToken(TokenType.BLOCK_END, "}"));
-        ctx.append(new EmitterToken(TokenType.POP_EMITTER_TYPE, null));
+        ctx.append(new EmitterToken(TokenType.CLASS_END, "}"));
         return true;
     }
 

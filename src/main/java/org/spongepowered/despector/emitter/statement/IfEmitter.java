@@ -37,7 +37,7 @@ public class IfEmitter implements StatementEmitter<If> {
 
     @Override
     public void emit(EmitterOutput ctx, If insn) {
-        ctx.append(new EmitterToken(TokenType.SPECIAL, "if"));
+        ctx.append(new EmitterToken(TokenType.IF, "if"));
         ctx.append(new EmitterToken(TokenType.LEFT_PAREN, "("));
         ctx.emitCondition(insn.getCondition());
         ctx.append(new EmitterToken(TokenType.RIGHT_PAREN, ")"));
@@ -49,7 +49,7 @@ public class IfEmitter implements StatementEmitter<If> {
         Else else_ = insn.getElseBlock();
         for (int i = 0; i < insn.getElifBlocks().size(); i++) {
             Elif elif = insn.getElifBlocks().get(i);
-            ctx.append(new EmitterToken(TokenType.SPECIAL, "else if"));
+            ctx.append(new EmitterToken(TokenType.ELSE_IF, "else if"));
             ctx.append(new EmitterToken(TokenType.LEFT_PAREN, "("));
             ctx.emitCondition(elif.getCondition());
             ctx.append(new EmitterToken(TokenType.RIGHT_PAREN, ")"));
@@ -59,7 +59,7 @@ public class IfEmitter implements StatementEmitter<If> {
         }
         if (else_ != null) {
             StatementBlock else_block = else_.getElseBody();
-            ctx.append(new EmitterToken(TokenType.SPECIAL, "else"));
+            ctx.append(new EmitterToken(TokenType.ELSE, "else"));
             ctx.append(new EmitterToken(TokenType.BLOCK_START, "{"));
             if (!else_block.getStatements().isEmpty()) {
                 ctx.emitBody(else_block, 0);

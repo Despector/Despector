@@ -39,7 +39,6 @@ import org.spongepowered.despector.ast.type.InterfaceEntry;
 import org.spongepowered.despector.emitter.AstEmitter;
 import org.spongepowered.despector.emitter.output.EmitterOutput;
 import org.spongepowered.despector.emitter.output.EmitterToken;
-import org.spongepowered.despector.emitter.output.TokenEmitterType;
 import org.spongepowered.despector.emitter.output.TokenType;
 
 public class MethodEntryEmitter implements AstEmitter<MethodEntry> {
@@ -65,7 +64,6 @@ public class MethodEntryEmitter implements AstEmitter<MethodEntry> {
                     return false;
                 }
             }
-            ctx.append(new EmitterToken(TokenType.PUSH_EMITTER_TYPE, TokenEmitterType.METHOD));
             for (Annotation anno : method.getAnnotations()) {
                 ctx.emit(anno);
             }
@@ -85,7 +83,6 @@ public class MethodEntryEmitter implements AstEmitter<MethodEntry> {
             // constants to the super ctor
             return false;
         }
-        ctx.append(new EmitterToken(TokenType.PUSH_EMITTER_TYPE, TokenEmitterType.METHOD));
         for (Annotation anno : method.getAnnotations()) {
             ctx.emit(anno);
         }
@@ -157,16 +154,15 @@ public class MethodEntryEmitter implements AstEmitter<MethodEntry> {
         }
         ctx.append(new EmitterToken(TokenType.RIGHT_PAREN, ")"));
         if (!method.isAbstract()) {
-            ctx.append(new EmitterToken(TokenType.BLOCK_START, "{"));
+            ctx.append(new EmitterToken(TokenType.METHOD_START, "{"));
             if (block == null) {
                 ctx.append(new EmitterToken(TokenType.COMMENT, "Error decompiling block"));
                 printReturn(ctx, method.getReturnType());
             } else {
                 ctx.emitBody(block, 0);
             }
-            ctx.append(new EmitterToken(TokenType.BLOCK_END, "}"));
+            ctx.append(new EmitterToken(TokenType.METHOD_END, "}"));
         }
-        ctx.append(new EmitterToken(TokenType.POP_EMITTER_TYPE, null));
         return true;
     }
 
@@ -180,28 +176,28 @@ public class MethodEntryEmitter implements AstEmitter<MethodEntry> {
         case 'S':
         case 'B':
         case 'C':
-            ctx.append(new EmitterToken(TokenType.KEYWORD, "return"));
+            ctx.append(new EmitterToken(TokenType.RETURN, "return"));
             ctx.append(new EmitterToken(TokenType.INT, 0));
             break;
         case 'J':
-            ctx.append(new EmitterToken(TokenType.KEYWORD, "return"));
+            ctx.append(new EmitterToken(TokenType.RETURN, "return"));
             ctx.append(new EmitterToken(TokenType.LONG, 0));
             break;
         case 'F':
-            ctx.append(new EmitterToken(TokenType.KEYWORD, "return"));
+            ctx.append(new EmitterToken(TokenType.RETURN, "return"));
             ctx.append(new EmitterToken(TokenType.FLOAT, 0));
             break;
         case 'D':
-            ctx.append(new EmitterToken(TokenType.KEYWORD, "return"));
+            ctx.append(new EmitterToken(TokenType.RETURN, "return"));
             ctx.append(new EmitterToken(TokenType.DOUBLE, 0));
             break;
         case 'Z':
-            ctx.append(new EmitterToken(TokenType.KEYWORD, "return"));
+            ctx.append(new EmitterToken(TokenType.RETURN, "return"));
             ctx.append(new EmitterToken(TokenType.BOOLEAN, false));
             break;
         case 'L':
-            ctx.append(new EmitterToken(TokenType.KEYWORD, "return"));
-            ctx.append(new EmitterToken(TokenType.KEYWORD, "null"));
+            ctx.append(new EmitterToken(TokenType.RETURN, "return"));
+            ctx.append(new EmitterToken(TokenType.RAW, "null"));
             break;
         default:
             throw new IllegalStateException("Malformed return type " + type);

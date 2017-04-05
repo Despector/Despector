@@ -35,7 +35,7 @@ public class NullConstantEmitter implements InstructionEmitter<NullConstant> {
 
     @Override
     public void emit(EmitterOutput ctx, NullConstant arg, TypeSignature type) {
-        ctx.append(new EmitterToken(TokenType.SPECIAL, "null"));
+        ctx.append(new EmitterToken(TokenType.RAW, "null"));
     }
 
 }

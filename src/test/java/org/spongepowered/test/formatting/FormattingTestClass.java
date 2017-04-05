@@ -24,48 +24,10 @@
  */
 package org.spongepowered.test.formatting;
 
-import java.util.ArrayList;
-import java.util.List;
+public enum FormattingTestClass {
 
-public class FormattingTestClass {
-
-    public int afield;
-    public String anotherField;
-    private List<String> alist = new ArrayList<>();
-
-    public int foo() {
-        return 0;
-    }
-
-    public void bar(String... args) {
-        this.alist.add(args[0]);
-    }
-
-    public static void main(String[] args) {
-        FormattingTestClass insn = new FormattingTestClass();
-        insn.foo();
-        insn.bar("This is a very long line", "with a lot of args that should form breakpoints and test line",
-                "wrapping foo bar bazz wheee alright this is over 150 characters");
-    }
-
-    public static class AnotherClass extends Foo implements Baz {
-
-    }
-
-    public static class Bar implements Baz, Noo {
-
-    }
-
-    public static interface Baz {
-
-    }
-
-    public static interface Noo {
-
-    }
-
-    public static class Foo {
-
-    }
+    ONE,
+    TWO,
+    THREE,
 
 }

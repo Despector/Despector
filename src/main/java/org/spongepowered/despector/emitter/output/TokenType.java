@@ -34,10 +34,13 @@ public enum TokenType {
     TYPE,
     SUPERCLASS,
     INTERFACE,
-    KEYWORD,
     PACKAGE,
 
     GENERIC_PARAMS,
+    CLASS_START,
+    CLASS_END,
+    METHOD_START,
+    METHOD_END,
     BLOCK_START,
     BLOCK_END,
     LEFT_PAREN,
@@ -65,6 +68,9 @@ public enum TokenType {
     TERNARY_ELSE,
     LAMBDA,
     RETURN,
+    IF,
+    ELSE_IF,
+    ELSE,
 
     INT,
     LONG,
@@ -76,8 +82,6 @@ public enum TokenType {
 
     WHEN_CASE,
 
-    PUSH_EMITTER_TYPE,
-    POP_EMITTER_TYPE,
     INSERT_IMPORTS,
 
 }

@@ -35,7 +35,6 @@ import org.spongepowered.despector.config.ConfigManager;
 import org.spongepowered.despector.emitter.AstEmitter;
 import org.spongepowered.despector.emitter.output.EmitterOutput;
 import org.spongepowered.despector.emitter.output.EmitterToken;
-import org.spongepowered.despector.emitter.output.TokenEmitterType;
 import org.spongepowered.despector.emitter.output.TokenType;
 
 import java.util.Collection;
@@ -44,7 +43,6 @@ public class InterfaceEntryEmitter implements AstEmitter<InterfaceEntry> {
 
     @Override
     public boolean emit(EmitterOutput ctx, InterfaceEntry type) {
-        ctx.append(new EmitterToken(TokenType.PUSH_EMITTER_TYPE, TokenEmitterType.INTERFACE));
 
         for (Annotation anno : type.getAnnotations()) {
             ctx.emit(anno);
@@ -77,7 +75,7 @@ public class InterfaceEntryEmitter implements AstEmitter<InterfaceEntry> {
                 ctx.append(new EmitterToken(TokenType.TYPE, "L" + type.getInterfaces().get(i) + ";"));
             }
         }
-        ctx.append(new EmitterToken(TokenType.BLOCK_START, "{"));
+        ctx.append(new EmitterToken(TokenType.CLASS_START, "{"));
         if (!type.getStaticFields().isEmpty()) {
             for (FieldEntry field : type.getStaticFields()) {
                 if (field.isSynthetic()) {
@@ -133,8 +131,7 @@ public class InterfaceEntryEmitter implements AstEmitter<InterfaceEntry> {
             TypeEntry inner_type = type.getSource().get(inner.getName());
             ctx.emitType(inner_type);
         }
-        ctx.append(new EmitterToken(TokenType.BLOCK_END, "}"));
-        ctx.append(new EmitterToken(TokenType.POP_EMITTER_TYPE, null));
+        ctx.append(new EmitterToken(TokenType.CLASS_END, "}"));
         return true;
     }
 

@@ -29,14 +29,12 @@ import org.spongepowered.despector.ast.members.FieldEntry;
 import org.spongepowered.despector.emitter.AstEmitter;
 import org.spongepowered.despector.emitter.output.EmitterOutput;
 import org.spongepowered.despector.emitter.output.EmitterToken;
-import org.spongepowered.despector.emitter.output.TokenEmitterType;
 import org.spongepowered.despector.emitter.output.TokenType;
 
 public class FieldEntryEmitter implements AstEmitter<FieldEntry> {
 
     @Override
     public boolean emit(EmitterOutput ctx, FieldEntry ast) {
-        ctx.append(new EmitterToken(TokenType.PUSH_EMITTER_TYPE, TokenEmitterType.FIELD));
 
         for (Annotation anno : ast.getAnnotations()) {
             ctx.emit(anno);
@@ -56,7 +54,6 @@ public class FieldEntryEmitter implements AstEmitter<FieldEntry> {
             ctx.emitInstruction(ast.getInitializer(), ast.getType());
         }
         ctx.append(new EmitterToken(TokenType.STATEMENT_END, ";"));
-        ctx.append(new EmitterToken(TokenType.POP_EMITTER_TYPE, null));
         return true;
     }
 

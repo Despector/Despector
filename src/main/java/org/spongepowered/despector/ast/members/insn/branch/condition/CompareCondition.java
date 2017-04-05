@@ -73,12 +73,12 @@ public class CompareCondition extends Condition {
      * Represents a specific comparison operator.
      */
     public static enum CompareOperator {
-        EQUAL(" == "),
-        NOT_EQUAL(" != "),
-        LESS_EQUAL(" <= "),
-        GREATER_EQUAL(" >= "),
-        LESS(" < "),
-        GREATER(" > ");
+        EQUAL("=="),
+        NOT_EQUAL("!="),
+        LESS_EQUAL("<="),
+        GREATER_EQUAL(">="),
+        LESS("<"),
+        GREATER(">");
 
         static {
             EQUAL.inverse = NOT_EQUAL;
