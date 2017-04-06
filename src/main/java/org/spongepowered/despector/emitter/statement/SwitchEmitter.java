@@ -41,6 +41,7 @@ import org.spongepowered.despector.ast.members.insn.function.StaticMethodInvoke;
 import org.spongepowered.despector.ast.type.TypeEntry;
 import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.StatementEmitter;
+import org.spongepowered.despector.emitter.format.EmitterFormat.BracePosition;
 
 import java.util.Map;
 
@@ -74,6 +75,7 @@ public class SwitchEmitter implements StatementEmitter<Switch> {
     public void emit(EmitterContext ctx, Switch tswitch, boolean semicolon) {
         Map<Integer, String> table = null;
         ctx.printString("switch (");
+        ctx.printString(" ", ctx.getFormat().insert_space_after_opening_paren_in_switch);
         boolean synthetic = false;
         if (tswitch.getSwitchVar() instanceof ArrayAccess) {
             ArrayAccess var = (ArrayAccess) tswitch.getSwitchVar();
@@ -101,7 +103,10 @@ public class SwitchEmitter implements StatementEmitter<Switch> {
         if (!synthetic) {
             ctx.emit(tswitch.getSwitchVar(), ClassTypeSignature.INT);
         }
-        ctx.printString(") {");
+        ctx.printString(" ", ctx.getFormat().insert_space_before_closing_paren_in_switch);
+        ctx.printString(") ");
+        ctx.emitBrace(ctx.getFormat().brace_position_for_switch, false);
+        ctx.dedent();
         ctx.newLine();
         for (Case cs : tswitch.getCases()) {
             for (int i = 0; i < cs.getIndices().size(); i++) {
@@ -118,12 +123,17 @@ public class SwitchEmitter implements StatementEmitter<Switch> {
                 } else {
                     ctx.printString(String.valueOf(cs.getIndices().get(i)));
                 }
+                ctx.printString(" ", ctx.getFormat().insert_space_before_colon_in_case);
                 ctx.printString(":");
+                ctx.printString(" ", ctx.getFormat().insert_space_after_colon_in_case);
                 ctx.newLine();
             }
             if (cs.isDefault()) {
                 ctx.printIndentation();
-                ctx.printString("default:");
+                ctx.printString("default");
+                ctx.printString(" ", ctx.getFormat().insert_space_before_colon_in_case);
+                ctx.printString(":");
+                ctx.printString(" ", ctx.getFormat().insert_space_after_colon_in_case);
                 ctx.newLine();
             }
             ctx.indent();
@@ -132,14 +142,26 @@ public class SwitchEmitter implements StatementEmitter<Switch> {
                 ctx.newLine();
             }
             if (cs.doesBreak()) {
+                if (!ctx.getFormat().indent_breaks_compare_to_cases) {
+                    ctx.dedent();
+                }
                 ctx.printIndentation();
                 ctx.printString("break;");
                 ctx.newLine();
             }
-            ctx.dedent();
+            if (!cs.doesBreak() || ctx.getFormat().indent_breaks_compare_to_cases) {
+                ctx.dedent();
+            }
         }
-        ctx.printIndentation();
-        ctx.printString("}");
+        if(ctx.getFormat().brace_position_for_switch == BracePosition.NEXT_LINE_SHIFTED) {
+            ctx.indent();
+            ctx.printIndentation();
+            ctx.printString("}");
+            ctx.dedent();
+        } else {
+            ctx.printIndentation();
+            ctx.printString("}");
+        }
     }
 
 }

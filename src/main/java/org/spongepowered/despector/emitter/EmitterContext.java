@@ -36,6 +36,13 @@ import org.spongepowered.despector.ast.members.MethodEntry;
 import org.spongepowered.despector.ast.members.insn.Statement;
 import org.spongepowered.despector.ast.members.insn.StatementBlock;
 import org.spongepowered.despector.ast.members.insn.arg.Instruction;
+import org.spongepowered.despector.ast.members.insn.branch.DoWhile;
+import org.spongepowered.despector.ast.members.insn.branch.For;
+import org.spongepowered.despector.ast.members.insn.branch.ForEach;
+import org.spongepowered.despector.ast.members.insn.branch.If;
+import org.spongepowered.despector.ast.members.insn.branch.Switch;
+import org.spongepowered.despector.ast.members.insn.branch.TryCatch;
+import org.spongepowered.despector.ast.members.insn.branch.While;
 import org.spongepowered.despector.ast.members.insn.branch.condition.Condition;
 import org.spongepowered.despector.ast.members.insn.misc.Return;
 import org.spongepowered.despector.ast.type.InterfaceEntry;
@@ -54,6 +61,7 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayDeque;
 import java.util.Deque;
+import java.util.HashSet;
 import java.util.Set;
 
 public class EmitterContext {
@@ -82,9 +90,19 @@ public class EmitterContext {
     private StringBuilder line_buffer = new StringBuilder();
     private boolean is_wrapped = false;
 
+    private final Set<Class<? extends Statement>> block_statements = new HashSet<>();
+
     public EmitterContext(Writer output, EmitterFormat format) {
         this.output = output;
         this.format = format;
+
+        this.block_statements.add(DoWhile.class);
+        this.block_statements.add(While.class);
+        this.block_statements.add(For.class);
+        this.block_statements.add(ForEach.class);
+        this.block_statements.add(If.class);
+        this.block_statements.add(Switch.class);
+        this.block_statements.add(TryCatch.class);
     }
 
     public EmitterSet getEmitterSet() {
@@ -153,6 +171,10 @@ public class EmitterContext {
 
     public void markDefined(LocalInstance local) {
         this.defined_locals.add(local);
+    }
+
+    public void markBlockStatement(Class<? extends Statement> type) {
+        this.block_statements.add(type);
     }
 
     public void emitOuterType(TypeEntry type) {
@@ -238,6 +260,17 @@ public class EmitterContext {
             should_indent = true;
             int mark = this.offs;
             emit(insn, this.semicolons);
+            if (this.block_statements.contains(insn.getClass())) {
+                if (i < instructions.getStatementCount() - 1) {
+                    if (instructions.getType() == StatementBlock.Type.METHOD && i == instructions.getStatementCount() - 2) {
+                        if (((Return) instructions.getStatement(instructions.getStatementCount() - 1)).getValue().isPresent()) {
+                            newLine();
+                        }
+                    } else {
+                        newLine();
+                    }
+                }
+            }
             if (this.offs == mark) {
                 should_indent = false;
                 last_success = false;
@@ -322,7 +355,16 @@ public class EmitterContext {
 
     public String getTypeName(String name) {
         if (name.endsWith("[]")) {
-            return getTypeName(name.substring(0, name.length() - 2)) + "[]";
+            String n = getTypeName(name.substring(0, name.length() - 2));
+            if (this.format.insert_space_before_opening_bracket_in_array_type_reference) {
+                n += " ";
+            }
+            if (this.format.insert_space_between_brackets_in_array_type_reference) {
+                n += "[ ]";
+            } else {
+                n += "[]";
+            }
+            return n;
         }
         if (name.indexOf('/') != -1) {
             if (this.import_manager.checkImport(name)) {

@@ -112,13 +112,13 @@ public class SwitchTests {
         String insn = TestHelper.getAsString(cw.toByteArray(), "test_mth");
         String good = "switch (ie) {\n"
                 + "case ONE:\n"
-                + "    SwitchTests.body();\n"
+                + "    org.spongepowered.test.decompile.SwitchTests.body();\n"
                 + "    break;\n"
                 + "case TWO:\n"
-                + "    SwitchTests.body();\n"
+                + "    org.spongepowered.test.decompile.SwitchTests.body();\n"
                 + "    break;\n"
                 + "default:\n"
-                + "    SwitchTests.body();\n"
+                + "    org.spongepowered.test.decompile.SwitchTests.body();\n"
                 + "}";
         Assert.assertEquals(good, insn);
     }
@@ -175,13 +175,13 @@ public class SwitchTests {
         String insn = TestHelper.getAsString(cw.toByteArray(), "test_mth");
         String good = "switch (ie) {\n"
                 + "case ONE:\n"
-                + "    SwitchTests.body();\n"
+                + "    org.spongepowered.test.decompile.SwitchTests.body();\n"
                 + "    break;\n"
                 + "case EIGHT:\n"
-                + "    SwitchTests.body();\n"
+                + "    org.spongepowered.test.decompile.SwitchTests.body();\n"
                 + "    break;\n"
                 + "default:\n"
-                + "    SwitchTests.body();\n"
+                + "    org.spongepowered.test.decompile.SwitchTests.body();\n"
                 + "}";
         Assert.assertEquals(good, insn);
     }
@@ -238,13 +238,13 @@ public class SwitchTests {
         String insn = TestHelper.getAsString(cw.toByteArray(), "test_mth");
         String good = "switch (ie) {\n"
                 + "case ONE:\n"
-                + "    SwitchTests.body();\n"
+                + "    org.spongepowered.test.decompile.SwitchTests.body();\n"
                 + "    return;\n"
                 + "case EIGHT:\n"
-                + "    SwitchTests.body();\n"
+                + "    org.spongepowered.test.decompile.SwitchTests.body();\n"
                 + "    return;\n"
-                + "}\n"
-                + "SwitchTests.body();";
+                + "}\n\n"
+                + "org.spongepowered.test.decompile.SwitchTests.body();";
         Assert.assertEquals(good, insn);
     }
 

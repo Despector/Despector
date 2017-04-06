@@ -35,6 +35,7 @@ public class ArrayLoadEmitter implements InstructionEmitter<ArrayAccess> {
     @Override
     public void emit(EmitterContext ctx, ArrayAccess arg, TypeSignature type) {
         ctx.emit(arg.getArrayVar(), null);
+        ctx.printString(" ", ctx.getFormat().insert_space_before_opening_bracket_in_array_reference);
         ctx.printString("[");
         ctx.emit(arg.getIndex(), ClassTypeSignature.INT);
         ctx.printString("]");

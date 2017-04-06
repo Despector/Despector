@@ -52,7 +52,7 @@ public class LambdaTest {
 
     @Test
     public void testConsumer() {
-        String good = "Consumer<Object> r = (obj) -> System.out.println(\"Hello World\");\n"
+        String good = "java.util.function.Consumer<Object> r = (obj) -> System.out.println(\"Hello World\");\n"
                 + "r.accept(null);";
         check(getClass(), "test_consumer", good);
     }
@@ -64,7 +64,7 @@ public class LambdaTest {
 
     @Test
     public void testProducer() {
-        String good = "Callable<Object> r = () -> null;\n"
+        String good = "java.util.concurrent.Callable<Object> r = () -> null;\n"
                 + "r.call();";
         check(getClass(), "test_producer", good);
     }

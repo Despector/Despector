@@ -46,7 +46,9 @@ public class OperatorEmitter implements InstructionEmitter<Operator> {
             ctx.emit(arg.getLeftOperand(), null);
         }
         ctx.markWrapPoint();
-        ctx.printString(" " + arg.getOperator().getSymbol() + " ");
+        ctx.printString(" ", ctx.getFormat().insert_space_before_binary_operator);
+        ctx.printString(arg.getOperator().getSymbol());
+        ctx.printString(" ", ctx.getFormat().insert_space_after_binary_operator);
         if (arg.getRightOperand() instanceof Operator) {
             Operator right = (Operator) arg.getRightOperand();
             if (arg.getOperator().getPrecedence() > right.getOperator().getPrecedence()) {

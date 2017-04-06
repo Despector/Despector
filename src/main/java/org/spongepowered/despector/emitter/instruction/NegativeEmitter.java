@@ -35,6 +35,7 @@ public class NegativeEmitter implements InstructionEmitter<NegativeOperator> {
     @Override
     public void emit(EmitterContext ctx, NegativeOperator arg, TypeSignature type) {
         ctx.printString("-");
+        ctx.printString(" ", ctx.getFormat().insert_space_after_unary_operator);
         if (arg.getOperand() instanceof Operator) {
             ctx.printString("(");
             ctx.emit(arg.getOperand(), null);

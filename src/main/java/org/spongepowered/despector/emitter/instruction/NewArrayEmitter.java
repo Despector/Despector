@@ -38,17 +38,57 @@ public class NewArrayEmitter implements InstructionEmitter<NewArray> {
         ctx.emitType(arg.getType());
         if (arg.getInitializer() == null || arg.getInitializer().length == 0) {
             ctx.printString("[");
+            ctx.printString(" ", ctx.getFormat().insert_space_after_opening_bracket_in_array_allocation_expression);
             ctx.emit(arg.getSize(), ClassTypeSignature.INT);
+            ctx.printString(" ", ctx.getFormat().insert_space_before_closing_bracket_in_array_allocation_expression);
             ctx.printString("]");
         } else {
-            ctx.printString("[] {");
+            ctx.printString("[] ");
+            ctx.emitBrace(ctx.getFormat().brace_position_for_array_initializer, false);
+            ctx.printString(" ", ctx.getFormat().insert_space_after_opening_brace_in_array_initializer);
+            ctx.markWrapPoint(ctx.getFormat().alignment_for_expressions_in_array_initializer, 0);
+            if (ctx.getFormat().insert_new_line_after_opening_brace_in_array_initializer) {
+                ctx.newLine();
+                ctx.printIndentation();
+            }
             for (int i = 0; i < arg.getInitializer().length; i++) {
                 ctx.emit(arg.getInitializer()[i], ClassTypeSignature.of(arg.getType()));
                 if (i < arg.getInitializer().length - 1) {
-                    ctx.printString(", ");
+                    ctx.printString(" ", ctx.getFormat().insert_space_before_comma_in_array_initializer);
+                    ctx.printString(",");
+                    ctx.printString(" ", ctx.getFormat().insert_space_after_comma_in_array_initializer);
+                    ctx.markWrapPoint(ctx.getFormat().alignment_for_expressions_in_array_initializer, i + 1);
                 }
             }
-            ctx.printString("}");
+            if (ctx.getFormat().insert_new_line_before_closing_brace_in_array_initializer) {
+                ctx.newLine();
+                ctx.printIndentation();
+            }
+            switch (ctx.getFormat().brace_position_for_array_initializer) {
+            case NEXT_LINE:
+                ctx.dedent();
+                ctx.newLine();
+                ctx.printIndentation();
+                ctx.printString("}");
+                break;
+            case NEXT_LINE_ON_WRAP:
+                ctx.dedent();
+                ctx.newLine();
+                ctx.printIndentation();
+                ctx.printString("}");
+                break;
+            case NEXT_LINE_SHIFTED:
+                ctx.newLine();
+                ctx.printIndentation();
+                ctx.printString("}");
+                ctx.dedent();
+                break;
+            case SAME_LINE:
+            default:
+                ctx.printString("}");
+                ctx.dedent();
+                break;
+            }
         }
     }
 

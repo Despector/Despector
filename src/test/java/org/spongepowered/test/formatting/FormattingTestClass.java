@@ -39,7 +39,9 @@ public class FormattingTestClass {
 
     public static void main(String[] args) {
         FormattingTestClass insn = new FormattingTestClass();
-        insn.foo();
+        if (insn != null) {
+            insn.foo();
+        }
         insn.bar("This is a very long line", "with a lot of args that should form breakpoints and test line",
                 "wrapping foo bar bazz wheee alright this is over 150 characters");
     }

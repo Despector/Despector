@@ -75,7 +75,10 @@ public class GenericsEmitter implements SpecialEmitter {
             ctx.emitType(type);
             emitTypeArguments(ctx, cls.getArguments());
             for (int i = 0; i < array_depth; i++) {
-                ctx.printString("[]");
+                ctx.printString(" ", ctx.getFormat().insert_space_before_opening_bracket_in_array_type_reference);
+                ctx.printString("[");
+                ctx.printString(" ", ctx.getFormat().insert_space_between_brackets_in_array_type_reference);
+                ctx.printString("]");
             }
         } else if (sig instanceof VoidTypeSignature) {
             ctx.printString("void");

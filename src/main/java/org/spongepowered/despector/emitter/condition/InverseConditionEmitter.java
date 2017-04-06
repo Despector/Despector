@@ -55,6 +55,7 @@ public class InverseConditionEmitter implements ConditionEmitter<InverseConditio
             return;
         }
         ctx.printString("!");
+        ctx.printString(" ", ctx.getFormat().insert_space_after_unary_operator);
         ctx.printString("(");
         ctx.emit(cond);
         ctx.printString(")");

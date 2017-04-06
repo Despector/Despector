@@ -37,6 +37,7 @@ import org.spongepowered.despector.ast.members.MethodEntry;
 import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
 import org.spongepowered.despector.ast.members.insn.arg.Cast;
 import org.spongepowered.despector.ast.members.insn.arg.cst.TypeConstant;
+import org.spongepowered.despector.ast.members.insn.function.New;
 import org.spongepowered.despector.ast.type.TypeEntry;
 import org.spongepowered.despector.ast.type.TypeEntry.InnerClassInfo;
 import org.spongepowered.despector.emitter.EmitterContext;
@@ -72,6 +73,9 @@ public class ImportManager {
 
         for (Annotation anno : type.getAnnotations()) {
             check(anno);
+        }
+        for (String i : type.getInterfaces()) {
+            add("L" + i + ";");
         }
         for (MethodEntry method : type.getStaticMethods()) {
             check(method, walker);
@@ -212,7 +216,7 @@ public class ImportManager {
             Collections.sort(group_imports);
             for (String import_ : group_imports) {
                 ctx.printString("import ");
-                ctx.printString(import_);
+                ctx.printString(import_.replace('/', '.'));
                 if (ctx.usesSemicolons()) {
                     ctx.printString(";");
                 }
@@ -244,6 +248,11 @@ public class ImportManager {
         @Override
         public void visitTypeConstant(TypeConstant cst) {
             ImportManager.this.add(cst.getConstant().getDescriptor());
+        }
+
+        @Override
+        public void visitNew(New ne) {
+            ImportManager.this.check(ne.getType());
         }
 
     }

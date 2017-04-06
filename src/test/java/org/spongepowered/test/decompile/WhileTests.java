@@ -64,7 +64,7 @@ public class WhileTests {
 
         String insn = TestHelper.getAsString(builder.finish(), "test_mth");
         String good = "while (i < 5) {\n"
-                + "    WhileTests.body();\n"
+                + "    org.spongepowered.test.decompile.WhileTests.body();\n"
                 + "}";
         Assert.assertEquals(good, insn);
     }
@@ -91,7 +91,7 @@ public class WhileTests {
 
         String insn = TestHelper.getAsString(builder.finish(), "test_mth");
         String good = "while (i < 5) {\n"
-                + "    WhileTests.body();\n"
+                + "    org.spongepowered.test.decompile.WhileTests.body();\n"
                 + "}";
         Assert.assertEquals(good, insn);
     }
@@ -119,7 +119,7 @@ public class WhileTests {
 
         String insn = TestHelper.getAsString(builder.finish(), "test_mth");
         String good = "for (i = 0; i < 5; i++) {\n"
-                + "    WhileTests.body();\n"
+                + "    org.spongepowered.test.decompile.WhileTests.body();\n"
                 + "}";
         Assert.assertEquals(good, insn);
     }
@@ -149,7 +149,7 @@ public class WhileTests {
 
         String insn = TestHelper.getAsString(builder.finish(), "test_mth");
         String good = "for (i = 0; i < 5; i++) {\n"
-                + "    WhileTests.body();\n"
+                + "    org.spongepowered.test.decompile.WhileTests.body();\n"
                 + "}";
         Assert.assertEquals(good, insn);
     }
@@ -176,7 +176,7 @@ public class WhileTests {
 
         String insn = TestHelper.getAsString(builder.finish(), "test_mth");
         String good = "while (a && b) {\n"
-                + "    WhileTests.body();\n"
+                + "    org.spongepowered.test.decompile.WhileTests.body();\n"
                 + "}";
         Assert.assertEquals(good, insn);
     }
@@ -205,7 +205,7 @@ public class WhileTests {
 
         String insn = TestHelper.getAsString(builder.finish(), "test_mth");
         String good = "while (a && b) {\n"
-                + "    WhileTests.body();\n"
+                + "    org.spongepowered.test.decompile.WhileTests.body();\n"
                 + "}";
         Assert.assertEquals(good, insn);
     }
@@ -236,9 +236,9 @@ public class WhileTests {
         String insn = TestHelper.getAsString(builder.finish(), "test_mth");
         String good = "while (a) {\n"
                 + "    if (b) {\n"
-                + "        WhileTests.body();\n"
-                + "    }\n"
-                + "    WhileTests.body();\n"
+                + "        org.spongepowered.test.decompile.WhileTests.body();\n"
+                + "    }\n\n"
+                + "    org.spongepowered.test.decompile.WhileTests.body();\n"
                 + "}";
         Assert.assertEquals(good, insn);
     }
@@ -271,9 +271,9 @@ public class WhileTests {
         String insn = TestHelper.getAsString(builder.finish(), "test_mth");
         String good = "while (a) {\n"
                 + "    if (b) {\n"
-                + "        WhileTests.body();\n"
-                + "    }\n"
-                + "    WhileTests.body();\n"
+                + "        org.spongepowered.test.decompile.WhileTests.body();\n"
+                + "    }\n\n"
+                + "    org.spongepowered.test.decompile.WhileTests.body();\n"
                 + "}";
         Assert.assertEquals(good, insn);
     }
@@ -304,7 +304,7 @@ public class WhileTests {
 
         String insn = TestHelper.getAsString(builder.finish(), "test_mth");
         String good = "while (i < 5) {\n"
-                + "    WhileTests.body();\n"
+                + "    org.spongepowered.test.decompile.WhileTests.body();\n"
                 + "    if (a) {\n"
                 + "        break;\n"
                 + "    }\n"
@@ -338,7 +338,7 @@ public class WhileTests {
 
         String insn = TestHelper.getAsString(builder.finish(), "test_mth");
         String good = "while (i < 5) {\n"
-                + "    WhileTests.body();\n"
+                + "    org.spongepowered.test.decompile.WhileTests.body();\n"
                 + "    if (a) {\n"
                 + "        break;\n"
                 + "    }\n"
@@ -372,7 +372,7 @@ public class WhileTests {
 
         String insn = TestHelper.getAsString(builder.finish(), "test_mth");
         String good = "while (i < 5) {\n"
-                + "    WhileTests.body();\n"
+                + "    org.spongepowered.test.decompile.WhileTests.body();\n"
                 + "    if (a) {\n"
                 + "        continue;\n"
                 + "    }\n"
@@ -409,11 +409,11 @@ public class WhileTests {
 
         String insn = TestHelper.getAsString(builder.finish(), "test_mth");
         String good = "while (i < 5) {\n"
-                + "    WhileTests.body();\n"
+                + "    org.spongepowered.test.decompile.WhileTests.body();\n"
                 + "    if (a) {\n"
                 + "        continue;\n"
-                + "    }\n"
-                + "    WhileTests.body();\n"
+                + "    }\n\n"
+                + "    org.spongepowered.test.decompile.WhileTests.body();\n"
                 + "}";
         Assert.assertEquals(good, insn);
     }
@@ -447,9 +447,9 @@ public class WhileTests {
         String insn = TestHelper.getAsString(builder.finish(), "test_mth");
         String good = "if (a) {\n"
                 + "    return;\n"
-                + "}\n"
+                + "}\n\n"
                 + "while (i < 5) {\n"
-                + "    WhileTests.body();\n"
+                + "    org.spongepowered.test.decompile.WhileTests.body();\n"
                 + "}";
         Assert.assertEquals(good, insn);
     }
@@ -480,7 +480,7 @@ public class WhileTests {
 
         String insn = TestHelper.getAsString(builder.finish(), "test_mth");
         String good = "while (i < 5) {\n"
-                + "    WhileTests.body();\n"
+                + "    org.spongepowered.test.decompile.WhileTests.body();\n"
                 + "    if (a) {\n"
                 + "        break;\n"
                 + "    }\n"

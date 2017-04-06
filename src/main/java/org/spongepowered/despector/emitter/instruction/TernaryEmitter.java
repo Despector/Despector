@@ -63,7 +63,9 @@ public class TernaryEmitter implements InstructionEmitter<Ternary> {
             } else if (tr == 1 && fl == 1) {
                 ctx.printString("true");
             } else if (tr == 0) {
-                ctx.printString("!(");
+                ctx.printString("!");
+                ctx.printString(" ", ctx.getFormat().insert_space_after_unary_operator);
+                ctx.printString("(");
                 ctx.emit(ternary.getCondition());
                 ctx.printString(")");
             } else if (fl == 0) {
@@ -75,7 +77,9 @@ public class TernaryEmitter implements InstructionEmitter<Ternary> {
         } else if (ternary.getTrueValue() instanceof IntConstant) {
             if (((IntConstant) ternary.getTrueValue()).getConstant() == 0) {
                 // !a && b
-                ctx.printString("!(");
+                ctx.printString("!");
+                ctx.printString(" ", ctx.getFormat().insert_space_after_unary_operator);
+                ctx.printString("(");
                 ctx.emit(ternary.getCondition());
                 ctx.printString(") && ");
                 if(ternary.getFalseValue() instanceof Ternary) {
@@ -101,7 +105,9 @@ public class TernaryEmitter implements InstructionEmitter<Ternary> {
         } else if (ternary.getFalseValue() instanceof IntConstant) {
             if (((IntConstant) ternary.getFalseValue()).getConstant() == 0) {
                 // !a && b
-                ctx.printString("!(");
+                ctx.printString("!");
+                ctx.printString(" ", ctx.getFormat().insert_space_after_unary_operator);
+                ctx.printString("(");
                 ctx.emit(ternary.getCondition());
                 ctx.printString(") && ");
                 if(ternary.getTrueValue() instanceof Ternary) {

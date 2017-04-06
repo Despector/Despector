@@ -73,6 +73,7 @@ public class EmitterFormat {
     public boolean insert_space_after_comma_in_superinterfaces = true;
 
     public int blank_lines_before_first_class_body_declaration = 1;
+    public BracePosition brace_position_for_type_declaration = BracePosition.SAME_LINE;
     public WrappingStyle alignment_for_superclass_in_type_declaration = WrappingStyle.DO_NOT_WRAP;
     public WrappingStyle alignment_for_superinterfaces_in_type_declaration = WrappingStyle.WRAP_WHEN_NEEDED;
 
@@ -110,6 +111,8 @@ public class EmitterFormat {
     public boolean insert_space_before_comma_in_method_declaration_parameters = false;
     public boolean insert_space_after_comma_in_method_declaration_parameters = true;
     public boolean insert_space_before_opening_paren_in_method_declaration = false;
+    public boolean insert_space_before_closing_paren_in_method_declaration = false;
+    public boolean insert_space_before_opening_brace_in_method_declaration = true;
     public BracePosition brace_position_for_method_declaration = BracePosition.SAME_LINE;
     public WrappingStyle alignment_for_parameters_in_method_declaration = WrappingStyle.WRAP_WHEN_NEEDED;
 
@@ -141,6 +144,8 @@ public class EmitterFormat {
     // loops
     // ========================================================================
 
+    public boolean new_lines_at_block_boundaries = true;
+
     // ========================================================================
     // ifs
     // ========================================================================
@@ -148,6 +153,13 @@ public class EmitterFormat {
     // ========================================================================
     // switch
     // ========================================================================
+
+    public boolean insert_space_after_opening_paren_in_switch = false;
+    public boolean insert_space_before_closing_paren_in_switch = false;
+    public boolean insert_space_before_colon_in_case = false;
+    public boolean insert_space_after_colon_in_case = false;
+    public boolean indent_breaks_compare_to_cases = true;
+    public BracePosition brace_position_for_switch = BracePosition.SAME_LINE;
 
     // ========================================================================
     // annotations
@@ -158,24 +170,9 @@ public class EmitterFormat {
     // ========================================================================
 
     // ========================================================================
-    // misc
+    // arrays
     // ========================================================================
-    public String disabling_tag = "@formatter:off";
-    public String enabling_tag = "@formatter:on";
 
-    // TODO need to finish sorting these...
-    public BracePosition brace_position_for_type_declaration = BracePosition.SAME_LINE;
-    public boolean insert_space_before_opening_brace_in_method_declaration = true;
-    public boolean insert_space_before_closing_paren_in_method_declaration = false;
-    public boolean insert_space_before_opening_brace_in_block = true;
-    public boolean new_lines_at_block_boundaries = true;
-    public int blank_lines_before_new_chunk = 1;
-    public boolean insert_space_after_unary_operator = false;
-    public boolean insert_space_before_binary_operator = true;
-    public boolean insert_space_after_binary_operator = true;
-    public boolean insert_space_before_prefix_operator = false;
-    public boolean insert_space_after_prefix_operator = false;
-    public boolean insert_space_after_postfix_operator = false;
     public boolean insert_space_between_brackets_in_array_type_reference = false;
     public boolean insert_space_after_opening_brace_in_array_initializer = false;
     public boolean insert_new_line_before_closing_brace_in_array_initializer = false;
@@ -184,15 +181,20 @@ public class EmitterFormat {
     public boolean insert_space_after_opening_bracket_in_array_allocation_expression = false;
     public boolean insert_space_before_closing_bracket_in_array_allocation_expression = false;
     public boolean insert_space_before_comma_in_array_initializer = false;
+    public boolean insert_space_after_comma_in_array_initializer = true;
     public boolean insert_space_before_opening_bracket_in_array_type_reference = false;
     public boolean insert_new_line_after_opening_brace_in_array_initializer = false;
     public boolean insert_space_before_opening_bracket_in_array_reference = false;
-    public boolean insert_space_after_opening_paren_in_switch = false;
-    public boolean insert_space_before_closing_paren_in_switch = false;
-    public boolean insert_space_before_colon_in_case = false;
-    public boolean indent_breaks_compare_to_cases = true;
-    public boolean insert_space_after_colon_in_case = true;
-    public BracePosition brace_position_for_switch = BracePosition.SAME_LINE;
+
+    // ========================================================================
+    // misc
+    // ========================================================================
+
+    public boolean insert_space_after_unary_operator = false;
+    public boolean insert_space_before_binary_operator = true;
+    public boolean insert_space_after_binary_operator = true;
+
+    // TODO need to finish sorting these...
     public boolean indent_switchstatements_compare_to_switch = true;
     public boolean insert_space_before_opening_brace_in_switch = true;
     public boolean insert_space_before_opening_paren_in_for = true;
@@ -275,7 +277,6 @@ public class EmitterFormat {
     public WrappingStyle alignment_for_compact_if = WrappingStyle.WRAP_WHEN_NEEDED;
     public boolean insert_space_after_comma_in_for_inits = true;
     public boolean indent_switchstatements_compare_to_cases = true;
-    public boolean insert_space_after_comma_in_array_initializer = true;
     public boolean insert_space_before_colon_in_default = false;
     public boolean insert_space_before_and_in_type_parameter = true;
     public boolean insert_space_between_empty_parens_in_constructor_declaration = false;

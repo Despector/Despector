@@ -133,7 +133,7 @@ public class TryCatchTest {
                     + "    return i;\n"
                     + "} catch (NullPointerException e) {\n"
                     + "    e.printStackTrace();\n"
-                    + "}\n"
+                    + "}\n\n"
                     + "return 0;";
         assertEquals(good, insn);
     }

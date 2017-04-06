@@ -181,6 +181,7 @@ public class MethodEntryEmitter implements AstEmitter<MethodEntry> {
                 ctx.markWrapPoint(ctx.getFormat().alignment_for_parameters_in_method_declaration, i + 1);
             }
         }
+        ctx.printString(" ", ctx.getFormat().insert_space_before_closing_paren_in_method_declaration);
         ctx.printString(")");
         if (!method.getMethodSignature().getThrowsSignature().isEmpty()) {
             ctx.printString(" throws ");
@@ -197,7 +198,7 @@ public class MethodEntryEmitter implements AstEmitter<MethodEntry> {
             }
         }
         if (!method.isAbstract()) {
-            ctx.printString(" ");
+            ctx.printString(" ", ctx.getFormat().insert_space_before_opening_brace_in_method_declaration);
             ctx.emitBrace(ctx.getFormat().brace_position_for_method_declaration, false);
             ctx.newLine();
             if (block == null) {

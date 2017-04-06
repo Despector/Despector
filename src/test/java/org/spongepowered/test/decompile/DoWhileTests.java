@@ -63,7 +63,7 @@ public class DoWhileTests {
 
         String insn = TestHelper.getAsString(builder.finish(), "test_mth");
         String good = "do {\n"
-                + "    DoWhileTests.body();\n"
+                + "    org.spongepowered.test.decompile.DoWhileTests.body();\n"
                 + "} while (i < 5);";
         Assert.assertEquals(good, insn);
     }
@@ -89,7 +89,7 @@ public class DoWhileTests {
 
         String insn = TestHelper.getAsString(builder.finish(), "test_mth");
         String good = "do {\n"
-                + "    DoWhileTests.body();\n"
+                + "    org.spongepowered.test.decompile.DoWhileTests.body();\n"
                 + "} while (a && b);";
         Assert.assertEquals(good, insn);
     }
@@ -115,7 +115,7 @@ public class DoWhileTests {
 
         String insn = TestHelper.getAsString(builder.finish(), "test_mth");
         String good = "do {\n"
-                + "    DoWhileTests.body();\n"
+                + "    org.spongepowered.test.decompile.DoWhileTests.body();\n"
                 + "} while (a || b);";
         Assert.assertEquals(good, insn);
     }
@@ -145,7 +145,7 @@ public class DoWhileTests {
 
         String insn = TestHelper.getAsString(builder.finish(), "test_mth");
         String good = "do {\n"
-                + "    DoWhileTests.body();\n"
+                + "    org.spongepowered.test.decompile.DoWhileTests.body();\n"
                 + "    if (a) {\n"
                 + "        break;\n"
                 + "    }\n"

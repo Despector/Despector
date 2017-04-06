@@ -60,7 +60,7 @@ public class IfTests {
 
         String insn = TestHelper.getAsString(builder.finish(), "test_mth");
         String good = "if (a) {\n"
-                + "    IfTests.body();\n"
+                + "    org.spongepowered.test.decompile.IfTests.body();\n"
                 + "}";
         Assert.assertEquals(good, insn);
     }
@@ -87,7 +87,7 @@ public class IfTests {
 
         String insn = TestHelper.getAsString(builder.finish(), "test_mth");
         String good = "if (a < 3 || b != null) {\n"
-                + "    IfTests.body();\n"
+                + "    org.spongepowered.test.decompile.IfTests.body();\n"
                 + "}";
         Assert.assertEquals(good, insn);
     }
@@ -113,7 +113,7 @@ public class IfTests {
 
         String insn = TestHelper.getAsString(builder.finish(), "test_mth");
         String good = "if (a || b) {\n"
-                + "    IfTests.body();\n"
+                + "    org.spongepowered.test.decompile.IfTests.body();\n"
                 + "}";
         Assert.assertEquals(good, insn);
     }
@@ -139,7 +139,7 @@ public class IfTests {
 
         String insn = TestHelper.getAsString(builder.finish(), "test_mth");
         String good = "if (a && b) {\n"
-                + "    IfTests.body();\n"
+                + "    org.spongepowered.test.decompile.IfTests.body();\n"
                 + "}";
         Assert.assertEquals(good, insn);
     }
@@ -168,7 +168,7 @@ public class IfTests {
 
         String insn = TestHelper.getAsString(builder.finish(), "test_mth");
         String good = "if (a && b && c) {\n"
-                + "    IfTests.body();\n"
+                + "    org.spongepowered.test.decompile.IfTests.body();\n"
                 + "}";
         Assert.assertEquals(good, insn);
     }
@@ -197,7 +197,7 @@ public class IfTests {
 
         String insn = TestHelper.getAsString(builder.finish(), "test_mth");
         String good = "if (a || b || c) {\n"
-                + "    IfTests.body();\n"
+                + "    org.spongepowered.test.decompile.IfTests.body();\n"
                 + "}";
         Assert.assertEquals(good, insn);
     }
@@ -226,7 +226,7 @@ public class IfTests {
 
         String insn = TestHelper.getAsString(builder.finish(), "test_mth");
         String good = "if (a || b && c) {\n"
-                + "    IfTests.body();\n"
+                + "    org.spongepowered.test.decompile.IfTests.body();\n"
                 + "}";
         Assert.assertEquals(good, insn);
     }
@@ -257,7 +257,7 @@ public class IfTests {
 
         String insn = TestHelper.getAsString(builder.finish(), "test_mth");
         String good = "if (a && b || c) {\n"
-                + "    IfTests.body();\n"
+                + "    org.spongepowered.test.decompile.IfTests.body();\n"
                 + "}";
         Assert.assertEquals(good, insn);
     }
@@ -291,7 +291,7 @@ public class IfTests {
 
         String insn = TestHelper.getAsString(builder.finish(), "test_mth");
         String good = "if ((a || b) && (c || d)) {\n"
-                + "    IfTests.body();\n"
+                + "    org.spongepowered.test.decompile.IfTests.body();\n"
                 + "}";
         Assert.assertEquals(good, insn);
     }
@@ -325,7 +325,7 @@ public class IfTests {
 
         String insn = TestHelper.getAsString(builder.finish(), "test_mth");
         String good = "if (a && b || c && d) {\n"
-                + "    IfTests.body();\n"
+                + "    org.spongepowered.test.decompile.IfTests.body();\n"
                 + "}";
         Assert.assertEquals(good, insn);
     }
@@ -364,7 +364,7 @@ public class IfTests {
 
         String insn = TestHelper.getAsString(builder.finish(), "test_mth");
         String good = "if ((a || b) && c || d && e) {\n"
-                + "    IfTests.body();\n"
+                + "    org.spongepowered.test.decompile.IfTests.body();\n"
                 + "}";
         Assert.assertEquals(good, insn);
     }
@@ -389,9 +389,9 @@ public class IfTests {
 
         String insn = TestHelper.getAsString(builder.finish(), "test_mth");
         String good = "if (a) {\n"
-                + "    IfTests.body();\n"
+                + "    org.spongepowered.test.decompile.IfTests.body();\n"
                 + "} else {\n"
-                + "    IfTests.body();\n"
+                + "    org.spongepowered.test.decompile.IfTests.body();\n"
                 + "}";
         Assert.assertEquals(good, insn);
     }
@@ -427,13 +427,13 @@ public class IfTests {
         String insn = TestHelper.getAsString(builder.finish(), "test_mth");
         String good = "if (a) {\n"
                 + "    if (b) {\n"
-                + "        IfTests.body();\n"
+                + "        org.spongepowered.test.decompile.IfTests.body();\n"
                 + "    } else {\n"
-                + "        IfTests.body();\n"
-                + "    }\n"
-                + "    IfTests.body();\n"
+                + "        org.spongepowered.test.decompile.IfTests.body();\n"
+                + "    }\n\n"
+                + "    org.spongepowered.test.decompile.IfTests.body();\n"
                 + "} else {\n"
-                + "    IfTests.body();\n"
+                + "    org.spongepowered.test.decompile.IfTests.body();\n"
                 + "}";
         Assert.assertEquals(good, insn);
     }
@@ -464,10 +464,10 @@ public class IfTests {
         String insn = TestHelper.getAsString(builder.finish(), "test_mth");
         String good = "if (a) {\n"
                 + "    if (b) {\n"
-                + "        IfTests.body();\n"
+                + "        org.spongepowered.test.decompile.IfTests.body();\n"
                 + "    }\n"
                 + "} else {\n"
-                + "    IfTests.body();\n"
+                + "    org.spongepowered.test.decompile.IfTests.body();\n"
                 + "}";
         Assert.assertEquals(good, insn);
     }
@@ -496,10 +496,10 @@ public class IfTests {
         String insn = TestHelper.getAsString(builder.finish(), "test_mth");
         String good = "if (a) {\n"
                 + "    if (b) {\n"
-                + "        IfTests.body();\n"
+                + "        org.spongepowered.test.decompile.IfTests.body();\n"
                 + "    }\n"
                 + "} else {\n"
-                + "    IfTests.body();\n"
+                + "    org.spongepowered.test.decompile.IfTests.body();\n"
                 + "}";
         Assert.assertEquals(good, insn);
     }
@@ -537,12 +537,12 @@ public class IfTests {
         String good = "if (a) {\n"
                 + "    if (b) {\n"
                 + "        if (c) {\n"
-                + "            IfTests.body();\n"
+                + "            org.spongepowered.test.decompile.IfTests.body();\n"
                 + "        } else {\n"
-                + "            IfTests.body();\n"
+                + "            org.spongepowered.test.decompile.IfTests.body();\n"
                 + "        }\n"
-                + "    }\n"
-                + "    IfTests.body();\n"
+                + "    }\n\n"
+                + "    org.spongepowered.test.decompile.IfTests.body();\n"
                 + "}";
         Assert.assertEquals(good, insn);
     }
@@ -578,12 +578,12 @@ public class IfTests {
         String good = "if (a) {\n"
                 + "    if (b) {\n"
                 + "        if (c) {\n"
-                + "            IfTests.body();\n"
+                + "            org.spongepowered.test.decompile.IfTests.body();\n"
                 + "        } else {\n"
-                + "            IfTests.body();\n"
+                + "            org.spongepowered.test.decompile.IfTests.body();\n"
                 + "        }\n"
-                + "    }\n"
-                + "    IfTests.body();\n"
+                + "    }\n\n"
+                + "    org.spongepowered.test.decompile.IfTests.body();\n"
                 + "}";
         Assert.assertEquals(good, insn);
     }
@@ -615,11 +615,11 @@ public class IfTests {
 
         String insn = TestHelper.getAsString(builder.finish(), "test_mth");
         String good = "if (a) {\n"
-                + "    IfTests.body();\n"
+                + "    org.spongepowered.test.decompile.IfTests.body();\n"
                 + "} else if (b) {\n"
-                + "    IfTests.body();\n"
+                + "    org.spongepowered.test.decompile.IfTests.body();\n"
                 + "} else {\n"
-                + "    IfTests.body();\n"
+                + "    org.spongepowered.test.decompile.IfTests.body();\n"
                 + "}";
         Assert.assertEquals(good, insn);
     }
@@ -647,9 +647,9 @@ public class IfTests {
 
         String insn = TestHelper.getAsString(builder.finish(), "test_mth");
         String good = "if (a) {\n"
-                + "    IfTests.body();\n"
-                + "    if (b instanceof IfTests) {\n"
-                + "        IfTests.body();\n"
+                + "    org.spongepowered.test.decompile.IfTests.body();\n"
+                + "    if (b instanceof org.spongepowered.test.decompile.IfTests) {\n"
+                + "        org.spongepowered.test.decompile.IfTests.body();\n"
                 + "    }\n"
                 + "}";
         Assert.assertEquals(good, insn);
@@ -676,9 +676,9 @@ public class IfTests {
 
         String insn = TestHelper.getAsString(builder.finish(), "test_mth");
         String good = "if (a) {\n"
-                + "    IfTests.body();\n"
-                + "    if (b instanceof IfTests) {\n"
-                + "        IfTests.body();\n"
+                + "    org.spongepowered.test.decompile.IfTests.body();\n"
+                + "    if (b instanceof org.spongepowered.test.decompile.IfTests) {\n"
+                + "        org.spongepowered.test.decompile.IfTests.body();\n"
                 + "    }\n"
                 + "}";
         Assert.assertEquals(good, insn);
@@ -709,14 +709,14 @@ public class IfTests {
 
         String insn = TestHelper.getAsString(builder.finish(), "test_mth");
         String good = "if (a) {\n"
-                + "    IfTests.body();\n"
+                + "    org.spongepowered.test.decompile.IfTests.body();\n"
                 + "    return;\n"
-                + "}\n"
+                + "}\n\n"
                 + "if (b) {\n"
-                + "    IfTests.body();\n"
+                + "    org.spongepowered.test.decompile.IfTests.body();\n"
                 + "    return;\n"
-                + "}\n"
-                + "IfTests.body();";
+                + "}\n\n"
+                + "org.spongepowered.test.decompile.IfTests.body();";
         Assert.assertEquals(good, insn);
     }
 
@@ -744,12 +744,12 @@ public class IfTests {
 
         String insn = TestHelper.getAsString(builder.finish(), "test_mth");
         String good = "if (a) {\n"
-                + "    IfTests.body();\n"
+                + "    org.spongepowered.test.decompile.IfTests.body();\n"
                 + "    if (b) {\n"
                 + "        return;\n"
                 + "    }\n"
                 + "} else {\n"
-                + "    IfTests.body();\n"
+                + "    org.spongepowered.test.decompile.IfTests.body();\n"
                 + "}";
         Assert.assertEquals(good, insn);
     }

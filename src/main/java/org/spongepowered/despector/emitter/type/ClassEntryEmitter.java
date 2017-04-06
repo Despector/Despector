@@ -38,6 +38,7 @@ import org.spongepowered.despector.ast.type.TypeEntry.InnerClassInfo;
 import org.spongepowered.despector.config.ConfigManager;
 import org.spongepowered.despector.emitter.AstEmitter;
 import org.spongepowered.despector.emitter.EmitterContext;
+import org.spongepowered.despector.emitter.format.EmitterFormat.BracePosition;
 import org.spongepowered.despector.emitter.special.GenericsEmitter;
 import org.spongepowered.despector.util.AstUtil;
 
@@ -119,12 +120,11 @@ public class ClassEntryEmitter implements AstEmitter<ClassEntry> {
             }
         }
         ctx.printString(" ", ctx.getFormat().insert_space_before_opening_brace_in_type_declaration);
-        ctx.printString("{");
+        ctx.emitBrace(ctx.getFormat().brace_position_for_type_declaration, false);
         ctx.newLine(ctx.getFormat().blank_lines_before_first_class_body_declaration + 1);
 
         // Ordering is static fields -> static methods -> instance fields ->
         // instance methods
-        ctx.indent();
 
         emitStaticFields(ctx, type);
         emitStaticMethods(ctx, type);
@@ -140,10 +140,15 @@ public class ClassEntryEmitter implements AstEmitter<ClassEntry> {
             ctx.newLine();
             ctx.emit(inner_type);
         }
-
-        ctx.dedent();
-        ctx.printIndentation();
-        ctx.printString("}");
+        if (ctx.getFormat().brace_position_for_type_declaration == BracePosition.NEXT_LINE_SHIFTED) {
+            ctx.printIndentation();
+            ctx.printString("}");
+            ctx.dedent();
+        } else {
+            ctx.dedent();
+            ctx.printIndentation();
+            ctx.printString("}");
+        }
         ctx.newLine();
         return true;
     }

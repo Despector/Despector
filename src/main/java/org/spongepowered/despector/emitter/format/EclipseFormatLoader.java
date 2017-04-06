@@ -73,15 +73,11 @@ public class EclipseFormatLoader implements FormatLoader {
         BiConsumer<EmitterFormat, String> noop = (f, v)->{};
         settings_handlers.put("org.eclipse.jdt.core.compiler.source", noop);
         settings_handlers.put("org.eclipse.jdt.core.formatter.continuation_indentation", (f, v) -> f.continuation_indentation = Integer.parseInt(v));
-        settings_handlers.put("org.eclipse.jdt.core.formatter.join_wrapped_lines", noop);
         settings_handlers.put("org.eclipse.jdt.core.formatter.lineSplit", (f, v) -> f.line_split = Integer.parseInt(v));
         settings_handlers.put("org.eclipse.jdt.core.formatter.indentation.size", (f, v) -> f.indentation_size = Integer.parseInt(v));
         settings_handlers.put("org.eclipse.jdt.core.formatter.tabulation.char", (f, v) -> f.indent_with_spaces = v.equals("space"));
-        settings_handlers.put("org.eclipse.jdt.core.formatter.tabulation.size", noop);
         settings_handlers.put("org.eclipse.jdt.core.formatter.indent_empty_lines", (f, v) -> f.indent_empty_lines = v.equals("true"));
         settings_handlers.put("org.eclipse.jdt.core.formatter.insert_new_line_at_end_of_file_if_missing", (f, v) -> f.insert_new_line_at_end_of_file_if_missing = v.equals("insert"));
-        settings_handlers.put("org.eclipse.jdt.core.compiler.codegen.inlineJsrBytecode", noop);
-        settings_handlers.put("org.eclipse.jdt.core.compiler.codegen.targetPlatform", noop);
         settings_handlers.put("org.eclipse.jdt.core.formatter.blank_lines_before_first_class_body_declaration", (f, v) -> f.blank_lines_before_first_class_body_declaration = Integer.parseInt(v));
         settings_handlers.put("org.eclipse.jdt.core.formatter.blank_lines_before_package", (f, v) -> f.blank_lines_before_package = Integer.parseInt(v));
         settings_handlers.put("org.eclipse.jdt.core.formatter.blank_lines_after_package", (f, v) -> f.blank_lines_after_package = Integer.parseInt(v));
@@ -91,7 +87,6 @@ public class EclipseFormatLoader implements FormatLoader {
         settings_handlers.put("org.eclipse.jdt.core.formatter.insert_space_after_comma_in_superinterfaces", (f, v) -> f.insert_space_after_comma_in_superinterfaces = v.equals("insert"));
         settings_handlers.put("org.eclipse.jdt.core.formatter.alignment_for_superclass_in_type_declaration", (f, v) -> f.alignment_for_superclass_in_type_declaration = wrapFromVal(Integer.parseInt(v)));
         settings_handlers.put("org.eclipse.jdt.core.formatter.align_type_members_on_columns", (f, v) -> f.align_type_members_on_columns = v.equals("true"));
-        settings_handlers.put("org.eclipse.jdt.core.formatter.blank_lines_before_member_type", noop);
         settings_handlers.put("org.eclipse.jdt.core.formatter.insert_space_after_comma_in_enum_constant_arguments", (f, v) -> f.insert_space_after_comma_in_enum_constant_arguments = v.equals("insert"));
         settings_handlers.put("org.eclipse.jdt.core.formatter.insert_space_before_comma_in_enum_declarations", (f, v) -> f.insert_space_before_comma_in_enum_declarations = v.equals("insert"));
         settings_handlers.put("org.eclipse.jdt.core.formatter.insert_space_after_comma_in_enum_declarations", (f, v) -> f.insert_space_after_comma_in_enum_declarations = v.equals("insert"));
@@ -134,16 +129,11 @@ public class EclipseFormatLoader implements FormatLoader {
         settings_handlers.put("org.eclipse.jdt.core.formatter.insert_space_before_opening_brace_in_method_declaration", (f, v) -> f.insert_space_before_opening_brace_in_method_declaration = v.equals("insert"));
         settings_handlers.put("org.eclipse.jdt.core.formatter.insert_space_before_closing_paren_in_method_declaration", (f, v) -> f.insert_space_before_closing_paren_in_method_declaration = v.equals("insert"));
 
-        settings_handlers.put("org.eclipse.jdt.core.formatter.insert_space_before_opening_brace_in_block", (f, v) -> f.insert_space_before_opening_brace_in_block = v.equals("insert"));
         settings_handlers.put("org.eclipse.jdt.core.formatter.comment.new_lines_at_block_boundaries", (f, v) -> f.new_lines_at_block_boundaries = v.equals("true"));
-        settings_handlers.put("org.eclipse.jdt.core.formatter.blank_lines_before_new_chunk", (f, v) -> f.blank_lines_before_new_chunk = Integer.parseInt(v));
 
         settings_handlers.put("org.eclipse.jdt.core.formatter.insert_space_after_unary_operator", (f, v) -> f.insert_space_after_unary_operator = v.equals("insert"));
         settings_handlers.put("org.eclipse.jdt.core.formatter.insert_space_before_binary_operator", (f, v) -> f.insert_space_before_binary_operator = v.equals("insert"));
         settings_handlers.put("org.eclipse.jdt.core.formatter.insert_space_after_binary_operator", (f, v) -> f.insert_space_after_binary_operator = v.equals("insert"));
-        settings_handlers.put("org.eclipse.jdt.core.formatter.insert_space_before_prefix_operator", (f, v) -> f.insert_space_before_prefix_operator = v.equals("insert"));
-        settings_handlers.put("org.eclipse.jdt.core.formatter.insert_space_after_prefix_operator", (f, v) -> f.insert_space_after_prefix_operator = v.equals("insert"));
-        settings_handlers.put("org.eclipse.jdt.core.formatter.insert_space_after_postfix_operator", (f, v) -> f.insert_space_after_postfix_operator = v.equals("insert"));
 
         settings_handlers.put("org.eclipse.jdt.core.formatter.insert_space_between_brackets_in_array_type_reference", (f, v) -> f.insert_space_between_brackets_in_array_type_reference = v.equals("insert"));
         settings_handlers.put("org.eclipse.jdt.core.formatter.insert_space_after_opening_brace_in_array_initializer", (f, v) -> f.insert_space_after_opening_brace_in_array_initializer = v.equals("insert"));
@@ -337,29 +327,13 @@ public class EclipseFormatLoader implements FormatLoader {
         settings_handlers.put("org.eclipse.jdt.core.formatter.indent_body_declarations_compare_to_annotation_declaration_header", (f, v) -> f.indent_body_declarations_compare_to_annotation_declaration_header = v.equals("true"));
         settings_handlers.put("org.eclipse.jdt.core.formatter.insert_space_before_closing_paren_in_annotation", (f, v) -> f.insert_space_before_closing_paren_in_annotation = v.equals("insert"));
 
-        settings_handlers.put("org.eclipse.jdt.core.formatter.comment.format_line_comments", noop);
         settings_handlers.put("org.eclipse.jdt.core.formatter.comment.clear_blank_lines_in_block_comment", (f, v) -> f.clear_blank_lines_in_block_comment = v.equals("true"));
         settings_handlers.put("org.eclipse.jdt.core.formatter.comment.insert_new_line_before_root_tags", (f, v) -> f.insert_new_line_before_root_tags = v.equals("insert"));
         settings_handlers.put("org.eclipse.jdt.core.formatter.comment.insert_new_line_for_parameter", (f, v) -> f.insert_new_line_for_parameter = v.equals("insert"));
         settings_handlers.put("org.eclipse.jdt.core.formatter.comment.indent_parameter_description", (f, v) -> f.indent_parameter_description = v.equals("true"));
-        settings_handlers.put("org.eclipse.jdt.core.formatter.comment.preserve_white_space_between_code_and_line_comments", noop);
-        settings_handlers.put("org.eclipse.jdt.core.formatter.format_line_comment_starting_on_first_column", noop);
         settings_handlers.put("org.eclipse.jdt.core.formatter.comment.indent_root_tags", (f, v) -> f.indent_root_tags = v.equals("true"));
-        settings_handlers.put("org.eclipse.jdt.core.formatter.comment.clear_blank_lines_in_javadoc_comment", noop);
-        settings_handlers.put("org.eclipse.jdt.core.formatter.comment.format_javadoc_comments", noop);
         settings_handlers.put("org.eclipse.jdt.core.formatter.comment.line_length", (f, v) -> f.comment_line_length = Integer.parseInt(v));
-        settings_handlers.put("org.eclipse.jdt.core.formatter.join_lines_in_comments", noop);
-        settings_handlers.put("org.eclipse.jdt.core.formatter.comment.format_html", noop);
-        settings_handlers.put("org.eclipse.jdt.core.formatter.comment.format_source_code", noop);
-        settings_handlers.put("org.eclipse.jdt.core.formatter.comment.format_header", noop);
-        settings_handlers.put("org.eclipse.jdt.core.formatter.comment.format_block_comments", noop);
-        settings_handlers.put("org.eclipse.jdt.core.formatter.never_indent_block_comments_on_first_column", noop);
         settings_handlers.put("org.eclipse.jdt.core.formatter.comment.new_lines_at_javadoc_boundaries", (f, v) -> f.new_lines_at_javadoc_boundaries = v.equals("true"));
-        settings_handlers.put("org.eclipse.jdt.core.formatter.never_indent_line_comments_on_first_column", noop);
-
-        settings_handlers.put("org.eclipse.jdt.core.formatter.use_on_off_tags", noop);
-        settings_handlers.put("org.eclipse.jdt.core.formatter.enabling_tag", (f, v) -> f.enabling_tag = v);
-        settings_handlers.put("org.eclipse.jdt.core.formatter.disabling_tag", (f, v) -> f.disabling_tag = v);
         // @formatter:on
     }
 

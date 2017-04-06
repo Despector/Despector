@@ -108,6 +108,10 @@ public class ConfigBase {
         public Classes classes = new Classes();
         public Enums enums = new Enums();
         public Fields fields = new Fields();
+        public Methods methods = new Methods();
+        public Misc misc = new Misc();
+        public Arrays arrays = new Arrays();
+        public Switches switches = new Switches();
 
         @ConfigSerializable
         public static class General {
@@ -141,6 +145,7 @@ public class ConfigBase {
             public boolean insert_space_after_comma_in_superinterfaces = true;
 
             public int blank_lines_before_first_class_body_declaration = 1;
+            public BracePosition brace_position_for_type_declaration = BracePosition.SAME_LINE;
             public WrappingStyle alignment_for_superclass_in_type_declaration = WrappingStyle.DO_NOT_WRAP;
             public WrappingStyle alignment_for_superinterfaces_in_type_declaration = WrappingStyle.WRAP_WHEN_NEEDED;
         }
@@ -180,9 +185,48 @@ public class ConfigBase {
             public boolean insert_space_before_comma_in_method_declaration_parameters = false;
             public boolean insert_space_after_comma_in_method_declaration_parameters = true;
             public boolean insert_space_before_opening_paren_in_method_declaration = false;
+            public boolean insert_space_before_closing_paren_in_method_declaration = false;
+            public boolean insert_space_before_opening_brace_in_method_declaration = true;
             public BracePosition brace_position_for_method_declaration = BracePosition.SAME_LINE;
             public WrappingStyle alignment_for_parameters_in_method_declaration = WrappingStyle.WRAP_WHEN_NEEDED;
 
+            public boolean new_lines_at_block_boundaries = true;
+
+        }
+
+        @ConfigSerializable
+        public static class Misc {
+
+            public boolean insert_space_after_unary_operator = false;
+            public boolean insert_space_before_binary_operator = true;
+            public boolean insert_space_after_binary_operator = true;
+        }
+
+        @ConfigSerializable
+        public static class Arrays {
+
+            public boolean insert_space_between_brackets_in_array_type_reference = false;
+            public boolean insert_space_after_opening_brace_in_array_initializer = false;
+            public boolean insert_new_line_before_closing_brace_in_array_initializer = false;
+            public WrappingStyle alignment_for_expressions_in_array_initializer = WrappingStyle.WRAP_WHEN_NEEDED;
+            public BracePosition brace_position_for_array_initializer = BracePosition.SAME_LINE;
+            public boolean insert_space_after_opening_bracket_in_array_allocation_expression = false;
+            public boolean insert_space_before_closing_bracket_in_array_allocation_expression = false;
+            public boolean insert_space_before_comma_in_array_initializer = false;
+            public boolean insert_space_after_comma_in_array_initializer = true;
+            public boolean insert_space_before_opening_bracket_in_array_type_reference = false;
+            public boolean insert_space_before_opening_bracket_in_array_reference = false;
+        }
+
+        @ConfigSerializable
+        public static class Switches {
+
+            public boolean insert_space_after_opening_paren_in_switch = false;
+            public boolean insert_space_before_closing_paren_in_switch = false;
+            public boolean insert_space_before_colon_in_case = false;
+            public boolean insert_space_after_colon_in_case = false;
+            public boolean indent_breaks_compare_to_cases = true;
+            public BracePosition brace_position_for_switch = BracePosition.SAME_LINE;
         }
 
     }
