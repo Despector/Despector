@@ -34,6 +34,8 @@ import org.spongepowered.despector.ast.AccessModifier;
 import org.spongepowered.despector.ast.Annotation;
 import org.spongepowered.despector.ast.Locals;
 import org.spongepowered.despector.ast.Locals.LocalInstance;
+import org.spongepowered.despector.ast.generic.ClassTypeSignature;
+import org.spongepowered.despector.ast.generic.MethodSignature;
 import org.spongepowered.despector.ast.members.MethodEntry;
 import org.spongepowered.despector.ast.members.insn.Comment;
 import org.spongepowered.despector.ast.members.insn.StatementBlock;
@@ -77,7 +79,13 @@ public class MethodInfoStep implements DecompilerStep {
             if (mn.signature != null) {
                 m.setMethodSignature(SignatureParser.parseMethod(mn.signature));
             } else {
-                m.setMethodSignature(SignatureParser.parseMethod(mn.desc));
+                MethodSignature sig = SignatureParser.parseMethod(mn.desc);
+                m.setMethodSignature(sig);
+                if (mn.exceptions != null && !mn.exceptions.isEmpty()) {
+                    for (String ex : (List<String>) mn.exceptions) {
+                        sig.getThrowsSignature().add(ClassTypeSignature.of(ex));
+                    }
+                }
             }
 
             if (mn.visibleAnnotations != null) {

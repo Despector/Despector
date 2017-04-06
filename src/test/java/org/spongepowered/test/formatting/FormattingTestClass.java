@@ -29,7 +29,7 @@ public class FormattingTestClass {
     public int afield = 5;
     public String anotherField = "";
 
-    public int foo() {
+    public int foo() throws RuntimeException {
         return 0;
     }
 

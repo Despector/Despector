@@ -182,6 +182,20 @@ public class MethodEntryEmitter implements AstEmitter<MethodEntry> {
             }
         }
         ctx.printString(")");
+        if (!method.getMethodSignature().getThrowsSignature().isEmpty()) {
+            ctx.printString(" throws ");
+            boolean first = true;
+            for (TypeSignature ex : method.getMethodSignature().getThrowsSignature()) {
+                if (!first) {
+                    ctx.printString(" ", ctx.getFormat().insert_space_before_comma_in_method_declaration_throws);
+                    ctx.printString(",");
+                    ctx.printString(" ", ctx.getFormat().insert_space_after_comma_in_method_declaration_throws);
+                } else {
+                    first = false;
+                }
+                generics.emitTypeSignature(ctx, ex);
+            }
+        }
         if (!method.isAbstract()) {
             ctx.printString(" ");
             ctx.emitBrace(ctx.getFormat().brace_position_for_method_declaration, false);
@@ -199,7 +213,7 @@ public class MethodEntryEmitter implements AstEmitter<MethodEntry> {
                 ctx.emitBody(block);
                 ctx.newLine();
             }
-            if(ctx.getFormat().brace_position_for_method_declaration == BracePosition.NEXT_LINE_SHIFTED) {
+            if (ctx.getFormat().brace_position_for_method_declaration == BracePosition.NEXT_LINE_SHIFTED) {
                 ctx.printIndentation();
                 ctx.printString("}");
                 ctx.dedent();
