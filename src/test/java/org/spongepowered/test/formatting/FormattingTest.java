@@ -28,7 +28,6 @@ import org.spongepowered.despector.ast.type.TypeEntry;
 import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.Emitters;
 import org.spongepowered.despector.emitter.format.EmitterFormat;
-import org.spongepowered.despector.emitter.format.EmitterFormat.WrappingStyle;
 import org.spongepowered.test.util.TestHelper;
 
 import java.io.StringWriter;

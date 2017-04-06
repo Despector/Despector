@@ -93,7 +93,7 @@ public class EmitterFormat {
     public boolean insert_space_before_comma_in_enum_constant_arguments = false;
     public boolean indent_body_declarations_compare_to_enum_declaration_header = true;
     public BracePosition brace_position_for_enum_constant = BracePosition.SAME_LINE;
-    public WrappingStyle alignment_for_arguments_in_enum_constant = WrappingStyle.WRAP_WHEN_NEEDED;
+//    public WrappingStyle alignment_for_arguments_in_enum_constant = WrappingStyle.WRAP_WHEN_NEEDED;
     public WrappingStyle alignment_for_superinterfaces_in_enum_declaration = WrappingStyle.WRAP_WHEN_NEEDED;
     public WrappingStyle alignment_for_enum_constants = WrappingStyle.WRAP_ALL;
 

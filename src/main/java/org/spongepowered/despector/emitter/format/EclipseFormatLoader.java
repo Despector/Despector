@@ -129,7 +129,7 @@ public class EclipseFormatLoader implements FormatLoader {
         settings_handlers.put("org.eclipse.jdt.core.formatter.insert_space_before_opening_paren_in_method_declaration", (f, v) -> f.insert_space_before_opening_paren_in_method_declaration = v.equals("insert"));
         settings_handlers.put("org.eclipse.jdt.core.formatter.insert_new_line_in_empty_enum_declaration", (f, v) -> f.insert_new_line_in_empty_enum_declaration = v.equals("insert"));
         settings_handlers.put("org.eclipse.jdt.core.formatter.alignment_for_superinterfaces_in_type_declaration", (f, v) -> f.alignment_for_superinterfaces_in_type_declaration = wrapFromVal(Integer.parseInt(v)));
-        settings_handlers.put("org.eclipse.jdt.core.formatter.alignment_for_arguments_in_enum_constant", (f, v) -> f.alignment_for_arguments_in_enum_constant = wrapFromVal(Integer.parseInt(v)));
+//        settings_handlers.put("org.eclipse.jdt.core.formatter.alignment_for_arguments_in_enum_constant", (f, v) -> f.alignment_for_arguments_in_enum_constant = wrapFromVal(Integer.parseInt(v)));
         settings_handlers.put("org.eclipse.jdt.core.formatter.blank_lines_between_import_groups", (f, v) -> f.blank_lines_between_import_groups = Integer.parseInt(v));
         settings_handlers.put("org.eclipse.jdt.core.formatter.insert_space_before_comma_in_enum_constant_arguments", (f, v) -> f.insert_space_before_comma_in_enum_constant_arguments = v.equals("insert"));
         settings_handlers.put("org.eclipse.jdt.core.formatter.brace_position_for_constructor_declaration", (f, v) -> f.brace_position_for_constructor_declaration = braceFromVal(v));

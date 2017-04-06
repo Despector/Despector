@@ -48,7 +48,7 @@ public class FormattingTestClass {
 
     }
 
-    public static class Bar implements Baz, Noo {
+    public static class Bar implements Baz {
 
     }
 
@@ -56,8 +56,12 @@ public class FormattingTestClass {
 
     }
 
-    public static interface Noo {
+    public static enum Noo {
+        ONE(1, 4), TWO(5, 2), THREE(4, 5);
 
+        Noo(int a, int b) {
+
+        }
     }
 
     public static class Foo {

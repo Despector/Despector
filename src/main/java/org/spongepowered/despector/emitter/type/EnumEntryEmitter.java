@@ -40,6 +40,7 @@ import org.spongepowered.despector.ast.type.TypeEntry.InnerClassInfo;
 import org.spongepowered.despector.config.ConfigManager;
 import org.spongepowered.despector.emitter.AstEmitter;
 import org.spongepowered.despector.emitter.EmitterContext;
+import org.spongepowered.despector.emitter.format.EmitterFormat.WrappingStyle;
 import org.spongepowered.despector.util.TypeHelper;
 
 import java.util.Collection;
@@ -78,18 +79,20 @@ public class EnumEntryEmitter implements AstEmitter<EnumEntry> {
             ctx.printString(name);
         }
         if (!type.getInterfaces().isEmpty()) {
-            ctx.printString(" implements ");
+            ctx.printString(" ");
+            ctx.markWrapPoint(ctx.getFormat().alignment_for_superinterfaces_in_enum_declaration, 0);
+            ctx.printString("implements ");
             for (int i = 0; i < type.getInterfaces().size(); i++) {
                 ctx.emitType(type.getInterfaces().get(i));
                 if (i < type.getInterfaces().size() - 1) {
                     ctx.printString(" ", ctx.getFormat().insert_space_before_comma_in_superinterfaces);
                     ctx.printString(",");
                     ctx.printString(" ", ctx.getFormat().insert_space_after_comma_in_superinterfaces);
-                    ctx.markWrapPoint();
+                    ctx.markWrapPoint(ctx.getFormat().alignment_for_superinterfaces_in_enum_declaration, i + 1);
                 }
             }
         }
-        ctx.printString(" ", ctx.getFormat().insert_space_before_opening_brace_in_type_declaration);
+        ctx.printString(" ", ctx.getFormat().insert_space_before_opening_brace_in_enum_declaration);
         ctx.printString("{");
         ctx.newLine(ctx.getFormat().blank_lines_before_first_class_body_declaration + 1);
         ctx.indent();
@@ -104,13 +107,14 @@ public class EnumEntryEmitter implements AstEmitter<EnumEntry> {
         if (clinit != null && clinit.getInstructions() != null) {
             Iterator<Statement> initializers = clinit.getInstructions().getStatements().iterator();
             boolean first = true;
+            int index = 0;
             while (initializers.hasNext()) {
                 Statement next = initializers.next();
                 if (!(next instanceof StaticFieldAssignment)) {
                     break;
                 }
                 StaticFieldAssignment assign = (StaticFieldAssignment) next;
-                if (assign.getFieldName().equals("$VALUES")) {
+                if (assign.getFieldName().contains("$VALUES")) {
                     continue;
                 }
                 if (!TypeHelper.descToType(assign.getOwnerType()).equals(type.getName()) || !(assign.getValue() instanceof New)) {
@@ -119,10 +123,14 @@ public class EnumEntryEmitter implements AstEmitter<EnumEntry> {
                 }
                 if (!first) {
                     ctx.printString(",");
-                    ctx.newLine();
+                    ctx.markWrapPoint(ctx.getFormat().alignment_for_enum_constants, index);
+                    if (ctx.getFormat().alignment_for_enum_constants == WrappingStyle.DO_NOT_WRAP) {
+                        ctx.printString(" ");
+                    }
+                } else {
+                    ctx.printIndentation();
                 }
                 New val = (New) assign.getValue();
-                ctx.printIndentation();
                 ctx.printString(assign.getFieldName());
                 found.add(assign.getFieldName());
                 if (val.getParameters().length != 2) {
@@ -137,6 +145,7 @@ public class EnumEntryEmitter implements AstEmitter<EnumEntry> {
                     ctx.printString(")");
                 }
                 first = false;
+                index++;
             }
             if (!first) {
                 ctx.printString(";");
@@ -156,7 +165,7 @@ public class EnumEntryEmitter implements AstEmitter<EnumEntry> {
             for (FieldEntry field : type.getStaticFields()) {
                 if (field.isSynthetic()) {
                     // Skip the values array.
-                    if(ConfigManager.getConfig().emitter.emit_synthetics) {
+                    if (ConfigManager.getConfig().emitter.emit_synthetics) {
                         ctx.printIndentation();
                         ctx.printString("// Synthetic");
                         ctx.newLine();
@@ -203,7 +212,7 @@ public class EnumEntryEmitter implements AstEmitter<EnumEntry> {
                     // initializer
                     continue;
                 } else if (mth.isSynthetic()) {
-                    if(ConfigManager.getConfig().emitter.emit_synthetics) {
+                    if (ConfigManager.getConfig().emitter.emit_synthetics) {
                         ctx.printIndentation();
                         ctx.printString("// Synthetic");
                         if (mth.isBridge()) {
@@ -222,7 +231,7 @@ public class EnumEntryEmitter implements AstEmitter<EnumEntry> {
         if (!type.getFields().isEmpty()) {
             for (FieldEntry field : type.getFields()) {
                 if (field.isSynthetic()) {
-                    if(ConfigManager.getConfig().emitter.emit_synthetics) {
+                    if (ConfigManager.getConfig().emitter.emit_synthetics) {
                         ctx.printIndentation();
                         ctx.printString("// Synthetic");
                         ctx.newLine();
@@ -240,7 +249,7 @@ public class EnumEntryEmitter implements AstEmitter<EnumEntry> {
         if (!type.getMethods().isEmpty()) {
             for (MethodEntry mth : type.getMethods()) {
                 if (mth.isSynthetic()) {
-                    if(ConfigManager.getConfig().emitter.emit_synthetics) {
+                    if (ConfigManager.getConfig().emitter.emit_synthetics) {
                         ctx.printIndentation();
                         ctx.printString("// Synthetic");
                         if (mth.isBridge()) {
