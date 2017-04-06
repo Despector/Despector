@@ -41,6 +41,7 @@ import org.spongepowered.despector.ast.members.insn.misc.Return;
 import org.spongepowered.despector.ast.type.InterfaceEntry;
 import org.spongepowered.despector.ast.type.TypeEntry;
 import org.spongepowered.despector.emitter.format.EmitterFormat;
+import org.spongepowered.despector.emitter.format.EmitterFormat.BracePosition;
 import org.spongepowered.despector.emitter.format.EmitterFormat.WrappingStyle;
 import org.spongepowered.despector.emitter.output.ImportManager;
 import org.spongepowered.despector.emitter.special.AnnotationEmitter;
@@ -490,6 +491,36 @@ public class EmitterContext {
             break;
         }
         return this;
+    }
+
+    public void emitBrace(BracePosition pos, boolean wrapped) {
+        switch (pos) {
+        case NEXT_LINE:
+            newLine();
+            printIndentation();
+            printString("{");
+            indent();
+            break;
+        case NEXT_LINE_ON_WRAP:
+            if (wrapped) {
+                newLine();
+                printIndentation();
+            }
+            printString("{");
+            indent();
+            break;
+        case NEXT_LINE_SHIFTED:
+            newLine();
+            indent();
+            printIndentation();
+            printString("{");
+            break;
+        case SAME_LINE:
+        default:
+            printString("{");
+            indent();
+            break;
+        }
     }
 
 }

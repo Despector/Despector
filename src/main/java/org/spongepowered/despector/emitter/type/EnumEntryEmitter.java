@@ -40,6 +40,7 @@ import org.spongepowered.despector.ast.type.TypeEntry.InnerClassInfo;
 import org.spongepowered.despector.config.ConfigManager;
 import org.spongepowered.despector.emitter.AstEmitter;
 import org.spongepowered.despector.emitter.EmitterContext;
+import org.spongepowered.despector.emitter.format.EmitterFormat.BracePosition;
 import org.spongepowered.despector.emitter.format.EmitterFormat.WrappingStyle;
 import org.spongepowered.despector.util.TypeHelper;
 
@@ -93,9 +94,8 @@ public class EnumEntryEmitter implements AstEmitter<EnumEntry> {
             }
         }
         ctx.printString(" ", ctx.getFormat().insert_space_before_opening_brace_in_enum_declaration);
-        ctx.printString("{");
+        ctx.emitBrace(ctx.getFormat().brace_position_for_enum_declaration, false);
         ctx.newLine(ctx.getFormat().blank_lines_before_first_class_body_declaration + 1);
-        ctx.indent();
 
         // we look through the class initializer to find the enum constant
         // initializers so that we can emit those specially before the rest of
@@ -122,10 +122,11 @@ public class EnumEntryEmitter implements AstEmitter<EnumEntry> {
                     break;
                 }
                 if (!first) {
+                    ctx.printString(" ", ctx.getFormat().insert_space_before_comma_in_enum_declarations);
                     ctx.printString(",");
                     ctx.markWrapPoint(ctx.getFormat().alignment_for_enum_constants, index);
                     if (ctx.getFormat().alignment_for_enum_constants == WrappingStyle.DO_NOT_WRAP) {
-                        ctx.printString(" ");
+                        ctx.printString(" ", ctx.getFormat().insert_space_after_comma_in_enum_declarations);
                     }
                 } else {
                     ctx.printIndentation();
@@ -134,14 +135,19 @@ public class EnumEntryEmitter implements AstEmitter<EnumEntry> {
                 ctx.printString(assign.getFieldName());
                 found.add(assign.getFieldName());
                 if (val.getParameters().length != 2) {
+                    ctx.printString(" ", ctx.getFormat().insert_space_before_opening_paren_in_enum_constant);
                     ctx.printString("(");
+                    ctx.printString(" ", ctx.getFormat().insert_space_after_opening_paren_in_enum_constant);
                     List<String> args = TypeHelper.splitSig(val.getCtorDescription());
                     for (int i = 2; i < val.getParameters().length; i++) {
                         ctx.emit(val.getParameters()[i], ClassTypeSignature.of(args.get(i)));
                         if (i < val.getParameters().length - 1) {
-                            ctx.printString(", ");
+                            ctx.printString(" ", ctx.getFormat().insert_space_before_comma_in_enum_constant_arguments);
+                            ctx.printString(",");
+                            ctx.printString(" ", ctx.getFormat().insert_space_after_comma_in_enum_constant_arguments);
                         }
                     }
+                    ctx.printString(" ", ctx.getFormat().insert_space_before_closing_paren_in_enum_constant);
                     ctx.printString(")");
                 }
                 first = false;
@@ -282,11 +288,17 @@ public class EnumEntryEmitter implements AstEmitter<EnumEntry> {
             ctx.newLine();
             ctx.emit(inner_type);
         }
-
-        ctx.dedent();
-        ctx.printIndentation();
-        ctx.printString("}");
-        ctx.newLine();
+        if(ctx.getFormat().brace_position_for_enum_declaration == BracePosition.NEXT_LINE_SHIFTED) {
+            ctx.printIndentation();
+            ctx.printString("}");
+            ctx.newLine();
+            ctx.dedent();
+        } else {
+            ctx.dedent();
+            ctx.printIndentation();
+            ctx.printString("}");
+            ctx.newLine();
+        }
         return true;
     }
 

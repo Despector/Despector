@@ -147,19 +147,15 @@ public class ConfigBase {
         public static class Enums {
 
             public boolean insert_space_before_opening_brace_in_enum_declaration = true;
-            public boolean insert_space_between_empty_parens_in_enum_constant = false;
+            public boolean insert_space_before_comma_in_enum_constant_arguments = false;
             public boolean insert_space_after_comma_in_enum_constant_arguments = true;
             public boolean insert_space_before_comma_in_enum_declarations = false;
             public boolean insert_space_after_comma_in_enum_declarations = true;
             public boolean insert_space_before_opening_paren_in_enum_constant = false;
             public boolean insert_space_after_opening_paren_in_enum_constant = false;
             public boolean insert_space_before_closing_paren_in_enum_constant = false;
-            public boolean insert_space_before_opening_brace_in_enum_constant = true;
-            public boolean insert_new_line_in_empty_enum_declaration = true;
-            public boolean insert_new_line_in_empty_enum_constant = true;
-            public boolean insert_space_before_comma_in_enum_constant_arguments = false;
             public boolean indent_body_declarations_compare_to_enum_declaration_header = true;
-            public BracePosition brace_position_for_enum_constant = BracePosition.SAME_LINE;
+            public BracePosition brace_position_for_enum_declaration = BracePosition.SAME_LINE;
             public WrappingStyle alignment_for_superinterfaces_in_enum_declaration = WrappingStyle.WRAP_WHEN_NEEDED;
             public WrappingStyle alignment_for_enum_constants = WrappingStyle.WRAP_ALL;
         }
