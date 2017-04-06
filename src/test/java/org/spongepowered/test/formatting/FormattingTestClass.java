@@ -26,8 +26,8 @@ package org.spongepowered.test.formatting;
 
 public class FormattingTestClass {
 
-    public int afield;
-    public String anotherField;
+    public int afield = 5;
+    public String anotherField = "";
 
     public int foo() {
         return 0;

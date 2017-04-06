@@ -26,9 +26,12 @@ package org.spongepowered.despector.emitter.type;
 
 import org.spongepowered.despector.ast.Annotation;
 import org.spongepowered.despector.ast.members.FieldEntry;
+import org.spongepowered.despector.config.ConfigManager;
 import org.spongepowered.despector.emitter.AstEmitter;
 import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.special.GenericsEmitter;
+
+import java.util.Collection;
 
 public class FieldEntryEmitter implements AstEmitter<FieldEntry> {
 
@@ -51,14 +54,54 @@ public class FieldEntryEmitter implements AstEmitter<FieldEntry> {
         }
         GenericsEmitter generics = ctx.getEmitterSet().getSpecialEmitter(GenericsEmitter.class);
         generics.emitTypeSignature(ctx, ast.getType());
-
-        ctx.printString(" ");
+        if (ctx.getFormat().align_type_members_on_columns && ctx.getType() != null) {
+            int len = getMaxTypeLength(ctx, ast.isStatic() ? ctx.getType().getStaticFields() : ctx.getType().getFields());
+            len -= getTypeLength(ctx, ast);
+            len++;
+            for (int i = 0; i < len; i++) {
+                ctx.printString(" ");
+            }
+        } else {
+            ctx.printString(" ");
+        }
         ctx.printString(ast.getName());
         if (ast.getInitializer() != null) {
-            ctx.printString(" = ");
+            if (ctx.getFormat().align_type_members_on_columns && ctx.getType() != null) {
+                int len = getMaxNameLength(ctx, ast.isStatic() ? ctx.getType().getStaticFields() : ctx.getType().getFields());
+                len -= ast.getName().length();
+                len++;
+                for (int i = 0; i < len; i++) {
+                    ctx.printString(" ");
+                }
+            } else {
+                ctx.printString(" ");
+            }
+            ctx.printString("= ");
             ctx.emit(ast.getInitializer(), ast.getType());
         }
         return true;
+    }
+
+    private int getMaxTypeLength(EmitterContext ctx, Collection<FieldEntry> fields) {
+        int max = 0;
+        for (FieldEntry fld : fields) {
+            if (fld.isSynthetic() && !ConfigManager.getConfig().emitter.emit_synthetics) {
+                continue;
+            }
+            max = Math.max(max, getTypeLength(ctx, fld));
+        }
+        return max;
+    }
+
+    private int getMaxNameLength(EmitterContext ctx, Collection<FieldEntry> fields) {
+        int max = 0;
+        for (FieldEntry fld : fields) {
+            if (fld.isSynthetic() && !ConfigManager.getConfig().emitter.emit_synthetics) {
+                continue;
+            }
+            max = Math.max(max, fld.getName().length());
+        }
+        return max;
     }
 
     private int getTypeLength(EmitterContext ctx, FieldEntry field) {

@@ -142,9 +142,34 @@ public class GenericsEmitter implements SpecialEmitter {
         }
         if (type instanceof ClassTypeSignature) {
             ClassTypeSignature cls = (ClassTypeSignature) type;
-            int length = cls.getName().length();
-            // TODO
+            int length = ctx.getType(cls.getDescriptor()).length();
+            if (!cls.getArguments().isEmpty()) {
+                for (TypeArgument arg : cls.getArguments()) {
+                    length += 2;
+                    switch (arg.getWildcard()) {
+                    case NONE:
+                        length += getLength(ctx, arg.getSignature());
+                        break;
+                    case EXTENDS:
+                        length += 10;
+                        length += getLength(ctx, arg.getSignature());
+                        break;
+                    case SUPER:
+                        length += 8;
+                        length += getLength(ctx, arg.getSignature());
+                        break;
+                    case STAR:
+                        length++;
+                        break;
+                    default:
+                        break;
+                    }
+                }
+            }
             return length;
+        }
+        if(type instanceof TypeVariableSignature) {
+            return ((TypeVariableSignature) type).getIdentifierName().length();
         }
         return 0;
     }

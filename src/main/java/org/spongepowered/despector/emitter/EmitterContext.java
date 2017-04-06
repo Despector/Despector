@@ -315,6 +315,33 @@ public class EmitterContext {
         return this;
     }
 
+    public String getType(String name) {
+        return getTypeName(TypeHelper.descToType(name));
+    }
+
+    public String getTypeName(String name) {
+        if (name.endsWith("[]")) {
+            return getTypeName(name.substring(0, name.length() - 2)) + "[]";
+        }
+        if (name.indexOf('/') != -1) {
+            if (this.import_manager.checkImport(name)) {
+                name = name.substring(name.lastIndexOf('/') + 1);
+            } else if (this.type != null) {
+                String this_package = "";
+                String target_package = name;
+                String this$name = this.type.getName();
+                if (this$name.indexOf('/') != -1) {
+                    this_package = this$name.substring(0, this$name.lastIndexOf('/'));
+                    target_package = name.substring(0, name.lastIndexOf('/'));
+                }
+                if (this_package.equals(target_package)) {
+                    name = name.substring(name.lastIndexOf('/') + 1);
+                }
+            }
+        }
+        return name.replace('/', '.').replace('$', '.');
+    }
+
     public EmitterContext emitType(TypeSignature sig) {
         GenericsEmitter generics = this.set.getSpecialEmitter(GenericsEmitter.class);
         generics.emitTypeSignature(this, sig);
@@ -322,42 +349,12 @@ public class EmitterContext {
     }
 
     public EmitterContext emitType(String name) {
-        emitTypeClassName(TypeHelper.descToType(name).replace('/', '.'));
+        emitTypeName(TypeHelper.descToType(name));
         return this;
     }
 
     public EmitterContext emitTypeName(String name) {
-        emitTypeClassName(name.replace('/', '.'));
-        return this;
-    }
-
-    public EmitterContext emitTypeClassName(String name) {
-        if (name.endsWith("[]")) {
-            emitTypeClassName(name.substring(0, name.length() - 2));
-            printString("[]");
-            return this;
-        }
-        if (name.indexOf('.') != -1) {
-            if (name.startsWith("java.lang.") && name.lastIndexOf('.') == 9) {
-                name = name.substring("java.lang.".length());
-            } else if (this.type != null) {
-                String this_package = "";
-                String target_package = name;
-                String this$name = this.type.getName().replace('/', '.');
-                if (this$name.indexOf('.') != -1) {
-                    this_package = this$name.substring(0, this$name.lastIndexOf('.'));
-                    target_package = name.substring(0, name.lastIndexOf('.'));
-                }
-                if (this_package.equals(target_package)) {
-                    name = name.substring(name.lastIndexOf('.') + 1);
-                } else if (this.import_manager.checkImport(name)) {
-                    name = name.substring(name.lastIndexOf('.') + 1);
-                }
-            } else if (this.import_manager.checkImport(name)) {
-                name = name.substring(name.lastIndexOf('.') + 1);
-            }
-        }
-        printString(name.replace('$', '.'));
+        printString(getTypeName(name));
         return this;
     }
 

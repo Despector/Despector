@@ -179,6 +179,11 @@ public class ImportManager {
         if (TypeHelper.isPrimative(type)) {
             return true;
         }
+        for (String implicit : this.implicit_imports) {
+            if (type.startsWith(implicit)) {
+                return true;
+            }
+        }
         return this.imports.contains(type);
     }
 

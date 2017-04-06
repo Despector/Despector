@@ -33,7 +33,7 @@ public class TypeConstantEmitter implements InstructionEmitter<TypeConstant> {
 
     @Override
     public void emit(EmitterContext ctx, TypeConstant arg, TypeSignature type) {
-        ctx.emitTypeClassName(arg.getConstant().getClassName());
+        ctx.emitTypeName(arg.getConstant().getInternalName());
         ctx.printString(".class");
     }
 
