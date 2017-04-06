@@ -78,14 +78,11 @@ public class EclipseFormatLoader implements FormatLoader {
         settings_handlers.put("org.eclipse.jdt.core.formatter.indentation.size", (f, v) -> f.indentation_size = Integer.parseInt(v));
         settings_handlers.put("org.eclipse.jdt.core.formatter.tabulation.char", (f, v) -> f.indent_with_spaces = v.equals("space"));
         settings_handlers.put("org.eclipse.jdt.core.formatter.tabulation.size", noop);
-        settings_handlers.put("org.eclipse.jdt.core.formatter.number_of_empty_lines_to_preserve", (f, v) -> f.number_of_empty_lines_to_preserve = Integer.parseInt(v));
         settings_handlers.put("org.eclipse.jdt.core.formatter.indent_empty_lines", (f, v) -> f.indent_empty_lines = v.equals("true"));
         settings_handlers.put("org.eclipse.jdt.core.formatter.insert_new_line_at_end_of_file_if_missing", (f, v) -> f.insert_new_line_at_end_of_file_if_missing = v.equals("insert"));
         settings_handlers.put("org.eclipse.jdt.core.compiler.codegen.inlineJsrBytecode", noop);
         settings_handlers.put("org.eclipse.jdt.core.compiler.codegen.targetPlatform", noop);
-        settings_handlers.put("org.eclipse.jdt.core.formatter.use_tabs_only_for_leading_indentations", (f, v) -> f.use_tabs_only_for_leading_indentations = v.equals("true"));
         settings_handlers.put("org.eclipse.jdt.core.formatter.blank_lines_before_first_class_body_declaration", (f, v) -> f.blank_lines_before_first_class_body_declaration = Integer.parseInt(v));
-        settings_handlers.put("org.eclipse.jdt.core.formatter.insert_new_line_in_empty_type_declaration", (f, v) -> f.insert_new_line_in_empty_type_declaration = v.equals("insert"));
         settings_handlers.put("org.eclipse.jdt.core.formatter.blank_lines_before_package", (f, v) -> f.blank_lines_before_package = Integer.parseInt(v));
         settings_handlers.put("org.eclipse.jdt.core.formatter.blank_lines_after_package", (f, v) -> f.blank_lines_after_package = Integer.parseInt(v));
         settings_handlers.put("org.eclipse.jdt.core.formatter.blank_lines_before_imports", (f, v) -> f.blank_lines_before_imports = Integer.parseInt(v));
@@ -137,7 +134,6 @@ public class EclipseFormatLoader implements FormatLoader {
         settings_handlers.put("org.eclipse.jdt.core.formatter.insert_space_before_comma_in_enum_constant_arguments", (f, v) -> f.insert_space_before_comma_in_enum_constant_arguments = v.equals("insert"));
         settings_handlers.put("org.eclipse.jdt.core.formatter.brace_position_for_constructor_declaration", (f, v) -> f.brace_position_for_constructor_declaration = braceFromVal(v));
         settings_handlers.put("org.eclipse.jdt.core.formatter.indent_body_declarations_compare_to_enum_declaration_header", (f, v) -> f.indent_body_declarations_compare_to_enum_declaration_header = v.equals("true"));
-        settings_handlers.put("org.eclipse.jdt.core.formatter.blank_lines_between_type_declarations", (f, v) -> f.blank_lines_between_type_declarations = Integer.parseInt(v));
         settings_handlers.put("org.eclipse.jdt.core.formatter.alignment_for_superinterfaces_in_enum_declaration", (f, v) -> f.alignment_for_superinterfaces_in_enum_declaration = wrapFromVal(Integer.parseInt(v)));
         settings_handlers.put("org.eclipse.jdt.core.formatter.insert_space_after_comma_in_constructor_declaration_throws", (f, v) -> f.insert_space_after_comma_in_constructor_declaration_throws = v.equals("insert"));
         settings_handlers.put("org.eclipse.jdt.core.formatter.alignment_for_parameters_in_method_declaration", (f, v) -> f.alignment_for_parameters_in_method_declaration = wrapFromVal(Integer.parseInt(v)));
@@ -381,9 +377,7 @@ public class EclipseFormatLoader implements FormatLoader {
     }
 
     @Override
-    public EmitterFormat load(Path formatter, Path import_order) throws IOException {
-        EmitterFormat format = new EmitterFormat();
-
+    public void load(EmitterFormat format, Path formatter, Path import_order) throws IOException {
         try (BufferedReader reader = new BufferedReader(new FileReader(import_order.toFile()))) {
             String line = null;
             while ((line = reader.readLine()) != null) {
@@ -428,7 +422,6 @@ public class EclipseFormatLoader implements FormatLoader {
                 String value = setting.getAttribute("value");
                 BiConsumer<EmitterFormat, String> handler = settings_handlers.get(id);
                 if (handler == null) {
-                    System.err.println("Unsupported eclipse formatter setting: " + id);
                     continue;
                 }
                 handler.accept(format, value);
@@ -438,8 +431,6 @@ public class EclipseFormatLoader implements FormatLoader {
             System.err.println("Error loading formatter xml:");
             e.printStackTrace();
         }
-
-        return format;
     }
 
 }

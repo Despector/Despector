@@ -25,7 +25,9 @@
 package org.spongepowered.despector.emitter.format;
 
 import com.google.common.collect.Lists;
+import org.spongepowered.despector.config.ConfigBase.FormatterConfig;
 
+import java.lang.reflect.Field;
 import java.util.List;
 
 /**
@@ -44,10 +46,6 @@ public class EmitterFormat {
     public int continuation_indentation = 2;
     // use spaces over tabs
     public boolean indent_with_spaces = true;
-    // if true then spaces are used to indent wrapped lines
-    public boolean use_tabs_only_for_leading_indentations = false;
-    // max number of empty lines to preserve
-    public int number_of_empty_lines_to_preserve = 1;
     // whether empty lines should be indented
     public boolean indent_empty_lines = false;
     // whether to insert a newline at end of file
@@ -75,8 +73,6 @@ public class EmitterFormat {
     public boolean insert_space_after_comma_in_superinterfaces = true;
 
     public int blank_lines_before_first_class_body_declaration = 1;
-    public boolean insert_new_line_in_empty_type_declaration = true;
-    public int blank_lines_between_type_declarations = 1;
     public WrappingStyle alignment_for_superclass_in_type_declaration = WrappingStyle.DO_NOT_WRAP;
     public WrappingStyle alignment_for_superinterfaces_in_type_declaration = WrappingStyle.WRAP_WHEN_NEEDED;
 
@@ -374,6 +370,46 @@ public class EmitterFormat {
     public boolean indent_root_tags = true;
     public int comment_line_length = 80;
     public boolean new_lines_at_javadoc_boundaries = true;
+
+    public void loadFrom(FormatterConfig conf) {
+        for (Field fld : FormatterConfig.class.getFields()) {
+            if (fld.getType().getName().startsWith("org.spongepowered.despector.")) {
+                Object insn;
+                try {
+                    insn = fld.get(conf);
+                } catch (IllegalArgumentException | IllegalAccessException e) {
+                    continue;
+                }
+                for (Field f : fld.getType().getFields()) {
+                    Field c = null;
+                    try {
+                        c = EmitterFormat.class.getField(f.getName());
+                    } catch (NoSuchFieldException | SecurityException e) {
+                        continue;
+                    }
+                    if (c != null) {
+                        try {
+                            c.set(this, f.get(insn));
+                        } catch (IllegalArgumentException | IllegalAccessException e) {
+                        }
+                    }
+                }
+                continue;
+            }
+            Field c = null;
+            try {
+                c = EmitterFormat.class.getField(fld.getName());
+            } catch (NoSuchFieldException | SecurityException e) {
+                continue;
+            }
+            if (c != null) {
+                try {
+                    c.set(this, fld.get(conf));
+                } catch (IllegalArgumentException | IllegalAccessException e) {
+                }
+            }
+        }
+    }
 
     public static enum WrappingStyle {
         DO_NOT_WRAP,

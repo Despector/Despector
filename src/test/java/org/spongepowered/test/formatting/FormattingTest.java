@@ -28,6 +28,7 @@ import org.spongepowered.despector.ast.type.TypeEntry;
 import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.Emitters;
 import org.spongepowered.despector.emitter.format.EmitterFormat;
+import org.spongepowered.despector.emitter.format.EmitterFormat.WrappingStyle;
 import org.spongepowered.test.util.TestHelper;
 
 import java.io.StringWriter;
@@ -44,8 +45,6 @@ public class FormattingTest {
 
         EmitterFormat format = new EmitterFormat();
         // Configure format for testing here
-        format.align_type_members_on_columns = true;
-        
 
         StringWriter writer = new StringWriter();
         EmitterContext emitter = new EmitterContext(writer, format);

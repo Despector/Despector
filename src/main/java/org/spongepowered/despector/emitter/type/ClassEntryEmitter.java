@@ -102,7 +102,9 @@ public class ClassEntryEmitter implements AstEmitter<ClassEntry> {
             }
         }
         if (!type.getInterfaces().isEmpty()) {
-            ctx.printString(" implements ");
+            ctx.printString(" ");
+            ctx.markWrapPoint(ctx.getFormat().alignment_for_superinterfaces_in_type_declaration, 0);
+            ctx.printString("implements ");
             for (int i = 0; i < type.getInterfaces().size(); i++) {
                 ctx.emitType(type.getInterfaces().get(i));
                 if (type.getSignature() != null) {
@@ -112,7 +114,7 @@ public class ClassEntryEmitter implements AstEmitter<ClassEntry> {
                     ctx.printString(" ", ctx.getFormat().insert_space_before_comma_in_superinterfaces);
                     ctx.printString(",");
                     ctx.printString(" ", ctx.getFormat().insert_space_after_comma_in_superinterfaces);
-                    ctx.markWrapPoint();
+                    ctx.markWrapPoint(ctx.getFormat().alignment_for_superinterfaces_in_type_declaration, i + 1);
                 }
             }
         }

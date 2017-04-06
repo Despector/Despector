@@ -330,12 +330,20 @@ public class EmitterContext {
                 String this_package = "";
                 String target_package = name;
                 String this$name = this.type.getName();
+                String outer_name = null;
                 if (this$name.indexOf('/') != -1) {
                     this_package = this$name.substring(0, this$name.lastIndexOf('/'));
+                    outer_name = this$name.substring(this_package.length() + 1);
+                    if (outer_name.indexOf('$') != -1) {
+                        outer_name = outer_name.substring(0, outer_name.indexOf('$'));
+                    }
                     target_package = name.substring(0, name.lastIndexOf('/'));
                 }
                 if (this_package.equals(target_package)) {
                     name = name.substring(name.lastIndexOf('/') + 1);
+                    if (name.startsWith(outer_name + "$")) {
+                        name = name.substring(outer_name.length() + 1);
+                    }
                 }
             }
         }
@@ -375,8 +383,9 @@ public class EmitterContext {
     public EmitterContext newLine() {
         __newLine();
         if (this.is_wrapped) {
-            dedent();
-            dedent();
+            for (int i = 0; i < this.format.continuation_indentation; i++) {
+                dedent();
+            }
             this.is_wrapped = false;
         }
         return this;
@@ -426,8 +435,9 @@ public class EmitterContext {
                 newLine();
                 if (!this.is_wrapped) {
                     this.is_wrapped = true;
-                    indent();
-                    indent();
+                    for (int i = 0; i < this.format.continuation_indentation; i++) {
+                        indent();
+                    }
                 }
                 printIndentation();
                 printString(next);
@@ -441,8 +451,44 @@ public class EmitterContext {
         return this;
     }
 
+    private void wrap(boolean indent) {
+        __newLine();
+        if (!this.is_wrapped && indent) {
+            this.is_wrapped = true;
+            for (int i = 0; i < this.format.continuation_indentation; i++) {
+                indent();
+            }
+        }
+        printIndentation();
+    }
+
     public EmitterContext markWrapPoint(WrappingStyle style, int index) {
-        this.wrap_point = this.line_length;
+        switch (style) {
+        case DO_NOT_WRAP:
+            break;
+        case WRAP_ALL:
+            wrap(false);
+            break;
+        case WRAP_ALL_AND_INDENT:
+            wrap(true);
+            break;
+        case WRAP_ALL_EXCEPT_FIRST:
+            if (index != 0) {
+                wrap(true);
+            }
+            break;
+        case WRAP_FIRST_OR_NEEDED:
+            if (index == 0) {
+                wrap(true);
+            } else {
+                this.wrap_point = this.line_length;
+            }
+            break;
+        case WRAP_WHEN_NEEDED:
+            this.wrap_point = this.line_length;
+        default:
+            break;
+        }
         return this;
     }
 

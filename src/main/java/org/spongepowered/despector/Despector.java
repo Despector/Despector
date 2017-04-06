@@ -145,14 +145,13 @@ public class Despector {
         if (!Files.exists(output)) {
             Files.createDirectories(output);
         }
-        EmitterFormat formatter = null;
+        EmitterFormat formatter = EmitterFormat.defaults();
+        formatter.loadFrom(ConfigManager.getConfig().formatter);
         Path formatter_path = Paths.get(".").resolve(ConfigManager.getConfig().emitter.formatting_path);
         Path importorder_path = Paths.get(".").resolve(ConfigManager.getConfig().emitter.imports_path);
         if (Files.exists(formatter_path) && Files.exists(importorder_path)) {
             FormatLoader formatter_loader = FormatLoader.getLoader(ConfigManager.getConfig().emitter.formatting_type);
-            formatter = formatter_loader.load(formatter_path, importorder_path);
-        } else {
-            formatter = EmitterFormat.defaults();
+            formatter_loader.load(formatter, formatter_path, importorder_path);
         }
 
         Decompiler decompiler = Decompilers.get(LANGUAGE);

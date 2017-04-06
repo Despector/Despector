@@ -36,5 +36,5 @@ public interface FormatLoader {
         throw new IllegalArgumentException("Unknown formatter type: " + name);
     }
 
-    EmitterFormat load(Path formatter, Path import_order) throws IOException;
+    void load(EmitterFormat format, Path formatter, Path import_order) throws IOException;
 }
