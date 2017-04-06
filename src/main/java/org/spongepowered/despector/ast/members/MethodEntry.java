@@ -26,13 +26,11 @@ package org.spongepowered.despector.ast.members;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.collect.Lists;
 import org.spongepowered.despector.ast.AccessModifier;
 import org.spongepowered.despector.ast.Annotation;
 import org.spongepowered.despector.ast.AnnotationType;
 import org.spongepowered.despector.ast.AstEntry;
 import org.spongepowered.despector.ast.SourceSet;
-import org.spongepowered.despector.ast.generic.ClassTypeSignature;
 import org.spongepowered.despector.ast.generic.MethodSignature;
 import org.spongepowered.despector.ast.generic.TypeSignature;
 import org.spongepowered.despector.ast.members.insn.StatementBlock;
@@ -61,16 +59,13 @@ public class MethodEntry extends AstEntry {
 
     protected String owner;
     protected String name;
-    protected String signature;
+    protected String desc;
 
     protected boolean is_abstract;
     protected boolean is_final;
     protected boolean is_static;
     protected boolean is_synthetic;
     protected boolean is_bridge;
-
-    protected TypeSignature return_type;
-    protected final List<String> param_types = Lists.newArrayList();
 
     protected StatementBlock instructions = null;
 
@@ -111,6 +106,14 @@ public class MethodEntry extends AstEntry {
 
     public void setOwner(String owner) {
         this.owner = owner;
+    }
+
+    public String getDescription() {
+        return this.desc;
+    }
+
+    public void setDescription(String desc) {
+        this.desc = checkNotNull(desc, "desc");
     }
 
     public boolean isAbstract() {
@@ -161,32 +164,18 @@ public class MethodEntry extends AstEntry {
      * void.
      */
     public TypeSignature getReturnType() {
-        return this.return_type;
+        return this.sig.getReturnType();
     }
 
     public String getReturnTypeName() {
-        return this.return_type.getName();
-    }
-
-    /**
-     * Gets the obfuscated signature of the method.
-     */
-    public String getSignature() {
-        return this.signature;
-    }
-
-    public void setSignature(String signature) {
-        this.signature = signature;
-        this.return_type = ClassTypeSignature.of(TypeHelper.getRet(signature));
-        this.param_types.clear();
-        this.param_types.addAll(TypeHelper.splitSig(signature));
+        return this.sig.getReturnType().getName();
     }
 
     /**
      * Gets the type entries of this methods parameters.
      */
-    public List<String> getParamTypes() {
-        return this.param_types;
+    public List<TypeSignature> getParamTypes() {
+        return this.sig.getParameters();
     }
 
     public MethodSignature getMethodSignature() {
@@ -222,23 +211,16 @@ public class MethodEntry extends AstEntry {
 
     @Override
     public void writeTo(MessagePacker pack) throws IOException {
-        pack.startMap(15);
+        pack.startMap(12);
         pack.writeString("id").writeInt(AstSerializer.ENTRY_ID_METHOD);
         pack.writeString("access").writeInt(this.access.ordinal());
         pack.writeString("owner").writeString(this.owner);
         pack.writeString("name").writeString(this.name);
-        pack.writeString("signature").writeString(this.signature);
         pack.writeString("abstract").writeBool(this.is_abstract);
         pack.writeString("final").writeBool(this.is_final);
         pack.writeString("static").writeBool(this.is_static);
         pack.writeString("synthetic").writeBool(this.is_synthetic);
         pack.writeString("bridge").writeBool(this.is_bridge);
-        pack.writeString("returntype");
-        this.return_type.writeTo(pack);
-        pack.writeString("paramtypes").startArray(this.param_types.size());
-        for (String param : this.param_types) {
-            pack.writeString(param);
-        }
         pack.writeString("methodsignature");
         this.sig.writeTo(pack);
         pack.writeString("instructions");
@@ -251,7 +233,7 @@ public class MethodEntry extends AstEntry {
 
     @Override
     public String toString() {
-        return "Method: " + this.name + " " + this.signature;
+        return "Method: " + this.name + " " + this.sig;
     }
 
 }

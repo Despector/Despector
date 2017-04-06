@@ -143,12 +143,9 @@ public class KotlinClassEntryEmitter implements AstEmitter<ClassEntry> {
             if (inner.getOuterName() == null || !inner.getOuterName().equals(type.getName())) {
                 continue;
             }
-            ctx.setOuterType(type);
             TypeEntry inner_type = type.getSource().get(inner.getName());
             ctx.emit(inner_type);
             ctx.newLine();
-            ctx.setType(type);
-            ctx.setOuterType(null);
         }
         if (emit_class) {
             ctx.dedent();

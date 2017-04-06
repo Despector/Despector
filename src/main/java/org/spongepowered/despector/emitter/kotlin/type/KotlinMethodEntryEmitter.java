@@ -53,7 +53,7 @@ import java.util.Set;
 public class KotlinMethodEntryEmitter extends MethodEntryEmitter {
 
     public static boolean isOverriden(MethodEntry method) {
-        if (method.getName().equals("toString") && method.getSignature().equals("()Ljava/lang/String;")) {
+        if (method.getName().equals("toString") && method.getDescription().equals("()Ljava/lang/String;")) {
             return true;
         }
         return false;

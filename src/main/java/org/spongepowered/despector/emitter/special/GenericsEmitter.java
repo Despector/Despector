@@ -68,13 +68,13 @@ public class GenericsEmitter implements SpecialEmitter {
             ClassTypeSignature cls = (ClassTypeSignature) sig;
             int array_depth = 0;
             String type = cls.getType();
-            while(type.startsWith("[")) {
+            while (type.startsWith("[")) {
                 array_depth++;
                 type = type.substring(1);
             }
             ctx.emitType(type);
             emitTypeArguments(ctx, cls.getArguments());
-            for(int i = 0; i < array_depth; i++) {
+            for (int i = 0; i < array_depth; i++) {
                 ctx.printString("[]");
             }
         } else if (sig instanceof VoidTypeSignature) {
@@ -134,6 +134,19 @@ public class GenericsEmitter implements SpecialEmitter {
             emitTypeArgument(ctx, param);
         }
         ctx.printString(">");
+    }
+
+    public static int getLength(EmitterContext ctx, TypeSignature type) {
+        if (type instanceof VoidTypeSignature) {
+            return 4;
+        }
+        if (type instanceof ClassTypeSignature) {
+            ClassTypeSignature cls = (ClassTypeSignature) type;
+            int length = cls.getName().length();
+            // TODO
+            return length;
+        }
+        return 0;
     }
 
 }

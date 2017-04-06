@@ -106,4 +106,35 @@ public class MethodSignature {
         this.return_type.writeTo(pack);
     }
 
+    @Override
+    public String toString() {
+        StringBuilder str = new StringBuilder();
+        if (!this.type_parameters.isEmpty()) {
+            boolean first = true;
+            str.append("<");
+            for (TypeParameter param : this.type_parameters) {
+                if (!first) {
+                    str.append(", ");
+                } else {
+                    first = false;
+                }
+                str.append(param);
+            }
+            str.append(">");
+        }
+        str.append("(");
+        boolean first = true;
+        for (TypeSignature param : this.parameters) {
+            if (!first) {
+                str.append(", ");
+            } else {
+                first = false;
+            }
+            str.append(param);
+        }
+        str.append(")");
+        str.append(this.return_type);
+        return str.toString();
+    }
+
 }

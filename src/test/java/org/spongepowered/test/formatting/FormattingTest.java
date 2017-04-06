@@ -44,7 +44,7 @@ public class FormattingTest {
 
         EmitterFormat format = new EmitterFormat();
         // Configure format for testing here
-        
+        format.align_type_members_on_columns = true;
         
 
         StringWriter writer = new StringWriter();

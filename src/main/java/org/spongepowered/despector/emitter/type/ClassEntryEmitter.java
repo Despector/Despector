@@ -134,12 +134,9 @@ public class ClassEntryEmitter implements AstEmitter<ClassEntry> {
             if (inner.getOuterName() == null || !inner.getOuterName().equals(type.getName())) {
                 continue;
             }
-            ctx.setOuterType(type);
             TypeEntry inner_type = type.getSource().get(inner.getName());
             ctx.newLine();
             ctx.emit(inner_type);
-            ctx.setType(type);
-            ctx.setOuterType(null);
         }
 
         ctx.dedent();

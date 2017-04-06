@@ -26,7 +26,6 @@ package org.spongepowered.despector.emitter;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
-import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import org.spongepowered.despector.ast.Annotation;
 import org.spongepowered.despector.ast.AstEntry;
@@ -43,6 +42,7 @@ import org.spongepowered.despector.ast.type.InterfaceEntry;
 import org.spongepowered.despector.ast.type.TypeEntry;
 import org.spongepowered.despector.emitter.format.EmitterFormat;
 import org.spongepowered.despector.emitter.format.EmitterFormat.WrappingStyle;
+import org.spongepowered.despector.emitter.output.ImportManager;
 import org.spongepowered.despector.emitter.special.AnnotationEmitter;
 import org.spongepowered.despector.emitter.special.GenericsEmitter;
 import org.spongepowered.despector.emitter.special.PackageEmitter;
@@ -52,21 +52,17 @@ import org.spongepowered.despector.util.TypeHelper;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayDeque;
-import java.util.Collections;
 import java.util.Deque;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Set;
 
 public class EmitterContext {
 
+    private final ImportManager import_manager = new ImportManager();
     private EmitterSet set;
 
     private EmitterFormat format;
     private Writer output;
-    private StringBuilder buffer = null;
     private Set<LocalInstance> defined_locals = Sets.newHashSet();
-    private Set<String> imports = null;
 
     private TypeEntry type = null;
     private TypeEntry outer_type = null;
@@ -88,8 +84,6 @@ public class EmitterContext {
     public EmitterContext(Writer output, EmitterFormat format) {
         this.output = output;
         this.format = format;
-
-        this.imports = Sets.newHashSet();
     }
 
     public EmitterSet getEmitterSet() {
@@ -110,10 +104,6 @@ public class EmitterContext {
 
     public TypeEntry getOuterType() {
         return this.outer_type;
-    }
-
-    public void setOuterType(TypeEntry t) {
-        this.outer_type = t;
     }
 
     public MethodEntry getMethod() {
@@ -148,6 +138,10 @@ public class EmitterContext {
         this.semicolons = state;
     }
 
+    public boolean usesSemicolons() {
+        return this.semicolons;
+    }
+
     public Deque<Instruction> getCurrentInstructionStack() {
         return this.insn_stack;
     }
@@ -160,18 +154,36 @@ public class EmitterContext {
         this.defined_locals.add(local);
     }
 
-    public <T extends AstEntry> void emitOuterType(T obj) {
-        if (obj instanceof TypeEntry) {
-            TypeEntry type = (TypeEntry) obj;
-            if (type.getName().endsWith("package-info")) {
-                PackageInfoEmitter emitter = this.set.getSpecialEmitter(PackageInfoEmitter.class);
-                emitter.emit(this, (InterfaceEntry) type);
-                return;
-            }
+    public void emitOuterType(TypeEntry type) {
+        if (type.getName().endsWith("package-info")) {
+            PackageInfoEmitter emitter = this.set.getSpecialEmitter(PackageInfoEmitter.class);
+            emitter.emit(this, (InterfaceEntry) type);
+            return;
         }
-        enableBuffer();
-        emit(obj);
-        outputBuffer();
+
+        this.import_manager.reset();
+        this.import_manager.calculateImports(type);
+        this.outer_type = type;
+        PackageEmitter pkg_emitter = this.set.getSpecialEmitter(PackageEmitter.class);
+        String pkg = this.outer_type.getName();
+        int last = pkg.lastIndexOf('/');
+        if (last != -1) {
+            for (int i = 0; i < this.format.blank_lines_before_package; i++) {
+                newLine();
+            }
+            pkg = pkg.substring(0, last).replace('/', '.');
+            pkg_emitter.emitPackage(this, pkg);
+            newLine();
+        }
+        int lines = Math.max(this.format.blank_lines_after_package, this.format.blank_lines_before_imports);
+        for (int i = 0; i < lines; i++) {
+            newLine();
+        }
+
+        this.import_manager.emitImports(this);
+
+        emit(type);
+        this.outer_type = null;
     }
 
     @SuppressWarnings("unchecked")
@@ -190,7 +202,9 @@ public class EmitterContext {
             throw new IllegalArgumentException("No emitter for ast entry " + obj.getClass().getName());
         }
         boolean state = emitter.emit(this, obj);
-        if (obj instanceof FieldEntry) {
+        if (obj instanceof TypeEntry) {
+            this.type = this.outer_type;
+        } else if (obj instanceof FieldEntry) {
             this.field = null;
         }
         return state;
@@ -336,10 +350,10 @@ public class EmitterContext {
                 }
                 if (this_package.equals(target_package)) {
                     name = name.substring(name.lastIndexOf('.') + 1);
-                } else if (checkImport(name)) {
+                } else if (this.import_manager.checkImport(name)) {
                     name = name.substring(name.lastIndexOf('.') + 1);
                 }
-            } else if (checkImport(name)) {
+            } else if (this.import_manager.checkImport(name)) {
                 name = name.substring(name.lastIndexOf('.') + 1);
             }
         }
@@ -372,28 +386,20 @@ public class EmitterContext {
     }
 
     public void flush() {
-        if (this.buffer == null) {
-            try {
-                this.output.write(this.line_buffer.toString());
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        } else {
-            this.buffer.append(this.line_buffer.toString());
+        try {
+            this.output.write(this.line_buffer.toString());
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
     private void __newLine() {
         flush();
         this.offs += 1;
-        if (this.buffer == null) {
-            try {
-                this.output.write('\n');
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        } else {
-            this.buffer.append('\n');
+        try {
+            this.output.write('\n');
+        } catch (IOException e) {
+            e.printStackTrace();
         }
         this.line_length = 0;
         this.wrap_point = -1;
@@ -403,6 +409,10 @@ public class EmitterContext {
     public void newIndentedLine() {
         newLine();
         printIndentation();
+    }
+
+    public int getCurrentLength() {
+        return this.line_length;
     }
 
     public EmitterContext printString(String line) {
@@ -437,113 +447,6 @@ public class EmitterContext {
     public EmitterContext markWrapPoint(WrappingStyle style, int index) {
         this.wrap_point = this.line_length;
         return this;
-    }
-
-    public boolean checkImport(String type) {
-        if (type.indexOf('$') != -1) {
-            type = type.substring(0, type.indexOf('$'));
-        }
-        if (this.imports == null) {
-            return false;
-        }
-        if (TypeHelper.isPrimative(type)) {
-            return true;
-        }
-        this.imports.add(type);
-        return true;
-    }
-
-    public void resetImports() {
-        this.imports.clear();
-    }
-
-    public void emitImports() {
-        List<String> imports = Lists.newArrayList(this.imports);
-        for (int i = 0; i < this.format.import_order.size(); i++) {
-            String group = this.format.import_order.get(i);
-            if (group.startsWith("/#")) {
-                // don't have static imports yet
-                continue;
-            }
-            List<String> group_imports = Lists.newArrayList();
-            for (Iterator<String> it = imports.iterator(); it.hasNext();) {
-                String import_ = it.next();
-                if (import_.startsWith(group)) {
-                    group_imports.add(import_);
-                    it.remove();
-                }
-            }
-            Collections.sort(group_imports);
-            for (String import_ : group_imports) {
-                printString("import ");
-                printString(import_);
-                if (this.semicolons) {
-                    printString(";");
-                }
-                newLine();
-            }
-            if (!group_imports.isEmpty() && i < this.format.import_order.size() - 1) {
-                for (int o = 0; o < this.format.blank_lines_between_import_groups; o++) {
-                    newLine();
-                }
-            }
-        }
-    }
-
-    public void enableBuffer() {
-        this.buffer = new StringBuilder();
-    }
-
-    public void outputBuffer() {
-
-        // Then once we have finished emitting the class contents we detach the
-        // buffer and then sort and emit the imports into the actual output and
-        // then finally replay the buffer into the output.
-
-        StringBuilder buf = this.buffer;
-        if (this.line_buffer.length() != 0) {
-            buf.append(this.line_buffer.toString());
-        }
-        this.buffer = null;
-        PackageEmitter pkg_emitter = this.set.getSpecialEmitter(PackageEmitter.class);
-        String pkg = this.type.getName();
-        int last = pkg.lastIndexOf('/');
-        if (last != -1) {
-            for (int i = 0; i < this.format.blank_lines_before_package; i++) {
-                newLine();
-            }
-            pkg = pkg.substring(0, last).replace('/', '.');
-            pkg_emitter.emitPackage(this, pkg);
-            newLine();
-        }
-        int lines = Math.max(this.format.blank_lines_after_package, this.format.blank_lines_before_imports);
-        for (int i = 0; i < lines; i++) {
-            newLine();
-        }
-
-        emitImports();
-
-        if (!this.imports.isEmpty()) {
-            for (int i = 0; i < this.format.blank_lines_after_imports - 1; i++) {
-                newLine();
-            }
-        }
-
-        String data = buf.toString();
-
-        // Replay the buffer.
-        try {
-            this.output.write(data);
-            if (this.format.insert_new_line_at_end_of_file_if_missing) {
-                if (data.charAt(data.length() - 1) != '\n') {
-                    this.output.write('\n');
-                }
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        this.imports = null;
-        this.buffer = null;
     }
 
 }

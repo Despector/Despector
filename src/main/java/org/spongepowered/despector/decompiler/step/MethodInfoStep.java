@@ -69,13 +69,15 @@ public class MethodInfoStep implements DecompilerStep {
             m.setFinal((mn.access & ACC_FINAL) != 0);
             m.setName(mn.name);
             m.setOwner(cn.name);
-            m.setSignature(mn.desc);
+            m.setDescription(mn.desc);
             m.setStatic((mn.access & ACC_STATIC) != 0);
             m.setSynthetic((mn.access & ACC_SYNTHETIC) != 0);
             m.setBridge((mn.access & ACC_BRIDGE) != 0);
 
             if (mn.signature != null) {
                 m.setMethodSignature(SignatureParser.parseMethod(mn.signature));
+            } else {
+                m.setMethodSignature(SignatureParser.parseMethod(mn.desc));
             }
 
             if (mn.visibleAnnotations != null) {

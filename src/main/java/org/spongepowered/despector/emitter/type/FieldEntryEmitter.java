@@ -34,15 +34,15 @@ public class FieldEntryEmitter implements AstEmitter<FieldEntry> {
 
     @Override
     public boolean emit(EmitterContext ctx, FieldEntry ast) {
-
         for (Annotation anno : ast.getAnnotations()) {
             ctx.emit(anno);
             ctx.newLine();
             ctx.printIndentation();
         }
-
         ctx.printString(ast.getAccessModifier().asString());
-        ctx.printString(" ");
+        if (!ast.getAccessModifier().asString().isEmpty()) {
+            ctx.printString(" ");
+        }
         if (ast.isStatic()) {
             ctx.printString("static ");
         }
@@ -51,6 +51,7 @@ public class FieldEntryEmitter implements AstEmitter<FieldEntry> {
         }
         GenericsEmitter generics = ctx.getEmitterSet().getSpecialEmitter(GenericsEmitter.class);
         generics.emitTypeSignature(ctx, ast.getType());
+
         ctx.printString(" ");
         ctx.printString(ast.getName());
         if (ast.getInitializer() != null) {
@@ -58,6 +59,23 @@ public class FieldEntryEmitter implements AstEmitter<FieldEntry> {
             ctx.emit(ast.getInitializer(), ast.getType());
         }
         return true;
+    }
+
+    private int getTypeLength(EmitterContext ctx, FieldEntry field) {
+        int length = 0;
+        length += field.getAccessModifier().asString().length();
+        if (length > 0) {
+            length++;
+        }
+        if (field.isStatic()) {
+            length += 7;
+        }
+        if (field.isFinal()) {
+            length += 6;
+        }
+        length += GenericsEmitter.getLength(ctx, field.getType());
+        length++;
+        return length;
     }
 
 }

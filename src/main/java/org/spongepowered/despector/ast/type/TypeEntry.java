@@ -110,25 +110,37 @@ public abstract class TypeEntry extends AstEntry {
         this.is_final = state;
     }
 
+    /**
+     * Gets if this type is synthetic.
+     */
     public boolean isSynthetic() {
         return this.is_synthetic;
     }
 
+    /**
+     * Sets if this type is synthetic.
+     */
     public void setSynthetic(boolean state) {
         this.is_synthetic = state;
     }
 
+    /**
+     * Gets if this type is an inner class of another type.
+     */
     public boolean isInnerClass() {
         return this.inner_class;
     }
 
     /**
-     * Gets the obfuscated name.
+     * Gets the type internal name.
      */
     public String getName() {
         return this.name;
     }
 
+    /**
+     * Gets the type descriptor.
+     */
     public String getDescriptor() {
         return "L" + this.name + ";";
     }
@@ -179,7 +191,7 @@ public abstract class TypeEntry extends AstEntry {
 
     protected MethodEntry findMethod(String name, String sig, Multimap<String, MethodEntry> map) {
         for (MethodEntry m : map.values()) {
-            if (m.getName().equals(name) && m.getSignature().equals(sig)) {
+            if (m.getName().equals(name) && m.getDescription().equals(sig)) {
                 return m;
             }
         }
@@ -279,13 +291,13 @@ public abstract class TypeEntry extends AstEntry {
     public void addMethod(MethodEntry m) {
         checkNotNull(m);
         if (m.isStatic()) {
-            MethodEntry existing = getStaticMethodSafe(m.getName(), m.getSignature());
+            MethodEntry existing = getStaticMethodSafe(m.getName(), m.getDescription());
             if (existing != null) {
                 throw new IllegalArgumentException("Duplicate method " + existing);
             }
             this.static_methods.put(m.getName(), m);
         } else {
-            MethodEntry existing = getMethodSafe(m.getName(), m.getSignature());
+            MethodEntry existing = getMethodSafe(m.getName(), m.getDescription());
             if (existing != null) {
                 throw new IllegalArgumentException("Duplicate method " + existing);
             }
