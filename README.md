@@ -50,16 +50,23 @@ cleanup {
     # Cleanup operations to apply before emitting
     operations=[]
 }
-# Emits source when loading classes (useful when debugging the decompiler).
-emit-source-on-load=false
+# Targeted cleanup operations
+"cleanup_sections"=[]
 # Emitter configuration
 emitter {
+    # Whether to emit synthetic members
+    emit-synthetics=false
     # The path of the formatter configuration
     formatting-path="run/eclipse_formatter.xml"
     # One of: eclipse,intellij
     formatting-type=eclipse
     # The path of the import order configuration
     import-order-path="run/eclipse.importorder"
+}
+# Kotlin specific configuration
+kotlin {
+    # Whether to replace strings containing new lines with raw strings
+    replace-multiline-strings=true
 }
 # Prints out opcodes of a method when it fails to decompile.
 print-opcodes-on-error=true
@@ -68,5 +75,5 @@ print-opcodes-on-error=true
 [Gradle]: https://www.gradle.org/
 [ASM]: http://asm.ow2.org/
 [Development/Support Chat]: https://webchat.esper.net/?channels=decompiler
-[Issue Tracker]: https://github.com/Deamon5550/Despector/issues
+[Issue Tracker]: https://github.com/Despector/Despector/issues
 [HOCON]: https://github.com/typesafehub/config/blob/master/HOCON.md

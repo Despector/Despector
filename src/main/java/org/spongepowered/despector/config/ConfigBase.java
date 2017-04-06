@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) SpongePowered <https://www.spongepowered.org>
+ * Copyright (c) Despector <https://despector.voxelgenesis.com>
  * Copyright (c) contributors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -42,11 +42,9 @@ public class ConfigBase {
     @Setting(comment = "Kotlin specific configuration")
     public KotlinConfig kotlin = new KotlinConfig();
 
-    @Setting(comment = "Targeted cleanup iperations")
+    @Setting(comment = "Targeted cleanup operations")
     public List<CleanupConfigSection> cleanup_sections = new ArrayList<>();
 
-    @Setting(value = "emit-source-on-load", comment = "Emits source when loading classes (useful when debugging the decompiler).")
-    public boolean emit_source_on_load = Boolean.valueOf(System.getProperty("despector.debug.emit", "false"));
     @Setting(value = "print-opcodes-on-error", comment = "Prints out opcodes of a method when it fails to decompile.")
     public boolean print_opcodes_on_error = Boolean.valueOf(System.getProperty("despector.debug.printerrors", "false"));
 
