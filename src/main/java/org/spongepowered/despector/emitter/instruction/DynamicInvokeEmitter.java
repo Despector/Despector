@@ -41,7 +41,13 @@ public class DynamicInvokeEmitter implements InstructionEmitter<DynamicInvokeHan
     public void emit(EmitterContext ctx, DynamicInvokeHandle arg, TypeSignature type) {
 
         TypeEntry owner = ctx.getType().getSource().get(arg.getLambdaOwner());
-        MethodEntry method = owner.getStaticMethod(arg.getLambdaMethod());
+        MethodEntry method = owner.getStaticMethodSafe(arg.getLambdaMethod());
+        if (method == null) {
+            method = owner.getMethodSafe(arg.getLambdaMethod());
+            if (method == null) {
+                throw new IllegalStateException();
+            }
+        }
         StatementBlock block = method.getInstructions();
 
         ctx.printString("(");

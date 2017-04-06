@@ -24,9 +24,12 @@
  */
 package org.spongepowered.despector.decompiler.method.graph.process;
 
-import static org.objectweb.asm.Opcodes.*;
+import static org.objectweb.asm.Opcodes.IRETURN;
+import static org.objectweb.asm.Opcodes.RETURN;
+
 import org.objectweb.asm.Label;
 import org.objectweb.asm.tree.AbstractInsnNode;
+import org.objectweb.asm.tree.JumpInsnNode;
 import org.objectweb.asm.tree.LabelNode;
 import org.objectweb.asm.tree.LookupSwitchInsnNode;
 import org.objectweb.asm.tree.TableSwitchInsnNode;
@@ -80,6 +83,7 @@ public class SwitchBlockProcessor implements GraphProcessor {
             Map<Label, SwitchCaseBlockSection> cases = new HashMap<>();
             int index = 0;
             OpcodeBlock end = null;
+            Label end_label = null;
             OpcodeBlock fartherst = null;
             int farthest_break = 0;
             boolean all_return = true;
@@ -124,12 +128,13 @@ public class SwitchBlockProcessor implements GraphProcessor {
                 }
                 if (last instanceof GotoOpcodeBlock) {
                     end = last.getTarget();
+                    end_label = ((JumpInsnNode) last.getLast()).label.getLabel();
                     case_region.remove(last);
                     cs.setBreaks(true);
                 }
                 try {
                     partial.getDecompiler().flattenGraph(partial, case_region, case_region.size(), cs.getBody());
-                } catch (Exception e) {
+                } catch (Throwable e) {
                     if (ConfigManager.getConfig().print_opcodes_on_error) {
                         List<String> comment = new ArrayList<>();
                         for (OpcodeBlock op : case_region) {
@@ -147,7 +152,7 @@ public class SwitchBlockProcessor implements GraphProcessor {
             SwitchCaseBlockSection cs = cases.get(dflt.getLabel());
             if (cs != null) {
                 cs.setDefault(true);
-            } else if (!all_return) {
+            } else if (!all_return && end_label != dflt.getLabel()) {
                 cs = sswitch.new SwitchCaseBlockSection();
                 cases.put(dflt.getLabel(), cs);
                 sswitch.addCase(cs);

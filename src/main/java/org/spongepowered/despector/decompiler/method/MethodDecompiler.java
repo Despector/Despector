@@ -289,6 +289,9 @@ public class MethodDecompiler {
 
     public void flattenGraph(PartialMethod partial, List<OpcodeBlock> blocks, int stop_point, List<BlockSection> result) {
         int stop_offs = blocks.size() - stop_point;
+        if(stop_offs < 0) {
+            return;
+        }
         outer: for (int i = 0; i < blocks.size() - stop_offs; i++) {
             OpcodeBlock region_start = blocks.get(i);
             for (GraphProcessor processor : this.processors) {
