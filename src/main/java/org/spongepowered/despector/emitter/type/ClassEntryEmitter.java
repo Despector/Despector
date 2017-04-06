@@ -48,6 +48,7 @@ public class ClassEntryEmitter implements AstEmitter<ClassEntry> {
 
     @Override
     public boolean emit(EmitterOutput ctx, ClassEntry type) {
+        ctx.append(new EmitterToken(TokenType.BEGIN_CLASS, type));
         for (Annotation anno : type.getAnnotations()) {
             ctx.emit(anno);
         }
@@ -98,7 +99,7 @@ public class ClassEntryEmitter implements AstEmitter<ClassEntry> {
             }
         }
 
-        ctx.append(new EmitterToken(TokenType.CLASS_START, "{"));
+        ctx.append(new EmitterToken(TokenType.BLOCK_START, "{"));
 
         emitStaticFields(ctx, type);
         emitStaticMethods(ctx, type);
@@ -114,7 +115,8 @@ public class ClassEntryEmitter implements AstEmitter<ClassEntry> {
             ctx.emitType(inner_type);
         }
 
-        ctx.append(new EmitterToken(TokenType.CLASS_END, "}"));
+        ctx.append(new EmitterToken(TokenType.BLOCK_END, "}"));
+        ctx.append(new EmitterToken(TokenType.END_CLASS, type));
         return true;
     }
 

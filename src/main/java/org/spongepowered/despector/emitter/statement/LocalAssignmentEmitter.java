@@ -39,6 +39,7 @@ public class LocalAssignmentEmitter implements StatementEmitter<LocalAssignment>
 
     @Override
     public void emit(EmitterOutput ctx, LocalAssignment insn) {
+        ctx.append(new EmitterToken(TokenType.BEGIN_STATEMENT, insn));
         if (!insn.getLocal().getLocal().isParameter() && !ctx.isDefined(insn.getLocal())) {
             LocalInstance local = insn.getLocal();
             ctx.append(new EmitterToken(TokenType.TYPE, local.getType()));
@@ -52,7 +53,8 @@ public class LocalAssignmentEmitter implements StatementEmitter<LocalAssignment>
         ctx.append(new EmitterToken(TokenType.NAME, insn.getLocal().getName()));
         ctx.append(new EmitterToken(TokenType.EQUALS, "="));
         ctx.emitInstruction(insn.getValue(), insn.getLocal().getType());
-        ctx.append(new EmitterToken(TokenType.STATEMENT_END, ";"));
+        ctx.append(new EmitterToken(TokenType.SPECIAL, ";"));
+        ctx.append(new EmitterToken(TokenType.END_STATEMENT, insn));
     }
 
     protected boolean checkOperator(EmitterOutput ctx, LocalAssignment insn, Instruction val) {
@@ -76,12 +78,14 @@ public class LocalAssignmentEmitter implements StatementEmitter<LocalAssignment>
                             } else {
                                 ctx.append(new EmitterToken(TokenType.BOOLEAN, false));
                             }
-                            ctx.append(new EmitterToken(TokenType.STATEMENT_END, ";"));
+                            ctx.append(new EmitterToken(TokenType.SPECIAL, ";"));
+                            ctx.append(new EmitterToken(TokenType.END_STATEMENT, insn));
                             return true;
                         }
                     }
                     ctx.emitInstruction(right, insn.getLocal().getType());
-                    ctx.append(new EmitterToken(TokenType.STATEMENT_END, ";"));
+                    ctx.append(new EmitterToken(TokenType.SPECIAL, ";"));
+                    ctx.append(new EmitterToken(TokenType.END_STATEMENT, insn));
                     return true;
                 }
             }

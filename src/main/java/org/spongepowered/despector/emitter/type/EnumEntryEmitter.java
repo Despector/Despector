@@ -52,6 +52,7 @@ public class EnumEntryEmitter implements AstEmitter<EnumEntry> {
 
     @Override
     public boolean emit(EmitterOutput ctx, EnumEntry type) {
+        ctx.append(new EmitterToken(TokenType.BEGIN_CLASS, type));
         for (Annotation anno : type.getAnnotations()) {
             ctx.emit(anno);
         }
@@ -77,7 +78,7 @@ public class EnumEntryEmitter implements AstEmitter<EnumEntry> {
                 ctx.append(new EmitterToken(TokenType.INTERFACE, "L" + type.getInterfaces().get(i) + ";"));
             }
         }
-        ctx.append(new EmitterToken(TokenType.CLASS_START, "{"));
+        ctx.append(new EmitterToken(TokenType.BLOCK_START, "{"));
 
         // we look through the class initializer to find the enum constant
         // initializers so that we can emit those specially before the rest of
@@ -123,7 +124,8 @@ public class EnumEntryEmitter implements AstEmitter<EnumEntry> {
                 }
             }
             if(!first) {
-                ctx.append(new EmitterToken(TokenType.STATEMENT_END, ";"));
+                ctx.append(new EmitterToken(TokenType.SPECIAL, ";"));
+                ctx.append(new EmitterToken(TokenType.END_STATEMENT, null));
             }
             // We store any remaining statements to be emitted later
             while (initializers.hasNext()) {
@@ -153,12 +155,14 @@ public class EnumEntryEmitter implements AstEmitter<EnumEntry> {
             // if we found any additional statements in the class initializer
             // while looking for enum constants we emit them here
 
+            ctx.append(new EmitterToken(TokenType.BEGIN_METHOD, "<clinit>"));
             ctx.append(new EmitterToken(TokenType.SPECIAL, "static"));
-            ctx.append(new EmitterToken(TokenType.METHOD_START, "{"));
+            ctx.append(new EmitterToken(TokenType.BLOCK_START, "{"));
             for (Statement stmt : remaining) {
                 ctx.emitStatement(stmt);
             }
-            ctx.append(new EmitterToken(TokenType.METHOD_END, "}"));
+            ctx.append(new EmitterToken(TokenType.BLOCK_END, "}"));
+            ctx.append(new EmitterToken(TokenType.END_METHOD, "<clinit>"));
         }
         if (!type.getStaticMethods().isEmpty()) {
             for (MethodEntry mth : type.getStaticMethods()) {
@@ -224,7 +228,8 @@ public class EnumEntryEmitter implements AstEmitter<EnumEntry> {
             TypeEntry inner_type = type.getSource().get(inner.getName());
             ctx.emitType(inner_type);
         }
-        ctx.append(new EmitterToken(TokenType.CLASS_END, "}"));
+        ctx.append(new EmitterToken(TokenType.BLOCK_END, "}"));
+        ctx.append(new EmitterToken(TokenType.END_CLASS, type));
         return true;
     }
 

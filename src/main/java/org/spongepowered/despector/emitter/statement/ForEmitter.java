@@ -34,6 +34,7 @@ public class ForEmitter implements StatementEmitter<For> {
 
     @Override
     public void emit(EmitterOutput ctx, For loop) {
+        ctx.append(new EmitterToken(TokenType.BEGIN_STATEMENT, loop));
         ctx.append(new EmitterToken(TokenType.SPECIAL, "for"));
         ctx.append(new EmitterToken(TokenType.LEFT_PAREN, "("));
         if (loop.getInit() != null) {
@@ -51,6 +52,7 @@ public class ForEmitter implements StatementEmitter<For> {
             ctx.emitBody(loop.getBody(), 0);
         }
         ctx.append(new EmitterToken(TokenType.BLOCK_END, "}"));
+        ctx.append(new EmitterToken(TokenType.END_STATEMENT, loop));
     }
 
 }

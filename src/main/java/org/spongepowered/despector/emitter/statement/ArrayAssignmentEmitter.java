@@ -35,13 +35,15 @@ public class ArrayAssignmentEmitter implements StatementEmitter<ArrayAssignment>
 
     @Override
     public void emit(EmitterOutput ctx, ArrayAssignment insn) {
+        ctx.append(new EmitterToken(TokenType.BEGIN_STATEMENT, insn));
         ctx.emitInstruction(insn.getArray(), null);
         ctx.append(new EmitterToken(TokenType.LEFT_BRACKET, "["));
         ctx.emitInstruction(insn.getIndex(), ClassTypeSignature.INT);
         ctx.append(new EmitterToken(TokenType.RIGHT_BRACKET, "]"));
         ctx.append(new EmitterToken(TokenType.EQUALS, "="));
         ctx.emitInstruction(insn.getValue(), null);
-        ctx.append(new EmitterToken(TokenType.STATEMENT_END, ";"));
+        ctx.append(new EmitterToken(TokenType.SPECIAL, ";"));
+        ctx.append(new EmitterToken(TokenType.END_STATEMENT, insn));
     }
 
 }

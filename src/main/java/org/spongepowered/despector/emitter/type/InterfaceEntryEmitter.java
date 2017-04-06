@@ -43,7 +43,7 @@ public class InterfaceEntryEmitter implements AstEmitter<InterfaceEntry> {
 
     @Override
     public boolean emit(EmitterOutput ctx, InterfaceEntry type) {
-
+        ctx.append(new EmitterToken(TokenType.BEGIN_CLASS, type));
         for (Annotation anno : type.getAnnotations()) {
             ctx.emit(anno);
         }
@@ -75,7 +75,7 @@ public class InterfaceEntryEmitter implements AstEmitter<InterfaceEntry> {
                 ctx.append(new EmitterToken(TokenType.TYPE, "L" + type.getInterfaces().get(i) + ";"));
             }
         }
-        ctx.append(new EmitterToken(TokenType.CLASS_START, "{"));
+        ctx.append(new EmitterToken(TokenType.BLOCK_START, "{"));
         if (!type.getStaticFields().isEmpty()) {
             for (FieldEntry field : type.getStaticFields()) {
                 if (field.isSynthetic()) {
@@ -131,7 +131,8 @@ public class InterfaceEntryEmitter implements AstEmitter<InterfaceEntry> {
             TypeEntry inner_type = type.getSource().get(inner.getName());
             ctx.emitType(inner_type);
         }
-        ctx.append(new EmitterToken(TokenType.CLASS_END, "}"));
+        ctx.append(new EmitterToken(TokenType.BLOCK_END, "}"));
+        ctx.append(new EmitterToken(TokenType.END_CLASS, type));
         return true;
     }
 

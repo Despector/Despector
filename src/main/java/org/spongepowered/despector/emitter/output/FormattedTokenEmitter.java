@@ -44,8 +44,6 @@ import java.util.Set;
 
 public class FormattedTokenEmitter {
 
-    private final SpacingCoordinator spacing = new SpacingCoordinator(this);
-
     private EmitterFormat format = EmitterFormat.defaults();
 
     private Writer writer;
@@ -59,9 +57,6 @@ public class FormattedTokenEmitter {
         this.implicit_imports.add("java/lang/");
     }
 
-    public SpacingCoordinator getSpacingCoordinator() {
-        return this.spacing;
-    }
 
     public EmitterFormat getFormat() {
         return this.format;
@@ -74,195 +69,11 @@ public class FormattedTokenEmitter {
     public void emit(Writer output, List<EmitterToken> tokens, TypeEntry type) {
         this.writer = output;
         this.type = type;
-        this.spacing.reset();
-
-        if (tokens.isEmpty()) {
-            return;
+        
+        for(int i = 0; i < tokens.size(); i++) {
+            
         }
-
-        EmitterToken next = tokens.get(0);
-        EmitterToken token = null;
-        EmitterToken prev;
-
-        for (int i = 0; i < tokens.size(); i++) {
-            prev = token;
-            token = next;
-            next = i < tokens.size() - 1 ? tokens.get(i + 1) : null;
-            this.spacing.pre(token, tokens, i, next, prev);
-            emitToken(token, tokens, i, next, prev);
-            this.spacing.post(token, tokens, i, next, prev);
-        }
-    }
-
-    @SuppressWarnings({"rawtypes", "unchecked"})
-    private void emitToken(EmitterToken token, List<EmitterToken> tokens, int index, EmitterToken next, EmitterToken last) {
-        switch (token.getType()) {
-        case PACKAGE:
-            printString("package ");
-            String pkg = (String) token.getToken();
-            pkg = pkg.substring(0, pkg.lastIndexOf('/')).replace('/', '.');
-            printString(pkg);
-            printString(";");
-            break;
-        case ACCESS:
-            AccessModifier acc = (AccessModifier) token.getToken();
-            printString(acc.asString());
-            break;
-        case SPECIAL:
-        case MODIFIER:
-            printString((String) token.getToken());
-            break;
-        case SUPERCLASS:
-            printType((String) token.getToken());
-            break;
-        case INTERFACE:
-            if (checkType(last, TokenType.INTERFACE)) {
-                printString(", ");
-            }
-            printType((String) token.getToken());
-            break;
-        case TYPE:
-            if (token.getToken() instanceof String) {
-                printType((String) token.getToken());
-            } else if (token.getToken() instanceof TypeSignature) {
-                emitTypeSignature((TypeSignature) token.getToken());
-            } else {
-                throw new IllegalStateException(token.getToken().toString());
-            }
-            break;
-        case NAME:
-            printString((String) token.getToken());
-            break;
-        case GENERIC_PARAMS:
-            if (token.getToken() instanceof List) {
-                List list = (List) token.getToken();
-                if (list.isEmpty()) {
-                    break;
-                }
-                Object first = list.get(0);
-                if (first instanceof TypeArgument) {
-                    emitTypeArguments(list);
-                    if (!checkType(next, TokenType.LEFT_PAREN)) {
-                        printString(" ");
-                    }
-                    break;
-                } else if (first instanceof TypeParameter) {
-                    emitTypeParameters(list);
-                    if (!checkType(next, TokenType.LEFT_PAREN)) {
-                        printString(" ");
-                    }
-                    break;
-                }
-                throw new IllegalStateException(list.get(0).getClass().getName());
-            } else if (token.getToken() instanceof String) {
-                printString((String) token.getToken());
-                break;
-            }
-            throw new IllegalStateException(token.getToken().getClass().getName());
-        case RETURN:
-            printString((String) token.getToken());
-            break;
-        case ENUM_CONSTANT:
-            printString((String) token.getToken());
-            break;
-        case CLASS_START:
-            printString("{");
-            break;
-        case CLASS_END:
-            printString("}");
-            break;
-        case METHOD_START:
-            printString("{");
-            break;
-        case METHOD_END:
-            printString("}");
-            break;
-        case BLOCK_START:
-            printString("{");
-            break;
-        case BLOCK_END:
-            printString("}");
-            break;
-        case LEFT_PAREN:
-        case LEFT_BRACKET:
-        case DOT:
-        case RAW:
-        case RIGHT_BRACKET:
-            printString((String) token.getToken());
-            break;
-        case RIGHT_PAREN:
-            printString((String) token.getToken());
-            break;
-        case ARG_SEPARATOR:
-            printString(",");
-            break;
-        case STATEMENT_END:
-            printString((String) token.getToken());
-            break;
-        case EQUALS:
-            printString((String) token.getToken());
-            break;
-        case DOUBLE:
-        case BOOLEAN:
-        case INT:
-            printString(token.getToken().toString());
-            break;
-        case LONG:
-            printString(token.getToken().toString());
-            printString('L');
-            break;
-        case FLOAT:
-            printString(token.getToken().toString());
-            printString('F');
-            break;
-        case STRING:
-            printString('"');
-            printString((String) token.getToken());
-            printString('"');
-            break;
-        case CHAR:
-            printString('\'');
-            printString(((Character) token.getToken()).charValue());
-            printString('\'');
-            break;
-        case OPERATOR:
-        case IF:
-        case ELSE_IF:
-        case ELSE:
-            printString((String) token.getToken());
-            printString(' ');
-            break;
-        case INSERT_IMPORTS:
-            generateImports(tokens);
-            // TODO sort, separate into groups
-            for (String s : this.imports) {
-                printString("import ");
-                printString(s.replace('/', '.'));
-                printString(";");
-                newLine();
-            }
-            if (!this.imports.isEmpty()) {
-                newLine();
-            }
-            break;
-        case COMMENT:
-        case BLOCK_COMMENT:
-        case FOR_EACH:
-        case FOR_SEPARATOR:
-        case TERNARY_IF:
-        case TERNARY_ELSE:
-        case LAMBDA:
-        case WHEN_CASE:
-        case OPERATOR_EQUALS:
-        case ARRAY_INITIALIZER_START:
-        case ARRAY_INITIALIZER_END:
-            printString((String) token.getToken());
-            break;
-        }
-    }
-
-    private boolean checkType(EmitterToken token, TokenType type) {
-        return token != null && token.getType() == type;
+        
     }
 
     void indent() {

@@ -192,7 +192,7 @@ public class KotlinMethodEntryEmitter extends MethodEntryEmitter {
             }
             ctx.append(new EmitterToken(TokenType.BLOCK_END, "}"));
         } else {
-            ctx.append(new EmitterToken(TokenType.STATEMENT_END, ";"));
+            ctx.append(new EmitterToken(TokenType.SPECIAL, ";"));
         }
         return true;
     }

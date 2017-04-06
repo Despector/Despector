@@ -173,7 +173,7 @@ public class KotlinClassEntryEmitter implements AstEmitter<ClassEntry> {
                     ctx.append(new EmitterToken(TokenType.EQUALS, "="));
                     ctx.emitInstruction(static_initializers.get(field.getName()), field.getType());
                 }
-                ctx.append(new EmitterToken(TokenType.STATEMENT_END, ";"));
+                ctx.append(new EmitterToken(TokenType.SPECIAL, ";"));
             }
         }
     }
@@ -229,7 +229,7 @@ public class KotlinClassEntryEmitter implements AstEmitter<ClassEntry> {
                     }
                 }
                 ctx.emitField(field);
-                ctx.append(new EmitterToken(TokenType.STATEMENT_END, ";"));
+                ctx.append(new EmitterToken(TokenType.SPECIAL, ";"));
             }
         }
     }

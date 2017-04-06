@@ -22,29 +22,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.despector.emitter.statement;
+package org.spongepowered.despector.emitter.output;
 
-import org.spongepowered.despector.ast.members.insn.branch.While;
-import org.spongepowered.despector.emitter.StatementEmitter;
-import org.spongepowered.despector.emitter.output.EmitterOutput;
-import org.spongepowered.despector.emitter.output.EmitterToken;
-import org.spongepowered.despector.emitter.output.TokenType;
 
-public class WhileEmitter implements StatementEmitter<While> {
-
-    @Override
-    public void emit(EmitterOutput ctx, While loop) {
-        ctx.append(new EmitterToken(TokenType.BEGIN_STATEMENT, loop));
-        ctx.append(new EmitterToken(TokenType.SPECIAL, "while"));
-        ctx.append(new EmitterToken(TokenType.LEFT_PAREN, "("));
-        ctx.emitCondition(loop.getCondition());
-        ctx.append(new EmitterToken(TokenType.RIGHT_PAREN, ")"));
-        ctx.append(new EmitterToken(TokenType.BLOCK_START, "{"));
-        if (!loop.getBody().getStatements().isEmpty()) {
-            ctx.emitBody(loop.getBody(), 0);
-        }
-        ctx.append(new EmitterToken(TokenType.BLOCK_END, "}"));
-        ctx.append(new EmitterToken(TokenType.END_STATEMENT, loop));
-    }
+public interface TokenRegionProcessor {
 
 }

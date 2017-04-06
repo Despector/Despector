@@ -67,6 +67,7 @@ public class MethodEntryEmitter implements AstEmitter<MethodEntry> {
             for (Annotation anno : method.getAnnotations()) {
                 ctx.emit(anno);
             }
+            ctx.append(new EmitterToken(TokenType.BEGIN_METHOD, "<clinit>"));
             ctx.append(new EmitterToken(TokenType.SPECIAL, "static"));
             if (method.getInstructions() == null) {
                 ctx.append(new EmitterToken(TokenType.COMMENT, "Error decompiling block"));
@@ -75,6 +76,7 @@ public class MethodEntryEmitter implements AstEmitter<MethodEntry> {
                 ctx.emitBody(method.getInstructions(), start);
             }
             ctx.append(new EmitterToken(TokenType.BLOCK_END, "}"));
+            ctx.append(new EmitterToken(TokenType.END_METHOD, "<clinit>"));
             return true;
         }
         if ("<init>".equals(method.getName()) && method.getAccessModifier() == AccessModifier.PUBLIC && method.getParamTypes().isEmpty()
@@ -83,6 +85,7 @@ public class MethodEntryEmitter implements AstEmitter<MethodEntry> {
             // constants to the super ctor
             return false;
         }
+        ctx.append(new EmitterToken(TokenType.BEGIN_METHOD, method));
         for (Annotation anno : method.getAnnotations()) {
             ctx.emit(anno);
         }
@@ -154,15 +157,16 @@ public class MethodEntryEmitter implements AstEmitter<MethodEntry> {
         }
         ctx.append(new EmitterToken(TokenType.RIGHT_PAREN, ")"));
         if (!method.isAbstract()) {
-            ctx.append(new EmitterToken(TokenType.METHOD_START, "{"));
+            ctx.append(new EmitterToken(TokenType.BLOCK_START, "{"));
             if (block == null) {
                 ctx.append(new EmitterToken(TokenType.COMMENT, "Error decompiling block"));
                 printReturn(ctx, method.getReturnType());
             } else {
                 ctx.emitBody(block, 0);
             }
-            ctx.append(new EmitterToken(TokenType.METHOD_END, "}"));
+            ctx.append(new EmitterToken(TokenType.BLOCK_END, "}"));
         }
+        ctx.append(new EmitterToken(TokenType.END_METHOD, method));
         return true;
     }
 

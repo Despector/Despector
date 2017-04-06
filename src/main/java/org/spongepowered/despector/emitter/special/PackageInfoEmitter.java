@@ -48,7 +48,7 @@ public class PackageInfoEmitter implements SpecialEmitter {
             pkg = pkg.substring(0, last).replace('/', '.');
             ctx.append(new EmitterToken(TokenType.SPECIAL, "package"));
             ctx.append(new EmitterToken(TokenType.NAME, pkg));
-            ctx.append(new EmitterToken(TokenType.STATEMENT_END, ";"));
+            ctx.append(new EmitterToken(TokenType.SPECIAL, ";"));
         }
     }
 

@@ -35,6 +35,7 @@ public class ForEachEmitter implements StatementEmitter<ForEach> {
 
     @Override
     public void emit(EmitterOutput ctx, ForEach loop) {
+        ctx.append(new EmitterToken(TokenType.BEGIN_STATEMENT, loop));
         ctx.append(new EmitterToken(TokenType.SPECIAL, "for"));
         ctx.append(new EmitterToken(TokenType.LEFT_PAREN, "("));
         LocalInstance local = loop.getValueAssignment();
@@ -48,6 +49,7 @@ public class ForEachEmitter implements StatementEmitter<ForEach> {
             ctx.emitBody(loop.getBody(), 0);
         }
         ctx.append(new EmitterToken(TokenType.BLOCK_END, "}"));
+        ctx.append(new EmitterToken(TokenType.END_STATEMENT, loop));
     }
 
 }

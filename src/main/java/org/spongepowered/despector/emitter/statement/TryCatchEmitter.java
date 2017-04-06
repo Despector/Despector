@@ -35,6 +35,7 @@ public class TryCatchEmitter implements StatementEmitter<TryCatch> {
 
     @Override
     public void emit(EmitterOutput ctx, TryCatch try_block) {
+        ctx.append(new EmitterToken(TokenType.BEGIN_STATEMENT, try_block));
         ctx.append(new EmitterToken(TokenType.SPECIAL, "try"));
         ctx.append(new EmitterToken(TokenType.BLOCK_START, "{"));
         ctx.emitBody(try_block.getTryBlock(), 0);
@@ -57,6 +58,7 @@ public class TryCatchEmitter implements StatementEmitter<TryCatch> {
             ctx.emitBody(c.getBlock(), 0);
             ctx.append(new EmitterToken(TokenType.BLOCK_END, "}"));
         }
+        ctx.append(new EmitterToken(TokenType.END_STATEMENT, try_block));
     }
 
 }

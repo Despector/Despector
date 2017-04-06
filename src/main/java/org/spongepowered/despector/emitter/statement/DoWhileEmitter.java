@@ -34,6 +34,7 @@ public class DoWhileEmitter implements StatementEmitter<DoWhile> {
 
     @Override
     public void emit(EmitterOutput ctx, DoWhile loop) {
+        ctx.append(new EmitterToken(TokenType.BEGIN_STATEMENT, loop));
         ctx.append(new EmitterToken(TokenType.SPECIAL, "do"));
         ctx.append(new EmitterToken(TokenType.BLOCK_START, "{"));
         if (!loop.getBody().getStatements().isEmpty()) {
@@ -44,7 +45,8 @@ public class DoWhileEmitter implements StatementEmitter<DoWhile> {
         ctx.append(new EmitterToken(TokenType.LEFT_PAREN, "("));
         ctx.emitCondition(loop.getCondition());
         ctx.append(new EmitterToken(TokenType.RIGHT_PAREN, ")"));
-        ctx.append(new EmitterToken(TokenType.STATEMENT_END, ";"));
+        ctx.append(new EmitterToken(TokenType.SPECIAL, ";"));
+        ctx.append(new EmitterToken(TokenType.END_STATEMENT, loop));
     }
 
 }

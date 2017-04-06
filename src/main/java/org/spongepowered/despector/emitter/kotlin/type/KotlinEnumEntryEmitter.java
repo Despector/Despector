@@ -176,7 +176,7 @@ public class KotlinEnumEntryEmitter implements AstEmitter<EnumEntry> {
                     ctx.append(new EmitterToken(TokenType.RIGHT_PAREN, ")"));
                 }
             }
-            ctx.append(new EmitterToken(TokenType.STATEMENT_END, ";"));
+            ctx.append(new EmitterToken(TokenType.SPECIAL, ";"));
             // We store any remaining statements to be emitted later
             while (initializers.hasNext()) {
                 remaining.add(initializers.next());
@@ -199,7 +199,7 @@ public class KotlinEnumEntryEmitter implements AstEmitter<EnumEntry> {
                     continue;
                 }
                 ctx.emitField(field);
-                ctx.append(new EmitterToken(TokenType.STATEMENT_END, ";"));
+                ctx.append(new EmitterToken(TokenType.SPECIAL, ";"));
             }
         }
         if (!remaining.isEmpty()) {

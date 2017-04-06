@@ -34,9 +34,11 @@ public class ThrowEmitter implements StatementEmitter<Throw> {
 
     @Override
     public void emit(EmitterOutput ctx, Throw insn) {
+        ctx.append(new EmitterToken(TokenType.BEGIN_STATEMENT, insn));
         ctx.append(new EmitterToken(TokenType.SPECIAL, "throw"));
         ctx.emitInstruction(insn.getException(), null);
-        ctx.append(new EmitterToken(TokenType.STATEMENT_END, ";"));
+        ctx.append(new EmitterToken(TokenType.SPECIAL, ";"));
+        ctx.append(new EmitterToken(TokenType.END_STATEMENT, insn));
     }
 
 }

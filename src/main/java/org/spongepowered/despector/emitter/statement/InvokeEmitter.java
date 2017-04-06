@@ -36,6 +36,7 @@ public class InvokeEmitter implements StatementEmitter<InvokeStatement> {
 
     @Override
     public void emit(EmitterOutput ctx, InvokeStatement insn) {
+        ctx.append(new EmitterToken(TokenType.BEGIN_STATEMENT, insn));
         Instruction i = insn.getInstruction();
         if (i instanceof InstanceMethodInvoke) {
             InstanceMethodInvoke mth = (InstanceMethodInvoke) i;
@@ -44,7 +45,8 @@ public class InvokeEmitter implements StatementEmitter<InvokeStatement> {
             }
         }
         ctx.emitInstruction(i, null);
-        ctx.append(new EmitterToken(TokenType.STATEMENT_END, ";"));
+        ctx.append(new EmitterToken(TokenType.SPECIAL, ";"));
+        ctx.append(new EmitterToken(TokenType.END_STATEMENT, insn));
     }
 
 }

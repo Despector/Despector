@@ -45,6 +45,7 @@ public class FieldAssignmentEmitter implements StatementEmitter<FieldAssignment>
         if (insn.isInitializer()) {
             return;
         }
+        ctx.append(new EmitterToken(TokenType.BEGIN_STATEMENT, insn));
         if (insn instanceof StaticFieldAssignment) {
             if (ctx.getType() != null && !((StaticFieldAssignment) insn).getOwnerType().equals(ctx.getType().getDescriptor())) {
                 ctx.append(new EmitterToken(TokenType.TYPE, ((StaticFieldAssignment) insn).getOwnerName()));
@@ -62,7 +63,8 @@ public class FieldAssignmentEmitter implements StatementEmitter<FieldAssignment>
         }
         ctx.append(new EmitterToken(TokenType.EQUALS, "="));
         ctx.emitInstruction(val, ClassTypeSignature.of(insn.getFieldDescription()));
-        ctx.append(new EmitterToken(TokenType.STATEMENT_END, ";"));
+        ctx.append(new EmitterToken(TokenType.SPECIAL, ";"));
+        ctx.append(new EmitterToken(TokenType.END_STATEMENT, insn));
     }
 
     protected boolean checkOperator(EmitterOutput ctx, FieldAssignment insn, Instruction val) {
@@ -87,12 +89,14 @@ public class FieldAssignmentEmitter implements StatementEmitter<FieldAssignment>
                                 } else {
                                     ctx.append(new EmitterToken(TokenType.BOOLEAN, false));
                                 }
-                                ctx.append(new EmitterToken(TokenType.STATEMENT_END, ";"));
+                                ctx.append(new EmitterToken(TokenType.SPECIAL, ";"));
+                                ctx.append(new EmitterToken(TokenType.END_STATEMENT, insn));
                                 return true;
                             }
                         }
                         ctx.emitInstruction(right, ClassTypeSignature.of(insn.getFieldDescription()));
-                        ctx.append(new EmitterToken(TokenType.STATEMENT_END, ";"));
+                        ctx.append(new EmitterToken(TokenType.SPECIAL, ";"));
+                        ctx.append(new EmitterToken(TokenType.END_STATEMENT, insn));
                         return true;
                     }
                 }

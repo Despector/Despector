@@ -37,6 +37,7 @@ public class IfEmitter implements StatementEmitter<If> {
 
     @Override
     public void emit(EmitterOutput ctx, If insn) {
+        ctx.append(new EmitterToken(TokenType.BEGIN_STATEMENT, insn));
         ctx.append(new EmitterToken(TokenType.IF, "if"));
         ctx.append(new EmitterToken(TokenType.LEFT_PAREN, "("));
         ctx.emitCondition(insn.getCondition());
@@ -66,6 +67,7 @@ public class IfEmitter implements StatementEmitter<If> {
             }
             ctx.append(new EmitterToken(TokenType.BLOCK_END, "}"));
         }
+        ctx.append(new EmitterToken(TokenType.END_STATEMENT, insn));
     }
 
 }

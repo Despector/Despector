@@ -26,6 +26,15 @@ package org.spongepowered.despector.emitter.output;
 
 public enum TokenType {
 
+    BEGIN_CLASS,
+    END_CLASS,
+    BEGIN_FIELD,
+    END_FIELD,
+    BEGIN_METHOD,
+    END_METHOD,
+    BEGIN_STATEMENT,
+    END_STATEMENT,
+
     RAW,
     NAME,
     ACCESS,
@@ -37,10 +46,6 @@ public enum TokenType {
     PACKAGE,
 
     GENERIC_PARAMS,
-    CLASS_START,
-    CLASS_END,
-    METHOD_START,
-    METHOD_END,
     BLOCK_START,
     BLOCK_END,
     LEFT_PAREN,
@@ -57,7 +62,6 @@ public enum TokenType {
     ARRAY_INITIALIZER_START,
     ARRAY_INITIALIZER_END,
 
-    STATEMENT_END,
     DOT,
     EQUALS,
     OPERATOR_EQUALS,

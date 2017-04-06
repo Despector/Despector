@@ -34,8 +34,10 @@ public class BreakEmitter implements StatementEmitter<Break> {
 
     @Override
     public void emit(EmitterOutput ctx, Break stmt) {
+        ctx.append(new EmitterToken(TokenType.BEGIN_STATEMENT, stmt));
         ctx.append(new EmitterToken(TokenType.SPECIAL, stmt.getType().getKeyword()));
-        ctx.append(new EmitterToken(TokenType.STATEMENT_END, ";"));
+        ctx.append(new EmitterToken(TokenType.SPECIAL, ";"));
+        ctx.append(new EmitterToken(TokenType.END_STATEMENT, stmt));
     }
 
 }

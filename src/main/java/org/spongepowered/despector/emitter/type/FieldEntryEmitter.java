@@ -35,11 +35,10 @@ public class FieldEntryEmitter implements AstEmitter<FieldEntry> {
 
     @Override
     public boolean emit(EmitterOutput ctx, FieldEntry ast) {
-
+        ctx.append(new EmitterToken(TokenType.BEGIN_FIELD, ast));
         for (Annotation anno : ast.getAnnotations()) {
             ctx.emit(anno);
         }
-
         ctx.append(new EmitterToken(TokenType.ACCESS, ast.getAccessModifier()));
         if (ast.isStatic()) {
             ctx.append(new EmitterToken(TokenType.MODIFIER, "static"));
@@ -53,7 +52,8 @@ public class FieldEntryEmitter implements AstEmitter<FieldEntry> {
             ctx.append(new EmitterToken(TokenType.EQUALS, "="));
             ctx.emitInstruction(ast.getInitializer(), ast.getType());
         }
-        ctx.append(new EmitterToken(TokenType.STATEMENT_END, ";"));
+        ctx.append(new EmitterToken(TokenType.SPECIAL, ";"));
+        ctx.append(new EmitterToken(TokenType.END_FIELD, ast));
         return true;
     }
 

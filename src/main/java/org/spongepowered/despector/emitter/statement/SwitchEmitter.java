@@ -75,6 +75,7 @@ public class SwitchEmitter implements StatementEmitter<Switch> {
     @Override
     public void emit(EmitterOutput ctx, Switch tswitch) {
         Map<Integer, String> table = null;
+        ctx.append(new EmitterToken(TokenType.BEGIN_STATEMENT, tswitch));
         ctx.append(new EmitterToken(TokenType.SPECIAL, "switch"));
         ctx.append(new EmitterToken(TokenType.LEFT_PAREN, "("));
         boolean synthetic = false;
@@ -131,6 +132,7 @@ public class SwitchEmitter implements StatementEmitter<Switch> {
             }
         }
         ctx.append(new EmitterToken(TokenType.BLOCK_END, "}"));
+        ctx.append(new EmitterToken(TokenType.END_STATEMENT, tswitch));
     }
 
 }

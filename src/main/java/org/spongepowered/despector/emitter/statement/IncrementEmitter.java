@@ -34,6 +34,7 @@ public class IncrementEmitter implements StatementEmitter<Increment> {
 
     @Override
     public void emit(EmitterOutput ctx, Increment insn) {
+        ctx.append(new EmitterToken(TokenType.BEGIN_STATEMENT, insn));
         ctx.append(new EmitterToken(TokenType.NAME, insn.getLocal().getName()));
         if (insn.getIncrementValue() == 1) {
             ctx.append(new EmitterToken(TokenType.OPERATOR, "++"));
@@ -43,7 +44,8 @@ public class IncrementEmitter implements StatementEmitter<Increment> {
             ctx.append(new EmitterToken(TokenType.OPERATOR_EQUALS, "+="));
             ctx.append(new EmitterToken(TokenType.INT, insn.getIncrementValue()));
         }
-        ctx.append(new EmitterToken(TokenType.STATEMENT_END, ";"));
+        ctx.append(new EmitterToken(TokenType.SPECIAL, ";"));
+        ctx.append(new EmitterToken(TokenType.END_STATEMENT, insn));
     }
 
 }
