@@ -33,11 +33,16 @@ import org.spongepowered.despector.ast.generic.TypeSignature;
 import org.spongepowered.despector.ast.members.MethodEntry;
 import org.spongepowered.despector.ast.members.insn.Statement;
 import org.spongepowered.despector.ast.members.insn.StatementBlock;
+import org.spongepowered.despector.ast.members.insn.assign.FieldAssignment;
 import org.spongepowered.despector.ast.members.insn.assign.StaticFieldAssignment;
+import org.spongepowered.despector.ast.members.insn.function.InstanceMethodInvoke;
+import org.spongepowered.despector.ast.members.insn.function.InvokeStatement;
+import org.spongepowered.despector.ast.members.insn.misc.Return;
 import org.spongepowered.despector.ast.type.EnumEntry;
 import org.spongepowered.despector.ast.type.InterfaceEntry;
 import org.spongepowered.despector.emitter.AstEmitter;
 import org.spongepowered.despector.emitter.EmitterContext;
+import org.spongepowered.despector.emitter.format.EmitterFormat.BracePosition;
 import org.spongepowered.despector.emitter.special.GenericsEmitter;
 
 public class MethodEntryEmitter implements AstEmitter<MethodEntry> {
@@ -130,6 +135,7 @@ public class MethodEntryEmitter implements AstEmitter<MethodEntry> {
             ctx.printString(" ");
             ctx.printString(method.getName());
         }
+        ctx.printString(" ", ctx.getFormat().insert_space_before_opening_paren_in_method_declaration);
         ctx.printString("(");
         StatementBlock block = method.getInstructions();
         int start = 0;
@@ -138,6 +144,9 @@ public class MethodEntryEmitter implements AstEmitter<MethodEntry> {
             // parameters
             // (which are the index and name of the enum constant)
             start += 2;
+        }
+        if (start >= method.getParamTypes().size()) {
+            ctx.printString(" ", ctx.getFormat().insert_space_between_empty_parens_in_method_declaration);
         }
         for (int i = start; i < method.getParamTypes().size(); i++) {
             int param_index = i;
@@ -166,31 +175,73 @@ public class MethodEntryEmitter implements AstEmitter<MethodEntry> {
                 ctx.printString(insn.getName());
             }
             if (i < method.getParamTypes().size() - 1) {
-                ctx.printString(", ");
-                ctx.markWrapPoint();
+                ctx.printString(" ", ctx.getFormat().insert_space_before_comma_in_method_declaration_parameters);
+                ctx.printString(",");
+                ctx.printString(" ", ctx.getFormat().insert_space_after_comma_in_method_declaration_parameters);
+                ctx.markWrapPoint(ctx.getFormat().alignment_for_parameters_in_method_declaration, i + 1);
             }
         }
         ctx.printString(")");
         if (!method.isAbstract()) {
-            ctx.printString(" {");
+            ctx.printString(" ");
+            ctx.emitBrace(ctx.getFormat().brace_position_for_method_declaration, false);
             ctx.newLine();
-            ctx.indent();
             if (block == null) {
                 ctx.printIndentation();
                 ctx.printString("// Error decompiling block");
                 printReturn(ctx, method.getReturnType());
+                ctx.newLine();
+            } else if (isEmpty(block, "<init>".equals(method.getName()))) {
+                if (ctx.getFormat().insert_new_line_in_empty_method_body) {
+                    ctx.newLine();
+                }
             } else {
                 ctx.emitBody(block);
+                ctx.newLine();
             }
-            ctx.newLine();
-            ctx.dedent();
-            ctx.printIndentation();
-            ctx.printString("}");
+            if(ctx.getFormat().brace_position_for_method_declaration == BracePosition.NEXT_LINE_SHIFTED) {
+                ctx.printIndentation();
+                ctx.printString("}");
+                ctx.dedent();
+            } else {
+                ctx.dedent();
+                ctx.printIndentation();
+                ctx.printString("}");
+            }
         } else {
             ctx.printString(";");
         }
         ctx.setMethod(null);
         return true;
+    }
+
+    protected boolean isEmpty(StatementBlock block, boolean is_init) {
+        if (block.getStatementCount() == 0) {
+            return true;
+        } else if (block.getStatementCount() == 1 && block.getStatement(0) instanceof Return) {
+            Return ret = (Return) block.getStatement(0);
+            return !ret.getValue().isPresent();
+        } else if (is_init && block.getStatementCount() >= 2 && block.getStatement(0) instanceof InvokeStatement
+                && block.getStatement(block.getStatementCount() - 1) instanceof Return) {
+            InvokeStatement invoke = (InvokeStatement) block.getStatement(0);
+            if (!(invoke.getInstruction() instanceof InstanceMethodInvoke)) {
+                return false;
+            }
+            for (int i = 1; i < block.getStatementCount() - 1; i++) {
+                Statement s = block.getStatement(i);
+                if (!(s instanceof FieldAssignment)) {
+                    return false;
+                }
+                FieldAssignment assign = (FieldAssignment) s;
+                if (!assign.isInitializer()) {
+                    return false;
+                }
+            }
+            InstanceMethodInvoke ctor = (InstanceMethodInvoke) invoke.getInstruction();
+            Return ret = (Return) block.getStatement(block.getStatementCount() - 1);
+            return !ret.getValue().isPresent() && ctor.getParams().length == 0;
+        }
+        return false;
     }
 
     protected static void printReturn(EmitterContext ctx, TypeSignature type) {

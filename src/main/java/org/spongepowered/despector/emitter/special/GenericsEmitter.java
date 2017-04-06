@@ -90,7 +90,9 @@ public class GenericsEmitter implements SpecialEmitter {
         boolean first = true;
         for (TypeParameter param : parameters) {
             if (!first) {
-                ctx.printString(", ");
+                ctx.printString(" ", ctx.getFormat().insert_space_before_comma_in_method_invocation_arguments);
+                ctx.printString(",");
+                ctx.printString(" ", ctx.getFormat().insert_space_after_comma_in_method_invocation_arguments);
             }
             first = false;
             emitTypeParameter(ctx, param);
@@ -168,7 +170,7 @@ public class GenericsEmitter implements SpecialEmitter {
             }
             return length;
         }
-        if(type instanceof TypeVariableSignature) {
+        if (type instanceof TypeVariableSignature) {
             return ((TypeVariableSignature) type).getIdentifierName().length();
         }
         return 0;

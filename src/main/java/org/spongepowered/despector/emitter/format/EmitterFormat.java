@@ -97,16 +97,13 @@ public class EmitterFormat {
     // field decl
     // ========================================================================
     public boolean align_type_members_on_columns = false;
-    public int blank_lines_before_field = 0;
-    public WrappingStyle alignment_for_multiple_fields = WrappingStyle.WRAP_WHEN_NEEDED;
 
     // ========================================================================
     // method decl
     // ========================================================================
     public boolean insert_space_between_empty_parens_in_method_declaration = false;
-    public boolean insert_space_after_ellipsis = true;
     public boolean insert_space_before_comma_in_method_invocation_arguments = false;
-    public int blank_lines_before_method = 1;
+    public boolean insert_space_after_comma_in_method_invocation_arguments = true;
     public boolean insert_new_line_in_empty_method_body = false;
     public boolean insert_space_before_comma_in_method_declaration_throws = false;
     public boolean insert_space_after_comma_in_method_declaration_throws = true;
@@ -114,7 +111,6 @@ public class EmitterFormat {
     public boolean insert_space_after_comma_in_method_declaration_parameters = true;
     public boolean insert_space_before_opening_paren_in_method_declaration = false;
     public BracePosition brace_position_for_method_declaration = BracePosition.SAME_LINE;
-    public WrappingStyle alignment_for_method_declaration = WrappingStyle.WRAP_WHEN_NEEDED;
     public WrappingStyle alignment_for_parameters_in_method_declaration = WrappingStyle.WRAP_WHEN_NEEDED;
 
     // ========================================================================
@@ -312,7 +308,6 @@ public class EmitterFormat {
     public boolean insert_space_before_opening_angle_bracket_in_parameterized_type_reference = false;
     public boolean insert_space_after_comma_in_multiple_field_declarations = true;
     public boolean insert_space_after_comma_in_multiple_local_declarations = true;
-    public boolean insert_space_after_comma_in_method_invocation_arguments = true;
     public boolean indent_body_declarations_compare_to_enum_constant_header = true;
     public boolean insert_space_after_semicolon_in_for = true;
     public boolean insert_space_before_semicolon_in_try_resources = false;

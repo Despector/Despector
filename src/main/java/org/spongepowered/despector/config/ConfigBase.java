@@ -106,6 +106,8 @@ public class ConfigBase {
         public General general = new General();
         public Imports imports = new Imports();
         public Classes classes = new Classes();
+        public Enums enums = new Enums();
+        public Fields fields = new Fields();
 
         @ConfigSerializable
         public static class General {
@@ -158,6 +160,29 @@ public class ConfigBase {
             public BracePosition brace_position_for_enum_declaration = BracePosition.SAME_LINE;
             public WrappingStyle alignment_for_superinterfaces_in_enum_declaration = WrappingStyle.WRAP_WHEN_NEEDED;
             public WrappingStyle alignment_for_enum_constants = WrappingStyle.WRAP_ALL;
+        }
+
+        @ConfigSerializable
+        public static class Fields {
+
+            public boolean align_type_members_on_columns = false;
+        }
+
+        @ConfigSerializable
+        public static class Methods {
+
+            public boolean insert_space_between_empty_parens_in_method_declaration = false;
+            public boolean insert_space_before_comma_in_method_invocation_arguments = false;
+            public boolean insert_space_after_comma_in_method_invocation_arguments = true;
+            public boolean insert_new_line_in_empty_method_body = false;
+            public boolean insert_space_before_comma_in_method_declaration_throws = false;
+            public boolean insert_space_after_comma_in_method_declaration_throws = true;
+            public boolean insert_space_before_comma_in_method_declaration_parameters = false;
+            public boolean insert_space_after_comma_in_method_declaration_parameters = true;
+            public boolean insert_space_before_opening_paren_in_method_declaration = false;
+            public BracePosition brace_position_for_method_declaration = BracePosition.SAME_LINE;
+            public WrappingStyle alignment_for_parameters_in_method_declaration = WrappingStyle.WRAP_WHEN_NEEDED;
+
         }
 
     }
