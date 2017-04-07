@@ -38,6 +38,7 @@ public class ArrayLoadEmitter implements InstructionEmitter<ArrayAccess> {
         ctx.printString(" ", ctx.getFormat().insert_space_before_opening_bracket_in_array_reference);
         ctx.printString("[");
         ctx.emit(arg.getIndex(), ClassTypeSignature.INT);
+        ctx.printString(" ", ctx.getFormat().insert_space_before_closing_bracket_in_array_reference);
         ctx.printString("]");
     }
 

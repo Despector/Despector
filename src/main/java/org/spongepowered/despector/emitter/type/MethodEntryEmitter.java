@@ -50,10 +50,15 @@ public class MethodEntryEmitter implements AstEmitter<MethodEntry> {
     @Override
     public boolean emit(EmitterContext ctx, MethodEntry method) {
 
+        ctx.printIndentation();
         for (Annotation anno : method.getAnnotations()) {
-            ctx.printIndentation();
             ctx.emit(anno);
-            ctx.newLine();
+            if (ctx.getFormat().insert_new_line_after_annotation_on_method) {
+                ctx.newLine();
+                ctx.printIndentation();
+            } else {
+                ctx.printString(" ");
+            }
         }
 
         ctx.setMethod(method);
@@ -75,7 +80,6 @@ public class MethodEntryEmitter implements AstEmitter<MethodEntry> {
                     return false;
                 }
             }
-            ctx.printIndentation();
             ctx.printString("static {");
             ctx.newLine();
             ctx.indent();
@@ -98,7 +102,6 @@ public class MethodEntryEmitter implements AstEmitter<MethodEntry> {
             // constants to the super ctor
             return false;
         }
-        ctx.printIndentation();
         if (!(ctx.getType() instanceof InterfaceEntry) && !(ctx.getType() instanceof EnumEntry && method.getName().equals("<init>"))) {
             ctx.printString(method.getAccessModifier().asString());
             if (method.getAccessModifier() != AccessModifier.PACKAGE_PRIVATE) {
@@ -168,7 +171,16 @@ public class MethodEntryEmitter implements AstEmitter<MethodEntry> {
                 LocalInstance insn = local.getParameterInstance();
                 for (Annotation anno : insn.getAnnotations()) {
                     ctx.emit(anno);
-                    ctx.printString(" ");
+                    if (ctx.getFormat().insert_new_line_after_annotation_on_parameter) {
+                        ctx.indent();
+                        ctx.indent();
+                        ctx.newLine();
+                        ctx.printIndentation();
+                        ctx.dedent();
+                        ctx.dedent();
+                    } else {
+                        ctx.printString(" ");
+                    }
                 }
                 generics.emitTypeSignature(ctx, insn.getType());
                 ctx.printString(" ");
@@ -198,8 +210,8 @@ public class MethodEntryEmitter implements AstEmitter<MethodEntry> {
             }
         }
         if (!method.isAbstract()) {
-            ctx.printString(" ", ctx.getFormat().insert_space_before_opening_brace_in_method_declaration);
-            ctx.emitBrace(ctx.getFormat().brace_position_for_method_declaration, false);
+            ctx.emitBrace(ctx.getFormat().brace_position_for_method_declaration, false,
+                    ctx.getFormat().insert_space_before_opening_brace_in_method_declaration);
             ctx.newLine();
             if (block == null) {
                 ctx.printIndentation();

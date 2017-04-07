@@ -104,9 +104,11 @@ public class SwitchEmitter implements StatementEmitter<Switch> {
             ctx.emit(tswitch.getSwitchVar(), ClassTypeSignature.INT);
         }
         ctx.printString(" ", ctx.getFormat().insert_space_before_closing_paren_in_switch);
-        ctx.printString(") ");
-        ctx.emitBrace(ctx.getFormat().brace_position_for_switch, false);
-        ctx.dedent();
+        ctx.printString(")");
+        ctx.emitBrace(ctx.getFormat().brace_position_for_switch, false, ctx.getFormat().insert_space_before_opening_brace_in_switch);
+        if(!ctx.getFormat().indent_switchstatements_compare_to_switch) {
+            ctx.dedent();
+        }
         ctx.newLine();
         for (Case cs : tswitch.getCases()) {
             for (int i = 0; i < cs.getIndices().size(); i++) {
@@ -136,24 +138,29 @@ public class SwitchEmitter implements StatementEmitter<Switch> {
                 ctx.printString(" ", ctx.getFormat().insert_space_after_colon_in_case);
                 ctx.newLine();
             }
-            ctx.indent();
+            if(ctx.getFormat().indent_switchstatements_compare_to_cases) {
+                ctx.indent();
+            }
             ctx.emitBody(cs.getBody());
             if (!cs.getBody().getStatements().isEmpty()) {
                 ctx.newLine();
             }
             if (cs.doesBreak()) {
-                if (!ctx.getFormat().indent_breaks_compare_to_cases) {
+                if (!ctx.getFormat().indent_breaks_compare_to_cases && ctx.getFormat().indent_switchstatements_compare_to_cases) {
                     ctx.dedent();
                 }
                 ctx.printIndentation();
                 ctx.printString("break;");
                 ctx.newLine();
             }
-            if (!cs.doesBreak() || ctx.getFormat().indent_breaks_compare_to_cases) {
+            if ((!cs.doesBreak() || ctx.getFormat().indent_breaks_compare_to_cases) && ctx.getFormat().indent_switchstatements_compare_to_cases) {
                 ctx.dedent();
             }
         }
-        if(ctx.getFormat().brace_position_for_switch == BracePosition.NEXT_LINE_SHIFTED) {
+        if (ctx.getFormat().indent_switchstatements_compare_to_switch) {
+            ctx.dedent();
+        }
+        if (ctx.getFormat().brace_position_for_switch == BracePosition.NEXT_LINE_SHIFTED) {
             ctx.indent();
             ctx.printIndentation();
             ctx.printString("}");

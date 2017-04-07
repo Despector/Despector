@@ -39,8 +39,12 @@ public class FieldEntryEmitter implements AstEmitter<FieldEntry> {
     public boolean emit(EmitterContext ctx, FieldEntry ast) {
         for (Annotation anno : ast.getAnnotations()) {
             ctx.emit(anno);
-            ctx.newLine();
-            ctx.printIndentation();
+            if (ctx.getFormat().insert_new_line_after_annotation_on_field) {
+                ctx.newLine();
+                ctx.printIndentation();
+            } else {
+                ctx.printString(" ");
+            }
         }
         ctx.printString(ast.getAccessModifier().asString());
         if (!ast.getAccessModifier().asString().isEmpty()) {

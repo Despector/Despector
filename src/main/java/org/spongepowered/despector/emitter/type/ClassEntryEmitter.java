@@ -53,12 +53,16 @@ public class ClassEntryEmitter implements AstEmitter<ClassEntry> {
     @Override
     public boolean emit(EmitterContext ctx, ClassEntry type) {
 
-        for (Annotation anno : type.getAnnotations()) {
-            ctx.printIndentation();
-            ctx.emit(anno);
-            ctx.newLine();
-        }
         ctx.printIndentation();
+        for (Annotation anno : type.getAnnotations()) {
+            ctx.emit(anno);
+            if (ctx.getFormat().insert_new_line_after_annotation_on_type) {
+                ctx.newLine();
+                ctx.printIndentation();
+            } else {
+                ctx.printString(" ");
+            }
+        }
         InnerClassInfo inner_info = null;
         if (type.isInnerClass() && ctx.getOuterType() != null) {
             inner_info = ctx.getOuterType().getInnerClassInfo(type.getName());
@@ -119,8 +123,8 @@ public class ClassEntryEmitter implements AstEmitter<ClassEntry> {
                 }
             }
         }
-        ctx.printString(" ", ctx.getFormat().insert_space_before_opening_brace_in_type_declaration);
-        ctx.emitBrace(ctx.getFormat().brace_position_for_type_declaration, false);
+        ctx.emitBrace(ctx.getFormat().brace_position_for_type_declaration, false,
+                ctx.getFormat().insert_space_before_opening_brace_in_type_declaration);
         ctx.newLine(ctx.getFormat().blank_lines_before_first_class_body_declaration + 1);
 
         // Ordering is static fields -> static methods -> instance fields ->

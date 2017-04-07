@@ -34,13 +34,18 @@ public class ForEachEmitter implements StatementEmitter<ForEach> {
 
     @Override
     public void emit(EmitterContext ctx, ForEach loop, boolean semicolon) {
-        ctx.printString("for (");
+        ctx.printString("for");
+        ctx.printString(" ", ctx.getFormat().insert_space_before_opening_paren_in_for);
+        ctx.printString("(");
+        ctx.printString(" ", ctx.getFormat().insert_space_after_opening_paren_in_for);
         LocalInstance local = loop.getValueAssignment();
         GenericsEmitter generics = ctx.getEmitterSet().getSpecialEmitter(GenericsEmitter.class);
         generics.emitTypeSignature(ctx, local.getType());
         ctx.printString(" ");
         ctx.printString(local.getName());
-        ctx.printString(": ");
+        ctx.printString(" ", ctx.getFormat().insert_space_before_colon_in_for);
+        ctx.printString(":");
+        ctx.printString(" ", ctx.getFormat().insert_space_after_colon_in_for);
         ctx.emit(loop.getCollectionValue(), null);
         ctx.printString(") {");
         ctx.newLine();

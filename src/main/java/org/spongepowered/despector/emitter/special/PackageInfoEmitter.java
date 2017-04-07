@@ -38,7 +38,11 @@ public class PackageInfoEmitter implements SpecialEmitter {
 
         for (Annotation anno : info.getAnnotations()) {
             emit(ctx, anno);
-            ctx.newLine();
+            if (ctx.getFormat().insert_new_line_after_annotation_on_package) {
+                ctx.newLine();
+            } else {
+                ctx.printString(" ");
+            }
         }
 
         String pkg = info.getName();

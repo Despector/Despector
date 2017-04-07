@@ -32,8 +32,12 @@ public class WhileEmitter implements StatementEmitter<While> {
 
     @Override
     public void emit(EmitterContext ctx, While loop, boolean semicolon) {
-        ctx.printString("while (");
+        ctx.printString("while");
+        ctx.printString(" ", ctx.getFormat().insert_space_before_opening_paren_in_while);
+        ctx.printString("(");
+        ctx.printString(" ", ctx.getFormat().insert_space_after_opening_paren_in_while);
         ctx.emit(loop.getCondition());
+        ctx.printString(" ", ctx.getFormat().insert_space_before_closing_paren_in_while);
         ctx.printString(") {");
         ctx.newLine();
         if (!loop.getBody().getStatements().isEmpty()) {

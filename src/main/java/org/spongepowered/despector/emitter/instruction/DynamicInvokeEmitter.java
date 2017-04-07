@@ -65,7 +65,8 @@ public class DynamicInvokeEmitter implements InstructionEmitter<DynamicInvokeHan
             }
         }
 
-        ctx.printString(") -> ");
+        ctx.printString(") ->");
+        ctx.printString(" ", ctx.getFormat().insert_space_after_lambda_arrow);
         if (block.getStatementCount() == 1) {
             Return ret = (Return) block.getStatement(0);
             ctx.emit(ret.getValue().get(), method.getReturnType());

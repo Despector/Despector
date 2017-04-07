@@ -43,8 +43,8 @@ public class NewArrayEmitter implements InstructionEmitter<NewArray> {
             ctx.printString(" ", ctx.getFormat().insert_space_before_closing_bracket_in_array_allocation_expression);
             ctx.printString("]");
         } else {
-            ctx.printString("[] ");
-            ctx.emitBrace(ctx.getFormat().brace_position_for_array_initializer, false);
+            ctx.printString("[]");
+            ctx.emitBrace(ctx.getFormat().brace_position_for_array_initializer, false, true);
             ctx.printString(" ", ctx.getFormat().insert_space_after_opening_brace_in_array_initializer);
             ctx.markWrapPoint(ctx.getFormat().alignment_for_expressions_in_array_initializer, 0);
             if (ctx.getFormat().insert_new_line_after_opening_brace_in_array_initializer) {

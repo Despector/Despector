@@ -41,7 +41,13 @@ public class TryCatchEmitter implements StatementEmitter<TryCatch> {
         ctx.newLine();
         for (CatchBlock c : try_block.getCatchBlocks()) {
             ctx.printIndentation();
-            ctx.printString("} catch (");
+            if (ctx.getFormat().insert_new_line_before_catch_in_try_statement) {
+                ctx.printString("}");
+                ctx.newIndentedLine();
+                ctx.printString("catch (");
+            } else {
+                ctx.printString("} catch (");
+            }
             for (int i = 0; i < c.getExceptions().size(); i++) {
                 ctx.emitType(c.getExceptions().get(i));
                 if (i < c.getExceptions().size() - 1) {

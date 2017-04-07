@@ -112,6 +112,10 @@ public class ConfigBase {
         public Misc misc = new Misc();
         public Arrays arrays = new Arrays();
         public Switches switches = new Switches();
+        public Loops loops = new Loops();
+        public Ifs ifs = new Ifs();
+        public TryCatches trycatches = new TryCatches();
+        public Annotations annotations = new Annotations();
 
         @ConfigSerializable
         public static class General {
@@ -190,16 +194,16 @@ public class ConfigBase {
             public BracePosition brace_position_for_method_declaration = BracePosition.SAME_LINE;
             public WrappingStyle alignment_for_parameters_in_method_declaration = WrappingStyle.WRAP_WHEN_NEEDED;
 
-            public boolean new_lines_at_block_boundaries = true;
-
         }
 
         @ConfigSerializable
         public static class Misc {
 
+            public boolean new_lines_at_block_boundaries = true;
             public boolean insert_space_after_unary_operator = false;
             public boolean insert_space_before_binary_operator = true;
             public boolean insert_space_after_binary_operator = true;
+            public boolean insert_space_after_lambda_arrow = true;
         }
 
         @ConfigSerializable
@@ -216,6 +220,7 @@ public class ConfigBase {
             public boolean insert_space_after_comma_in_array_initializer = true;
             public boolean insert_space_before_opening_bracket_in_array_type_reference = false;
             public boolean insert_space_before_opening_bracket_in_array_reference = false;
+            public boolean insert_space_before_closing_bracket_in_array_reference = false;
         }
 
         @ConfigSerializable
@@ -225,8 +230,47 @@ public class ConfigBase {
             public boolean insert_space_before_closing_paren_in_switch = false;
             public boolean insert_space_before_colon_in_case = false;
             public boolean insert_space_after_colon_in_case = false;
+            public boolean insert_space_before_opening_brace_in_switch = true;
             public boolean indent_breaks_compare_to_cases = true;
+            public boolean indent_switchstatements_compare_to_switch = false;
+            public boolean indent_switchstatements_compare_to_cases = true;
             public BracePosition brace_position_for_switch = BracePosition.SAME_LINE;
+        }
+
+        @ConfigSerializable
+        public static class Loops {
+
+            public boolean insert_space_before_opening_paren_in_for = true;
+            public boolean insert_space_after_opening_paren_in_for = false;
+            public boolean insert_space_before_colon_in_for = true;
+            public boolean insert_space_after_colon_in_for = true;
+            public boolean insert_space_before_opening_paren_in_while = true;
+            public boolean insert_space_after_opening_paren_in_while = false;
+            public boolean insert_space_before_closing_paren_in_while = false;
+        }
+
+        @ConfigSerializable
+        public static class Ifs {
+
+            public boolean insert_space_before_opening_paren_in_if = true;
+            public boolean insert_space_after_opening_paren_in_if = false;
+            public boolean insert_space_before_closing_paren_in_if = false;
+            public boolean insert_new_line_before_else_in_if_statement = false;
+        }
+
+        @ConfigSerializable
+        public static class TryCatches {
+
+            public boolean insert_new_line_before_catch_in_try_statement = false;
+        }
+
+        @ConfigSerializable
+        public static class Annotations {
+
+            public boolean insert_space_before_closing_paren_in_annotation = false;
+            public boolean insert_new_line_after_annotation_on_type = true;
+            public boolean insert_new_line_after_annotation_on_parameter = false;
+            public boolean insert_new_line_after_annotation_on_package = true;
         }
 
     }

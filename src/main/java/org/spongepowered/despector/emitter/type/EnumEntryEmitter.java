@@ -54,12 +54,16 @@ public class EnumEntryEmitter implements AstEmitter<EnumEntry> {
     @Override
     public boolean emit(EmitterContext ctx, EnumEntry type) {
 
-        for (Annotation anno : type.getAnnotations()) {
-            ctx.printIndentation();
-            ctx.emit(anno);
-            ctx.newLine();
-        }
         ctx.printIndentation();
+        for (Annotation anno : type.getAnnotations()) {
+            ctx.emit(anno);
+            if (ctx.getFormat().insert_new_line_after_annotation_on_type) {
+                ctx.newLine();
+                ctx.printIndentation();
+            } else {
+                ctx.printString(" ");
+            }
+        }
         ctx.printString(type.getAccessModifier().asString());
         if (type.getAccessModifier() != AccessModifier.PACKAGE_PRIVATE) {
             ctx.printString(" ");
@@ -93,8 +97,8 @@ public class EnumEntryEmitter implements AstEmitter<EnumEntry> {
                 }
             }
         }
-        ctx.printString(" ", ctx.getFormat().insert_space_before_opening_brace_in_enum_declaration);
-        ctx.emitBrace(ctx.getFormat().brace_position_for_enum_declaration, false);
+        ctx.emitBrace(ctx.getFormat().brace_position_for_enum_declaration, false,
+                ctx.getFormat().insert_space_before_opening_brace_in_enum_declaration);
         ctx.newLine(ctx.getFormat().blank_lines_before_first_class_body_declaration + 1);
 
         // we look through the class initializer to find the enum constant
@@ -288,7 +292,7 @@ public class EnumEntryEmitter implements AstEmitter<EnumEntry> {
             ctx.newLine();
             ctx.emit(inner_type);
         }
-        if(ctx.getFormat().brace_position_for_enum_declaration == BracePosition.NEXT_LINE_SHIFTED) {
+        if (ctx.getFormat().brace_position_for_enum_declaration == BracePosition.NEXT_LINE_SHIFTED) {
             ctx.printIndentation();
             ctx.printString("}");
             ctx.newLine();

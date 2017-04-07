@@ -94,6 +94,7 @@ public class AnnotationEmitter implements SpecialEmitter {
         } else if (annotation.getKeys().size() == 1 && "value".equals(annotation.getKeys().iterator().next())) {
             ctx.printString("(");
             emitValue(ctx, annotation.getValue("value"));
+            ctx.printString(" ", ctx.getFormat().insert_space_before_closing_paren_in_annotation);
             ctx.printString(")");
         } else {
             ctx.printString("(");
@@ -108,6 +109,7 @@ public class AnnotationEmitter implements SpecialEmitter {
                 Object value = annotation.getValue(key);
                 emitValue(ctx, value);
             }
+            ctx.printString(" ", ctx.getFormat().insert_space_before_closing_paren_in_annotation);
             ctx.printString(")");
         }
     }

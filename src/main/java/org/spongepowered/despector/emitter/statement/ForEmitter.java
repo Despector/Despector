@@ -32,7 +32,10 @@ public class ForEmitter implements StatementEmitter<For> {
 
     @Override
     public void emit(EmitterContext ctx, For loop, boolean semicolon) {
-        ctx.printString("for (");
+        ctx.printString("for");
+        ctx.printString(" ", ctx.getFormat().insert_space_before_opening_paren_in_for);
+        ctx.printString("(");
+        ctx.printString(" ", ctx.getFormat().insert_space_after_opening_paren_in_for);
         if (loop.getInit() != null) {
             ctx.emit(loop.getInit(), false);
         }

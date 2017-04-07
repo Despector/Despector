@@ -164,7 +164,6 @@ public class EclipseFormatLoader implements FormatLoader {
         settings_handlers.put("org.eclipse.jdt.core.formatter.insert_space_after_opening_paren_in_while", (f, v) -> f.insert_space_after_opening_paren_in_while = v.equals("insert"));
 
         settings_handlers.put("org.eclipse.jdt.core.formatter.insert_new_line_before_else_in_if_statement", (f, v) -> f.insert_new_line_before_else_in_if_statement = v.equals("insert"));
-        settings_handlers.put("org.eclipse.jdt.core.formatter.keep_else_statement_on_same_line", (f, v) -> f.keep_else_statement_on_same_line = v.equals("true"));
         settings_handlers.put("org.eclipse.jdt.core.formatter.insert_space_before_opening_paren_in_if", (f, v) -> f.insert_space_before_opening_paren_in_if = v.equals("insert"));
         settings_handlers.put("org.eclipse.jdt.core.formatter.insert_space_before_closing_paren_in_if", (f, v) -> f.insert_space_before_closing_paren_in_if = v.equals("insert"));
         settings_handlers.put("org.eclipse.jdt.core.formatter.compact_else_if", (f, v) -> f.compact_else_if = v.equals("true"));
@@ -218,7 +217,7 @@ public class EclipseFormatLoader implements FormatLoader {
         settings_handlers.put("org.eclipse.jdt.core.formatter.brace_position_for_lambda_body", (f, v) -> f.brace_position_for_lambda_body = braceFromVal(v));
         settings_handlers.put("org.eclipse.jdt.core.formatter.insert_space_after_opening_paren_in_cast", (f, v) -> f.insert_space_after_opening_paren_in_cast = v.equals("insert"));
         settings_handlers.put("org.eclipse.jdt.core.formatter.insert_space_before_unary_operator", (f, v) -> f.insert_space_before_unary_operator = v.equals("insert"));
-        settings_handlers.put("org.eclipse.jdt.core.formatter.keep_imple_if_on_one_line", (f, v) -> f.keep_imple_if_on_one_line = v.equals("true"));
+        settings_handlers.put("org.eclipse.jdt.core.formatter.keep_imple_if_on_one_line", (f, v) -> f.keep_simple_if_on_one_line = v.equals("true"));
         settings_handlers.put("org.eclipse.jdt.core.formatter.insert_space_before_colon_in_labeled_statement", (f, v) -> f.insert_space_before_colon_in_labeled_statement = v.equals("insert"));
         settings_handlers.put("org.eclipse.jdt.core.formatter.insert_space_after_colon_in_for", (f, v) -> f.insert_space_after_colon_in_for = v.equals("insert"));
         settings_handlers.put("org.eclipse.jdt.core.formatter.alignment_for_binary_expression", (f, v) -> f.alignment_for_binary_expression = wrapFromVal(Integer.parseInt(v)));

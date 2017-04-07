@@ -535,7 +535,7 @@ public class EmitterContext {
         return this;
     }
 
-    public void emitBrace(BracePosition pos, boolean wrapped) {
+    public void emitBrace(BracePosition pos, boolean wrapped, boolean with_space) {
         switch (pos) {
         case NEXT_LINE:
             newLine();
@@ -547,6 +547,8 @@ public class EmitterContext {
             if (wrapped) {
                 newLine();
                 printIndentation();
+            } else if (with_space) {
+                printString(" ");
             }
             printString("{");
             indent();
@@ -559,6 +561,9 @@ public class EmitterContext {
             break;
         case SAME_LINE:
         default:
+            if (with_space) {
+                printString(" ");
+            }
             printString("{");
             indent();
             break;

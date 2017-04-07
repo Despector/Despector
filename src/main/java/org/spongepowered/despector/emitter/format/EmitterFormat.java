@@ -95,8 +95,21 @@ public class EmitterFormat {
     public WrappingStyle alignment_for_enum_constants = WrappingStyle.WRAP_ALL;
 
     // ========================================================================
+    // annotations
+    // ========================================================================
+
+    public boolean insert_space_before_closing_paren_in_annotation = false;
+    public boolean insert_new_line_after_annotation_on_type = true;
+    public boolean insert_new_line_after_annotation_on_parameter = false;
+    public boolean insert_new_line_after_annotation_on_package = true;
+    public boolean insert_new_line_after_annotation_on_field = false;
+    public boolean insert_new_line_after_annotation_on_local_variable = true;
+    public boolean insert_new_line_after_annotation_on_method = true;
+
+    // ========================================================================
     // field decl
     // ========================================================================
+
     public boolean align_type_members_on_columns = false;
 
     // ========================================================================
@@ -138,17 +151,29 @@ public class EmitterFormat {
     // try
     // ========================================================================
 
+    public boolean insert_new_line_before_catch_in_try_statement = false;
     public WrappingStyle alignment_for_union_type_in_multicatch = WrappingStyle.WRAP_WHEN_NEEDED;
 
     // ========================================================================
     // loops
     // ========================================================================
 
-    public boolean new_lines_at_block_boundaries = true;
+    public boolean insert_space_before_opening_paren_in_for = true;
+    public boolean insert_space_after_opening_paren_in_for = false;
+    public boolean insert_space_before_colon_in_for = true;
+    public boolean insert_space_after_colon_in_for = true;
+    public boolean insert_space_before_opening_paren_in_while = true;
+    public boolean insert_space_after_opening_paren_in_while = false;
+    public boolean insert_space_before_closing_paren_in_while = false;
 
     // ========================================================================
     // ifs
     // ========================================================================
+
+    public boolean insert_space_before_opening_paren_in_if = true;
+    public boolean insert_space_after_opening_paren_in_if = false;
+    public boolean insert_space_before_closing_paren_in_if = false;
+    public boolean insert_new_line_before_else_in_if_statement = false;
 
     // ========================================================================
     // switch
@@ -158,7 +183,10 @@ public class EmitterFormat {
     public boolean insert_space_before_closing_paren_in_switch = false;
     public boolean insert_space_before_colon_in_case = false;
     public boolean insert_space_after_colon_in_case = false;
+    public boolean insert_space_before_opening_brace_in_switch = true;
     public boolean indent_breaks_compare_to_cases = true;
+    public boolean indent_switchstatements_compare_to_switch = false;
+    public boolean indent_switchstatements_compare_to_cases = true;
     public BracePosition brace_position_for_switch = BracePosition.SAME_LINE;
 
     // ========================================================================
@@ -185,30 +213,21 @@ public class EmitterFormat {
     public boolean insert_space_before_opening_bracket_in_array_type_reference = false;
     public boolean insert_new_line_after_opening_brace_in_array_initializer = false;
     public boolean insert_space_before_opening_bracket_in_array_reference = false;
+    public boolean insert_space_before_closing_bracket_in_array_reference = false;
 
     // ========================================================================
     // misc
     // ========================================================================
 
+    public boolean new_lines_at_block_boundaries = true;
     public boolean insert_space_after_unary_operator = false;
     public boolean insert_space_before_binary_operator = true;
     public boolean insert_space_after_binary_operator = true;
+    public boolean insert_space_after_lambda_arrow = true;
 
     // TODO need to finish sorting these...
-    public boolean indent_switchstatements_compare_to_switch = true;
-    public boolean insert_space_before_opening_brace_in_switch = true;
-    public boolean insert_space_before_opening_paren_in_for = true;
-    public boolean insert_space_after_opening_paren_in_for = false;
     public boolean insert_space_after_comma_in_for_increments = true;
-    public boolean insert_space_before_colon_in_for = true;
-    public boolean insert_space_before_opening_paren_in_while = true;
-    public boolean insert_space_after_opening_paren_in_while = false;
-    public boolean insert_new_line_before_else_in_if_statement = false;
-    public boolean keep_else_statement_on_same_line = true;
-    public boolean insert_space_before_opening_paren_in_if = true;
-    public boolean insert_space_before_closing_paren_in_if = false;
     public boolean compact_else_if = false;
-    public boolean insert_new_line_before_catch_in_try_statement = false;
     public boolean insert_new_line_before_finally_in_try_statement = false;
     public boolean insert_space_before_closing_paren_in_try = false;
     public boolean insert_space_after_opening_paren_in_try = false;
@@ -217,7 +236,6 @@ public class EmitterFormat {
     public WrappingStyle alignment_for_selector_in_method_invocation = WrappingStyle.WRAP_WHEN_NEEDED;
     public boolean insert_space_after_question_in_conditional = true;
     public boolean insert_space_after_question_in_wildcard = false;
-    public boolean insert_space_after_lambda_arrow = true;
     public boolean insert_space_after_opening_paren_in_parenthesized_expression = false;
     public WrappingStyle blank_before_alignment_for_assignmentjavadoc_tags = WrappingStyle.WRAP_WHEN_NEEDED;
     public boolean insert_space_after_semicolon_in_try_resources = true;
@@ -232,11 +250,9 @@ public class EmitterFormat {
     public BracePosition brace_position_for_block = BracePosition.SAME_LINE;
     public boolean insert_space_before_comma_in_for_inits = false;
     public boolean wrap_before_or_operator_multicatch = true;
-    public boolean insert_space_before_closing_bracket_in_array_reference = false;
     public boolean insert_space_before_comma_in_allocation_expression = false;
     public boolean insert_space_after_closing_brace_in_block = true;
     public boolean insert_space_before_comma_in_constructor_declaration_throws = false;
-    public boolean insert_space_after_opening_paren_in_if = false;
     public boolean insert_space_after_assignment_operator = true;
     public boolean insert_space_before_assignment_operator = true;
     public boolean insert_space_after_opening_paren_in_synchronized = false;
@@ -254,11 +270,9 @@ public class EmitterFormat {
     public BracePosition brace_position_for_lambda_body = BracePosition.SAME_LINE;
     public boolean insert_space_after_opening_paren_in_cast = false;
     public boolean insert_space_before_unary_operator = false;
-    public boolean keep_imple_if_on_one_line = false;
+    public boolean keep_simple_if_on_one_line = false;
     public boolean insert_space_before_colon_in_labeled_statement = false;
-    public boolean insert_space_after_colon_in_for = true;
     public WrappingStyle alignment_for_binary_expression = WrappingStyle.WRAP_WHEN_NEEDED;
-    public boolean insert_space_before_closing_paren_in_while = false;
     public boolean insert_space_before_opening_paren_in_try = true;
     public boolean put_empty_statement_on_new_line = true;
     public boolean insert_new_line_after_label = false;
@@ -276,7 +290,6 @@ public class EmitterFormat {
     public boolean insert_space_before_comma_in_multiple_field_declarations = false;
     public WrappingStyle alignment_for_compact_if = WrappingStyle.WRAP_WHEN_NEEDED;
     public boolean insert_space_after_comma_in_for_inits = true;
-    public boolean indent_switchstatements_compare_to_cases = true;
     public boolean insert_space_before_colon_in_default = false;
     public boolean insert_space_before_and_in_type_parameter = true;
     public boolean insert_space_between_empty_parens_in_constructor_declaration = false;
@@ -339,21 +352,14 @@ public class EmitterFormat {
     public boolean insert_space_between_empty_parens_in_annotation_type_member_declaration = false;
     public boolean insert_space_before_opening_brace_in_annotation_type_declaration = true;
     public boolean insert_space_after_at_in_annotation = false;
-    public boolean insert_new_line_after_annotation_on_local_variable = true;
-    public boolean insert_new_line_after_annotation_on_method = true;
     public BracePosition brace_position_for_annotation_type_declaration = BracePosition.SAME_LINE;
     public boolean insert_space_before_comma_in_annotation = false;
     public boolean insert_space_after_at_in_annotation_type_declaration = false;
-    public boolean insert_new_line_after_annotation_on_field = false;
     public boolean insert_space_before_opening_paren_in_annotation = false;
     public boolean insert_space_before_at_in_annotation_type_declaration = true;
     public boolean insert_new_line_after_type_annotation = false;
-    public boolean insert_new_line_after_annotation_on_type = true;
-    public boolean insert_new_line_after_annotation_on_parameter = false;
-    public boolean insert_new_line_after_annotation_on_package = true;
     public WrappingStyle alignment_for_arguments_in_annotation = WrappingStyle.DO_NOT_WRAP;
     public boolean indent_body_declarations_compare_to_annotation_declaration_header = true;
-    public boolean insert_space_before_closing_paren_in_annotation = false;
     public boolean clear_blank_lines_in_block_comment = true;
     public boolean insert_new_line_before_root_tags = true;
     public boolean insert_new_line_for_parameter = false;

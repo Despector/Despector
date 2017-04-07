@@ -44,12 +44,16 @@ public class InterfaceEntryEmitter implements AstEmitter<InterfaceEntry> {
     @Override
     public boolean emit(EmitterContext ctx, InterfaceEntry type) {
 
-        for (Annotation anno : type.getAnnotations()) {
-            ctx.printIndentation();
-            ctx.emit(anno);
-            ctx.newLine();
-        }
         ctx.printIndentation();
+        for (Annotation anno : type.getAnnotations()) {
+            ctx.emit(anno);
+            if (ctx.getFormat().insert_new_line_after_annotation_on_type) {
+                ctx.newLine();
+                ctx.printIndentation();
+            } else {
+                ctx.printString(" ");
+            }
+        }
         InnerClassInfo inner_info = null;
         if (type.isInnerClass() && ctx.getOuterType() != null) {
             inner_info = ctx.getOuterType().getInnerClassInfo(type.getName());
@@ -88,14 +92,14 @@ public class InterfaceEntryEmitter implements AstEmitter<InterfaceEntry> {
                 }
             }
         }
-        ctx.printString(" ", ctx.getFormat().insert_space_before_opening_brace_in_type_declaration);
-        ctx.emitBrace(ctx.getFormat().brace_position_for_type_declaration, false);
+        ctx.emitBrace(ctx.getFormat().brace_position_for_type_declaration, false,
+                ctx.getFormat().insert_space_before_opening_brace_in_type_declaration);
         ctx.newLine(ctx.getFormat().blank_lines_before_first_class_body_declaration + 1);
         if (!type.getStaticFields().isEmpty()) {
             boolean at_least_one = false;
             for (FieldEntry field : type.getStaticFields()) {
                 if (field.isSynthetic()) {
-                    if(ConfigManager.getConfig().emitter.emit_synthetics) {
+                    if (ConfigManager.getConfig().emitter.emit_synthetics) {
                         ctx.printIndentation();
                         ctx.printString("// Synthetic");
                         ctx.newLine();
@@ -116,7 +120,7 @@ public class InterfaceEntryEmitter implements AstEmitter<InterfaceEntry> {
         if (!type.getStaticMethods().isEmpty()) {
             for (MethodEntry mth : type.getStaticMethods()) {
                 if (mth.isSynthetic()) {
-                    if(ConfigManager.getConfig().emitter.emit_synthetics) {
+                    if (ConfigManager.getConfig().emitter.emit_synthetics) {
                         ctx.printIndentation();
                         ctx.printString("// Synthetic");
                         if (mth.isBridge()) {
@@ -135,7 +139,7 @@ public class InterfaceEntryEmitter implements AstEmitter<InterfaceEntry> {
         if (!type.getMethods().isEmpty()) {
             for (MethodEntry mth : type.getMethods()) {
                 if (mth.isSynthetic()) {
-                    if(ConfigManager.getConfig().emitter.emit_synthetics) {
+                    if (ConfigManager.getConfig().emitter.emit_synthetics) {
                         ctx.printIndentation();
                         ctx.printString("// Synthetic");
                         if (mth.isBridge()) {
