@@ -64,7 +64,9 @@ public class ImportManager {
     }
 
     public void addImplicitImport(String i) {
-        this.implicit_imports.add(i);
+        if (!this.implicit_imports.contains(i)) {
+            this.implicit_imports.add(i);
+        }
     }
 
     public void calculateImports(TypeEntry type) {
@@ -110,7 +112,7 @@ public class ImportManager {
             type = type.substring(0, type.indexOf('$'));
         }
         for (String implicit : this.implicit_imports) {
-            if (type.startsWith(implicit)) {
+            if (type.startsWith(implicit) && type.lastIndexOf('/') <= implicit.length()) {
                 return;
             }
         }

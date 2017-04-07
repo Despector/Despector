@@ -177,6 +177,10 @@ public class EmitterContext {
         this.block_statements.add(type);
     }
 
+    public ImportManager getImportManager() {
+        return this.import_manager;
+    }
+
     public void emitOuterType(TypeEntry type) {
         if (type.getName().endsWith("package-info")) {
             PackageInfoEmitter emitter = this.set.getSpecialEmitter(PackageInfoEmitter.class);

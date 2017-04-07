@@ -25,21 +25,24 @@
 package org.spongepowered.despector.emitter;
 
 import org.spongepowered.despector.ast.type.TypeEntry;
+import org.spongepowered.despector.emitter.output.ImportManager;
 
-public class BaseEmitter implements Emitter {
-
-    private final EmitterSet set;
-
-    public BaseEmitter(EmitterSet set) {
-        this.set = set;
-    }
+public class KotlinEmitter implements Emitter {
 
     @Override
     public void emit(EmitterContext ctx, TypeEntry type) {
-        if(this.set == Emitters.KOTLIN_SET) {
-            ctx.setSemicolons(false);
-        }
-        ctx.setEmitterSet(this.set);
+        ctx.setSemicolons(false);
+        ctx.setEmitterSet(Emitters.KOTLIN_SET);
+        ImportManager imports = ctx.getImportManager();
+        imports.addImplicitImport("kotlin/");
+        imports.addImplicitImport("kotlin/annotation/");
+        imports.addImplicitImport("kotlin/collections/");
+        imports.addImplicitImport("kotlin/comparisons/");
+        imports.addImplicitImport("kotlin/io/");
+        imports.addImplicitImport("kotlin/ranges/");
+        imports.addImplicitImport("kotlin/sequences/");
+        imports.addImplicitImport("kotlin/text/");
+        imports.addImplicitImport("kotlin/jvm/");
         ctx.emitOuterType(type);
     }
 

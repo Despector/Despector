@@ -158,8 +158,8 @@ public class Emitters {
     public static final EmitterSet JAVA_SET = new EmitterSet();
     public static final EmitterSet KOTLIN_SET = new EmitterSet();
 
-    public static final Emitter JAVA = new BaseEmitter(JAVA_SET);
-    public static final Emitter KOTLIN = new BaseEmitter(KOTLIN_SET);
+    public static final Emitter JAVA = new JavaEmitter();
+    public static final Emitter KOTLIN = new KotlinEmitter();
     public static final Emitter WILD = new WildEmitter();
 
     private static final EnumMap<Language, Emitter> EMITTERS = new EnumMap<>(Language.class);
