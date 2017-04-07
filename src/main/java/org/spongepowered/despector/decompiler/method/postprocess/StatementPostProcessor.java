@@ -26,8 +26,15 @@ package org.spongepowered.despector.decompiler.method.postprocess;
 
 import org.spongepowered.despector.ast.members.insn.StatementBlock;
 
+/**
+ * A post processor for performing final operations to a statement block just
+ * before it is finalized and set onto the method.
+ */
 public interface StatementPostProcessor {
 
+    /**
+     * Process the given statement block.
+     */
     void postprocess(StatementBlock block);
 
 }

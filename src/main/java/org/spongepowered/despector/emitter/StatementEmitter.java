@@ -26,8 +26,14 @@ package org.spongepowered.despector.emitter;
 
 import org.spongepowered.despector.ast.members.insn.Statement;
 
+/**
+ * An emitter for a particular statement type.
+ */
 public interface StatementEmitter<T extends Statement> {
 
+    /**
+     * Emits the given statement.
+     */
     void emit(EmitterContext ctx, T stmt, boolean semicolon);
 
 }

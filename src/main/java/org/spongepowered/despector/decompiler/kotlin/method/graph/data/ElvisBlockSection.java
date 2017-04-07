@@ -56,6 +56,8 @@ public class ElvisBlockSection extends BlockSection {
 
     @Override
     public void appendTo(StatementBlock block, Deque<Instruction> stack) {
+        // The blocksection before this one should have been our processed elvis
+        // and will have left the value to be null checked on the stack
         StatementBlock dummy = new StatementBlock(StatementBlock.Type.IF, block.getLocals());
         Deque<Instruction> dummy_stack = new ArrayDeque<>();
         StatementBuilder.appendBlock(this.block, dummy, block.getLocals(), dummy_stack);

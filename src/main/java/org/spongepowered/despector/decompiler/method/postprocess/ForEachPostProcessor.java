@@ -50,6 +50,13 @@ import org.spongepowered.despector.util.AstUtil;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * A post processor that converts for loops to for-each loops where it is
+ * determined likely that the original structure was a for-each loop.
+ * 
+ * <p>This handles both iterator based for each loops and loops over simple
+ * arrays.</p>
+ */
 public class ForEachPostProcessor implements StatementPostProcessor {
 
     private static final StatementMatcher<For> LIST_ITERATOR = StatementMatcher.forloop()

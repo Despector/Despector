@@ -37,6 +37,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * A structure of intermediate data of a method which is in the process of being
+ * decompiled.
+ */
 public class PartialMethod {
 
     private final MethodDecompiler decompiler;
@@ -56,58 +60,101 @@ public class PartialMethod {
         this.method = method;
     }
 
+    /**
+     * Gets the associated method decompiler.
+     */
     public MethodDecompiler getDecompiler() {
         return this.decompiler;
     }
 
+    /**
+     * Gets the asm node of the method being decompiled.
+     */
     public MethodNode getAsmNode() {
         return this.node;
     }
 
+    /**
+     * Gets the {@link MethodEntry} which is being populated.
+     */
     public MethodEntry getEntry() {
         return this.method;
     }
 
+    /**
+     * Gets the method locals.
+     */
     public Locals getLocals() {
         return this.locals;
     }
 
+    /**
+     * Sets the method locals.
+     */
     public void setLocals(Locals locals) {
         this.locals = locals;
     }
 
+    /**
+     * Gets the method's opcodes.
+     */
     public List<AbstractInsnNode> getOpcodes() {
         return this.ops;
     }
 
+    /**
+     * Sets the method's opcodes.
+     */
     public void setOpcodes(List<AbstractInsnNode> ops) {
         this.ops = ops;
     }
 
+    /**
+     * Gets the {@link StatementBlock} that will be filled with the final
+     * statements.
+     */
     public StatementBlock getBlock() {
         return this.block;
     }
 
+    /**
+     * Sets the {@link StatementBlock}.
+     */
     public void setBlock(StatementBlock block) {
         this.block = block;
     }
 
+    /**
+     * Gets the indices of labels within the list of opcodes.
+     */
     public Map<Label, Integer> getLabelIndices() {
         return this.label_indices;
     }
 
+    /**
+     * Sets the indices of labels within the list of opcodes.
+     */
     public void setLabelIndices(Map<Label, Integer> label_indices) {
         this.label_indices = label_indices;
     }
 
+    /**
+     * Gets the opcode blocks forming the graph of the method's control flow.
+     */
     public List<OpcodeBlock> getGraph() {
         return this.graph;
     }
 
+    /**
+     * Sets the opcode blocks forming the graph of the method's control flow.
+     */
     public void setGraph(List<OpcodeBlock> graph) {
         this.graph = graph;
     }
 
+    /**
+     * Gets the final block sections.
+     */
     public List<BlockSection> getFinalBlocks() {
         return this.final_blocks;
     }

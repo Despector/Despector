@@ -47,6 +47,10 @@ import org.spongepowered.despector.util.AstUtil;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * A post processor that converts while loops to for loops where it is
+ * determined likely that the original structure was a for loop.
+ */
 public class ForFromWhilePostProcessor implements StatementPostProcessor {
 
     private static final StatementMatcher<?> STORE = MatchContext.storeLocal("loop_val", StatementMatcher.localassign()

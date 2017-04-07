@@ -37,6 +37,9 @@ import org.spongepowered.despector.ast.members.insn.branch.TryCatch.CatchBlock;
 import org.spongepowered.despector.ast.members.insn.branch.While;
 import org.spongepowered.despector.ast.members.insn.branch.condition.AndCondition;
 
+/**
+ * A post processor which cleans up nested if statements that can be simplified.
+ */
 public class IfCombiningPostProcessor implements StatementPostProcessor {
 
     @Override

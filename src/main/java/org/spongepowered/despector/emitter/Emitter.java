@@ -26,10 +26,19 @@ package org.spongepowered.despector.emitter;
 
 import org.spongepowered.despector.ast.type.TypeEntry;
 
+/**
+ * A source emitter.
+ */
 public interface Emitter {
 
+    /**
+     * Initializes the given {@link EmitterContext} for this emitter type.
+     */
     void setup(EmitterContext ctx);
 
+    /**
+     * Emits the given type to the given {@link EmitterContext}.
+     */
     void emit(EmitterContext ctx, TypeEntry type);
 
 }

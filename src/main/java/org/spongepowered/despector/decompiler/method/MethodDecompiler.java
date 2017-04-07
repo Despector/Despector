@@ -24,6 +24,7 @@
  */
 package org.spongepowered.despector.decompiler.method;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static org.objectweb.asm.Opcodes.ALOAD;
 import static org.objectweb.asm.Opcodes.ASTORE;
 import static org.objectweb.asm.Opcodes.ILOAD;
@@ -70,6 +71,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.annotation.Nullable;
+
 /**
  * A decompiler for method bodies.
  */
@@ -84,33 +87,59 @@ public class MethodDecompiler {
     private final List<StatementPostProcessor> post_processors = new ArrayList<>();
     private final Map<Class<?>, SpecialMethodProcessor> special_processors = new HashMap<>();
 
+    /**
+     * Adds the given {@link GraphProducerStep} to the end of the graph
+     * producers.
+     */
     public void addGraphProducer(GraphProducerStep step) {
-        this.graph_producers.add(step);
+        this.graph_producers.add(checkNotNull(step, "step"));
     }
 
+    /**
+     * Adds the given {@link GraphOperation} to the end of the cleanup steps.
+     */
     public void addCleanupOperation(GraphOperation op) {
-        this.cleanup_operations.add(op);
+        this.cleanup_operations.add(checkNotNull(op, "op"));
     }
 
+    /**
+     * Adds the given {@link GraphProcessor} to the end of the graph processors.
+     */
     public void addProcessor(GraphProcessor proc) {
-        this.processors.add(proc);
+        this.processors.add(checkNotNull(proc, "proc"));
     }
 
+    /**
+     * Adds the given {@link RegionProcessor} to the end of the region
+     * processors.
+     */
     public void addRegionProcessor(RegionProcessor proc) {
-        this.region_processors.add(proc);
+        this.region_processors.add(checkNotNull(proc, "proc"));
     }
 
+    /**
+     * Adds the given {@link StatementPostProcessor} to the end of the post
+     * processors.
+     */
     public void addPostProcessor(StatementPostProcessor post) {
-        this.post_processors.add(post);
+        this.post_processors.add(checkNotNull(post, "post"));
     }
 
+    /**
+     * Adds the given {@link SpecialMethodProcessor} to the special processors.
+     */
     public <T extends SpecialMethodProcessor> void setSpecialProcessor(Class<T> type, T processor) {
-        this.special_processors.put(type, processor);
+        this.special_processors.put(checkNotNull(type, "type"), checkNotNull(processor, "processor"));
     }
 
+    /**
+     * Gets the registered {@link SpecialMethodProcessor} corresponding to the
+     * given type, or null if not found.
+     */
     @SuppressWarnings("unchecked")
+    @Nullable
     public <T extends SpecialMethodProcessor> T getSpecialProcessor(Class<T> type) {
-        return (T) this.special_processors.get(type);
+        return (T) this.special_processors.get(checkNotNull(type, "type"));
     }
 
     @SuppressWarnings("unchecked")
@@ -182,14 +211,18 @@ public class MethodDecompiler {
             return null;
         }
 
+        // Setup the partial method
         PartialMethod partial = new PartialMethod(this, asm, entry);
         partial.setLocals(locals);
 
+        // Convert the instructions linked list to an array list for easier
+        // processing
         List<AbstractInsnNode> ops = Lists.newArrayList(asm.instructions.iterator());
         partial.setOpcodes(ops);
         StatementBlock block = new StatementBlock(StatementBlock.Type.METHOD, partial.getLocals());
         partial.setBlock(block);
 
+        // Calculate the indices of all labels within the instructions list
         Map<Label, Integer> label_indices = Maps.newHashMap();
         for (int index = 0; index < ops.size(); index++) {
             AbstractInsnNode next = ops.get(index);
@@ -197,9 +230,11 @@ public class MethodDecompiler {
                 label_indices.put(((LabelNode) next).getLabel(), index);
             }
         }
+        // use the labels to bake the local instances
         partial.getLocals().bakeInstances(label_indices);
         partial.setLabelIndices(label_indices);
 
+        // Creates the initial form of the control flow graph
         List<OpcodeBlock> graph = makeGraph(partial);
         partial.setGraph(graph);
 
@@ -207,6 +242,8 @@ public class MethodDecompiler {
             System.out.println();
         }
 
+        // process the graph to perform in-graph operations prior to flattening
+        // it to a list of block sections
         for (GraphOperation op : this.cleanup_operations) {
             op.process(partial);
         }
@@ -227,6 +264,11 @@ public class MethodDecompiler {
         // Append all block sections to the output in order. This finalizes all
         // decompilation of statements not already decompiled.
         Deque<Instruction> stack = new ArrayDeque<>();
+        // some compilers create what resembles a kotlin elvis statement in the
+        // switch synthetic methods and it breaks our pure java decompiler
+        //
+        // TODO We should add a processor that can handle this even in java to
+        // produce almost correct code rather than erroring
         int start = entry.getName().startsWith("$SWITCH_TABLE$") ? 2 : 0;
         for (int i = start; i < flat_graph.size(); i++) {
             BlockSection op = flat_graph.get(i);
@@ -250,6 +292,8 @@ public class MethodDecompiler {
 
         Set<Integer> break_points = new HashSet<>();
 
+        // queries all graph producers to determine where the instructions
+        // should be broken up to form the graph
         for (GraphProducerStep step : this.graph_producers) {
             step.collectBreakpoints(partial, break_points);
         }
@@ -260,6 +304,8 @@ public class MethodDecompiler {
         Map<Integer, OpcodeBlock> blocks = new HashMap<>();
         List<OpcodeBlock> block_list = new ArrayList<>();
 
+        // turn all blocks to the basic body opcode block, the various
+        // processors will then replace these with the specialized opcode blocks
         int last_brk = 0;
         for (int brk : sorted_break_points) {
             // accumulate the opcodes beween the next breakpoint and the last
@@ -280,6 +326,7 @@ public class MethodDecompiler {
             }
         }
 
+        // form the edges of the graph
         for (GraphProducerStep step : this.graph_producers) {
             step.formEdges(partial, blocks, sorted_break_points, block_list);
         }
@@ -287,9 +334,12 @@ public class MethodDecompiler {
         return block_list;
     }
 
+    /**
+     * Processes the given region into one or more block sections.
+     */
     public void flattenGraph(PartialMethod partial, List<OpcodeBlock> blocks, int stop_point, List<BlockSection> result) {
         int stop_offs = blocks.size() - stop_point;
-        if(stop_offs < 0) {
+        if (stop_offs < 0) {
             return;
         }
         outer: for (int i = 0; i < blocks.size() - stop_offs; i++) {
@@ -304,6 +354,9 @@ public class MethodDecompiler {
         }
     }
 
+    /**
+     * Processes the given region with the registered region processors.
+     */
     public BlockSection processRegion(PartialMethod partial, List<OpcodeBlock> region, OpcodeBlock ret, int body_start) {
         for (RegionProcessor proc : this.region_processors) {
             BlockSection block = proc.process(partial, region, ret, body_start);

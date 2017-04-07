@@ -83,36 +83,60 @@ public class Despector {
         });
     }
 
+    /**
+     * Decompiles the given {@link InputStream}.
+     */
     public static TypeEntry decompile(InputStream input) throws IOException {
         SourceSet source = new SourceSet();
         return decompile(input, source, Language.ANY);
     }
 
+    /**
+     * Decompiles the given {@link InputStream} as the given language.
+     */
     public static TypeEntry decompile(InputStream input, Language lang) throws IOException {
         return decompile(input, new SourceSet(), lang);
     }
 
+    /**
+     * Decompiles the given {@link InputStream} with the given loader for
+     * additional types.
+     */
     public static TypeEntry decompile(InputStream input, SourceSet.Loader loader) throws IOException {
         SourceSet source = new SourceSet();
         source.setLoader(loader);
         return decompile(input, source);
     }
 
+    /**
+     * Decompiles the given {@link InputStream} with the given language and
+     * loader for additional types.
+     */
     public static TypeEntry decompile(InputStream input, Language lang, SourceSet.Loader loader) throws IOException {
         SourceSet source = new SourceSet();
         source.setLoader(loader);
         return decompile(input, source, lang);
     }
 
+    /**
+     * Decompiles the given {@link InputStream} into the given source set.
+     */
     public static TypeEntry decompile(InputStream input, SourceSet source) throws IOException {
         return decompile(input, source, Language.ANY);
     }
 
+    /**
+     * Decompiles the given {@link InputStream} with the given language into the
+     * given source set.
+     */
     public static TypeEntry decompile(InputStream input, SourceSet source, Language lang) throws IOException {
         TypeEntry type = Decompilers.get(lang).decompile(input, source);
         return type;
     }
 
+    /**
+     * Emits the given type entry to a string.
+     */
     public static String emitToString(TypeEntry type) {
         StringWriter writer = new StringWriter();
         EmitterContext ctx = new EmitterContext(writer, EmitterFormat.defaults());

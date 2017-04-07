@@ -27,8 +27,14 @@ package org.spongepowered.despector.decompiler.method.special;
 import org.objectweb.asm.tree.MethodNode;
 import org.spongepowered.despector.ast.Locals;
 
+/**
+ * A special processor for pre-processing a method's locals.
+ */
 public interface LocalsProcessor extends SpecialMethodProcessor {
 
+    /**
+     * Process the given method's locals.
+     */
     void process(MethodNode asm, Locals locals);
 
 }

@@ -153,6 +153,9 @@ import org.spongepowered.despector.emitter.type.MethodEntryEmitter;
 
 import java.util.EnumMap;
 
+/**
+ * Standard emitters.
+ */
 public class Emitters {
 
     public static final EmitterSet JAVA_SET = new EmitterSet();

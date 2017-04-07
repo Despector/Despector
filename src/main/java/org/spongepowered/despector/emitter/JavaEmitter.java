@@ -26,6 +26,9 @@ package org.spongepowered.despector.emitter;
 
 import org.spongepowered.despector.ast.type.TypeEntry;
 
+/**
+ * A java source emitter.
+ */
 public class JavaEmitter implements Emitter {
 
     @Override

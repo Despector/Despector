@@ -34,18 +34,39 @@ import org.spongepowered.despector.transform.matcher.instruction.IntConstantMatc
 import org.spongepowered.despector.transform.matcher.instruction.LocalAccessMatcher;
 import org.spongepowered.despector.transform.matcher.instruction.StaticInvokeMatcher;
 
+import javax.annotation.Nullable;
+
+/**
+ * A matcher for instructions.
+ */
 public interface InstructionMatcher<T extends Instruction> {
 
+    /**
+     * Attempts to match against the given instruction and return the matched
+     * instruction if successful.
+     */
+    @Nullable
     T match(MatchContext ctx, Instruction insn);
 
+    /**
+     * Attempts to match against the given instruction and return the matched
+     * instruction if successful.
+     */
+    @Nullable
     default T match(Instruction insn) {
         return match(MatchContext.create(), insn);
     }
 
+    /**
+     * Attempts to match against the given instruction..
+     */
     default boolean matches(MatchContext ctx, Instruction insn) {
         return match(ctx, insn) != null;
     }
 
+    /**
+     * A matcher which matches any instruction.
+     */
     static final InstructionMatcher<?> ANY = new Any();
 
     public static StaticInvokeMatcher.Builder staticinvoke() {

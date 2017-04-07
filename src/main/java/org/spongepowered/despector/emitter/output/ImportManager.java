@@ -50,6 +50,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * A manager which handles determining which types should be imported and
+ * whether a given type is already imported.
+ */
 public class ImportManager {
 
     private final List<String> implicit_imports = new ArrayList<>();
@@ -59,16 +63,30 @@ public class ImportManager {
         addImplicitImport("java/lang/");
     }
 
+    /**
+     * Clears all imports from this manager.
+     */
     public void reset() {
         this.imports.clear();
     }
 
+    /**
+     * Adds the given package prefix as an implicit import. Implicit imports are
+     * not emitted at the top of the class but are still considered present.
+     * 
+     * <p>An example of an implicit import is {@code 'java/lang/'} which is
+     * always considered as imported in java code.</p>
+     */
     public void addImplicitImport(String i) {
         if (!this.implicit_imports.contains(i)) {
             this.implicit_imports.add(i);
         }
     }
 
+    /**
+     * Traverses the given type and determines what types should be imported for
+     * it.
+     */
     public void calculateImports(TypeEntry type) {
 
         ImportWalker walker = new ImportWalker();
@@ -99,6 +117,9 @@ public class ImportManager {
         }
     }
 
+    /**
+     * Adds the given type descriptor to the list of imports.
+     */
     private void add(String desc) {
         if (desc.startsWith("[")) {
             add(desc.substring(1));
@@ -178,6 +199,9 @@ public class ImportManager {
         }
     }
 
+    /**
+     * Checks if the given type is imported.
+     */
     public boolean checkImport(String type) {
         if (type.indexOf('$') != -1) {
             type = type.substring(0, type.indexOf('$'));
@@ -193,6 +217,9 @@ public class ImportManager {
         return this.imports.contains(type);
     }
 
+    /**
+     * Emits the imports to the given emitter context.
+     */
     public void emitImports(EmitterContext ctx) {
         for (Iterator<String> it = this.imports.iterator(); it.hasNext();) {
             String i = it.next();

@@ -26,8 +26,14 @@ package org.spongepowered.despector.transform;
 
 import org.spongepowered.despector.ast.type.TypeEntry;
 
+/**
+ * A transformer which can perform some operation against a type.
+ */
 public interface TypeTransformer {
 
+    /**
+     * Transforms the given type.
+     */
     void transform(TypeEntry type);
 
 }

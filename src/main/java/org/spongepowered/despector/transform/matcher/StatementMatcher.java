@@ -31,19 +31,44 @@ import org.spongepowered.despector.transform.matcher.statement.IncrementMatcher;
 import org.spongepowered.despector.transform.matcher.statement.LocalAssignmentMatcher;
 import org.spongepowered.despector.transform.matcher.statement.WhileLoopMatcher;
 
+import javax.annotation.Nullable;
+
+/**
+ * A matcher for statements.
+ */
 public interface StatementMatcher<T extends Statement> {
 
+    /**
+     * Attempts to match against the given statement and return the matched
+     * statement if successful.
+     */
+    @Nullable
     T match(MatchContext ctx, Statement stmt);
 
+    /**
+     * Attempts to match against the given statement and return the matched
+     * statement if successful.
+     */
+    @Nullable
     default T match(Statement stmt) {
         return match(MatchContext.create(), stmt);
     }
 
+    /**
+     * Attempts to match against the given statement..
+     */
     default boolean matches(MatchContext ctx, Statement stmt) {
         return match(ctx, stmt) != null;
     }
 
+    /**
+     * A matcher which matches any statement.
+     */
     static final StatementMatcher<?> ANY = new Any();
+    /**
+     * A matcher which matches no statement. Does match true for a null
+     * statement.
+     */
     static final StatementMatcher<?> NONE = new None();
 
     static ForEachMatcher.Builder foreach() {

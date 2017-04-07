@@ -25,6 +25,7 @@
 package org.spongepowered.despector.emitter;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.Sets;
 import org.spongepowered.despector.ast.Annotation;
@@ -64,6 +65,11 @@ import java.util.Deque;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.annotation.Nullable;
+
+/**
+ * A holder for the current context of a type being emitted.
+ */
 public class EmitterContext {
 
     private final ImportManager import_manager = new ImportManager();
@@ -105,82 +111,147 @@ public class EmitterContext {
         this.block_statements.add(TryCatch.class);
     }
 
+    /**
+     * Gets the current {@link EmitterSet}.
+     */
     public EmitterSet getEmitterSet() {
         return this.set;
     }
 
+    /**
+     * Sets the current {@link EmitterSet}.
+     */
     public void setEmitterSet(EmitterSet set) {
-        this.set = set;
+        this.set = checkNotNull(set, "set");
     }
 
+    /**
+     * Gets the current type being emitted.
+     */
+    @Nullable
     public TypeEntry getType() {
         return this.type;
     }
 
-    public void setType(TypeEntry type) {
+    /**
+     * Sets the current type being emitted.
+     */
+    public void setType(@Nullable TypeEntry type) {
         this.type = type;
     }
 
+    /**
+     * Gets the current outer type being emitted.
+     */
+    @Nullable
     public TypeEntry getOuterType() {
         return this.outer_type;
     }
 
+    /**
+     * Gets the current method being emitted.
+     */
+    @Nullable
     public MethodEntry getMethod() {
         return this.method;
     }
 
-    public void setMethod(MethodEntry mth) {
+    /**
+     * Sets the current method being emitted.
+     */
+    public void setMethod(@Nullable MethodEntry mth) {
         this.method = mth;
     }
 
+    /**
+     * Gets the current field being emitted.
+     */
+    @Nullable
     public FieldEntry getField() {
         return this.field;
     }
 
-    public void setField(FieldEntry fld) {
+    /**
+     * Sets the current field being emitted.
+     */
+    public void setField(@Nullable FieldEntry fld) {
         this.field = fld;
     }
 
+    /**
+     * Gets the current statement being emitted.
+     */
     public Statement getStatement() {
         return this.statement;
     }
 
+    /**
+     * Sets the current statement being emitted.
+     */
     public void setStatement(Statement stmt) {
         this.statement = stmt;
     }
 
+    /**
+     * Gets the emitter format.
+     */
     public EmitterFormat getFormat() {
         return this.format;
     }
 
-    public void setSemicolons(boolean state) {
-        this.semicolons = state;
-    }
-
+    /**
+     * Gets if semicolons should be emitted after statements.
+     */
     public boolean usesSemicolons() {
         return this.semicolons;
     }
 
+    /**
+     * Sets if semicolons should be emitted after statements.
+     */
+    public void setSemicolons(boolean state) {
+        this.semicolons = state;
+    }
+
+    /**
+     * Gets the current instruction stack.
+     */
     public Deque<Instruction> getCurrentInstructionStack() {
         return this.insn_stack;
     }
 
+    /**
+     * Gets if the given local instance has been defined previously in this
+     * method.
+     */
     public boolean isDefined(LocalInstance local) {
         return this.defined_locals.contains(local);
     }
 
+    /**
+     * Sets if the given local instance as defined.
+     */
     public void markDefined(LocalInstance local) {
-        this.defined_locals.add(local);
+        this.defined_locals.add(checkNotNull(local, "local"));
     }
 
+    /**
+     * Marks the given statement type as a block statement.
+     */
     public void markBlockStatement(Class<? extends Statement> type) {
-        this.block_statements.add(type);
+        this.block_statements.add(checkNotNull(type, "type"));
     }
 
+    /**
+     * Gets the import manager.
+     */
     public ImportManager getImportManager() {
         return this.import_manager;
     }
 
+    /**
+     * Emits the given type as an outer type.
+     */
     public void emitOuterType(TypeEntry type) {
         if (type.getName().endsWith("package-info")) {
             PackageInfoEmitter emitter = this.set.getSpecialEmitter(PackageInfoEmitter.class);
@@ -188,6 +259,7 @@ public class EmitterContext {
             return;
         }
 
+        // reset and calculate imports for this type.
         this.import_manager.reset();
         this.import_manager.calculateImports(type);
         this.outer_type = type;
@@ -213,6 +285,9 @@ public class EmitterContext {
         this.outer_type = null;
     }
 
+    /**
+     * Emits the given ast entry.
+     */
     @SuppressWarnings("unchecked")
     public <T extends AstEntry> boolean emit(T obj) {
         if (obj instanceof TypeEntry) {
@@ -237,11 +312,17 @@ public class EmitterContext {
         return state;
     }
 
+    /**
+     * Emits the given body.
+     */
     public EmitterContext emitBody(StatementBlock instructions) {
         emitBody(instructions, 0);
         return this;
     }
 
+    /**
+     * Emits the given body starting at the given start index.
+     */
     public EmitterContext emitBody(StatementBlock instructions, int start) {
         if (instructions.getType() == StatementBlock.Type.METHOD) {
             this.defined_locals.clear();
@@ -283,6 +364,9 @@ public class EmitterContext {
         return this;
     }
 
+    /**
+     * Emits the given statement.
+     */
     @SuppressWarnings("unchecked")
     public <T extends Statement> EmitterContext emit(T obj, boolean semicolon) {
         StatementEmitter<T> emitter = (StatementEmitter<T>) this.set.getStatementEmitter(obj.getClass());
@@ -296,6 +380,9 @@ public class EmitterContext {
         return this;
     }
 
+    /**
+     * Emits the given instruction.
+     */
     @SuppressWarnings("unchecked")
     public <T extends Instruction> EmitterContext emit(T obj, TypeSignature type) {
         InstructionEmitter<T> emitter = (InstructionEmitter<T>) this.set.getInstructionEmitter(obj.getClass());
@@ -311,6 +398,9 @@ public class EmitterContext {
         return this;
     }
 
+    /**
+     * Emits the given condition.
+     */
     @SuppressWarnings("unchecked")
     public <T extends Condition> EmitterContext emit(T condition) {
         ConditionEmitter<T> emitter = (ConditionEmitter<T>) this.set.getConditionEmitter(condition.getClass());
@@ -321,6 +411,9 @@ public class EmitterContext {
         return this;
     }
 
+    /**
+     * Emits the given annotation.
+     */
     public EmitterContext emit(Annotation anno) {
         AnnotationEmitter emitter = this.set.getSpecialEmitter(AnnotationEmitter.class);
         if (emitter == null) {
@@ -330,16 +423,25 @@ public class EmitterContext {
         return this;
     }
 
+    /**
+     * Increases the indentation level by one.
+     */
     public EmitterContext indent() {
         this.indentation++;
         return this;
     }
 
+    /**
+     * Decreases the indentation level by one.
+     */
     public EmitterContext dedent() {
         this.indentation--;
         return this;
     }
 
+    /**
+     * Prints the required indentation for the current indentation level.
+     */
     public EmitterContext printIndentation() {
         if (this.format.indent_with_spaces) {
             for (int i = 0; i < this.indentation * this.format.indentation_size; i++) {
@@ -353,10 +455,18 @@ public class EmitterContext {
         return this;
     }
 
+    /**
+     * Gets the string for the given type descriptor taking imports into
+     * account.
+     */
     public String getType(String name) {
         return getTypeName(TypeHelper.descToType(name));
     }
 
+    /**
+     * Gets the string for the given type internal name taking imports into
+     * account.
+     */
     public String getTypeName(String name) {
         if (name.endsWith("[]")) {
             String n = getTypeName(name.substring(0, name.length() - 2));
@@ -397,22 +507,34 @@ public class EmitterContext {
         return name.replace('/', '.').replace('$', '.');
     }
 
+    /**
+     * Emits the given type signature taking imports into account.
+     */
     public EmitterContext emitType(TypeSignature sig) {
         GenericsEmitter generics = this.set.getSpecialEmitter(GenericsEmitter.class);
         generics.emitTypeSignature(this, sig);
         return this;
     }
 
+    /**
+     * Emits the given type descriptor taking imports into account.
+     */
     public EmitterContext emitType(String name) {
         emitTypeName(TypeHelper.descToType(name));
         return this;
     }
 
+    /**
+     * Emits the given type internal name taking imports into account.
+     */
     public EmitterContext emitTypeName(String name) {
         printString(getTypeName(name));
         return this;
     }
 
+    /**
+     * Prints the given string if the condition is met.
+     */
     public EmitterContext printString(String line, boolean condition) {
         if (condition) {
             printString(line);
@@ -420,6 +542,9 @@ public class EmitterContext {
         return this;
     }
 
+    /**
+     * Inserts `count` new lines.
+     */
     public EmitterContext newLine(int count) {
         for (int i = 0; i < count; i++) {
             newLine();
@@ -427,6 +552,9 @@ public class EmitterContext {
         return this;
     }
 
+    /**
+     * Inserts a new line.
+     */
     public EmitterContext newLine() {
         __newLine();
         if (this.is_wrapped) {
@@ -438,6 +566,9 @@ public class EmitterContext {
         return this;
     }
 
+    /**
+     * Flushes the line buffer to the output.
+     */
     public void flush() {
         try {
             this.output.write(this.line_buffer.toString());
@@ -446,6 +577,9 @@ public class EmitterContext {
         }
     }
 
+    /**
+     * inserts a new line without resetting wrapping.
+     */
     private void __newLine() {
         flush();
         this.offs += 1;
@@ -459,15 +593,24 @@ public class EmitterContext {
         this.line_buffer.setLength(0);
     }
 
+    /**
+     * Inserts a new line and indents.
+     */
     public void newIndentedLine() {
         newLine();
         printIndentation();
     }
 
+    /**
+     * Gets the length of the current line.
+     */
     public int getCurrentLength() {
         return this.line_length;
     }
 
+    /**
+     * Prints the given string to the output.
+     */
     public EmitterContext printString(String line) {
         checkArgument(line.indexOf('\n') == -1);
         this.offs += this.line_buffer.length();
@@ -493,11 +636,17 @@ public class EmitterContext {
         return this;
     }
 
+    /**
+     * Marks the current line posittion as a possible line break point.
+     */
     public EmitterContext markWrapPoint() {
         markWrapPoint(WrappingStyle.WRAP_WHEN_NEEDED, 0);
         return this;
     }
 
+    /**
+     * Wraps the current line at the current position.
+     */
     private void wrap(boolean indent) {
         __newLine();
         if (!this.is_wrapped && indent) {
@@ -509,6 +658,10 @@ public class EmitterContext {
         printIndentation();
     }
 
+    /**
+     * Marks the current line posittion as a possible line break point depending
+     * on the given wrapping style and index.
+     */
     public EmitterContext markWrapPoint(WrappingStyle style, int index) {
         switch (style) {
         case DO_NOT_WRAP:
@@ -539,6 +692,10 @@ public class EmitterContext {
         return this;
     }
 
+    /**
+     * Emits an opening brace with a position depending on the given
+     * {@link BracePosition}.
+     */
     public void emitBrace(BracePosition pos, boolean wrapped, boolean with_space) {
         switch (pos) {
         case NEXT_LINE:

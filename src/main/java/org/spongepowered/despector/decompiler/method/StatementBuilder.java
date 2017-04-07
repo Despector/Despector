@@ -85,6 +85,9 @@ import org.spongepowered.despector.util.TypeHelper;
 
 import java.util.Deque;
 
+/**
+ * A utility for forming non-control flow opcodes into statements.
+ */
 public class StatementBuilder {
 
     public static void appendBlock(OpcodeBlock op, StatementBlock block, Locals locals, Deque<Instruction> stack) {

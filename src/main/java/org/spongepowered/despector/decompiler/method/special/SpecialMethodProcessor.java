@@ -24,7 +24,9 @@
  */
 package org.spongepowered.despector.decompiler.method.special;
 
-
+/**
+ * A marker interface for special processors.
+ */
 public interface SpecialMethodProcessor {
 
 }

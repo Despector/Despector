@@ -31,6 +31,9 @@ import org.spongepowered.despector.ast.members.insn.arg.cst.IntConstant.IntForma
 import org.spongepowered.despector.ast.type.TypeEntry;
 import org.spongepowered.despector.transform.TypeTransformer;
 
+/**
+ * A cleanup transformer than converts messy large decimals to hexadecimal.
+ */
 public class HexConstantsTransformer implements TypeTransformer {
 
     @Override

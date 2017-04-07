@@ -29,18 +29,39 @@ import org.spongepowered.despector.ast.members.insn.branch.condition.Condition;
 import org.spongepowered.despector.transform.matcher.condition.BooleanConditionMatcher;
 import org.spongepowered.despector.transform.matcher.condition.ConditionReferenceMatcher;
 
+import javax.annotation.Nullable;
+
+/**
+ * A matcher for conditions.
+ */
 public interface ConditionMatcher<T extends Condition> {
 
+    /**
+     * Matches against the given condition and return the matched condition if
+     * successful.
+     */
+    @Nullable
     T match(MatchContext ctx, Condition cond);
 
+    /**
+     * Matches against the given condition and return the matched condition if
+     * successful.
+     */
+    @Nullable
     default T match(Condition cond) {
         return match(MatchContext.create(), cond);
     }
 
+    /**
+     * Attempts to match the given condition.
+     */
     default boolean matches(MatchContext ctx, Condition cond) {
         return match(ctx, cond) != null;
     }
 
+    /**
+     * A matcher which matches any condition.
+     */
     static final ConditionMatcher<?> ANY = new Any();
 
     static BooleanConditionMatcher.Builder bool() {

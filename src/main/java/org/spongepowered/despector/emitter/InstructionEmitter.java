@@ -27,8 +27,14 @@ package org.spongepowered.despector.emitter;
 import org.spongepowered.despector.ast.generic.TypeSignature;
 import org.spongepowered.despector.ast.members.insn.arg.Instruction;
 
+/**
+ * An emitter for a particular instruction type.
+ */
 public interface InstructionEmitter<T extends Instruction> {
 
+    /**
+     * Emits the given instruction.
+     */
     void emit(EmitterContext ctx, T arg, TypeSignature type);
 
 }

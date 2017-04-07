@@ -27,6 +27,9 @@ package org.spongepowered.despector.emitter;
 import org.spongepowered.despector.ast.type.TypeEntry;
 import org.spongepowered.despector.emitter.output.ImportManager;
 
+/**
+ * A kotlin source emitter.
+ */
 public class KotlinEmitter implements Emitter {
 
     @Override

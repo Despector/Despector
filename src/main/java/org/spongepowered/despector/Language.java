@@ -26,6 +26,9 @@ package org.spongepowered.despector;
 
 import org.spongepowered.despector.ast.type.TypeEntry;
 
+/**
+ * Represents a source language.
+ */
 public enum Language {
 
     JAVA(".java"),
@@ -38,6 +41,9 @@ public enum Language {
         this.ext = ext;
     }
 
+    /**
+     * Gets the type extension for this language.
+     */
     public String getExtension(TypeEntry type) {
         if (this.ext != null) {
             return this.ext;
