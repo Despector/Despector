@@ -30,10 +30,13 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
+import org.objectweb.asm.Type;
 import org.spongepowered.test.util.TestHelper;
 import org.spongepowered.test.util.TestMethodBuilder;
 
 public class TernaryTests {
+
+    private static final Type THIS_TYPE = Type.getType(TernaryTests.class);
 
     @Test
     public void testSimple() {
@@ -59,6 +62,163 @@ public class TernaryTests {
 
         String insn = TestHelper.getAsString(builder.finish(), "test_mth");
         String good = "i = a ? 6 : 3;";
+        Assert.assertEquals(good, insn);
+    }
+
+    @Test
+    public void testToField() {
+        TestMethodBuilder builder = new TestMethodBuilder("test_mth", "(ZI)V");
+        MethodVisitor mv = builder.getGenerator();
+        Label start = new Label();
+        mv.visitLabel(start);
+        Label end = new Label();
+        Label l1 = new Label();
+        Label l2 = new Label();
+        mv.visitIntInsn(ILOAD, 0);
+        mv.visitJumpInsn(IFEQ, l1);
+        mv.visitIntInsn(BIPUSH, 6);
+        mv.visitJumpInsn(GOTO, l2);
+        mv.visitLabel(l1);
+        mv.visitInsn(ICONST_3);
+        mv.visitLabel(l2);
+        mv.visitFieldInsn(PUTSTATIC, THIS_TYPE.getInternalName(), "afield", "I");
+        mv.visitLabel(end);
+        mv.visitInsn(RETURN);
+        mv.visitLocalVariable("a", "Z", null, start, end, 0);
+        mv.visitLocalVariable("i", "I", null, start, end, 1);
+
+        String insn = TestHelper.getAsString(builder.finish(), "test_mth");
+        String good = "org.spongepowered.test.decompile.TernaryTests.afield = a ? 6 : 3;";
+        Assert.assertEquals(good, insn);
+    }
+
+    @Test
+    public void testNested() {
+        TestMethodBuilder builder = new TestMethodBuilder("test_mth", "(ZIZ)V");
+        MethodVisitor mv = builder.getGenerator();
+        Label start = new Label();
+        mv.visitLabel(start);
+        Label end = new Label();
+        Label l1 = new Label();
+        Label l2 = new Label();
+        Label l3 = new Label();
+        mv.visitIntInsn(ILOAD, 0);
+        mv.visitJumpInsn(IFEQ, l1);
+        mv.visitIntInsn(ILOAD, 2);
+        mv.visitJumpInsn(IFEQ, l3);
+        mv.visitInsn(ICONST_4);
+        mv.visitJumpInsn(GOTO, l2);
+        mv.visitLabel(l3);
+        mv.visitInsn(ICONST_5);
+        mv.visitJumpInsn(GOTO, l2);
+        mv.visitLabel(l1);
+        mv.visitInsn(ICONST_3);
+        mv.visitLabel(l2);
+        mv.visitIntInsn(ISTORE, 1);
+        mv.visitLabel(end);
+        mv.visitInsn(RETURN);
+        mv.visitLocalVariable("a", "Z", null, start, end, 0);
+        mv.visitLocalVariable("i", "I", null, start, end, 1);
+        mv.visitLocalVariable("b", "Z", null, start, end, 2);
+
+        String insn = TestHelper.getAsString(builder.finish(), "test_mth");
+        String good = "i = a ? b ? 4 : 5 : 3;";
+        Assert.assertEquals(good, insn);
+    }
+
+    @Test
+    public void testNested2() {
+        TestMethodBuilder builder = new TestMethodBuilder("test_mth", "(ZIZ)V");
+        MethodVisitor mv = builder.getGenerator();
+        Label start = new Label();
+        mv.visitLabel(start);
+        Label end = new Label();
+        Label l1 = new Label();
+        Label l2 = new Label();
+        Label l3 = new Label();
+        mv.visitIntInsn(ILOAD, 0);
+        mv.visitJumpInsn(IFEQ, l1);
+        mv.visitInsn(ICONST_3);
+        mv.visitJumpInsn(GOTO, l2);
+        mv.visitLabel(l1);
+        mv.visitIntInsn(ILOAD, 2);
+        mv.visitJumpInsn(IFEQ, l3);
+        mv.visitInsn(ICONST_4);
+        mv.visitJumpInsn(GOTO, l2);
+        mv.visitLabel(l3);
+        mv.visitInsn(ICONST_5);
+        mv.visitLabel(l2);
+        mv.visitIntInsn(ISTORE, 1);
+        mv.visitLabel(end);
+        mv.visitInsn(RETURN);
+        mv.visitLocalVariable("a", "Z", null, start, end, 0);
+        mv.visitLocalVariable("i", "I", null, start, end, 1);
+        mv.visitLocalVariable("b", "Z", null, start, end, 2);
+
+        String insn = TestHelper.getAsString(builder.finish(), "test_mth");
+        String good = "i = a ? 3 : b ? 4 : 5;";
+        Assert.assertEquals(good, insn);
+    }
+
+    @Test
+    public void testReturned() {
+        TestMethodBuilder builder = new TestMethodBuilder("test_mth", "(ZI)I");
+        MethodVisitor mv = builder.getGenerator();
+        Label start = new Label();
+        mv.visitLabel(start);
+        Label end = new Label();
+        Label l1 = new Label();
+        mv.visitIntInsn(ILOAD, 0);
+        mv.visitJumpInsn(IFEQ, l1);
+        mv.visitIntInsn(BIPUSH, 6);
+        mv.visitJumpInsn(GOTO, end);
+        mv.visitLabel(l1);
+        mv.visitInsn(ICONST_3);
+        mv.visitLabel(end);
+        mv.visitInsn(IRETURN);
+        mv.visitLocalVariable("a", "Z", null, start, end, 0);
+        mv.visitLocalVariable("i", "I", null, start, end, 1);
+
+        String insn = TestHelper.getAsString(builder.finish(), "test_mth");
+        String good = "return a ? 6 : 3;";
+        Assert.assertEquals(good, insn);
+    }
+
+    @Test
+    public void testTryCatchReturned() {
+        TestMethodBuilder builder = new TestMethodBuilder("test_mth", "(Z)I");
+        MethodVisitor mv = builder.getGenerator();
+        Label l0 = new Label();
+        Label l1 = new Label();
+        Label l2 = new Label();
+        mv.visitTryCatchBlock(l0, l1, l2, "java/lang/Exception");
+        mv.visitLabel(l0);
+        mv.visitVarInsn(ILOAD, 1);
+        Label l3 = new Label();
+        mv.visitJumpInsn(IFEQ, l3);
+        mv.visitIntInsn(BIPUSH, 6);
+        mv.visitJumpInsn(GOTO, l1);
+        mv.visitLabel(l3);
+        mv.visitInsn(ICONST_3);
+        mv.visitLabel(l1);
+        mv.visitInsn(IRETURN);
+        mv.visitLabel(l2);
+        mv.visitVarInsn(ASTORE, 2);
+        Label l4 = new Label();
+        mv.visitLabel(l4);
+        mv.visitInsn(ICONST_0);
+        mv.visitInsn(IRETURN);
+        Label l5 = new Label();
+        mv.visitLabel(l5);
+        mv.visitLocalVariable("a", "Z", null, l0, l5, 1);
+        mv.visitLocalVariable("e", "Ljava/lang/Exception;", null, l4, l5, 2);
+
+        String insn = TestHelper.getAsString(builder.finish(), "test_mth");
+        String good = "try {\n"
+                + "    return a ? 6 : 3;\n"
+                + "} catch (Exception e) {\n"
+                + "    return 0;\n"
+                + "}";
         Assert.assertEquals(good, insn);
     }
 }
