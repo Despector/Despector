@@ -128,7 +128,7 @@ public class KotlinCompanionClassEmitter implements SpecialEmitter {
                     ctx.indent();
                     for (Statement stmt : fld.getter.getStatements()) {
                         ctx.printIndentation();
-                        ctx.emit(stmt, true);
+                        ctx.emit(stmt, ctx.usesSemicolons());
                         ctx.newLine();
                     }
                     ctx.dedent();

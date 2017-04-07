@@ -30,7 +30,7 @@ import org.spongepowered.despector.emitter.output.ImportManager;
 public class KotlinEmitter implements Emitter {
 
     @Override
-    public void emit(EmitterContext ctx, TypeEntry type) {
+    public void setup(EmitterContext ctx) {
         ctx.setSemicolons(false);
         ctx.setEmitterSet(Emitters.KOTLIN_SET);
         ImportManager imports = ctx.getImportManager();
@@ -43,6 +43,11 @@ public class KotlinEmitter implements Emitter {
         imports.addImplicitImport("kotlin/sequences/");
         imports.addImplicitImport("kotlin/text/");
         imports.addImplicitImport("kotlin/jvm/");
+    }
+
+    @Override
+    public void emit(EmitterContext ctx, TypeEntry type) {
+        setup(ctx);
         ctx.emitOuterType(type);
     }
 

@@ -30,6 +30,10 @@ import org.spongepowered.despector.ast.type.TypeEntry;
 public class WildEmitter implements Emitter {
 
     @Override
+    public void setup(EmitterContext ctx) {
+    }
+
+    @Override
     public void emit(EmitterContext ctx, TypeEntry type) {
         if(type.getLanguage() == Language.KOTLIN) {
             Emitters.KOTLIN.emit(ctx, type);

@@ -22,22 +22,5 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.despector.emitter;
-
-import org.spongepowered.despector.ast.type.TypeEntry;
-
-public class JavaEmitter implements Emitter {
-
-    @Override
-    public void setup(EmitterContext ctx) {
-        ctx.setSemicolons(true);
-        ctx.setEmitterSet(Emitters.JAVA_SET);
-    }
-
-    @Override
-    public void emit(EmitterContext ctx, TypeEntry type) {
-        setup(ctx);
-        ctx.emitOuterType(type);
-    }
-
-}
+@org.spongepowered.despector.util.NonnullByDefault
+package org.spongepowered.despector.decompiler.kotlin.method.postprocess;

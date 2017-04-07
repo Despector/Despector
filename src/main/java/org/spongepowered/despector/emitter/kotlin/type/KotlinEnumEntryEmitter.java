@@ -241,7 +241,7 @@ public class KotlinEnumEntryEmitter implements AstEmitter<EnumEntry> {
             ctx.indent();
             for (Statement stmt : remaining) {
                 ctx.printIndentation();
-                ctx.emit(stmt, true);
+                ctx.emit(stmt, ctx.usesSemicolons());
                 ctx.newLine();
             }
             ctx.dedent();

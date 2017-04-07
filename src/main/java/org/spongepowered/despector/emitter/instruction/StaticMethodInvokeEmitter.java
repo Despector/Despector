@@ -101,7 +101,7 @@ public class StaticMethodInvokeEmitter implements InstructionEmitter<StaticMetho
                     replacement = new StaticFieldAssignment(assign.getFieldName(), assign.getFieldDescription(), assign.getOwnerType(),
                             arg.getParams()[0]);
                 }
-                ctx.emit(replacement, true);
+                ctx.emit(replacement, ctx.usesSemicolons());
                 return true;
             }
             // getter

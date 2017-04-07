@@ -203,8 +203,6 @@ public class KotlinMethodEntryEmitter extends MethodEntryEmitter {
                 ctx.printString("// Error decompiling block");
                 printReturn(ctx, method.getReturnType());
             } else {
-                LocalMutabilityVisitor visitor = new LocalMutabilityVisitor();
-                block.accept(visitor);
                 ctx.emitBody(block);
             }
             ctx.newLine();
@@ -232,27 +230,6 @@ public class KotlinMethodEntryEmitter extends MethodEntryEmitter {
             def.add(assign.getValue());
         }
         return def;
-    }
-
-    private static class LocalMutabilityVisitor extends InstructionVisitor {
-
-        private final Set<LocalInstance> defined = new HashSet<>();
-
-        public LocalMutabilityVisitor() {
-
-        }
-
-        @Override
-        public void visitLocalAssignment(LocalAssignment assign) {
-            LocalInstance local = assign.getLocal();
-            if (this.defined.contains(local)) {
-                local.setEffectivelyFinal(false);
-                return;
-            }
-            this.defined.add(local);
-            local.setEffectivelyFinal(true);
-        }
-
     }
 
 }

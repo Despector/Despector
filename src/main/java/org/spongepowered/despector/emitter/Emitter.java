@@ -28,6 +28,8 @@ import org.spongepowered.despector.ast.type.TypeEntry;
 
 public interface Emitter {
 
+    void setup(EmitterContext ctx);
+
     void emit(EmitterContext ctx, TypeEntry type);
-    
+
 }

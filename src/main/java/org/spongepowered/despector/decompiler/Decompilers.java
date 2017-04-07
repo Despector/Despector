@@ -27,6 +27,7 @@ package org.spongepowered.despector.decompiler;
 import org.spongepowered.despector.Language;
 import org.spongepowered.despector.decompiler.kotlin.method.graph.create.ElvisGraphProducerStep;
 import org.spongepowered.despector.decompiler.kotlin.method.graph.operate.KotlinTernaryPrePassOperation;
+import org.spongepowered.despector.decompiler.kotlin.method.postprocess.KotlinLocalsMutabilityPostProcess;
 import org.spongepowered.despector.decompiler.kotlin.method.special.KotlinLocalsProcessor;
 import org.spongepowered.despector.decompiler.kotlin.step.KotlinMethodInfoStep;
 import org.spongepowered.despector.decompiler.method.MethodDecompiler;
@@ -118,7 +119,8 @@ public class Decompilers {
         KOTLIN_METHOD.addRegionProcessor(new IfBlockRegionProcessor());
         KOTLIN_METHOD.addPostProcessor(new IfCombiningPostProcessor());
         KOTLIN_METHOD.addPostProcessor(new ForEachPostProcessor());
-//        KOTLIN_METHOD.setSpecialProcessor(LocalsProcessor.class, new KotlinLocalsProcessor());
+        KOTLIN_METHOD.addPostProcessor(new KotlinLocalsMutabilityPostProcess());
+        KOTLIN_METHOD.setSpecialProcessor(LocalsProcessor.class, new KotlinLocalsProcessor());
 
         DECOMPILERS.put(Language.JAVA, JAVA);
         DECOMPILERS.put(Language.KOTLIN, KOTLIN);
