@@ -34,16 +34,6 @@ import java.io.IOException;
 @SuppressWarnings("unused")
 public class TernaryTest {
 
-    public void mth_basicTernary(boolean a) {
-        int r = a ? 6 : 3;
-    }
-
-    @Test
-    public void testBasicTernary() throws IOException {
-        String good = "int r = a ? 6 : 3;";
-        check(getClass(), "mth_basicTernary", good);
-    }
-
     public void mth_moreComplexTernary(boolean a, boolean b, int j) {
         int i = a || b ? 0 - j * 24 + Integer.MAX_VALUE : 1 + j;
     }

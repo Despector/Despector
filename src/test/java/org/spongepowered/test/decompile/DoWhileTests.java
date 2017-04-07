@@ -24,15 +24,13 @@
  */
 package org.spongepowered.test.decompile;
 
-import static org.objectweb.asm.Opcodes.RETURN;
-import static org.objectweb.asm.commons.GeneratorAdapter.*;
+import static org.objectweb.asm.Opcodes.*;
 
 import org.junit.Assert;
 import org.junit.Test;
 import org.objectweb.asm.Label;
+import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Type;
-import org.objectweb.asm.commons.GeneratorAdapter;
-import org.objectweb.asm.commons.Method;
 import org.spongepowered.test.util.TestHelper;
 import org.spongepowered.test.util.TestMethodBuilder;
 
@@ -46,17 +44,17 @@ public class DoWhileTests {
 
     @Test
     public void testDoWhile() {
-        TestMethodBuilder builder = new TestMethodBuilder("test_mth", "void test_mth (int)");
-        GeneratorAdapter mv = builder.getGenerator();
-        Label start = mv.newLabel();
+        TestMethodBuilder builder = new TestMethodBuilder("test_mth", "(I)V");
+        MethodVisitor mv = builder.getGenerator();
+        Label start = new Label();
         mv.visitLabel(start);
-        Label l1 = mv.newLabel();
-        Label end = mv.newLabel();
+        Label end = new Label();
+        Label l1 = new Label();
         mv.visitLabel(l1);
-        mv.invokeStatic(THIS_TYPE, Method.getMethod("void body ()"));
-        mv.loadArg(0);
-        mv.push(5);
-        mv.ifICmp(LT, l1);
+        mv.visitMethodInsn(INVOKESTATIC, THIS_TYPE.getInternalName(), "body", "()V", false);
+        mv.visitVarInsn(ILOAD, 0);
+        mv.visitInsn(ICONST_5);
+        mv.visitJumpInsn(IF_ICMPLT, l1);
         mv.visitLabel(end);
         mv.visitInsn(RETURN);
         mv.visitLocalVariable("i", "I", null, start, end, 0);
@@ -70,18 +68,18 @@ public class DoWhileTests {
 
     @Test
     public void testDoWhileAnd() {
-        TestMethodBuilder builder = new TestMethodBuilder("test_mth", "void test_mth (boolean, boolean)");
-        GeneratorAdapter mv = builder.getGenerator();
-        Label start = mv.newLabel();
+        TestMethodBuilder builder = new TestMethodBuilder("test_mth", "(ZZ)V");
+        MethodVisitor mv = builder.getGenerator();
+        Label start = new Label();
         mv.visitLabel(start);
-        Label l1 = mv.newLabel();
-        Label end = mv.newLabel();
+        Label end = new Label();
+        Label l1 = new Label();
         mv.visitLabel(l1);
-        mv.invokeStatic(THIS_TYPE, Method.getMethod("void body ()"));
-        mv.loadArg(0);
-        mv.ifZCmp(EQ, end);
-        mv.loadArg(1);
-        mv.ifZCmp(NE, l1);
+        mv.visitMethodInsn(INVOKESTATIC, THIS_TYPE.getInternalName(), "body", "()V", false);
+        mv.visitVarInsn(ILOAD, 0);
+        mv.visitJumpInsn(IFEQ, end);
+        mv.visitVarInsn(ILOAD, 1);
+        mv.visitJumpInsn(IFNE, l1);
         mv.visitLabel(end);
         mv.visitInsn(RETURN);
         mv.visitLocalVariable("a", "Z", null, start, end, 0);
@@ -96,18 +94,18 @@ public class DoWhileTests {
 
     @Test
     public void testDoWhileOr() {
-        TestMethodBuilder builder = new TestMethodBuilder("test_mth", "void test_mth (boolean, boolean)");
-        GeneratorAdapter mv = builder.getGenerator();
-        Label start = mv.newLabel();
+        TestMethodBuilder builder = new TestMethodBuilder("test_mth", "(ZZ)V");
+        MethodVisitor mv = builder.getGenerator();
+        Label start = new Label();
         mv.visitLabel(start);
-        Label l1 = mv.newLabel();
-        Label end = mv.newLabel();
+        Label end = new Label();
+        Label l1 = new Label();
         mv.visitLabel(l1);
-        mv.invokeStatic(THIS_TYPE, Method.getMethod("void body ()"));
-        mv.loadArg(0);
-        mv.ifZCmp(NE, l1);
-        mv.loadArg(1);
-        mv.ifZCmp(NE, l1);
+        mv.visitMethodInsn(INVOKESTATIC, THIS_TYPE.getInternalName(), "body", "()V", false);
+        mv.visitVarInsn(ILOAD, 0);
+        mv.visitJumpInsn(IFNE, l1);
+        mv.visitVarInsn(ILOAD, 1);
+        mv.visitJumpInsn(IFNE, l1);
         mv.visitLabel(end);
         mv.visitInsn(RETURN);
         mv.visitLocalVariable("a", "Z", null, start, end, 0);
@@ -122,22 +120,22 @@ public class DoWhileTests {
 
     @Test
     public void testDoWhileBreak() {
-        TestMethodBuilder builder = new TestMethodBuilder("test_mth", "void test_mth (int, boolean)");
-        GeneratorAdapter mv = builder.getGenerator();
-        Label start = mv.newLabel();
+        TestMethodBuilder builder = new TestMethodBuilder("test_mth", "(IZ)V");
+        MethodVisitor mv = builder.getGenerator();
+        Label start = new Label();
         mv.visitLabel(start);
-        Label l1 = mv.newLabel();
-        Label l2 = mv.newLabel();
-        Label end = mv.newLabel();
+        Label end = new Label();
+        Label l1 = new Label();
+        Label l2 = new Label();
         mv.visitLabel(l1);
-        mv.invokeStatic(THIS_TYPE, Method.getMethod("void body ()"));
-        mv.loadArg(1);
-        mv.ifZCmp(EQ, l2);
-        mv.goTo(end);
+        mv.visitMethodInsn(INVOKESTATIC, THIS_TYPE.getInternalName(), "body", "()V", false);
+        mv.visitVarInsn(ILOAD, 1);
+        mv.visitJumpInsn(IFEQ, l2);
+        mv.visitJumpInsn(GOTO, end);
         mv.visitLabel(l2);
-        mv.loadArg(0);
-        mv.push(5);
-        mv.ifICmp(LT, l1);
+        mv.visitVarInsn(ILOAD, 0);
+        mv.visitInsn(ICONST_5);
+        mv.visitJumpInsn(IF_ICMPLT, l1);
         mv.visitLabel(end);
         mv.visitInsn(RETURN);
         mv.visitLocalVariable("i", "I", null, start, end, 0);
@@ -155,23 +153,23 @@ public class DoWhileTests {
 
     //@Test
     public void testDoWhileContinue() {
-        TestMethodBuilder builder = new TestMethodBuilder("test_mth", "void test_mth (int, boolean)");
-        GeneratorAdapter mv = builder.getGenerator();
-        Label start = mv.newLabel();
+        TestMethodBuilder builder = new TestMethodBuilder("test_mth", "(IZ)V");
+        MethodVisitor mv = builder.getGenerator();
+        Label start = new Label();
         mv.visitLabel(start);
-        Label l1 = mv.newLabel();
-        Label l2 = mv.newLabel();
-        Label end = mv.newLabel();
+        Label end = new Label();
+        Label l1 = new Label();
+        Label l2 = new Label();
         mv.visitLabel(l1);
-        mv.invokeStatic(THIS_TYPE, Method.getMethod("void body ()"));
-        mv.loadArg(1);
-        mv.ifZCmp(EQ, l2);
-        mv.goTo(l1);
+        mv.visitMethodInsn(INVOKESTATIC, THIS_TYPE.getInternalName(), "body", "()V", false);
+        mv.visitVarInsn(ILOAD, 1);
+        mv.visitJumpInsn(IFEQ, l2);
+        mv.visitJumpInsn(GOTO, l1);
         mv.visitLabel(l2);
-        mv.invokeStatic(THIS_TYPE, Method.getMethod("void body ()"));
-        mv.loadArg(0);
-        mv.push(5);
-        mv.ifICmp(LT, l1);
+        mv.visitMethodInsn(INVOKESTATIC, THIS_TYPE.getInternalName(), "body", "()V", false);
+        mv.visitVarInsn(ILOAD, 0);
+        mv.visitInsn(ICONST_5);
+        mv.visitJumpInsn(IF_ICMPLT, l1);
         mv.visitLabel(end);
         mv.visitInsn(RETURN);
         mv.visitLocalVariable("i", "I", null, start, end, 0);

@@ -25,13 +25,11 @@
 package org.spongepowered.test.decompile;
 
 import static org.objectweb.asm.Opcodes.*;
-import static org.objectweb.asm.commons.GeneratorAdapter.*;
 
 import org.junit.Assert;
 import org.junit.Test;
 import org.objectweb.asm.Label;
-import org.objectweb.asm.Type;
-import org.objectweb.asm.commons.GeneratorAdapter;
+import org.objectweb.asm.MethodVisitor;
 import org.spongepowered.test.util.TestHelper;
 import org.spongepowered.test.util.TestMethodBuilder;
 
@@ -39,13 +37,13 @@ public class OperatorTests {
 
     @Test
     public void testIntConstant() {
-        TestMethodBuilder builder = new TestMethodBuilder("test_mth", "void test_mth (int)");
-        GeneratorAdapter mv = builder.getGenerator();
-        Label start = mv.newLabel();
+        TestMethodBuilder builder = new TestMethodBuilder("test_mth", "(I)V");
+        MethodVisitor mv = builder.getGenerator();
+        Label start = new Label();
         mv.visitLabel(start);
-        Label end = mv.newLabel();
-        mv.push(65);
-        mv.storeArg(0);
+        Label end = new Label();
+        mv.visitIntInsn(BIPUSH, 65);
+        mv.visitIntInsn(ISTORE, 0);
         mv.visitLabel(end);
         mv.visitInsn(RETURN);
         mv.visitLocalVariable("i", "I", null, start, end, 0);
@@ -57,14 +55,14 @@ public class OperatorTests {
 
     @Test
     public void testNegative() {
-        TestMethodBuilder builder = new TestMethodBuilder("test_mth", "void test_mth (int, int)");
-        GeneratorAdapter mv = builder.getGenerator();
-        Label start = mv.newLabel();
+        TestMethodBuilder builder = new TestMethodBuilder("test_mth", "(II)V");
+        MethodVisitor mv = builder.getGenerator();
+        Label start = new Label();
         mv.visitLabel(start);
-        Label end = mv.newLabel();
-        mv.loadArg(1);
-        mv.math(NEG, Type.INT_TYPE);
-        mv.storeArg(0);
+        Label end = new Label();
+        mv.visitIntInsn(ILOAD, 1);
+        mv.visitInsn(INEG);
+        mv.visitIntInsn(ISTORE, 0);
         mv.visitLabel(end);
         mv.visitInsn(RETURN);
         mv.visitLocalVariable("i", "I", null, start, end, 0);
@@ -77,15 +75,15 @@ public class OperatorTests {
 
     @Test
     public void testAdd() {
-        TestMethodBuilder builder = new TestMethodBuilder("test_mth", "void test_mth (int, int, int)");
-        GeneratorAdapter mv = builder.getGenerator();
-        Label start = mv.newLabel();
+        TestMethodBuilder builder = new TestMethodBuilder("test_mth", "(III)V");
+        MethodVisitor mv = builder.getGenerator();
+        Label start = new Label();
         mv.visitLabel(start);
-        Label end = mv.newLabel();
-        mv.loadArg(1);
-        mv.loadArg(2);
-        mv.math(ADD, Type.INT_TYPE);
-        mv.storeArg(0);
+        Label end = new Label();
+        mv.visitIntInsn(ILOAD, 1);
+        mv.visitIntInsn(ILOAD, 2);
+        mv.visitInsn(IADD);
+        mv.visitIntInsn(ISTORE, 0);
         mv.visitLabel(end);
         mv.visitInsn(RETURN);
         mv.visitLocalVariable("i", "I", null, start, end, 0);
@@ -99,15 +97,15 @@ public class OperatorTests {
 
     @Test
     public void testSub() {
-        TestMethodBuilder builder = new TestMethodBuilder("test_mth", "void test_mth (int, int, int)");
-        GeneratorAdapter mv = builder.getGenerator();
-        Label start = mv.newLabel();
+        TestMethodBuilder builder = new TestMethodBuilder("test_mth", "(III)V");
+        MethodVisitor mv = builder.getGenerator();
+        Label start = new Label();
         mv.visitLabel(start);
-        Label end = mv.newLabel();
-        mv.loadArg(1);
-        mv.loadArg(2);
-        mv.math(SUB, Type.INT_TYPE);
-        mv.storeArg(0);
+        Label end = new Label();
+        mv.visitIntInsn(ILOAD, 1);
+        mv.visitIntInsn(ILOAD, 2);
+        mv.visitInsn(ISUB);
+        mv.visitIntInsn(ISTORE, 0);
         mv.visitLabel(end);
         mv.visitInsn(RETURN);
         mv.visitLocalVariable("i", "I", null, start, end, 0);
@@ -121,15 +119,15 @@ public class OperatorTests {
 
     @Test
     public void testMultiply() {
-        TestMethodBuilder builder = new TestMethodBuilder("test_mth", "void test_mth (int, int, int)");
-        GeneratorAdapter mv = builder.getGenerator();
-        Label start = mv.newLabel();
+        TestMethodBuilder builder = new TestMethodBuilder("test_mth", "(III)V");
+        MethodVisitor mv = builder.getGenerator();
+        Label start = new Label();
         mv.visitLabel(start);
-        Label end = mv.newLabel();
-        mv.loadArg(1);
-        mv.loadArg(2);
-        mv.math(MUL, Type.INT_TYPE);
-        mv.storeArg(0);
+        Label end = new Label();
+        mv.visitIntInsn(ILOAD, 1);
+        mv.visitIntInsn(ILOAD, 2);
+        mv.visitInsn(IMUL);
+        mv.visitIntInsn(ISTORE, 0);
         mv.visitLabel(end);
         mv.visitInsn(RETURN);
         mv.visitLocalVariable("i", "I", null, start, end, 0);
@@ -143,15 +141,15 @@ public class OperatorTests {
 
     @Test
     public void testDiv() {
-        TestMethodBuilder builder = new TestMethodBuilder("test_mth", "void test_mth (int, int, int)");
-        GeneratorAdapter mv = builder.getGenerator();
-        Label start = mv.newLabel();
+        TestMethodBuilder builder = new TestMethodBuilder("test_mth", "(III)V");
+        MethodVisitor mv = builder.getGenerator();
+        Label start = new Label();
         mv.visitLabel(start);
-        Label end = mv.newLabel();
-        mv.loadArg(1);
-        mv.loadArg(2);
-        mv.math(DIV, Type.INT_TYPE);
-        mv.storeArg(0);
+        Label end = new Label();
+        mv.visitIntInsn(ILOAD, 1);
+        mv.visitIntInsn(ILOAD, 2);
+        mv.visitInsn(IDIV);
+        mv.visitIntInsn(ISTORE, 0);
         mv.visitLabel(end);
         mv.visitInsn(RETURN);
         mv.visitLocalVariable("i", "I", null, start, end, 0);
@@ -165,15 +163,15 @@ public class OperatorTests {
 
     @Test
     public void testRem() {
-        TestMethodBuilder builder = new TestMethodBuilder("test_mth", "void test_mth (int, int, int)");
-        GeneratorAdapter mv = builder.getGenerator();
-        Label start = mv.newLabel();
+        TestMethodBuilder builder = new TestMethodBuilder("test_mth", "(III)V");
+        MethodVisitor mv = builder.getGenerator();
+        Label start = new Label();
         mv.visitLabel(start);
-        Label end = mv.newLabel();
-        mv.loadArg(1);
-        mv.loadArg(2);
-        mv.math(REM, Type.INT_TYPE);
-        mv.storeArg(0);
+        Label end = new Label();
+        mv.visitIntInsn(ILOAD, 1);
+        mv.visitIntInsn(ILOAD, 2);
+        mv.visitInsn(IREM);
+        mv.visitIntInsn(ISTORE, 0);
         mv.visitLabel(end);
         mv.visitInsn(RETURN);
         mv.visitLocalVariable("i", "I", null, start, end, 0);
@@ -187,15 +185,15 @@ public class OperatorTests {
 
     @Test
     public void testShr() {
-        TestMethodBuilder builder = new TestMethodBuilder("test_mth", "void test_mth (int, int, int)");
-        GeneratorAdapter mv = builder.getGenerator();
-        Label start = mv.newLabel();
+        TestMethodBuilder builder = new TestMethodBuilder("test_mth", "(III)V");
+        MethodVisitor mv = builder.getGenerator();
+        Label start = new Label();
         mv.visitLabel(start);
-        Label end = mv.newLabel();
-        mv.loadArg(1);
-        mv.loadArg(2);
-        mv.math(SHR, Type.INT_TYPE);
-        mv.storeArg(0);
+        Label end = new Label();
+        mv.visitIntInsn(ILOAD, 1);
+        mv.visitIntInsn(ILOAD, 2);
+        mv.visitInsn(ISHR);
+        mv.visitIntInsn(ISTORE, 0);
         mv.visitLabel(end);
         mv.visitInsn(RETURN);
         mv.visitLocalVariable("i", "I", null, start, end, 0);
@@ -209,15 +207,15 @@ public class OperatorTests {
 
     @Test
     public void testUshr() {
-        TestMethodBuilder builder = new TestMethodBuilder("test_mth", "void test_mth (int, int, int)");
-        GeneratorAdapter mv = builder.getGenerator();
-        Label start = mv.newLabel();
+        TestMethodBuilder builder = new TestMethodBuilder("test_mth", "(III)V");
+        MethodVisitor mv = builder.getGenerator();
+        Label start = new Label();
         mv.visitLabel(start);
-        Label end = mv.newLabel();
-        mv.loadArg(1);
-        mv.loadArg(2);
-        mv.math(USHR, Type.INT_TYPE);
-        mv.storeArg(0);
+        Label end = new Label();
+        mv.visitIntInsn(ILOAD, 1);
+        mv.visitIntInsn(ILOAD, 2);
+        mv.visitInsn(IUSHR);
+        mv.visitIntInsn(ISTORE, 0);
         mv.visitLabel(end);
         mv.visitInsn(RETURN);
         mv.visitLocalVariable("i", "I", null, start, end, 0);
@@ -231,15 +229,15 @@ public class OperatorTests {
 
     @Test
     public void testShl() {
-        TestMethodBuilder builder = new TestMethodBuilder("test_mth", "void test_mth (int, int, int)");
-        GeneratorAdapter mv = builder.getGenerator();
-        Label start = mv.newLabel();
+        TestMethodBuilder builder = new TestMethodBuilder("test_mth", "(III)V");
+        MethodVisitor mv = builder.getGenerator();
+        Label start = new Label();
         mv.visitLabel(start);
-        Label end = mv.newLabel();
-        mv.loadArg(1);
-        mv.loadArg(2);
-        mv.math(SHL, Type.INT_TYPE);
-        mv.storeArg(0);
+        Label end = new Label();
+        mv.visitIntInsn(ILOAD, 1);
+        mv.visitIntInsn(ILOAD, 2);
+        mv.visitInsn(ISHL);
+        mv.visitIntInsn(ISTORE, 0);
         mv.visitLabel(end);
         mv.visitInsn(RETURN);
         mv.visitLocalVariable("i", "I", null, start, end, 0);
@@ -253,23 +251,23 @@ public class OperatorTests {
 
     @Test
     public void testFloatCompare() {
-        TestMethodBuilder builder = new TestMethodBuilder("test_mth", "void test_mth (boolean, float, float)");
-        GeneratorAdapter mv = builder.getGenerator();
-        Label start = mv.newLabel();
+        TestMethodBuilder builder = new TestMethodBuilder("test_mth", "(ZFF)V");
+        MethodVisitor mv = builder.getGenerator();
+        Label start = new Label();
         mv.visitLabel(start);
-        Label end = mv.newLabel();
-        Label l1 = mv.newLabel();
-        Label l2 = mv.newLabel();
-        mv.loadArg(1);
-        mv.loadArg(2);
+        Label end = new Label();
+        Label l1 = new Label();
+        Label l2 = new Label();
+        mv.visitIntInsn(FLOAD, 1);
+        mv.visitIntInsn(FLOAD, 2);
         mv.visitInsn(FCMPG);
-        mv.ifZCmp(GT, l1);
-        mv.push(true);
-        mv.goTo(l2);
+        mv.visitJumpInsn(IFGT, l1);
+        mv.visitInsn(ICONST_1);
+        mv.visitJumpInsn(GOTO, l2);
         mv.visitLabel(l1);
-        mv.push(false);
+        mv.visitInsn(ICONST_0);
         mv.visitLabel(l2);
-        mv.storeArg(0);
+        mv.visitIntInsn(ISTORE, 0);
         mv.visitLabel(end);
         mv.visitInsn(RETURN);
         mv.visitLocalVariable("i", "Z", null, start, end, 0);

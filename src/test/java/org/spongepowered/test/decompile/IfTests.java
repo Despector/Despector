@@ -25,14 +25,12 @@
 package org.spongepowered.test.decompile;
 
 import static org.objectweb.asm.Opcodes.*;
-import static org.objectweb.asm.commons.GeneratorAdapter.*;
 
 import org.junit.Assert;
 import org.junit.Test;
 import org.objectweb.asm.Label;
+import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Type;
-import org.objectweb.asm.commons.GeneratorAdapter;
-import org.objectweb.asm.commons.Method;
 import org.spongepowered.test.util.TestHelper;
 import org.spongepowered.test.util.TestMethodBuilder;
 
@@ -46,14 +44,14 @@ public class IfTests {
 
     @Test
     public void testSimple() {
-        TestMethodBuilder builder = new TestMethodBuilder("test_mth", "void test_mth (boolean)");
-        GeneratorAdapter mv = builder.getGenerator();
-        Label start = mv.newLabel();
+        TestMethodBuilder builder = new TestMethodBuilder("test_mth", "(Z)V");
+        MethodVisitor mv = builder.getGenerator();
+        Label start = new Label();
         mv.visitLabel(start);
-        Label end = mv.newLabel();
-        mv.loadArg(0);
-        mv.ifZCmp(EQ, end);
-        mv.invokeStatic(THIS_TYPE, Method.getMethod("void body ()"));
+        Label end = new Label();
+        mv.visitVarInsn(ILOAD, 0);
+        mv.visitJumpInsn(IFEQ, end);
+        mv.visitMethodInsn(INVOKESTATIC, THIS_TYPE.getInternalName(), "body", "()V", false);
         mv.visitLabel(end);
         mv.visitInsn(RETURN);
         mv.visitLocalVariable("a", "Z", null, start, end, 0);
@@ -67,19 +65,19 @@ public class IfTests {
 
     @Test
     public void testComparisonAndNull() {
-        TestMethodBuilder builder = new TestMethodBuilder("test_mth", "void test_mth (int, Object)");
-        GeneratorAdapter mv = builder.getGenerator();
-        Label start = mv.newLabel();
+        TestMethodBuilder builder = new TestMethodBuilder("test_mth", "(ILjava/lang/Object;)V");
+        MethodVisitor mv = builder.getGenerator();
+        Label start = new Label();
         mv.visitLabel(start);
-        Label ret = mv.newLabel();
-        Label body = mv.newLabel();
-        mv.loadArg(0);
-        mv.push(3);
-        mv.ifICmp(LT, body);
-        mv.loadArg(1);
-        mv.ifNull(ret);
+        Label ret = new Label();
+        Label body = new Label();
+        mv.visitVarInsn(ILOAD, 0);
+        mv.visitInsn(ICONST_3);
+        mv.visitJumpInsn(IF_ICMPLT, body);
+        mv.visitVarInsn(ILOAD, 1);
+        mv.visitJumpInsn(IFNULL, ret);
         mv.visitLabel(body);
-        mv.invokeStatic(THIS_TYPE, Method.getMethod("void body ()"));
+        mv.visitMethodInsn(INVOKESTATIC, THIS_TYPE.getInternalName(), "body", "()V", false);
         mv.visitLabel(ret);
         mv.visitInsn(RETURN);
         mv.visitLocalVariable("a", "I", null, start, ret, 0);
@@ -94,18 +92,18 @@ public class IfTests {
 
     @Test
     public void testOr() {
-        TestMethodBuilder builder = new TestMethodBuilder("test_mth", "void test_mth (boolean, boolean)");
-        GeneratorAdapter mv = builder.getGenerator();
-        Label start = mv.newLabel();
+        TestMethodBuilder builder = new TestMethodBuilder("test_mth", "(ZZ)V");
+        MethodVisitor mv = builder.getGenerator();
+        Label start = new Label();
         mv.visitLabel(start);
-        Label ret = mv.newLabel();
-        Label body = mv.newLabel();
-        mv.loadArg(0);
-        mv.ifZCmp(NE, body);
-        mv.loadArg(1);
-        mv.ifZCmp(EQ, ret);
+        Label ret = new Label();
+        Label body = new Label();
+        mv.visitVarInsn(ILOAD, 0);
+        mv.visitJumpInsn(IFNE, body);
+        mv.visitVarInsn(ILOAD, 1);
+        mv.visitJumpInsn(IFEQ, ret);
         mv.visitLabel(body);
-        mv.invokeStatic(THIS_TYPE, Method.getMethod("void body ()"));
+        mv.visitMethodInsn(INVOKESTATIC, THIS_TYPE.getInternalName(), "body", "()V", false);
         mv.visitLabel(ret);
         mv.visitInsn(RETURN);
         mv.visitLocalVariable("a", "Z", null, start, ret, 0);
@@ -120,18 +118,18 @@ public class IfTests {
 
     @Test
     public void testAnd() {
-        TestMethodBuilder builder = new TestMethodBuilder("test_mth", "void test_mth (boolean, boolean)");
-        GeneratorAdapter mv = builder.getGenerator();
-        Label start = mv.newLabel();
+        TestMethodBuilder builder = new TestMethodBuilder("test_mth", "(ZZ)V");
+        MethodVisitor mv = builder.getGenerator();
+        Label start = new Label();
         mv.visitLabel(start);
-        Label ret = mv.newLabel();
-        Label body = mv.newLabel();
-        mv.loadArg(0);
-        mv.ifZCmp(EQ, ret);
-        mv.loadArg(1);
-        mv.ifZCmp(EQ, ret);
+        Label ret = new Label();
+        Label body = new Label();
+        mv.visitVarInsn(ILOAD, 0);
+        mv.visitJumpInsn(IFEQ, ret);
+        mv.visitVarInsn(ILOAD, 1);
+        mv.visitJumpInsn(IFEQ, ret);
         mv.visitLabel(body);
-        mv.invokeStatic(THIS_TYPE, Method.getMethod("void body ()"));
+        mv.visitMethodInsn(INVOKESTATIC, THIS_TYPE.getInternalName(), "body", "()V", false);
         mv.visitLabel(ret);
         mv.visitInsn(RETURN);
         mv.visitLocalVariable("a", "Z", null, start, ret, 0);
@@ -146,20 +144,20 @@ public class IfTests {
 
     @Test
     public void testMultipleAnd() {
-        TestMethodBuilder builder = new TestMethodBuilder("test_mth", "void test_mth (boolean, boolean, boolean)");
-        GeneratorAdapter mv = builder.getGenerator();
-        Label start = mv.newLabel();
+        TestMethodBuilder builder = new TestMethodBuilder("test_mth", "(ZZZ)V");
+        MethodVisitor mv = builder.getGenerator();
+        Label start = new Label();
         mv.visitLabel(start);
-        Label ret = mv.newLabel();
-        Label body = mv.newLabel();
-        mv.loadArg(0);
-        mv.ifZCmp(EQ, ret);
-        mv.loadArg(1);
-        mv.ifZCmp(EQ, ret);
-        mv.loadArg(2);
-        mv.ifZCmp(EQ, ret);
+        Label ret = new Label();
+        Label body = new Label();
+        mv.visitVarInsn(ILOAD, 0);
+        mv.visitJumpInsn(IFEQ, ret);
+        mv.visitVarInsn(ILOAD, 1);
+        mv.visitJumpInsn(IFEQ, ret);
+        mv.visitVarInsn(ILOAD, 2);
+        mv.visitJumpInsn(IFEQ, ret);
         mv.visitLabel(body);
-        mv.invokeStatic(THIS_TYPE, Method.getMethod("void body ()"));
+        mv.visitMethodInsn(INVOKESTATIC, THIS_TYPE.getInternalName(), "body", "()V", false);
         mv.visitLabel(ret);
         mv.visitInsn(RETURN);
         mv.visitLocalVariable("a", "Z", null, start, ret, 0);
@@ -175,20 +173,20 @@ public class IfTests {
 
     @Test
     public void testMultipleOr() {
-        TestMethodBuilder builder = new TestMethodBuilder("test_mth", "void test_mth (boolean, boolean, boolean)");
-        GeneratorAdapter mv = builder.getGenerator();
-        Label start = mv.newLabel();
+        TestMethodBuilder builder = new TestMethodBuilder("test_mth", "(ZZZ)V");
+        MethodVisitor mv = builder.getGenerator();
+        Label start = new Label();
         mv.visitLabel(start);
-        Label ret = mv.newLabel();
-        Label body = mv.newLabel();
-        mv.loadArg(0);
-        mv.ifZCmp(NE, body);
-        mv.loadArg(1);
-        mv.ifZCmp(NE, body);
-        mv.loadArg(2);
-        mv.ifZCmp(EQ, ret);
+        Label ret = new Label();
+        Label body = new Label();
+        mv.visitVarInsn(ILOAD, 0);
+        mv.visitJumpInsn(IFNE, body);
+        mv.visitVarInsn(ILOAD, 1);
+        mv.visitJumpInsn(IFNE, body);
+        mv.visitVarInsn(ILOAD, 2);
+        mv.visitJumpInsn(IFEQ, ret);
         mv.visitLabel(body);
-        mv.invokeStatic(THIS_TYPE, Method.getMethod("void body ()"));
+        mv.visitMethodInsn(INVOKESTATIC, THIS_TYPE.getInternalName(), "body", "()V", false);
         mv.visitLabel(ret);
         mv.visitInsn(RETURN);
         mv.visitLocalVariable("a", "Z", null, start, ret, 0);
@@ -204,20 +202,20 @@ public class IfTests {
 
     @Test
     public void testOrAnd() {
-        TestMethodBuilder builder = new TestMethodBuilder("test_mth", "void test_mth (boolean, boolean, boolean)");
-        GeneratorAdapter mv = builder.getGenerator();
-        Label start = mv.newLabel();
+        TestMethodBuilder builder = new TestMethodBuilder("test_mth", "(ZZZ)V");
+        MethodVisitor mv = builder.getGenerator();
+        Label start = new Label();
         mv.visitLabel(start);
-        Label ret = mv.newLabel();
-        Label body = mv.newLabel();
-        mv.loadArg(0);
-        mv.ifZCmp(NE, body);
-        mv.loadArg(1);
-        mv.ifZCmp(EQ, ret);
-        mv.loadArg(2);
-        mv.ifZCmp(EQ, ret);
+        Label ret = new Label();
+        Label body = new Label();
+        mv.visitVarInsn(ILOAD, 0);
+        mv.visitJumpInsn(IFNE, body);
+        mv.visitVarInsn(ILOAD, 1);
+        mv.visitJumpInsn(IFEQ, ret);
+        mv.visitVarInsn(ILOAD, 2);
+        mv.visitJumpInsn(IFEQ, ret);
         mv.visitLabel(body);
-        mv.invokeStatic(THIS_TYPE, Method.getMethod("void body ()"));
+        mv.visitMethodInsn(INVOKESTATIC, THIS_TYPE.getInternalName(), "body", "()V", false);
         mv.visitLabel(ret);
         mv.visitInsn(RETURN);
         mv.visitLocalVariable("a", "Z", null, start, ret, 0);
@@ -233,22 +231,22 @@ public class IfTests {
 
     @Test
     public void testAndOr() {
-        TestMethodBuilder builder = new TestMethodBuilder("test_mth", "void test_mth (boolean, boolean, boolean)");
-        GeneratorAdapter mv = builder.getGenerator();
-        Label start = mv.newLabel();
+        TestMethodBuilder builder = new TestMethodBuilder("test_mth", "(ZZZ)V");
+        MethodVisitor mv = builder.getGenerator();
+        Label start = new Label();
         mv.visitLabel(start);
-        Label ret = mv.newLabel();
-        Label body = mv.newLabel();
-        Label l1 = mv.newLabel();
-        mv.loadArg(0);
-        mv.ifZCmp(EQ, l1);
-        mv.loadArg(1);
-        mv.ifZCmp(NE, body);
+        Label ret = new Label();
+        Label body = new Label();
+        Label l1 = new Label();
+        mv.visitVarInsn(ILOAD, 0);
+        mv.visitJumpInsn(IFEQ, l1);
+        mv.visitVarInsn(ILOAD, 1);
+        mv.visitJumpInsn(IFNE, body);
         mv.visitLabel(l1);
-        mv.loadArg(2);
-        mv.ifZCmp(EQ, ret);
+        mv.visitVarInsn(ILOAD, 2);
+        mv.visitJumpInsn(IFEQ, ret);
         mv.visitLabel(body);
-        mv.invokeStatic(THIS_TYPE, Method.getMethod("void body ()"));
+        mv.visitMethodInsn(INVOKESTATIC, THIS_TYPE.getInternalName(), "body", "()V", false);
         mv.visitLabel(ret);
         mv.visitInsn(RETURN);
         mv.visitLocalVariable("a", "Z", null, start, ret, 0);
@@ -264,24 +262,24 @@ public class IfTests {
 
     @Test
     public void testPOS() {
-        TestMethodBuilder builder = new TestMethodBuilder("test_mth", "void test_mth (boolean, boolean, boolean, boolean)");
-        GeneratorAdapter mv = builder.getGenerator();
-        Label start = mv.newLabel();
+        TestMethodBuilder builder = new TestMethodBuilder("test_mth", "(ZZZZ)V");
+        MethodVisitor mv = builder.getGenerator();
+        Label start = new Label();
         mv.visitLabel(start);
-        Label ret = mv.newLabel();
-        Label body = mv.newLabel();
-        Label l1 = mv.newLabel();
-        mv.loadArg(0);
-        mv.ifZCmp(NE, l1);
-        mv.loadArg(1);
-        mv.ifZCmp(EQ, ret);
+        Label ret = new Label();
+        Label body = new Label();
+        Label l1 = new Label();
+        mv.visitVarInsn(ILOAD, 0);
+        mv.visitJumpInsn(IFNE, l1);
+        mv.visitVarInsn(ILOAD, 1);
+        mv.visitJumpInsn(IFEQ, ret);
         mv.visitLabel(l1);
-        mv.loadArg(2);
-        mv.ifZCmp(NE, body);
-        mv.loadArg(3);
-        mv.ifZCmp(EQ, ret);
+        mv.visitVarInsn(ILOAD, 2);
+        mv.visitJumpInsn(IFNE, body);
+        mv.visitVarInsn(ILOAD, 3);
+        mv.visitJumpInsn(IFEQ, ret);
         mv.visitLabel(body);
-        mv.invokeStatic(THIS_TYPE, Method.getMethod("void body ()"));
+        mv.visitMethodInsn(INVOKESTATIC, THIS_TYPE.getInternalName(), "body", "()V", false);
         mv.visitLabel(ret);
         mv.visitInsn(RETURN);
         mv.visitLocalVariable("a", "Z", null, start, ret, 0);
@@ -298,24 +296,24 @@ public class IfTests {
 
     @Test
     public void testSOP() {
-        TestMethodBuilder builder = new TestMethodBuilder("test_mth", "void test_mth (boolean, boolean, boolean, boolean)");
-        GeneratorAdapter mv = builder.getGenerator();
-        Label start = mv.newLabel();
+        TestMethodBuilder builder = new TestMethodBuilder("test_mth", "(ZZZZ)V");
+        MethodVisitor mv = builder.getGenerator();
+        Label start = new Label();
         mv.visitLabel(start);
-        Label ret = mv.newLabel();
-        Label body = mv.newLabel();
-        Label l1 = mv.newLabel();
-        mv.loadArg(0);
-        mv.ifZCmp(EQ, l1);
-        mv.loadArg(1);
-        mv.ifZCmp(NE, body);
+        Label ret = new Label();
+        Label body = new Label();
+        Label l1 = new Label();
+        mv.visitVarInsn(ILOAD, 0);
+        mv.visitJumpInsn(IFEQ, l1);
+        mv.visitVarInsn(ILOAD, 1);
+        mv.visitJumpInsn(IFNE, body);
         mv.visitLabel(l1);
-        mv.loadArg(2);
-        mv.ifZCmp(EQ, ret);
-        mv.loadArg(3);
-        mv.ifZCmp(EQ, ret);
+        mv.visitVarInsn(ILOAD, 2);
+        mv.visitJumpInsn(IFEQ, ret);
+        mv.visitVarInsn(ILOAD, 3);
+        mv.visitJumpInsn(IFEQ, ret);
         mv.visitLabel(body);
-        mv.invokeStatic(THIS_TYPE, Method.getMethod("void body ()"));
+        mv.visitMethodInsn(INVOKESTATIC, THIS_TYPE.getInternalName(), "body", "()V", false);
         mv.visitLabel(ret);
         mv.visitInsn(RETURN);
         mv.visitLocalVariable("a", "Z", null, start, ret, 0);
@@ -332,28 +330,28 @@ public class IfTests {
 
     @Test
     public void testCommonFactor() {
-        TestMethodBuilder builder = new TestMethodBuilder("test_mth", "void test_mth (boolean, boolean, boolean, boolean, boolean)");
-        GeneratorAdapter mv = builder.getGenerator();
-        Label start = mv.newLabel();
+        TestMethodBuilder builder = new TestMethodBuilder("test_mth", "(ZZZZZ)V");
+        MethodVisitor mv = builder.getGenerator();
+        Label start = new Label();
         mv.visitLabel(start);
-        Label ret = mv.newLabel();
-        Label body = mv.newLabel();
-        Label l1 = mv.newLabel();
-        Label l2 = mv.newLabel();
-        mv.loadArg(0);
-        mv.ifZCmp(NE, l1);
-        mv.loadArg(1);
-        mv.ifZCmp(EQ, l2);
+        Label ret = new Label();
+        Label body = new Label();
+        Label l1 = new Label();
+        Label l2 = new Label();
+        mv.visitVarInsn(ILOAD, 0);
+        mv.visitJumpInsn(IFNE, l1);
+        mv.visitVarInsn(ILOAD, 1);
+        mv.visitJumpInsn(IFEQ, l2);
         mv.visitLabel(l1);
-        mv.loadArg(2);
-        mv.ifZCmp(NE, body);
+        mv.visitVarInsn(ILOAD, 2);
+        mv.visitJumpInsn(IFNE, body);
         mv.visitLabel(l2);
-        mv.loadArg(3);
-        mv.ifZCmp(EQ, ret);
-        mv.loadArg(4);
-        mv.ifZCmp(EQ, ret);
+        mv.visitVarInsn(ILOAD, 3);
+        mv.visitJumpInsn(IFEQ, ret);
+        mv.visitVarInsn(ILOAD, 4);
+        mv.visitJumpInsn(IFEQ, ret);
         mv.visitLabel(body);
-        mv.invokeStatic(THIS_TYPE, Method.getMethod("void body ()"));
+        mv.visitMethodInsn(INVOKESTATIC, THIS_TYPE.getInternalName(), "body", "()V", false);
         mv.visitLabel(ret);
         mv.visitInsn(RETURN);
         mv.visitLocalVariable("a", "Z", null, start, ret, 0);
@@ -371,18 +369,18 @@ public class IfTests {
 
     @Test
     public void testElse() {
-        TestMethodBuilder builder = new TestMethodBuilder("test_mth", "void test_mth (boolean)");
-        GeneratorAdapter mv = builder.getGenerator();
-        Label start = mv.newLabel();
+        TestMethodBuilder builder = new TestMethodBuilder("test_mth", "(Z)V");
+        MethodVisitor mv = builder.getGenerator();
+        Label start = new Label();
         mv.visitLabel(start);
-        Label else_ = mv.newLabel();
-        Label end = mv.newLabel();
-        mv.loadArg(0);
-        mv.ifZCmp(EQ, else_);
-        mv.invokeStatic(THIS_TYPE, Method.getMethod("void body ()"));
-        mv.goTo(end);
+        Label end = new Label();
+        Label else_ = new Label();
+        mv.visitVarInsn(ILOAD, 0);
+        mv.visitJumpInsn(IFEQ, else_);
+        mv.visitMethodInsn(INVOKESTATIC, THIS_TYPE.getInternalName(), "body", "()V", false);
+        mv.visitJumpInsn(GOTO, end);
         mv.visitLabel(else_);
-        mv.invokeStatic(THIS_TYPE, Method.getMethod("void body ()"));
+        mv.visitMethodInsn(INVOKESTATIC, THIS_TYPE.getInternalName(), "body", "()V", false);
         mv.visitLabel(end);
         mv.visitInsn(RETURN);
         mv.visitLocalVariable("a", "Z", null, start, end, 0);
@@ -398,27 +396,27 @@ public class IfTests {
 
     @Test
     public void testNestedIf() {
-        TestMethodBuilder builder = new TestMethodBuilder("test_mth", "void test_mth (boolean, boolean)");
-        GeneratorAdapter mv = builder.getGenerator();
-        Label start = mv.newLabel();
+        TestMethodBuilder builder = new TestMethodBuilder("test_mth", "(ZZ)V");
+        MethodVisitor mv = builder.getGenerator();
+        Label start = new Label();
         mv.visitLabel(start);
-        Label else_ = mv.newLabel();
-        Label inner_else = mv.newLabel();
-        Label inner_end = mv.newLabel();
-        Label end = mv.newLabel();
-        mv.loadArg(0);
-        mv.ifZCmp(EQ, else_);
-        mv.loadArg(1);
-        mv.ifZCmp(EQ, inner_else);
-        mv.invokeStatic(THIS_TYPE, Method.getMethod("void body ()"));
-        mv.goTo(inner_end);
+        Label end = new Label();
+        Label else_ = new Label();
+        Label inner_else = new Label();
+        Label inner_end = new Label();
+        mv.visitVarInsn(ILOAD, 0);
+        mv.visitJumpInsn(IFEQ, else_);
+        mv.visitVarInsn(ILOAD, 1);
+        mv.visitJumpInsn(IFEQ, inner_else);
+        mv.visitMethodInsn(INVOKESTATIC, THIS_TYPE.getInternalName(), "body", "()V", false);
+        mv.visitJumpInsn(GOTO, inner_end);
         mv.visitLabel(inner_else);
-        mv.invokeStatic(THIS_TYPE, Method.getMethod("void body ()"));
+        mv.visitMethodInsn(INVOKESTATIC, THIS_TYPE.getInternalName(), "body", "()V", false);
         mv.visitLabel(inner_end);
-        mv.invokeStatic(THIS_TYPE, Method.getMethod("void body ()"));
-        mv.goTo(end);
+        mv.visitMethodInsn(INVOKESTATIC, THIS_TYPE.getInternalName(), "body", "()V", false);
+        mv.visitJumpInsn(GOTO, end);
         mv.visitLabel(else_);
-        mv.invokeStatic(THIS_TYPE, Method.getMethod("void body ()"));
+        mv.visitMethodInsn(INVOKESTATIC, THIS_TYPE.getInternalName(), "body", "()V", false);
         mv.visitLabel(end);
         mv.visitInsn(RETURN);
         mv.visitLocalVariable("a", "Z", null, start, end, 0);
@@ -440,22 +438,22 @@ public class IfTests {
 
     @Test
     public void testNestedIf2() {
-        TestMethodBuilder builder = new TestMethodBuilder("test_mth", "void test_mth (boolean, boolean)");
-        GeneratorAdapter mv = builder.getGenerator();
-        Label start = mv.newLabel();
+        TestMethodBuilder builder = new TestMethodBuilder("test_mth", "(ZZ)V");
+        MethodVisitor mv = builder.getGenerator();
+        Label start = new Label();
         mv.visitLabel(start);
-        Label else_ = mv.newLabel();
-        Label inner_else = mv.newLabel();
-        Label end = mv.newLabel();
-        mv.loadArg(0);
-        mv.ifZCmp(EQ, else_);
-        mv.loadArg(1);
-        mv.ifZCmp(EQ, inner_else);
-        mv.invokeStatic(THIS_TYPE, Method.getMethod("void body ()"));
+        Label end = new Label();
+        Label else_ = new Label();
+        Label inner_else = new Label();
+        mv.visitVarInsn(ILOAD, 0);
+        mv.visitJumpInsn(IFEQ, else_);
+        mv.visitVarInsn(ILOAD, 1);
+        mv.visitJumpInsn(IFEQ, inner_else);
+        mv.visitMethodInsn(INVOKESTATIC, THIS_TYPE.getInternalName(), "body", "()V", false);
         mv.visitLabel(inner_else);
-        mv.goTo(end);
+        mv.visitJumpInsn(GOTO, end);
         mv.visitLabel(else_);
-        mv.invokeStatic(THIS_TYPE, Method.getMethod("void body ()"));
+        mv.visitMethodInsn(INVOKESTATIC, THIS_TYPE.getInternalName(), "body", "()V", false);
         mv.visitLabel(end);
         mv.visitInsn(RETURN);
         mv.visitLocalVariable("a", "Z", null, start, end, 0);
@@ -474,20 +472,20 @@ public class IfTests {
 
     @Test
     public void testNestedIf2Optimized() {
-        TestMethodBuilder builder = new TestMethodBuilder("test_mth", "void test_mth (boolean, boolean)");
-        GeneratorAdapter mv = builder.getGenerator();
-        Label start = mv.newLabel();
+        TestMethodBuilder builder = new TestMethodBuilder("test_mth", "(ZZ)V");
+        MethodVisitor mv = builder.getGenerator();
+        Label start = new Label();
         mv.visitLabel(start);
-        Label else_ = mv.newLabel();
-        Label end = mv.newLabel();
-        mv.loadArg(0);
-        mv.ifZCmp(EQ, else_);
-        mv.loadArg(1);
-        mv.ifZCmp(EQ, end);
-        mv.invokeStatic(THIS_TYPE, Method.getMethod("void body ()"));
-        mv.goTo(end);
+        Label end = new Label();
+        Label else_ = new Label();
+        mv.visitVarInsn(ILOAD, 0);
+        mv.visitJumpInsn(IFEQ, else_);
+        mv.visitVarInsn(ILOAD, 1);
+        mv.visitJumpInsn(IFEQ, end);
+        mv.visitMethodInsn(INVOKESTATIC, THIS_TYPE.getInternalName(), "body", "()V", false);
+        mv.visitJumpInsn(GOTO, end);
         mv.visitLabel(else_);
-        mv.invokeStatic(THIS_TYPE, Method.getMethod("void body ()"));
+        mv.visitMethodInsn(INVOKESTATIC, THIS_TYPE.getInternalName(), "body", "()V", false);
         mv.visitLabel(end);
         mv.visitInsn(RETURN);
         mv.visitLocalVariable("a", "Z", null, start, end, 0);
@@ -506,27 +504,27 @@ public class IfTests {
 
     @Test
     public void testNestedIf3() {
-        TestMethodBuilder builder = new TestMethodBuilder("test_mth", "void test_mth (boolean, boolean, boolean)");
-        GeneratorAdapter mv = builder.getGenerator();
-        Label start = mv.newLabel();
+        TestMethodBuilder builder = new TestMethodBuilder("test_mth", "(ZZZ)V");
+        MethodVisitor mv = builder.getGenerator();
+        Label start = new Label();
         mv.visitLabel(start);
-        Label l1 = mv.newLabel();
-        Label l2 = mv.newLabel();
-        Label l3 = mv.newLabel();
-        Label end = mv.newLabel();
-        mv.loadArg(0);
-        mv.ifZCmp(EQ, end);
-        mv.loadArg(1);
-        mv.ifZCmp(EQ, l1);
-        mv.loadArg(2);
-        mv.ifZCmp(EQ, l2);
-        mv.invokeStatic(THIS_TYPE, Method.getMethod("void body ()"));
-        mv.goTo(l3);
+        Label end = new Label();
+        Label l1 = new Label();
+        Label l2 = new Label();
+        Label l3 = new Label();
+        mv.visitVarInsn(ILOAD, 0);
+        mv.visitJumpInsn(IFEQ, end);
+        mv.visitVarInsn(ILOAD, 1);
+        mv.visitJumpInsn(IFEQ, l1);
+        mv.visitVarInsn(ILOAD, 2);
+        mv.visitJumpInsn(IFEQ, l2);
+        mv.visitMethodInsn(INVOKESTATIC, THIS_TYPE.getInternalName(), "body", "()V", false);
+        mv.visitJumpInsn(GOTO, l3);
         mv.visitLabel(l2);
-        mv.invokeStatic(THIS_TYPE, Method.getMethod("void body ()"));
+        mv.visitMethodInsn(INVOKESTATIC, THIS_TYPE.getInternalName(), "body", "()V", false);
         mv.visitLabel(l3);
         mv.visitLabel(l1);
-        mv.invokeStatic(THIS_TYPE, Method.getMethod("void body ()"));
+        mv.visitMethodInsn(INVOKESTATIC, THIS_TYPE.getInternalName(), "body", "()V", false);
         mv.visitLabel(end);
         mv.visitInsn(RETURN);
         mv.visitLocalVariable("a", "Z", null, start, end, 0);
@@ -549,25 +547,25 @@ public class IfTests {
 
     @Test
     public void testNestedIf3Optimized() {
-        TestMethodBuilder builder = new TestMethodBuilder("test_mth", "void test_mth (boolean, boolean, boolean)");
-        GeneratorAdapter mv = builder.getGenerator();
-        Label start = mv.newLabel();
+        TestMethodBuilder builder = new TestMethodBuilder("test_mth", "(ZZZ)V");
+        MethodVisitor mv = builder.getGenerator();
+        Label start = new Label();
         mv.visitLabel(start);
-        Label l1 = mv.newLabel();
-        Label l2 = mv.newLabel();
-        Label end = mv.newLabel();
-        mv.loadArg(0);
-        mv.ifZCmp(EQ, end);
-        mv.loadArg(1);
-        mv.ifZCmp(EQ, l1);
-        mv.loadArg(2);
-        mv.ifZCmp(EQ, l2);
-        mv.invokeStatic(THIS_TYPE, Method.getMethod("void body ()"));
-        mv.goTo(l1);
+        Label end = new Label();
+        Label l1 = new Label();
+        Label l2 = new Label();
+        mv.visitVarInsn(ILOAD, 0);
+        mv.visitJumpInsn(IFEQ, end);
+        mv.visitVarInsn(ILOAD, 1);
+        mv.visitJumpInsn(IFEQ, l1);
+        mv.visitVarInsn(ILOAD, 2);
+        mv.visitJumpInsn(IFEQ, l2);
+        mv.visitMethodInsn(INVOKESTATIC, THIS_TYPE.getInternalName(), "body", "()V", false);
+        mv.visitJumpInsn(GOTO, l1);
         mv.visitLabel(l2);
-        mv.invokeStatic(THIS_TYPE, Method.getMethod("void body ()"));
+        mv.visitMethodInsn(INVOKESTATIC, THIS_TYPE.getInternalName(), "body", "()V", false);
         mv.visitLabel(l1);
-        mv.invokeStatic(THIS_TYPE, Method.getMethod("void body ()"));
+        mv.visitMethodInsn(INVOKESTATIC, THIS_TYPE.getInternalName(), "body", "()V", false);
         mv.visitLabel(end);
         mv.visitInsn(RETURN);
         mv.visitLocalVariable("a", "Z", null, start, end, 0);
@@ -590,24 +588,24 @@ public class IfTests {
 
     @Test
     public void testElif() {
-        TestMethodBuilder builder = new TestMethodBuilder("test_mth", "void test_mth (boolean, boolean)");
-        GeneratorAdapter mv = builder.getGenerator();
-        Label start = mv.newLabel();
+        TestMethodBuilder builder = new TestMethodBuilder("test_mth", "(ZZ)V");
+        MethodVisitor mv = builder.getGenerator();
+        Label start = new Label();
         mv.visitLabel(start);
-        Label else_ = mv.newLabel();
-        Label else2 = mv.newLabel();
-        Label end = mv.newLabel();
-        mv.loadArg(0);
-        mv.ifZCmp(EQ, else_);
-        mv.invokeStatic(THIS_TYPE, Method.getMethod("void body ()"));
-        mv.goTo(end);
+        Label end = new Label();
+        Label else_ = new Label();
+        Label else2 = new Label();
+        mv.visitVarInsn(ILOAD, 0);
+        mv.visitJumpInsn(IFEQ, else_);
+        mv.visitMethodInsn(INVOKESTATIC, THIS_TYPE.getInternalName(), "body", "()V", false);
+        mv.visitJumpInsn(GOTO, end);
         mv.visitLabel(else_);
-        mv.loadArg(1);
-        mv.ifZCmp(EQ, else2);
-        mv.invokeStatic(THIS_TYPE, Method.getMethod("void body ()"));
-        mv.goTo(end);
+        mv.visitVarInsn(ILOAD, 1);
+        mv.visitJumpInsn(IFEQ, else2);
+        mv.visitMethodInsn(INVOKESTATIC, THIS_TYPE.getInternalName(), "body", "()V", false);
+        mv.visitJumpInsn(GOTO, end);
         mv.visitLabel(else2);
-        mv.invokeStatic(THIS_TYPE, Method.getMethod("void body ()"));
+        mv.visitMethodInsn(INVOKESTATIC, THIS_TYPE.getInternalName(), "body", "()V", false);
         mv.visitLabel(end);
         mv.visitInsn(RETURN);
         mv.visitLocalVariable("a", "Z", null, start, end, 0);
@@ -626,19 +624,19 @@ public class IfTests {
 
     @Test
     public void testNestedInstanceOf() {
-        TestMethodBuilder builder = new TestMethodBuilder("test_mth", "void test_mth (boolean, Object)");
-        GeneratorAdapter mv = builder.getGenerator();
-        Label start = mv.newLabel();
+        TestMethodBuilder builder = new TestMethodBuilder("test_mth", "(ZLjava/lang/Object;)V");
+        MethodVisitor mv = builder.getGenerator();
+        Label start = new Label();
         mv.visitLabel(start);
-        Label l1 = mv.newLabel();
-        Label end = mv.newLabel();
-        mv.loadArg(0);
-        mv.ifZCmp(EQ, end);
-        mv.invokeStatic(THIS_TYPE, Method.getMethod("void body ()"));
-        mv.loadArg(1);
-        mv.instanceOf(THIS_TYPE);
-        mv.ifZCmp(EQ, l1);
-        mv.invokeStatic(THIS_TYPE, Method.getMethod("void body ()"));
+        Label end = new Label();
+        Label l1 = new Label();
+        mv.visitVarInsn(ILOAD, 0);
+        mv.visitJumpInsn(IFEQ, end);
+        mv.visitMethodInsn(INVOKESTATIC, THIS_TYPE.getInternalName(), "body", "()V", false);
+        mv.visitVarInsn(ILOAD, 1);
+        mv.visitTypeInsn(INSTANCEOF, THIS_TYPE.getInternalName());
+        mv.visitJumpInsn(IFEQ, l1);
+        mv.visitMethodInsn(INVOKESTATIC, THIS_TYPE.getInternalName(), "body", "()V", false);
         mv.visitLabel(l1);
         mv.visitLabel(end);
         mv.visitInsn(RETURN);
@@ -657,18 +655,18 @@ public class IfTests {
 
     @Test
     public void testNestedInstanceOfOptimized() {
-        TestMethodBuilder builder = new TestMethodBuilder("test_mth", "void test_mth (boolean, Object)");
-        GeneratorAdapter mv = builder.getGenerator();
-        Label start = mv.newLabel();
+        TestMethodBuilder builder = new TestMethodBuilder("test_mth", "(ZLjava/lang/Object;)V");
+        MethodVisitor mv = builder.getGenerator();
+        Label start = new Label();
         mv.visitLabel(start);
-        Label end = mv.newLabel();
-        mv.loadArg(0);
-        mv.ifZCmp(EQ, end);
-        mv.invokeStatic(THIS_TYPE, Method.getMethod("void body ()"));
-        mv.loadArg(1);
-        mv.instanceOf(THIS_TYPE);
-        mv.ifZCmp(EQ, end);
-        mv.invokeStatic(THIS_TYPE, Method.getMethod("void body ()"));
+        Label end = new Label();
+        mv.visitVarInsn(ILOAD, 0);
+        mv.visitJumpInsn(IFEQ, end);
+        mv.visitMethodInsn(INVOKESTATIC, THIS_TYPE.getInternalName(), "body", "()V", false);
+        mv.visitVarInsn(ILOAD, 1);
+        mv.visitTypeInsn(INSTANCEOF, THIS_TYPE.getInternalName());
+        mv.visitJumpInsn(IFEQ, end);
+        mv.visitMethodInsn(INVOKESTATIC, THIS_TYPE.getInternalName(), "body", "()V", false);
         mv.visitLabel(end);
         mv.visitInsn(RETURN);
         mv.visitLocalVariable("a", "Z", null, start, end, 0);
@@ -686,23 +684,23 @@ public class IfTests {
 
     @Test
     public void testIfReturns() {
-        TestMethodBuilder builder = new TestMethodBuilder("test_mth", "void test_mth (boolean, boolean)");
-        GeneratorAdapter mv = builder.getGenerator();
-        Label start = mv.newLabel();
+        TestMethodBuilder builder = new TestMethodBuilder("test_mth", "(ZZ)V");
+        MethodVisitor mv = builder.getGenerator();
+        Label start = new Label();
         mv.visitLabel(start);
-        Label l1 = mv.newLabel();
-        Label end = mv.newLabel();
-        mv.loadArg(0);
-        mv.ifZCmp(EQ, l1);
-        mv.invokeStatic(THIS_TYPE, Method.getMethod("void body ()"));
+        Label end = new Label();
+        Label l1 = new Label();
+        mv.visitVarInsn(ILOAD, 0);
+        mv.visitJumpInsn(IFEQ, l1);
+        mv.visitMethodInsn(INVOKESTATIC, THIS_TYPE.getInternalName(), "body", "()V", false);
         mv.visitInsn(RETURN);
         mv.visitLabel(l1);
-        mv.loadArg(1);
-        mv.ifZCmp(EQ, end);
-        mv.invokeStatic(THIS_TYPE, Method.getMethod("void body ()"));
+        mv.visitVarInsn(ILOAD, 1);
+        mv.visitJumpInsn(IFEQ, end);
+        mv.visitMethodInsn(INVOKESTATIC, THIS_TYPE.getInternalName(), "body", "()V", false);
         mv.visitInsn(RETURN);
         mv.visitLabel(end);
-        mv.invokeStatic(THIS_TYPE, Method.getMethod("void body ()"));
+        mv.visitMethodInsn(INVOKESTATIC, THIS_TYPE.getInternalName(), "body", "()V", false);
         mv.visitInsn(RETURN);
         mv.visitLocalVariable("a", "Z", null, start, end, 0);
         mv.visitLocalVariable("b", "Z", null, start, end, 1);
@@ -722,21 +720,21 @@ public class IfTests {
 
     @Test
     public void testIfElseReturns() {
-        TestMethodBuilder builder = new TestMethodBuilder("test_mth", "void test_mth (boolean, boolean)");
-        GeneratorAdapter mv = builder.getGenerator();
-        Label start = mv.newLabel();
+        TestMethodBuilder builder = new TestMethodBuilder("test_mth", "(ZZ)V");
+        MethodVisitor mv = builder.getGenerator();
+        Label start = new Label();
         mv.visitLabel(start);
-        Label l1 = mv.newLabel();
-        Label l2 = mv.newLabel();
-        Label end = mv.newLabel();
-        mv.loadArg(0);
-        mv.ifZCmp(EQ, l1);
-        mv.invokeStatic(THIS_TYPE, Method.getMethod("void body ()"));
-        mv.loadArg(1);
-        mv.ifZCmp(EQ, l2);
+        Label end = new Label();
+        Label l1 = new Label();
+        Label l2 = new Label();
+        mv.visitVarInsn(ILOAD, 0);
+        mv.visitJumpInsn(IFEQ, l1);
+        mv.visitMethodInsn(INVOKESTATIC, THIS_TYPE.getInternalName(), "body", "()V", false);
+        mv.visitVarInsn(ILOAD, 1);
+        mv.visitJumpInsn(IFEQ, l2);
         mv.visitInsn(RETURN);
         mv.visitLabel(l1);
-        mv.invokeStatic(THIS_TYPE, Method.getMethod("void body ()"));
+        mv.visitMethodInsn(INVOKESTATIC, THIS_TYPE.getInternalName(), "body", "()V", false);
         mv.visitLabel(l2);
         mv.visitInsn(RETURN);
         mv.visitLocalVariable("a", "Z", null, start, end, 0);

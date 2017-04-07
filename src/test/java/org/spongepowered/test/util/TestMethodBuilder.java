@@ -24,44 +24,60 @@
  */
 package org.spongepowered.test.util;
 
-import static org.objectweb.asm.Opcodes.ACC_PUBLIC;
-import static org.objectweb.asm.Opcodes.ACC_STATIC;
-import static org.objectweb.asm.Opcodes.ACC_SUPER;
-import static org.objectweb.asm.Opcodes.V1_8;
+import static org.objectweb.asm.Opcodes.*;
 
 import org.objectweb.asm.ClassWriter;
+import org.objectweb.asm.Label;
+import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Type;
-import org.objectweb.asm.commons.GeneratorAdapter;
-import org.objectweb.asm.commons.Method;
 
 public class TestMethodBuilder {
 
+    private Type type;
     private ClassWriter cw;
-    private GeneratorAdapter generator;
+    private MethodVisitor generator;
 
     public TestMethodBuilder(String name, String sig) {
         this.cw = new ClassWriter(ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES);
         this.cw.visit(V1_8, ACC_PUBLIC | ACC_SUPER, name + "_Class", null, "java/lang/Object", null);
+        String desc = "L" + name + "_Class;";
+        this.type = Type.getType(desc);
 
-        Method m = Method.getMethod("void <init> ()");
-        GeneratorAdapter mg = new GeneratorAdapter(ACC_PUBLIC, m, null, null, this.cw);
-        mg.loadThis();
-        mg.invokeConstructor(Type.getType(Object.class), m);
-        mg.returnValue();
-        mg.endMethod();
+        {
+            MethodVisitor mv = this.cw.visitMethod(ACC_PUBLIC, "<init>", "()V", null, null);
+            mv.visitCode();
+            Label l0 = new Label();
+            mv.visitLabel(l0);
+            mv.visitVarInsn(ALOAD, 0);
+            mv.visitMethodInsn(INVOKESPECIAL, "java/lang/Object", "<init>", "()V", false);
+            mv.visitInsn(RETURN);
+            Label l1 = new Label();
+            mv.visitLabel(l1);
+            mv.visitLocalVariable("this", desc, null, l0, l1, 0);
+            mv.visitMaxs(0, 0);
+            mv.visitEnd();
+        }
 
-        m = Method.getMethod(sig);
-        mg = new GeneratorAdapter(ACC_PUBLIC + ACC_STATIC, m, null, null, this.cw);
-        this.generator = mg;
+        {
+            MethodVisitor mv = this.cw.visitMethod(ACC_PUBLIC | ACC_STATIC, name, sig, null, null);
+            mv.visitCode();
+
+            this.generator = mv;
+        }
 
     }
 
-    public GeneratorAdapter getGenerator() {
+    public Type getType() {
+        return this.type;
+    }
+
+    public MethodVisitor getGenerator() {
         return this.generator;
     }
 
     public byte[] finish() {
-        this.generator.endMethod();
+        this.generator.visitMaxs(0, 0);
+        this.generator.visitEnd();
         this.cw.visitEnd();
         return this.cw.toByteArray();
     }
