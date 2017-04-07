@@ -118,7 +118,7 @@ public class Decompilers {
         KOTLIN_METHOD.addRegionProcessor(new IfBlockRegionProcessor());
         KOTLIN_METHOD.addPostProcessor(new IfCombiningPostProcessor());
         KOTLIN_METHOD.addPostProcessor(new ForEachPostProcessor());
-        KOTLIN_METHOD.setSpecialProcessor(LocalsProcessor.class, new KotlinLocalsProcessor());
+//        KOTLIN_METHOD.setSpecialProcessor(LocalsProcessor.class, new KotlinLocalsProcessor());
 
         DECOMPILERS.put(Language.JAVA, JAVA);
         DECOMPILERS.put(Language.KOTLIN, KOTLIN);

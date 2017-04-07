@@ -26,6 +26,7 @@ package org.spongepowered.despector.emitter.instruction;
 
 import org.spongepowered.despector.ast.generic.ClassTypeSignature;
 import org.spongepowered.despector.ast.generic.TypeSignature;
+import org.spongepowered.despector.ast.generic.VoidTypeSignature;
 import org.spongepowered.despector.ast.members.MethodEntry;
 import org.spongepowered.despector.ast.members.insn.arg.Instruction;
 import org.spongepowered.despector.ast.members.insn.arg.NewArray;
@@ -89,7 +90,7 @@ public class StaticMethodInvokeEmitter implements InstructionEmitter<StaticMetho
         TypeEntry owner_type = ctx.getType().getSource().get(owner);
         if (owner_type != null) {
             MethodEntry accessor = owner_type.getStaticMethod(arg.getMethodName());
-            if (accessor.getReturnType().equals("V")) {
+            if (accessor.getReturnType().equals(VoidTypeSignature.VOID)) {
                 // setter
                 FieldAssignment assign = (FieldAssignment) accessor.getInstructions().getStatements().get(0);
                 FieldAssignment replacement = null;

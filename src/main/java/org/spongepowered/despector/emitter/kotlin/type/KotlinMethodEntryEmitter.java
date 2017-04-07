@@ -29,6 +29,7 @@ import org.spongepowered.despector.ast.Annotation;
 import org.spongepowered.despector.ast.Locals.Local;
 import org.spongepowered.despector.ast.Locals.LocalInstance;
 import org.spongepowered.despector.ast.generic.MethodSignature;
+import org.spongepowered.despector.ast.generic.VoidTypeSignature;
 import org.spongepowered.despector.ast.members.MethodEntry;
 import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
 import org.spongepowered.despector.ast.members.insn.Statement;
@@ -177,7 +178,7 @@ public class KotlinMethodEntryEmitter extends MethodEntryEmitter {
             }
         }
 
-        if (!method.getReturnType().equals("V")) {
+        if (!method.getReturnType().equals(VoidTypeSignature.VOID)) {
             ctx.printString(": ");
             if (sig != null) {
                 if (!sig.getTypeParameters().isEmpty()) {
