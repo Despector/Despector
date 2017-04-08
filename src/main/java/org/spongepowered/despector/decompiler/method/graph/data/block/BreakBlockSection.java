@@ -61,36 +61,59 @@ public class BreakBlockSection extends BlockSection {
     }
 
     /**
-     * Gets the {@link OpcodeBlock} that is represented by this block section.
+     * Gets the {@link OpcodeBlock} that broken by this break.
      */
     public BlockSection getLoop() {
         return this.loop;
     }
 
+    /**
+     * Sets the {@link OpcodeBlock} that broken by this break.
+     */
     public void setLoop(BlockSection section) {
         this.loop = section;
     }
 
+    /**
+     * Gets the marker opcode block this section was formed from.
+     */
     public BreakMarkerOpcodeBlock getMarker() {
         return this.marker;
     }
 
+    /**
+     * Gets the break marker type.
+     */
     public MarkerType getType() {
         return this.type;
     }
 
+    /**
+     * Gets if this break is nested within an inner loop and will require a
+     * label to break the outer loop.
+     */
     public boolean isNested() {
         return this.nested;
     }
 
+    /**
+     * Sets if this break is nested within an inner loop and will require a
+     * label to break the outer loop.
+     */
     public void setNested(boolean state) {
         this.nested = state;
     }
 
+    /**
+     * Gets the breakable loop that this break is breaking.
+     */
     public Breakable getBreakable() {
         return this.br;
     }
 
+    /**
+     * Sets the breakable loop that this break is breaking.
+     */
     public void setBreakable(Breakable br) {
         this.br = br;
         if (this.final_break != null) {
@@ -98,6 +121,13 @@ public class BreakBlockSection extends BlockSection {
         }
     }
 
+    /**
+     * Gets any inlined conditional blocks for this control flow break.
+     * 
+     * <p>Sometimes a control flow break is formed from a set of conditions
+     * rather than a goto if the goto would be the only thing in the body of an
+     * if statement.</p>
+     */
     public List<ConditionalOpcodeBlock> getInlinedConditions() {
         return this.inlined;
     }

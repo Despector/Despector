@@ -32,6 +32,9 @@ import org.spongepowered.despector.ast.members.insn.branch.ForEach;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * A match context used to share context between matchers.
+ */
 public class MatchContext {
 
     public static <T extends Statement> StatementMatcher<T> storeLocal(String identifier, StatementMatcher<T> inner) {
@@ -48,13 +51,19 @@ public class MatchContext {
 
     }
 
-    public void storeLocal(String ident, LocalInstance local) {
+    /**
+     * Stores the given local as the given identifier.
+     */
+    public void setLocal(String ident, LocalInstance local) {
         if (this.locals == null) {
             this.locals = new HashMap<>();
         }
         this.locals.put(ident, local);
     }
 
+    /**
+     * Gets the local defined by the given identifier.
+     */
     public LocalInstance getLocal(String ident) {
         if (this.locals == null) {
             return null;
@@ -62,6 +71,13 @@ public class MatchContext {
         return this.locals.get(ident);
     }
 
+    /**
+     * A matcher which stores the local within the matched statement if a match
+     * is successful.
+     * 
+     * <p>Only the local assigned to in a {@link LocalAssignment} or the loop
+     * local of a {@link ForEach} loop is supported.</p>
+     */
     private static class LocalStoreMatcher<T extends Statement> implements StatementMatcher<T> {
 
         private String identifier;
@@ -79,10 +95,10 @@ public class MatchContext {
                 return null;
             }
             if (inner instanceof LocalAssignment) {
-                ctx.storeLocal(this.identifier, ((LocalAssignment) inner).getLocal());
+                ctx.setLocal(this.identifier, ((LocalAssignment) inner).getLocal());
             }
             if (inner instanceof ForEach) {
-                ctx.storeLocal(this.identifier, ((ForEach) inner).getValueAssignment());
+                ctx.setLocal(this.identifier, ((ForEach) inner).getValueAssignment());
             }
             return inner;
         }

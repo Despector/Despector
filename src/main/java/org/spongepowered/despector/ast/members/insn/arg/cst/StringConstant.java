@@ -93,4 +93,9 @@ public class StringConstant extends Constant {
         return this.cst.equals(insn.cst);
     }
 
+    @Override
+    public int hashCode() {
+        return this.cst.hashCode();
+    }
+
 }

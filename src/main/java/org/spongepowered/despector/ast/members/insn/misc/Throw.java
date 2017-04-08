@@ -90,4 +90,9 @@ public class Throw implements Statement {
         return this.ex.equals(insn.ex);
     }
 
+    @Override
+    public int hashCode() {
+        return this.ex.hashCode();
+    }
+
 }

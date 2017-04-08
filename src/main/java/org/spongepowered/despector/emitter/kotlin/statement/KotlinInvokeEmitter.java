@@ -31,6 +31,9 @@ import org.spongepowered.despector.ast.members.insn.function.StaticMethodInvoke;
 import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.StatementEmitter;
 
+/**
+ * An emitter kotlin invoke statements.
+ */
 public class KotlinInvokeEmitter implements StatementEmitter<InvokeStatement> {
 
     @Override
@@ -41,9 +44,9 @@ public class KotlinInvokeEmitter implements StatementEmitter<InvokeStatement> {
             if (mth.getMethodName().equals("<init>") && mth.getParams().length == 0) {
                 return;
             }
-        } else if(i instanceof StaticMethodInvoke) {
+        } else if (i instanceof StaticMethodInvoke) {
             StaticMethodInvoke mth = (StaticMethodInvoke) i;
-            if("Lkotlin/jvm/internal/Intrinsics;".equals(mth.getOwner())) {
+            if ("Lkotlin/jvm/internal/Intrinsics;".equals(mth.getOwner())) {
                 return;
             }
         }

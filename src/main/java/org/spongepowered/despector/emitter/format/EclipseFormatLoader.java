@@ -44,7 +44,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 /**
  * A loader for loading an eclipse formatter configuration.
  */
-public class EclipseFormatLoader implements FormatLoader {
+public final class EclipseFormatLoader implements FormatLoader {
 
     public static final EclipseFormatLoader instance = new EclipseFormatLoader();
     private static final Map<String, BiConsumer<EmitterFormat, String>> settings_handlers = Maps.newHashMap();
@@ -371,10 +371,10 @@ public class EclipseFormatLoader implements FormatLoader {
             }
         }
 
-        DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+        DocumentBuilderFactory db_factory = DocumentBuilderFactory.newInstance();
         try {
-            DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-            Document doc = dBuilder.parse(formatter.toFile());
+            DocumentBuilder doc_builder = db_factory.newDocumentBuilder();
+            Document doc = doc_builder.parse(formatter.toFile());
             doc.getDocumentElement().normalize();
             Element profiles = (Element) doc.getElementsByTagName("profiles").item(0);
             Element profile = (Element) profiles.getElementsByTagName("profile").item(0);

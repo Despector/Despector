@@ -36,6 +36,9 @@ import java.util.ArrayList;
 import java.util.Deque;
 import java.util.List;
 
+/**
+ * A block section containing a processed ternary.
+ */
 public class TernaryBlockSection extends BlockSection {
 
     private final List<BlockSection> true_body = new ArrayList<>();

@@ -64,8 +64,11 @@ import java.util.List;
 /**
  * A utility for forming a condition a set of conditional jumps.
  */
-public class ConditionBuilder {
+public final class ConditionBuilder {
 
+    /**
+     * Creates a simple condition from the given {@link ConditionalOpcodeBlock}.
+     */
     public static Condition makeSimpleCondition(ConditionalOpcodeBlock block, Locals locals) {
 
         // This forms the condition representing the conditional jump of the
@@ -79,61 +82,61 @@ public class ConditionBuilder {
         StatementBuilder.appendBlock(block, dummy, locals, dummy_stack);
 
         switch (block.getLast().getOpcode()) {
-            case IFEQ: {
-                if (dummy_stack.size() != 1) {
-                    throw new IllegalStateException();
-                }
-                Instruction val = dummy_stack.pop();
-                return new BooleanCondition(val, true);
+        case IFEQ: {
+            if (dummy_stack.size() != 1) {
+                throw new IllegalStateException();
             }
-            case IFNE: {
-                if (dummy_stack.size() != 1) {
-                    throw new IllegalStateException();
-                }
-                Instruction val = dummy_stack.pop();
-                return new BooleanCondition(val, false);
+            Instruction val = dummy_stack.pop();
+            return new BooleanCondition(val, true);
+        }
+        case IFNE: {
+            if (dummy_stack.size() != 1) {
+                throw new IllegalStateException();
             }
-            case IFLT:
-            case IFLE:
-            case IFGT:
-            case IFGE: {
-                if (dummy_stack.size() != 1) {
-                    throw new IllegalStateException();
-                }
-                Instruction val = dummy_stack.pop();
-                return new CompareCondition(val, new IntConstant(0), CompareCondition.fromOpcode(block.getLast().getOpcode()));
+            Instruction val = dummy_stack.pop();
+            return new BooleanCondition(val, false);
+        }
+        case IFLT:
+        case IFLE:
+        case IFGT:
+        case IFGE: {
+            if (dummy_stack.size() != 1) {
+                throw new IllegalStateException();
             }
-            case IF_ICMPEQ:
-            case IF_ICMPNE:
-            case IF_ICMPLT:
-            case IF_ICMPLE:
-            case IF_ICMPGT:
-            case IF_ICMPGE:
-            case IF_ACMPEQ:
-            case IF_ACMPNE: {
-                if (dummy_stack.size() != 2) {
-                    throw new IllegalStateException();
-                }
-                Instruction b = dummy_stack.pop();
-                Instruction a = dummy_stack.pop();
-                return new CompareCondition(a, b, CompareCondition.fromOpcode(block.getLast().getOpcode()));
+            Instruction val = dummy_stack.pop();
+            return new CompareCondition(val, new IntConstant(0), CompareCondition.fromOpcode(block.getLast().getOpcode()));
+        }
+        case IF_ICMPEQ:
+        case IF_ICMPNE:
+        case IF_ICMPLT:
+        case IF_ICMPLE:
+        case IF_ICMPGT:
+        case IF_ICMPGE:
+        case IF_ACMPEQ:
+        case IF_ACMPNE: {
+            if (dummy_stack.size() != 2) {
+                throw new IllegalStateException();
             }
-            case IFNULL: {
-                if (dummy_stack.size() == 0) {
-                    throw new IllegalStateException();
-                }
-                Instruction val = dummy_stack.pop();
-                return new CompareCondition(val, NullConstant.NULL, CompareCondition.CompareOperator.EQUAL);
+            Instruction b = dummy_stack.pop();
+            Instruction a = dummy_stack.pop();
+            return new CompareCondition(a, b, CompareCondition.fromOpcode(block.getLast().getOpcode()));
+        }
+        case IFNULL: {
+            if (dummy_stack.size() == 0) {
+                throw new IllegalStateException();
             }
-            case IFNONNULL: {
-                if (dummy_stack.size() != 1) {
-                    throw new IllegalStateException();
-                }
-                Instruction val = dummy_stack.pop();
-                return new CompareCondition(val, NullConstant.NULL, CompareCondition.CompareOperator.NOT_EQUAL);
+            Instruction val = dummy_stack.pop();
+            return new CompareCondition(val, NullConstant.NULL, CompareCondition.CompareOperator.EQUAL);
+        }
+        case IFNONNULL: {
+            if (dummy_stack.size() != 1) {
+                throw new IllegalStateException();
             }
-            default:
-                throw new IllegalStateException("Unsupported conditional jump opcode " + block.getLast().getOpcode());
+            Instruction val = dummy_stack.pop();
+            return new CompareCondition(val, NullConstant.NULL, CompareCondition.CompareOperator.NOT_EQUAL);
+        }
+        default:
+            throw new IllegalStateException("Unsupported conditional jump opcode " + block.getLast().getOpcode());
         }
     }
 
@@ -226,6 +229,12 @@ public class ConditionBuilder {
         return ConditionUtil.simplifyCondition(condition);
     }
 
+    private ConditionBuilder() {
+    }
+
+    /**
+     * A node for converting a control flow graph to a condition.
+     */
     private static class ConditionGraphNode {
 
         private final Condition condition;

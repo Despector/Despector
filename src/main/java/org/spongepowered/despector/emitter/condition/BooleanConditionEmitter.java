@@ -36,6 +36,9 @@ import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.InstructionEmitter;
 import org.spongepowered.despector.emitter.instruction.TernaryEmitter;
 
+/**
+ * An emitter for boolean conditions.
+ */
 public class BooleanConditionEmitter implements ConditionEmitter<BooleanCondition> {
 
     @Override

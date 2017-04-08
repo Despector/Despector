@@ -29,6 +29,9 @@ import org.spongepowered.despector.ast.members.insn.arg.cst.TypeConstant;
 import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.InstructionEmitter;
 
+/**
+ * An emitter for type constants.
+ */
 public class TypeConstantEmitter implements InstructionEmitter<TypeConstant> {
 
     @Override

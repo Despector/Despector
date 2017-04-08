@@ -24,7 +24,9 @@
  */
 package org.spongepowered.despector.emitter.special;
 
-
+/**
+ * A marker interface for special purpose emitters.
+ */
 public interface SpecialEmitter {
 
 }

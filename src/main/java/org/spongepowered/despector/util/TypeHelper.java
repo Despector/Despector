@@ -178,6 +178,9 @@ public final class TypeHelper {
         return count;
     }
 
+    /**
+     * Gets the parameter types out of the given method signature.
+     */
     public static List<String> splitSig(String sig) {
         if (sig == null) {
             return null;
@@ -252,6 +255,9 @@ public final class TypeHelper {
         return "V";
     }
 
+    /**
+     * Gets if the given name is a primative type.
+     */
     public static boolean isPrimative(String type) {
         if ("void".equals(type) || "boolean".equals(type) || "byte".equals(type) || "short".equals(type) || "int".equals(type) || "long".equals(type)
                 || "float".equals(type) || "double".equals(type) || "char".equals(type)) {

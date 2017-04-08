@@ -38,6 +38,9 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * An instance of an annotation on a member.
+ */
 public class Annotation {
 
     private static final Set<Class<?>> VALID_TYPES = new HashSet<>();
@@ -57,6 +60,9 @@ public class Annotation {
         VALID_TYPES.add(Character.class);
     }
 
+    /**
+     * Gets if the given class is a valid annotation value type.
+     */
     public static boolean isValidValue(Class<?> type) {
         if (type.isPrimitive() || VALID_TYPES.contains(type)) {
             return true;
@@ -75,10 +81,16 @@ public class Annotation {
         this.type = checkNotNull(type, "type");
     }
 
+    /**
+     * Gets the type of this annotation.
+     */
     public AnnotationType getType() {
         return this.type;
     }
 
+    /**
+     * Sets the given key value pair in this annotation.
+     */
     public void setValue(String key, Object value) {
         Class<?> expected = this.type.getType(key);
         if (this.type.isComplete()) {
@@ -92,10 +104,16 @@ public class Annotation {
         this.values.put(key, value);
     }
 
+    /**
+     * Gets the value of the given field.
+     */
     public Object getValue(String key) {
         return this.values.get(key);
     }
 
+    /**
+     * Gets all valid fields in this annotation.
+     */
     public Set<String> getKeys() {
         return this.values.keySet();
     }
@@ -123,6 +141,9 @@ public class Annotation {
         throw new IllegalStateException("Cannot pack " + o.getClass().getSimpleName());
     }
 
+    /**
+     * Writes this annotation to the given {@link MessagePacker}.
+     */
     public void writeTo(MessagePacker pack) throws IOException {
         pack.startMap(4);
         pack.writeString("id").writeInt(AstSerializer.ENTRY_ID_ANNOTATION);

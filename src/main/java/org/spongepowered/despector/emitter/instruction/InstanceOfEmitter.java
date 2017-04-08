@@ -29,6 +29,9 @@ import org.spongepowered.despector.ast.members.insn.arg.InstanceOf;
 import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.InstructionEmitter;
 
+/**
+ * An emitter for an instanceof check.
+ */
 public class InstanceOfEmitter implements InstructionEmitter<InstanceOf> {
 
     @Override

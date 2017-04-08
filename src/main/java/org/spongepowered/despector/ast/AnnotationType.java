@@ -31,6 +31,9 @@ import static com.google.common.base.Preconditions.checkState;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * An anotation type.
+ */
 public class AnnotationType {
 
     private final String name;
@@ -44,42 +47,69 @@ public class AnnotationType {
         this.name = checkNotNull(name, "name");
     }
 
+    /**
+     * Gets the type descriptor.
+     */
     public String getName() {
         return this.name;
     }
 
+    /**
+     * Gets the type of the given annotation field.
+     */
     public Class<?> getType(String key) {
         return this.types.get(key);
     }
 
+    /**
+     * Sets the type of the given annotation field.
+     */
     public void setType(String key, Class<?> type) {
         checkArgument(Annotation.isValidValue(type), "Type " + type.getName() + " is not a valid annotation value type");
         checkState(!this.complete);
         this.types.put(key, type);
     }
 
+    /**
+     * Gets the default value of the given field.
+     */
     public Object getDefaultValue(String key) {
         return this.defaults.get(key);
     }
 
+    /**
+     * Sets the default value of the given field.
+     */
     public void setDefault(String key, Object value) {
         checkNotNull(this.types.get(key), "Cannot set default value before type");
         checkArgument(this.types.get(key).isInstance(value), "Value does not match type for annotation key");
         this.defaults.put(key, value);
     }
 
+    /**
+     * Gets if this annotation type is complete.
+     */
     public boolean isComplete() {
         return this.complete;
     }
 
+    /**
+     * Marks if this annotation type is complete.
+     */
     public void markComplete() {
         this.complete = true;
     }
 
+    /**
+     * Gets if this annotation is visible at runtime.
+     */
     public boolean isRuntimeVisible() {
         return this.runtime;
     }
 
+    /**
+     * Sets if this annotation is visible at runtime.
+     */
     public void setRuntimeVisible(boolean state) {
         this.runtime = state;
     }

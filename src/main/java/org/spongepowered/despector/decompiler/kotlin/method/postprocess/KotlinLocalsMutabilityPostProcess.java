@@ -34,6 +34,10 @@ import org.spongepowered.despector.decompiler.method.postprocess.StatementPostPr
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * A post processing statement for determining which locals are mutated after
+ * assignment.
+ */
 public class KotlinLocalsMutabilityPostProcess implements StatementPostProcessor {
 
     @Override
@@ -42,6 +46,9 @@ public class KotlinLocalsMutabilityPostProcess implements StatementPostProcessor
         block.accept(visitor);
     }
 
+    /**
+     * An instruction visitor for determining which locals are mutated.
+     */
     private static class LocalMutabilityVisitor extends InstructionVisitor {
 
         private final Set<LocalInstance> defined = new HashSet<>();

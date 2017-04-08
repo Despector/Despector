@@ -32,12 +32,18 @@ import org.spongepowered.despector.util.TypeHelper;
 
 import java.util.List;
 
+/**
+ * An emitter for a package-info type.
+ */
 public class PackageInfoEmitter implements SpecialEmitter {
 
+    /**
+     * Emits the given package-info class.
+     */
     public void emit(EmitterContext ctx, InterfaceEntry info) {
 
         for (Annotation anno : info.getAnnotations()) {
-            emit(ctx, anno);
+            emitAnnotation(ctx, anno);
             if (ctx.getFormat().insert_new_line_after_annotation_on_package) {
                 ctx.newLine();
             } else {
@@ -81,7 +87,10 @@ public class PackageInfoEmitter implements SpecialEmitter {
         }
     }
 
-    public void emit(EmitterContext ctx, Annotation annotation) {
+    /**
+     * Emits the given annotation with fully-qualified names.
+     */
+    public void emitAnnotation(EmitterContext ctx, Annotation annotation) {
         ctx.printString("@");
         ctx.printString(TypeHelper.descToType(annotation.getType().getName()).replace('/', '.'));
         if (annotation.getKeys().isEmpty()) {

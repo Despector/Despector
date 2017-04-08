@@ -28,6 +28,9 @@ import org.spongepowered.despector.ast.members.insn.misc.Increment;
 import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.StatementEmitter;
 
+/**
+ * An emitter for increment statements.
+ */
 public class IncrementEmitter implements StatementEmitter<Increment> {
 
     @Override
@@ -35,16 +38,22 @@ public class IncrementEmitter implements StatementEmitter<Increment> {
         ctx.printString(insn.getLocal().getName());
         if (insn.getIncrementValue() == 1) {
             ctx.printString("++");
-            if(semicolon) ctx.printString(";");
+            if (semicolon) {
+                ctx.printString(";");
+            }
             return;
         } else if (insn.getIncrementValue() == -1) {
             ctx.printString("--");
-            if(semicolon) ctx.printString(";");
+            if (semicolon) {
+                ctx.printString(";");
+            }
             return;
         }
         ctx.printString(" += ");
         ctx.printString(String.valueOf(insn.getIncrementValue()));
-        if(semicolon) ctx.printString(";");
+        if (semicolon) {
+            ctx.printString(";");
+        }
     }
 
 }

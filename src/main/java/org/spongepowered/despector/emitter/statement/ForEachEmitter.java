@@ -30,6 +30,9 @@ import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.StatementEmitter;
 import org.spongepowered.despector.emitter.special.GenericsEmitter;
 
+/**
+ * An emitter for for-each loops.
+ */
 public class ForEachEmitter implements StatementEmitter<ForEach> {
 
     @Override

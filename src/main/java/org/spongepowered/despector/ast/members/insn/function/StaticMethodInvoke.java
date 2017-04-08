@@ -31,7 +31,6 @@ import org.spongepowered.despector.util.serialization.AstSerializer;
 import org.spongepowered.despector.util.serialization.MessagePacker;
 
 import java.io.IOException;
-import java.util.Arrays;
 
 /**
  * A statement calling a static method.
@@ -71,19 +70,6 @@ public class StaticMethodInvoke extends MethodInvoke {
         for (Instruction insn : this.params) {
             insn.writeTo(pack);
         }
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (obj == this) {
-            return true;
-        }
-        if (!(obj instanceof StaticMethodInvoke)) {
-            return false;
-        }
-        StaticMethodInvoke insn = (StaticMethodInvoke) obj;
-        return this.method_desc.equals(insn.method_desc) && this.method_name.equals(insn.method_name)
-                && this.method_owner.equals(insn.method_owner) && Arrays.equals(this.params, insn.params);
     }
 
 }

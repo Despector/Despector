@@ -33,6 +33,9 @@ import org.spongepowered.despector.transform.matcher.StatementMatcher;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * A matcher for while loops.
+ */
 public class WhileLoopMatcher implements StatementMatcher<While> {
 
     private ConditionMatcher<?> condition;
@@ -68,6 +71,9 @@ public class WhileLoopMatcher implements StatementMatcher<While> {
         return loop;
     }
 
+    /**
+     * A matcher builder.
+     */
     public static class Builder {
 
         private ConditionMatcher<?> condition;
@@ -87,6 +93,9 @@ public class WhileLoopMatcher implements StatementMatcher<While> {
             return this;
         }
 
+        /**
+         * Resets this builder.
+         */
         public Builder reset() {
             this.condition = null;
             this.body.clear();

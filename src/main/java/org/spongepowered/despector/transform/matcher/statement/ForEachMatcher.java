@@ -34,6 +34,9 @@ import org.spongepowered.despector.transform.matcher.StatementMatcher;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * A matcher for for-each loops.
+ */
 public class ForEachMatcher implements StatementMatcher<ForEach> {
 
     private LocalInstance init;
@@ -74,6 +77,9 @@ public class ForEachMatcher implements StatementMatcher<ForEach> {
         return loop;
     }
 
+    /**
+     * A builder for for-each loop matchers.
+     */
     public static class Builder {
 
         private LocalInstance init;
@@ -99,6 +105,9 @@ public class ForEachMatcher implements StatementMatcher<ForEach> {
             return this;
         }
 
+        /**
+         * Resets the builder.
+         */
         public Builder reset() {
             this.init = null;
             this.value = null;

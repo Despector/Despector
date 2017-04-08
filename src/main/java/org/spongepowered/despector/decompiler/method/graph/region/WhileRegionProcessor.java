@@ -86,6 +86,9 @@ public class WhileRegionProcessor implements RegionProcessor {
         return null;
     }
 
+    /**
+     * Replaces break marker blocks within the region.
+     */
     public static void replaceBreaks(BlockSection section, OpcodeBlock continue_point, OpcodeBlock break_point, BreakableBlockSection loop,
             boolean nested) {
         if (section instanceof BreakBlockSection) {

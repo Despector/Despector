@@ -120,4 +120,12 @@ public class InstanceOf implements Instruction {
         return this.check.equals(insn.check) && this.type.equals(insn.type);
     }
 
+    @Override
+    public int hashCode() {
+        int h = 1;
+        h = h * 37 + this.check.hashCode();
+        h = h * 37 + this.type.hashCode();
+        return h;
+    }
+
 }

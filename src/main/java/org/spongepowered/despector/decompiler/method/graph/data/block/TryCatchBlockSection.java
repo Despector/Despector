@@ -36,6 +36,9 @@ import java.util.ArrayList;
 import java.util.Deque;
 import java.util.List;
 
+/**
+ * A block section containing a processed try-catch block.
+ */
 public class TryCatchBlockSection extends BlockSection {
 
     private final List<BlockSection> body = new ArrayList<>();
@@ -83,6 +86,9 @@ public class TryCatchBlockSection extends BlockSection {
         }
     }
 
+    /**
+     * A processed catch block.
+     */
     public static class CatchBlockSection {
 
         private Locals.LocalInstance exlocal;

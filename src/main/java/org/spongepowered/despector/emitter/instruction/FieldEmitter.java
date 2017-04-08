@@ -33,6 +33,9 @@ import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.InstructionEmitter;
 import org.spongepowered.despector.util.TypeHelper;
 
+/**
+ * An emitter for instance field accesses.
+ */
 public class FieldEmitter implements InstructionEmitter<FieldAccess> {
 
     @Override

@@ -24,6 +24,9 @@
  */
 package org.spongepowered.despector.util;
 
+/**
+ * A utility class for a pair of related objects.
+ */
 public class Pair<A, B> {
 
     private final A a;

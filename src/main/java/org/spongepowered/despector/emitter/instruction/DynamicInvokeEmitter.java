@@ -35,6 +35,9 @@ import org.spongepowered.despector.ast.type.TypeEntry;
 import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.InstructionEmitter;
 
+/**
+ * An emitter for a dynamic invoke.
+ */
 public class DynamicInvokeEmitter implements InstructionEmitter<DynamicInvokeHandle> {
 
     @Override

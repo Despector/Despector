@@ -52,6 +52,9 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+/**
+ * A decompilation step which decompiles all methods in a type.
+ */
 public class MethodInfoStep implements DecompilerStep {
 
     private MethodDecompiler method_decomp;

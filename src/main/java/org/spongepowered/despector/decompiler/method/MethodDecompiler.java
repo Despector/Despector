@@ -142,6 +142,9 @@ public class MethodDecompiler {
         return (T) this.special_processors.get(checkNotNull(type, "type"));
     }
 
+    /**
+     * Creates the locals for the given method.
+     */
     @SuppressWarnings("unchecked")
     public Locals createLocals(MethodEntry entry, MethodNode asm) {
         Locals locals = new Locals();
@@ -189,8 +192,8 @@ public class MethodDecompiler {
                 AbstractInsnNode next = it.next();
                 if (next.getOpcode() >= ISTORE && next.getOpcode() <= ASTORE && last.getOpcode() >= ILOAD && last.getOpcode() <= ALOAD) {
                     Local store_local = locals.getLocal(((VarInsnNode) next).var);
-                    LocalInstance store = store_local.getLVTInstance(i);
-                    LocalInstance load = locals.getLocal(((VarInsnNode) last).var).getLVTInstance(i);
+                    LocalInstance store = store_local.getInstance(i);
+                    LocalInstance load = locals.getLocal(((VarInsnNode) last).var).getInstance(i);
                     if (store == null && load != null) {
                         LocalInstance new_insn = new LocalInstance(store_local, load.getLVN(), load.getName(),
                                 load.getType(), load.getStart(), load.getEnd());
@@ -205,6 +208,9 @@ public class MethodDecompiler {
         return locals;
     }
 
+    /**
+     * Decompiles the given asm method to a statement block.
+     */
     @SuppressWarnings("unchecked")
     public StatementBlock decompile(MethodEntry entry, MethodNode asm, Locals locals) {
         if (asm.instructions.size() == 0) {

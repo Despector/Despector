@@ -39,6 +39,9 @@ import org.spongepowered.despector.emitter.special.GenericsEmitter;
 
 import java.util.Collection;
 
+/**
+ * An emitter for interface types.
+ */
 public class InterfaceEntryEmitter implements AstEmitter<InterfaceEntry> {
 
     @Override

@@ -26,6 +26,9 @@ package org.spongepowered.despector.decompiler.method.graph.data.opcode;
 
 import org.spongepowered.despector.decompiler.method.graph.data.block.BlockSection;
 
+/**
+ * An opcode block holding a conditional jump.
+ */
 public class ConditionalOpcodeBlock extends OpcodeBlock {
 
     private OpcodeBlock else_target;

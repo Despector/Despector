@@ -46,6 +46,9 @@ public abstract class AstEntry {
         return this.source;
     }
 
+    /**
+     * Writes this ast element to the given {@link MessagePacker}.
+     */
     public abstract void writeTo(MessagePacker pack) throws IOException;
 
 }

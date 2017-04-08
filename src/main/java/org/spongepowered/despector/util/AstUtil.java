@@ -111,7 +111,7 @@ public final class AstUtil {
      * 
      * <p>This uses a static {@link Textifier} which means that all label
      * numbers will be constantly incrementing as the program continues. Call
-     * {@link #_resetTextifier()} to reset label indices.</p>
+     * {@link #__resetTextifier()} to reset label indices.</p>
      */
     public static String insnToString(AbstractInsnNode insn) {
         insn.accept(mp);
@@ -129,7 +129,7 @@ public final class AstUtil {
      * Resets the {@link Textifier} instance used by
      * {@link #insnToString(AbstractInsnNode)} to reset the label names.
      */
-    public static void _resetTextifier() {
+    public static void __resetTextifier() {
         printer = new Textifier();
     }
 
@@ -137,8 +137,7 @@ public final class AstUtil {
     private static TraceMethodVisitor mp = new TraceMethodVisitor(printer);
 
     /**
-     * Gets the change in the stack size caused by the given
-     * {@link AbstractInsnNode}.
+     * Gets the count of values consumed from the stack by the given opcode.
      */
     public static int getStackRequirementsSize(AbstractInsnNode next) {
         if (next == null) {
@@ -306,7 +305,8 @@ public final class AstUtil {
         case INVOKEINTERFACE: {
             MethodInsnNode method = (MethodInsnNode) next;
             int count = TypeHelper.paramCount(method.desc);
-            count++; // the object ref
+            // the object ref
+            count++;
             return count;
         }
         case INVOKESTATIC: {
@@ -325,6 +325,9 @@ public final class AstUtil {
         }
     }
 
+    /**
+     * Gets the count of values pushed to the stack by the given opcode.
+     */
     public static int getStackResultSize(AbstractInsnNode next) {
         if (next == null) {
             return 0;
@@ -507,10 +510,16 @@ public final class AstUtil {
         }
     }
 
+    /**
+     * Gets the change in stack size from the given opcode.
+     */
     public static int getStackDelta(AbstractInsnNode next) {
         return getStackResultSize(next) - getStackRequirementsSize(next);
     }
 
+    /**
+     * Gets the first non-meta opcode in the given list of opcodes.
+     */
     public static AbstractInsnNode getFirstOpcode(List<AbstractInsnNode> opcodes) {
         for (int index = 0; index < opcodes.size(); index++) {
             AbstractInsnNode next = opcodes.get(index);
@@ -526,6 +535,9 @@ public final class AstUtil {
         return null;
     }
 
+    /**
+     * Gets the last non-meta opcode in the given list of opcodes.
+     */
     public static AbstractInsnNode getLastOpcode(List<AbstractInsnNode> opcodes) {
         for (int index = opcodes.size() - 1; index >= 0; index--) {
             AbstractInsnNode next = opcodes.get(index);
@@ -541,6 +553,10 @@ public final class AstUtil {
         return null;
     }
 
+    /**
+     * Gets if the given list of opcodes requires values on the stack from
+     * before it starts.
+     */
     public static boolean hasStartingRequirement(List<AbstractInsnNode> opcodes) {
         int size = 0;
         for (int i = 0; i < opcodes.size(); i++) {
@@ -593,6 +609,9 @@ public final class AstUtil {
         return true;
     }
 
+    /**
+     * Gets if the given list of opcodes is only metadata nodes.
+     */
     public static boolean isEmptyOfLogic(List<AbstractInsnNode> opcodes, int size) {
         for (int i = 0; i < size; i++) {
             AbstractInsnNode next = opcodes.get(i);
@@ -604,24 +623,36 @@ public final class AstUtil {
         return true;
     }
 
+    /**
+     * Gets if the given statement references the given local.
+     */
     public static boolean references(Statement insn, LocalInstance local) {
         LocalFinder visitor = new LocalFinder(local);
         insn.accept(visitor);
         return visitor.isFound();
     }
 
+    /**
+     * Gets if the given instruction references the given local.
+     */
     public static boolean references(Instruction insn, LocalInstance local) {
         LocalFinder visitor = new LocalFinder(local);
         insn.accept(visitor);
         return visitor.isFound();
     }
 
+    /**
+     * Gets if the given condition references the given local.
+     */
     public static boolean references(Condition condition, LocalInstance local) {
         LocalFinder visitor = new LocalFinder(local);
         condition.accept(visitor);
         return visitor.isFound();
     }
 
+    /**
+     * A visitor that looks for references to a given local.
+     */
     private static class LocalFinder extends InstructionVisitor {
 
         private final LocalInstance local;

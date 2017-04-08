@@ -28,8 +28,14 @@ import org.spongepowered.despector.ast.generic.ClassTypeSignature;
 import org.spongepowered.despector.ast.generic.TypeSignature;
 import org.spongepowered.despector.emitter.EmitterContext;
 
-public class KotlinEmitterUtil {
+/**
+ * A utility for the kotlin emitter.
+ */
+public final class KotlinEmitterUtil {
 
+    /**
+     * Emits the given type.
+     */
     public static void emitParamType(EmitterContext ctx, TypeSignature type) {
         if (type.isArray()) {
             ctx.printString("Array<");
@@ -42,6 +48,9 @@ public class KotlinEmitterUtil {
         }
     }
 
+    /**
+     * Emits the given parameter type.
+     */
     public static void emitParamType(EmitterContext ctx, String type) {
         if ("Ljava/lang/Object;".equals(type)) {
             ctx.printString("Any");
@@ -50,6 +59,9 @@ public class KotlinEmitterUtil {
         }
     }
 
+    /**
+     * Emits the given type.
+     */
     public static void emitType(EmitterContext ctx, TypeSignature type) {
         if (type.isArray()) {
             ctx.printString("Array<");
@@ -76,6 +88,9 @@ public class KotlinEmitterUtil {
         }
     }
 
+    /**
+     * Emits the given type.
+     */
     public static void emitType(EmitterContext ctx, String type) {
         if (type.startsWith("[")) {
             ctx.printString("Array<");

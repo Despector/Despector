@@ -29,6 +29,9 @@ import org.spongepowered.despector.ast.members.insn.arg.field.ArrayAccess;
 import org.spongepowered.despector.transform.matcher.InstructionMatcher;
 import org.spongepowered.despector.transform.matcher.MatchContext;
 
+/**
+ * A matcher for {@link ArrayAccess} instructions.
+ */
 public class ArrayAccessMatcher implements InstructionMatcher<ArrayAccess> {
 
     private InstructionMatcher<?> array;
@@ -54,6 +57,9 @@ public class ArrayAccessMatcher implements InstructionMatcher<ArrayAccess> {
         return invoke;
     }
 
+    /**
+     * A matcher builder.
+     */
     public static class Builder {
 
         private InstructionMatcher<?> array;
@@ -63,22 +69,34 @@ public class ArrayAccessMatcher implements InstructionMatcher<ArrayAccess> {
             reset();
         }
 
+        /**
+         * Sets the matcher for the array value.
+         */
         public Builder array(InstructionMatcher<?> val) {
             this.array = val;
             return this;
         }
 
+        /**
+         * Sets the matcher for the array index.
+         */
         public Builder index(InstructionMatcher<?> index) {
             this.index = index;
             return this;
         }
 
+        /**
+         * Resets the builder.
+         */
         public Builder reset() {
             this.array = null;
             this.index = null;
             return this;
         }
 
+        /**
+         * Creates a new matcher.
+         */
         public ArrayAccessMatcher build() {
             return new ArrayAccessMatcher(this.array, this.index);
         }

@@ -71,6 +71,9 @@ public class IfCombiningPostProcessor implements StatementPostProcessor {
         }
     }
 
+    /**
+     * Checks if the given if statement can be simplified.
+     */
     public void check(If ifblock) {
         if (ifblock.getElifBlocks().isEmpty() && ifblock.getElseBlock() == null) {
             StatementBlock block = ifblock.getIfBody();

@@ -30,8 +30,14 @@ import org.spongepowered.despector.ast.members.insn.arg.operator.OperatorType;
 import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.InstructionEmitter;
 
+/**
+ * An emitter for kotlin operators.
+ */
 public class KotlinOperatorEmitter implements InstructionEmitter<Operator> {
 
+    /**
+     * Gets if the given operator needs to be wrapped in parens.
+     */
     public boolean needParens(OperatorType op) {
         switch (op) {
         case AND:
@@ -51,6 +57,9 @@ public class KotlinOperatorEmitter implements InstructionEmitter<Operator> {
         }
     }
 
+    /**
+     * Emits the given operator.
+     */
     public void emitOp(EmitterContext ctx, OperatorType op) {
         switch (op) {
         case AND:

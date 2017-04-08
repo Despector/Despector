@@ -50,12 +50,12 @@ public class TryCatchGraphProducerStep implements GraphProducerStep {
     @SuppressWarnings("unchecked")
     @Override
     public void collectBreakpoints(PartialMethod partial, Set<Integer> break_points) {
-        List<TryCatchBlockNode> tryCatchBlocks = partial.getAsmNode().tryCatchBlocks;
+        List<TryCatchBlockNode> try_catch_blocks = partial.getAsmNode().tryCatchBlocks;
         Map<Label, Integer> label_indices = partial.getLabelIndices();
         List<AbstractInsnNode> instructions = partial.getOpcodes();
         Locals locals = partial.getLocals();
 
-        for (TryCatchBlockNode tc : tryCatchBlocks) {
+        for (TryCatchBlockNode tc : try_catch_blocks) {
             break_points.add(label_indices.get(tc.start.getLabel()));
             break_points.add(label_indices.get(tc.end.getLabel()));
             break_points.add(label_indices.get(tc.handler.getLabel()));
@@ -83,14 +83,11 @@ public class TryCatchGraphProducerStep implements GraphProducerStep {
     @SuppressWarnings("unchecked")
     @Override
     public void formEdges(PartialMethod partial, Map<Integer, OpcodeBlock> blocks, List<Integer> sorted_break_points, List<OpcodeBlock> block_list) {
-        List<TryCatchBlockNode> tryCatchBlocks = partial.getAsmNode().tryCatchBlocks;
+        List<TryCatchBlockNode> try_catch_blocks = partial.getAsmNode().tryCatchBlocks;
         Map<Label, Integer> label_indices = partial.getLabelIndices();
 
-        for (int i = tryCatchBlocks.size() - 1; i >= 0; i--) {
-            TryCatchBlockNode tc = tryCatchBlocks.get(i);
-            OpcodeBlock start = blocks.get(sorted_break_points.get(sorted_break_points.indexOf(label_indices.get(tc.start.getLabel())) + 1));
-            OpcodeBlock end = blocks.get(sorted_break_points.get(sorted_break_points.indexOf(label_indices.get(tc.end.getLabel())) + 1));
-            OpcodeBlock handler = blocks.get(sorted_break_points.get(sorted_break_points.indexOf(label_indices.get(tc.handler.getLabel())) + 1));
+        for (int i = try_catch_blocks.size() - 1; i >= 0; i--) {
+            TryCatchBlockNode tc = try_catch_blocks.get(i);
             TryCatchMarkerOpcodeBlock start_marker = new TryCatchMarkerOpcodeBlock(TryCatchMarkerType.START, tc);
             TryCatchMarkerOpcodeBlock end_marker = new TryCatchMarkerOpcodeBlock(TryCatchMarkerType.END, tc);
             TryCatchMarkerOpcodeBlock handler_marker = new TryCatchMarkerOpcodeBlock(TryCatchMarkerType.CATCH, tc);
@@ -98,6 +95,9 @@ public class TryCatchGraphProducerStep implements GraphProducerStep {
             end_marker.setStartMarker(start_marker);
             handler_marker.setStartMarker(start_marker);
             handler_marker.setEndMarker(end_marker);
+            OpcodeBlock start = blocks.get(sorted_break_points.get(sorted_break_points.indexOf(label_indices.get(tc.start.getLabel())) + 1));
+            OpcodeBlock end = blocks.get(sorted_break_points.get(sorted_break_points.indexOf(label_indices.get(tc.end.getLabel())) + 1));
+            OpcodeBlock handler = blocks.get(sorted_break_points.get(sorted_break_points.indexOf(label_indices.get(tc.handler.getLabel())) + 1));
             block_list.add(block_list.indexOf(start), start_marker);
             block_list.add(block_list.indexOf(end), end_marker);
             block_list.add(block_list.indexOf(handler), handler_marker);

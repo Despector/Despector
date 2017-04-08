@@ -28,6 +28,9 @@ import org.spongepowered.despector.ast.members.insn.Comment;
 import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.StatementEmitter;
 
+/**
+ * An emitter for comments.
+ */
 public class CommentEmitter implements StatementEmitter<Comment> {
 
     @Override

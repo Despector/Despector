@@ -30,6 +30,9 @@ import org.spongepowered.despector.ast.members.insn.branch.condition.CompareCond
 import org.spongepowered.despector.emitter.ConditionEmitter;
 import org.spongepowered.despector.emitter.EmitterContext;
 
+/**
+ * An emitter for kotlin compare conditions.
+ */
 public class KotlinCompareConditionEmitter implements ConditionEmitter<CompareCondition> {
 
     @Override

@@ -41,7 +41,8 @@ import javax.annotation.Nullable;
 public class TypeParameter {
 
     private String identifier;
-    @Nullable private TypeSignature class_bound;
+    @Nullable
+    private TypeSignature class_bound;
     private List<TypeSignature> interface_bounds = new ArrayList<>();
 
     public TypeParameter(String ident, @Nullable TypeSignature cl) {
@@ -85,6 +86,9 @@ public class TypeParameter {
         return this.interface_bounds;
     }
 
+    /**
+     * Writes this type parameter to the given {@link MessagePacker}.
+     */
     public void writeTo(MessagePacker pack) throws IOException {
         int len = 3;
         if (this.class_bound != null) {

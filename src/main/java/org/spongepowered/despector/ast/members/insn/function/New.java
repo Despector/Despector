@@ -142,4 +142,15 @@ public class New implements Instruction {
         return this.type.equals(insn.type) && this.ctor.equals(insn.ctor) && Arrays.equals(this.params, insn.params);
     }
 
+    @Override
+    public int hashCode() {
+        int h = 1;
+        h = h * 37 + this.type.hashCode();
+        h = h * 37 + this.ctor.hashCode();
+        for (Instruction insn : this.params) {
+            h = h * 37 + insn.hashCode();
+        }
+        return h;
+    }
+
 }

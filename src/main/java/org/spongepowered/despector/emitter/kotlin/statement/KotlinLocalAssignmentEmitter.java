@@ -30,6 +30,9 @@ import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.kotlin.KotlinEmitterUtil;
 import org.spongepowered.despector.emitter.statement.LocalAssignmentEmitter;
 
+/**
+ * An emitter for kotlin local assignments.
+ */
 public class KotlinLocalAssignmentEmitter extends LocalAssignmentEmitter {
 
     @Override

@@ -26,6 +26,8 @@ package org.spongepowered.test.decompile;
 
 import static org.objectweb.asm.Opcodes.*;
 
+import org.spongepowered.test.util.TestHelper;
+
 import org.junit.Assert;
 import org.junit.Test;
 import org.objectweb.asm.ClassWriter;
@@ -36,7 +38,6 @@ import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.GeneratorAdapter;
 import org.objectweb.asm.commons.Method;
-import org.spongepowered.test.util.TestHelper;
 
 public class SwitchTests {
 
@@ -155,7 +156,7 @@ public class SwitchTests {
             mv.loadArg(0);
             mv.invokeVirtual(TEST_ENUM_TYPE, Method.getMethod("int ordinal ()"));
             mv.arrayLoad(Type.INT_TYPE);
-            mv.visitLookupSwitchInsn(def, new int[]{1, 8}, new Label[]{l1, l2});
+            mv.visitLookupSwitchInsn(def, new int[] {1, 8}, new Label[] {l1, l2});
             mv.visitLabel(l1);
             mv.invokeStatic(THIS_TYPE, Method.getMethod("void body ()"));
             mv.goTo(end);
@@ -218,7 +219,7 @@ public class SwitchTests {
             mv.loadArg(0);
             mv.invokeVirtual(TEST_ENUM_TYPE, Method.getMethod("int ordinal ()"));
             mv.arrayLoad(Type.INT_TYPE);
-            mv.visitLookupSwitchInsn(def, new int[]{1, 8}, new Label[]{l1, l2});
+            mv.visitLookupSwitchInsn(def, new int[] {1, 8}, new Label[] {l1, l2});
             mv.visitLabel(l1);
             mv.invokeStatic(THIS_TYPE, Method.getMethod("void body ()"));
             mv.visitInsn(RETURN);

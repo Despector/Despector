@@ -28,6 +28,9 @@ import org.spongepowered.despector.ast.generic.TypeSignature;
 import org.spongepowered.despector.ast.members.insn.function.StaticMethodInvoke;
 import org.spongepowered.despector.emitter.EmitterContext;
 
+/**
+ * An emitter for kotlin tuple creation methods.
+ */
 public class TupleToEmitter implements SpecialMethodEmitter<StaticMethodInvoke> {
 
     @Override

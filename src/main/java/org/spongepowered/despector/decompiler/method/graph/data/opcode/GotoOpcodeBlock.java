@@ -26,6 +26,9 @@ package org.spongepowered.despector.decompiler.method.graph.data.opcode;
 
 import org.spongepowered.despector.decompiler.method.graph.data.block.BlockSection;
 
+/**
+ * An opcode block representing an unconditional jump.
+ */
 public class GotoOpcodeBlock extends OpcodeBlock {
 
     public GotoOpcodeBlock(int br) {

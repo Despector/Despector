@@ -35,9 +35,7 @@ import org.spongepowered.despector.util.serialization.MessagePacker;
 import java.io.IOException;
 
 /**
- * An instruction which negates the current value on the stack
- *
- * <p>Example: -(val)</p>
+ * An instruction which negates the current value on the stack.
  */
 public class NegativeOperator implements Instruction {
 

@@ -29,6 +29,9 @@ import org.spongepowered.despector.ast.members.insn.assign.ArrayAssignment;
 import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.StatementEmitter;
 
+/**
+ * An emitter for array assignments.
+ */
 public class ArrayAssignmentEmitter implements StatementEmitter<ArrayAssignment> {
 
     @Override
@@ -38,7 +41,9 @@ public class ArrayAssignmentEmitter implements StatementEmitter<ArrayAssignment>
         ctx.emit(insn.getIndex(), ClassTypeSignature.INT);
         ctx.printString("] = ");
         ctx.emit(insn.getValue(), null);
-        if(semicolon) ctx.printString(";");
+        if (semicolon) {
+            ctx.printString(";");
+        }
     }
 
 }

@@ -27,6 +27,9 @@ package org.spongepowered.despector.decompiler.method.graph.data.opcode;
 import org.spongepowered.despector.decompiler.method.graph.data.block.BlockSection;
 import org.spongepowered.despector.decompiler.method.graph.data.block.BreakBlockSection;
 
+/**
+ * An opcode block that acts as a marker for a control flow break.
+ */
 public class BreakMarkerOpcodeBlock extends OpcodeBlock {
 
     private MarkerType type;
@@ -37,18 +40,30 @@ public class BreakMarkerOpcodeBlock extends OpcodeBlock {
         this.type = type;
     }
 
+    /**
+     * Gets the type of this control flow break.
+     */
     public MarkerType getType() {
         return this.type;
     }
 
+    /**
+     * Sets the type of this control flow break.
+     */
     public void setType(MarkerType type) {
         this.type = type;
     }
 
+    /**
+     * Gets the targeted block.
+     */
     public OpcodeBlock getMarked() {
         return this.marked;
     }
 
+    /**
+     * Sets the targeted block.
+     */
     public void setMarked(OpcodeBlock marked) {
         this.marked = marked;
     }
@@ -63,6 +78,11 @@ public class BreakMarkerOpcodeBlock extends OpcodeBlock {
         return false;
     }
 
+    /**
+     * Gets the original target of this block as the regular
+     * {@link #getTarget()} method is changed to return null to prevent it from
+     * breaking the region detection.
+     */
     public OpcodeBlock getOldTarget() {
         return this.target;
     }
@@ -78,6 +98,9 @@ public class BreakMarkerOpcodeBlock extends OpcodeBlock {
                 + this.type.name() + ", marked: " + (this.marked != null ? this.marked.getBreakpoint() : -1) + ")";
     }
 
+    /**
+     * An enumeration of the types of control flow breaks.
+     */
     public static enum MarkerType {
         BREAK,
         CONTINUE;

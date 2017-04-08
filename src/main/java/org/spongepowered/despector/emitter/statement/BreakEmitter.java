@@ -28,10 +28,14 @@ import org.spongepowered.despector.ast.members.insn.branch.Break;
 import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.StatementEmitter;
 
+/**
+ * An emitter of a control flow break.
+ */
 public class BreakEmitter implements StatementEmitter<Break> {
 
     @Override
     public void emit(EmitterContext ctx, Break stmt, boolean semicolon) {
+        // TODO labels if nested.
         ctx.printString(stmt.getType().getKeyword());
         if (semicolon) {
             ctx.printString(";");

@@ -42,8 +42,14 @@ import org.spongepowered.despector.emitter.special.SpecialEmitter;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+/**
+ * An emitter for kotlin data classes.
+ */
 public class KotlinDataClassEmitter implements SpecialEmitter {
 
+    /**
+     * Emits the given data class.
+     */
     public void emit(EmitterContext ctx, ClassEntry type) {
         ctx.printIndentation();
         ctx.printString("data class ");
@@ -140,6 +146,9 @@ public class KotlinDataClassEmitter implements SpecialEmitter {
         ctx.newLine();
     }
 
+    /**
+     * A data field.
+     */
     private static class DataField {
 
         public String name;

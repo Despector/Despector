@@ -24,6 +24,9 @@
  */
 package org.spongepowered.despector.ast.members.insn.arg.operator;
 
+/**
+ * An enumeration of all operators.
+ */
 public enum OperatorType {
 
     ADD(11, "+"),

@@ -80,7 +80,8 @@ public abstract class TypeEntry extends AstEntry {
     protected final Map<AnnotationType, Annotation> annotations = new LinkedHashMap<>();
     protected final Map<String, InnerClassInfo> inner_classes = new LinkedHashMap<>();
 
-    @Nullable protected ClassSignature signature;
+    @Nullable
+    protected ClassSignature signature;
 
     public TypeEntry(SourceSet source, Language lang, String name) {
         super(source);
@@ -427,6 +428,10 @@ public abstract class TypeEntry extends AstEntry {
         return "Class " + this.name;
     }
 
+    /**
+     * Writes this type to the givem {@link MessagePacker}. Takes an argument
+     * for how much extra space in the map to reserve for the subtypes values.
+     */
     public void writeTo(MessagePacker pack, int extra, int id) throws IOException {
         int len = 15 + extra;
         if (this.signature != null) {
@@ -474,6 +479,9 @@ public abstract class TypeEntry extends AstEntry {
         }
     }
 
+    /**
+     * Info for all inner classes of this type.
+     */
     public static class InnerClassInfo {
 
         private String name;
@@ -496,6 +504,9 @@ public abstract class TypeEntry extends AstEntry {
             this.access = AccessModifier.fromModifiers(acc);
         }
 
+        /**
+         * Writes this inner class info to the given {@link MessagePacker}.
+         */
         public void writeTo(MessagePacker pack) throws IOException {
             pack.startMap(8);
             pack.writeString("name").writeString(this.name);

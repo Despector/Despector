@@ -87,6 +87,9 @@ public class MethodSignature {
         return this.exceptions;
     }
 
+    /**
+     * Writes this method signature to the given {@link MessagePacker}.
+     */
     public void writeTo(MessagePacker pack) throws IOException {
         pack.startMap(5);
         pack.writeString("id").writeInt(AstSerializer.SIGNATURE_ID_METHOD);

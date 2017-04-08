@@ -47,7 +47,8 @@ public class If implements Statement {
     private Condition condition;
     private StatementBlock block;
     private final List<Elif> elif_blocks = new ArrayList<>();
-    @Nullable private Else else_block;
+    @Nullable
+    private Else else_block;
 
     public If(Condition condition, StatementBlock insn) {
         this.condition = checkNotNull(condition, "condition");
@@ -182,6 +183,18 @@ public class If implements Statement {
         return this.condition.equals(insn.condition) && this.block.equals(insn.block);
     }
 
+    @Override
+    public int hashCode() {
+        int h = 1;
+        h = h * 37 + this.condition.hashCode();
+        h = h * 37 + this.block.hashCode();
+        h = h * 37 + (this.else_block == null ? 0 : this.else_block.hashCode());
+        for (Elif elif : this.elif_blocks) {
+            h = h * 37 + elif.hashCode();
+        }
+        return h;
+    }
+
     /**
      * An else-if block attached to an if statement.
      */
@@ -224,6 +237,9 @@ public class If implements Statement {
             this.block = checkNotNull(block, "block");
         }
 
+        /**
+         * Accepts the given visitor.
+         */
         public void accept(InstructionVisitor visitor) {
             visitor.visitElif(this);
             for (Statement stmt : this.block.getStatements()) {
@@ -255,6 +271,14 @@ public class If implements Statement {
             Elif insn = (Elif) obj;
             return this.condition.equals(insn.condition) && this.block.equals(insn.block);
         }
+
+        @Override
+        public int hashCode() {
+            int h = 1;
+            h = h * 37 + this.condition.hashCode();
+            h = h * 37 + this.block.hashCode();
+            return h;
+        }
     }
 
     /**
@@ -283,6 +307,9 @@ public class If implements Statement {
             this.block = checkNotNull(block, "block");
         }
 
+        /**
+         * Accepts the given visitor.
+         */
         public void accept(InstructionVisitor visitor) {
             visitor.visitElse(this);
             for (Statement stmt : this.block.getStatements()) {
@@ -311,6 +338,11 @@ public class If implements Statement {
             }
             Else insn = (Else) obj;
             return this.block.equals(insn.block);
+        }
+
+        @Override
+        public int hashCode() {
+            return this.block.hashCode();
         }
 
     }

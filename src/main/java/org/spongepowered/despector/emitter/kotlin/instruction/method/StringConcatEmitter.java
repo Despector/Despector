@@ -37,6 +37,10 @@ import org.spongepowered.despector.emitter.EmitterContext;
 
 import java.util.List;
 
+/**
+ * A special method emitter to convert a string builder chain into a string
+ * concatenation with addition operators.
+ */
 public class StringConcatEmitter implements SpecialMethodEmitter<InstanceMethodInvoke> {
 
     @Override

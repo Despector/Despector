@@ -111,6 +111,16 @@ public class Switch implements Statement {
         return this.variable.equals(insn.variable) && this.cases.equals(insn.cases);
     }
 
+    @Override
+    public int hashCode() {
+        int h = 1;
+        h = h * 37 + this.variable.hashCode();
+        for (Case cs : this.cases) {
+            h = h * 37 + cs.hashCode();
+        }
+        return h;
+    }
+
     /**
      * A switch case.
      */
@@ -199,6 +209,16 @@ public class Switch implements Statement {
             Case insn = (Case) obj;
             return this.body.equals(insn.body) && this.breaks == insn.breaks && this.is_default == insn.is_default
                     && this.indices.equals(insn.indices);
+        }
+
+        @Override
+        public int hashCode() {
+            int h = 1;
+            h = h * 37 + this.body.hashCode();
+            h = h * 37 + this.indices.hashCode();
+            h = h * 37 + (this.breaks ? 1 : 0);
+            h = h * 37 + (this.is_default ? 1 : 0);
+            return h;
         }
 
     }

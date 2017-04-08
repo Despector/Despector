@@ -110,6 +110,9 @@ public class Break implements Statement {
      */
     public static interface Breakable {
 
+        /**
+         * Gets all control flow breaks for this statement.
+         */
         List<Break> getBreaks();
 
     }

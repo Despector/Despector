@@ -40,7 +40,8 @@ import javax.annotation.Nullable;
 public class ClassSignature {
 
     private final List<TypeParameter> parameters = new ArrayList<>();
-    @Nullable private ClassTypeSignature superclass;
+    @Nullable
+    private ClassTypeSignature superclass;
     private final List<ClassTypeSignature> interfaces = new ArrayList<>();
 
     public ClassSignature() {
@@ -77,6 +78,9 @@ public class ClassSignature {
         return this.interfaces;
     }
 
+    /**
+     * Writes this signature to the given {@link MessagePacker}.
+     */
     public void writeTo(MessagePacker pack) throws IOException {
         int len = 3;
         if (this.superclass != null) {

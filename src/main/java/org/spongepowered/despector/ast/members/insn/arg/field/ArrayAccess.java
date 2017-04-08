@@ -123,4 +123,12 @@ public class ArrayAccess implements Instruction {
         return this.array.equals(insn.array) && this.index.equals(insn.index);
     }
 
+    @Override
+    public int hashCode() {
+        int h = 1;
+        h = h * 37 + this.array.hashCode();
+        h = h * 37 + this.index.hashCode();
+        return h;
+    }
+
 }

@@ -30,6 +30,9 @@ import org.spongepowered.despector.ast.members.insn.arg.operator.Operator;
 import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.InstructionEmitter;
 
+/**
+ * An emitter for kotlin casts.
+ */
 public class KotlinCastEmitter implements InstructionEmitter<Cast> {
 
     @Override

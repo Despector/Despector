@@ -76,6 +76,9 @@ public interface ConditionMatcher<T extends Condition> {
         return new ConditionReferenceMatcher(ctx);
     }
 
+    /**
+     * A condition matcher that matches any condition.
+     */
     public static class Any implements ConditionMatcher<Condition> {
 
         Any() {

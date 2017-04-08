@@ -32,6 +32,9 @@ import org.spongepowered.despector.util.serialization.MessagePacker;
 
 import java.io.IOException;
 
+/**
+ * A dynamic method invoke instruction.
+ */
 public class DynamicInvokeHandle implements Instruction {
 
     private TypeSignature type;
@@ -48,22 +51,37 @@ public class DynamicInvokeHandle implements Instruction {
         this.name = name;
     }
 
+    /**
+     * Gets the owner of the lambda.
+     */
     public String getLambdaOwner() {
         return this.lambda_owner;
     }
 
+    /**
+     * Gets the lambda method.
+     */
     public String getLambdaMethod() {
         return this.lambda_method;
     }
 
+    /**
+     * Gets the lambda description.
+     */
     public String getLambdaDescription() {
         return this.lambda_desc;
     }
 
+    /**
+     * Gets the lambda return type.
+     */
     public TypeSignature getType() {
         return this.type;
     }
 
+    /**
+     * Gets the lambda name.
+     */
     public String getName() {
         return this.name;
     }

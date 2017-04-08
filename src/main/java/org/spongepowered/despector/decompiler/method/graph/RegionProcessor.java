@@ -44,6 +44,10 @@ public interface RegionProcessor {
      */
     BlockSection process(PartialMethod partial, List<OpcodeBlock> region, OpcodeBlock ret, int body_start);
 
+    /**
+     * Gets the end of the region starting at the start index, or -1 if it does
+     * not form a sub region.
+     */
     static int getRegionEnd(List<OpcodeBlock> blk, OpcodeBlock ret, int start) {
         List<OpcodeBlock> blocks = new ArrayList<>(blk);
         if (ret != null) {
@@ -106,11 +110,15 @@ public interface RegionProcessor {
         } else {
             end = blocks.indexOf(region_start.getTarget());
         }
-        boolean isGoto = region_start instanceof GotoOpcodeBlock;
-        return getRegionEnd(blocks, start, end, isGoto, ret);
+        boolean is_goto = region_start instanceof GotoOpcodeBlock;
+        return getRegionEnd(blocks, start, end, is_goto, ret);
     }
 
-    static int getRegionEnd(List<OpcodeBlock> blocks, int start, int end, boolean isGoto, OpcodeBlock ret) {
+    /**
+     * Gets the end of the region starting at the start index, or -1 if it does
+     * not form a sub region.
+     */
+    static int getRegionEnd(List<OpcodeBlock> blocks, int start, int end, boolean is_goto, OpcodeBlock ret) {
 
         // This is a rather brute force search for the next node after the start
         // node which post-dominates the preceding nodes.
@@ -185,7 +193,7 @@ public interface RegionProcessor {
                                     alt_end = block_index;
                                     alt = block;
                                 }
-                            } else if(block instanceof BreakMarkerOpcodeBlock) {
+                            } else if (block instanceof BreakMarkerOpcodeBlock) {
                                 int block_index = blocks.indexOf(block);
                                 if (block_index > start && block_index < end && block_index > alt_end) {
                                     alt_end = block_index;
@@ -206,7 +214,7 @@ public interface RegionProcessor {
                     continue check;
                 }
             }
-            if (isGoto) {
+            if (is_goto) {
                 OpcodeBlock next = blocks.get(end);
                 int pos_ext = end_extension;
                 while (next instanceof ConditionalOpcodeBlock) {

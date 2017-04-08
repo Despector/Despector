@@ -45,6 +45,9 @@ import org.spongepowered.despector.util.TypeHelper;
 
 import java.util.List;
 
+/**
+ * An emitter for static method invoke instructions.
+ */
 public class StaticMethodInvokeEmitter implements InstructionEmitter<StaticMethodInvoke> {
 
     @Override

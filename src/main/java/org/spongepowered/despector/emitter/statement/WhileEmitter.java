@@ -28,6 +28,9 @@ import org.spongepowered.despector.ast.members.insn.branch.While;
 import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.StatementEmitter;
 
+/**
+ * An emitter for a while statement.
+ */
 public class WhileEmitter implements StatementEmitter<While> {
 
     @Override

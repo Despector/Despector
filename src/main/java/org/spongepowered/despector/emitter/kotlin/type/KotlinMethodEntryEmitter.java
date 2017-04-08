@@ -31,7 +31,6 @@ import org.spongepowered.despector.ast.Locals.LocalInstance;
 import org.spongepowered.despector.ast.generic.MethodSignature;
 import org.spongepowered.despector.ast.generic.VoidTypeSignature;
 import org.spongepowered.despector.ast.members.MethodEntry;
-import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
 import org.spongepowered.despector.ast.members.insn.Statement;
 import org.spongepowered.despector.ast.members.insn.StatementBlock;
 import org.spongepowered.despector.ast.members.insn.arg.Instruction;
@@ -47,16 +46,21 @@ import org.spongepowered.despector.emitter.special.GenericsEmitter;
 import org.spongepowered.despector.emitter.type.MethodEntryEmitter;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
+/**
+ * An emitter for kotlin methods.
+ */
 public class KotlinMethodEntryEmitter extends MethodEntryEmitter {
 
+    /**
+     * Gets if this method is overriden from a super type.
+     */
     public static boolean isOverriden(MethodEntry method) {
         if (method.getName().equals("toString") && method.getDescription().equals("()Ljava/lang/String;")) {
             return true;
         }
+        // TODO
         return false;
     }
 

@@ -235,9 +235,9 @@ public class ChildRegionProcessor implements RegionProcessor {
                 }
                 OpcodeBlock last = region.get(region.size() - 1);
                 if (!(last instanceof GotoOpcodeBlock) && sstart instanceof ConditionalOpcodeBlock) {
-                    GotoOpcodeBlock fakeLoop = new GotoOpcodeBlock(last.getBreakpoint());
-                    fakeLoop.setTarget(sstart);
-                    region.add(fakeLoop);
+                    GotoOpcodeBlock fake_loop = new GotoOpcodeBlock(last.getBreakpoint());
+                    fake_loop.setTarget(sstart);
+                    region.add(fake_loop);
                 }
                 continue;
             } else {

@@ -32,7 +32,6 @@ import org.spongepowered.despector.util.serialization.AstSerializer;
 import org.spongepowered.despector.util.serialization.MessagePacker;
 
 import java.io.IOException;
-import java.util.Arrays;
 
 /**
  * A statement calling an instance method.
@@ -99,12 +98,18 @@ public class InstanceMethodInvoke extends MethodInvoke {
         if (obj == this) {
             return true;
         }
-        if (!(obj instanceof InstanceMethodInvoke)) {
+        if (!super.equals(obj)) {
             return false;
         }
         InstanceMethodInvoke insn = (InstanceMethodInvoke) obj;
-        return this.callee.equals(insn.callee) && this.method_desc.equals(insn.method_desc) && this.method_name.equals(insn.method_name)
-                && this.method_owner.equals(insn.method_owner) && Arrays.equals(this.params, insn.params);
+        return this.callee.equals(insn.callee);
+    }
+
+    @Override
+    public int hashCode() {
+        int h = super.hashCode();
+        h = h * 37 + this.callee.hashCode();
+        return h;
     }
 
 }

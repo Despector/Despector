@@ -59,7 +59,7 @@ public class TryCatchBlockProcessor implements GraphProcessor {
             TryCatchMarkerOpcodeBlock marker = (TryCatchMarkerOpcodeBlock) region_start;
             checkState(marker.getType() == TryCatchMarkerType.START);
             List<OpcodeBlock> body = new ArrayList<>();
-            List<TryCatchMarkerOpcodeBlock> allEnds = new ArrayList<>();
+            List<TryCatchMarkerOpcodeBlock> all_ends = new ArrayList<>();
 
             for (int l = blocks.indexOf(marker.getEndMarker()); l < blocks.size(); l++) {
                 OpcodeBlock next_end = blocks.get(l);
@@ -68,22 +68,22 @@ public class TryCatchBlockProcessor implements GraphProcessor {
                 }
                 TryCatchMarkerOpcodeBlock next_marker = (TryCatchMarkerOpcodeBlock) next_end;
                 checkState(next_marker.getType() == TryCatchMarkerType.END);
-                allEnds.add(next_marker);
+                all_ends.add(next_marker);
             }
-            TryCatchMarkerOpcodeBlock last_start = allEnds.get(allEnds.size() - 1).getStartMarker();
-            TryCatchMarkerOpcodeBlock first_end = allEnds.get(0);
+            TryCatchMarkerOpcodeBlock last_start = all_ends.get(all_ends.size() - 1).getStartMarker();
+            TryCatchMarkerOpcodeBlock first_end = all_ends.get(0);
             for (int end = blocks.indexOf(last_start) + 1; end < blocks.indexOf(first_end); end++) {
                 OpcodeBlock next = blocks.get(end);
                 body.add(next);
             }
-            int end = blocks.indexOf(allEnds.get(allEnds.size() - 1)) + 1;
+            int end = blocks.indexOf(all_ends.get(all_ends.size() - 1)) + 1;
             OpcodeBlock next = blocks.get(end);
             OpcodeBlock end_of_catch = null;
             int last_block = -1;
             if (next instanceof GotoOpcodeBlock) {
                 end_of_catch = next.getTarget();
                 last_block = blocks.indexOf(end_of_catch);
-                if(last_block > 1) {
+                if (last_block > 1) {
                     OpcodeBlock prev = blocks.get(last_block - 1);
                     if (prev instanceof TryCatchMarkerOpcodeBlock && ((TryCatchMarkerOpcodeBlock) prev).getType() == TryCatchMarkerType.START) {
                         last_block -= 2;
@@ -109,7 +109,7 @@ public class TryCatchBlockProcessor implements GraphProcessor {
                     throw e;
                 }
             }
-            while (!allEnds.isEmpty()) {
+            while (!all_ends.isEmpty()) {
                 end++;
                 next = blocks.get(end);
                 if (next instanceof TryCatchMarkerOpcodeBlock) {
@@ -121,7 +121,7 @@ public class TryCatchBlockProcessor implements GraphProcessor {
                         if (cnext instanceof TryCatchMarkerOpcodeBlock) {
                             TryCatchMarkerOpcodeBlock cnext_marker = (TryCatchMarkerOpcodeBlock) cnext;
                             boolean found = false;
-                            for (Iterator<TryCatchMarkerOpcodeBlock> it = allEnds.iterator(); it.hasNext();) {
+                            for (Iterator<TryCatchMarkerOpcodeBlock> it = all_ends.iterator(); it.hasNext();) {
                                 TryCatchMarkerOpcodeBlock t = it.next();
                                 if (cnext_marker.getAsmNode() == t.getAsmNode()) {
                                     found = true;
@@ -148,13 +148,13 @@ public class TryCatchBlockProcessor implements GraphProcessor {
                             label_index = catch_start.getBreakpoint() - (catch_start.getOpcodes().size() - k);
                             it.remove();
                             break;
-                        } else if(op.getOpcode() == POP) {
+                        } else if (op.getOpcode() == POP) {
                             it.remove();
                             break;
                         }
                         k++;
                     }
-                    Locals.LocalInstance local = label_index == -1? null : partial.getLocals().getLocal(local_num).getInstance(label_index);
+                    Locals.LocalInstance local = label_index == -1 ? null : partial.getLocals().getLocal(local_num).getInstance(label_index);
                     List<OpcodeBlock> catch_body = new ArrayList<>();
                     catch_body.add(catch_start);
                     int stop_index = -1;
@@ -168,7 +168,7 @@ public class TryCatchBlockProcessor implements GraphProcessor {
                             if (cnext instanceof GotoOpcodeBlock && cnext.getTarget() == end_of_catch) {
                                 break;
                             } else if (cnext == end_of_catch) {
-                                allEnds.clear();
+                                all_ends.clear();
                                 break;
                             }
                         }

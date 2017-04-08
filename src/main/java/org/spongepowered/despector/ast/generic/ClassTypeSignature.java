@@ -87,10 +87,20 @@ public class ClassTypeSignature extends TypeSignature {
         SPECIAL.put(CHARACTER_OBJECT.getType(), CHARACTER_OBJECT);
     }
 
+    /**
+     * Gets the {@link ClassTypeSignature} for the given type descriptor. A new
+     * instance is created unless the type is a special type (primatives,
+     * primative wrappers, object, and string).
+     */
     public static ClassTypeSignature of(String type) {
         return of(type, false);
     }
 
+    /**
+     * Gets the {@link ClassTypeSignature} for the given type descriptor. A new
+     * instance is created unless the type is a special type (primatives,
+     * primative wrappers, object, and string) and the no_special flag is unset.
+     */
     public static ClassTypeSignature of(String type, boolean no_special) {
         if (!no_special) {
             ClassTypeSignature sig = SPECIAL.get(type);
@@ -174,6 +184,9 @@ public class ClassTypeSignature extends TypeSignature {
         return str.toString();
     }
 
+    /**
+     * An immutable class type signature.
+     */
     private static class ImmutableClassTypeSignature extends ClassTypeSignature {
 
         public ImmutableClassTypeSignature(String type) {

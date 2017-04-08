@@ -209,4 +209,14 @@ public class For implements Statement, Breakable {
         return this.condition.equals(insn.condition) && this.body.equals(insn.body);
     }
 
+    @Override
+    public int hashCode() {
+        int h = 1;
+        h = h * 37 + (this.init == null ? 0 : this.init.hashCode());
+        h = h * 37 + (this.incr == null ? 0 : this.incr.hashCode());
+        h = h * 37 + this.condition.hashCode();
+        h = h * 37 + this.body.hashCode();
+        return h;
+    }
+
 }

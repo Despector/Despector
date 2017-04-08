@@ -82,6 +82,9 @@ public class SourceSet {
         this.classes.put(e.getName(), e);
     }
 
+    /**
+     * Gets the type with the given internal name.
+     */
     public TypeEntry get(String name) {
         checkNotNull(name);
         if (name.endsWith("[]")) {
@@ -148,6 +151,9 @@ public class SourceSet {
         this.annotations.put(anno.getName(), anno);
     }
 
+    /**
+     * Gets the annotation type with the given internal name.
+     */
     public AnnotationType getAnnotationType(String name) {
         AnnotationType anno = this.annotations.get(name);
         if (anno == null) {
@@ -161,6 +167,9 @@ public class SourceSet {
         return this.annotations.values();
     }
 
+    /**
+     * Writes this source set to the given {@link MessagePacker}.
+     */
     public void writeTo(MessagePacker pack) throws IOException {
         pack.startMap(2);
         pack.writeString("version").writeInt(AstSerializer.VERSION);
@@ -171,6 +180,9 @@ public class SourceSet {
         }
     }
 
+    /**
+     * A loader which from which new types can be requested on demand.
+     */
     public static interface Loader {
 
         InputStream find(String name);

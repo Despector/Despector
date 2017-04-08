@@ -29,6 +29,9 @@ import org.spongepowered.despector.ast.members.insn.arg.cst.NullConstant;
 import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.InstructionEmitter;
 
+/**
+ * An emitter for the null constant.
+ */
 public class NullConstantEmitter implements InstructionEmitter<NullConstant> {
 
     @Override

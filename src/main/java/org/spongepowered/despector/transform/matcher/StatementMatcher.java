@@ -91,6 +91,9 @@ public interface StatementMatcher<T extends Statement> {
         return new WhileLoopMatcher.Builder();
     }
 
+    /**
+     * A statement matcher that matches any statement.
+     */
     public static class Any implements StatementMatcher<Statement> {
 
         Any() {
@@ -103,6 +106,9 @@ public interface StatementMatcher<T extends Statement> {
 
     }
 
+    /**
+     * A statement matcher that matches no statement excetp a null statement.
+     */
     public static class None implements StatementMatcher<Statement> {
 
         None() {

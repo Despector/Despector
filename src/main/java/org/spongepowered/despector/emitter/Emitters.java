@@ -156,7 +156,7 @@ import java.util.EnumMap;
 /**
  * Standard emitters.
  */
-public class Emitters {
+public final class Emitters {
 
     public static final EmitterSet JAVA_SET = new EmitterSet();
     public static final EmitterSet KOTLIN_SET = new EmitterSet();
@@ -266,8 +266,15 @@ public class Emitters {
         EMITTERS.put(Language.ANY, WILD);
     }
 
+    /**
+     * Gets the emitter for the given language.
+     */
     public static Emitter get(Language lang) {
         return EMITTERS.get(lang);
+    }
+
+    private Emitters() {
+
     }
 
 }

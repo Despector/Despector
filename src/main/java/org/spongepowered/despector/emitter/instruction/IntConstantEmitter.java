@@ -30,6 +30,9 @@ import org.spongepowered.despector.ast.members.insn.arg.cst.IntConstant;
 import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.InstructionEmitter;
 
+/**
+ * An emitter for integer constants.
+ */
 public class IntConstantEmitter implements InstructionEmitter<IntConstant> {
 
     @Override

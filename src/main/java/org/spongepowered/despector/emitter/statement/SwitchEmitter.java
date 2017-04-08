@@ -45,6 +45,9 @@ import org.spongepowered.despector.emitter.format.EmitterFormat.BracePosition;
 
 import java.util.Map;
 
+/**
+ * An emitter for switch statements.
+ */
 public class SwitchEmitter implements StatementEmitter<Switch> {
 
     private Map<Integer, String> buildSwitchTable(MethodEntry mth, String field) {
@@ -106,7 +109,7 @@ public class SwitchEmitter implements StatementEmitter<Switch> {
         ctx.printString(" ", ctx.getFormat().insert_space_before_closing_paren_in_switch);
         ctx.printString(")");
         ctx.emitBrace(ctx.getFormat().brace_position_for_switch, false, ctx.getFormat().insert_space_before_opening_brace_in_switch);
-        if(!ctx.getFormat().indent_switchstatements_compare_to_switch) {
+        if (!ctx.getFormat().indent_switchstatements_compare_to_switch) {
             ctx.dedent();
         }
         ctx.newLine();
@@ -138,7 +141,7 @@ public class SwitchEmitter implements StatementEmitter<Switch> {
                 ctx.printString(" ", ctx.getFormat().insert_space_after_colon_in_case);
                 ctx.newLine();
             }
-            if(ctx.getFormat().indent_switchstatements_compare_to_cases) {
+            if (ctx.getFormat().indent_switchstatements_compare_to_cases) {
                 ctx.indent();
             }
             ctx.emitBody(cs.getBody());

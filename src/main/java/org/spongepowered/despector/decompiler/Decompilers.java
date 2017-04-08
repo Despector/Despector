@@ -58,7 +58,10 @@ import org.spongepowered.despector.decompiler.step.MethodInfoStep;
 
 import java.util.EnumMap;
 
-public class Decompilers {
+/**
+ * Standard decompilers.
+ */
+public final class Decompilers {
 
     public static final BaseDecompiler JAVA = new BaseDecompiler(Language.JAVA);
     public static final BaseDecompiler KOTLIN = new BaseDecompiler(Language.KOTLIN);
@@ -127,8 +130,14 @@ public class Decompilers {
         DECOMPILERS.put(Language.ANY, WILD);
     }
 
+    /**
+     * Gets the decompiler for the given language.
+     */
     public static Decompiler get(Language lang) {
         return DECOMPILERS.get(lang);
+    }
+
+    private Decompilers() {
     }
 
 }

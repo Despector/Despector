@@ -55,7 +55,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
 
-public class Despector {
+/**
+ * Despector.
+ */
+public final class Despector {
 
     private static final Map<String, Consumer<String>> flags = new HashMap<>();
 
@@ -144,6 +147,9 @@ public class Despector {
         return writer.toString();
     }
 
+    /**
+     * The main entrance point.
+     */
     public static void main(String[] args) throws IOException {
         if (args.length < 2) {
             System.out.println("Usage: java -jar Despector.jar [sources...] [destination]");
@@ -267,6 +273,9 @@ public class Despector {
             }
         }
 
+    }
+
+    private Despector() {
     }
 
 }

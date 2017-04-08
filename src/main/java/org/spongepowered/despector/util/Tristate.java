@@ -24,6 +24,9 @@
  */
 package org.spongepowered.despector.util;
 
+/**
+ * A tristate value that may be true, false, or undefined.
+ */
 public enum Tristate {
 
     TRUE(true),
@@ -31,13 +34,13 @@ public enum Tristate {
     UNDEFINED(false);
 
     private final boolean bool;
-    
+
     Tristate(boolean b) {
         this.bool = b;
     }
-    
+
     public boolean asBoolean() {
         return this.bool;
     }
-    
+
 }

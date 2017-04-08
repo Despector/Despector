@@ -28,13 +28,18 @@ import org.spongepowered.despector.ast.members.insn.misc.Throw;
 import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.StatementEmitter;
 
+/**
+ * An emitter for a throw statement.
+ */
 public class ThrowEmitter implements StatementEmitter<Throw> {
 
     @Override
     public void emit(EmitterContext ctx, Throw insn, boolean semicolon) {
         ctx.printString("throw ");
         ctx.emit(insn.getException(), null);
-        if(semicolon) ctx.printString(";");
+        if (semicolon) {
+            ctx.printString(";");
+        }
     }
 
 }

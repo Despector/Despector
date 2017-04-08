@@ -29,6 +29,9 @@ import org.spongepowered.despector.ast.members.insn.arg.field.InstanceFieldAcces
 import org.spongepowered.despector.transform.matcher.InstructionMatcher;
 import org.spongepowered.despector.transform.matcher.MatchContext;
 
+/**
+ * A matcher for instance field accesses.
+ */
 public class InstanceFieldMatcher implements InstructionMatcher<InstanceFieldAccess> {
 
     private InstructionMatcher<?> owner;
@@ -59,6 +62,9 @@ public class InstanceFieldMatcher implements InstructionMatcher<InstanceFieldAcc
         return invoke;
     }
 
+    /**
+     * A matcher builder.
+     */
     public static class Builder {
 
         private InstructionMatcher<?> callee;
@@ -84,6 +90,9 @@ public class InstanceFieldMatcher implements InstructionMatcher<InstanceFieldAcc
             return this;
         }
 
+        /**
+         * Resets this builder.
+         */
         public Builder reset() {
             this.callee = null;
             this.name = null;

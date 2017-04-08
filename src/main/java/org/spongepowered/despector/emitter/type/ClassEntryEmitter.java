@@ -48,6 +48,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+/**
+ * An emitter of class types.
+ */
 public class ClassEntryEmitter implements AstEmitter<ClassEntry> {
 
     @Override
@@ -157,6 +160,9 @@ public class ClassEntryEmitter implements AstEmitter<ClassEntry> {
         return true;
     }
 
+    /**
+     * Emits the static fields for the given type.
+     */
     public void emitStaticFields(EmitterContext ctx, ClassEntry type) {
         if (!type.getStaticFields().isEmpty()) {
 
@@ -203,6 +209,9 @@ public class ClassEntryEmitter implements AstEmitter<ClassEntry> {
         }
     }
 
+    /**
+     * Emits the static methods for the given type.
+     */
     public void emitStaticMethods(EmitterContext ctx, ClassEntry type) {
         if (!type.getStaticMethods().isEmpty()) {
             for (MethodEntry mth : type.getStaticMethods()) {
@@ -226,6 +235,9 @@ public class ClassEntryEmitter implements AstEmitter<ClassEntry> {
         }
     }
 
+    /**
+     * Emits the instance fields for the given type.
+     */
     public void emitFields(EmitterContext ctx, ClassEntry type) {
         if (!type.getFields().isEmpty()) {
 
@@ -276,6 +288,9 @@ public class ClassEntryEmitter implements AstEmitter<ClassEntry> {
         }
     }
 
+    /**
+     * Emits the instance fields for the given type.
+     */
     public void emitMethods(EmitterContext ctx, ClassEntry type) {
         if (!type.getMethods().isEmpty()) {
             for (MethodEntry mth : type.getMethods()) {

@@ -198,4 +198,13 @@ public class CompareCondition extends Condition {
         return and.right.equals(this.right) && and.left.equals(this.left) && this.op == and.op;
     }
 
+    @Override
+    public int hashCode() {
+        int h = 1;
+        h = h * 37 + this.right.hashCode();
+        h = h * 37 + this.left.hashCode();
+        h = h * 37 + this.op.hashCode();
+        return h;
+    }
+
 }

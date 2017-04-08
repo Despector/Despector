@@ -36,6 +36,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * A pre pass operation that identifies jumps that form control flow breaks.
+ */
 public class BreakPrePassOperation implements GraphOperation {
 
     @Override
@@ -185,6 +188,9 @@ public class BreakPrePassOperation implements GraphOperation {
         }
     }
 
+    /**
+     * A representation of a loop.
+     */
     private static class Loop {
 
         public int start;

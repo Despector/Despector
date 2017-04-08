@@ -40,6 +40,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * An emitter for kotlin instance method invoke instructions.
+ */
 public class KotlinInstanceMethodInvokeEmitter extends InstanceMethodInvokeEmitter {
 
     private static final Set<String> NO_CALLEE = new HashSet<>();

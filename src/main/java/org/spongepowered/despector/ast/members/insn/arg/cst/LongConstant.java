@@ -91,4 +91,9 @@ public class LongConstant extends Constant {
         return this.cst == cast.cst;
     }
 
+    @Override
+    public int hashCode() {
+        return (int) ((this.cst >>> 32) ^ this.cst);
+    }
+
 }

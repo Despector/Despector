@@ -29,6 +29,9 @@ import org.spongepowered.despector.ast.kotlin.Elvis;
 import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.InstructionEmitter;
 
+/**
+ * An emitter for kotlin elvis instructions.
+ */
 public class ElvisEmitter implements InstructionEmitter<Elvis> {
 
     @Override

@@ -29,6 +29,9 @@ import org.spongepowered.despector.ast.members.insn.arg.InstanceOf;
 import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.InstructionEmitter;
 
+/**
+ * An emitter for kotlin instanceof instructions.
+ */
 public class KotlinInstanceOfEmitter implements InstructionEmitter<InstanceOf> {
 
     @Override

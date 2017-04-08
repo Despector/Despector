@@ -29,6 +29,9 @@ import org.spongepowered.despector.ast.members.insn.arg.cst.DoubleConstant;
 import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.InstructionEmitter;
 
+/**
+ * An emitter for a double constant.
+ */
 public class DoubleConstantEmitter implements InstructionEmitter<DoubleConstant> {
 
     @Override

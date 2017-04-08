@@ -156,4 +156,13 @@ public class ForEach implements Statement, Breakable {
         return this.collection.equals(insn.collection) && this.body.equals(insn.body) && this.val.equals(insn.val);
     }
 
+    @Override
+    public int hashCode() {
+        int h = 1;
+        h = h * 37 + this.collection.hashCode();
+        h = h * 37 + this.body.hashCode();
+        h = h * 37 + this.val.hashCode();
+        return h;
+    }
+
 }

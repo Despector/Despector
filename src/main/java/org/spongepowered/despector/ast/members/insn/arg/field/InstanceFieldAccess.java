@@ -96,4 +96,14 @@ public class InstanceFieldAccess extends FieldAccess {
                 && this.owner.equals(insn.owner);
     }
 
+    @Override
+    public int hashCode() {
+        int h = 1;
+        h = h * 37 + this.field_desc.hashCode();
+        h = h * 37 + this.field_name.hashCode();
+        h = h * 37 + this.owner_type.hashCode();
+        h = h * 37 + this.owner.hashCode();
+        return h;
+    }
+
 }

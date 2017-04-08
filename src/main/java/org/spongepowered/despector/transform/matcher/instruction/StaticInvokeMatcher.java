@@ -29,6 +29,9 @@ import org.spongepowered.despector.ast.members.insn.function.StaticMethodInvoke;
 import org.spongepowered.despector.transform.matcher.InstructionMatcher;
 import org.spongepowered.despector.transform.matcher.MatchContext;
 
+/**
+ * A matcher for static method invoke instructions.
+ */
 public class StaticInvokeMatcher implements InstructionMatcher<StaticMethodInvoke> {
 
     private String owner;
@@ -59,6 +62,9 @@ public class StaticInvokeMatcher implements InstructionMatcher<StaticMethodInvok
         return invoke;
     }
 
+    /**
+     * A matcher builder.
+     */
     public static class Builder {
 
         private String owner;
@@ -84,6 +90,9 @@ public class StaticInvokeMatcher implements InstructionMatcher<StaticMethodInvok
             return this;
         }
 
+        /**
+         * Resets this builder.
+         */
         public Builder reset() {
             this.owner = null;
             this.name = null;

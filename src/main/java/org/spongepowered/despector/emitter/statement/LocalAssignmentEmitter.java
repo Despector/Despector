@@ -34,6 +34,9 @@ import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.StatementEmitter;
 import org.spongepowered.despector.emitter.special.GenericsEmitter;
 
+/**
+ * An emitter for local assignments.
+ */
 public class LocalAssignmentEmitter implements StatementEmitter<LocalAssignment> {
 
     @Override

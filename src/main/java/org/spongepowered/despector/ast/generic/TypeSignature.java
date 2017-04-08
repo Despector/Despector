@@ -49,6 +49,9 @@ public abstract class TypeSignature {
 
     public abstract void writeTo(MessagePacker pack) throws IOException;
 
+    /**
+     * Gets a {@link TypeSignature} which is an array of the given type.
+     */
     public static TypeSignature arrayOf(TypeSignature type) {
         if (type instanceof ClassTypeSignature) {
             ClassTypeSignature sig = (ClassTypeSignature) type;
@@ -63,6 +66,9 @@ public abstract class TypeSignature {
         throw new IllegalStateException();
     }
 
+    /**
+     * Gets the component {@link TypeSignature} of the given array type.
+     */
     public static TypeSignature getArrayComponent(TypeSignature type) {
         if (type instanceof ClassTypeSignature) {
             ClassTypeSignature sig = (ClassTypeSignature) type;

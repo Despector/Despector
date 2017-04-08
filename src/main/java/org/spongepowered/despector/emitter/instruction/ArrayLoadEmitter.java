@@ -30,6 +30,9 @@ import org.spongepowered.despector.ast.members.insn.arg.field.ArrayAccess;
 import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.InstructionEmitter;
 
+/**
+ * An emitter for an array access instruction.
+ */
 public class ArrayLoadEmitter implements InstructionEmitter<ArrayAccess> {
 
     @Override

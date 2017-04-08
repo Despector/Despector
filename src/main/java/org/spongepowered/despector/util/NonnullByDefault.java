@@ -31,14 +31,15 @@ import java.lang.annotation.RetentionPolicy;
 import javax.annotation.Nonnull;
 import javax.annotation.meta.TypeQualifierDefault;
 
+/**
+ * An annotation marking that all elements are non-null by default.
+ */
 @Nonnull
-@TypeQualifierDefault(
-        {
-                ElementType.FIELD,
-                ElementType.METHOD,
-                ElementType.PARAMETER
-        }
-)
+@TypeQualifierDefault({
+        ElementType.FIELD,
+        ElementType.METHOD,
+        ElementType.PARAMETER
+})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface NonnullByDefault {
 

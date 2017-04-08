@@ -27,8 +27,14 @@ package org.spongepowered.despector.decompiler;
 import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.despector.ast.type.TypeEntry;
 
+/**
+ * A single decompilation step.
+ */
 public interface DecompilerStep {
 
+    /**
+     * Performs this decompilation step.
+     */
     void process(ClassNode cn, TypeEntry entry);
 
 }

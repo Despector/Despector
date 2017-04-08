@@ -31,6 +31,9 @@ import org.spongepowered.despector.ast.members.insn.branch.If.Else;
 import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.StatementEmitter;
 
+/**
+ * An emitter for if statements.
+ */
 public class IfEmitter implements StatementEmitter<If> {
 
     @Override

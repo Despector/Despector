@@ -40,6 +40,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * An emitter for kotlin static methods.
+ */
 public class KotlinStaticMethodInvokeEmitter extends StaticMethodInvokeEmitter {
 
     private static final Set<String> IGNORED_METHODS = new HashSet<>();
@@ -107,6 +110,10 @@ public class KotlinStaticMethodInvokeEmitter extends StaticMethodInvokeEmitter {
         ctx.printString(")");
     }
 
+    /**
+     * Unwraps a call to a default method to determine the default parameter
+     * values.
+     */
     public void callDefaultMethod(EmitterContext ctx, StaticMethodInvoke call) {
         Instruction callee = call.getParams()[0];
         int set = ((IntConstant) call.getParams()[call.getParams().length - 2]).getConstant();

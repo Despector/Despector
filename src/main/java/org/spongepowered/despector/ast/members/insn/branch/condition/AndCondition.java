@@ -82,7 +82,7 @@ public class AndCondition extends Condition {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < this.args.size(); i++) {
             Condition arg = this.args.get(i);
-            if(arg instanceof OrCondition) {
+            if (arg instanceof OrCondition) {
                 sb.append("(");
                 sb.append(this.args.get(i));
                 sb.append(')');
@@ -114,6 +114,15 @@ public class AndCondition extends Condition {
             }
         }
         return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int h = 1;
+        for (Condition cond : this.args) {
+            h = h * 37 + cond.hashCode();
+        }
+        return h;
     }
 
 }

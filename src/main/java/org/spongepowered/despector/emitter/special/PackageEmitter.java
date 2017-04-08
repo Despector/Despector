@@ -26,8 +26,14 @@ package org.spongepowered.despector.emitter.special;
 
 import org.spongepowered.despector.emitter.EmitterContext;
 
+/**
+ * An emitter for a package declaration.
+ */
 public class PackageEmitter implements SpecialEmitter {
 
+    /**
+     * Emits the given package.
+     */
     public void emitPackage(EmitterContext ctx, String pkg) {
         ctx.printString("package ");
         ctx.printString(pkg);

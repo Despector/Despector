@@ -104,4 +104,9 @@ public class Return implements Statement {
         return this.value.equals(insn.value);
     }
 
+    @Override
+    public int hashCode() {
+        return this.value.hashCode();
+    }
+
 }

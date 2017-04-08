@@ -90,4 +90,10 @@ public class DoubleConstant extends Constant {
         DoubleConstant cast = (DoubleConstant) obj;
         return this.cst == cast.cst;
     }
+
+    @Override
+    public int hashCode() {
+        long bits = Double.doubleToLongBits(this.cst);
+        return (int) ((bits >>> 32) ^ bits);
+    }
 }

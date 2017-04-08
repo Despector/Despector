@@ -26,8 +26,14 @@ package org.spongepowered.despector.decompiler.method.graph.data.block;
 
 import java.util.List;
 
+/**
+ * A block section representing a breakable control flow element.
+ */
 public interface BreakableBlockSection {
 
+    /**
+     * Gets the control flow breaks targeting this section.
+     */
     List<BreakBlockSection> getBreaks();
 
 }

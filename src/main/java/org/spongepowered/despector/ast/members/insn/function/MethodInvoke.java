@@ -136,4 +136,37 @@ public abstract class MethodInvoke implements Instruction {
         }
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (o == this) {
+            return true;
+        }
+        if (o == null || !getClass().equals(o.getClass())) {
+            return false;
+        }
+        MethodInvoke invoke = (MethodInvoke) o;
+        if (this.params.length != invoke.params.length) {
+            return false;
+        }
+        for (int i = 0; i < this.params.length; i++) {
+            if (!this.params[i].equals(invoke.params[i])) {
+                return false;
+            }
+        }
+        return this.method_desc.equals(invoke.method_desc) && this.method_name.equals(invoke.method_name)
+                && this.method_owner.equals(invoke.method_owner);
+    }
+
+    @Override
+    public int hashCode() {
+        int h = 1;
+        h = h * 37 + this.method_desc.hashCode();
+        h = h * 37 + this.method_name.hashCode();
+        h = h * 37 + this.method_owner.hashCode();
+        for (Instruction insn : this.params) {
+            h = h * 37 + insn.hashCode();
+        }
+        return h;
+    }
+
 }

@@ -38,6 +38,9 @@ import org.spongepowered.despector.util.TypeHelper;
 
 import java.util.List;
 
+/**
+ * An emitter for a new instruction.
+ */
 public class NewEmitter implements InstructionEmitter<New> {
 
     @Override
@@ -45,8 +48,8 @@ public class NewEmitter implements InstructionEmitter<New> {
 
         if (arg.getType().getName().contains("$")) {
             String last = arg.getType().getName();
-            int last$ = last.lastIndexOf('$');
-            last = last.substring(last$ + 1);
+            int last_inner_class = last.lastIndexOf('$');
+            last = last.substring(last_inner_class + 1);
             if (last.matches("[0-9]+")) {
                 TypeEntry anon_type = ctx.getType().getSource().get(arg.getType().getName());
                 if (anon_type != null) {

@@ -50,6 +50,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * An emitter for kotlin enum types.
+ */
 public class KotlinEnumEntryEmitter implements AstEmitter<EnumEntry> {
 
     private static final Set<String> HIDDEN_ANNOTATIONS = new HashSet<>();
@@ -209,7 +212,7 @@ public class KotlinEnumEntryEmitter implements AstEmitter<EnumEntry> {
             for (FieldEntry field : type.getStaticFields()) {
                 if (field.isSynthetic()) {
                     // Skip the values array.
-                    if(ConfigManager.getConfig().emitter.emit_synthetics) {
+                    if (ConfigManager.getConfig().emitter.emit_synthetics) {
                         ctx.printIndentation();
                         ctx.printString("// Synthetic");
                         ctx.newLine();
@@ -256,7 +259,7 @@ public class KotlinEnumEntryEmitter implements AstEmitter<EnumEntry> {
                     // initializer
                     continue;
                 } else if (mth.isSynthetic()) {
-                    if(ConfigManager.getConfig().emitter.emit_synthetics) {
+                    if (ConfigManager.getConfig().emitter.emit_synthetics) {
                         ctx.printIndentation();
                         ctx.printString("// Synthetic");
                         ctx.newLine();
@@ -272,7 +275,7 @@ public class KotlinEnumEntryEmitter implements AstEmitter<EnumEntry> {
         if (!type.getMethods().isEmpty()) {
             for (MethodEntry mth : type.getMethods()) {
                 if (mth.isSynthetic() || mth.getName().equals("<init>")) {
-                    if(ConfigManager.getConfig().emitter.emit_synthetics) {
+                    if (ConfigManager.getConfig().emitter.emit_synthetics) {
                         ctx.printIndentation();
                         ctx.printString("// Synthetic");
                         ctx.newLine();
@@ -303,6 +306,9 @@ public class KotlinEnumEntryEmitter implements AstEmitter<EnumEntry> {
         return true;
     }
 
+    /**
+     * An enum field.
+     */
     private static class EnumField {
 
         public String name;

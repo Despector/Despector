@@ -41,6 +41,9 @@ import org.spongepowered.despector.emitter.kotlin.KotlinEmitterUtil;
 
 import java.util.List;
 
+/**
+ * An emitter of a kotlin when instruction.
+ */
 public class WhenEmitter implements InstructionEmitter<When> {
 
     private void emit(EmitterContext ctx, Condition cond, LocalInstance local) {
@@ -51,7 +54,7 @@ public class WhenEmitter implements InstructionEmitter<When> {
                 if (mth.getMethodName().equals("areEqual") && mth.getOwner().equals("Lkotlin/jvm/internal/Intrinsics;")) {
                     ctx.emit(mth.getParams()[1], null);
                 }
-            } else if(val instanceof InstanceOf) {
+            } else if (val instanceof InstanceOf) {
                 ctx.printString("is ");
                 KotlinEmitterUtil.emitType(ctx, ((InstanceOf) val).getType());
             } else {

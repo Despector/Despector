@@ -30,8 +30,14 @@ import org.spongepowered.despector.config.ConfigManager;
 import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.InstructionEmitter;
 
+/**
+ * An emitter for string constants.
+ */
 public class StringConstantEmitter implements InstructionEmitter<StringConstant> {
 
+    /**
+     * Escapes the given string.
+     */
     public static String escape(String text) {
         StringBuilder str = new StringBuilder();
         for (int i = 0; i < text.length(); i++) {

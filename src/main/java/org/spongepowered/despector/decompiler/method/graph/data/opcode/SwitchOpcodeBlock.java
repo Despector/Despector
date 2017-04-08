@@ -30,6 +30,9 @@ import org.spongepowered.despector.decompiler.method.graph.data.block.BlockSecti
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * An opcode block ending with a switch instruction.
+ */
 public class SwitchOpcodeBlock extends OpcodeBlock {
 
     private final Map<Label, OpcodeBlock> additional_targets = new HashMap<>();

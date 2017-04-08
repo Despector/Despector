@@ -262,6 +262,9 @@ public class ImportManager {
         }
     }
 
+    /**
+     * A visitor to gather types needing to be imported.
+     */
     private class ImportWalker extends InstructionVisitor {
 
         @Override

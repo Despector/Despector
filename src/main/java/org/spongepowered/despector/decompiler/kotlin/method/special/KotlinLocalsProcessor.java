@@ -48,6 +48,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * A locals processor for locals in kotlin that attempts to simplify some of the
+ * extra locals that kotlin creates.
+ */
 public class KotlinLocalsProcessor implements LocalsProcessor {
 
     @SuppressWarnings("unchecked")
@@ -178,6 +182,10 @@ public class KotlinLocalsProcessor implements LocalsProcessor {
 
     }
 
+    /**
+     * Counts the number of times the given local is read between the start and
+     * end indices in the opcode list.
+     */
     public static int countReads(List<AbstractInsnNode> ops, int start, int end, int local, Map<Label, List<Integer>> label_targets) {
         int count = 0;
         for (int i = end - 1; i >= start; i--) {
@@ -207,6 +215,9 @@ public class KotlinLocalsProcessor implements LocalsProcessor {
         return count;
     }
 
+    /**
+     * Gets the index of the last read of the given local.
+     */
     public static int lastRead(List<AbstractInsnNode> ops, int start, int end, int local) {
 
         for (int i = end - 1; i >= start; i--) {
@@ -222,6 +233,9 @@ public class KotlinLocalsProcessor implements LocalsProcessor {
         return -1;
     }
 
+    /**
+     * Gets the index of the next modification of the given local.
+     */
     public static int nextMod(List<AbstractInsnNode> ops, int start, int local) {
 
         for (int i = start; i < ops.size(); i++) {

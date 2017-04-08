@@ -113,4 +113,25 @@ public abstract class FieldAssignment extends Assignment {
         this.initializer = state;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (o == this) {
+            return true;
+        }
+        if (o == null || !o.getClass().equals(getClass())) {
+            return false;
+        }
+        FieldAssignment assign = (FieldAssignment) o;
+        return this.field_name.equals(assign.field_name) && this.owner_type.equals(assign.owner_type) && this.type_desc.equals(assign.type_desc);
+    }
+
+    @Override
+    public int hashCode() {
+        int h = 1;
+        h = h * 37 + this.field_name.hashCode();
+        h = h * 37 + this.owner_type.hashCode();
+        h = h * 37 + this.type_desc.hashCode();
+        return h;
+    }
+
 }

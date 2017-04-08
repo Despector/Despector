@@ -29,6 +29,9 @@ import org.spongepowered.despector.ast.members.insn.misc.Return;
 import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.StatementEmitter;
 
+/**
+ * An emitter for a return statement.
+ */
 public class ReturnEmitter implements StatementEmitter<Return> {
 
     @Override
@@ -42,8 +45,9 @@ public class ReturnEmitter implements StatementEmitter<Return> {
             ctx.printString(" ");
             ctx.emit(insn.getValue().get(), type);
         }
-        if (semicolon)
+        if (semicolon) {
             ctx.printString(";");
+        }
     }
 
 }

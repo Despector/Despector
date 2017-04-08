@@ -29,6 +29,9 @@ import org.spongepowered.despector.ast.members.insn.function.InstanceMethodInvok
 import org.spongepowered.despector.transform.matcher.InstructionMatcher;
 import org.spongepowered.despector.transform.matcher.MatchContext;
 
+/**
+ * A matcher for instance method invokes.
+ */
 public class InstanceInvokeMatcher implements InstructionMatcher<InstanceMethodInvoke> {
 
     private InstructionMatcher<?> callee;
@@ -70,6 +73,9 @@ public class InstanceInvokeMatcher implements InstructionMatcher<InstanceMethodI
         return invoke;
     }
 
+    /**
+     * A matcher builder.
+     */
     public static class Builder {
 
         private InstructionMatcher<?> callee;
@@ -107,6 +113,9 @@ public class InstanceInvokeMatcher implements InstructionMatcher<InstanceMethodI
             return this;
         }
 
+        /**
+         * Resets this builder.
+         */
         public Builder reset() {
             this.callee = null;
             this.owner = null;

@@ -42,6 +42,9 @@ import java.util.ArrayList;
 import java.util.Deque;
 import java.util.List;
 
+/**
+ * a block section containing a processed kotlin when statement.
+ */
 public class WhenBlockSection extends BlockSection {
 
     private final List<WhenCondition> conditions = new ArrayList<>();
@@ -83,13 +86,16 @@ public class WhenBlockSection extends BlockSection {
             section.appendTo(case_body, case_stack);
         }
         when.setElseBody(case_body, case_stack.peek());
-        if(has_last) {
+        if (has_last) {
             stack.push(when);
         } else {
             block.append(new InvokeStatement(when));
         }
     }
 
+    /**
+     * A condition of a when statement.
+     */
     public static class WhenCondition {
 
         private Condition condition;

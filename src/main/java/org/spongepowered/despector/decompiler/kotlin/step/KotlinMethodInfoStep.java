@@ -52,6 +52,9 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+/**
+ * A decompilation step for decompiling kotlin methods.
+ */
 public class KotlinMethodInfoStep implements DecompilerStep {
 
     private MethodDecompiler method_decomp;

@@ -75,6 +75,9 @@ public class TypeArgument {
         this.sig = sig;
     }
 
+    /**
+     * Writes this type argument to the given {@link MessagePacker}.
+     */
     public void writeTo(MessagePacker pack) throws IOException {
         int len = 2;
         if (this.sig != null) {

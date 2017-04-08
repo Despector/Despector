@@ -24,16 +24,27 @@
  */
 package org.spongepowered.despector.util.serialization;
 
+import static com.google.common.base.Preconditions.checkState;
 import static org.spongepowered.despector.util.serialization.MessageType.*;
 
 import com.google.common.base.Charsets;
 
-import static com.google.common.base.Preconditions.checkState;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
+/**
+ * A deserializer for data using the messagepack format.
+ */
 public class MessageUnpacker implements AutoCloseable {
+
+    private static final int FIXINT_TYPE_MASK = 0x80;
+    private static final int FIXINT_MASK = 0x7F;
+    private static final int NEGATIVE_FIXINT_MASK = 0xFFFFFF00;
+    private static final int SHORTSTRING_TYPE_MASK = 0xE0;
+    private static final int SHORTSTRING_MASK = 0x1F;
+    private static final int SHORTARRAY_MASK = 0xF0;
+    private static final int NIBBLE_MASK = 0xF;
 
     private final DataInputStream stream;
 
@@ -51,6 +62,9 @@ public class MessageUnpacker implements AutoCloseable {
         this.stream.close();
     }
 
+    /**
+     * Peeks at the next type in the input.
+     */
     public MessageType peekType() throws IOException {
         this.stream.mark(1);
         int next = this.stream.readUnsignedByte();
@@ -65,11 +79,17 @@ public class MessageUnpacker implements AutoCloseable {
         }
     }
 
+    /**
+     * Reads a nil value from the input.
+     */
     public void readNil() throws IOException {
         expectType(MessageType.NIL);
         this.stream.skipBytes(1);
     }
 
+    /**
+     * Reads a boolean value from the input.
+     */
     public boolean readBool() throws IOException {
         int next = this.stream.readUnsignedByte();
         if (next == TYPE_BOOL_TRUE) {
@@ -80,26 +100,32 @@ public class MessageUnpacker implements AutoCloseable {
         throw new IllegalStateException("Unexpected type " + MessageType.of(next).name() + " but expected BOOL");
     }
 
+    /**
+     * Reads a byte value from the input.
+     */
     public byte readByte() throws IOException {
         expectType(MessageType.INT);
         int next = this.stream.readUnsignedByte();
-        if ((next & 0x80) == 0) {
-            return (byte) (next & 0x7F);
+        if ((next & FIXINT_TYPE_MASK) == 0) {
+            return (byte) (next & FIXINT_MASK);
         } else if ((next & TYPE_NEGINT_MASK) == TYPE_NEGINT_MASK) {
-            return (byte) (0xFFFFFF00 | next);
+            return (byte) (NEGATIVE_FIXINT_MASK | next);
         } else if (next == TYPE_INT8) {
             return this.stream.readByte();
         }
         throw new IllegalStateException("Unexpected type " + MessageType.of(next).name() + " but expected INT");
     }
 
+    /**
+     * Reads a short value from the input.
+     */
     public short readShort() throws IOException {
         expectType(MessageType.INT);
         int next = this.stream.readUnsignedByte();
-        if ((next & 0x80) == 0) {
-            return (byte) (next & 0x7F);
+        if ((next & FIXINT_TYPE_MASK) == 0) {
+            return (byte) (next & FIXINT_MASK);
         } else if ((next & TYPE_NEGINT_MASK) == TYPE_NEGINT_MASK) {
-            return (byte) (0xFFFFFF00 | next);
+            return (byte) (NEGATIVE_FIXINT_MASK | next);
         } else if (next == TYPE_INT8) {
             return this.stream.readByte();
         } else if (next == TYPE_INT16) {
@@ -108,13 +134,16 @@ public class MessageUnpacker implements AutoCloseable {
         throw new IllegalStateException("Unexpected type " + MessageType.of(next).name() + " but expected INT");
     }
 
+    /**
+     * Reads an integer value from the input.
+     */
     public int readInt() throws IOException {
         expectType(MessageType.INT);
         int next = this.stream.readUnsignedByte();
-        if ((next & 0x80) == 0) {
-            return (byte) (next & 0x7F);
+        if ((next & FIXINT_TYPE_MASK) == 0) {
+            return (byte) (next & FIXINT_MASK);
         } else if ((next & TYPE_NEGINT_MASK) == TYPE_NEGINT_MASK) {
-            return (byte) (0xFFFFFF00 | next);
+            return (byte) (NEGATIVE_FIXINT_MASK | next);
         } else if (next == TYPE_INT8) {
             return this.stream.readByte();
         } else if (next == TYPE_INT16) {
@@ -125,13 +154,16 @@ public class MessageUnpacker implements AutoCloseable {
         throw new IllegalStateException("Unexpected type " + MessageType.of(next).name() + " but expected INT");
     }
 
+    /**
+     * Reads a long value from the input.
+     */
     public long readLong() throws IOException {
         expectType(MessageType.INT);
         int next = this.stream.readUnsignedByte();
-        if ((next & 0x80) == 0) {
-            return (byte) (next & 0x7F);
+        if ((next & FIXINT_TYPE_MASK) == 0) {
+            return (byte) (next & FIXINT_MASK);
         } else if ((next & TYPE_NEGINT_MASK) == TYPE_NEGINT_MASK) {
-            return (byte) (0xFFFFFF00 | next);
+            return (byte) (NEGATIVE_FIXINT_MASK | next);
         } else if (next == TYPE_INT8) {
             return this.stream.readByte();
         } else if (next == TYPE_INT16) {
@@ -144,22 +176,28 @@ public class MessageUnpacker implements AutoCloseable {
         throw new IllegalStateException("Unexpected type " + MessageType.of(next).name() + " but expected INT");
     }
 
-    public byte readUnsignedByte() throws IOException {
+    /**
+     * Reads an unsigned byte value from the input.
+     */
+    public int readUnsignedByte() throws IOException {
         expectType(MessageType.UINT);
         int next = this.stream.readUnsignedByte();
-        if ((next & 0x80) == 0) {
-            return (byte) (next & 0x7F);
+        if ((next & FIXINT_TYPE_MASK) == 0) {
+            return (next & FIXINT_MASK);
         } else if (next == TYPE_UINT8) {
             return this.stream.readByte();
         }
         throw new IllegalStateException("Unexpected type " + MessageType.of(next).name() + " but expected UINT");
     }
 
-    public short readUnsignedShort() throws IOException {
+    /**
+     * Reads an unsigned short value from the input.
+     */
+    public int readUnsignedShort() throws IOException {
         expectType(MessageType.UINT);
         int next = this.stream.readUnsignedByte();
-        if ((next & 0x80) == 0) {
-            return (byte) (next & 0x7F);
+        if ((next & FIXINT_TYPE_MASK) == 0) {
+            return (byte) (next & FIXINT_MASK);
         } else if (next == TYPE_UINT8) {
             return this.stream.readByte();
         } else if (next == TYPE_UINT16) {
@@ -168,11 +206,14 @@ public class MessageUnpacker implements AutoCloseable {
         throw new IllegalStateException("Unexpected type " + MessageType.of(next).name() + " but expected UINT");
     }
 
-    public int readUnsignedInt() throws IOException {
+    /**
+     * Reads an unsigned integer value from the input.
+     */
+    public long readUnsignedInt() throws IOException {
         expectType(MessageType.UINT);
         int next = this.stream.readUnsignedByte();
-        if ((next & 0x80) == 0) {
-            return (byte) (next & 0x7F);
+        if ((next & FIXINT_TYPE_MASK) == 0) {
+            return (byte) (next & FIXINT_MASK);
         } else if (next == TYPE_UINT8) {
             return this.stream.readByte();
         } else if (next == TYPE_UINT16) {
@@ -183,11 +224,14 @@ public class MessageUnpacker implements AutoCloseable {
         throw new IllegalStateException("Unexpected type " + MessageType.of(next).name() + " but expected UINT");
     }
 
+    /**
+     * Reads an unsigned long value from the input.
+     */
     public long readUnsignedLong() throws IOException {
         expectType(MessageType.UINT);
         int next = this.stream.readUnsignedByte();
-        if ((next & 0x80) == 0) {
-            return (byte) (next & 0x7F);
+        if ((next & FIXINT_TYPE_MASK) == 0) {
+            return (byte) (next & FIXINT_MASK);
         } else if (next == TYPE_UINT8) {
             return this.stream.readByte();
         } else if (next == TYPE_UINT16) {
@@ -200,24 +244,33 @@ public class MessageUnpacker implements AutoCloseable {
         throw new IllegalStateException("Unexpected type " + MessageType.of(next).name() + " but expected UINT");
     }
 
+    /**
+     * Reads a 32-bit floating point value from the input.
+     */
     public float readFloat() throws IOException {
         expectType(MessageType.FLOAT);
         this.stream.skipBytes(1);
         return this.stream.readFloat();
     }
 
+    /**
+     * Reads a 64-bit floating point value from the input.
+     */
     public double readDouble() throws IOException {
         expectType(MessageType.DOUBLE);
         this.stream.skipBytes(1);
         return this.stream.readDouble();
     }
 
+    /**
+     * Reads a string value from the input.
+     */
     public String readString() throws IOException {
         expectType(MessageType.STRING);
         int next = this.stream.readUnsignedByte();
         int len = -1;
-        if ((next & 0xE0) == TYPE_STR5_MASK) {
-            len = next & 0x1F;
+        if ((next & SHORTSTRING_TYPE_MASK) == TYPE_STR5_MASK) {
+            len = next & SHORTSTRING_MASK;
         } else if (next == TYPE_STR8) {
             len = this.stream.readUnsignedByte();
         } else if (next == TYPE_STR16) {
@@ -230,6 +283,9 @@ public class MessageUnpacker implements AutoCloseable {
         return new String(data, Charsets.UTF_8);
     }
 
+    /**
+     * Reads a binary value from the input.
+     */
     public byte[] readBinary() throws IOException {
         expectType(MessageType.BIN);
         int next = this.stream.readUnsignedByte();
@@ -246,12 +302,16 @@ public class MessageUnpacker implements AutoCloseable {
         return data;
     }
 
+    /**
+     * Reads an array value from the input and returns the number of items in
+     * the array.
+     */
     public int readArray() throws IOException {
         expectType(MessageType.ARRAY);
         int next = this.stream.readUnsignedByte();
         int len = -1;
-        if ((next & 0xF0) == TYPE_ARRAY8_MASK) {
-            len = next & 0xF;
+        if ((next & SHORTARRAY_MASK) == TYPE_ARRAY8_MASK) {
+            len = next & NIBBLE_MASK;
         } else if (next == TYPE_ARRAY16) {
             len = this.stream.readUnsignedShort();
         } else if (next == TYPE_ARRAY32) {
@@ -260,12 +320,16 @@ public class MessageUnpacker implements AutoCloseable {
         return len;
     }
 
+    /**
+     * Reads a map value from the input and returns the number of key value
+     * pairs in the map.
+     */
     public int readMap() throws IOException {
         expectType(MessageType.MAP);
         int next = this.stream.readUnsignedByte();
         int len = -1;
-        if ((next & 0xF0) == TYPE_MAP8_MASK) {
-            len = next & 0xF;
+        if ((next & SHORTARRAY_MASK) == TYPE_MAP8_MASK) {
+            len = next & NIBBLE_MASK;
         } else if (next == TYPE_MAP16) {
             len = this.stream.readUnsignedShort();
         } else if (next == TYPE_MAP32) {

@@ -32,6 +32,9 @@ import org.spongepowered.despector.ast.members.insn.branch.condition.CompareCond
 import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.InstructionEmitter;
 
+/**
+ * An emitter for ternary instructions.
+ */
 public class TernaryEmitter implements InstructionEmitter<Ternary> {
 
     @Override
@@ -54,6 +57,9 @@ public class TernaryEmitter implements InstructionEmitter<Ternary> {
         ctx.emit(ternary.getFalseValue(), type);
     }
 
+    /**
+     * Checks if the given ternary can be simplified to a boolean expression.
+     */
     public boolean checkBooleanExpression(EmitterContext ctx, Ternary ternary) {
         if (ternary.getTrueValue() instanceof IntConstant && ternary.getFalseValue() instanceof IntConstant) {
             int tr = ((IntConstant) ternary.getTrueValue()).getConstant();
@@ -82,7 +88,7 @@ public class TernaryEmitter implements InstructionEmitter<Ternary> {
                 ctx.printString("(");
                 ctx.emit(ternary.getCondition());
                 ctx.printString(") && ");
-                if(ternary.getFalseValue() instanceof Ternary) {
+                if (ternary.getFalseValue() instanceof Ternary) {
                     ctx.printString("(");
                     ctx.emit(ternary.getFalseValue(), ClassTypeSignature.BOOLEAN);
                     ctx.printString(")");
@@ -93,7 +99,7 @@ public class TernaryEmitter implements InstructionEmitter<Ternary> {
                 ctx.emit(ternary.getCondition());
                 ctx.markWrapPoint();
                 ctx.printString(" || ");
-                if(ternary.getFalseValue() instanceof Ternary) {
+                if (ternary.getFalseValue() instanceof Ternary) {
                     ctx.printString("(");
                     ctx.emit(ternary.getFalseValue(), ClassTypeSignature.BOOLEAN);
                     ctx.printString(")");
@@ -110,7 +116,7 @@ public class TernaryEmitter implements InstructionEmitter<Ternary> {
                 ctx.printString("(");
                 ctx.emit(ternary.getCondition());
                 ctx.printString(") && ");
-                if(ternary.getTrueValue() instanceof Ternary) {
+                if (ternary.getTrueValue() instanceof Ternary) {
                     ctx.printString("(");
                     ctx.emit(ternary.getTrueValue(), ClassTypeSignature.BOOLEAN);
                     ctx.printString(")");
@@ -121,7 +127,7 @@ public class TernaryEmitter implements InstructionEmitter<Ternary> {
                 ctx.emit(ternary.getCondition());
                 ctx.markWrapPoint();
                 ctx.printString(" || ");
-                if(ternary.getTrueValue() instanceof Ternary) {
+                if (ternary.getTrueValue() instanceof Ternary) {
                     ctx.printString("(");
                     ctx.emit(ternary.getTrueValue(), ClassTypeSignature.BOOLEAN);
                     ctx.printString(")");

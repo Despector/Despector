@@ -33,6 +33,9 @@ import org.spongepowered.despector.transform.matcher.InstructionMatcher;
 import org.spongepowered.despector.transform.matcher.MatchContext;
 import org.spongepowered.despector.transform.matcher.StatementMatcher;
 
+/**
+ * A matcher for local assignments.
+ */
 public class LocalAssignmentMatcher implements StatementMatcher<LocalAssignment> {
 
     private InstructionMatcher<?> value;
@@ -64,6 +67,9 @@ public class LocalAssignmentMatcher implements StatementMatcher<LocalAssignment>
         return assign;
     }
 
+    /**
+     * A matcher builder.
+     */
     public static class Builder {
 
         private InstructionMatcher<?> value;
@@ -89,6 +95,9 @@ public class LocalAssignmentMatcher implements StatementMatcher<LocalAssignment>
             return this;
         }
 
+        /**
+         * Resets this builder.
+         */
         public Builder reset() {
             this.value = null;
             this.type = null;

@@ -28,6 +28,9 @@ import org.spongepowered.despector.ast.members.insn.branch.DoWhile;
 import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.StatementEmitter;
 
+/**
+ * An emitter for do while loops.
+ */
 public class DoWhileEmitter implements StatementEmitter<DoWhile> {
 
     @Override
@@ -44,7 +47,9 @@ public class DoWhileEmitter implements StatementEmitter<DoWhile> {
         ctx.printString("} while (");
         ctx.emit(loop.getCondition());
         ctx.printString(")");
-        if(semicolon) ctx.printString(";");
+        if (semicolon) {
+            ctx.printString(";");
+        }
     }
 
 }

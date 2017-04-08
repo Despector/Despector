@@ -81,6 +81,9 @@ public class ConfigBase {
 
     }
 
+    /**
+     * Configuration for a targeted cleanup operation.
+     */
     @ConfigSerializable
     public static class CleanupConfigSection {
 
@@ -92,6 +95,9 @@ public class ConfigBase {
 
     }
 
+    /**
+     * Configuration specific to kotlin decompilation.
+     */
     @ConfigSerializable
     public static class KotlinConfig {
 
@@ -100,6 +106,9 @@ public class ConfigBase {
 
     }
 
+    /**
+     * Configuration for the output formatting.
+     */
     @ConfigSerializable
     public static class FormatterConfig {
 
@@ -117,6 +126,9 @@ public class ConfigBase {
         public TryCatches trycatches = new TryCatches();
         public Annotations annotations = new Annotations();
 
+        /**
+         * Configuration for general formatting.
+         */
         @ConfigSerializable
         public static class General {
 
@@ -129,6 +141,9 @@ public class ConfigBase {
 
         }
 
+        /**
+         * Configuration for import formating.
+         */
         @ConfigSerializable
         public static class Imports {
 
@@ -142,6 +157,9 @@ public class ConfigBase {
 
         }
 
+        /**
+         * Configuration for class formatting.
+         */
         @ConfigSerializable
         public static class Classes {
 
@@ -154,6 +172,9 @@ public class ConfigBase {
             public WrappingStyle alignment_for_superinterfaces_in_type_declaration = WrappingStyle.WRAP_WHEN_NEEDED;
         }
 
+        /**
+         * Configuration for enum formatting.
+         */
         @ConfigSerializable
         public static class Enums {
 
@@ -171,12 +192,18 @@ public class ConfigBase {
             public WrappingStyle alignment_for_enum_constants = WrappingStyle.WRAP_ALL;
         }
 
+        /**
+         * Configuration for field formatting.
+         */
         @ConfigSerializable
         public static class Fields {
 
             public boolean align_type_members_on_columns = false;
         }
 
+        /**
+         * Configuration for method formatting.
+         */
         @ConfigSerializable
         public static class Methods {
 
@@ -196,6 +223,9 @@ public class ConfigBase {
 
         }
 
+        /**
+         * Configuration for general statement formatting.
+         */
         @ConfigSerializable
         public static class Misc {
 
@@ -206,6 +236,9 @@ public class ConfigBase {
             public boolean insert_space_after_lambda_arrow = true;
         }
 
+        /**
+         * Configuration for array formatting.
+         */
         @ConfigSerializable
         public static class Arrays {
 
@@ -223,6 +256,9 @@ public class ConfigBase {
             public boolean insert_space_before_closing_bracket_in_array_reference = false;
         }
 
+        /**
+         * Configuration for switch formatting.
+         */
         @ConfigSerializable
         public static class Switches {
 
@@ -237,6 +273,9 @@ public class ConfigBase {
             public BracePosition brace_position_for_switch = BracePosition.SAME_LINE;
         }
 
+        /**
+         * Configuration for loop formatting.
+         */
         @ConfigSerializable
         public static class Loops {
 
@@ -249,6 +288,9 @@ public class ConfigBase {
             public boolean insert_space_before_closing_paren_in_while = false;
         }
 
+        /**
+         * Configuration for if formatting.
+         */
         @ConfigSerializable
         public static class Ifs {
 
@@ -258,12 +300,18 @@ public class ConfigBase {
             public boolean insert_new_line_before_else_in_if_statement = false;
         }
 
+        /**
+         * Configuration for try catch formatting.
+         */
         @ConfigSerializable
         public static class TryCatches {
 
             public boolean insert_new_line_before_catch_in_try_statement = false;
         }
 
+        /**
+         * Configuration for annotation formatting.
+         */
         @ConfigSerializable
         public static class Annotations {
 

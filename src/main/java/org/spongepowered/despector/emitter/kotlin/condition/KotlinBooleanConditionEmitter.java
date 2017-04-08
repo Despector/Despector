@@ -30,6 +30,9 @@ import org.spongepowered.despector.ast.members.insn.branch.condition.BooleanCond
 import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.condition.BooleanConditionEmitter;
 
+/**
+ * An emitter for kotlin boolean conditions.
+ */
 public class KotlinBooleanConditionEmitter extends BooleanConditionEmitter {
 
     @Override

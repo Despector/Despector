@@ -34,6 +34,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.BiConsumer;
 
+/**
+ * An emitter for annotations.
+ */
 public class AnnotationEmitter implements SpecialEmitter {
 
     private static final Map<Class<?>, BiConsumer<EmitterContext, Object>> value_emitters = new HashMap<>();
@@ -86,6 +89,9 @@ public class AnnotationEmitter implements SpecialEmitter {
         emitter.accept(ctx, value);
     }
 
+    /**
+     * Emits the given annotation.
+     */
     public void emit(EmitterContext ctx, Annotation annotation) {
         ctx.printString("@");
         ctx.emitType(annotation.getType().getName());

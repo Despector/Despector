@@ -32,6 +32,9 @@ import org.spongepowered.despector.ast.members.insn.branch.condition.InverseCond
 import org.spongepowered.despector.emitter.ConditionEmitter;
 import org.spongepowered.despector.emitter.EmitterContext;
 
+/**
+ * An emitter for an inverse condition.
+ */
 public class InverseConditionEmitter implements ConditionEmitter<InverseCondition> {
 
     @Override

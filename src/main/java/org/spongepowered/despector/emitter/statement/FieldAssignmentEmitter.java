@@ -36,6 +36,9 @@ import org.spongepowered.despector.ast.members.insn.assign.StaticFieldAssignment
 import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.StatementEmitter;
 
+/**
+ * An emitter for field assignments.
+ */
 public class FieldAssignmentEmitter implements StatementEmitter<FieldAssignment> {
 
     @Override
@@ -60,8 +63,9 @@ public class FieldAssignmentEmitter implements StatementEmitter<FieldAssignment>
         }
         ctx.printString(" = ");
         ctx.emit(val, ClassTypeSignature.of(insn.getFieldDescription()));
-        if (semicolon)
+        if (semicolon) {
             ctx.printString(";");
+        }
     }
 
     protected boolean checkOperator(EmitterContext ctx, FieldAssignment insn, Instruction val, boolean semicolon) {
@@ -86,14 +90,16 @@ public class FieldAssignmentEmitter implements StatementEmitter<FieldAssignment>
                                 } else {
                                     ctx.printString("false");
                                 }
-                                if (semicolon)
+                                if (semicolon) {
                                     ctx.printString(";");
+                                }
                                 return true;
                             }
                         }
                         ctx.emit(right, ClassTypeSignature.of(insn.getFieldDescription()));
-                        if (semicolon)
+                        if (semicolon) {
                             ctx.printString(";");
+                        }
                         return true;
                     }
                 }

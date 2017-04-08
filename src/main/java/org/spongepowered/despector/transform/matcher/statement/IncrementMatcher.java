@@ -29,6 +29,9 @@ import org.spongepowered.despector.ast.members.insn.misc.Increment;
 import org.spongepowered.despector.transform.matcher.MatchContext;
 import org.spongepowered.despector.transform.matcher.StatementMatcher;
 
+/**
+ * A matcher for increment statements.
+ */
 public class IncrementMatcher implements StatementMatcher<Increment> {
 
     private Integer value;
@@ -49,6 +52,9 @@ public class IncrementMatcher implements StatementMatcher<Increment> {
         return invoke;
     }
 
+    /**
+     * A builder for increment matchers.
+     */
     public static class Builder {
 
         private Integer value;

@@ -39,8 +39,14 @@ import org.spongepowered.despector.util.TypeHelper;
 
 import java.util.List;
 
+/**
+ * An emitter for anonymous classes.
+ */
 public class AnonymousClassEmitter implements SpecialEmitter {
 
+    /**
+     * Emits the given anonymous class.
+     */
     public void emit(EmitterContext ctx, ClassEntry type, New new_insn) {
         checkArgument(type.isAnonType());
 
@@ -95,6 +101,9 @@ public class AnonymousClassEmitter implements SpecialEmitter {
         ctx.printString("}");
     }
 
+    /**
+     * Emits the methods in the given anonymous class.
+     */
     public void emitMethods(EmitterContext ctx, ClassEntry type) {
         if (!type.getMethods().isEmpty()) {
             for (MethodEntry mth : type.getMethods()) {

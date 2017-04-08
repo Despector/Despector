@@ -134,4 +134,13 @@ public class Ternary implements Instruction {
         return this.condition.equals(insn.condition) && this.true_val.equals(insn.true_val) && this.false_val.equals(insn.false_val);
     }
 
+    @Override
+    public int hashCode() {
+        int h = 1;
+        h = h * 37 + this.condition.hashCode();
+        h = h * 37 + this.true_val.hashCode();
+        h = h * 37 + this.false_val.hashCode();
+        return h;
+    }
+
 }

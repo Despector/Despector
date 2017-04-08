@@ -35,7 +35,7 @@ import java.io.IOException;
 /**
  * A constant null value.
  */
-public class NullConstant extends Constant {
+public final class NullConstant extends Constant {
 
     public static final NullConstant NULL = new NullConstant();
 
@@ -72,6 +72,11 @@ public class NullConstant extends Constant {
             return false;
         }
         return true;
+    }
+
+    @Override
+    public int hashCode() {
+        return 0;
     }
 
 }

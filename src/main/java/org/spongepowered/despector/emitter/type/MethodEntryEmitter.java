@@ -45,6 +45,9 @@ import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.format.EmitterFormat.BracePosition;
 import org.spongepowered.despector.emitter.special.GenericsEmitter;
 
+/**
+ * An emitter for methods.
+ */
 public class MethodEntryEmitter implements AstEmitter<MethodEntry> {
 
     @Override

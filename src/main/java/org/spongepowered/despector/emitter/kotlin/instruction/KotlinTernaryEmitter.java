@@ -31,6 +31,9 @@ import org.spongepowered.despector.ast.members.insn.branch.condition.CompareCond
 import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.instruction.TernaryEmitter;
 
+/**
+ * An emitter for kotlin ternaries.
+ */
 public class KotlinTernaryEmitter extends TernaryEmitter {
 
     @Override

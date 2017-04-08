@@ -368,6 +368,9 @@ public class EmitterFormat {
     public int comment_line_length = 80;
     public boolean new_lines_at_javadoc_boundaries = true;
 
+    /**
+     * Loads the formatter settings from the given formatter config.
+     */
     public void loadFrom(FormatterConfig conf) {
         for (Field fld : FormatterConfig.class.getFields()) {
             if (fld.getType().getName().startsWith("org.spongepowered.despector.")) {
@@ -388,6 +391,7 @@ public class EmitterFormat {
                         try {
                             c.set(this, f.get(insn));
                         } catch (IllegalArgumentException | IllegalAccessException e) {
+                            e.printStackTrace();
                         }
                     }
                 }
@@ -403,11 +407,15 @@ public class EmitterFormat {
                 try {
                     c.set(this, fld.get(conf));
                 } catch (IllegalArgumentException | IllegalAccessException e) {
+                    e.printStackTrace();
                 }
             }
         }
     }
 
+    /**
+     * An enumeration of various wrapping styles.
+     */
     public static enum WrappingStyle {
         DO_NOT_WRAP,
         WRAP_WHEN_NEEDED,
@@ -417,6 +425,9 @@ public class EmitterFormat {
         WRAP_ALL_EXCEPT_FIRST;
     }
 
+    /**
+     * An enumeration of various brace positions.
+     */
     public static enum BracePosition {
         SAME_LINE,
         NEXT_LINE,

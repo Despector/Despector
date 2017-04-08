@@ -119,6 +119,16 @@ public class TryCatch implements Statement {
         return this.block.equals(insn.block) && this.catch_blocks.equals(insn.catch_blocks);
     }
 
+    @Override
+    public int hashCode() {
+        int h = 1;
+        h = h * 37 + this.block.hashCode();
+        for (CatchBlock cat : this.catch_blocks) {
+            h = h * 37 + cat.hashCode();
+        }
+        return h;
+    }
+
     /**
      * A catch block.
      */
@@ -227,6 +237,16 @@ public class TryCatch implements Statement {
             CatchBlock insn = (CatchBlock) obj;
             return this.exception_local.equals(insn.exception_local) && this.exceptions.equals(insn.exceptions) && this.block.equals(insn.block)
                     && this.dummy_name.equals(insn.dummy_name);
+        }
+
+        @Override
+        public int hashCode() {
+            int h = 1;
+            h = h * 37 + this.exception_local.hashCode();
+            h = h * 37 + this.exceptions.hashCode();
+            h = h * 37 + this.block.hashCode();
+            h = h * 37 + this.dummy_name.hashCode();
+            return h;
         }
 
     }

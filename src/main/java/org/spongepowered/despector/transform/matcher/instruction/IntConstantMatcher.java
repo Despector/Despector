@@ -29,6 +29,9 @@ import org.spongepowered.despector.ast.members.insn.arg.cst.IntConstant;
 import org.spongepowered.despector.transform.matcher.InstructionMatcher;
 import org.spongepowered.despector.transform.matcher.MatchContext;
 
+/**
+ * A matcher for integer constants.
+ */
 public class IntConstantMatcher implements InstructionMatcher<IntConstant> {
 
     private Integer value;
@@ -49,6 +52,9 @@ public class IntConstantMatcher implements InstructionMatcher<IntConstant> {
         return invoke;
     }
 
+    /**
+     * A matcher builder.
+     */
     public static class Builder {
 
         private Integer value;
@@ -62,6 +68,9 @@ public class IntConstantMatcher implements InstructionMatcher<IntConstant> {
             return this;
         }
 
+        /**
+         * Resets this builder.
+         */
         public Builder reset() {
             this.value = null;
             return this;

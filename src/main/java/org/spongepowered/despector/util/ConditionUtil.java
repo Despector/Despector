@@ -38,7 +38,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-public class ConditionUtil {
+/**
+ * A utility for operations on conditions.
+ */
+public final class ConditionUtil {
 
     /**
      * Creates the inverse of the given condition. Where it can this is
@@ -673,6 +676,10 @@ public class ConditionUtil {
         return condition;
     }
 
+    /**
+     * A result of an attempted bisection of two conditions for a common sub
+     * part.
+     */
     private static class BisectionResult {
 
         public int[] first;

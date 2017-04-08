@@ -35,6 +35,9 @@ import org.spongepowered.despector.transform.matcher.InstructionMatcher;
 import org.spongepowered.despector.transform.matcher.MatchContext;
 import org.spongepowered.despector.transform.matcher.StatementMatcher;
 
+/**
+ * An emitter for kotlin for-each loops.
+ */
 public class KotlinForEachEmitter implements StatementEmitter<ForEach> {
 
     private static final StatementMatcher<ForEach> MAP_ITERATOR = MatchContext.storeLocal("loop_value", StatementMatcher.foreach()
@@ -86,6 +89,9 @@ public class KotlinForEachEmitter implements StatementEmitter<ForEach> {
         ctx.printString("}");
     }
 
+    /**
+     * Checks if the given for-each loop is over a map iterator.
+     */
     public boolean checkMapIterator(EmitterContext ctx, ForEach loop) {
         if (!MAP_ITERATOR.matches(MatchContext.create(), loop)) {
             return false;

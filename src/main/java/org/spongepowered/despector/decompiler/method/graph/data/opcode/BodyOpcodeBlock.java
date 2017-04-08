@@ -27,6 +27,10 @@ package org.spongepowered.despector.decompiler.method.graph.data.opcode;
 import org.spongepowered.despector.decompiler.method.graph.data.block.BlockSection;
 import org.spongepowered.despector.decompiler.method.graph.data.block.InlineBlockSection;
 
+/**
+ * An opcode block containing a simple sequence of opcodes with no control flow
+ * logic.
+ */
 public class BodyOpcodeBlock extends OpcodeBlock {
 
     public BodyOpcodeBlock(int br) {

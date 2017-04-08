@@ -486,11 +486,11 @@ public class EmitterContext {
             } else if (this.type != null) {
                 String this_package = "";
                 String target_package = name;
-                String this$name = this.type.getName();
+                String this_name = this.type.getName();
                 String outer_name = null;
-                if (this$name.indexOf('/') != -1) {
-                    this_package = this$name.substring(0, this$name.lastIndexOf('/'));
-                    outer_name = this$name.substring(this_package.length() + 1);
+                if (this_name.indexOf('/') != -1) {
+                    this_package = this_name.substring(0, this_name.lastIndexOf('/'));
+                    outer_name = this_name.substring(this_package.length() + 1);
                     if (outer_name.indexOf('$') != -1) {
                         outer_name = outer_name.substring(0, outer_name.indexOf('$'));
                     }
@@ -529,16 +529,6 @@ public class EmitterContext {
      */
     public EmitterContext emitTypeName(String name) {
         printString(getTypeName(name));
-        return this;
-    }
-
-    /**
-     * Prints the given string if the condition is met.
-     */
-    public EmitterContext printString(String line, boolean condition) {
-        if (condition) {
-            printString(line);
-        }
         return this;
     }
 
@@ -637,6 +627,16 @@ public class EmitterContext {
     }
 
     /**
+     * Prints the given string if the condition is met.
+     */
+    public EmitterContext printString(String line, boolean condition) {
+        if (condition) {
+            printString(line);
+        }
+        return this;
+    }
+
+    /**
      * Marks the current line posittion as a possible line break point.
      */
     public EmitterContext markWrapPoint() {
@@ -686,6 +686,7 @@ public class EmitterContext {
             break;
         case WRAP_WHEN_NEEDED:
             this.wrap_point = this.line_length;
+            break;
         default:
             break;
         }

@@ -30,6 +30,9 @@ import org.spongepowered.despector.ast.members.insn.function.InvokeStatement;
 import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.StatementEmitter;
 
+/**
+ * An emitter for invoke statements.
+ */
 public class InvokeEmitter implements StatementEmitter<InvokeStatement> {
 
     @Override

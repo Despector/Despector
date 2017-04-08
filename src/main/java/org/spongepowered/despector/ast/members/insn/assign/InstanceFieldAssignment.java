@@ -89,11 +89,19 @@ public class InstanceFieldAssignment extends FieldAssignment {
         if (obj == this) {
             return true;
         }
-        if (!(obj instanceof InstanceFieldAssignment)) {
+        if (!super.equals(obj)) {
             return false;
         }
         InstanceFieldAssignment insn = (InstanceFieldAssignment) obj;
         return this.val.equals(insn.val) && this.owner.equals(insn.owner);
+    }
+
+    @Override
+    public int hashCode() {
+        int h = super.hashCode();
+        h = h * 37 + this.val.hashCode();
+        h = h * 37 + this.owner.hashCode();
+        return h;
     }
 
 }

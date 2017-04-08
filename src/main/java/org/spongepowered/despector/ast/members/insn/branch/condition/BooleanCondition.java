@@ -106,4 +106,12 @@ public class BooleanCondition extends Condition {
         return this.value.equals(and.value) && this.inverse == and.inverse;
     }
 
+    @Override
+    public int hashCode() {
+        int h = 1;
+        h = h * 37 + this.value.hashCode();
+        h = h * 37 + (this.inverse ? 0 : 1);
+        return h;
+    }
+
 }

@@ -30,6 +30,9 @@ import org.spongepowered.despector.ast.members.insn.arg.NewArray;
 import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.InstructionEmitter;
 
+/**
+ * An emitter for a new array instanciation instruction.
+ */
 public class NewArrayEmitter implements InstructionEmitter<NewArray> {
 
     @Override

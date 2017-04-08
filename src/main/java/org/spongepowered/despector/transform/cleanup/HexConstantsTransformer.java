@@ -47,14 +47,19 @@ public class HexConstantsTransformer implements TypeTransformer {
         }
     }
 
+    /**
+     * A visitor to replace messy integer constants.
+     */
     private static class Walker extends InstructionVisitor {
+
+        private static final int MIN_CONSTANT = 10000;
 
         public Walker() {
         }
 
         @Override
         public void visitIntConstant(IntConstant arg) {
-            if (arg.getConstant() > 10000 && !String.valueOf(arg.getConstant()).endsWith("000")) {
+            if (arg.getConstant() > MIN_CONSTANT && !String.valueOf(arg.getConstant()).endsWith("000")) {
                 arg.setFormat(IntFormat.HEXADECIMAL);
             }
         }

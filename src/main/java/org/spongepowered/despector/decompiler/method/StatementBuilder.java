@@ -88,8 +88,11 @@ import java.util.Deque;
 /**
  * A utility for forming non-control flow opcodes into statements.
  */
-public class StatementBuilder {
+public final class StatementBuilder {
 
+    /**
+     * Appends the given opcode block to the statement block.
+     */
     public static void appendBlock(OpcodeBlock op, StatementBlock block, Locals locals, Deque<Instruction> stack) {
 
         // Decompiles a set of opcodes into statements.
@@ -681,6 +684,9 @@ public class StatementBuilder {
                 throw new IllegalStateException();
             }
         }
+    }
+
+    private StatementBuilder() {
     }
 
 }

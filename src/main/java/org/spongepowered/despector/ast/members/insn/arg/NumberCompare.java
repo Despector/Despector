@@ -112,4 +112,12 @@ public class NumberCompare implements Instruction {
         NumberCompare insn = (NumberCompare) obj;
         return this.left.equals(insn.left) && this.right.equals(insn.right);
     }
+
+    @Override
+    public int hashCode() {
+        int h = 1;
+        h = h * 37 + this.left.hashCode();
+        h = h * 37 + this.right.hashCode();
+        return h;
+    }
 }

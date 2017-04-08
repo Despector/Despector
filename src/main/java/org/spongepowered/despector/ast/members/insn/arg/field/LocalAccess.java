@@ -96,4 +96,9 @@ public class LocalAccess implements Instruction {
         return this.local.equals(insn.local);
     }
 
+    @Override
+    public int hashCode() {
+        return this.local.hashCode();
+    }
+
 }

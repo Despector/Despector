@@ -43,6 +43,9 @@ import org.spongepowered.despector.util.SignatureParser;
 
 import java.util.List;
 
+/**
+ * A decompilation step to extract fields.
+ */
 public class FieldInfoStep implements DecompilerStep {
 
     @SuppressWarnings("unchecked")

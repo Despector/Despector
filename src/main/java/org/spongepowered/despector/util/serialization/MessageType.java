@@ -24,6 +24,9 @@
  */
 package org.spongepowered.despector.util.serialization;
 
+/**
+ * An enumeration of messagepack data types.
+ */
 public enum MessageType {
 
     NIL,
@@ -38,6 +41,10 @@ public enum MessageType {
     BIN,
     ARRAY,
     MAP;
+
+    private static final int FIXINT_MASK = 0x80;
+    private static final int SHORTSTRING_MASK = 0xE0;
+    private static final int SHORTARRAY_MASK = 0xF0;
 
     public static final int TYPE_NIL = 0xC0;
     public static final int TYPE_BOOL_FALSE = 0xC2;
@@ -75,10 +82,13 @@ public enum MessageType {
     public static final int TYPE_EXT16 = 0xC8;
     public static final int TYPE_EXT32 = 0xC9;
 
+    /**
+     * Gets the {@link MessageType} of the next value.
+     */
     public static MessageType of(int next) {
         if (next == TYPE_BOOL_FALSE || next == TYPE_BOOL_TRUE) {
             return BOOL;
-        } else if ((next & 0x80) == 0 || (next & TYPE_NEGINT_MASK) == TYPE_NEGINT_MASK || next == TYPE_INT8 || next == TYPE_INT16
+        } else if ((next & FIXINT_MASK) == 0 || (next & TYPE_NEGINT_MASK) == TYPE_NEGINT_MASK || next == TYPE_INT8 || next == TYPE_INT16
                 || next == TYPE_INT32 || next == TYPE_INT64) {
             return INT;
         } else if (next == TYPE_UINT8 || next == TYPE_UINT16 || next == TYPE_UINT32 || next == TYPE_UINT64) {
@@ -87,13 +97,13 @@ public enum MessageType {
             return FLOAT;
         } else if (next == TYPE_DOUBLE) {
             return DOUBLE;
-        } else if ((next & 0xE0) == TYPE_STR5_MASK || next == TYPE_STR8 || next == TYPE_STR16 || next == TYPE_STR32) {
+        } else if ((next & SHORTSTRING_MASK) == TYPE_STR5_MASK || next == TYPE_STR8 || next == TYPE_STR16 || next == TYPE_STR32) {
             return STRING;
         } else if (next == TYPE_BIN8 || next == TYPE_BIN16 || next == TYPE_BIN32) {
             return BIN;
-        } else if ((next & 0xF0) == TYPE_ARRAY8_MASK || next == TYPE_ARRAY16 || next == TYPE_ARRAY32) {
+        } else if ((next & SHORTARRAY_MASK) == TYPE_ARRAY8_MASK || next == TYPE_ARRAY16 || next == TYPE_ARRAY32) {
             return ARRAY;
-        } else if ((next & 0xF0) == TYPE_MAP8_MASK || next == TYPE_MAP16 || next == TYPE_MAP32) {
+        } else if ((next & SHORTARRAY_MASK) == TYPE_MAP8_MASK || next == TYPE_MAP16 || next == TYPE_MAP32) {
             return MAP;
         } else if (next == TYPE_NIL) {
             return NIL;

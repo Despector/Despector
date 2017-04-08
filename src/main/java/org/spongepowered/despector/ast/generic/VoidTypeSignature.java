@@ -32,7 +32,7 @@ import java.io.IOException;
 /**
  * The void type signature.
  */
-public class VoidTypeSignature extends TypeSignature {
+public final class VoidTypeSignature extends TypeSignature {
 
     public static final VoidTypeSignature VOID = new VoidTypeSignature();
 

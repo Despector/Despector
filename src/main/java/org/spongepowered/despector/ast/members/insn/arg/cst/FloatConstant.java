@@ -91,4 +91,8 @@ public class FloatConstant extends Constant {
         return this.cst == cast.cst;
     }
 
+    @Override
+    public int hashCode() {
+        return Float.floatToIntBits(this.cst);
+    }
 }

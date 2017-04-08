@@ -106,4 +106,13 @@ public class OrCondition extends Condition {
         return true;
     }
 
+    @Override
+    public int hashCode() {
+        int h = 1;
+        for (Condition arg : this.args) {
+            h = h * 37 + arg.hashCode();
+        }
+        return h;
+    }
+
 }

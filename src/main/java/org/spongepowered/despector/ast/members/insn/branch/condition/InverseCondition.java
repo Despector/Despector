@@ -88,4 +88,11 @@ public class InverseCondition extends Condition {
         return this.value.equals(and.value);
     }
 
+    @Override
+    public int hashCode() {
+        int h = 1;
+        h = h * 37 + this.value.hashCode();
+        return h;
+    }
+
 }

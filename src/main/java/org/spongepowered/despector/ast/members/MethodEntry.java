@@ -186,6 +186,9 @@ public class MethodEntry extends AstEntry {
         this.sig = sig;
     }
 
+    /**
+     * Gets the statements of this method.
+     */
     public StatementBlock getInstructions() {
         if (this.is_abstract) {
             return null;
@@ -193,6 +196,9 @@ public class MethodEntry extends AstEntry {
         return this.instructions;
     }
 
+    /**
+     * Sets the statements of this method.
+     */
     public void setInstructions(StatementBlock block) {
         this.instructions = block;
     }

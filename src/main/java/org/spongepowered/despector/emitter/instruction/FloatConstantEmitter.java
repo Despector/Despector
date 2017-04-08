@@ -29,6 +29,9 @@ import org.spongepowered.despector.ast.members.insn.arg.cst.FloatConstant;
 import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.InstructionEmitter;
 
+/**
+ * An emitter for 32-bit floating point constants.
+ */
 public class FloatConstantEmitter implements InstructionEmitter<FloatConstant> {
 
     @Override

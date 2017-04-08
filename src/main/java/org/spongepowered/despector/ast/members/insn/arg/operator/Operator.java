@@ -129,4 +129,13 @@ public class Operator implements Instruction {
         return this.left.equals(insn.left) && this.right.equals(insn.right) && this.operator == insn.operator;
     }
 
+    @Override
+    public int hashCode() {
+        int h = 1;
+        h = h * 37 + this.left.hashCode();
+        h = h * 37 + this.right.hashCode();
+        h = h * 37 + this.operator.hashCode();
+        return h;
+    }
+
 }

@@ -94,4 +94,12 @@ public class LocalAssignment extends Assignment {
         return this.val.equals(insn.val) && this.local.equals(insn.local);
     }
 
+    @Override
+    public int hashCode() {
+        int h = 1;
+        h = h * 37 + this.val.hashCode();
+        h = h * 37 + this.local.hashCode();
+        return h;
+    }
+
 }

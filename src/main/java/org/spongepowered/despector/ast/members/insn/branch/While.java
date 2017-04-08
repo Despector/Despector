@@ -133,4 +133,12 @@ public class While implements Statement, Breakable {
         return this.condition.equals(insn.condition) && this.body.equals(insn.body);
     }
 
+    @Override
+    public int hashCode() {
+        int h = 1;
+        h = h * 37 + this.condition.hashCode();
+        h = h * 37 + this.body.hashCode();
+        return h;
+    }
+
 }

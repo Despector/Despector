@@ -114,4 +114,12 @@ public class Cast implements Instruction {
         return this.type.equals(cast.type) && this.val.equals(cast.val);
     }
 
+    @Override
+    public int hashCode() {
+        int h = 1;
+        h = h * 37 + this.type.hashCode();
+        h = h * 37 + this.val.hashCode();
+        return h;
+    }
+
 }

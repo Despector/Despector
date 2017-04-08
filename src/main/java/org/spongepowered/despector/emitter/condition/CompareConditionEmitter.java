@@ -29,11 +29,14 @@ import org.spongepowered.despector.ast.members.insn.branch.condition.CompareCond
 import org.spongepowered.despector.emitter.ConditionEmitter;
 import org.spongepowered.despector.emitter.EmitterContext;
 
+/**
+ * An emitter for a compare condition.
+ */
 public class CompareConditionEmitter implements ConditionEmitter<CompareCondition> {
 
     @Override
     public void emit(EmitterContext ctx, CompareCondition compare) {
-        if(compare.getLeft() instanceof NumberCompare) {
+        if (compare.getLeft() instanceof NumberCompare) {
             NumberCompare cmp = (NumberCompare) compare.getLeft();
             ctx.emit(cmp.getLeftOperand(), null);
             ctx.markWrapPoint();

@@ -33,7 +33,7 @@ import java.util.Deque;
 import java.util.List;
 
 /**
- * Represents a block section containing a comment;
+ * Represents a block section containing a comment.
  */
 public class CommentBlockSection extends BlockSection {
 

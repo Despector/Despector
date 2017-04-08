@@ -136,6 +136,9 @@ public class StatementBlock {
         }
     }
 
+    /**
+     * Writes this statement block to the given {@link MessagePacker}.
+     */
     public void writeTo(MessagePacker pack) throws IOException {
         pack.startMap(this.type == Type.METHOD ? 3 : 2);
         pack.writeString("id").writeInt(AstSerializer.ENTRY_ID_STATEMENT_BODY);
@@ -179,6 +182,16 @@ public class StatementBlock {
             }
         }
         return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int h = 1;
+        h = h * 37 + this.type.hashCode();
+        for (Statement stmt : this.statements) {
+            h = h * 37 + stmt.hashCode();
+        }
+        return h;
     }
 
 }

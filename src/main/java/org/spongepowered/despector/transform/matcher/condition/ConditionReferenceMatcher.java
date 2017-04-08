@@ -30,6 +30,10 @@ import org.spongepowered.despector.transform.matcher.ConditionMatcher;
 import org.spongepowered.despector.transform.matcher.MatchContext;
 import org.spongepowered.despector.util.AstUtil;
 
+/**
+ * A condition matcher that matches any condition references a given local
+ * instance.
+ */
 public class ConditionReferenceMatcher implements ConditionMatcher<Condition> {
 
     private final LocalInstance local;

@@ -33,6 +33,9 @@ import org.spongepowered.despector.transform.matcher.InstructionMatcher;
 import org.spongepowered.despector.transform.matcher.MatchContext;
 import org.spongepowered.despector.util.Tristate;
 
+/**
+ * A matcher for boolean conditions.
+ */
 public class BooleanConditionMatcher implements ConditionMatcher<BooleanCondition> {
 
     private InstructionMatcher<?> value;
@@ -58,6 +61,9 @@ public class BooleanConditionMatcher implements ConditionMatcher<BooleanConditio
         return bool;
     }
 
+    /**
+     * A matcher builder.
+     */
     public static class Builder {
 
         private InstructionMatcher<?> value;
@@ -67,22 +73,34 @@ public class BooleanConditionMatcher implements ConditionMatcher<BooleanConditio
             reset();
         }
 
+        /**
+         * Sets the matcher for the boolean value.
+         */
         public Builder value(InstructionMatcher<?> val) {
             this.value = val;
             return this;
         }
 
+        /**
+         * Sets the expected inverse state.
+         */
         public Builder inverse(Tristate inv) {
             this.inverse = checkNotNull(inv, "inverse");
             return this;
         }
 
+        /**
+         * Resets the builder to default values.
+         */
         public Builder reset() {
             this.value = null;
             this.inverse = Tristate.UNDEFINED;
             return this;
         }
 
+        /**
+         * Creates a new matcher.
+         */
         public BooleanConditionMatcher build() {
             return new BooleanConditionMatcher(this.value, this.inverse);
         }

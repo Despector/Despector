@@ -33,14 +33,29 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
 
+/**
+ * A decompiler.
+ */
 public interface Decompiler {
 
+    /**
+     * Decompiles the class file at the given path.
+     */
     TypeEntry decompile(Path cls_path, SourceSet source) throws IOException;
 
+    /**
+     * Decompiles the class file at the given file.
+     */
     TypeEntry decompile(File cls_path, SourceSet source) throws IOException;
 
+    /**
+     * Decompiles the class file in the given input stream.
+     */
     TypeEntry decompile(InputStream cls_path, SourceSet source) throws IOException;
 
+    /**
+     * Decompiles the given asm class node.
+     */
     TypeEntry decompile(ClassNode cn, SourceSet source);
 
 }

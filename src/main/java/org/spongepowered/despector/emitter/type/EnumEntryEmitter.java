@@ -49,6 +49,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * An emitter for enum types.
+ */
 public class EnumEntryEmitter implements AstEmitter<EnumEntry> {
 
     @Override

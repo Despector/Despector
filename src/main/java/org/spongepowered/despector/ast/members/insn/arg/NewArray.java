@@ -160,4 +160,15 @@ public class NewArray implements Instruction {
         return this.size.equals(insn.size) && this.type.equals(insn.type);
     }
 
+    @Override
+    public int hashCode() {
+        int h = 1;
+        h = h * 37 + this.size.hashCode();
+        h = h * 37 + this.type.hashCode();
+        for (Instruction insn : this.values) {
+            h = h * 37 + insn.hashCode();
+        }
+        return h;
+    }
+
 }

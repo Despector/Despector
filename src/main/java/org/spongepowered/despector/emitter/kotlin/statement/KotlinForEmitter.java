@@ -37,6 +37,9 @@ import org.spongepowered.despector.transform.matcher.InstructionMatcher;
 import org.spongepowered.despector.transform.matcher.MatchContext;
 import org.spongepowered.despector.transform.matcher.StatementMatcher;
 
+/**
+ * An emitter for kotlin for loops.
+ */
 public class KotlinForEmitter extends ForEmitter {
 
     private static final StatementMatcher<For> CHAR_ITERATOR = StatementMatcher.forloop()
@@ -77,6 +80,9 @@ public class KotlinForEmitter extends ForEmitter {
         super.emit(ctx, loop, semicolon);
     }
 
+    /**
+     * Checks if the given for loop is an iterator over characters in a string.
+     */
     public boolean checkCharIterator(EmitterContext ctx, For loop) {
         if (!CHAR_ITERATOR.matches(MatchContext.create(), loop)) {
             return false;

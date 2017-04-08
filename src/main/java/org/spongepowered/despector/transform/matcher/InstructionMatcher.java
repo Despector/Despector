@@ -93,6 +93,9 @@ public interface InstructionMatcher<T extends Instruction> {
         return new ArrayAccessMatcher.Builder();
     }
 
+    /**
+     * An instruction matcher that matches any instruction.
+     */
     public static class Any implements InstructionMatcher<Instruction> {
 
         Any() {
@@ -105,6 +108,10 @@ public interface InstructionMatcher<T extends Instruction> {
 
     }
 
+    /**
+     * Unwraps the given instruction if it is a cast or a primative unboxing
+     * method.
+     */
     static Instruction unwrapCast(Instruction insn) {
         if (insn instanceof Cast) {
             return unwrapCast(((Cast) insn).getValue());

@@ -43,8 +43,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * An emitter for kotlin companion classes.
+ */
 public class KotlinCompanionClassEmitter implements SpecialEmitter {
 
+    /**
+     * Emits the given companion class.
+     */
     public void emit(EmitterContext ctx, ClassEntry type) {
         ctx.printIndentation();
         ctx.printString("companion object {");
@@ -145,6 +151,9 @@ public class KotlinCompanionClassEmitter implements SpecialEmitter {
 
     }
 
+    /**
+     * A representation of a field.
+     */
     private static class Field {
 
         public List<Annotation> annotations = new ArrayList<>();

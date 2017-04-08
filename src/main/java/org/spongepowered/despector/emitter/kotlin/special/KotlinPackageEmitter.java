@@ -27,6 +27,9 @@ package org.spongepowered.despector.emitter.kotlin.special;
 import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.special.PackageEmitter;
 
+/**
+ * Emits a kotlin package.
+ */
 public class KotlinPackageEmitter extends PackageEmitter {
 
     @Override

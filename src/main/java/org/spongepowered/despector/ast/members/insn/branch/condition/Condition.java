@@ -44,6 +44,9 @@ public abstract class Condition {
 
     @Override
     public abstract boolean equals(Object o);
+    
+    @Override
+    public abstract int hashCode();
 
     public abstract void writeTo(MessagePacker pack) throws IOException;
 

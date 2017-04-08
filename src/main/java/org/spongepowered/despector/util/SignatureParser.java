@@ -38,10 +38,16 @@ import org.spongepowered.despector.ast.generic.WildcardType;
 
 import java.util.List;
 
-public class SignatureParser {
+/**
+ * A parser for various generic signatures.
+ */
+public final class SignatureParser {
 
     private static final String VALID_PRIM = "BSIJFDCZ";
 
+    /**
+     * Parses the given class signature.
+     */
     public static ClassSignature parse(String signature) {
         Parser parser = new Parser(signature);
         ClassSignature struct = new ClassSignature();
@@ -58,6 +64,9 @@ public class SignatureParser {
         return struct;
     }
 
+    /**
+     * Parses the given method signature.
+     */
     public static MethodSignature parseMethod(String signature) {
         Parser parser = new Parser(signature);
         MethodSignature sig = new MethodSignature();
@@ -177,6 +186,9 @@ public class SignatureParser {
         return sig;
     }
 
+    /**
+     * A helper for parsing.
+     */
     private static class Parser {
 
         private int index;

@@ -28,6 +28,9 @@ import org.spongepowered.despector.ast.generic.TypeSignature;
 import org.spongepowered.despector.ast.members.insn.function.InstanceMethodInvoke;
 import org.spongepowered.despector.emitter.EmitterContext;
 
+/**
+ * An emitter for kotlin collection contains methods.
+ */
 public class ListContainsEmitter implements SpecialMethodEmitter<InstanceMethodInvoke> {
 
     @Override

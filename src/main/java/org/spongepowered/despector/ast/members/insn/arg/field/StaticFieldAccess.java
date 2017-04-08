@@ -70,7 +70,18 @@ public class StaticFieldAccess extends FieldAccess {
             return false;
         }
         StaticFieldAccess insn = (StaticFieldAccess) obj;
-        return this.field_desc.equals(insn.field_desc) && this.field_name.equals(insn.field_name) && this.owner_type.equals(insn.owner_type);
+        return this.field_desc.equals(insn.field_desc) && this.field_name.equals(insn.field_name) && this.owner_type.equals(insn.owner_type)
+                && this.signature.equals(insn.signature);
+    }
+
+    @Override
+    public int hashCode() {
+        int h = 1;
+        h = h * 37 + this.field_desc.hashCode();
+        h = h * 37 + this.field_name.hashCode();
+        h = h * 37 + this.owner_type.hashCode();
+        h = h * 37 + this.signature.hashCode();
+        return h;
     }
 
 }

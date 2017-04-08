@@ -114,4 +114,13 @@ public class ArrayAssignment extends Assignment {
         return this.val.equals(insn.val) && this.array.equals(insn.array) && this.index.equals(insn.index);
     }
 
+    @Override
+    public int hashCode() {
+        int h = 1;
+        h = h * 37 + this.val.hashCode();
+        h = h * 37 + this.array.hashCode();
+        h = h * 37 + this.index.hashCode();
+        return h;
+    }
+
 }

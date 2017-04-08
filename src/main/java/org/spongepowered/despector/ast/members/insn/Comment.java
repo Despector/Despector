@@ -31,6 +31,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * A comment statement.
+ */
 public class Comment implements Statement {
 
     private final List<String> comment_text = new ArrayList<>();

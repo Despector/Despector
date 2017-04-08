@@ -26,8 +26,14 @@ package org.spongepowered.despector.emitter;
 
 import org.spongepowered.despector.ast.AstEntry;
 
+/**
+ * An emitter for an {@link AstEntry}.
+ */
 public interface AstEmitter<T extends AstEntry> {
 
+    /**
+     * Emits the given entry.
+     */
     boolean emit(EmitterContext ctx, T ast);
 
 }

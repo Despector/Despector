@@ -30,6 +30,9 @@ import org.spongepowered.despector.ast.members.insn.branch.condition.OrCondition
 import org.spongepowered.despector.emitter.ConditionEmitter;
 import org.spongepowered.despector.emitter.EmitterContext;
 
+/**
+ * An emitter for and conditions.
+ */
 public class AndConditionEmitter implements ConditionEmitter<AndCondition> {
 
     @Override

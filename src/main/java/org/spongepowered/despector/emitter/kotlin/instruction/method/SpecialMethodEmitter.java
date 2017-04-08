@@ -28,8 +28,14 @@ import org.spongepowered.despector.ast.generic.TypeSignature;
 import org.spongepowered.despector.ast.members.insn.function.MethodInvoke;
 import org.spongepowered.despector.emitter.EmitterContext;
 
+/**
+ * A special method emitter for custom handling of certain methods.
+ */
 public interface SpecialMethodEmitter<T extends MethodInvoke> {
 
+    /**
+     * Emits the given method.
+     */
     boolean emit(EmitterContext ctx, T arg, TypeSignature type);
 
 }

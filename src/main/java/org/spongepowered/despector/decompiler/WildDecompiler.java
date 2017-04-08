@@ -37,6 +37,9 @@ import java.io.InputStream;
 import java.nio.file.Path;
 import java.util.List;
 
+/**
+ * A decompiler that detects the language type and chooses the correct language.
+ */
 public class WildDecompiler implements Decompiler {
 
     @Override

@@ -78,12 +78,18 @@ public class Locals {
         return this.locals[i];
     }
 
+    /**
+     * Bakes the local instances using the given label indices.
+     */
     public void bakeInstances(Map<Label, Integer> label_indices) {
         for (Local local : this.locals) {
             local.bakeInstances(label_indices);
         }
     }
 
+    /**
+     * Gets a name for the variable that does not conflict with any other names.
+     */
     public String getNonConflictingName(String name, int index) {
         int i = 1;
         while (true) {
@@ -103,6 +109,9 @@ public class Locals {
         return name;
     }
 
+    /**
+     * Fines a local from the given start point with the given type.
+     */
     public LocalInstance findLocal(Label start, String type) {
         for (Local local : this.locals) {
             LocalInstance i = local.find(start, type);
@@ -113,6 +122,9 @@ public class Locals {
         return null;
     }
 
+    /**
+     * Writes this locals set to the given {@link MessagePacker}.
+     */
     public void writeTo(MessagePacker pack) throws IOException {
         pack.startArray(this.locals.length);
         for (Local loc : this.locals) {
@@ -164,6 +176,9 @@ public class Locals {
             return this.lvt;
         }
 
+        /**
+         * Bakes the instances of this local.
+         */
         public void bakeInstances(Map<Label, Integer> label_indices) {
             if (this.lvt.isEmpty()) {
                 if (this.index == 0) {
@@ -184,18 +199,9 @@ public class Locals {
             }
         }
 
-        public LocalInstance getLVTInstance(int index) {
-            if (this.parameter_instance != null) {
-                return this.parameter_instance;
-            }
-            for (LocalInstance insn : this.instances) {
-                if (index >= insn.getStart() - 1 && index <= insn.getEnd()) {
-                    return insn;
-                }
-            }
-            return null;
-        }
-
+        /**
+         * Gets the local instance for the given index.
+         */
         public LocalInstance getInstance(int index) {
             for (LocalInstance insn : this.instances) {
                 if (index >= insn.getStart() - 1 && index <= insn.getEnd()) {
@@ -210,6 +216,9 @@ public class Locals {
             return this.parameter_instance;
         }
 
+        /**
+         * Adds the given instance to this local.
+         */
         public void addInstance(LocalInstance insn) {
             if (insn.getStart() == -1 && insn.getEnd() == -1) {
                 this.parameter_instance = insn;
@@ -226,6 +235,9 @@ public class Locals {
             this.parameter_instance = insn;
         }
 
+        /**
+         * Finds an instance for the given label and type.
+         */
         public LocalInstance find(Label start, String type) {
             for (LocalVariableNode lvn : this.lvt) {
                 if (lvn.start.getLabel() == start && lvn.desc.equals(type)) {
@@ -251,6 +263,9 @@ public class Locals {
 
     }
 
+    /**
+     * An instance of a local.
+     */
     public static class LocalInstance {
 
         private final Local local;
@@ -327,6 +342,9 @@ public class Locals {
             return this.annotations;
         }
 
+        /**
+         * Writes the simple form of this instance.
+         */
         public void writeToSimple(MessagePacker pack) throws IOException {
             pack.startMap(3);
             pack.writeString("local").writeInt(this.local.getIndex());
@@ -334,6 +352,9 @@ public class Locals {
             pack.writeString("end").writeInt(this.end);
         }
 
+        /**
+         * Writes the complete form of this instance.
+         */
         public void writeTo(MessagePacker pack) throws IOException {
             pack.startMap(6);
             pack.writeString("name").writeString(this.name);

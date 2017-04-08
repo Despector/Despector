@@ -50,6 +50,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+/**
+ * An emitter for kotlin casts.
+ */
 public class KotlinClassEntryEmitter implements AstEmitter<ClassEntry> {
 
     private static final Set<String> HIDDEN_ANNOTATIONS = new HashSet<>();
@@ -156,6 +159,9 @@ public class KotlinClassEntryEmitter implements AstEmitter<ClassEntry> {
         return true;
     }
 
+    /**
+     * Emits the static fields of the given type.
+     */
     public void emitStaticFields(EmitterContext ctx, ClassEntry type) {
         if (!type.getStaticFields().isEmpty()) {
 
@@ -178,7 +184,7 @@ public class KotlinClassEntryEmitter implements AstEmitter<ClassEntry> {
             boolean at_least_one = false;
             for (FieldEntry field : type.getStaticFields()) {
                 if (field.isSynthetic() || field.getName().equals("Companion")) {
-                    if(ConfigManager.getConfig().emitter.emit_synthetics) {
+                    if (ConfigManager.getConfig().emitter.emit_synthetics) {
                         ctx.printIndentation();
                         ctx.printString("// Synthetic");
                         ctx.newLine();
@@ -202,11 +208,14 @@ public class KotlinClassEntryEmitter implements AstEmitter<ClassEntry> {
         }
     }
 
+    /**
+     * Emits the static methods of the given type.
+     */
     public void emitStaticMethods(EmitterContext ctx, ClassEntry type) {
         if (!type.getStaticMethods().isEmpty()) {
             for (MethodEntry mth : type.getStaticMethods()) {
                 if (mth.isSynthetic()) {
-                    if(ConfigManager.getConfig().emitter.emit_synthetics) {
+                    if (ConfigManager.getConfig().emitter.emit_synthetics) {
                         ctx.printIndentation();
                         ctx.printString("// Synthetic");
                         ctx.newLine();
@@ -222,6 +231,9 @@ public class KotlinClassEntryEmitter implements AstEmitter<ClassEntry> {
         }
     }
 
+    /**
+     * Emits the instance fields of the given type.
+     */
     public void emitFields(EmitterContext ctx, ClassEntry type) {
         if (!type.getFields().isEmpty()) {
 
@@ -252,7 +264,7 @@ public class KotlinClassEntryEmitter implements AstEmitter<ClassEntry> {
             boolean at_least_one = false;
             for (FieldEntry field : type.getFields()) {
                 if (field.isSynthetic()) {
-                    if(ConfigManager.getConfig().emitter.emit_synthetics) {
+                    if (ConfigManager.getConfig().emitter.emit_synthetics) {
                         ctx.printIndentation();
                         ctx.printString("// Synthetic");
                         ctx.newLine();
@@ -272,11 +284,14 @@ public class KotlinClassEntryEmitter implements AstEmitter<ClassEntry> {
         }
     }
 
+    /**
+     * Emits the instance methods of the given type.
+     */
     public void emitMethods(EmitterContext ctx, ClassEntry type) {
         if (!type.getMethods().isEmpty()) {
             for (MethodEntry mth : type.getMethods()) {
                 if (mth.isSynthetic() || mth.getName().equals("<init>")) {
-                    if(ConfigManager.getConfig().emitter.emit_synthetics) {
+                    if (ConfigManager.getConfig().emitter.emit_synthetics) {
                         ctx.printIndentation();
                         ctx.printString("// Synthetic");
                         ctx.newLine();

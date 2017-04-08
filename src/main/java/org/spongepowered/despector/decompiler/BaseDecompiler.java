@@ -48,6 +48,9 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * A language decompiler.
+ */
 public class BaseDecompiler implements Decompiler {
 
     private final Language lang;
@@ -57,10 +60,16 @@ public class BaseDecompiler implements Decompiler {
         this.lang = lang;
     }
 
+    /**
+     * Gets the decompilation steps.
+     */
     public List<DecompilerStep> getSteps() {
         return this.steps;
     }
 
+    /**
+     * Adds the given step to this decompiler.
+     */
     public void addStep(DecompilerStep step) {
         this.steps.add(step);
     }
@@ -107,6 +116,9 @@ public class BaseDecompiler implements Decompiler {
         return entry;
     }
 
+    /**
+     * Creates a new annotation instance for the given annotation node.
+     */
     public static Annotation createAnnotation(SourceSet src, AnnotationNode an) {
         AnnotationType anno_type = src.getAnnotationType(an.desc);
         Annotation anno = new Annotation(anno_type);

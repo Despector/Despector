@@ -36,6 +36,9 @@ import org.spongepowered.despector.util.TypeHelper;
 
 import java.util.Iterator;
 
+/**
+ * A decompilation step to find enum constants.
+ */
 public class EnumConstantsStep implements DecompilerStep {
 
     @Override

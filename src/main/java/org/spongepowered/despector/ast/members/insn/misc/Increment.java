@@ -107,4 +107,12 @@ public class Increment implements Statement {
         return this.local.equals(insn.local) && this.val == insn.val;
     }
 
+    @Override
+    public int hashCode() {
+        int h = 1;
+        h = h * 37 + this.local.hashCode();
+        h = h * 37 + this.val;
+        return h;
+    }
+
 }

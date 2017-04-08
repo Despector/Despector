@@ -24,7 +24,10 @@
  */
 package org.spongepowered.despector.util.serialization;
 
-public class AstSerializer {
+/**
+ * Constants for serializing ast elements.
+ */
+public final class AstSerializer {
 
     public static final int VERSION = 1;
 
@@ -90,5 +93,8 @@ public class AstSerializer {
     public static final int CONDITION_ID_OR = 0x92;
     public static final int CONDITION_ID_COMPARE = 0x93;
     public static final int CONDITION_ID_INVERSE = 0x94;
+
+    private AstSerializer() {
+    }
 
 }

@@ -26,6 +26,9 @@ package org.spongepowered.despector.decompiler.method.graph.data.opcode;
 
 import org.spongepowered.despector.decompiler.method.graph.data.block.BlockSection;
 
+/**
+ * An opcode block wrapping an already processed block section.
+ */
 public class ProcessedOpcodeBlock extends OpcodeBlock {
 
     private BlockSection internal = null;

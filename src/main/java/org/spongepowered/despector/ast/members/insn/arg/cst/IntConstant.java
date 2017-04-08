@@ -102,6 +102,14 @@ public class IntConstant extends Constant {
         return this.cst == cast.cst;
     }
 
+    @Override
+    public int hashCode() {
+        return this.cst;
+    }
+
+    /**
+     * The format for an integer constant when emitted.
+     */
     public static enum IntFormat {
         BINARY,
         OCTAL,

@@ -68,11 +68,18 @@ public class StaticFieldAssignment extends FieldAssignment {
         if (obj == this) {
             return true;
         }
-        if (!(obj instanceof StaticFieldAssignment)) {
+        if (!super.equals(obj)) {
             return false;
         }
         StaticFieldAssignment insn = (StaticFieldAssignment) obj;
         return this.val.equals(insn.val);
+    }
+
+    @Override
+    public int hashCode() {
+        int h = super.hashCode();
+        h = h * 37 + this.val.hashCode();
+        return h;
     }
 
 }

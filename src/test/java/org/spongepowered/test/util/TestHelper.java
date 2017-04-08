@@ -75,7 +75,7 @@ public class TestHelper {
 
     public static TypeEntry get(Class<?> cls) {
         TypeEntry type = CACHED_TYPES.get(cls);
-        if(type != null) {
+        if (type != null) {
             return type;
         }
         String path = cls.getProtectionDomain().getCodeSource().getLocation().getPath();
@@ -108,6 +108,7 @@ public class TestHelper {
         emitter.flush();
         return writer.toString();
     }
+
     public static String getAsString(Class<?> cls, String method_name) {
         TypeEntry type = get(cls);
         MethodEntry method = type.getMethodSafe(method_name);

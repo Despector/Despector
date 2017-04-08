@@ -34,8 +34,14 @@ import org.spongepowered.despector.emitter.EmitterContext;
 
 import java.util.List;
 
+/**
+ * An emitter for various generic signatures.
+ */
 public class GenericsEmitter implements SpecialEmitter {
 
+    /**
+     * Emits the given {@link TypeParameter}.
+     */
     public void emitTypeParameter(EmitterContext ctx, TypeParameter param) {
         ctx.printString(param.getIdentifier());
         boolean had_superclass = false;
@@ -60,6 +66,9 @@ public class GenericsEmitter implements SpecialEmitter {
         }
     }
 
+    /**
+     * Emits the given type.
+     */
     public void emitTypeSignature(EmitterContext ctx, TypeSignature sig) {
         if (sig instanceof TypeVariableSignature) {
             String desc = ((TypeVariableSignature) sig).getIdentifier();
@@ -85,6 +94,9 @@ public class GenericsEmitter implements SpecialEmitter {
         }
     }
 
+    /**
+     * Emits the given set of {@link TypeParameter}s.
+     */
     public void emitTypeParameters(EmitterContext ctx, List<TypeParameter> parameters) {
         if (parameters.isEmpty()) {
             return;
@@ -104,6 +116,9 @@ public class GenericsEmitter implements SpecialEmitter {
 
     }
 
+    /**
+     * Emits the given {@link TypeArgument}.
+     */
     public void emitTypeArgument(EmitterContext ctx, TypeArgument arg) {
         switch (arg.getWildcard()) {
         case NONE:
@@ -125,6 +140,9 @@ public class GenericsEmitter implements SpecialEmitter {
         }
     }
 
+    /**
+     * Emits the given set of {@link TypeArgument}s.
+     */
     public void emitTypeArguments(EmitterContext ctx, List<TypeArgument> arguments) {
         if (arguments.isEmpty()) {
             return;
@@ -141,6 +159,9 @@ public class GenericsEmitter implements SpecialEmitter {
         ctx.printString(">");
     }
 
+    /**
+     * Gets the length of the given {@link TypeSignature} when its emitted.
+     */
     public static int getLength(EmitterContext ctx, TypeSignature type) {
         if (type instanceof VoidTypeSignature) {
             return 4;

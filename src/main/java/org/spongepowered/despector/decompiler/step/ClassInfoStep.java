@@ -40,6 +40,9 @@ import org.spongepowered.despector.util.SignatureParser;
 
 import java.util.List;
 
+/**
+ * A decompiler step which retrieves class metadata.
+ */
 public class ClassInfoStep implements DecompilerStep {
 
     @SuppressWarnings("unchecked")

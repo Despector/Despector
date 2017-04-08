@@ -158,6 +158,10 @@ public class ForEachPostProcessor implements StatementPostProcessor {
         }
     }
 
+    /**
+     * Checks if the given for loop is a collection interator and replaces it
+     * with a for-each loop.
+     */
     public boolean checkIterator(StatementBlock block, For ffor) {
         if (!LIST_ITERATOR.matches(MatchContext.create(), ffor)) {
             return false;
@@ -180,6 +184,10 @@ public class ForEachPostProcessor implements StatementPostProcessor {
         return true;
     }
 
+    /**
+     * Checks if the given for loop is an array interator and replaces it with a
+     * for-each loop.
+     */
     public boolean checkArray(StatementBlock block, For ffor, List<Statement> to_remove) {
         int i = block.getStatements().indexOf(ffor);
         if (i < 2) {

@@ -40,6 +40,9 @@ import org.spongepowered.despector.util.TypeHelper;
 
 import java.util.List;
 
+/**
+ * An emitter for instance method invoke instructions.
+ */
 public class InstanceMethodInvokeEmitter implements InstructionEmitter<InstanceMethodInvoke> {
 
     @Override

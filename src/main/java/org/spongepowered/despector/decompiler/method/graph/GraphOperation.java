@@ -43,6 +43,9 @@ public interface GraphOperation {
      */
     void process(PartialMethod partial);
 
+    /**
+     * Remaps all references to the given from block to the new block.
+     */
     static void remap(List<OpcodeBlock> blocks, OpcodeBlock from, OpcodeBlock to) {
         for (OpcodeBlock other : blocks) {
             if (other instanceof ConditionalOpcodeBlock) {

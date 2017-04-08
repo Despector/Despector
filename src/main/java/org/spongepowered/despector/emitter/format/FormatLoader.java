@@ -27,8 +27,14 @@ package org.spongepowered.despector.emitter.format;
 import java.io.IOException;
 import java.nio.file.Path;
 
+/**
+ * A loader for emitter formats.
+ */
 public interface FormatLoader {
 
+    /**
+     * Gets the loader for the given formatter type.
+     */
     public static FormatLoader getLoader(String name) {
         if ("eclipse".equalsIgnoreCase(name)) {
             return EclipseFormatLoader.instance;

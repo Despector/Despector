@@ -31,6 +31,9 @@ import org.spongepowered.despector.ast.generic.VoidTypeSignature;
 import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.special.GenericsEmitter;
 
+/**
+ * An emitter for kotlin generics.
+ */
 public class KotlinGenericsEmitter extends GenericsEmitter {
 
     @Override
@@ -42,14 +45,14 @@ public class KotlinGenericsEmitter extends GenericsEmitter {
             ClassTypeSignature cls = (ClassTypeSignature) sig;
             int array_depth = 0;
             String type = cls.getType();
-            while(type.startsWith("[")) {
+            while (type.startsWith("[")) {
                 array_depth++;
                 type = type.substring(1);
                 ctx.printString("Array<");
             }
             ctx.emitType(type);
             emitTypeArguments(ctx, cls.getArguments());
-            for(int i = 0; i < array_depth; i++) {
+            for (int i = 0; i < array_depth; i++) {
                 ctx.printString(">");
             }
         } else if (sig instanceof VoidTypeSignature) {

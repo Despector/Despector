@@ -33,6 +33,9 @@ import org.spongepowered.despector.emitter.special.GenericsEmitter;
 
 import java.util.Collection;
 
+/**
+ * An emitter for field entries.
+ */
 public class FieldEntryEmitter implements AstEmitter<FieldEntry> {
 
     @Override

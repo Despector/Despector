@@ -28,6 +28,9 @@ import org.spongepowered.despector.ast.members.insn.branch.For;
 import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.StatementEmitter;
 
+/**
+ * An emitter for for loops.
+ */
 public class ForEmitter implements StatementEmitter<For> {
 
     @Override

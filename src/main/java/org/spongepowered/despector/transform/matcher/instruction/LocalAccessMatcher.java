@@ -32,6 +32,9 @@ import org.spongepowered.despector.transform.matcher.MatchContext;
 
 import java.util.function.Function;
 
+/**
+ * A matcher for local accesses.
+ */
 public class LocalAccessMatcher implements InstructionMatcher<LocalAccess> {
 
     private LocalInstance local;
@@ -64,6 +67,9 @@ public class LocalAccessMatcher implements InstructionMatcher<LocalAccess> {
         return acc;
     }
 
+    /**
+     * A matcher builder.
+     */
     public static class Builder {
 
         private LocalInstance local;
@@ -83,12 +89,18 @@ public class LocalAccessMatcher implements InstructionMatcher<LocalAccess> {
             return this;
         }
 
+        /**
+         * Resets this builder.
+         */
         public Builder reset() {
             this.local = null;
             this.ctx_local = null;
             return this;
         }
 
+        /**
+         * Creates a new matcher.
+         */
         public LocalAccessMatcher build() {
             if (this.ctx_local != null) {
                 return new LocalAccessMatcher(this.ctx_local);

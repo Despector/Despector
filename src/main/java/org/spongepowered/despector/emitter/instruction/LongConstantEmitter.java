@@ -29,6 +29,9 @@ import org.spongepowered.despector.ast.members.insn.arg.cst.LongConstant;
 import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.InstructionEmitter;
 
+/**
+ * An emitter for long constants.
+ */
 public class LongConstantEmitter implements InstructionEmitter<LongConstant> {
 
     @Override
