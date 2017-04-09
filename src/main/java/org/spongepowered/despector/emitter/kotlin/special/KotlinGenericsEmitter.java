@@ -29,6 +29,7 @@ import org.spongepowered.despector.ast.generic.TypeSignature;
 import org.spongepowered.despector.ast.generic.TypeVariableSignature;
 import org.spongepowered.despector.ast.generic.VoidTypeSignature;
 import org.spongepowered.despector.emitter.EmitterContext;
+import org.spongepowered.despector.emitter.kotlin.KotlinEmitterUtil;
 import org.spongepowered.despector.emitter.special.GenericsEmitter;
 
 /**
@@ -50,7 +51,7 @@ public class KotlinGenericsEmitter extends GenericsEmitter {
                 type = type.substring(1);
                 ctx.printString("Array<");
             }
-            ctx.emitType(type);
+            KotlinEmitterUtil.emitType(ctx, type);
             emitTypeArguments(ctx, cls.getArguments());
             for (int i = 0; i < array_depth; i++) {
                 ctx.printString(">");
