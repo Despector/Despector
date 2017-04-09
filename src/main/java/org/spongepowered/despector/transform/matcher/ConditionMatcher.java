@@ -31,6 +31,7 @@ import org.spongepowered.despector.transform.matcher.condition.AndConditionMatch
 import org.spongepowered.despector.transform.matcher.condition.BooleanConditionMatcher;
 import org.spongepowered.despector.transform.matcher.condition.CompareConditionMatcher;
 import org.spongepowered.despector.transform.matcher.condition.ConditionReferenceMatcher;
+import org.spongepowered.despector.transform.matcher.condition.InverseConditionMatcher;
 import org.spongepowered.despector.transform.matcher.condition.OrConditionMatcher;
 
 /**
@@ -75,6 +76,10 @@ public interface ConditionMatcher<T extends Condition> {
 
     static BooleanConditionMatcher.Builder bool() {
         return new BooleanConditionMatcher.Builder();
+    }
+
+    static InverseConditionMatcher.Builder inverse() {
+        return new InverseConditionMatcher.Builder();
     }
 
     static CompareConditionMatcher.Builder compare() {
