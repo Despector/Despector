@@ -24,6 +24,7 @@
  */
 package org.spongepowered.despector.ast.members.insn.arg.field;
 
+import org.spongepowered.despector.ast.generic.TypeSignature;
 import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
 import org.spongepowered.despector.util.TypeHelper;
 import org.spongepowered.despector.util.serialization.AstSerializer;
@@ -36,7 +37,7 @@ import java.io.IOException;
  */
 public class StaticFieldAccess extends FieldAccess {
 
-    public StaticFieldAccess(String name, String desc, String owner) {
+    public StaticFieldAccess(String name, TypeSignature desc, String owner) {
         super(name, desc, owner);
     }
 
@@ -47,13 +48,12 @@ public class StaticFieldAccess extends FieldAccess {
 
     @Override
     public void writeTo(MessagePacker pack) throws IOException {
-        pack.startMap(5);
+        pack.startMap(4);
         pack.writeString("id").writeInt(AstSerializer.STATEMENT_ID_STATIC_FIELD_ACCESS);
         pack.writeString("name").writeString(this.field_name);
-        pack.writeString("desc").writeString(this.field_desc);
+        pack.writeString("desc");
+        this.field_desc.writeTo(pack);
         pack.writeString("owner").writeString(this.owner_type);
-        pack.writeString("signature");
-        this.signature.writeTo(pack);
     }
 
     @Override
@@ -70,8 +70,7 @@ public class StaticFieldAccess extends FieldAccess {
             return false;
         }
         StaticFieldAccess insn = (StaticFieldAccess) obj;
-        return this.field_desc.equals(insn.field_desc) && this.field_name.equals(insn.field_name) && this.owner_type.equals(insn.owner_type)
-                && this.signature.equals(insn.signature);
+        return this.field_desc.equals(insn.field_desc) && this.field_name.equals(insn.field_name) && this.owner_type.equals(insn.owner_type);
     }
 
     @Override
@@ -80,7 +79,6 @@ public class StaticFieldAccess extends FieldAccess {
         h = h * 37 + this.field_desc.hashCode();
         h = h * 37 + this.field_name.hashCode();
         h = h * 37 + this.owner_type.hashCode();
-        h = h * 37 + this.signature.hashCode();
         return h;
     }
 

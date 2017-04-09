@@ -506,7 +506,7 @@ public final class StatementBuilder {
                 if (!owner.startsWith("[")) {
                     owner = "L" + owner + ";";
                 }
-                FieldAccess arg = new StaticFieldAccess(field.name, field.desc, owner);
+                FieldAccess arg = new StaticFieldAccess(field.name, ClassTypeSignature.of(field.desc), owner);
                 stack.push(arg);
                 break;
             }
@@ -527,7 +527,7 @@ public final class StatementBuilder {
                 if (!owner.startsWith("[")) {
                     owner = "L" + owner + ";";
                 }
-                FieldAccess arg = new InstanceFieldAccess(field.name, field.desc, owner, stack.pop());
+                FieldAccess arg = new InstanceFieldAccess(field.name, ClassTypeSignature.of(field.desc), owner, stack.pop());
                 stack.push(arg);
                 break;
             }
@@ -647,7 +647,7 @@ public final class StatementBuilder {
                 break;
             }
             case ARRAYLENGTH:
-                stack.push(new InstanceFieldAccess("length", "I", "hidden-array-field", stack.pop()));
+                stack.push(new InstanceFieldAccess("length", ClassTypeSignature.INT, "hidden-array-field", stack.pop()));
                 break;
             case ATHROW:
                 block.append(new Throw(stack.pop()));

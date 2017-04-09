@@ -114,7 +114,7 @@ public class StaticMethodInvokeEmitter implements InstructionEmitter<StaticMetho
             if (arg.getParams().length == 1) {
                 replacement = new InstanceFieldAccess(getter.getFieldName(), getter.getTypeDescriptor(), getter.getOwnerType(), arg.getParams()[0]);
             } else {
-                replacement = new StaticFieldAccess(getter.getFieldName(), getter.getTypeDescriptor(), getter.getOwnerType());
+                replacement = new StaticFieldAccess(getter.getFieldName(),  getter.getTypeDescriptor(), getter.getOwnerType());
             }
             ctx.emit(replacement, null);
             return true;

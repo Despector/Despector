@@ -26,7 +26,6 @@ package org.spongepowered.despector.ast.members.insn.arg.field;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import org.spongepowered.despector.ast.generic.ClassTypeSignature;
 import org.spongepowered.despector.ast.generic.TypeSignature;
 import org.spongepowered.despector.ast.members.insn.arg.Instruction;
 import org.spongepowered.despector.util.TypeHelper;
@@ -37,11 +36,10 @@ import org.spongepowered.despector.util.TypeHelper;
 public abstract class FieldAccess implements Instruction {
 
     protected String field_name;
-    protected String field_desc;
+    protected TypeSignature field_desc;
     protected String owner_type;
-    protected TypeSignature signature;
 
-    public FieldAccess(String name, String desc, String owner) {
+    public FieldAccess(String name, TypeSignature desc, String owner) {
         this.field_name = checkNotNull(name, "name");
         this.field_desc = checkNotNull(desc, "desc");
         this.owner_type = checkNotNull(owner, "owner");
@@ -64,16 +62,15 @@ public abstract class FieldAccess implements Instruction {
     /**
      * Gets the accessed field descriptor.
      */
-    public String getTypeDescriptor() {
+    public TypeSignature getTypeDescriptor() {
         return this.field_desc;
     }
 
     /**
      * Sets the accessed field descriptor.
      */
-    public void setTypeDescriptor(String desc) {
+    public void setTypeDescriptor(TypeSignature desc) {
         this.field_desc = checkNotNull(desc, "desc");
-        this.signature = null;
     }
 
     /**
@@ -99,10 +96,7 @@ public abstract class FieldAccess implements Instruction {
 
     @Override
     public TypeSignature inferType() {
-        if (this.signature == null) {
-            this.signature = ClassTypeSignature.of(this.field_desc);
-        }
-        return this.signature;
+        return this.field_desc;
     }
 
 }
