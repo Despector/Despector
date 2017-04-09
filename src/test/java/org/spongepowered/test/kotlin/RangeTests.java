@@ -24,10 +24,7 @@
  */
 package org.spongepowered.test.kotlin;
 
-import static org.objectweb.asm.Opcodes.GOTO;
-import static org.objectweb.asm.Opcodes.IF_ICMPLE;
-import static org.objectweb.asm.Opcodes.ILOAD;
-import static org.objectweb.asm.Opcodes.IRETURN;
+import static org.objectweb.asm.Opcodes.*;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -36,34 +33,53 @@ import org.objectweb.asm.MethodVisitor;
 import org.spongepowered.test.util.KotlinTestHelper;
 import org.spongepowered.test.util.TestMethodBuilder;
 
-public class IfTests {
+public class RangeTests {
+
 
     @Test
-    public void testSimpleIf() {
-        TestMethodBuilder builder = new TestMethodBuilder("maxOf", "(II)I");
+    public void testIfRange() {
+        TestMethodBuilder builder = new TestMethodBuilder("decimalDigitValue", "(C)I");
         MethodVisitor mv = builder.getGenerator();
         Label start = new Label();
         Label l1 = new Label();
+        Label l2 = new Label();
+        Label l3 = new Label();
         mv.visitLabel(start);
         Label end = new Label();
+        mv.visitIntInsn(BIPUSH, 48);
         mv.visitVarInsn(ILOAD, 0);
+        mv.visitVarInsn(ISTORE, 1);
         mv.visitVarInsn(ILOAD, 1);
-        mv.visitJumpInsn(IF_ICMPLE, l1);
-        mv.visitVarInsn(ILOAD, 0);
-        mv.visitInsn(IRETURN);
+        mv.visitJumpInsn(IF_ICMPGT, l1);
+        mv.visitVarInsn(ILOAD, 1);
+        mv.visitIntInsn(BIPUSH, 57);
+        mv.visitJumpInsn(IF_ICMPGT, l1);
+        mv.visitInsn(ICONST_0);
+        mv.visitJumpInsn(GOTO, l2);
         mv.visitLabel(l1);
-        mv.visitVarInsn(ILOAD, 1);
+        mv.visitInsn(ICONST_1);
+        mv.visitLabel(l2);
+        mv.visitJumpInsn(IFEQ, l3);
+        mv.visitTypeInsn(NEW, "java/lang/IllegalArgumentException");
+        mv.visitInsn(DUP);
+        mv.visitLdcInsn("Out of range");
+        mv.visitMethodInsn(INVOKESPECIAL, "java/lang/IllegalArgumentException", "<init>", "(Ljava/lang/String;)V", false);
+        mv.visitTypeInsn(CHECKCAST, "java/lang/Throwable");
+        mv.visitInsn(ATHROW);
+        mv.visitLabel(l3);
+        mv.visitVarInsn(ILOAD, 0);
+        mv.visitIntInsn(BIPUSH, 48);
+        mv.visitInsn(ISUB);
         mv.visitLabel(end);
         mv.visitInsn(IRETURN);
-        mv.visitLocalVariable("a", "I", null, start, end, 0);
-        mv.visitLocalVariable("b", "I", null, start, end, 1);
+        mv.visitLocalVariable("c", "C", null, start, end, 0);
 
-        String insn = KotlinTestHelper.getMethodAsString(builder.finish(), "maxOf");
-        String good = "fun maxOf(a: Int, b: Int): Int {\n"
-                + "    if (a > b) {\n"
-                + "        return a\n"
+        String insn = KotlinTestHelper.getMethodAsString(builder.finish(), "decimalDigitValue");
+        String good = "fun decimalDigitValue(c: Char): Int {\n"
+                + "    if (c !in '0'..'9') {\n"
+                + "        throw IllegalArgumentException(\"Out of range\")\n"
                 + "    }\n\n"
-                + "    return b\n"
+                + "    return c - 48\n"
                 + "}";
         Assert.assertEquals(good, insn);
     }

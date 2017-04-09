@@ -24,12 +24,14 @@
  */
 package org.spongepowered.despector.transform.matcher;
 
+import javax.annotation.Nullable;
 import org.spongepowered.despector.ast.Locals.LocalInstance;
 import org.spongepowered.despector.ast.members.insn.branch.condition.Condition;
+import org.spongepowered.despector.transform.matcher.condition.AndConditionMatcher;
 import org.spongepowered.despector.transform.matcher.condition.BooleanConditionMatcher;
+import org.spongepowered.despector.transform.matcher.condition.CompareConditionMatcher;
 import org.spongepowered.despector.transform.matcher.condition.ConditionReferenceMatcher;
-
-import javax.annotation.Nullable;
+import org.spongepowered.despector.transform.matcher.condition.OrConditionMatcher;
 
 /**
  * A matcher for conditions.
@@ -60,12 +62,31 @@ public interface ConditionMatcher<T extends Condition> {
     }
 
     /**
+     * Attempts to match the given condition.
+     */
+    default boolean matches(Condition cond) {
+        return match(MatchContext.create(), cond) != null;
+    }
+
+    /**
      * A matcher which matches any condition.
      */
     static final ConditionMatcher<?> ANY = new Any();
 
     static BooleanConditionMatcher.Builder bool() {
         return new BooleanConditionMatcher.Builder();
+    }
+
+    static CompareConditionMatcher.Builder compare() {
+        return new CompareConditionMatcher.Builder();
+    }
+
+    static AndConditionMatcher.Builder and() {
+        return new AndConditionMatcher.Builder();
+    }
+
+    static OrConditionMatcher.Builder or() {
+        return new OrConditionMatcher.Builder();
     }
 
     static ConditionReferenceMatcher references(LocalInstance local) {

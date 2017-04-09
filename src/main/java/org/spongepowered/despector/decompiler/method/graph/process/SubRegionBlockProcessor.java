@@ -109,7 +109,7 @@ public class SubRegionBlockProcessor implements GraphProcessor {
         }
 
         OpcodeBlock first = region.get(0);
-        if (first instanceof ConditionalOpcodeBlock && AstUtil.hasStartingRequirement(first.getOpcodes())) {
+        if (first instanceof ConditionalOpcodeBlock && AstUtil.hasStartingRequirement(first.getOpcodes()) && ((ConditionalOpcodeBlock) first).getPrefix() == null) {
             OpcodeBlock prev = blocks.get(i - 1);
             if (prev instanceof ProcessedOpcodeBlock) {
                 ((ConditionalOpcodeBlock) first).setPrefix(prev);

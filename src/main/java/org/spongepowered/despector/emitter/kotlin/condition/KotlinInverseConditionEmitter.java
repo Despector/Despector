@@ -22,46 +22,20 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.despector.emitter.kotlin.instruction;
+package org.spongepowered.despector.emitter.kotlin.condition;
 
-import org.spongepowered.despector.ast.generic.ClassTypeSignature;
-import org.spongepowered.despector.ast.generic.TypeSignature;
-import org.spongepowered.despector.ast.members.insn.branch.Ternary;
-import org.spongepowered.despector.ast.members.insn.branch.condition.CompareCondition;
+import org.spongepowered.despector.ast.members.insn.branch.condition.InverseCondition;
 import org.spongepowered.despector.emitter.EmitterContext;
-import org.spongepowered.despector.emitter.instruction.TernaryEmitter;
+import org.spongepowered.despector.emitter.condition.InverseConditionEmitter;
 import org.spongepowered.despector.emitter.kotlin.special.KotlinRangeEmitter;
 
-/**
- * An emitter for kotlin ternaries.
- */
-public class KotlinTernaryEmitter extends TernaryEmitter {
+public class KotlinInverseConditionEmitter extends InverseConditionEmitter {
 
     @Override
-    public void emit(EmitterContext ctx, Ternary ternary, TypeSignature type) {
-        if (type == ClassTypeSignature.BOOLEAN && checkBooleanExpression(ctx, ternary)) {
+    public void emit(EmitterContext ctx, InverseCondition inv) {
+        if (KotlinRangeEmitter.checkRange(ctx, inv.getConditionValue(), true)) {
             return;
         }
-        ctx.printString("if (");
-        if (ternary.getCondition() instanceof CompareCondition) {
-            ctx.emit(ternary.getCondition());
-        } else {
-            ctx.emit(ternary.getCondition());
-        }
-        ctx.printString(") ");
-        ctx.markWrapPoint();
-        ctx.emit(ternary.getTrueValue(), type);
-        ctx.markWrapPoint();
-        ctx.printString(" else ");
-        ctx.emit(ternary.getFalseValue(), type);
+        super.emit(ctx, inv);
     }
-
-    @Override
-    public boolean checkBooleanExpression(EmitterContext ctx, Ternary ternary) {
-        if (KotlinRangeEmitter.checkRangeTernary(ctx, ternary)) {
-            return true;
-        }
-        return super.checkBooleanExpression(ctx, ternary);
-    }
-
 }

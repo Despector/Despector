@@ -105,9 +105,11 @@ import org.spongepowered.despector.emitter.instruction.TernaryEmitter;
 import org.spongepowered.despector.emitter.instruction.TypeConstantEmitter;
 import org.spongepowered.despector.emitter.kotlin.condition.KotlinBooleanConditionEmitter;
 import org.spongepowered.despector.emitter.kotlin.condition.KotlinCompareConditionEmitter;
+import org.spongepowered.despector.emitter.kotlin.condition.KotlinInverseConditionEmitter;
 import org.spongepowered.despector.emitter.kotlin.instruction.ElvisEmitter;
 import org.spongepowered.despector.emitter.kotlin.instruction.KotlinCastEmitter;
 import org.spongepowered.despector.emitter.kotlin.instruction.KotlinInstanceOfEmitter;
+import org.spongepowered.despector.emitter.kotlin.instruction.KotlinNewEmitter;
 import org.spongepowered.despector.emitter.kotlin.instruction.KotlinOperatorEmitter;
 import org.spongepowered.despector.emitter.kotlin.instruction.KotlinTernaryEmitter;
 import org.spongepowered.despector.emitter.kotlin.instruction.WhenEmitter;
@@ -257,9 +259,11 @@ public final class Emitters {
         KOTLIN_SET.setInstructionEmitter(Elvis.class, new ElvisEmitter());
         KOTLIN_SET.setInstructionEmitter(When.class, new WhenEmitter());
         KOTLIN_SET.setInstructionEmitter(Operator.class, new KotlinOperatorEmitter());
+        KOTLIN_SET.setInstructionEmitter(New.class, new KotlinNewEmitter());
 
         KOTLIN_SET.setConditionEmitter(BooleanCondition.class, new KotlinBooleanConditionEmitter());
         KOTLIN_SET.setConditionEmitter(CompareCondition.class, new KotlinCompareConditionEmitter());
+        KOTLIN_SET.setConditionEmitter(InverseCondition.class, new KotlinInverseConditionEmitter());
 
         EMITTERS.put(Language.JAVA, JAVA);
         EMITTERS.put(Language.KOTLIN, KOTLIN);

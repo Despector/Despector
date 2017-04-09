@@ -146,6 +146,9 @@ public class KotlinTernaryPrePassOperation implements GraphOperation {
             first = condition_blocks.get(0);
             first_true = first;
             conditions.add(0, next_when);
+            if (start < 0) {
+                break;
+            }
             go = blocks.get(start--);
         }
         OpcodeBlock replacement = null;
