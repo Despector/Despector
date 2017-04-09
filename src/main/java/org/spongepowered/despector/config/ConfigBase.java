@@ -68,6 +68,9 @@ public class ConfigBase {
         @Setting(value = "emit-synthetics", comment = "Whether to emit synthetic members")
         public boolean emit_synthetics = false;
 
+        public boolean emit_this_for_fields = true;
+        public boolean emit_this_for_methods = false;
+
     }
 
     /**
@@ -147,7 +150,7 @@ public class ConfigBase {
         @ConfigSerializable
         public static class Imports {
 
-            public final List<String> import_order = Lists.newArrayList("/#", "", "java", "javax");
+            public List<String> import_order = Lists.newArrayList("/#", "", "java", "javax");
 
             public int blank_lines_before_package = 0;
             public int blank_lines_after_package = 1;

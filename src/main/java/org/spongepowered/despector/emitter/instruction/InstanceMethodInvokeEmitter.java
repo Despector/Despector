@@ -34,6 +34,7 @@ import org.spongepowered.despector.ast.members.insn.arg.field.LocalAccess;
 import org.spongepowered.despector.ast.members.insn.function.InstanceMethodInvoke;
 import org.spongepowered.despector.ast.members.insn.function.New;
 import org.spongepowered.despector.ast.members.insn.function.StaticMethodInvoke;
+import org.spongepowered.despector.config.ConfigManager;
 import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.InstructionEmitter;
 import org.spongepowered.despector.util.TypeHelper;
@@ -68,6 +69,8 @@ public class InstanceMethodInvokeEmitter implements InstructionEmitter<InstanceM
                 if (local.getLocal().getIndex() == 0) {
                     if (ctx.getType() != null && !arg.getOwnerType().equals(ctx.getType().getName())) {
                         ctx.printString("super.");
+                    } else if (ConfigManager.getConfig().emitter.emit_this_for_methods) {
+                        ctx.printString("this.");
                     }
                 } else {
                     ctx.emit(local, null);

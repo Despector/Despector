@@ -24,39 +24,19 @@
  */
 package org.spongepowered.despector.emitter.instruction;
 
-import org.spongepowered.despector.ast.generic.ClassTypeSignature;
 import org.spongepowered.despector.ast.generic.TypeSignature;
-import org.spongepowered.despector.ast.members.insn.arg.field.FieldAccess;
-import org.spongepowered.despector.ast.members.insn.arg.field.InstanceFieldAccess;
-import org.spongepowered.despector.ast.members.insn.arg.field.StaticFieldAccess;
+import org.spongepowered.despector.ast.members.insn.arg.field.LocalAccess;
 import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.InstructionEmitter;
-import org.spongepowered.despector.util.TypeHelper;
 
 /**
- * An emitter for instance field accesses.
+ * An emitter for a local access.
  */
-public class FieldEmitter implements InstructionEmitter<FieldAccess> {
+public class LocalAccessEmitter implements InstructionEmitter<LocalAccess> {
 
     @Override
-    public void emit(EmitterContext ctx, FieldAccess arg, TypeSignature type) {
-        if (arg instanceof StaticFieldAccess) {
-            if (ctx.getType() == null || !((StaticFieldAccess) arg).getOwnerName().equals(ctx.getType().getName())) {
-                ctx.emitTypeName(((StaticFieldAccess) arg).getOwnerName());
-                ctx.printString(".");
-            }
-            ctx.printString(arg.getFieldName());
-        } else if (arg instanceof InstanceFieldAccess) {
-            if (TypeHelper.isAnonClass(arg.getOwnerName()) && arg.getFieldName().startsWith("val$")) {
-                ctx.printString(arg.getFieldName().substring(4));
-                return;
-            }
-            ctx.emit(((InstanceFieldAccess) arg).getFieldOwner(), ClassTypeSignature.of(arg.getOwnerType()));
-            ctx.printString(".");
-            ctx.printString(arg.getFieldName());
-        } else {
-            throw new UnsupportedOperationException();
-        }
+    public void emit(EmitterContext ctx, LocalAccess arg, TypeSignature type) {
+        ctx.printString(arg.getLocal().getName());
     }
 
 }

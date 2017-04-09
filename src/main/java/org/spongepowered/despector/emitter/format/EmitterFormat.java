@@ -54,7 +54,7 @@ public class EmitterFormat {
     // ========================================================================
     // imports
     // ========================================================================
-    public final List<String> import_order = Lists.newArrayList();
+    public List<String> import_order = Lists.newArrayList();
 
     public int blank_lines_before_package = 0;
     public int blank_lines_after_package = 1;
