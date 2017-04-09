@@ -63,7 +63,7 @@ public class StringConcatEmitter implements SpecialMethodEmitter<InstanceMethodI
                 }
             } else if (callee instanceof New) {
                 New ref = (New) callee;
-                if ("Ljava/lang/StringBuilder;".equals(ref.getType())) {
+                if ("Ljava/lang/StringBuilder;".equals(ref.getType().getDescriptor())) {
                     if (ref.getParameters().length == 1) {
                         Instruction initial = ref.getParameters()[0];
                         if (initial instanceof StaticMethodInvoke) {
