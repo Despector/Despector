@@ -120,7 +120,7 @@ public class ImportManager {
     /**
      * Adds the given type descriptor to the list of imports.
      */
-    private void add(String desc) {
+    void add(String desc) {
         if (desc.startsWith("[")) {
             add(desc.substring(1));
             return;
@@ -189,7 +189,7 @@ public class ImportManager {
         // the methods
     }
 
-    private void check(TypeSignature sig) {
+    void check(TypeSignature sig) {
         if (sig instanceof ClassTypeSignature) {
             ClassTypeSignature cls = (ClassTypeSignature) sig;
             add(cls.getDescriptor());
@@ -266,6 +266,9 @@ public class ImportManager {
      * A visitor to gather types needing to be imported.
      */
     private class ImportWalker extends InstructionVisitor {
+
+        public ImportWalker() {
+        }
 
         @Override
         public void visitCast(Cast cast) {
