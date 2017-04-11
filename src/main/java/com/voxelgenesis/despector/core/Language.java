@@ -24,7 +24,7 @@
  */
 package com.voxelgenesis.despector.core;
 
-import com.voxelgenesis.despector.core.decompiler.Decompiler;
+import com.voxelgenesis.despector.core.decompiler.BaseDecompiler;
 import com.voxelgenesis.despector.core.emitter.Emitter;
 import com.voxelgenesis.despector.core.loader.SourceLoader;
 
@@ -45,7 +45,7 @@ public class Language {
 
     private final String name;
     private SourceLoader loader;
-    private Decompiler decompiler;
+    private BaseDecompiler decompiler;
     private Emitter emitter;
 
     public Language(String name) {
@@ -64,11 +64,11 @@ public class Language {
         this.loader = loader;
     }
 
-    public Decompiler getDecompiler() {
+    public BaseDecompiler getDecompiler() {
         return this.decompiler;
     }
 
-    public void setDecompiler(Decompiler decompiler) {
+    public void setDecompiler(BaseDecompiler decompiler) {
         this.decompiler = decompiler;
     }
 

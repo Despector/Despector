@@ -24,7 +24,21 @@
  */
 package com.voxelgenesis.despector.core.decompiler;
 
+import com.voxelgenesis.despector.core.ast.SourceSet;
+import com.voxelgenesis.despector.core.ast.type.MethodEntry;
+import com.voxelgenesis.despector.core.ast.type.SourceEntry;
 
-public interface Decompiler {
+public class BaseDecompiler {
+
+    public void decompile(SourceEntry entry, SourceSet set) {
+
+    }
+
+    public void decompile(MethodEntry method, SourceEntry entry, SourceSet set) {
+        if (method.getIR() == null || method.getStatements() != null) {
+            return;
+        }
+
+    }
 
 }

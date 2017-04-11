@@ -24,6 +24,7 @@
  */
 package com.voxelgenesis.despector.core.ast.type;
 
+import com.voxelgenesis.despector.core.ast.StatementBlock;
 import com.voxelgenesis.despector.core.ir.InsnBlock;
 
 public class MethodEntry {
@@ -32,6 +33,7 @@ public class MethodEntry {
     private final String signature;
 
     private InsnBlock ir;
+    private StatementBlock statements;
 
     public MethodEntry(String name, String signature) {
         this.name = name;
@@ -52,6 +54,14 @@ public class MethodEntry {
 
     public void setIR(InsnBlock ir) {
         this.ir = ir;
+    }
+
+    public StatementBlock getStatements() {
+        return this.statements;
+    }
+
+    public void setStatements(StatementBlock block) {
+        this.statements = block;
     }
 
 }

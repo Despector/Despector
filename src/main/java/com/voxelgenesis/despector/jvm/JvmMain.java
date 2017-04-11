@@ -25,6 +25,8 @@
 package com.voxelgenesis.despector.jvm;
 
 import com.voxelgenesis.despector.core.Language;
+import com.voxelgenesis.despector.core.decompiler.BaseDecompiler;
+import com.voxelgenesis.despector.jvm.emitter.java.JavaEmitter;
 import com.voxelgenesis.despector.jvm.loader.ClassSourceLoader;
 
 public class JvmMain {
@@ -40,6 +42,8 @@ public class JvmMain {
         done_setup = true;
         Language.register(JAVA_LANG);
         JAVA_LANG.setLoader(new ClassSourceLoader());
+        JAVA_LANG.setDecompiler(new BaseDecompiler());
+        JAVA_LANG.setEmitter(new JavaEmitter());
     }
 
 }

@@ -33,7 +33,6 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
-import org.spongepowered.test.util.TestHelper;
 import org.spongepowered.test.util.TestMethodBuilder;
 
 public class BasicTests {

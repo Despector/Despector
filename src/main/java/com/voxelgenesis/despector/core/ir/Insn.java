@@ -28,14 +28,63 @@ public abstract class Insn {
 
     public static final int NOOP = 0;
     public static final int PUSH = 1;
+    public static final int ICONST = 2;
+    public static final int LCONST = 3;
+    public static final int FCONST = 4;
+    public static final int DCONST = 5;
 
     public static final int LOCAL_LOAD = 10;
     public static final int LOCAL_STORE = 11;
+    public static final int ARRAY_LOAD = 12;
+    public static final int ARRAY_STORE = 13;
+    public static final int GETFIELD = 14;
+    public static final int PUTFIELD = 15;
+    public static final int GETSTATIC = 16;
+    public static final int PUTSTATIC = 17;
 
     public static final int INVOKE = 20;
     public static final int INVOKESTATIC = 21;
+    public static final int NEW = 22;
+    public static final int NEWARRAY = 23;
+    public static final int THROW = 24;
+    public static final int RETURN = 25;
+    public static final int ARETURN = 26;
 
-    public static final int RETURN = 100;
+    public static final int POP = 30;
+    public static final int DUP = 31;
+    public static final int DUP_X1 = 32;
+    public static final int DUP_X2 = 33;
+    public static final int DUP2 = 34;
+    public static final int DUP2_X1 = 35;
+    public static final int DUP2_X2 = 36;
+    public static final int SWAP = 37;
+
+    public static final int ADD = 40;
+    public static final int SUB = 41;
+    public static final int MUL = 42;
+    public static final int DIV = 43;
+    public static final int REM = 44;
+    public static final int NEG = 45;
+    public static final int SHL = 46;
+    public static final int SHR = 47;
+    public static final int USHR = 48;
+    public static final int AND = 49;
+    public static final int OR = 50;
+    public static final int XOR = 51;
+
+    public static final int IINC = 60;
+    public static final int CMP = 61;
+
+    public static final int IFEQ = 70;
+    public static final int IFNE = 71;
+    public static final int IF_CMPLT = 72;
+    public static final int IF_CMPGT = 73;
+    public static final int IF_CMPGE = 74;
+    public static final int IF_CMPLE = 75;
+    public static final int IF_CMPEQ = 76;
+    public static final int IF_CMPNE = 77;
+    public static final int GOTO = 78;
+    public static final int SWITCH = 79;
 
     private int opcode;
 

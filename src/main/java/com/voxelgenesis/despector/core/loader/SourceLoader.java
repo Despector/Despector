@@ -24,6 +24,7 @@
  */
 package com.voxelgenesis.despector.core.loader;
 
+import com.voxelgenesis.despector.core.Language;
 import com.voxelgenesis.despector.core.ast.SourceSet;
 
 import java.io.IOException;
@@ -31,6 +32,6 @@ import java.io.InputStream;
 
 public interface SourceLoader {
 
-    void load(InputStream data, SourceSet set) throws IOException;
+    void load(InputStream data, Language lang, SourceSet set) throws IOException;
 
 }

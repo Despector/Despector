@@ -24,6 +24,7 @@
  */
 package com.voxelgenesis.despector.jvm.loader;
 
+import com.voxelgenesis.despector.core.Language;
 import com.voxelgenesis.despector.core.ast.SourceSet;
 import com.voxelgenesis.despector.core.ast.type.FieldEntry;
 import com.voxelgenesis.despector.core.ast.type.MethodEntry;
@@ -60,7 +61,7 @@ public class ClassSourceLoader implements SourceLoader {
     private final BytecodeTranslator bytecode = new BytecodeTranslator();
 
     @Override
-    public void load(InputStream input, SourceSet set) throws IOException {
+    public void load(InputStream input, Language lang, SourceSet set) throws IOException {
         DataInputStream data = (input instanceof DataInputStream) ? (DataInputStream) input : new DataInputStream(input);
 
         int magic = data.readInt();
@@ -186,9 +187,8 @@ public class ClassSourceLoader implements SourceLoader {
             System.err.println("Skipping unknown class attribute: " + attribute_name);
             data.skipBytes(length);
         }
-
+        lang.getDecompiler().decompile(entry, set);
         set.add(entry);
-
     }
 
 }

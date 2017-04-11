@@ -22,41 +22,19 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.voxelgenesis.jvm.test;
+package com.voxelgenesis.despector.core.ir;
 
-import com.voxelgenesis.despector.core.Language;
-import com.voxelgenesis.despector.core.ast.SourceSet;
-import com.voxelgenesis.despector.core.ast.type.MethodEntry;
-import com.voxelgenesis.despector.core.ast.type.SourceEntry;
-import com.voxelgenesis.despector.jvm.JvmMain;
+public class LdcInsn extends Insn {
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.StringWriter;
+    private Object operand;
 
-public class CoreTestHelper {
+    public LdcInsn(int op, Object operand) {
+        super(op);
+        this.operand = operand;
+    }
 
-    public static String getAsString(byte[] clazz, Language lang, String string) {
-        JvmMain.setup();
-
-        ByteArrayInputStream input = new ByteArrayInputStream(clazz);
-        SourceSet dummy = new SourceSet();
-
-        try {
-            lang.getLoader().load(input, lang, dummy);
-            if (dummy.getAllSources().isEmpty()) {
-                return null;
-            }
-            SourceEntry loaded = dummy.getAllSources().iterator().next();
-
-            MethodEntry method = loaded.findMethod(string);
-
-            StringWriter out = new StringWriter();
-            lang.getEmitter().emitMethod(out, method);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return null;
+    public Object getOperand() {
+        return this.operand;
     }
 
 }
