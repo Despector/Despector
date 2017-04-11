@@ -22,29 +22,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.voxelgenesis.despector.core.util;
+package com.voxelgenesis.despector.core.ast.signature;
 
-import com.voxelgenesis.despector.core.ir.Insn;
+public class ArrayTypeSignature extends TypeSignature {
 
-public final class DebugUtil {
+    private final TypeSignature component;
 
-    private static final String[] opcodes = new String[256];
-
-    static {
-        opcodes[Insn.INVOKE] = "INVOKE";
-        opcodes[Insn.INVOKESTATIC] = "INVOKESTATIC";
-        opcodes[Insn.LOCAL_LOAD] = "LOCAL_LOAD";
-        opcodes[Insn.LOCAL_STORE] = "LOCAL_STORE";
-        opcodes[Insn.NOOP] = "NOOP";
-        opcodes[Insn.PUSH] = "PUSH";
-        opcodes[Insn.RETURN] = "RETURN";
+    public ArrayTypeSignature(TypeSignature type) {
+        this.component = type;
     }
 
-    public static String opcodeToString(int opcode) {
-        return opcodes[opcode];
+    public TypeSignature getComponentType() {
+        return this.component;
     }
 
-    private DebugUtil() {
+    @Override
+    public String getName() {
+        return this.component.getName() + "[]";
+    }
+
+    @Override
+    public String getDescriptor() {
+        return "[" + this.component.getDescriptor();
     }
 
 }

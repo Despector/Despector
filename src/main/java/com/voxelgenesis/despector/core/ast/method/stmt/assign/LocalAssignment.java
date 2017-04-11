@@ -22,45 +22,42 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.despector.ast.members.insn.arg.cst;
+package com.voxelgenesis.despector.core.ast.method.stmt.assign;
 
-import org.spongepowered.despector.ast.generic.ClassTypeSignature;
-import org.spongepowered.despector.ast.generic.TypeSignature;
-import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
-import org.spongepowered.despector.util.serialization.AstSerializer;
-import org.spongepowered.despector.util.serialization.MessagePacker;
+import static com.google.common.base.Preconditions.checkNotNull;
 
-import java.io.IOException;
+import com.voxelgenesis.despector.core.ast.method.Local;
+import com.voxelgenesis.despector.core.ast.method.insn.Instruction;
 
 /**
- * A constant null value.
+ * An assignment statement for assigning a value to a local.
  */
-public final class NullConstant extends Constant {
+public class LocalAssignment extends Assignment {
 
-    public static final NullConstant NULL = new NullConstant();
+    private Local local;
 
-    private NullConstant() {
+    public LocalAssignment(Local local, Instruction val) {
+        super(val);
+        this.local = checkNotNull(local, "local");
     }
 
-    @Override
-    public TypeSignature inferType() {
-        return ClassTypeSignature.OBJECT;
+    /**
+     * Gets the local to which the value is being assigned.
+     */
+    public Local getLocal() {
+        return this.local;
     }
 
-    @Override
-    public void accept(InstructionVisitor visitor) {
-        visitor.visitNullConstant(this);
-    }
-
-    @Override
-    public void writeTo(MessagePacker pack) throws IOException {
-        pack.startMap(1);
-        pack.writeString("id").writeInt(AstSerializer.STATEMENT_ID_NULL_CONSTANT);
+    /**
+     * Sets the local to which the value is being assigned.
+     */
+    public void setLocal(Local local) {
+        this.local = checkNotNull(local, "local");
     }
 
     @Override
     public String toString() {
-        return "null";
+        return this.local + " = " + this.val + ";";
     }
 
     @Override
@@ -68,15 +65,19 @@ public final class NullConstant extends Constant {
         if (obj == this) {
             return true;
         }
-        if (!(obj instanceof NullConstant)) {
+        if (!(obj instanceof LocalAssignment)) {
             return false;
         }
-        return true;
+        LocalAssignment insn = (LocalAssignment) obj;
+        return this.val.equals(insn.val) && this.local.equals(insn.local);
     }
 
     @Override
     public int hashCode() {
-        return 0;
+        int h = 1;
+        h = h * 37 + this.val.hashCode();
+        h = h * 37 + this.local.hashCode();
+        return h;
     }
 
 }

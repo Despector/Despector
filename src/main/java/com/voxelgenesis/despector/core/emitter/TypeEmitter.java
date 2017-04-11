@@ -22,9 +22,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.voxelgenesis.despector.core.ast;
+package com.voxelgenesis.despector.core.emitter;
 
+import com.voxelgenesis.despector.core.ast.type.SourceEntry;
 
-public interface Instruction {
+/**
+ * An emitter for a {@link SourceEntry}.
+ */
+public interface TypeEmitter<T extends SourceEntry> {
+
+    /**
+     * Emits the given entry.
+     */
+    boolean emit(EmitterContext ctx, T ast);
 
 }

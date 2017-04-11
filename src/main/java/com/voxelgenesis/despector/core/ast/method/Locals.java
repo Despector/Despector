@@ -22,52 +22,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.voxelgenesis.despector.core.ast.type;
+package com.voxelgenesis.despector.core.ast.method;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-public class SourceEntry {
+public class Locals {
 
-    private final String name;
+    private final List<Local> locals = new ArrayList<>();
 
-    private final Map<String, Map<String, MethodEntry>> methods = new HashMap<>();
-    private final List<MethodEntry> all_methods = new ArrayList<>();
+    public Locals() {
 
-    public SourceEntry(String name) {
-        this.name = name;
     }
 
-    public String getName() {
-        return this.name;
-    }
-
-    public void addMethod(MethodEntry method) {
-        Map<String, MethodEntry> mth = this.methods.get(method.getName());
-        if (mth == null) {
-            mth = new HashMap<>();
-            this.methods.put(method.getName(), mth);
+    public Local get(int index) {
+        while (this.locals.size() <= index) {
+            this.locals.add(new Local(this.locals.size()));
         }
-        mth.put(method.getSignature(), method);
-        this.all_methods.add(method);
-    }
-
-    public MethodEntry findMethod(String name) {
-        Map<String, MethodEntry> mth = this.methods.get(name);
-        if (mth != null) {
-            if (mth.size() != 1) {
-                throw new IllegalArgumentException("Attempted to find ambiguous method: " + name);
-            }
-            return mth.values().iterator().next();
-        }
-        return null;
-    }
-
-    public Collection<MethodEntry> getMethods() {
-        return this.all_methods;
+        return this.locals.get(index);
     }
 
 }

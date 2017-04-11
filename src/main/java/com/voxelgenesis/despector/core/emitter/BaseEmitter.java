@@ -22,29 +22,42 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.voxelgenesis.despector.core.util;
+package com.voxelgenesis.despector.core.emitter;
 
-import com.voxelgenesis.despector.core.ir.Insn;
+import com.voxelgenesis.despector.core.ast.method.stmt.Statement;
+import com.voxelgenesis.despector.core.ast.method.stmt.misc.Return;
+import com.voxelgenesis.despector.core.ast.type.MethodEntry;
+import com.voxelgenesis.despector.core.ast.type.SourceEntry;
 
-public final class DebugUtil {
+public class BaseEmitter {
 
-    private static final String[] opcodes = new String[256];
+    private final EmitterSet set;
 
-    static {
-        opcodes[Insn.INVOKE] = "INVOKE";
-        opcodes[Insn.INVOKESTATIC] = "INVOKESTATIC";
-        opcodes[Insn.LOCAL_LOAD] = "LOCAL_LOAD";
-        opcodes[Insn.LOCAL_STORE] = "LOCAL_STORE";
-        opcodes[Insn.NOOP] = "NOOP";
-        opcodes[Insn.PUSH] = "PUSH";
-        opcodes[Insn.RETURN] = "RETURN";
+    public BaseEmitter(EmitterSet set) {
+        this.set = set;
     }
 
-    public static String opcodeToString(int opcode) {
-        return opcodes[opcode];
+    public EmitterSet getSet() {
+        return this.set;
     }
 
-    private DebugUtil() {
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    public void emit(EmitterContext ctx, SourceEntry entry) {
+        TypeEmitter emitter = this.set.getAstEmitter(entry.getClass());
+        emitter.emit(ctx, entry);
+    }
+
+    public void emitMethodBody(EmitterContext ctx, MethodEntry entry) {
+        for (int i = 0; i < entry.getStatements().size(); i++) {
+            Statement stmt = entry.getStatements().get(i);
+            if (i == entry.getStatements().size() - 1 && stmt instanceof Return && !((Return) stmt).getValue().isPresent()) {
+                return;
+            }
+            if (i > 0) {
+                ctx.newLine();
+            }
+            ctx.emitStatement(stmt, true);
+        }
     }
 
 }

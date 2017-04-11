@@ -22,45 +22,55 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.despector.ast.members.insn.arg.cst;
+package com.voxelgenesis.despector.core.ast.method.insn.cst;
 
-import org.spongepowered.despector.ast.generic.ClassTypeSignature;
-import org.spongepowered.despector.ast.generic.TypeSignature;
-import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
-import org.spongepowered.despector.util.serialization.AstSerializer;
-import org.spongepowered.despector.util.serialization.MessagePacker;
+import static com.google.common.base.Preconditions.checkNotNull;
 
-import java.io.IOException;
+import com.voxelgenesis.despector.core.ast.signature.PrimativeTypeSignature;
+import com.voxelgenesis.despector.core.ast.signature.TypeSignature;
 
 /**
- * A constant null value.
+ * A constant int value.
  */
-public final class NullConstant extends Constant {
+public class IntConstant extends Constant {
 
-    public static final NullConstant NULL = new NullConstant();
+    private int cst;
+    private IntFormat format = IntFormat.DECIMAL;
 
-    private NullConstant() {
+    public IntConstant(int val) {
+        this.cst = val;
+    }
+
+    /**
+     * Gets the constant value.
+     */
+    public int getConstant() {
+        return this.cst;
+    }
+
+    /**
+     * Sets the constant value.
+     */
+    public void setConstant(int cst) {
+        this.cst = cst;
+    }
+
+    public IntFormat getFormat() {
+        return this.format;
+    }
+
+    public void setFormat(IntFormat format) {
+        this.format = checkNotNull(format, "format");
     }
 
     @Override
     public TypeSignature inferType() {
-        return ClassTypeSignature.OBJECT;
-    }
-
-    @Override
-    public void accept(InstructionVisitor visitor) {
-        visitor.visitNullConstant(this);
-    }
-
-    @Override
-    public void writeTo(MessagePacker pack) throws IOException {
-        pack.startMap(1);
-        pack.writeString("id").writeInt(AstSerializer.STATEMENT_ID_NULL_CONSTANT);
+        return PrimativeTypeSignature.INT;
     }
 
     @Override
     public String toString() {
-        return "null";
+        return String.valueOf(this.cst);
     }
 
     @Override
@@ -68,15 +78,26 @@ public final class NullConstant extends Constant {
         if (obj == this) {
             return true;
         }
-        if (!(obj instanceof NullConstant)) {
+        if (!(obj instanceof IntConstant)) {
             return false;
         }
-        return true;
+        IntConstant cast = (IntConstant) obj;
+        return this.cst == cast.cst;
     }
 
     @Override
     public int hashCode() {
-        return 0;
+        return this.cst;
+    }
+
+    /**
+     * The format for an integer constant when emitted.
+     */
+    public static enum IntFormat {
+        BINARY,
+        OCTAL,
+        DECIMAL,
+        HEXADECIMAL
     }
 
 }

@@ -22,52 +22,41 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.voxelgenesis.despector.core.ast.type;
+package com.voxelgenesis.despector.jvm.loader;
 
-import java.util.ArrayList;
-import java.util.Collection;
+import com.voxelgenesis.despector.core.ast.signature.ArrayTypeSignature;
+import com.voxelgenesis.despector.core.ast.signature.ClassTypeSignature;
+import com.voxelgenesis.despector.core.ast.signature.PrimativeTypeSignature;
+import com.voxelgenesis.despector.core.ast.signature.TypeSignature;
+
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
-public class SourceEntry {
+public class JvmHelper {
 
-    private final String name;
+    private static final Map<String, TypeSignature> SPECIAL = new HashMap<>();
 
-    private final Map<String, Map<String, MethodEntry>> methods = new HashMap<>();
-    private final List<MethodEntry> all_methods = new ArrayList<>();
-
-    public SourceEntry(String name) {
-        this.name = name;
+    static {
+        SPECIAL.put("B", PrimativeTypeSignature.BYTE);
+        SPECIAL.put("S", PrimativeTypeSignature.SHORT);
+        SPECIAL.put("I", PrimativeTypeSignature.INT);
+        SPECIAL.put("J", PrimativeTypeSignature.LONG);
+        SPECIAL.put("F", PrimativeTypeSignature.FLOAT);
+        SPECIAL.put("D", PrimativeTypeSignature.DOUBLE);
+        SPECIAL.put("C", PrimativeTypeSignature.CHAR);
+        SPECIAL.put("Z", PrimativeTypeSignature.BOOLEAN);
     }
 
-    public String getName() {
-        return this.name;
-    }
-
-    public void addMethod(MethodEntry method) {
-        Map<String, MethodEntry> mth = this.methods.get(method.getName());
-        if (mth == null) {
-            mth = new HashMap<>();
-            this.methods.put(method.getName(), mth);
+    public static TypeSignature of(String type) {
+        TypeSignature sig = SPECIAL.get(type);
+        if (sig != null) {
+            return sig;
         }
-        mth.put(method.getSignature(), method);
-        this.all_methods.add(method);
-    }
-
-    public MethodEntry findMethod(String name) {
-        Map<String, MethodEntry> mth = this.methods.get(name);
-        if (mth != null) {
-            if (mth.size() != 1) {
-                throw new IllegalArgumentException("Attempted to find ambiguous method: " + name);
-            }
-            return mth.values().iterator().next();
+        if (type.startsWith("[")) {
+            return new ArrayTypeSignature(of(type.substring(1)));
         }
-        return null;
-    }
-
-    public Collection<MethodEntry> getMethods() {
-        return this.all_methods;
+        sig = new ClassTypeSignature(type);
+        return sig;
     }
 
 }

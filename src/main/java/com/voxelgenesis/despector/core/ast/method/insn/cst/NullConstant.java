@@ -22,29 +22,45 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.voxelgenesis.despector.core.util;
+package com.voxelgenesis.despector.core.ast.method.insn.cst;
 
-import com.voxelgenesis.despector.core.ir.Insn;
+import com.voxelgenesis.despector.core.ast.signature.TypeSignature;
+import com.voxelgenesis.despector.core.ast.signature.VoidTypeSignature;
 
-public final class DebugUtil {
+/**
+ * A constant null value.
+ */
+public final class NullConstant extends Constant {
 
-    private static final String[] opcodes = new String[256];
+    public static final NullConstant NULL = new NullConstant();
 
-    static {
-        opcodes[Insn.INVOKE] = "INVOKE";
-        opcodes[Insn.INVOKESTATIC] = "INVOKESTATIC";
-        opcodes[Insn.LOCAL_LOAD] = "LOCAL_LOAD";
-        opcodes[Insn.LOCAL_STORE] = "LOCAL_STORE";
-        opcodes[Insn.NOOP] = "NOOP";
-        opcodes[Insn.PUSH] = "PUSH";
-        opcodes[Insn.RETURN] = "RETURN";
+    private NullConstant() {
     }
 
-    public static String opcodeToString(int opcode) {
-        return opcodes[opcode];
+    @Override
+    public TypeSignature inferType() {
+        return VoidTypeSignature.VOID;
     }
 
-    private DebugUtil() {
+    @Override
+    public String toString() {
+        return "null";
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        }
+        if (!(obj instanceof NullConstant)) {
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        return 0;
     }
 
 }

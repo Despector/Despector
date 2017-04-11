@@ -24,20 +24,34 @@
  */
 package com.voxelgenesis.despector.core.ast.type;
 
-import com.voxelgenesis.despector.core.ast.StatementBlock;
+import com.voxelgenesis.despector.core.ast.method.Locals;
+import com.voxelgenesis.despector.core.ast.method.StatementBlock;
+import com.voxelgenesis.despector.core.ast.signature.TypeSignature;
 import com.voxelgenesis.despector.core.ir.InsnBlock;
+import com.voxelgenesis.despector.jvm.loader.JvmHelper;
+import org.spongepowered.despector.util.TypeHelper;
 
 public class MethodEntry {
 
     private final String name;
     private final String signature;
 
+    private TypeSignature return_type;
+
+    private boolean is_static;
+
     private InsnBlock ir;
     private StatementBlock statements;
+
+    private Locals locals;
 
     public MethodEntry(String name, String signature) {
         this.name = name;
         this.signature = signature;
+
+        this.locals = new Locals();
+
+        this.return_type = JvmHelper.of(TypeHelper.getRet(this.signature));
     }
 
     public String getName() {
@@ -46,6 +60,18 @@ public class MethodEntry {
 
     public String getSignature() {
         return this.signature;
+    }
+
+    public TypeSignature getReturnType() {
+        return this.return_type;
+    }
+
+    public boolean isStatic() {
+        return this.is_static;
+    }
+
+    public void setStatic(boolean state) {
+        this.is_static = state;
     }
 
     public InsnBlock getIR() {
@@ -62,6 +88,10 @@ public class MethodEntry {
 
     public void setStatements(StatementBlock block) {
         this.statements = block;
+    }
+
+    public Locals getLocals() {
+        return this.locals;
     }
 
 }

@@ -22,45 +22,47 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.despector.ast.members.insn.arg.cst;
+package com.voxelgenesis.despector.core.ast.method.insn.cst;
 
-import org.spongepowered.despector.ast.generic.ClassTypeSignature;
-import org.spongepowered.despector.ast.generic.TypeSignature;
-import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
-import org.spongepowered.despector.util.serialization.AstSerializer;
-import org.spongepowered.despector.util.serialization.MessagePacker;
+import static com.google.common.base.Preconditions.checkNotNull;
 
-import java.io.IOException;
+import com.voxelgenesis.despector.core.ast.signature.TypeSignature;
+import com.voxelgenesis.despector.jvm.loader.JvmHelper;
+import org.spongepowered.despector.util.TypeHelper;
 
 /**
- * A constant null value.
+ * A constant type value.
  */
-public final class NullConstant extends Constant {
+public class TypeConstant extends Constant {
 
-    public static final NullConstant NULL = new NullConstant();
+    private String cst;
 
-    private NullConstant() {
+    public TypeConstant(String cst) {
+        this.cst = checkNotNull(cst, "type");
+    }
+
+    /**
+     * Gets the constant value.
+     */
+    public String getConstant() {
+        return this.cst;
+    }
+
+    /**
+     * Sets the constant value.
+     */
+    public void setConstant(String type) {
+        this.cst = checkNotNull(type, "type");
     }
 
     @Override
     public TypeSignature inferType() {
-        return ClassTypeSignature.OBJECT;
-    }
-
-    @Override
-    public void accept(InstructionVisitor visitor) {
-        visitor.visitNullConstant(this);
-    }
-
-    @Override
-    public void writeTo(MessagePacker pack) throws IOException {
-        pack.startMap(1);
-        pack.writeString("id").writeInt(AstSerializer.STATEMENT_ID_NULL_CONSTANT);
+        return JvmHelper.of("Ljava/lang/Class;");
     }
 
     @Override
     public String toString() {
-        return "null";
+        return TypeHelper.descToTypeName(this.cst) + ".class";
     }
 
     @Override
@@ -68,15 +70,16 @@ public final class NullConstant extends Constant {
         if (obj == this) {
             return true;
         }
-        if (!(obj instanceof NullConstant)) {
+        if (!(obj instanceof TypeConstant)) {
             return false;
         }
-        return true;
+        TypeConstant insn = (TypeConstant) obj;
+        return this.cst.equals(insn.cst);
     }
 
     @Override
     public int hashCode() {
-        return 0;
+        return this.cst.hashCode();
     }
 
 }

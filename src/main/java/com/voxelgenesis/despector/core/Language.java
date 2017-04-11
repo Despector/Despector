@@ -25,11 +25,14 @@
 package com.voxelgenesis.despector.core;
 
 import com.voxelgenesis.despector.core.decompiler.BaseDecompiler;
-import com.voxelgenesis.despector.core.emitter.Emitter;
+import com.voxelgenesis.despector.core.emitter.BaseEmitter;
+import com.voxelgenesis.despector.core.emitter.EmitterContext;
 import com.voxelgenesis.despector.core.loader.SourceLoader;
 
+import java.io.Writer;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.BiFunction;
 
 public class Language {
 
@@ -46,7 +49,8 @@ public class Language {
     private final String name;
     private SourceLoader loader;
     private BaseDecompiler decompiler;
-    private Emitter emitter;
+    private BaseEmitter emitter;
+    private BiFunction<Language, Writer, EmitterContext> ctx_builder;
 
     public Language(String name) {
         this.name = name;
@@ -72,11 +76,19 @@ public class Language {
         this.decompiler = decompiler;
     }
 
-    public Emitter getEmitter() {
+    public BaseEmitter getEmitter() {
         return this.emitter;
     }
 
-    public void setEmitter(Emitter emitter) {
+    public void setEmitter(BaseEmitter emitter) {
         this.emitter = emitter;
+    }
+
+    public void setEmitterContextProvider(BiFunction<Language, Writer, EmitterContext> provider) {
+        this.ctx_builder = provider;
+    }
+
+    public EmitterContext newEmitterContext(Writer out) {
+        return this.ctx_builder.apply(this, out);
     }
 }

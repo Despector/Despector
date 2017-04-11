@@ -26,18 +26,18 @@ package com.voxelgenesis.despector.jvm.loader;
 
 import com.voxelgenesis.despector.core.Language;
 import com.voxelgenesis.despector.core.ast.SourceSet;
+import com.voxelgenesis.despector.core.ast.method.Local;
 import com.voxelgenesis.despector.core.ast.type.FieldEntry;
 import com.voxelgenesis.despector.core.ast.type.MethodEntry;
 import com.voxelgenesis.despector.core.ast.type.TypeEntry;
-import com.voxelgenesis.despector.core.ir.Insn;
 import com.voxelgenesis.despector.core.loader.SourceFormatException;
 import com.voxelgenesis.despector.core.loader.SourceLoader;
-import com.voxelgenesis.despector.core.util.DebugUtil;
 import com.voxelgenesis.despector.jvm.ast.type.AnnotationEntry;
 import com.voxelgenesis.despector.jvm.ast.type.ClassEntry;
 import com.voxelgenesis.despector.jvm.ast.type.EnumEntry;
 import com.voxelgenesis.despector.jvm.ast.type.InterfaceEntry;
 import com.voxelgenesis.despector.jvm.loader.bytecode.BytecodeTranslator;
+import org.spongepowered.despector.util.TypeHelper;
 
 import java.io.DataInputStream;
 import java.io.IOException;
@@ -50,8 +50,13 @@ public class ClassSourceLoader implements SourceLoader {
     private static final boolean DUMP_IR_ON_LOAD = Boolean.getBoolean("despector.debug.dump_ir");
 
     private static final int ACC_PUBLIC = 0x0001;
+    private static final int ACC_PRIVATE = 0x0002;
+    private static final int ACC_PROTECTED = 0x0004;
+    private static final int ACC_STATIC = 0x0008;
     private static final int ACC_FINAL = 0x0010;
     private static final int ACC_SUPER = 0x0020;
+    private static final int ACC_VOLATILE = 0x0040;
+    private static final int ACC_TRANSIENT = 0x0080;
     private static final int ACC_INTERFACE = 0x0200;
     private static final int ACC_ABSTRACT = 0x0400;
     private static final int ACC_SYNTHETIC = 0x1000;
@@ -120,6 +125,7 @@ public class ClassSourceLoader implements SourceLoader {
 
             MethodEntry method = new MethodEntry(method_name, method_desc);
             methods.add(method);
+            method.setStatic((method_access & ACC_STATIC) != 0);
 
             int attribute_count = data.readUnsignedShort();
             for (int a = 0; a < attribute_count; a++) {
@@ -132,15 +138,6 @@ public class ClassSourceLoader implements SourceLoader {
                     byte[] code = new byte[code_length];
                     data.read(code, 0, code_length);
 
-                    method.setIR(this.bytecode.createIR(code, pool));
-
-                    if (DUMP_IR_ON_LOAD) {
-                        System.out.println("Instructions of " + method_name + " " + method_desc);
-                        for (Insn ir : method.getIR().getInstructions()) {
-                            System.out.println("  " + DebugUtil.irToString(ir));
-                        }
-                    }
-
                     int exception_table_length = data.readUnsignedShort();
                     for (int ex = 0; ex < exception_table_length; ex++) {
                         data.skipBytes(8);
@@ -151,8 +148,39 @@ public class ClassSourceLoader implements SourceLoader {
                     for (int ca = 0; ca < code_attribute_count; ca++) {
                         String code_attribute_name = pool.getUtf8(data.readUnsignedShort());
                         int clength = data.readInt();
-                        System.err.println("Skipping unknown code attribute: " + code_attribute_name);
-                        data.skipBytes(clength);
+                        if ("LocalVariableTable".equals(code_attribute_name)) {
+                            int lvt_length = data.readUnsignedShort();
+                            int param_count = TypeHelper.paramCount(method.getSignature());
+                            if (!method.isStatic()) {
+                                param_count++;
+                            }
+                            for (int j = 0; j < lvt_length; j++) {
+                                int start_pc = data.readUnsignedShort();
+                                int local_length = data.readUnsignedShort();
+                                String local_name = pool.getUtf8(data.readUnsignedShort());
+                                String local_desc = pool.getUtf8(data.readUnsignedShort());
+                                int index = data.readUnsignedShort();
+                                Local local = method.getLocals().get(index);
+                                local.setName(local_name);
+                                local.setType(JvmHelper.of(local_desc));
+                                if (j < param_count) {
+                                    local.setParameter(true);
+                                }
+                                // TODO need to store data to pass to bytecode
+                                // translator to seperate all overloading of
+                                // local slots to unique indices
+                            }
+                        } else {
+                            System.err.println("Skipping unknown code attribute: " + code_attribute_name);
+                            data.skipBytes(clength);
+                        }
+
+                        method.setIR(this.bytecode.createIR(code, pool));
+
+                        if (DUMP_IR_ON_LOAD) {
+                            System.out.println("Instructions of " + method_name + " " + method_desc);
+                            System.out.println(method.getIR());
+                        }
                     }
 
                 } else {

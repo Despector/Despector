@@ -22,21 +22,69 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.voxelgenesis.despector.core.ir;
+package com.voxelgenesis.despector.core.ast.method;
 
-import com.voxelgenesis.despector.core.util.DebugUtil;
+import com.voxelgenesis.despector.core.ast.method.stmt.Statement;
 
-public class OpInsn extends Insn {
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
-    public OpInsn(int op) {
-        super(op);
+public class StatementBlock implements Iterable<Statement> {
+
+    private final List<Statement> statements;
+
+    public StatementBlock() {
+        this.statements = new ArrayList<>();
+    }
+
+    public int size() {
+        return this.statements.size();
+    }
+
+    public Statement get(int i) {
+        return this.statements.get(i);
+    }
+
+    public void append(Statement stmt) {
+        this.statements.add(stmt);
+    }
+
+    public List<Statement> getStatements() {
+        return this.statements;
     }
 
     @Override
     public String toString() {
         StringBuilder str = new StringBuilder();
-        str.append(DebugUtil.opcodeToString(this.opcode));
+        for (Statement stmt : this.statements) {
+            str.append(stmt.toString()).append("\n");
+        }
         return str.toString();
+    }
+
+    @Override
+    public Iterator<Statement> iterator() {
+        return new Itr();
+    }
+
+    private class Itr implements Iterator<Statement> {
+
+        private int index;
+
+        public Itr() {
+
+        }
+
+        @Override
+        public boolean hasNext() {
+            return StatementBlock.this.size() > this.index;
+        }
+
+        @Override
+        public Statement next() {
+            return StatementBlock.this.get(this.index++);
+        }
     }
 
 }

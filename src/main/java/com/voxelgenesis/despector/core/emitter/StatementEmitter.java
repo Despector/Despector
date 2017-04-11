@@ -22,29 +22,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.voxelgenesis.despector.core.util;
+package com.voxelgenesis.despector.core.emitter;
 
-import com.voxelgenesis.despector.core.ir.Insn;
+import com.voxelgenesis.despector.core.ast.method.stmt.Statement;
 
-public final class DebugUtil {
+/**
+ * An emitter for a particular statement type.
+ */
+public interface StatementEmitter<T extends Statement> {
 
-    private static final String[] opcodes = new String[256];
-
-    static {
-        opcodes[Insn.INVOKE] = "INVOKE";
-        opcodes[Insn.INVOKESTATIC] = "INVOKESTATIC";
-        opcodes[Insn.LOCAL_LOAD] = "LOCAL_LOAD";
-        opcodes[Insn.LOCAL_STORE] = "LOCAL_STORE";
-        opcodes[Insn.NOOP] = "NOOP";
-        opcodes[Insn.PUSH] = "PUSH";
-        opcodes[Insn.RETURN] = "RETURN";
-    }
-
-    public static String opcodeToString(int opcode) {
-        return opcodes[opcode];
-    }
-
-    private DebugUtil() {
-    }
+    /**
+     * Emits the given statement.
+     */
+    void emit(EmitterContext ctx, T stmt, boolean semicolon);
 
 }

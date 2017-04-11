@@ -22,29 +22,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.voxelgenesis.despector.core.ast;
+package com.voxelgenesis.despector.core.ast.signature;
 
-import java.util.ArrayList;
-import java.util.List;
+public class VoidTypeSignature extends TypeSignature {
 
-public class StatementBlock {
+    public static final VoidTypeSignature VOID = new VoidTypeSignature();
 
-    private final List<Statement> statements;
-
-    public StatementBlock() {
-        this.statements = new ArrayList<>();
+    private VoidTypeSignature() {
     }
 
-    public int size() {
-        return this.statements.size();
+    @Override
+    public String getName() {
+        return "void";
     }
 
-    public Statement get(int i) {
-        return this.statements.get(i);
+    @Override
+    public String getDescriptor() {
+        return "V";
     }
 
-    public List<Statement> getStatements() {
-        return this.statements;
+    @Override
+    public String toString() {
+        return "void";
     }
 
 }

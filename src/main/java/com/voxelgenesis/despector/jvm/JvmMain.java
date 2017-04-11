@@ -25,8 +25,20 @@
 package com.voxelgenesis.despector.jvm;
 
 import com.voxelgenesis.despector.core.Language;
+import com.voxelgenesis.despector.core.ast.method.insn.cst.IntConstant;
+import com.voxelgenesis.despector.core.ast.method.insn.var.LocalAccess;
+import com.voxelgenesis.despector.core.ast.method.invoke.InvokeStatement;
+import com.voxelgenesis.despector.core.ast.method.stmt.assign.LocalAssignment;
+import com.voxelgenesis.despector.core.ast.method.stmt.misc.Return;
 import com.voxelgenesis.despector.core.decompiler.BaseDecompiler;
-import com.voxelgenesis.despector.jvm.emitter.java.JavaEmitter;
+import com.voxelgenesis.despector.core.emitter.BaseEmitter;
+import com.voxelgenesis.despector.core.emitter.EmitterSet;
+import com.voxelgenesis.despector.jvm.emitter.java.JavaEmitterContext;
+import com.voxelgenesis.despector.jvm.emitter.java.instruction.IntConstantEmitter;
+import com.voxelgenesis.despector.jvm.emitter.java.instruction.LocalAccessEmitter;
+import com.voxelgenesis.despector.jvm.emitter.java.statement.InvokeEmitter;
+import com.voxelgenesis.despector.jvm.emitter.java.statement.LocalAssignmentEmitter;
+import com.voxelgenesis.despector.jvm.emitter.java.statement.ReturnEmitter;
 import com.voxelgenesis.despector.jvm.loader.ClassSourceLoader;
 
 public class JvmMain {
@@ -34,6 +46,7 @@ public class JvmMain {
     private static boolean done_setup = false;
 
     public static final Language JAVA_LANG = new Language("java");
+    public static final EmitterSet JAVA_SET = new EmitterSet();
 
     public static void setup() {
         if (done_setup) {
@@ -43,7 +56,15 @@ public class JvmMain {
         Language.register(JAVA_LANG);
         JAVA_LANG.setLoader(new ClassSourceLoader());
         JAVA_LANG.setDecompiler(new BaseDecompiler());
-        JAVA_LANG.setEmitter(new JavaEmitter());
+        JAVA_LANG.setEmitter(new BaseEmitter(JAVA_SET));
+        JAVA_LANG.setEmitterContextProvider((lang, out) -> new JavaEmitterContext(lang.getEmitter().getSet(), out));
+
+        JAVA_SET.setStatementEmitter(LocalAssignment.class, new LocalAssignmentEmitter());
+        JAVA_SET.setStatementEmitter(InvokeStatement.class, new InvokeEmitter());
+        JAVA_SET.setStatementEmitter(Return.class, new ReturnEmitter());
+        
+        JAVA_SET.setInstructionEmitter(IntConstant.class, new IntConstantEmitter());
+        JAVA_SET.setInstructionEmitter(LocalAccess.class, new LocalAccessEmitter());
     }
 
 }

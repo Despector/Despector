@@ -86,7 +86,7 @@ public abstract class Insn {
     public static final int GOTO = 78;
     public static final int SWITCH = 79;
 
-    private int opcode;
+    protected int opcode;
 
     public Insn(int op) {
         this.opcode = op;

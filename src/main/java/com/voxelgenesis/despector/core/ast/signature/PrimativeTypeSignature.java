@@ -22,21 +22,40 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.voxelgenesis.despector.core.ir;
+package com.voxelgenesis.despector.core.ast.signature;
 
-import com.voxelgenesis.despector.core.util.DebugUtil;
+import org.spongepowered.despector.util.TypeHelper;
 
-public class OpInsn extends Insn {
+public class PrimativeTypeSignature extends TypeSignature {
 
-    public OpInsn(int op) {
-        super(op);
+    public static final PrimativeTypeSignature BOOLEAN = new PrimativeTypeSignature("Z");
+    public static final PrimativeTypeSignature BYTE = new PrimativeTypeSignature("B");
+    public static final PrimativeTypeSignature SHORT = new PrimativeTypeSignature("S");
+    public static final PrimativeTypeSignature INT = new PrimativeTypeSignature("I");
+    public static final PrimativeTypeSignature LONG = new PrimativeTypeSignature("J");
+    public static final PrimativeTypeSignature FLOAT = new PrimativeTypeSignature("F");
+    public static final PrimativeTypeSignature DOUBLE = new PrimativeTypeSignature("D");
+    public static final PrimativeTypeSignature CHAR = new PrimativeTypeSignature("C");
+
+    private final String type_name;
+
+    public PrimativeTypeSignature(String type) {
+        this.type_name = type;
+    }
+
+    @Override
+    public String getName() {
+        return TypeHelper.descToType(this.type_name);
+    }
+
+    @Override
+    public String getDescriptor() {
+        return this.type_name;
     }
 
     @Override
     public String toString() {
-        StringBuilder str = new StringBuilder();
-        str.append(DebugUtil.opcodeToString(this.opcode));
-        return str.toString();
+        return this.type_name;
     }
 
 }

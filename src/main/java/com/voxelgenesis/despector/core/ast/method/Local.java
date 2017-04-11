@@ -22,52 +22,48 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.voxelgenesis.despector.core.ast.type;
+package com.voxelgenesis.despector.core.ast.method;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import com.voxelgenesis.despector.core.ast.signature.TypeSignature;
 
-public class SourceEntry {
+public class Local {
 
-    private final String name;
+    private final int index;
 
-    private final Map<String, Map<String, MethodEntry>> methods = new HashMap<>();
-    private final List<MethodEntry> all_methods = new ArrayList<>();
+    private String name;
+    private TypeSignature type;
+    private boolean parameter;
 
-    public SourceEntry(String name) {
-        this.name = name;
+    public Local(int index) {
+        this.index = index;
+    }
+
+    public int getIndex() {
+        return this.index;
     }
 
     public String getName() {
         return this.name;
     }
 
-    public void addMethod(MethodEntry method) {
-        Map<String, MethodEntry> mth = this.methods.get(method.getName());
-        if (mth == null) {
-            mth = new HashMap<>();
-            this.methods.put(method.getName(), mth);
-        }
-        mth.put(method.getSignature(), method);
-        this.all_methods.add(method);
+    public void setName(String name) {
+        this.name = name;
     }
 
-    public MethodEntry findMethod(String name) {
-        Map<String, MethodEntry> mth = this.methods.get(name);
-        if (mth != null) {
-            if (mth.size() != 1) {
-                throw new IllegalArgumentException("Attempted to find ambiguous method: " + name);
-            }
-            return mth.values().iterator().next();
-        }
-        return null;
+    public TypeSignature getType() {
+        return this.type;
     }
 
-    public Collection<MethodEntry> getMethods() {
-        return this.all_methods;
+    public void setType(TypeSignature type) {
+        this.type = type;
+    }
+
+    public boolean isParameter() {
+        return this.parameter;
+    }
+
+    public void setParameter(boolean state) {
+        this.parameter = state;
     }
 
 }

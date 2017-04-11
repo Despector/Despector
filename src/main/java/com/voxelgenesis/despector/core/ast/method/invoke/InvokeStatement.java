@@ -22,29 +22,42 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.voxelgenesis.despector.core.util;
+package com.voxelgenesis.despector.core.ast.method.invoke;
 
-import com.voxelgenesis.despector.core.ir.Insn;
+import static com.google.common.base.Preconditions.checkNotNull;
 
-public final class DebugUtil {
+import com.voxelgenesis.despector.core.ast.method.insn.Instruction;
+import com.voxelgenesis.despector.core.ast.method.stmt.Statement;
 
-    private static final String[] opcodes = new String[256];
+/**
+ * A statement wrapping an instruction. Typically used for method invokes that
+ * have no return value and therefore are called as instructions rather than as
+ * part of another statement.
+ */
+public class InvokeStatement implements Statement {
 
-    static {
-        opcodes[Insn.INVOKE] = "INVOKE";
-        opcodes[Insn.INVOKESTATIC] = "INVOKESTATIC";
-        opcodes[Insn.LOCAL_LOAD] = "LOCAL_LOAD";
-        opcodes[Insn.LOCAL_STORE] = "LOCAL_STORE";
-        opcodes[Insn.NOOP] = "NOOP";
-        opcodes[Insn.PUSH] = "PUSH";
-        opcodes[Insn.RETURN] = "RETURN";
+    private Instruction inner;
+
+    public InvokeStatement(Instruction inner) {
+        this.inner = checkNotNull(inner, "instruction");
     }
 
-    public static String opcodeToString(int opcode) {
-        return opcodes[opcode];
+    /**
+     * Gets the instruction being invoked in this statement.
+     */
+    public Instruction getInstruction() {
+        return this.inner;
     }
 
-    private DebugUtil() {
+    /**
+     * Sets the instruction being invoked in this statement.
+     */
+    public void setInstruction(Instruction insn) {
+        this.inner = checkNotNull(insn, "instruction");
     }
 
+    @Override
+    public String toString() {
+        return this.inner.toString();
+    }
 }

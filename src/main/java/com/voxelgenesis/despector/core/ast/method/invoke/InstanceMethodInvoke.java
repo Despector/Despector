@@ -22,45 +22,48 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.despector.ast.members.insn.arg.cst;
+package com.voxelgenesis.despector.core.ast.method.invoke;
 
-import org.spongepowered.despector.ast.generic.ClassTypeSignature;
-import org.spongepowered.despector.ast.generic.TypeSignature;
-import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
-import org.spongepowered.despector.util.serialization.AstSerializer;
-import org.spongepowered.despector.util.serialization.MessagePacker;
+import static com.google.common.base.Preconditions.checkNotNull;
 
-import java.io.IOException;
+import com.voxelgenesis.despector.core.ast.method.insn.Instruction;
 
 /**
- * A constant null value.
+ * A statement calling an instance method.
  */
-public final class NullConstant extends Constant {
+public class InstanceMethodInvoke extends MethodInvoke {
 
-    public static final NullConstant NULL = new NullConstant();
+    private Instruction callee;
 
-    private NullConstant() {
+    public InstanceMethodInvoke(String name, String desc, String owner, Instruction[] args, Instruction call) {
+        super(name, desc, owner, args);
+        this.callee = checkNotNull(call, "callee");
     }
 
-    @Override
-    public TypeSignature inferType() {
-        return ClassTypeSignature.OBJECT;
+    /**
+     * Gets the object that the method is onvoked on.
+     */
+    public Instruction getCallee() {
+        return this.callee;
     }
 
-    @Override
-    public void accept(InstructionVisitor visitor) {
-        visitor.visitNullConstant(this);
-    }
-
-    @Override
-    public void writeTo(MessagePacker pack) throws IOException {
-        pack.startMap(1);
-        pack.writeString("id").writeInt(AstSerializer.STATEMENT_ID_NULL_CONSTANT);
+    /**
+     * Sets the object that the method is onvoked on.
+     */
+    public void setCallee(Instruction callee) {
+        this.callee = checkNotNull(callee, "callee");
     }
 
     @Override
     public String toString() {
-        return "null";
+        StringBuilder params = new StringBuilder();
+        for (int i = 0; i < this.params.length; i++) {
+            params.append(this.params[i]);
+            if (i < this.params.length - 1) {
+                params.append(", ");
+            }
+        }
+        return this.callee + "." + this.method_name + "(" + params + ");";
     }
 
     @Override
@@ -68,15 +71,18 @@ public final class NullConstant extends Constant {
         if (obj == this) {
             return true;
         }
-        if (!(obj instanceof NullConstant)) {
+        if (!super.equals(obj)) {
             return false;
         }
-        return true;
+        InstanceMethodInvoke insn = (InstanceMethodInvoke) obj;
+        return this.callee.equals(insn.callee);
     }
 
     @Override
     public int hashCode() {
-        return 0;
+        int h = super.hashCode();
+        h = h * 37 + this.callee.hashCode();
+        return h;
     }
 
 }

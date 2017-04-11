@@ -22,29 +22,21 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.voxelgenesis.despector.core.util;
+package com.voxelgenesis.despector.jvm.emitter.java.instruction;
 
-import com.voxelgenesis.despector.core.ir.Insn;
+import com.voxelgenesis.despector.core.ast.method.insn.var.LocalAccess;
+import com.voxelgenesis.despector.core.ast.signature.TypeSignature;
+import com.voxelgenesis.despector.core.emitter.EmitterContext;
+import com.voxelgenesis.despector.core.emitter.InstructionEmitter;
 
-public final class DebugUtil {
+/**
+ * An emitter for a local access.
+ */
+public class LocalAccessEmitter implements InstructionEmitter<LocalAccess> {
 
-    private static final String[] opcodes = new String[256];
-
-    static {
-        opcodes[Insn.INVOKE] = "INVOKE";
-        opcodes[Insn.INVOKESTATIC] = "INVOKESTATIC";
-        opcodes[Insn.LOCAL_LOAD] = "LOCAL_LOAD";
-        opcodes[Insn.LOCAL_STORE] = "LOCAL_STORE";
-        opcodes[Insn.NOOP] = "NOOP";
-        opcodes[Insn.PUSH] = "PUSH";
-        opcodes[Insn.RETURN] = "RETURN";
-    }
-
-    public static String opcodeToString(int opcode) {
-        return opcodes[opcode];
-    }
-
-    private DebugUtil() {
+    @Override
+    public void emit(EmitterContext ctx, LocalAccess arg, TypeSignature type) {
+        ctx.printString(arg.getLocal().getName());
     }
 
 }

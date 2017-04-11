@@ -24,6 +24,8 @@
  */
 package com.voxelgenesis.despector.core.ir;
 
+import com.voxelgenesis.despector.core.util.DebugUtil;
+
 public class LdcInsn extends Insn {
 
     private Object operand;
@@ -33,8 +35,16 @@ public class LdcInsn extends Insn {
         this.operand = operand;
     }
 
-    public Object getOperand() {
+    public Object getConstant() {
         return this.operand;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder str = new StringBuilder();
+        str.append(DebugUtil.opcodeToString(this.opcode));
+        str.append(" ").append(this.operand);
+        return str.toString();
     }
 
 }

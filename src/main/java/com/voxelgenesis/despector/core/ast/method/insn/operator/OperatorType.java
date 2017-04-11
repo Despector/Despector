@@ -22,29 +22,42 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.voxelgenesis.despector.core.util;
+package com.voxelgenesis.despector.core.ast.method.insn.operator;
 
-import com.voxelgenesis.despector.core.ir.Insn;
+/**
+ * An enumeration of all operators.
+ */
+public enum OperatorType {
 
-public final class DebugUtil {
+    // TODO lang agnostic symbols
+    ADD(11, "+"),
+    SUBTRACT(11, "-"),
+    MULTIPLY(12, "*"),
+    DIVIDE(12, "/"),
+    REMAINDER(12, "%"),
 
-    private static final String[] opcodes = new String[256];
+    SHIFT_LEFT(10, "<<"),
+    SHIFT_RIGHT(10, ">>"),
+    UNSIGNED_SHIFT_RIGHT(10, ">>>"),
 
-    static {
-        opcodes[Insn.INVOKE] = "INVOKE";
-        opcodes[Insn.INVOKESTATIC] = "INVOKESTATIC";
-        opcodes[Insn.LOCAL_LOAD] = "LOCAL_LOAD";
-        opcodes[Insn.LOCAL_STORE] = "LOCAL_STORE";
-        opcodes[Insn.NOOP] = "NOOP";
-        opcodes[Insn.PUSH] = "PUSH";
-        opcodes[Insn.RETURN] = "RETURN";
+    AND(7, "&"),
+    OR(5, "|"),
+    XOR(6, "^");
+
+    private final String symbol;
+    private final int precedence;
+
+    OperatorType(int p, String s) {
+        this.precedence = p;
+        this.symbol = s;
     }
 
-    public static String opcodeToString(int opcode) {
-        return opcodes[opcode];
+    public String getSymbol() {
+        return this.symbol;
     }
 
-    private DebugUtil() {
+    public int getPrecedence() {
+        return this.precedence;
     }
 
 }

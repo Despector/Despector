@@ -22,29 +22,61 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.voxelgenesis.despector.core.util;
+package com.voxelgenesis.despector.core.ast.method.insn.cst;
 
-import com.voxelgenesis.despector.core.ir.Insn;
+import com.voxelgenesis.despector.core.ast.signature.PrimativeTypeSignature;
+import com.voxelgenesis.despector.core.ast.signature.TypeSignature;
 
-public final class DebugUtil {
+/**
+ * A constant long value.
+ */
+public class LongConstant extends Constant {
 
-    private static final String[] opcodes = new String[256];
+    private long cst;
 
-    static {
-        opcodes[Insn.INVOKE] = "INVOKE";
-        opcodes[Insn.INVOKESTATIC] = "INVOKESTATIC";
-        opcodes[Insn.LOCAL_LOAD] = "LOCAL_LOAD";
-        opcodes[Insn.LOCAL_STORE] = "LOCAL_STORE";
-        opcodes[Insn.NOOP] = "NOOP";
-        opcodes[Insn.PUSH] = "PUSH";
-        opcodes[Insn.RETURN] = "RETURN";
+    public LongConstant(long val) {
+        this.cst = val;
     }
 
-    public static String opcodeToString(int opcode) {
-        return opcodes[opcode];
+    /**
+     * Gets the constant value.
+     */
+    public long getConstant() {
+        return this.cst;
     }
 
-    private DebugUtil() {
+    /**
+     * Sets the constant value.
+     */
+    public void setConstant(long cst) {
+        this.cst = cst;
+    }
+
+    @Override
+    public TypeSignature inferType() {
+        return PrimativeTypeSignature.LONG;
+    }
+
+    @Override
+    public String toString() {
+        return String.valueOf(this.cst);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        }
+        if (!(obj instanceof LongConstant)) {
+            return false;
+        }
+        LongConstant cast = (LongConstant) obj;
+        return this.cst == cast.cst;
+    }
+
+    @Override
+    public int hashCode() {
+        return (int) ((this.cst >>> 32) ^ this.cst);
     }
 
 }

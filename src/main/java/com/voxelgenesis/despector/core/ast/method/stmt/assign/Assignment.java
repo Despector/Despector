@@ -22,29 +22,36 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.voxelgenesis.despector.core.util;
+package com.voxelgenesis.despector.core.ast.method.stmt.assign;
 
-import com.voxelgenesis.despector.core.ir.Insn;
+import static com.google.common.base.Preconditions.checkNotNull;
 
-public final class DebugUtil {
+import com.voxelgenesis.despector.core.ast.method.insn.Instruction;
+import com.voxelgenesis.despector.core.ast.method.stmt.Statement;
 
-    private static final String[] opcodes = new String[256];
+/**
+ * An abstract statement for assignments.
+ */
+public abstract class Assignment implements Statement {
 
-    static {
-        opcodes[Insn.INVOKE] = "INVOKE";
-        opcodes[Insn.INVOKESTATIC] = "INVOKESTATIC";
-        opcodes[Insn.LOCAL_LOAD] = "LOCAL_LOAD";
-        opcodes[Insn.LOCAL_STORE] = "LOCAL_STORE";
-        opcodes[Insn.NOOP] = "NOOP";
-        opcodes[Insn.PUSH] = "PUSH";
-        opcodes[Insn.RETURN] = "RETURN";
+    protected Instruction val;
+
+    protected Assignment(Instruction val) {
+        this.val = checkNotNull(val, "value");
     }
 
-    public static String opcodeToString(int opcode) {
-        return opcodes[opcode];
+    /**
+     * Gets the value being assigned.
+     */
+    public Instruction getValue() {
+        return this.val;
     }
 
-    private DebugUtil() {
+    /**
+     * Sets the value being assigned.
+     */
+    public void setValue(Instruction insn) {
+        this.val = checkNotNull(insn, "value");
     }
 
 }

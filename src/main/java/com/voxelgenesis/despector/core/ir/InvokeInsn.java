@@ -24,6 +24,8 @@
  */
 package com.voxelgenesis.despector.core.ir;
 
+import com.voxelgenesis.despector.core.util.DebugUtil;
+
 public class InvokeInsn extends Insn {
 
     private String owner;
@@ -47,6 +49,16 @@ public class InvokeInsn extends Insn {
 
     public String getDescription() {
         return this.desc;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder str = new StringBuilder();
+        str.append(DebugUtil.opcodeToString(this.opcode));
+        str.append(" ").append(this.owner);
+        str.append(" ").append(this.name);
+        str.append(" ").append(this.desc);
+        return str.toString();
     }
 
 }

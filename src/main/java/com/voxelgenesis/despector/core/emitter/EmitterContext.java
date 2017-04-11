@@ -22,29 +22,34 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.voxelgenesis.despector.core.util;
+package com.voxelgenesis.despector.core.emitter;
 
-import com.voxelgenesis.despector.core.ir.Insn;
+import com.voxelgenesis.despector.core.ast.method.Local;
+import com.voxelgenesis.despector.core.ast.method.insn.Instruction;
+import com.voxelgenesis.despector.core.ast.method.stmt.Statement;
+import com.voxelgenesis.despector.core.ast.signature.TypeSignature;
+import com.voxelgenesis.despector.core.ast.type.MethodEntry;
 
-public final class DebugUtil {
+public interface EmitterContext {
 
-    private static final String[] opcodes = new String[256];
+    MethodEntry getCurrentMethod();
 
-    static {
-        opcodes[Insn.INVOKE] = "INVOKE";
-        opcodes[Insn.INVOKESTATIC] = "INVOKESTATIC";
-        opcodes[Insn.LOCAL_LOAD] = "LOCAL_LOAD";
-        opcodes[Insn.LOCAL_STORE] = "LOCAL_STORE";
-        opcodes[Insn.NOOP] = "NOOP";
-        opcodes[Insn.PUSH] = "PUSH";
-        opcodes[Insn.RETURN] = "RETURN";
-    }
+    void setCurrentMethod(MethodEntry method);
 
-    public static String opcodeToString(int opcode) {
-        return opcodes[opcode];
-    }
+    boolean isDefined(Local local);
 
-    private DebugUtil() {
-    }
+    void markDefined(Local local);
+
+    void clearDefinedLocals();
+
+    <T extends Statement> void emitStatement(T stmt, boolean semicolon);
+
+    <T extends Instruction> void emitInstruction(T stmt, TypeSignature type);
+
+    void emitTypeSignature(TypeSignature sig);
+
+    void printString(String str);
+
+    void newLine();
 
 }

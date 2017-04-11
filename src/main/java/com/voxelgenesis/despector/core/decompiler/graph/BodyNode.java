@@ -22,22 +22,37 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.voxelgenesis.despector.jvm.emitter.java;
+package com.voxelgenesis.despector.core.decompiler.graph;
 
-import com.voxelgenesis.despector.core.ast.type.MethodEntry;
-import com.voxelgenesis.despector.core.ast.type.SourceEntry;
-import com.voxelgenesis.despector.core.emitter.Emitter;
+import com.voxelgenesis.despector.core.ast.method.Locals;
+import com.voxelgenesis.despector.core.ast.method.StatementBlock;
+import com.voxelgenesis.despector.core.ast.method.insn.Instruction;
+import com.voxelgenesis.despector.core.decompiler.InsnAppender;
+import com.voxelgenesis.despector.core.ir.Insn;
 
-import java.io.Writer;
+import java.util.ArrayList;
+import java.util.Deque;
+import java.util.List;
 
-public class JavaEmitter implements Emitter {
+public class BodyNode extends GraphNode {
 
-    @Override
-    public void emit(Writer output, SourceEntry entry) {
+    private final List<Insn> instructions = new ArrayList<>();
+
+    public BodyNode(List<Insn> insn, int start, int end) {
+        for (int i = start; i < end; i++) {
+            this.instructions.add(insn.get(i));
+        }
+    }
+
+    public List<Insn> getInstructions() {
+        return this.instructions;
     }
 
     @Override
-    public void emitMethod(Writer output, MethodEntry entry) {
+    public void append(StatementBlock block, Locals locals, Deque<Instruction> stack) {
+        for (Insn insn : this.instructions) {
+            InsnAppender.append(insn, block, locals, stack);
+        }
     }
 
 }

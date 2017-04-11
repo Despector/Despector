@@ -22,29 +22,36 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.voxelgenesis.despector.core.util;
+package com.voxelgenesis.despector.jvm.emitter.java;
 
-import com.voxelgenesis.despector.core.ir.Insn;
+import com.google.common.base.Throwables;
+import com.voxelgenesis.despector.core.emitter.AbstractEmitterContext;
+import com.voxelgenesis.despector.core.emitter.EmitterSet;
 
-public final class DebugUtil {
+import java.io.IOException;
+import java.io.Writer;
 
-    private static final String[] opcodes = new String[256];
+public class JavaEmitterContext extends AbstractEmitterContext {
 
-    static {
-        opcodes[Insn.INVOKE] = "INVOKE";
-        opcodes[Insn.INVOKESTATIC] = "INVOKESTATIC";
-        opcodes[Insn.LOCAL_LOAD] = "LOCAL_LOAD";
-        opcodes[Insn.LOCAL_STORE] = "LOCAL_STORE";
-        opcodes[Insn.NOOP] = "NOOP";
-        opcodes[Insn.PUSH] = "PUSH";
-        opcodes[Insn.RETURN] = "RETURN";
+    private final Writer output;
+
+    public JavaEmitterContext(EmitterSet set, Writer out) {
+        super(set);
+        this.output = out;
     }
 
-    public static String opcodeToString(int opcode) {
-        return opcodes[opcode];
+    @Override
+    public void printString(String str) {
+        try {
+            this.output.write(str);
+        } catch (IOException e) {
+            Throwables.propagate(e);
+        }
     }
 
-    private DebugUtil() {
+    @Override
+    public void newLine() {
+        printString("\n");
     }
 
 }

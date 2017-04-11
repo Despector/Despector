@@ -22,17 +22,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.voxelgenesis.despector.core.emitter;
+package com.voxelgenesis.despector.core.ast.method.condition;
 
-import com.voxelgenesis.despector.core.ast.type.MethodEntry;
-import com.voxelgenesis.despector.core.ast.type.SourceEntry;
-
-import java.io.Writer;
-
-public interface Emitter {
-
-    void emit(Writer output, SourceEntry entry);
-
-    void emitMethod(Writer output, MethodEntry entry);
+/**
+ * A boolean condition of arbitrary complexity.
+ */
+public abstract class Condition {
 
 }

@@ -22,29 +22,45 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.voxelgenesis.despector.core.util;
+package com.voxelgenesis.despector.core.ast.method.insn.operator;
 
-import com.voxelgenesis.despector.core.ir.Insn;
+import static com.google.common.base.Preconditions.checkNotNull;
 
-public final class DebugUtil {
+import com.voxelgenesis.despector.core.ast.method.insn.Instruction;
+import com.voxelgenesis.despector.core.ast.signature.TypeSignature;
 
-    private static final String[] opcodes = new String[256];
+/**
+ * An instruction which negates the current value on the stack.
+ */
+public class NegativeOperator implements Instruction {
 
-    static {
-        opcodes[Insn.INVOKE] = "INVOKE";
-        opcodes[Insn.INVOKESTATIC] = "INVOKESTATIC";
-        opcodes[Insn.LOCAL_LOAD] = "LOCAL_LOAD";
-        opcodes[Insn.LOCAL_STORE] = "LOCAL_STORE";
-        opcodes[Insn.NOOP] = "NOOP";
-        opcodes[Insn.PUSH] = "PUSH";
-        opcodes[Insn.RETURN] = "RETURN";
+    private Instruction val;
+
+    public NegativeOperator(Instruction val) {
+        this.val = checkNotNull(val, "val");
     }
 
-    public static String opcodeToString(int opcode) {
-        return opcodes[opcode];
+    /**
+     * Gets the operand that this unary operator is operating on.
+     */
+    public Instruction getOperand() {
+        return this.val;
     }
 
-    private DebugUtil() {
+    /**
+     * Sets the operand that this unary operator is operating on.
+     */
+    public void setOperand(Instruction insn) {
+        this.val = checkNotNull(insn, "val");
     }
 
+    @Override
+    public TypeSignature inferType() {
+        return this.val.inferType();
+    }
+
+    @Override
+    public String toString() {
+        return "-(" + this.val.toString() + ")";
+    }
 }

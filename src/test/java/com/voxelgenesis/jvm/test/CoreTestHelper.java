@@ -28,6 +28,7 @@ import com.voxelgenesis.despector.core.Language;
 import com.voxelgenesis.despector.core.ast.SourceSet;
 import com.voxelgenesis.despector.core.ast.type.MethodEntry;
 import com.voxelgenesis.despector.core.ast.type.SourceEntry;
+import com.voxelgenesis.despector.core.emitter.EmitterContext;
 import com.voxelgenesis.despector.jvm.JvmMain;
 
 import java.io.ByteArrayInputStream;
@@ -52,7 +53,9 @@ public class CoreTestHelper {
             MethodEntry method = loaded.findMethod(string);
 
             StringWriter out = new StringWriter();
-            lang.getEmitter().emitMethod(out, method);
+            EmitterContext ctx = lang.newEmitterContext(out);
+            lang.getEmitter().emitMethodBody(ctx, method);
+            return out.toString();
         } catch (IOException e) {
             e.printStackTrace();
         }

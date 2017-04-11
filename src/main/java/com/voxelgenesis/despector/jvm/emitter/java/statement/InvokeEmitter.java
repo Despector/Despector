@@ -22,29 +22,32 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.voxelgenesis.despector.core.util;
+package com.voxelgenesis.despector.jvm.emitter.java.statement;
 
-import com.voxelgenesis.despector.core.ir.Insn;
+import com.voxelgenesis.despector.core.ast.method.insn.Instruction;
+import com.voxelgenesis.despector.core.ast.method.invoke.InstanceMethodInvoke;
+import com.voxelgenesis.despector.core.ast.method.invoke.InvokeStatement;
+import com.voxelgenesis.despector.core.emitter.EmitterContext;
+import com.voxelgenesis.despector.core.emitter.StatementEmitter;
 
-public final class DebugUtil {
+/**
+ * An emitter for invoke statements.
+ */
+public class InvokeEmitter implements StatementEmitter<InvokeStatement> {
 
-    private static final String[] opcodes = new String[256];
-
-    static {
-        opcodes[Insn.INVOKE] = "INVOKE";
-        opcodes[Insn.INVOKESTATIC] = "INVOKESTATIC";
-        opcodes[Insn.LOCAL_LOAD] = "LOCAL_LOAD";
-        opcodes[Insn.LOCAL_STORE] = "LOCAL_STORE";
-        opcodes[Insn.NOOP] = "NOOP";
-        opcodes[Insn.PUSH] = "PUSH";
-        opcodes[Insn.RETURN] = "RETURN";
-    }
-
-    public static String opcodeToString(int opcode) {
-        return opcodes[opcode];
-    }
-
-    private DebugUtil() {
+    @Override
+    public void emit(EmitterContext ctx, InvokeStatement insn, boolean semicolon) {
+        Instruction i = insn.getInstruction();
+        if (i instanceof InstanceMethodInvoke) {
+            InstanceMethodInvoke mth = (InstanceMethodInvoke) i;
+            if (mth.getMethodName().equals("<init>") && (mth.getParams().length == 0 || mth.getOwner().equals("Ljava/lang/Enum;"))) {
+                return;
+            }
+        }
+        ctx.emitInstruction(i, null);
+        if (semicolon) {
+            ctx.printString(";");
+        }
     }
 
 }

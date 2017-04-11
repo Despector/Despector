@@ -22,29 +22,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.voxelgenesis.despector.core.util;
+package com.voxelgenesis.despector.core.ast.signature;
 
-import com.voxelgenesis.despector.core.ir.Insn;
+/**
+ * A type signature which can be either a type variable or a concrete class or
+ * void.
+ */
+public abstract class TypeSignature {
 
-public final class DebugUtil {
+    public abstract String getName();
 
-    private static final String[] opcodes = new String[256];
-
-    static {
-        opcodes[Insn.INVOKE] = "INVOKE";
-        opcodes[Insn.INVOKESTATIC] = "INVOKESTATIC";
-        opcodes[Insn.LOCAL_LOAD] = "LOCAL_LOAD";
-        opcodes[Insn.LOCAL_STORE] = "LOCAL_STORE";
-        opcodes[Insn.NOOP] = "NOOP";
-        opcodes[Insn.PUSH] = "PUSH";
-        opcodes[Insn.RETURN] = "RETURN";
-    }
-
-    public static String opcodeToString(int opcode) {
-        return opcodes[opcode];
-    }
-
-    private DebugUtil() {
-    }
+    public abstract String getDescriptor();
 
 }

@@ -22,21 +22,63 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.voxelgenesis.despector.core.ir;
+package com.voxelgenesis.despector.core.ast.method.insn.cst;
 
-import com.voxelgenesis.despector.core.util.DebugUtil;
+import static com.google.common.base.Preconditions.checkNotNull;
 
-public class OpInsn extends Insn {
+import com.voxelgenesis.despector.core.ast.signature.TypeSignature;
+import com.voxelgenesis.despector.jvm.loader.JvmHelper;
 
-    public OpInsn(int op) {
-        super(op);
+/**
+ * A constant String value.
+ */
+public class StringConstant extends Constant {
+
+    private String cst;
+
+    public StringConstant(String cst) {
+        this.cst = checkNotNull(cst, "cst");
+    }
+
+    /**
+     * Gets the constant value.
+     */
+    public String getConstant() {
+        return this.cst;
+    }
+
+    /**
+     * Sets the constant value.
+     */
+    public void setConstant(String cst) {
+        this.cst = checkNotNull(cst, "cst");
+    }
+
+    @Override
+    public TypeSignature inferType() {
+        return JvmHelper.of("Ljava/lang/String;");
     }
 
     @Override
     public String toString() {
-        StringBuilder str = new StringBuilder();
-        str.append(DebugUtil.opcodeToString(this.opcode));
-        return str.toString();
+        return "\"" + this.cst + "\"";
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        }
+        if (!(obj instanceof StringConstant)) {
+            return false;
+        }
+        StringConstant insn = (StringConstant) obj;
+        return this.cst.equals(insn.cst);
+    }
+
+    @Override
+    public int hashCode() {
+        return this.cst.hashCode();
     }
 
 }

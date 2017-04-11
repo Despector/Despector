@@ -25,9 +25,10 @@
 package com.voxelgenesis.despector.core.ir;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
-public class InsnBlock {
+public class InsnBlock implements Iterable<Insn> {
 
     private final List<Insn> instructions;
 
@@ -42,13 +43,43 @@ public class InsnBlock {
     public Insn get(int i) {
         return this.instructions.get(i);
     }
-    
+
     public void append(Insn insn) {
         this.instructions.add(insn);
     }
 
     public List<Insn> getInstructions() {
         return this.instructions;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder str = new StringBuilder();
+        for (Insn insn : this.instructions) {
+            str.append(" ").append(insn).append("\n");
+        }
+        return str.toString();
+    }
+
+    @Override
+    public Iterator<Insn> iterator() {
+        return new Itr();
+    }
+
+    public class Itr implements Iterator<Insn> {
+
+        private int index;
+
+        @Override
+        public boolean hasNext() {
+            return InsnBlock.this.getInstructions().size() > this.index;
+        }
+
+        @Override
+        public Insn next() {
+            return InsnBlock.this.getInstructions().get(this.index++);
+        }
+
     }
 
 }

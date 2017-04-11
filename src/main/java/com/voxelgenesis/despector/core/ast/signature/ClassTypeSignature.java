@@ -22,9 +22,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.voxelgenesis.despector.core.ast;
+package com.voxelgenesis.despector.core.ast.signature;
 
+import org.spongepowered.despector.util.TypeHelper;
 
-public interface Statement {
+public class ClassTypeSignature extends TypeSignature {
+
+    private final String type;
+
+    public ClassTypeSignature(String type) {
+        this.type = type;
+    }
+
+    @Override
+    public String getName() {
+        return TypeHelper.descToType(this.type);
+    }
+
+    @Override
+    public String getDescriptor() {
+        return this.type;
+    }
 
 }
