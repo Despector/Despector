@@ -31,7 +31,6 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
-import org.spongepowered.test.util.TestHelper;
 import org.spongepowered.test.util.TestMethodBuilder;
 
 public class OperatorTests {
@@ -247,6 +246,36 @@ public class OperatorTests {
 
         String insn = CoreTestHelper.getAsString(builder.finish(), JvmMain.JAVA_LANG, "test_mth");
         String good = "i = a << b;";
+        Assert.assertEquals(good, insn);
+    }
+
+    //@Test
+    public void testFloatCompare() {
+        TestMethodBuilder builder = new TestMethodBuilder("test_mth", "(ZFF)V");
+        MethodVisitor mv = builder.getGenerator();
+        Label start = new Label();
+        mv.visitLabel(start);
+        Label end = new Label();
+        Label l1 = new Label();
+        Label l2 = new Label();
+        mv.visitIntInsn(FLOAD, 1);
+        mv.visitIntInsn(FLOAD, 2);
+        mv.visitInsn(FCMPG);
+        mv.visitJumpInsn(IFGT, l1);
+        mv.visitInsn(ICONST_1);
+        mv.visitJumpInsn(GOTO, l2);
+        mv.visitLabel(l1);
+        mv.visitInsn(ICONST_0);
+        mv.visitLabel(l2);
+        mv.visitIntInsn(ISTORE, 0);
+        mv.visitLabel(end);
+        mv.visitInsn(RETURN);
+        mv.visitLocalVariable("i", "Z", null, start, end, 0);
+        mv.visitLocalVariable("a", "F", null, start, end, 1);
+        mv.visitLocalVariable("b", "F", null, start, end, 2);
+
+        String insn = CoreTestHelper.getAsString(builder.finish(), JvmMain.JAVA_LANG, "test_mth");
+        String good = "i = a <= b;";
         Assert.assertEquals(good, insn);
     }
 }

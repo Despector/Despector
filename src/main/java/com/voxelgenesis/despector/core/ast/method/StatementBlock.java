@@ -25,6 +25,8 @@
 package com.voxelgenesis.despector.core.ast.method;
 
 import com.voxelgenesis.despector.core.ast.method.stmt.Statement;
+import com.voxelgenesis.despector.core.ast.visitor.AstVisitor;
+import com.voxelgenesis.despector.core.ast.visitor.TypeVisitor;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -66,6 +68,12 @@ public class StatementBlock implements Iterable<Statement> {
     @Override
     public Iterator<Statement> iterator() {
         return new Itr();
+    }
+
+    public void accept(AstVisitor visitor) {
+        for (Statement stmt : this.statements) {
+            stmt.accept(visitor);
+        }
     }
 
     private class Itr implements Iterator<Statement> {

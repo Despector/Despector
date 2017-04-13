@@ -28,6 +28,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.voxelgenesis.despector.core.ast.method.insn.Instruction;
 import com.voxelgenesis.despector.core.ast.signature.TypeSignature;
+import com.voxelgenesis.despector.core.ast.visitor.AstVisitor;
+import com.voxelgenesis.despector.core.ast.visitor.InstructionVisitor;
 
 /**
  * An instruction which negates the current value on the stack.
@@ -57,6 +59,14 @@ public class NegativeOperator implements Instruction {
     @Override
     public TypeSignature inferType() {
         return this.val.inferType();
+    }
+
+    @Override
+    public void accept(AstVisitor visitor) {
+        if (visitor instanceof InstructionVisitor) {
+            ((InstructionVisitor) visitor).visitNegativeOperator(this);
+        }
+        this.val.accept(visitor);
     }
 
     @Override

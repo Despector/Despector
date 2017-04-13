@@ -25,9 +25,12 @@
 package com.voxelgenesis.despector.core.ast.method.insn;
 
 import com.voxelgenesis.despector.core.ast.signature.TypeSignature;
+import com.voxelgenesis.despector.core.ast.visitor.AstVisitor;
 
 public interface Instruction {
 
     TypeSignature inferType();
+
+    void accept(AstVisitor visitor);
 
 }

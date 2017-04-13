@@ -28,6 +28,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.voxelgenesis.despector.core.ast.method.insn.Instruction;
 import com.voxelgenesis.despector.core.ast.method.stmt.Statement;
+import com.voxelgenesis.despector.core.ast.visitor.AstVisitor;
+import com.voxelgenesis.despector.core.ast.visitor.StatementVisitor;
 
 /**
  * A statement wrapping an instruction. Typically used for method invokes that
@@ -54,6 +56,14 @@ public class InvokeStatement implements Statement {
      */
     public void setInstruction(Instruction insn) {
         this.inner = checkNotNull(insn, "instruction");
+    }
+
+    @Override
+    public void accept(AstVisitor visitor) {
+        if(visitor instanceof StatementVisitor) {
+            ((StatementVisitor) visitor).visitInvokeStatement(this);
+        }
+        this.inner.accept(visitor);
     }
 
     @Override

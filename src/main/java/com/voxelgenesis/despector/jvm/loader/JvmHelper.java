@@ -34,17 +34,26 @@ import java.util.Map;
 
 public class JvmHelper {
 
+    public static final PrimativeTypeSignature BOOLEAN = new PrimativeTypeSignature("Z");
+    public static final PrimativeTypeSignature BYTE = new PrimativeTypeSignature("B");
+    public static final PrimativeTypeSignature SHORT = new PrimativeTypeSignature("S");
+    public static final PrimativeTypeSignature INT = new PrimativeTypeSignature("I");
+    public static final PrimativeTypeSignature LONG = new PrimativeTypeSignature("J");
+    public static final PrimativeTypeSignature FLOAT = new PrimativeTypeSignature("F");
+    public static final PrimativeTypeSignature DOUBLE = new PrimativeTypeSignature("D");
+    public static final PrimativeTypeSignature CHAR = new PrimativeTypeSignature("C");
+
     private static final Map<String, TypeSignature> SPECIAL = new HashMap<>();
 
     static {
-        SPECIAL.put("B", PrimativeTypeSignature.BYTE);
-        SPECIAL.put("S", PrimativeTypeSignature.SHORT);
-        SPECIAL.put("I", PrimativeTypeSignature.INT);
-        SPECIAL.put("J", PrimativeTypeSignature.LONG);
-        SPECIAL.put("F", PrimativeTypeSignature.FLOAT);
-        SPECIAL.put("D", PrimativeTypeSignature.DOUBLE);
-        SPECIAL.put("C", PrimativeTypeSignature.CHAR);
-        SPECIAL.put("Z", PrimativeTypeSignature.BOOLEAN);
+        SPECIAL.put("B", BYTE);
+        SPECIAL.put("S", SHORT);
+        SPECIAL.put("I", INT);
+        SPECIAL.put("J", LONG);
+        SPECIAL.put("F", FLOAT);
+        SPECIAL.put("D", DOUBLE);
+        SPECIAL.put("C", CHAR);
+        SPECIAL.put("Z", BOOLEAN);
     }
 
     public static TypeSignature of(String type) {

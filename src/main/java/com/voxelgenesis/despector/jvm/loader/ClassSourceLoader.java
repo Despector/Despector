@@ -27,6 +27,7 @@ package com.voxelgenesis.despector.jvm.loader;
 import com.voxelgenesis.despector.core.Language;
 import com.voxelgenesis.despector.core.ast.SourceSet;
 import com.voxelgenesis.despector.core.ast.method.Local;
+import com.voxelgenesis.despector.core.ast.signature.TypeSignature;
 import com.voxelgenesis.despector.core.ast.type.FieldEntry;
 import com.voxelgenesis.despector.core.ast.type.MethodEntry;
 import com.voxelgenesis.despector.core.ast.type.TypeEntry;
@@ -123,7 +124,12 @@ public class ClassSourceLoader implements SourceLoader {
             String method_name = pool.getUtf8(data.readUnsignedShort());
             String method_desc = pool.getUtf8(data.readUnsignedShort());
 
-            MethodEntry method = new MethodEntry(method_name, method_desc);
+            List<TypeSignature> param_types = new ArrayList<>();
+            for (String t : TypeHelper.splitSig(method_desc)) {
+                param_types.add(JvmHelper.of(t));
+            }
+
+            MethodEntry method = new MethodEntry(method_name, param_types, JvmHelper.of(TypeHelper.getRet(method_desc)));
             methods.add(method);
             method.setStatic((method_access & ACC_STATIC) != 0);
 
@@ -150,7 +156,7 @@ public class ClassSourceLoader implements SourceLoader {
                         int clength = data.readInt();
                         if ("LocalVariableTable".equals(code_attribute_name)) {
                             int lvt_length = data.readUnsignedShort();
-                            int param_count = TypeHelper.paramCount(method.getSignature());
+                            int param_count = method.getParamTypes().size();
                             if (!method.isStatic()) {
                                 param_count++;
                             }

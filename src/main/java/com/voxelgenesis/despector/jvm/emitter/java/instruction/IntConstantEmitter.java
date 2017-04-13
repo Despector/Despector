@@ -25,10 +25,10 @@
 package com.voxelgenesis.despector.jvm.emitter.java.instruction;
 
 import com.voxelgenesis.despector.core.ast.method.insn.cst.IntConstant;
-import com.voxelgenesis.despector.core.ast.signature.PrimativeTypeSignature;
 import com.voxelgenesis.despector.core.ast.signature.TypeSignature;
 import com.voxelgenesis.despector.core.emitter.EmitterContext;
 import com.voxelgenesis.despector.core.emitter.InstructionEmitter;
+import com.voxelgenesis.despector.jvm.loader.JvmHelper;
 
 /**
  * An emitter for integer constants.
@@ -47,14 +47,14 @@ public class IntConstantEmitter implements InstructionEmitter<IntConstant> {
             ctx.printString("Integer.MIN_VALUE");
             return;
         }
-        if (type == PrimativeTypeSignature.BOOLEAN) {
+        if (type == JvmHelper.BOOLEAN) {
             if (cst == 0) {
                 ctx.printString("false");
             } else {
                 ctx.printString("true");
             }
             return;
-        } else if (type == PrimativeTypeSignature.CHAR) {
+        } else if (type == JvmHelper.CHAR) {
             char c = (char) cst;
             if (c < 127 && c > 31) {
                 ctx.printString("'" + c + "'");

@@ -22,33 +22,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.voxelgenesis.despector.core.ast.signature;
+package com.voxelgenesis.despector.core.ast.visitor;
 
-public class ArrayTypeSignature extends TypeSignature {
+import com.voxelgenesis.despector.core.ast.method.invoke.InvokeStatement;
+import com.voxelgenesis.despector.core.ast.method.stmt.assign.LocalAssignment;
+import com.voxelgenesis.despector.core.ast.method.stmt.misc.Return;
 
-    private final TypeSignature component;
+public interface StatementVisitor extends AstVisitor {
 
-    public ArrayTypeSignature(TypeSignature type) {
-        this.component = type;
-    }
+    void visitReturn(Return stmt);
 
-    public TypeSignature getComponentType() {
-        return this.component;
-    }
+    void visitLocalAssignment(LocalAssignment stmt);
 
-    @Override
-    public String getName() {
-        return this.component.getName() + "[]";
-    }
-
-    @Override
-    public String getDescriptor() {
-        return "[" + this.component.getDescriptor();
-    }
-
-    @Override
-    public String toString() {
-        return getDescriptor();
-    }
+    void visitInvokeStatement(InvokeStatement stmt);
 
 }

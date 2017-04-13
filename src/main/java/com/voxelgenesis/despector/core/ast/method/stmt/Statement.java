@@ -24,7 +24,10 @@
  */
 package com.voxelgenesis.despector.core.ast.method.stmt;
 
+import com.voxelgenesis.despector.core.ast.visitor.AstVisitor;
 
 public interface Statement {
 
+    void accept(AstVisitor visitor);
+    
 }

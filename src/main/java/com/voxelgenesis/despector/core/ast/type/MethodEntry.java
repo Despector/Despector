@@ -27,39 +27,34 @@ package com.voxelgenesis.despector.core.ast.type;
 import com.voxelgenesis.despector.core.ast.method.Locals;
 import com.voxelgenesis.despector.core.ast.method.StatementBlock;
 import com.voxelgenesis.despector.core.ast.signature.TypeSignature;
+import com.voxelgenesis.despector.core.ast.visitor.AstVisitor;
+import com.voxelgenesis.despector.core.ast.visitor.TypeVisitor;
 import com.voxelgenesis.despector.core.ir.InsnBlock;
-import com.voxelgenesis.despector.jvm.loader.JvmHelper;
-import org.spongepowered.despector.util.TypeHelper;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class MethodEntry {
 
     private final String name;
-    private final String signature;
 
     private List<TypeSignature> param_types;
     private TypeSignature return_type;
 
     private boolean is_static;
+    private boolean is_native;
 
     private InsnBlock ir;
     private StatementBlock statements;
 
     private Locals locals;
 
-    public MethodEntry(String name, String signature) {
+    public MethodEntry(String name, List<TypeSignature> param_types, TypeSignature returntype) {
         this.name = name;
-        this.signature = signature;
 
         this.locals = new Locals();
 
-        this.return_type = JvmHelper.of(TypeHelper.getRet(this.signature));
-        this.param_types = new ArrayList<>();
-        for (String param : TypeHelper.splitSig(this.signature)) {
-            this.param_types.add(JvmHelper.of(param));
-        }
+        this.return_type = returntype;
+        this.param_types = param_types;
     }
 
     public String getName() {
@@ -67,7 +62,13 @@ public class MethodEntry {
     }
 
     public String getSignature() {
-        return this.signature;
+        StringBuilder sig = new StringBuilder("(");
+        for (TypeSignature param : this.param_types) {
+            sig.append(param.getDescriptor());
+        }
+        sig.append(")");
+        sig.append(this.return_type.getDescriptor());
+        return sig.toString();
     }
 
     public List<TypeSignature> getParamTypes() {
@@ -84,6 +85,14 @@ public class MethodEntry {
 
     public void setStatic(boolean state) {
         this.is_static = state;
+    }
+
+    public boolean isNative() {
+        return this.is_native;
+    }
+
+    public void setNative(boolean state) {
+        this.is_native = state;
     }
 
     public InsnBlock getIR() {
@@ -104,6 +113,15 @@ public class MethodEntry {
 
     public Locals getLocals() {
         return this.locals;
+    }
+
+    public void accept(AstVisitor visitor) {
+        if (visitor instanceof TypeVisitor) {
+            ((TypeVisitor) visitor).visitMethod(this);
+        }
+        if (this.statements != null) {
+            this.statements.accept(visitor);
+        }
     }
 
 }

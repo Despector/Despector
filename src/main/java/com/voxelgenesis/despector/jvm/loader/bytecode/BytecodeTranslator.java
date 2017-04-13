@@ -28,11 +28,15 @@ import com.voxelgenesis.despector.core.ir.Insn;
 import com.voxelgenesis.despector.core.ir.InsnBlock;
 import com.voxelgenesis.despector.core.ir.IntInsn;
 import com.voxelgenesis.despector.core.ir.InvokeInsn;
+import com.voxelgenesis.despector.core.ir.JumpInsn;
 import com.voxelgenesis.despector.core.ir.LdcInsn;
 import com.voxelgenesis.despector.core.ir.OpInsn;
 import com.voxelgenesis.despector.core.loader.SourceFormatException;
 import com.voxelgenesis.despector.jvm.loader.ClassConstantPool;
 import com.voxelgenesis.despector.jvm.loader.ClassConstantPool.MethodRef;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class BytecodeTranslator {
 
@@ -42,8 +46,11 @@ public class BytecodeTranslator {
 
     public InsnBlock createIR(byte[] code, ClassConstantPool pool) {
         InsnBlock block = new InsnBlock();
+        List<Integer> insn_starts = new ArrayList<>();
 
         for (int i = 0; i < code.length;) {
+            int opcode_index = i;
+            insn_starts.add(opcode_index);
             int next = code[i++] & 0xFF;
             switch (next) {
             case 0: // NOP
@@ -315,8 +322,19 @@ public class BytecodeTranslator {
             case 150: // FCMPG
             case 151: // DCMPL
             case 152: // DCMPG
-            case 153: // IFEQ
-            case 154: // IFNE
+                throw new SourceFormatException("Unknown java opcode: " + next);
+            case 153: {// IFEQ
+                int target = code[i++];
+                target = (target << 8) | code[i++];
+                block.append(new JumpInsn(Insn.IFEQ, opcode_index + target));
+                break;
+            }
+            case 154: {// IFNE
+                int target = code[i++];
+                target = (target << 8) | code[i++];
+                block.append(new JumpInsn(Insn.IFNE, opcode_index + target));
+                break;
+            }
             case 155: // IFLT
             case 156: // IFGE
             case 157: // IFGT
@@ -355,7 +373,12 @@ public class BytecodeTranslator {
                 block.append(new InvokeInsn(Insn.INVOKE, ref.cls, ref.name, ref.type));
                 break;
             }
-            case 184: // INVOKESTATIC
+            case 184: { // INVOKESTATIC
+                int index = (code[i++] << 8) | code[i++];
+                MethodRef ref = pool.getMethodRef(index);
+                block.append(new InvokeInsn(Insn.INVOKESTATIC, ref.cls, ref.name, ref.type));
+                break;
+            }
             case 185: // INVOKEINTERFACE
             case 186: // INVOKEDYNAMIC
             case 187: // NEW
@@ -375,6 +398,13 @@ public class BytecodeTranslator {
             case 201: // JSR_W
             default:
                 throw new SourceFormatException("Unknown java opcode: " + next);
+            }
+        }
+
+        for (Insn insn : block) {
+            if (insn instanceof JumpInsn) {
+                JumpInsn jump = (JumpInsn) insn;
+                jump.setTarget(insn_starts.indexOf(jump.getTarget()));
             }
         }
 

@@ -27,6 +27,8 @@ package com.voxelgenesis.despector.core.ast.method.insn.cst;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.voxelgenesis.despector.core.ast.signature.TypeSignature;
+import com.voxelgenesis.despector.core.ast.visitor.AstVisitor;
+import com.voxelgenesis.despector.core.ast.visitor.InstructionVisitor;
 import com.voxelgenesis.despector.jvm.loader.JvmHelper;
 
 /**
@@ -57,6 +59,13 @@ public class StringConstant extends Constant {
     @Override
     public TypeSignature inferType() {
         return JvmHelper.of("Ljava/lang/String;");
+    }
+
+    @Override
+    public void accept(AstVisitor visitor) {
+        if (visitor instanceof InstructionVisitor) {
+            ((InstructionVisitor) visitor).visitStringConstant(this);
+        }
     }
 
     @Override

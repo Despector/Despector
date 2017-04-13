@@ -25,6 +25,7 @@
 package com.voxelgenesis.despector.core.ast;
 
 import com.voxelgenesis.despector.core.ast.type.SourceEntry;
+import com.voxelgenesis.despector.core.ast.visitor.AstVisitor;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -42,8 +43,18 @@ public class SourceSet {
         this.all_sources.put(source.getName(), source);
     }
 
+    public SourceEntry find(String name) {
+        return this.all_sources.get(name);
+    }
+
     public Collection<SourceEntry> getAllSources() {
         return this.all_sources.values();
+    }
+
+    public void accept(AstVisitor visitor) {
+        for (SourceEntry entry : this.all_sources.values()) {
+            entry.accept(visitor);
+        }
     }
 
 }

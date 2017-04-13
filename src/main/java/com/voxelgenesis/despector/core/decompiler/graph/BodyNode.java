@@ -55,4 +55,15 @@ public class BodyNode extends GraphNode {
         }
     }
 
+    @Override
+    public String toString() {
+        StringBuilder str = new StringBuilder();
+        str.append("BodyNode:\n");
+        for (Insn insn : this.instructions) {
+            str.append(insn.toString()).append("\n");
+        }
+
+        return str.toString();
+    }
+
 }

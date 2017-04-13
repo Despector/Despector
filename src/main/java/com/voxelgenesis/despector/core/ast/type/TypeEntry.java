@@ -24,6 +24,9 @@
  */
 package com.voxelgenesis.despector.core.ast.type;
 
+import com.voxelgenesis.despector.core.ast.visitor.AstVisitor;
+import com.voxelgenesis.despector.core.ast.visitor.TypeVisitor;
+
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -46,6 +49,17 @@ public class TypeEntry extends SourceEntry {
 
     public Collection<FieldEntry> getFields() {
         return this.fields.values();
+    }
+
+    @Override
+    public void accept(AstVisitor visitor) {
+        super.accept(visitor);
+        if(visitor instanceof TypeVisitor) {
+            ((TypeVisitor) visitor).visitTypeEntry(this);
+        }
+        for (FieldEntry field : this.fields.values()) {
+            field.accept(visitor);
+        }
     }
 
 }

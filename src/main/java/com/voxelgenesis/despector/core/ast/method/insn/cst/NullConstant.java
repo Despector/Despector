@@ -26,6 +26,8 @@ package com.voxelgenesis.despector.core.ast.method.insn.cst;
 
 import com.voxelgenesis.despector.core.ast.signature.TypeSignature;
 import com.voxelgenesis.despector.core.ast.signature.VoidTypeSignature;
+import com.voxelgenesis.despector.core.ast.visitor.AstVisitor;
+import com.voxelgenesis.despector.core.ast.visitor.InstructionVisitor;
 
 /**
  * A constant null value.
@@ -40,6 +42,13 @@ public final class NullConstant extends Constant {
     @Override
     public TypeSignature inferType() {
         return VoidTypeSignature.VOID;
+    }
+
+    @Override
+    public void accept(AstVisitor visitor) {
+        if (visitor instanceof InstructionVisitor) {
+            ((InstructionVisitor) visitor).visitNullConstant(this);
+        }
     }
 
     @Override

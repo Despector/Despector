@@ -22,74 +22,43 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.voxelgenesis.despector.core.ast.method.insn.var;
+package com.voxelgenesis.despector.core.ast.method.invoke;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.voxelgenesis.despector.core.ast.method.Local;
 import com.voxelgenesis.despector.core.ast.method.insn.Instruction;
-import com.voxelgenesis.despector.core.ast.signature.TypeSignature;
 import com.voxelgenesis.despector.core.ast.visitor.AstVisitor;
 import com.voxelgenesis.despector.core.ast.visitor.InstructionVisitor;
+import org.spongepowered.despector.util.TypeHelper;
 
 /**
- * An instruction for accessing a local.
+ * A statement calling a static method.
  */
-public class LocalAccess implements Instruction {
+public class StaticMethodInvoke extends MethodInvoke {
 
-    private Local local;
-
-    public LocalAccess(Local local) {
-        this.local = checkNotNull(local, "local");
-    }
-
-    /**
-     * Gets the {@link Local} accessed.
-     */
-    public Local getLocal() {
-        return this.local;
-    }
-
-    /**
-     * Sets the {@link Local} accessed.
-     */
-    public void setLocal(Local local) {
-        this.local = checkNotNull(local, "local");
-    }
-
-    @Override
-    public TypeSignature inferType() {
-        return this.local.getType();
+    public StaticMethodInvoke(String name, String desc, String owner, Instruction[] args) {
+        super(name, desc, owner, args);
     }
 
     @Override
     public void accept(AstVisitor visitor) {
         if (visitor instanceof InstructionVisitor) {
-            ((InstructionVisitor) visitor).visitLocalAccess(this);
+            ((InstructionVisitor) visitor).visitStaticMethodInvoke(this);
         }
-        this.local.accept(visitor);
+        for (Instruction arg : this.params) {
+            arg.accept(visitor);
+        }
     }
 
     @Override
     public String toString() {
-        return this.local.toString();
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (obj == this) {
-            return true;
+        StringBuilder params = new StringBuilder();
+        for (int i = 0; i < this.params.length; i++) {
+            params.append(this.params[i]);
+            if (i < this.params.length - 1) {
+                params.append(", ");
+            }
         }
-        if (!(obj instanceof LocalAccess)) {
-            return false;
-        }
-        LocalAccess insn = (LocalAccess) obj;
-        return this.local.equals(insn.local);
-    }
-
-    @Override
-    public int hashCode() {
-        return this.local.hashCode();
+        return TypeHelper.descToType(this.method_owner) + "." + this.method_name + "(" + params + ");";
     }
 
 }

@@ -33,6 +33,7 @@ import com.voxelgenesis.despector.core.decompiler.graph.BodyNode;
 import com.voxelgenesis.despector.core.decompiler.graph.GraphNode;
 import com.voxelgenesis.despector.core.ir.Insn;
 import com.voxelgenesis.despector.core.ir.InsnBlock;
+import com.voxelgenesis.despector.core.ir.JumpInsn;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -78,7 +79,10 @@ public class BaseDecompiler {
         Set<Integer> break_points = new HashSet<>();
 
         for (Insn insn : block) {
-            // TODO add break points for jumps, etc.
+            if (insn instanceof JumpInsn) {
+                break_points.add(block.getInstructions().indexOf(insn));
+                break_points.add(((JumpInsn) insn).getTarget());
+            }
         }
 
         List<Integer> sorted = new ArrayList<>(break_points);

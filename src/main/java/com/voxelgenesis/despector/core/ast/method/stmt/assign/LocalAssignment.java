@@ -28,6 +28,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.voxelgenesis.despector.core.ast.method.Local;
 import com.voxelgenesis.despector.core.ast.method.insn.Instruction;
+import com.voxelgenesis.despector.core.ast.visitor.AstVisitor;
+import com.voxelgenesis.despector.core.ast.visitor.StatementVisitor;
 
 /**
  * An assignment statement for assigning a value to a local.
@@ -53,6 +55,14 @@ public class LocalAssignment extends Assignment {
      */
     public void setLocal(Local local) {
         this.local = checkNotNull(local, "local");
+    }
+
+    @Override
+    public void accept(AstVisitor visitor) {
+        if(visitor instanceof StatementVisitor) {
+            ((StatementVisitor) visitor).visitLocalAssignment(this);
+        }
+        this.local.accept(visitor);
     }
 
     @Override

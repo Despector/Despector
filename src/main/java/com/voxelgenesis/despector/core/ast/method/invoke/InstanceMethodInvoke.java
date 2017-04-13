@@ -27,6 +27,8 @@ package com.voxelgenesis.despector.core.ast.method.invoke;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.voxelgenesis.despector.core.ast.method.insn.Instruction;
+import com.voxelgenesis.despector.core.ast.visitor.AstVisitor;
+import com.voxelgenesis.despector.core.ast.visitor.InstructionVisitor;
 
 /**
  * A statement calling an instance method.
@@ -52,6 +54,17 @@ public class InstanceMethodInvoke extends MethodInvoke {
      */
     public void setCallee(Instruction callee) {
         this.callee = checkNotNull(callee, "callee");
+    }
+
+    @Override
+    public void accept(AstVisitor visitor) {
+        if (visitor instanceof InstructionVisitor) {
+            ((InstructionVisitor) visitor).visitInstanceMethodInvoke(this);
+        }
+        for (Instruction arg : this.params) {
+            arg.accept(visitor);
+        }
+        this.callee.accept(visitor);
     }
 
     @Override

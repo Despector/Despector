@@ -25,6 +25,8 @@
 package com.voxelgenesis.despector.core.ast.method;
 
 import com.voxelgenesis.despector.core.ast.signature.TypeSignature;
+import com.voxelgenesis.despector.core.ast.visitor.AstVisitor;
+import com.voxelgenesis.despector.core.ast.visitor.InstructionVisitor;
 
 public class Local {
 
@@ -64,6 +66,12 @@ public class Local {
 
     public void setParameter(boolean state) {
         this.parameter = state;
+    }
+    
+    public void accept(AstVisitor visitor) {
+        if(visitor instanceof InstructionVisitor) {
+            ((InstructionVisitor) visitor).visitLocal(this);
+        }
     }
 
     @Override

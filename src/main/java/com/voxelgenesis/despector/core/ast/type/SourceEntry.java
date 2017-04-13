@@ -24,6 +24,9 @@
  */
 package com.voxelgenesis.despector.core.ast.type;
 
+import com.voxelgenesis.despector.core.ast.visitor.AstVisitor;
+import com.voxelgenesis.despector.core.ast.visitor.TypeVisitor;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -68,6 +71,15 @@ public class SourceEntry {
 
     public Collection<MethodEntry> getMethods() {
         return this.all_methods;
+    }
+
+    public void accept(AstVisitor visitor) {
+        if(visitor instanceof TypeVisitor) {
+            ((TypeVisitor) visitor).visitSourceEntry(this);
+        }
+        for (MethodEntry method : this.all_methods) {
+            method.accept(visitor);
+        }
     }
 
 }

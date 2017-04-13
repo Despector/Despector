@@ -25,6 +25,8 @@
 package com.voxelgenesis.despector.core.ast.type;
 
 import com.voxelgenesis.despector.core.ast.signature.TypeSignature;
+import com.voxelgenesis.despector.core.ast.visitor.AstVisitor;
+import com.voxelgenesis.despector.core.ast.visitor.TypeVisitor;
 
 public class FieldEntry {
 
@@ -42,6 +44,12 @@ public class FieldEntry {
 
     public TypeSignature getType() {
         return this.desc;
+    }
+
+    public void accept(AstVisitor visitor) {
+        if(visitor instanceof TypeVisitor) {
+            ((TypeVisitor) visitor).visitField(this);
+        }
     }
 
 }

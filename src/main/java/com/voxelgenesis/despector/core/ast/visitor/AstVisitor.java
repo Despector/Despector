@@ -22,33 +22,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.voxelgenesis.despector.core.ast.signature;
+package com.voxelgenesis.despector.core.ast.visitor;
 
-public class ArrayTypeSignature extends TypeSignature {
 
-    private final TypeSignature component;
-
-    public ArrayTypeSignature(TypeSignature type) {
-        this.component = type;
-    }
-
-    public TypeSignature getComponentType() {
-        return this.component;
-    }
-
-    @Override
-    public String getName() {
-        return this.component.getName() + "[]";
-    }
-
-    @Override
-    public String getDescriptor() {
-        return "[" + this.component.getDescriptor();
-    }
-
-    @Override
-    public String toString() {
-        return getDescriptor();
-    }
+public interface AstVisitor {
 
 }

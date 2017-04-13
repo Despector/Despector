@@ -28,6 +28,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.voxelgenesis.despector.core.ast.method.insn.Instruction;
 import com.voxelgenesis.despector.core.ast.signature.TypeSignature;
+import com.voxelgenesis.despector.core.ast.visitor.AstVisitor;
+import com.voxelgenesis.despector.core.ast.visitor.InstructionVisitor;
 import com.voxelgenesis.despector.jvm.loader.JvmHelper;
 
 /**
@@ -88,6 +90,15 @@ public class Operator implements Instruction {
         int left_index = PRIMATIVE_ORDERING.indexOf(this.left.inferType().toString().charAt(0));
         int right_index = PRIMATIVE_ORDERING.indexOf(this.right.inferType().toString().charAt(0));
         return JvmHelper.of(String.valueOf(PRIMATIVE_ORDERING.charAt(Math.max(left_index, right_index))));
+    }
+
+    @Override
+    public void accept(AstVisitor visitor) {
+        if (visitor instanceof InstructionVisitor) {
+            ((InstructionVisitor) visitor).visitOperator(this);
+        }
+        this.left.accept(visitor);
+        this.right.accept(visitor);
     }
 
     @Override

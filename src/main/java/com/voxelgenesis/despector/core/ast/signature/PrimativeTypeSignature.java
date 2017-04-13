@@ -28,15 +28,6 @@ import org.spongepowered.despector.util.TypeHelper;
 
 public class PrimativeTypeSignature extends TypeSignature {
 
-    public static final PrimativeTypeSignature BOOLEAN = new PrimativeTypeSignature("Z");
-    public static final PrimativeTypeSignature BYTE = new PrimativeTypeSignature("B");
-    public static final PrimativeTypeSignature SHORT = new PrimativeTypeSignature("S");
-    public static final PrimativeTypeSignature INT = new PrimativeTypeSignature("I");
-    public static final PrimativeTypeSignature LONG = new PrimativeTypeSignature("J");
-    public static final PrimativeTypeSignature FLOAT = new PrimativeTypeSignature("F");
-    public static final PrimativeTypeSignature DOUBLE = new PrimativeTypeSignature("D");
-    public static final PrimativeTypeSignature CHAR = new PrimativeTypeSignature("C");
-
     private final String type_name;
 
     public PrimativeTypeSignature(String type) {

@@ -28,10 +28,12 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.voxelgenesis.despector.core.ast.method.insn.Instruction;
 import com.voxelgenesis.despector.core.ast.method.stmt.Statement;
+import com.voxelgenesis.despector.core.ast.visitor.AstVisitor;
+import com.voxelgenesis.despector.core.ast.visitor.StatementVisitor;
+import com.voxelgenesis.despector.core.ast.visitor.TypeVisitor;
+import javax.annotation.Nullable;
 
 import java.util.Optional;
-
-import javax.annotation.Nullable;
 
 /**
  * A return statement which returns a value.
@@ -86,6 +88,16 @@ public class Return implements Statement {
     @Override
     public int hashCode() {
         return this.value.hashCode();
+    }
+
+    @Override
+    public void accept(AstVisitor visitor) {
+        if (visitor instanceof StatementVisitor) {
+            ((StatementVisitor) visitor).visitReturn(this);
+        }
+        if (this.value != null) {
+            this.value.accept(visitor);
+        }
     }
 
 }

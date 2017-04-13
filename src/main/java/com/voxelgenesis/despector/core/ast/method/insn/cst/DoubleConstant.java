@@ -24,8 +24,10 @@
  */
 package com.voxelgenesis.despector.core.ast.method.insn.cst;
 
-import com.voxelgenesis.despector.core.ast.signature.PrimativeTypeSignature;
 import com.voxelgenesis.despector.core.ast.signature.TypeSignature;
+import com.voxelgenesis.despector.core.ast.visitor.AstVisitor;
+import com.voxelgenesis.despector.core.ast.visitor.InstructionVisitor;
+import com.voxelgenesis.despector.jvm.loader.JvmHelper;
 
 /**
  * A constant double value.
@@ -54,7 +56,14 @@ public class DoubleConstant extends Constant {
 
     @Override
     public TypeSignature inferType() {
-        return PrimativeTypeSignature.DOUBLE;
+        return JvmHelper.DOUBLE;
+    }
+
+    @Override
+    public void accept(AstVisitor visitor) {
+        if (visitor instanceof InstructionVisitor) {
+            ((InstructionVisitor) visitor).visitDoubleConstant(this);
+        }
     }
 
     @Override

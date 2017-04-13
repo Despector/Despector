@@ -22,33 +22,33 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.voxelgenesis.despector.core.ast.signature;
+package com.voxelgenesis.despector.core.ir;
 
-public class ArrayTypeSignature extends TypeSignature {
+import com.voxelgenesis.despector.core.util.DebugUtil;
 
-    private final TypeSignature component;
+public class JumpInsn extends Insn {
 
-    public ArrayTypeSignature(TypeSignature type) {
-        this.component = type;
+    private int target;
+
+    public JumpInsn(int op, int operand) {
+        super(op);
+        this.target = operand;
     }
 
-    public TypeSignature getComponentType() {
-        return this.component;
+    public int getTarget() {
+        return this.target;
     }
 
-    @Override
-    public String getName() {
-        return this.component.getName() + "[]";
-    }
-
-    @Override
-    public String getDescriptor() {
-        return "[" + this.component.getDescriptor();
+    public void setTarget(int target) {
+        this.target = target;
     }
 
     @Override
     public String toString() {
-        return getDescriptor();
+        StringBuilder str = new StringBuilder();
+        str.append(DebugUtil.opcodeToString(this.opcode));
+        str.append(" ").append(this.target);
+        return str.toString();
     }
 
 }
