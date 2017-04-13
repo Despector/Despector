@@ -22,36 +22,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.voxelgenesis.jvm.test;
+package com.voxelgenesis.despector.core.emitter.format;
 
-import static org.objectweb.asm.Opcodes.BIPUSH;
-import static org.objectweb.asm.Opcodes.ISTORE;
-import static org.objectweb.asm.Opcodes.RETURN;
 
-import com.voxelgenesis.despector.jvm.JvmMain;
-import org.junit.Assert;
-import org.junit.Test;
-import org.objectweb.asm.Label;
-import org.objectweb.asm.MethodVisitor;
-import org.spongepowered.test.util.TestMethodBuilder;
-
-public class BasicTests {
-
-    @Test
-    public void testIntConstant() {
-        TestMethodBuilder builder = new TestMethodBuilder("test_mth", "(I)V");
-        MethodVisitor mv = builder.getGenerator();
-        Label start = new Label();
-        mv.visitLabel(start);
-        Label end = new Label();
-        mv.visitIntInsn(BIPUSH, 65);
-        mv.visitIntInsn(ISTORE, 0);
-        mv.visitLabel(end);
-        mv.visitInsn(RETURN);
-        mv.visitLocalVariable("i", "I", null, start, end, 0);
-
-        String insn = CoreTestHelper.getAsString(builder.finish(), JvmMain.JAVA_LANG, "test_mth");
-        String good = "i = 65;";
-        Assert.assertEquals(good, insn);
-    }
+public enum BracePosition {
+    SAME_LINE,
+    NEXT_LINE,
+    NEXT_LINE_SHIFTED,
+    NEXT_LINE_ON_WRAP;
 }

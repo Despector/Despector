@@ -29,6 +29,7 @@ import com.voxelgenesis.despector.core.ast.method.insn.Instruction;
 import com.voxelgenesis.despector.core.ast.method.stmt.Statement;
 import com.voxelgenesis.despector.core.ast.signature.TypeSignature;
 import com.voxelgenesis.despector.core.ast.type.MethodEntry;
+import com.voxelgenesis.despector.core.ast.type.TypeEntry;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -36,12 +37,44 @@ import java.util.Set;
 public abstract class AbstractEmitterContext implements EmitterContext {
 
     private final EmitterSet set;
-
+    private boolean semicolons = true;
     private final Set<Local> defined_locals = new HashSet<>();
+    private TypeEntry current_type;
+    private TypeEntry current_outer_type;
     private MethodEntry current_method;
 
     public AbstractEmitterContext(EmitterSet set) {
         this.set = set;
+    }
+
+    @Override
+    public boolean useSemicolons() {
+        return this.semicolons;
+    }
+
+    @Override
+    public void setSemicolons(boolean state) {
+        this.semicolons = state;
+    }
+
+    @Override
+    public TypeEntry getCurrentType() {
+        return this.current_type;
+    }
+
+    @Override
+    public void setCurrentType(TypeEntry method) {
+        this.current_type = method;
+    }
+
+    @Override
+    public TypeEntry getCurrentOuterType() {
+        return this.current_outer_type;
+    }
+
+    @Override
+    public void setCurrentOuterType(TypeEntry method) {
+        this.current_outer_type = method;
     }
 
     @Override

@@ -66,4 +66,9 @@ public class Local {
         this.parameter = state;
     }
 
+    @Override
+    public String toString() {
+        return this.name;
+    }
+
 }

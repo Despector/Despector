@@ -22,26 +22,30 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.voxelgenesis.despector.core.ast.type;
+package com.voxelgenesis.despector.jvm.emitter.java.instruction;
 
+import com.voxelgenesis.despector.core.ast.method.insn.operator.NegativeOperator;
+import com.voxelgenesis.despector.core.ast.method.insn.operator.Operator;
 import com.voxelgenesis.despector.core.ast.signature.TypeSignature;
+import com.voxelgenesis.despector.core.emitter.EmitterContext;
+import com.voxelgenesis.despector.core.emitter.InstructionEmitter;
 
-public class FieldEntry {
+/**
+ * An emitter for a unary negative operator.
+ */
+public class NegativeOperatorEmitter implements InstructionEmitter<NegativeOperator> {
 
-    private final String name;
-    private TypeSignature desc;
-
-    public FieldEntry(String name, TypeSignature desc) {
-        this.name = name;
-        this.desc = desc;
-    }
-
-    public String getName() {
-        return this.name;
-    }
-
-    public TypeSignature getType() {
-        return this.desc;
+    @Override
+    public void emit(EmitterContext ctx, NegativeOperator arg, TypeSignature type) {
+        ctx.printString("-");
+        //TODO ctx.printString(" ", ctx.getFormat().insert_space_after_unary_operator);
+        if (arg.getOperand() instanceof Operator) {
+            ctx.printString("(");
+            ctx.emitInstruction(arg.getOperand(), null);
+            ctx.printString(")");
+        } else {
+            ctx.emitInstruction(arg.getOperand(), null);
+        }
     }
 
 }

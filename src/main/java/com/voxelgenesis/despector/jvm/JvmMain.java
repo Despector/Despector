@@ -26,6 +26,9 @@ package com.voxelgenesis.despector.jvm;
 
 import com.voxelgenesis.despector.core.Language;
 import com.voxelgenesis.despector.core.ast.method.insn.cst.IntConstant;
+import com.voxelgenesis.despector.core.ast.method.insn.cst.NullConstant;
+import com.voxelgenesis.despector.core.ast.method.insn.operator.NegativeOperator;
+import com.voxelgenesis.despector.core.ast.method.insn.operator.Operator;
 import com.voxelgenesis.despector.core.ast.method.insn.var.LocalAccess;
 import com.voxelgenesis.despector.core.ast.method.invoke.InvokeStatement;
 import com.voxelgenesis.despector.core.ast.method.stmt.assign.LocalAssignment;
@@ -33,9 +36,13 @@ import com.voxelgenesis.despector.core.ast.method.stmt.misc.Return;
 import com.voxelgenesis.despector.core.decompiler.BaseDecompiler;
 import com.voxelgenesis.despector.core.emitter.BaseEmitter;
 import com.voxelgenesis.despector.core.emitter.EmitterSet;
+import com.voxelgenesis.despector.core.emitter.format.EmitterFormat;
 import com.voxelgenesis.despector.jvm.emitter.java.JavaEmitterContext;
 import com.voxelgenesis.despector.jvm.emitter.java.instruction.IntConstantEmitter;
 import com.voxelgenesis.despector.jvm.emitter.java.instruction.LocalAccessEmitter;
+import com.voxelgenesis.despector.jvm.emitter.java.instruction.NegativeOperatorEmitter;
+import com.voxelgenesis.despector.jvm.emitter.java.instruction.NullConstantEmitter;
+import com.voxelgenesis.despector.jvm.emitter.java.instruction.OperatorEmitter;
 import com.voxelgenesis.despector.jvm.emitter.java.statement.InvokeEmitter;
 import com.voxelgenesis.despector.jvm.emitter.java.statement.LocalAssignmentEmitter;
 import com.voxelgenesis.despector.jvm.emitter.java.statement.ReturnEmitter;
@@ -57,7 +64,7 @@ public class JvmMain {
         JAVA_LANG.setLoader(new ClassSourceLoader());
         JAVA_LANG.setDecompiler(new BaseDecompiler());
         JAVA_LANG.setEmitter(new BaseEmitter(JAVA_SET));
-        JAVA_LANG.setEmitterContextProvider((lang, out) -> new JavaEmitterContext(lang.getEmitter().getSet(), out));
+        JAVA_LANG.setEmitterContextProvider((lang, out) -> new JavaEmitterContext(lang.getEmitter().getSet(), out, EmitterFormat.defaults()));
 
         JAVA_SET.setStatementEmitter(LocalAssignment.class, new LocalAssignmentEmitter());
         JAVA_SET.setStatementEmitter(InvokeStatement.class, new InvokeEmitter());
@@ -65,6 +72,9 @@ public class JvmMain {
         
         JAVA_SET.setInstructionEmitter(IntConstant.class, new IntConstantEmitter());
         JAVA_SET.setInstructionEmitter(LocalAccess.class, new LocalAccessEmitter());
+        JAVA_SET.setInstructionEmitter(NullConstant.class, new NullConstantEmitter());
+        JAVA_SET.setInstructionEmitter(Operator.class, new OperatorEmitter());
+        JAVA_SET.setInstructionEmitter(NegativeOperator.class, new NegativeOperatorEmitter());
     }
 
 }

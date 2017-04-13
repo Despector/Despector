@@ -22,26 +22,21 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.voxelgenesis.despector.core.ast.type;
+package com.voxelgenesis.despector.jvm.emitter.java.instruction;
 
+import com.voxelgenesis.despector.core.ast.method.insn.cst.NullConstant;
 import com.voxelgenesis.despector.core.ast.signature.TypeSignature;
+import com.voxelgenesis.despector.core.emitter.EmitterContext;
+import com.voxelgenesis.despector.core.emitter.InstructionEmitter;
 
-public class FieldEntry {
+/**
+ * An emitter for the null constant.
+ */
+public class NullConstantEmitter implements InstructionEmitter<NullConstant> {
 
-    private final String name;
-    private TypeSignature desc;
-
-    public FieldEntry(String name, TypeSignature desc) {
-        this.name = name;
-        this.desc = desc;
-    }
-
-    public String getName() {
-        return this.name;
-    }
-
-    public TypeSignature getType() {
-        return this.desc;
+    @Override
+    public void emit(EmitterContext ctx, NullConstant arg, TypeSignature type) {
+        ctx.printString("null");
     }
 
 }

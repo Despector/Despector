@@ -22,26 +22,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.voxelgenesis.despector.core.ast.type;
+package com.voxelgenesis.despector.core.emitter.format;
 
-import com.voxelgenesis.despector.core.ast.signature.TypeSignature;
+import java.io.IOException;
+import java.nio.file.Path;
 
-public class FieldEntry {
+/**
+ * A loader for emitter formats.
+ */
+public interface FormatLoader {
 
-    private final String name;
-    private TypeSignature desc;
-
-    public FieldEntry(String name, TypeSignature desc) {
-        this.name = name;
-        this.desc = desc;
-    }
-
-    public String getName() {
-        return this.name;
-    }
-
-    public TypeSignature getType() {
-        return this.desc;
-    }
-
+    void load(EmitterFormat format, Path formatter, Path import_order) throws IOException;
 }

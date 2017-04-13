@@ -45,19 +45,21 @@ public class BaseEmitter {
     public void emit(EmitterContext ctx, SourceEntry entry) {
         TypeEmitter emitter = this.set.getAstEmitter(entry.getClass());
         emitter.emit(ctx, entry);
+        ctx.flush();
     }
 
     public void emitMethodBody(EmitterContext ctx, MethodEntry entry) {
         for (int i = 0; i < entry.getStatements().size(); i++) {
             Statement stmt = entry.getStatements().get(i);
             if (i == entry.getStatements().size() - 1 && stmt instanceof Return && !((Return) stmt).getValue().isPresent()) {
-                return;
+                break;
             }
             if (i > 0) {
                 ctx.newLine();
             }
             ctx.emitStatement(stmt, true);
         }
+        ctx.flush();
     }
 
 }

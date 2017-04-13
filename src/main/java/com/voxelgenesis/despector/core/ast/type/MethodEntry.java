@@ -31,11 +31,15 @@ import com.voxelgenesis.despector.core.ir.InsnBlock;
 import com.voxelgenesis.despector.jvm.loader.JvmHelper;
 import org.spongepowered.despector.util.TypeHelper;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class MethodEntry {
 
     private final String name;
     private final String signature;
 
+    private List<TypeSignature> param_types;
     private TypeSignature return_type;
 
     private boolean is_static;
@@ -52,6 +56,10 @@ public class MethodEntry {
         this.locals = new Locals();
 
         this.return_type = JvmHelper.of(TypeHelper.getRet(this.signature));
+        this.param_types = new ArrayList<>();
+        for (String param : TypeHelper.splitSig(this.signature)) {
+            this.param_types.add(JvmHelper.of(param));
+        }
     }
 
     public String getName() {
@@ -60,6 +68,10 @@ public class MethodEntry {
 
     public String getSignature() {
         return this.signature;
+    }
+
+    public List<TypeSignature> getParamTypes() {
+        return this.param_types;
     }
 
     public TypeSignature getReturnType() {

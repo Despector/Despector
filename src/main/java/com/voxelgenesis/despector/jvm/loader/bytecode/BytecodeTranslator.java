@@ -107,34 +107,44 @@ public class BytecodeTranslator {
             case 18: // LDC
             case 19: // LDC_W
             case 20: // LDC2_W
+                throw new SourceFormatException("Unknown java opcode: " + next);
             case 21: // ILOAD
             case 22: // LLOAD
             case 23: // FLOAD
             case 24: // DLOAD
-            case 25: // ALOAD
-            case 26: // ILOAD_0
-            case 27: // ILOAD_1
-            case 28: // ILOAD_2
-            case 29: // ILOAD_3
-            case 30: // LLOAD_0
-            case 31: // LLOAD_1
-            case 32: // LLOAD_2
-            case 33: // LLOAD_3
-            case 34: // FLOAD_0
-            case 35: // FLOAD_1
-            case 36: // FLOAD_2
-            case 37: // FLOAD_3
-            case 38: // DLOAD_0
-            case 39: // DLOAD_1
-            case 40: // DLOAD_2
-            case 41: // DLOAD_3
+            case 25: { // ALOAD
+                int val = code[i++];
+                block.append(new IntInsn(Insn.LOCAL_LOAD, val));
                 break;
+            }
+            case 26: // ILOAD_0
+            case 30: // LLOAD_0
+            case 34: // FLOAD_0
+            case 38: // DLOAD_0
             case 42: // ALOAD_0
                 block.append(new IntInsn(Insn.LOCAL_LOAD, 0));
                 break;
+            case 27: // ILOAD_1
+            case 31: // LLOAD_1
+            case 35: // FLOAD_1
+            case 39: // DLOAD_1
             case 43: // ALOAD_1
+                block.append(new IntInsn(Insn.LOCAL_LOAD, 1));
+                break;
+            case 28: // ILOAD_2
+            case 32: // LLOAD_2
+            case 36: // FLOAD_2
+            case 40: // DLOAD_2
             case 44: // ALOAD_2
+                block.append(new IntInsn(Insn.LOCAL_LOAD, 2));
+                break;
+            case 29: // ILOAD_3
+            case 33: // LLOAD_3
+            case 37: // FLOAD_3
+            case 41: // DLOAD_3
             case 45: // ALOAD_3
+                block.append(new IntInsn(Insn.LOCAL_LOAD, 3));
+                break;
             case 46: // IALOAD
             case 47: // LALOAD
             case 48: // FALOAD
@@ -143,7 +153,7 @@ public class BytecodeTranslator {
             case 51: // BALOAD
             case 52: // CALOAD
             case 53: // SALOAD
-                break;
+                throw new SourceFormatException("Unknown java opcode: " + next);
             case 54: { // ISTORE
                 int local = code[i++];
                 block.append(new IntInsn(Insn.LOCAL_STORE, local));
@@ -152,27 +162,39 @@ public class BytecodeTranslator {
             case 55: // LSTORE
             case 56: // FSTORE
             case 57: // DSTORE
-            case 58: // ASTORE
+            case 58: { // ASTORE
+                int val = code[i++];
+                block.append(new IntInsn(Insn.LOCAL_STORE, val));
+                break;
+            }
             case 59: // ISTORE_0
-            case 60: // ISTORE_1
-            case 61: // ISTORE_2
-            case 62: // ISTORE_3
             case 63: // LSTORE_0
-            case 64: // LSTORE_1
-            case 65: // LSTORE_2
-            case 66: // LSTORE_3
             case 67: // FSTORE_0
-            case 68: // FSTORE_1
-            case 69: // FSTORE_2
-            case 70: // FSTORE_3
             case 71: // DSTORE_0
-            case 72: // DSTORE_1
-            case 73: // DSTORE_2
-            case 74: // DSTORE_3
             case 75: // ASTORE_0
+                block.append(new IntInsn(Insn.LOCAL_STORE, 0));
+                break;
+            case 60: // ISTORE_1
+            case 64: // LSTORE_1
+            case 68: // FSTORE_1
+            case 72: // DSTORE_1
             case 76: // ASTORE_1
+                block.append(new IntInsn(Insn.LOCAL_STORE, 1));
+                break;
+            case 61: // ISTORE_2
+            case 65: // LSTORE_2
+            case 69: // FSTORE_2
+            case 73: // DSTORE_2
             case 77: // ASTORE_2
+                block.append(new IntInsn(Insn.LOCAL_STORE, 2));
+                break;
+            case 62: // ISTORE_3
+            case 66: // LSTORE_3
+            case 70: // FSTORE_3
+            case 74: // DSTORE_3
             case 78: // ASTORE_3
+                block.append(new IntInsn(Insn.LOCAL_STORE, 3));
+                break;
             case 79: // IASTORE
             case 80: // LASTORE
             case 81: // FASTORE
@@ -181,52 +203,98 @@ public class BytecodeTranslator {
             case 84: // BASTORE
             case 85: // CASTORE
             case 86: // SASTORE
+                throw new SourceFormatException("Unknown java opcode: " + next);
             case 87: // POP
+                block.append(new OpInsn(Insn.POP));
+                break;
             case 88: // POP2
+                block.append(new OpInsn(Insn.POP));
+                block.append(new OpInsn(Insn.POP));
+                break;
             case 89: // DUP
+                block.append(new OpInsn(Insn.DUP));
+                break;
             case 90: // DUP_X1
+                block.append(new OpInsn(Insn.DUP_X1));
+                break;
             case 91: // DUP_X2
+                block.append(new OpInsn(Insn.DUP_X2));
+                break;
             case 92: // DUP2
+                block.append(new OpInsn(Insn.DUP2));
+                break;
             case 93: // DUP2_X1
+                block.append(new OpInsn(Insn.DUP2_X1));
+                break;
             case 94: // DUP2_X2
+                block.append(new OpInsn(Insn.DUP2_X2));
+                break;
             case 95: // SWAP
+                block.append(new OpInsn(Insn.SWAP));
+                break;
             case 96: // IADD
             case 97: // LADD
             case 98: // FADD
             case 99: // DADD
+                block.append(new OpInsn(Insn.ADD));
+                break;
             case 100: // ISUB
             case 101: // LSUB
             case 102: // FSUB
             case 103: // DSUB
+                block.append(new OpInsn(Insn.SUB));
+                break;
             case 104: // IMUL
             case 105: // LMUL
             case 106: // FMUL
             case 107: // DMUL
+                block.append(new OpInsn(Insn.MUL));
+                break;
             case 108: // IDIV
             case 109: // LDIV
             case 110: // FDIV
             case 111: // DDIV
+                block.append(new OpInsn(Insn.DIV));
+                break;
             case 112: // IREM
             case 113: // LREM
             case 114: // FREM
             case 115: // DREM
+                block.append(new OpInsn(Insn.REM));
+                break;
             case 116: // INEG
             case 117: // LNEG
             case 118: // FNEG
             case 119: // DNEG
+                block.append(new OpInsn(Insn.NEG));
+                break;
             case 120: // ISHL
             case 121: // LSHL
+                block.append(new OpInsn(Insn.SHL));
+                break;
             case 122: // ISHR
             case 123: // LSHR
+                block.append(new OpInsn(Insn.SHR));
+                break;
             case 124: // IUSHR
             case 125: // LUSHR
+                block.append(new OpInsn(Insn.USHR));
+                break;
             case 126: // IAND
             case 127: // LAND
+                block.append(new OpInsn(Insn.AND));
+                break;
             case 128: // IOR
             case 129: // LOR
+                block.append(new OpInsn(Insn.OR));
+                break;
             case 130: // IXOR
             case 131: // LXOR
+                block.append(new OpInsn(Insn.XOR));
+                break;
             case 132: // IINC
+                block.append(new OpInsn(Insn.IINC));
+                break;
             case 133: // I2L
             case 134: // I2F
             case 135: // I2D
@@ -271,7 +339,7 @@ public class BytecodeTranslator {
             case 174: // FRETURN
             case 175: // DRETURN
             case 176: // ARETURN
-                break;
+                throw new SourceFormatException("Unknown java opcode: " + next);
             case 177: // RETURN
                 block.append(new OpInsn(Insn.RETURN));
                 break;
@@ -280,7 +348,7 @@ public class BytecodeTranslator {
             case 180: // GETFIELD
             case 181: // PUTFIELD
             case 182: // INVOKEVIRTUAL
-                break;
+                throw new SourceFormatException("Unknown java opcode: " + next);
             case 183: { // INVOKESPECIAL
                 int index = (code[i++] << 8) | code[i++];
                 MethodRef ref = pool.getMethodRef(index);
@@ -305,7 +373,6 @@ public class BytecodeTranslator {
             case 199: // IFNONNULL
             case 200: // GOTO_W
             case 201: // JSR_W
-                break;
             default:
                 throw new SourceFormatException("Unknown java opcode: " + next);
             }

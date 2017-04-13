@@ -104,7 +104,7 @@ public class ClassSourceLoader implements SourceLoader {
             String field_name = pool.getUtf8(data.readUnsignedShort());
             String field_desc = pool.getUtf8(data.readUnsignedShort());
 
-            FieldEntry field = new FieldEntry(field_name, field_desc);
+            FieldEntry field = new FieldEntry(field_name, JvmHelper.of(field_desc));
             fields.add(field);
 
             int attribute_count = data.readUnsignedShort();

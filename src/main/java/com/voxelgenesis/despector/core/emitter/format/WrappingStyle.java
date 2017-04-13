@@ -22,26 +22,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.voxelgenesis.despector.core.ast.type;
+package com.voxelgenesis.despector.core.emitter.format;
 
-import com.voxelgenesis.despector.core.ast.signature.TypeSignature;
 
-public class FieldEntry {
-
-    private final String name;
-    private TypeSignature desc;
-
-    public FieldEntry(String name, TypeSignature desc) {
-        this.name = name;
-        this.desc = desc;
-    }
-
-    public String getName() {
-        return this.name;
-    }
-
-    public TypeSignature getType() {
-        return this.desc;
-    }
-
+public enum WrappingStyle {
+    DO_NOT_WRAP,
+    WRAP_WHEN_NEEDED,
+    WRAP_FIRST_OR_NEEDED,
+    WRAP_ALL,
+    WRAP_ALL_AND_INDENT,
+    WRAP_ALL_EXCEPT_FIRST;
 }

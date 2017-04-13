@@ -30,6 +30,9 @@ import com.voxelgenesis.despector.core.ast.method.StatementBlock;
 import com.voxelgenesis.despector.core.ast.method.insn.Instruction;
 import com.voxelgenesis.despector.core.ast.method.insn.cst.IntConstant;
 import com.voxelgenesis.despector.core.ast.method.insn.cst.NullConstant;
+import com.voxelgenesis.despector.core.ast.method.insn.operator.NegativeOperator;
+import com.voxelgenesis.despector.core.ast.method.insn.operator.Operator;
+import com.voxelgenesis.despector.core.ast.method.insn.operator.OperatorType;
 import com.voxelgenesis.despector.core.ast.method.insn.var.LocalAccess;
 import com.voxelgenesis.despector.core.ast.method.invoke.InstanceMethodInvoke;
 import com.voxelgenesis.despector.core.ast.method.invoke.InvokeStatement;
@@ -120,18 +123,77 @@ public class InsnAppender {
         case Insn.DUP2_X1:
         case Insn.DUP2_X2:
         case Insn.SWAP:
-        case Insn.ADD:
-        case Insn.SUB:
-        case Insn.MUL:
-        case Insn.DIV:
-        case Insn.REM:
-        case Insn.NEG:
-        case Insn.SHL:
-        case Insn.SHR:
-        case Insn.USHR:
-        case Insn.AND:
-        case Insn.OR:
-        case Insn.XOR:
+            throw new IllegalStateException("Unsupported opcode in appender: " + insn);
+        case Insn.ADD: {
+            Instruction right = stack.pop();
+            Instruction left = stack.pop();
+            stack.push(new Operator(OperatorType.ADD, left, right));
+            break;
+        }
+        case Insn.SUB: {
+            Instruction right = stack.pop();
+            Instruction left = stack.pop();
+            stack.push(new Operator(OperatorType.SUBTRACT, left, right));
+            break;
+        }
+        case Insn.MUL: {
+            Instruction right = stack.pop();
+            Instruction left = stack.pop();
+            stack.push(new Operator(OperatorType.MULTIPLY, left, right));
+            break;
+        }
+        case Insn.DIV: {
+            Instruction right = stack.pop();
+            Instruction left = stack.pop();
+            stack.push(new Operator(OperatorType.DIVIDE, left, right));
+            break;
+        }
+        case Insn.REM: {
+            Instruction right = stack.pop();
+            Instruction left = stack.pop();
+            stack.push(new Operator(OperatorType.REMAINDER, left, right));
+            break;
+        }
+        case Insn.NEG: {
+            stack.push(new NegativeOperator(stack.pop()));
+            break;
+        }
+        case Insn.SHL: {
+            Instruction right = stack.pop();
+            Instruction left = stack.pop();
+            stack.push(new Operator(OperatorType.SHIFT_LEFT, left, right));
+            break;
+        }
+        case Insn.SHR: {
+            Instruction right = stack.pop();
+            Instruction left = stack.pop();
+            stack.push(new Operator(OperatorType.SHIFT_RIGHT, left, right));
+            break;
+        }
+        case Insn.USHR: {
+            Instruction right = stack.pop();
+            Instruction left = stack.pop();
+            stack.push(new Operator(OperatorType.UNSIGNED_SHIFT_RIGHT, left, right));
+            break;
+        }
+        case Insn.AND: {
+            Instruction right = stack.pop();
+            Instruction left = stack.pop();
+            stack.push(new Operator(OperatorType.AND, left, right));
+            break;
+        }
+        case Insn.OR: {
+            Instruction right = stack.pop();
+            Instruction left = stack.pop();
+            stack.push(new Operator(OperatorType.OR, left, right));
+            break;
+        }
+        case Insn.XOR: {
+            Instruction right = stack.pop();
+            Instruction left = stack.pop();
+            stack.push(new Operator(OperatorType.XOR, left, right));
+            break;
+        }
         case Insn.IINC:
         case Insn.CMP:
         case Insn.IFEQ:

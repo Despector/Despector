@@ -29,8 +29,27 @@ import com.voxelgenesis.despector.core.ast.method.insn.Instruction;
 import com.voxelgenesis.despector.core.ast.method.stmt.Statement;
 import com.voxelgenesis.despector.core.ast.signature.TypeSignature;
 import com.voxelgenesis.despector.core.ast.type.MethodEntry;
+import com.voxelgenesis.despector.core.ast.type.TypeEntry;
+import com.voxelgenesis.despector.core.emitter.format.BracePosition;
+import com.voxelgenesis.despector.core.emitter.format.EmitterFormat;
+import com.voxelgenesis.despector.core.emitter.format.WrappingStyle;
+import com.voxelgenesis.despector.jvm.emitter.java.JavaEmitterContext;
 
 public interface EmitterContext {
+
+    EmitterFormat getFormat();
+
+    boolean useSemicolons();
+
+    void setSemicolons(boolean state);
+
+    TypeEntry getCurrentType();
+
+    void setCurrentType(TypeEntry method);
+
+    TypeEntry getCurrentOuterType();
+
+    void setCurrentOuterType(TypeEntry method);
 
     MethodEntry getCurrentMethod();
 
@@ -48,8 +67,40 @@ public interface EmitterContext {
 
     void emitTypeSignature(TypeSignature sig);
 
-    void printString(String str);
+    EmitterContext printString(String str);
 
-    void newLine();
+    EmitterContext newLine();
+
+    EmitterContext markWrapPoint();
+
+    EmitterContext indent();
+
+    EmitterContext dedent();
+
+    EmitterContext printIndentation();
+
+    String getType(String name);
+
+    String getTypeName(String name);
+
+    EmitterContext emitType(TypeSignature sig);
+
+    EmitterContext emitType(String name);
+
+    EmitterContext emitTypeName(String name);
+
+    EmitterContext newLine(int count);
+
+    void newIndentedLine();
+
+    int getCurrentLength();
+
+    EmitterContext printString(String line, boolean condition);
+
+    JavaEmitterContext markWrapPoint(WrappingStyle style, int index);
+
+    void emitBrace(BracePosition pos, boolean wrapped, boolean with_space);
+
+    void flush();
 
 }
