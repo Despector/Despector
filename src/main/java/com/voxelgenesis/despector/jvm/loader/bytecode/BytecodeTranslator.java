@@ -24,16 +24,25 @@
  */
 package com.voxelgenesis.despector.jvm.loader.bytecode;
 
+import com.voxelgenesis.despector.core.ir.DoubleInsn;
+import com.voxelgenesis.despector.core.ir.FieldInsn;
+import com.voxelgenesis.despector.core.ir.FloatInsn;
 import com.voxelgenesis.despector.core.ir.Insn;
 import com.voxelgenesis.despector.core.ir.InsnBlock;
 import com.voxelgenesis.despector.core.ir.IntInsn;
 import com.voxelgenesis.despector.core.ir.InvokeInsn;
 import com.voxelgenesis.despector.core.ir.JumpInsn;
 import com.voxelgenesis.despector.core.ir.LdcInsn;
+import com.voxelgenesis.despector.core.ir.LongInsn;
 import com.voxelgenesis.despector.core.ir.OpInsn;
 import com.voxelgenesis.despector.core.loader.SourceFormatException;
 import com.voxelgenesis.despector.jvm.loader.ClassConstantPool;
-import com.voxelgenesis.despector.jvm.loader.ClassConstantPool.MethodRef;
+import com.voxelgenesis.despector.jvm.loader.ClassConstantPool.Entry;
+import com.voxelgenesis.despector.jvm.loader.ClassConstantPool.FieldRefEntry;
+import com.voxelgenesis.despector.jvm.loader.ClassConstantPool.FloatEntry;
+import com.voxelgenesis.despector.jvm.loader.ClassConstantPool.IntEntry;
+import com.voxelgenesis.despector.jvm.loader.ClassConstantPool.MethodRefEntry;
+import com.voxelgenesis.despector.jvm.loader.ClassConstantPool.StringEntry;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -81,25 +90,25 @@ public class BytecodeTranslator {
                 block.append(new IntInsn(Insn.ICONST, 5));
                 break;
             case 9: // LCONST_0
-                block.append(new IntInsn(Insn.LCONST, 0));
+                block.append(new LongInsn(Insn.LCONST, 0));
                 break;
             case 10: // LCONST_1
-                block.append(new IntInsn(Insn.LCONST, 1));
+                block.append(new LongInsn(Insn.LCONST, 1));
                 break;
             case 11: // FCONST_0
-                block.append(new IntInsn(Insn.FCONST, 0));
+                block.append(new FloatInsn(Insn.FCONST, 0));
                 break;
             case 12: // FCONST_1
-                block.append(new IntInsn(Insn.FCONST, 1));
+                block.append(new FloatInsn(Insn.FCONST, 1));
                 break;
             case 13: // FCONST_2
-                block.append(new IntInsn(Insn.FCONST, 2));
+                block.append(new FloatInsn(Insn.FCONST, 2));
                 break;
             case 14: // DCONST_0
-                block.append(new IntInsn(Insn.DCONST, 0));
+                block.append(new DoubleInsn(Insn.DCONST, 0));
                 break;
             case 15: // DCONST_1
-                block.append(new IntInsn(Insn.DCONST, 1));
+                block.append(new DoubleInsn(Insn.DCONST, 1));
                 break;
             case 16: {// BIPUSH
                 int val = code[i++];
@@ -111,7 +120,20 @@ public class BytecodeTranslator {
                 block.append(new IntInsn(Insn.ICONST, val));
                 break;
             }
-            case 18: // LDC
+            case 18: {// LDC
+                int index = code[i++] & 0xFF;
+                Entry entry = pool.getEntry(index);
+                if (entry instanceof IntEntry) {
+                    block.append(new IntInsn(Insn.ICONST, ((IntEntry) entry).value));
+                } else if (entry instanceof FloatEntry) {
+                    block.append(new FloatInsn(Insn.FCONST, ((FloatEntry) entry).value));
+                } else if (entry instanceof StringEntry) {
+                    block.append(new LdcInsn(Insn.PUSH, ((StringEntry) entry).value));
+                } else {
+                    throw new IllegalStateException("Unsupported constant pool entry type in LDC node " + entry.getClass().getSimpleName());
+                }
+                break;
+            }
             case 19: // LDC_W
             case 20: // LDC2_W
                 throw new SourceFormatException("Unknown java opcode: " + next);
@@ -120,7 +142,7 @@ public class BytecodeTranslator {
             case 23: // FLOAD
             case 24: // DLOAD
             case 25: { // ALOAD
-                int val = code[i++];
+                int val = code[i++] & 0xFF;
                 block.append(new IntInsn(Insn.LOCAL_LOAD, val));
                 break;
             }
@@ -162,7 +184,7 @@ public class BytecodeTranslator {
             case 53: // SALOAD
                 throw new SourceFormatException("Unknown java opcode: " + next);
             case 54: { // ISTORE
-                int local = code[i++];
+                int local = code[i++] & 0xFF;
                 block.append(new IntInsn(Insn.LOCAL_STORE, local));
                 break;
             }
@@ -170,7 +192,7 @@ public class BytecodeTranslator {
             case 56: // FSTORE
             case 57: // DSTORE
             case 58: { // ASTORE
-                int val = code[i++];
+                int val = code[i++] & 0xFF;
                 block.append(new IntInsn(Insn.LOCAL_STORE, val));
                 break;
             }
@@ -324,15 +346,13 @@ public class BytecodeTranslator {
             case 152: // DCMPG
                 throw new SourceFormatException("Unknown java opcode: " + next);
             case 153: {// IFEQ
-                int target = code[i++];
-                target = (target << 8) | code[i++];
-                block.append(new JumpInsn(Insn.IFEQ, opcode_index + target));
+                int index = ((code[i++] & 0xFF) << 8) | (code[i++] & 0xFF);
+                block.append(new JumpInsn(Insn.IFEQ, opcode_index + index));
                 break;
             }
             case 154: {// IFNE
-                int target = code[i++];
-                target = (target << 8) | code[i++];
-                block.append(new JumpInsn(Insn.IFNE, opcode_index + target));
+                int index = ((code[i++] & 0xFF) << 8) | (code[i++] & 0xFF);
+                block.append(new JumpInsn(Insn.IFNE, opcode_index + index));
                 break;
             }
             case 155: // IFLT
@@ -361,21 +381,40 @@ public class BytecodeTranslator {
             case 177: // RETURN
                 block.append(new OpInsn(Insn.RETURN));
                 break;
-            case 178: // GETSTATIC
-            case 179: // PUTSTATIC
-            case 180: // GETFIELD
-            case 181: // PUTFIELD
+            case 178: { // GETSTATIC
+                int index = ((code[i++] & 0xFF) << 8) | (code[i++] & 0xFF);
+                FieldRefEntry ref = pool.getFieldRef(index);
+                block.append(new FieldInsn(Insn.GETSTATIC, ref.cls, ref.name, ref.type));
+                break;
+            }
+            case 179: { // PUTSTATIC
+                int index = ((code[i++] & 0xFF) << 8) | (code[i++] & 0xFF);
+                FieldRefEntry ref = pool.getFieldRef(index);
+                block.append(new FieldInsn(Insn.PUTSTATIC, ref.cls, ref.name, ref.type));
+                break;
+            }
+            case 180: { // GETFIELD
+                int index = ((code[i++] & 0xFF) << 8) | (code[i++] & 0xFF);
+                FieldRefEntry ref = pool.getFieldRef(index);
+                block.append(new FieldInsn(Insn.GETFIELD, ref.cls, ref.name, ref.type));
+                break;
+            }
+            case 181: { // PUTFIELD
+                int index = ((code[i++] & 0xFF) << 8) | (code[i++] & 0xFF);
+                FieldRefEntry ref = pool.getFieldRef(index);
+                block.append(new FieldInsn(Insn.PUTFIELD, ref.cls, ref.name, ref.type));
+                break;
+            }
             case 182: // INVOKEVIRTUAL
-                throw new SourceFormatException("Unknown java opcode: " + next);
             case 183: { // INVOKESPECIAL
-                int index = (code[i++] << 8) | code[i++];
-                MethodRef ref = pool.getMethodRef(index);
+                int index = ((code[i++] & 0xFF) << 8) | (code[i++] & 0xFF);
+                MethodRefEntry ref = pool.getMethodRef(index);
                 block.append(new InvokeInsn(Insn.INVOKE, ref.cls, ref.name, ref.type));
                 break;
             }
             case 184: { // INVOKESTATIC
-                int index = (code[i++] << 8) | code[i++];
-                MethodRef ref = pool.getMethodRef(index);
+                int index = ((code[i++] & 0xFF) << 8) | (code[i++] & 0xFF);
+                MethodRefEntry ref = pool.getMethodRef(index);
                 block.append(new InvokeInsn(Insn.INVOKESTATIC, ref.cls, ref.name, ref.type));
                 break;
             }

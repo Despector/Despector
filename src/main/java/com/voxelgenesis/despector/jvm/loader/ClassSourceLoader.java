@@ -98,6 +98,17 @@ public class ClassSourceLoader implements SourceLoader {
             interfaces.add(pool.getClass(data.readUnsignedShort()).name);
         }
 
+        TypeEntry entry = null;
+        if ((access_flags & ACC_INTERFACE) != 0) {
+            entry = new InterfaceEntry(name);
+        } else if ((access_flags & ACC_ENUM) != 0) {
+            entry = new EnumEntry(name);
+        } else if ((access_flags & ACC_ANNOTATION) != 0) {
+            entry = new AnnotationEntry(name);
+        } else {
+            entry = new ClassEntry(name);
+        }
+
         int field_count = data.readUnsignedShort();
         List<FieldEntry> fields = new ArrayList<>();
         for (int i = 0; i < field_count; i++) {
@@ -129,7 +140,7 @@ public class ClassSourceLoader implements SourceLoader {
                 param_types.add(JvmHelper.of(t));
             }
 
-            MethodEntry method = new MethodEntry(method_name, param_types, JvmHelper.of(TypeHelper.getRet(method_desc)));
+            MethodEntry method = new MethodEntry(entry, method_name, param_types, JvmHelper.of(TypeHelper.getRet(method_desc)));
             methods.add(method);
             method.setStatic((method_access & ACC_STATIC) != 0);
 
@@ -194,17 +205,6 @@ public class ClassSourceLoader implements SourceLoader {
                     data.skipBytes(length);
                 }
             }
-        }
-
-        TypeEntry entry = null;
-        if ((access_flags & ACC_INTERFACE) != 0) {
-            entry = new InterfaceEntry(name);
-        } else if ((access_flags & ACC_ENUM) != 0) {
-            entry = new EnumEntry(name);
-        } else if ((access_flags & ACC_ANNOTATION) != 0) {
-            entry = new AnnotationEntry(name);
-        } else {
-            entry = new ClassEntry(name);
         }
 
         for (MethodEntry mth : methods) {

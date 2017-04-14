@@ -26,7 +26,6 @@ package com.voxelgenesis.despector.core.ast.method;
 
 import com.voxelgenesis.despector.core.ast.method.stmt.Statement;
 import com.voxelgenesis.despector.core.ast.visitor.AstVisitor;
-import com.voxelgenesis.despector.core.ast.visitor.TypeVisitor;
 
 import java.util.ArrayList;
 import java.util.Iterator;

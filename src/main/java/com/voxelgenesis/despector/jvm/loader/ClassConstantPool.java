@@ -49,7 +49,7 @@ public class ClassConstantPool {
             EntryType type = EntryType.values()[tag];
             switch (type) {
             case UTF8: {
-                Utf8 u = new Utf8();
+                Utf8Entry u = new Utf8Entry();
                 int len = data.readUnsignedShort();
                 byte[] bytes = new byte[len];
                 data.read(bytes, 0, len);
@@ -61,7 +61,7 @@ public class ClassConstantPool {
                 break;
             }
             case INTEGER: {
-                IntConstant c = new IntConstant();
+                IntEntry c = new IntEntry();
                 c.value = data.readInt();
                 this.values[i] = c;
                 if (DUMP_CONSTANT_POOL) {
@@ -70,7 +70,7 @@ public class ClassConstantPool {
                 break;
             }
             case FLOAT: {
-                FloatConstant c = new FloatConstant();
+                FloatEntry c = new FloatEntry();
                 c.value = data.readFloat();
                 this.values[i] = c;
                 if (DUMP_CONSTANT_POOL) {
@@ -79,7 +79,7 @@ public class ClassConstantPool {
                 break;
             }
             case LONG: {
-                LongConstant c = new LongConstant();
+                LongEntry c = new LongEntry();
                 long l = ((long) data.readInt() << 32);
                 l |= data.readInt();
                 c.value = l;
@@ -91,7 +91,7 @@ public class ClassConstantPool {
                 break;
             }
             case DOUBLE: {
-                DoubleConstant c = new DoubleConstant();
+                DoubleEntry c = new DoubleEntry();
                 long l = ((long) data.readInt() << 32);
                 l |= data.readInt();
                 c.value = Double.longBitsToDouble(l);
@@ -121,7 +121,7 @@ public class ClassConstantPool {
                 break;
             }
             case FIELD_REF: {
-                FieldRef f = new FieldRef();
+                FieldRefEntry f = new FieldRefEntry();
                 f.class_index = data.readUnsignedShort();
                 f.name_and_type_index = data.readUnsignedShort();
                 this.values[i] = f;
@@ -131,7 +131,7 @@ public class ClassConstantPool {
                 break;
             }
             case METHOD_REF: {
-                MethodRef f = new MethodRef();
+                MethodRefEntry f = new MethodRefEntry();
                 f.class_index = data.readUnsignedShort();
                 f.name_and_type_index = data.readUnsignedShort();
                 this.values[i] = f;
@@ -141,7 +141,7 @@ public class ClassConstantPool {
                 break;
             }
             case INTERFACE_METHOD_REF: {
-                InterfaceMethodRef f = new InterfaceMethodRef();
+                InterfaceMethodRefEntry f = new InterfaceMethodRefEntry();
                 f.class_index = data.readUnsignedShort();
                 f.name_and_type_index = data.readUnsignedShort();
                 this.values[i] = f;
@@ -151,7 +151,7 @@ public class ClassConstantPool {
                 break;
             }
             case NAME_AND_TYPE: {
-                NameAndType n = new NameAndType();
+                NameAndTypeEntry n = new NameAndTypeEntry();
                 n.name_index = data.readUnsignedShort();
                 n.type_index = data.readUnsignedShort();
                 this.values[i] = n;
@@ -161,7 +161,7 @@ public class ClassConstantPool {
                 break;
             }
             case METHOD_HANDLE: {
-                MethodHandle h = new MethodHandle();
+                MethodHandleEntry h = new MethodHandleEntry();
                 h.kind = data.readByte();
                 h.reference_index = data.readUnsignedShort();
                 this.values[i] = h;
@@ -171,7 +171,7 @@ public class ClassConstantPool {
                 break;
             }
             case METHOD_TYPE: {
-                MethodType t = new MethodType();
+                MethodTypeEntry t = new MethodTypeEntry();
                 t.desc_index = data.readUnsignedShort();
                 this.values[i] = t;
                 if (DUMP_CONSTANT_POOL) {
@@ -180,7 +180,7 @@ public class ClassConstantPool {
                 break;
             }
             case INVOKE_DYNAMIC: {
-                InvokeDynamic d = new InvokeDynamic();
+                InvokeDynamicEntry d = new InvokeDynamicEntry();
                 d.bootstrap_index = data.readUnsignedShort();
                 d.name_and_type_index = data.readUnsignedShort();
                 this.values[i] = d;
@@ -218,28 +218,28 @@ public class ClassConstantPool {
                 break;
             }
             case FIELD_REF: {
-                FieldRef f = (FieldRef) e;
-                f.cls = getClass(f.class_index).name;
-                f.name = getNameAndType(f.name_and_type_index).name;
-                f.type = getNameAndType(f.name_and_type_index).type;
+                FieldRefEntry f = (FieldRefEntry) e;
+                f.cls = getUtf8(getClass(f.class_index).name_index);
+                f.name = getUtf8(getNameAndType(f.name_and_type_index).name_index);
+                f.type = getUtf8(getNameAndType(f.name_and_type_index).type_index);
                 break;
             }
             case METHOD_REF: {
-                MethodRef f = (MethodRef) e;
-                f.cls = getClass(f.class_index).name;
-                f.name = getNameAndType(f.name_and_type_index).name;
-                f.type = getNameAndType(f.name_and_type_index).type;
+                MethodRefEntry f = (MethodRefEntry) e;
+                f.cls = getUtf8(getClass(f.class_index).name_index);
+                f.name = getUtf8(getNameAndType(f.name_and_type_index).name_index);
+                f.type = getUtf8(getNameAndType(f.name_and_type_index).type_index);
                 break;
             }
             case INTERFACE_METHOD_REF: {
-                InterfaceMethodRef f = (InterfaceMethodRef) e;
-                f.cls = getClass(f.class_index).name;
+                InterfaceMethodRefEntry f = (InterfaceMethodRefEntry) e;
+                f.cls = getUtf8(getClass(f.class_index).name_index);
                 f.name = getUtf8(getNameAndType(f.name_and_type_index).name_index);
                 f.type = getUtf8(getNameAndType(f.name_and_type_index).type_index);
                 break;
             }
             case NAME_AND_TYPE: {
-                NameAndType n = (NameAndType) e;
+                NameAndTypeEntry n = (NameAndTypeEntry) e;
                 n.name = getUtf8(n.name_index);
                 n.type = getUtf8(n.type_index);
                 break;
@@ -247,7 +247,7 @@ public class ClassConstantPool {
             case METHOD_HANDLE:
                 break;
             case METHOD_TYPE: {
-                MethodType t = (MethodType) e;
+                MethodTypeEntry t = (MethodTypeEntry) e;
                 t.desc = getUtf8(t.desc_index);
                 break;
             }
@@ -259,44 +259,48 @@ public class ClassConstantPool {
         }
     }
 
+    public Entry getEntry(int index) {
+        return this.values[index - 1];
+    }
+
     public String getUtf8(int index) {
-        return ((Utf8) this.values[index - 1]).value;
+        return ((Utf8Entry) this.values[index - 1]).value;
     }
 
     public int getInt(int index) {
-        return ((IntConstant) this.values[index - 1]).value;
+        return ((IntEntry) this.values[index - 1]).value;
     }
 
     public float getFloat(int index) {
-        return ((FloatConstant) this.values[index - 1]).value;
+        return ((FloatEntry) this.values[index - 1]).value;
     }
 
     public long getLong(int index) {
-        return ((LongConstant) this.values[index - 1]).value;
+        return ((LongEntry) this.values[index - 1]).value;
     }
 
     public double getDouble(int index) {
-        return ((DoubleConstant) this.values[index - 1]).value;
+        return ((DoubleEntry) this.values[index - 1]).value;
     }
 
     public ClassEntry getClass(int index) {
         return (ClassEntry) this.values[index - 1];
     }
 
-    public NameAndType getNameAndType(int index) {
-        return (NameAndType) this.values[index - 1];
+    public NameAndTypeEntry getNameAndType(int index) {
+        return (NameAndTypeEntry) this.values[index - 1];
     }
 
-    public FieldRef getFieldRef(int index) {
-        return (FieldRef) this.values[index - 1];
+    public FieldRefEntry getFieldRef(int index) {
+        return (FieldRefEntry) this.values[index - 1];
     }
 
-    public MethodRef getMethodRef(int index) {
-        return (MethodRef) this.values[index - 1];
+    public MethodRefEntry getMethodRef(int index) {
+        return (MethodRefEntry) this.values[index - 1];
     }
 
-    public InterfaceMethodRef getInterfaceMethodRef(int index) {
-        return (InterfaceMethodRef) this.values[index - 1];
+    public InterfaceMethodRefEntry getInterfaceMethodRef(int index) {
+        return (InterfaceMethodRefEntry) this.values[index - 1];
     }
 
     public static abstract class Entry {
@@ -304,27 +308,27 @@ public class ClassConstantPool {
         public EntryType type;
     }
 
-    public static class Utf8 extends Entry {
+    public static class Utf8Entry extends Entry {
 
         public String value;
     }
 
-    public static class IntConstant extends Entry {
+    public static class IntEntry extends Entry {
 
         public int value;
     }
 
-    public static class FloatConstant extends Entry {
+    public static class FloatEntry extends Entry {
 
         public float value;
     }
 
-    public static class LongConstant extends Entry {
+    public static class LongEntry extends Entry {
 
         public long value;
     }
 
-    public static class DoubleConstant extends Entry {
+    public static class DoubleEntry extends Entry {
 
         public double value;
     }
@@ -341,7 +345,7 @@ public class ClassConstantPool {
         public String name;
     }
 
-    public static class NameAndType extends Entry {
+    public static class NameAndTypeEntry extends Entry {
 
         public int name_index;
         public int type_index;
@@ -350,7 +354,7 @@ public class ClassConstantPool {
         public String type;
     }
 
-    public static class FieldRef extends Entry {
+    public static class FieldRefEntry extends Entry {
 
         public int class_index;
         public int name_and_type_index;
@@ -360,7 +364,7 @@ public class ClassConstantPool {
         public String type;
     }
 
-    public static class MethodRef extends Entry {
+    public static class MethodRefEntry extends Entry {
 
         public int class_index;
         public int name_and_type_index;
@@ -370,7 +374,7 @@ public class ClassConstantPool {
         public String type;
     }
 
-    public static class InterfaceMethodRef extends Entry {
+    public static class InterfaceMethodRefEntry extends Entry {
 
         public int class_index;
         public int name_and_type_index;
@@ -380,20 +384,20 @@ public class ClassConstantPool {
         public String type;
     }
 
-    public static class MethodHandle extends Entry {
+    public static class MethodHandleEntry extends Entry {
 
         public byte kind;
         public int reference_index;
     }
 
-    public static class MethodType extends Entry {
+    public static class MethodTypeEntry extends Entry {
 
         public int desc_index;
 
         public String desc;
     }
 
-    public static class InvokeDynamic extends Entry {
+    public static class InvokeDynamicEntry extends Entry {
 
         public int bootstrap_index;
         public int name_and_type_index;

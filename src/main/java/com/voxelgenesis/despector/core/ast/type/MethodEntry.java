@@ -35,6 +35,7 @@ import java.util.List;
 
 public class MethodEntry {
 
+    private final SourceEntry owner;
     private final String name;
 
     private List<TypeSignature> param_types;
@@ -48,13 +49,18 @@ public class MethodEntry {
 
     private Locals locals;
 
-    public MethodEntry(String name, List<TypeSignature> param_types, TypeSignature returntype) {
+    public MethodEntry(SourceEntry owner, String name, List<TypeSignature> param_types, TypeSignature returntype) {
+        this.owner = owner;
         this.name = name;
 
         this.locals = new Locals();
 
         this.return_type = returntype;
         this.param_types = param_types;
+    }
+
+    public SourceEntry getOwner() {
+        return this.owner;
     }
 
     public String getName() {

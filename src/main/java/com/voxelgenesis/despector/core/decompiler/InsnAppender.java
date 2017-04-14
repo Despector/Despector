@@ -30,18 +30,27 @@ import com.voxelgenesis.despector.core.ast.method.StatementBlock;
 import com.voxelgenesis.despector.core.ast.method.insn.Instruction;
 import com.voxelgenesis.despector.core.ast.method.insn.cst.IntConstant;
 import com.voxelgenesis.despector.core.ast.method.insn.cst.NullConstant;
+import com.voxelgenesis.despector.core.ast.method.insn.cst.StringConstant;
 import com.voxelgenesis.despector.core.ast.method.insn.operator.NegativeOperator;
 import com.voxelgenesis.despector.core.ast.method.insn.operator.Operator;
 import com.voxelgenesis.despector.core.ast.method.insn.operator.OperatorType;
+import com.voxelgenesis.despector.core.ast.method.insn.var.FieldAccess;
+import com.voxelgenesis.despector.core.ast.method.insn.var.InstanceFieldAccess;
 import com.voxelgenesis.despector.core.ast.method.insn.var.LocalAccess;
+import com.voxelgenesis.despector.core.ast.method.insn.var.StaticFieldAccess;
 import com.voxelgenesis.despector.core.ast.method.invoke.InstanceMethodInvoke;
 import com.voxelgenesis.despector.core.ast.method.invoke.InvokeStatement;
+import com.voxelgenesis.despector.core.ast.method.stmt.assign.FieldAssignment;
+import com.voxelgenesis.despector.core.ast.method.stmt.assign.InstanceFieldAssignment;
 import com.voxelgenesis.despector.core.ast.method.stmt.assign.LocalAssignment;
+import com.voxelgenesis.despector.core.ast.method.stmt.assign.StaticFieldAssignment;
 import com.voxelgenesis.despector.core.ast.method.stmt.misc.Return;
+import com.voxelgenesis.despector.core.ir.FieldInsn;
 import com.voxelgenesis.despector.core.ir.Insn;
 import com.voxelgenesis.despector.core.ir.IntInsn;
 import com.voxelgenesis.despector.core.ir.InvokeInsn;
 import com.voxelgenesis.despector.core.ir.LdcInsn;
+import com.voxelgenesis.despector.jvm.loader.JvmHelper;
 import org.spongepowered.despector.util.TypeHelper;
 
 import java.util.Deque;
@@ -56,6 +65,8 @@ public class InsnAppender {
             LdcInsn ldc = (LdcInsn) insn;
             if (ldc.getConstant() == null) {
                 stack.push(NullConstant.NULL);
+            } else if (ldc.getConstant() instanceof String) {
+                stack.push(new StringConstant((String) ldc.getConstant()));
             } else {
                 throw new IllegalStateException("Unsupported constant value " + ldc.getConstant().getClass().getName());
             }
@@ -84,11 +95,50 @@ public class InsnAppender {
         }
         case Insn.ARRAY_LOAD:
         case Insn.ARRAY_STORE:
-        case Insn.GETFIELD:
-        case Insn.PUTFIELD:
-        case Insn.GETSTATIC:
-        case Insn.PUTSTATIC:
             throw new IllegalStateException("Unsupported opcode in appender: " + insn);
+        case Insn.GETSTATIC: {
+            FieldInsn field = (FieldInsn) insn;
+            String owner = field.getOwner();
+            if (!owner.startsWith("[")) {
+                owner = "L" + owner + ";";
+            }
+            FieldAccess arg = new StaticFieldAccess(field.getName(), JvmHelper.of(field.getDescription()), owner);
+            stack.push(arg);
+            break;
+        }
+        case Insn.PUTSTATIC: {
+            FieldInsn field = (FieldInsn) insn;
+            Instruction val = stack.pop();
+            String owner = field.getOwner();
+            if (!owner.startsWith("[")) {
+                owner = "L" + owner + ";";
+            }
+            FieldAssignment assign = new StaticFieldAssignment(field.getName(), field.getDescription(), owner, val);
+            block.append(assign);
+            break;
+        }
+        case Insn.GETFIELD: {
+            FieldInsn field = (FieldInsn) insn;
+            String owner = field.getOwner();
+            if (!owner.startsWith("[")) {
+                owner = "L" + owner + ";";
+            }
+            FieldAccess arg = new InstanceFieldAccess(field.getName(), JvmHelper.of(field.getDescription()), owner, stack.pop());
+            stack.push(arg);
+            break;
+        }
+        case Insn.PUTFIELD: {
+            FieldInsn field = (FieldInsn) insn;
+            Instruction val = stack.pop();
+            Instruction owner = stack.pop();
+            String owner_t = field.getOwner();
+            if (!owner_t.startsWith("[")) {
+                owner_t = "L" + owner_t + ";";
+            }
+            FieldAssignment assign = new InstanceFieldAssignment(field.getName(), field.getDescription(), owner_t, owner, val);
+            block.append(assign);
+            break;
+        }
         case Insn.INVOKE: {
             InvokeInsn invoke = (InvokeInsn) insn;
             int param_count = TypeHelper.paramCount(invoke.getDescription());

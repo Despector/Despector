@@ -22,24 +22,29 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.voxelgenesis.despector.core.ast.visitor;
+package com.voxelgenesis.despector.core.ir;
 
-import com.voxelgenesis.despector.core.ast.method.invoke.InvokeStatement;
-import com.voxelgenesis.despector.core.ast.method.stmt.assign.InstanceFieldAssignment;
-import com.voxelgenesis.despector.core.ast.method.stmt.assign.LocalAssignment;
-import com.voxelgenesis.despector.core.ast.method.stmt.assign.StaticFieldAssignment;
-import com.voxelgenesis.despector.core.ast.method.stmt.misc.Return;
+import com.voxelgenesis.despector.core.util.DebugUtil;
 
-public interface StatementVisitor extends AstVisitor {
+public class DoubleInsn extends Insn {
 
-    void visitReturn(Return stmt);
+    private double operand;
 
-    void visitLocalAssignment(LocalAssignment stmt);
+    public DoubleInsn(int op, double operand) {
+        super(op);
+        this.operand = operand;
+    }
 
-    void visitInvokeStatement(InvokeStatement stmt);
+    public double getValue() {
+        return this.operand;
+    }
 
-    void visitInstanceFieldAssignment(InstanceFieldAssignment stmt);
-
-    void visitStaticFieldAssignment(StaticFieldAssignment stmt);
+    @Override
+    public String toString() {
+        StringBuilder str = new StringBuilder();
+        str.append(DebugUtil.opcodeToString(this.opcode));
+        str.append(" ").append(this.operand);
+        return str.toString();
+    }
 
 }

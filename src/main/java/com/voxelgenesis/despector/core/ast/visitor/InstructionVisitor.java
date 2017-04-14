@@ -34,7 +34,9 @@ import com.voxelgenesis.despector.core.ast.method.insn.cst.StringConstant;
 import com.voxelgenesis.despector.core.ast.method.insn.cst.TypeConstant;
 import com.voxelgenesis.despector.core.ast.method.insn.operator.NegativeOperator;
 import com.voxelgenesis.despector.core.ast.method.insn.operator.Operator;
+import com.voxelgenesis.despector.core.ast.method.insn.var.InstanceFieldAccess;
 import com.voxelgenesis.despector.core.ast.method.insn.var.LocalAccess;
+import com.voxelgenesis.despector.core.ast.method.insn.var.StaticFieldAccess;
 import com.voxelgenesis.despector.core.ast.method.invoke.InstanceMethodInvoke;
 import com.voxelgenesis.despector.core.ast.method.invoke.StaticMethodInvoke;
 
@@ -65,5 +67,9 @@ public interface InstructionVisitor extends AstVisitor {
     void visitStringConstant(StringConstant insn);
 
     void visitTypeConstant(TypeConstant insn);
+
+    void visitInstanceFieldAccess(InstanceFieldAccess insn);
+
+    void visitStaticFieldAccess(StaticFieldAccess insn);
 
 }

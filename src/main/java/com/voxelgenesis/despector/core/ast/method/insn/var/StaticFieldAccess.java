@@ -22,54 +22,33 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.voxelgenesis.despector.core.ast.method.stmt.misc;
+package com.voxelgenesis.despector.core.ast.method.insn.var;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.voxelgenesis.despector.core.ast.method.insn.Instruction;
-import com.voxelgenesis.despector.core.ast.method.stmt.Statement;
+import com.voxelgenesis.despector.core.ast.signature.TypeSignature;
 import com.voxelgenesis.despector.core.ast.visitor.AstVisitor;
-import com.voxelgenesis.despector.core.ast.visitor.StatementVisitor;
-import javax.annotation.Nullable;
-
-import java.util.Optional;
+import com.voxelgenesis.despector.core.ast.visitor.InstructionVisitor;
+import org.spongepowered.despector.util.TypeHelper;
 
 /**
- * A return statement which returns a value.
+ * An instruction for accessing a static field.
  */
-public class Return implements Statement {
+public class StaticFieldAccess extends FieldAccess {
 
-    @Nullable
-    private Instruction value;
-
-    public Return() {
-        this.value = null;
+    public StaticFieldAccess(String name, TypeSignature desc, String owner) {
+        super(name, desc, owner);
     }
 
-    public Return(Instruction val) {
-        this.value = checkNotNull(val, "value");
-    }
-
-    /**
-     * Gets the value being returned, if present.
-     */
-    public Optional<Instruction> getValue() {
-        return Optional.ofNullable(this.value);
-    }
-
-    /**
-     * Sets the value being returned, may be null.
-     */
-    public void setValue(@Nullable Instruction insn) {
-        this.value = insn;
+    @Override
+    public void accept(AstVisitor visitor) {
+        if(visitor instanceof InstructionVisitor) {
+            ((InstructionVisitor) visitor).visitStaticFieldAccess(this);
+        }
     }
 
     @Override
     public String toString() {
-        if (this.value == null) {
-            return "return;";
-        }
-        return "return " + this.value + ";";
+        return TypeHelper.descToTypeName(this.owner_type) + "." + this.field_name;
     }
 
     @Override
@@ -77,26 +56,20 @@ public class Return implements Statement {
         if (obj == this) {
             return true;
         }
-        if (!(obj instanceof Return)) {
+        if (!(obj instanceof StaticFieldAccess)) {
             return false;
         }
-        Return insn = (Return) obj;
-        return this.value.equals(insn.value);
+        StaticFieldAccess insn = (StaticFieldAccess) obj;
+        return this.field_desc.equals(insn.field_desc) && this.field_name.equals(insn.field_name) && this.owner_type.equals(insn.owner_type);
     }
 
     @Override
     public int hashCode() {
-        return this.value.hashCode();
-    }
-
-    @Override
-    public void accept(AstVisitor visitor) {
-        if (visitor instanceof StatementVisitor) {
-            ((StatementVisitor) visitor).visitReturn(this);
-        }
-        if (this.value != null) {
-            this.value.accept(visitor);
-        }
+        int h = 1;
+        h = h * 37 + this.field_desc.hashCode();
+        h = h * 37 + this.field_name.hashCode();
+        h = h * 37 + this.owner_type.hashCode();
+        return h;
     }
 
 }

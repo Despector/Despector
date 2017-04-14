@@ -22,24 +22,43 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.voxelgenesis.despector.core.ast.visitor;
+package com.voxelgenesis.despector.core.ir;
 
-import com.voxelgenesis.despector.core.ast.method.invoke.InvokeStatement;
-import com.voxelgenesis.despector.core.ast.method.stmt.assign.InstanceFieldAssignment;
-import com.voxelgenesis.despector.core.ast.method.stmt.assign.LocalAssignment;
-import com.voxelgenesis.despector.core.ast.method.stmt.assign.StaticFieldAssignment;
-import com.voxelgenesis.despector.core.ast.method.stmt.misc.Return;
+import com.voxelgenesis.despector.core.util.DebugUtil;
 
-public interface StatementVisitor extends AstVisitor {
+public class FieldInsn extends Insn {
 
-    void visitReturn(Return stmt);
+    private String owner;
+    private String name;
+    private String desc;
 
-    void visitLocalAssignment(LocalAssignment stmt);
+    public FieldInsn(int op, String owner, String name, String desc) {
+        super(op);
+        this.owner = owner;
+        this.name = name;
+        this.desc = desc;
+    }
 
-    void visitInvokeStatement(InvokeStatement stmt);
+    public String getOwner() {
+        return this.owner;
+    }
 
-    void visitInstanceFieldAssignment(InstanceFieldAssignment stmt);
+    public String getName() {
+        return this.name;
+    }
 
-    void visitStaticFieldAssignment(StaticFieldAssignment stmt);
+    public String getDescription() {
+        return this.desc;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder str = new StringBuilder();
+        str.append(DebugUtil.opcodeToString(this.opcode));
+        str.append(" ").append(this.owner);
+        str.append(" ").append(this.name);
+        str.append(" ").append(this.desc);
+        return str.toString();
+    }
 
 }
