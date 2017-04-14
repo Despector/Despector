@@ -44,4 +44,16 @@ public class ClassTypeSignature extends TypeSignature {
         return this.type;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (o == this) {
+            return true;
+        }
+        if (!(o instanceof ClassTypeSignature)) {
+            return false;
+        }
+        ClassTypeSignature c = (ClassTypeSignature) o;
+        return this.type.equals(c.type);
+    }
+
 }

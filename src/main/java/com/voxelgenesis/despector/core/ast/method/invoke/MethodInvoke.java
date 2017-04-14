@@ -47,7 +47,6 @@ public abstract class MethodInvoke implements Instruction {
         this.method_desc = checkNotNull(desc, "desc");
         this.method_owner = checkNotNull(owner, "owner");
         checkNotNull(args, "args");
-        checkArgument(TypeHelper.paramCount(this.method_desc) == args.length);
         this.params = args;
     }
 
