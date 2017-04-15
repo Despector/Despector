@@ -24,18 +24,15 @@
  */
 package org.spongepowered.despector.decompiler.method;
 
-import org.objectweb.asm.Label;
-import org.objectweb.asm.tree.AbstractInsnNode;
-import org.objectweb.asm.tree.MethodNode;
 import org.spongepowered.despector.ast.Locals;
 import org.spongepowered.despector.ast.members.MethodEntry;
 import org.spongepowered.despector.ast.members.insn.StatementBlock;
+import org.spongepowered.despector.decompiler.ir.InsnBlock;
 import org.spongepowered.despector.decompiler.method.graph.data.block.BlockSection;
 import org.spongepowered.despector.decompiler.method.graph.data.opcode.OpcodeBlock;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * A structure of intermediate data of a method which is in the process of being
@@ -44,19 +41,16 @@ import java.util.Map;
 public class PartialMethod {
 
     private final MethodDecompiler decompiler;
-    private final MethodNode node;
     private final MethodEntry method;
 
     private Locals locals;
-    private List<AbstractInsnNode> ops;
+    private InsnBlock ops;
     private StatementBlock block;
-    private Map<Label, Integer> label_indices;
     private List<OpcodeBlock> graph;
     private List<BlockSection> final_blocks = new ArrayList<>();
 
-    public PartialMethod(MethodDecompiler decompiler, MethodNode node, MethodEntry method) {
+    public PartialMethod(MethodDecompiler decompiler, MethodEntry method) {
         this.decompiler = decompiler;
-        this.node = node;
         this.method = method;
     }
 
@@ -65,13 +59,6 @@ public class PartialMethod {
      */
     public MethodDecompiler getDecompiler() {
         return this.decompiler;
-    }
-
-    /**
-     * Gets the asm node of the method being decompiled.
-     */
-    public MethodNode getAsmNode() {
-        return this.node;
     }
 
     /**
@@ -98,14 +85,14 @@ public class PartialMethod {
     /**
      * Gets the method's opcodes.
      */
-    public List<AbstractInsnNode> getOpcodes() {
+    public InsnBlock getOpcodes() {
         return this.ops;
     }
 
     /**
      * Sets the method's opcodes.
      */
-    public void setOpcodes(List<AbstractInsnNode> ops) {
+    public void setOpcodes(InsnBlock ops) {
         this.ops = ops;
     }
 
@@ -122,20 +109,6 @@ public class PartialMethod {
      */
     public void setBlock(StatementBlock block) {
         this.block = block;
-    }
-
-    /**
-     * Gets the indices of labels within the list of opcodes.
-     */
-    public Map<Label, Integer> getLabelIndices() {
-        return this.label_indices;
-    }
-
-    /**
-     * Sets the indices of labels within the list of opcodes.
-     */
-    public void setLabelIndices(Map<Label, Integer> label_indices) {
-        this.label_indices = label_indices;
     }
 
     /**

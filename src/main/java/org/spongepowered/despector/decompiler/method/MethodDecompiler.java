@@ -32,6 +32,7 @@ import static org.objectweb.asm.Opcodes.ISTORE;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import javax.annotation.Nullable;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.AbstractInsnNode;
@@ -47,6 +48,8 @@ import org.spongepowered.despector.ast.generic.TypeSignature;
 import org.spongepowered.despector.ast.members.MethodEntry;
 import org.spongepowered.despector.ast.members.insn.StatementBlock;
 import org.spongepowered.despector.ast.members.insn.arg.Instruction;
+import org.spongepowered.despector.decompiler.ir.InsnBlock;
+import org.spongepowered.despector.decompiler.loader.AsmTranslator;
 import org.spongepowered.despector.decompiler.method.graph.GraphOperation;
 import org.spongepowered.despector.decompiler.method.graph.GraphProcessor;
 import org.spongepowered.despector.decompiler.method.graph.GraphProducerStep;
@@ -70,8 +73,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import javax.annotation.Nullable;
 
 /**
  * A decompiler for method bodies.
@@ -218,27 +219,15 @@ public class MethodDecompiler {
         }
 
         // Setup the partial method
-        PartialMethod partial = new PartialMethod(this, asm, entry);
+        PartialMethod partial = new PartialMethod(this, entry);
         partial.setLocals(locals);
 
         // Convert the instructions linked list to an array list for easier
         // processing
-        List<AbstractInsnNode> ops = Lists.newArrayList(asm.instructions.iterator());
+        InsnBlock ops = AsmTranslator.convert(partial, asm.instructions);
         partial.setOpcodes(ops);
         StatementBlock block = new StatementBlock(StatementBlock.Type.METHOD, partial.getLocals());
         partial.setBlock(block);
-
-        // Calculate the indices of all labels within the instructions list
-        Map<Label, Integer> label_indices = Maps.newHashMap();
-        for (int index = 0; index < ops.size(); index++) {
-            AbstractInsnNode next = ops.get(index);
-            if (next instanceof LabelNode) {
-                label_indices.put(((LabelNode) next).getLabel(), index);
-            }
-        }
-        // use the labels to bake the local instances
-        partial.getLocals().bakeInstances(label_indices);
-        partial.setLabelIndices(label_indices);
 
         // Creates the initial form of the control flow graph
         List<OpcodeBlock> graph = makeGraph(partial);
@@ -294,7 +283,7 @@ public class MethodDecompiler {
     }
 
     private List<OpcodeBlock> makeGraph(PartialMethod partial) {
-        List<AbstractInsnNode> instructions = partial.getOpcodes();
+        InsnBlock instructions = partial.getOpcodes();
 
         Set<Integer> break_points = new HashSet<>();
 

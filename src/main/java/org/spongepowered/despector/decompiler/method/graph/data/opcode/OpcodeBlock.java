@@ -25,8 +25,10 @@
 package org.spongepowered.despector.decompiler.method.graph.data.opcode;
 
 import org.objectweb.asm.tree.AbstractInsnNode;
+import org.spongepowered.despector.decompiler.ir.Insn;
 import org.spongepowered.despector.decompiler.method.graph.data.block.BlockSection;
 import org.spongepowered.despector.util.AstUtil;
+import org.spongepowered.despector.util.DebugUtil;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -42,7 +44,7 @@ import java.util.Set;
 public abstract class OpcodeBlock {
 
     protected final int break_point;
-    protected final List<AbstractInsnNode> opcodes = new ArrayList<>();
+    protected final List<Insn> opcodes = new ArrayList<>();
     protected OpcodeBlock target;
 
     protected Set<OpcodeBlock> targetted_by = new HashSet<>();
@@ -64,7 +66,7 @@ public abstract class OpcodeBlock {
     /**
      * Gets the opcodes that are part of this block.
      */
-    public List<AbstractInsnNode> getOpcodes() {
+    public List<Insn> getOpcodes() {
         return this.opcodes;
     }
 
@@ -151,8 +153,8 @@ public abstract class OpcodeBlock {
     public String toString() {
         StringBuilder builder = new StringBuilder();
         builder.append(getDebugHeader()).append("\n");
-        for (AbstractInsnNode insn : this.opcodes) {
-            builder.append("  ").append(AstUtil.insnToString(insn)).append("\n");
+        for (Insn insn : this.opcodes) {
+            builder.append("  ").append(insn.toString()).append("\n");
         }
         return builder.toString();
     }

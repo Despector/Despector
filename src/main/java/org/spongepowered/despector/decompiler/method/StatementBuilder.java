@@ -24,22 +24,6 @@
  */
 package org.spongepowered.despector.decompiler.method;
 
-import static org.objectweb.asm.Opcodes.*;
-
-import org.objectweb.asm.Handle;
-import org.objectweb.asm.Type;
-import org.objectweb.asm.tree.AbstractInsnNode;
-import org.objectweb.asm.tree.FieldInsnNode;
-import org.objectweb.asm.tree.FrameNode;
-import org.objectweb.asm.tree.IincInsnNode;
-import org.objectweb.asm.tree.IntInsnNode;
-import org.objectweb.asm.tree.InvokeDynamicInsnNode;
-import org.objectweb.asm.tree.LabelNode;
-import org.objectweb.asm.tree.LdcInsnNode;
-import org.objectweb.asm.tree.LineNumberNode;
-import org.objectweb.asm.tree.MethodInsnNode;
-import org.objectweb.asm.tree.TypeInsnNode;
-import org.objectweb.asm.tree.VarInsnNode;
 import org.spongepowered.despector.ast.Locals;
 import org.spongepowered.despector.ast.Locals.Local;
 import org.spongepowered.despector.ast.Locals.LocalInstance;
@@ -79,6 +63,7 @@ import org.spongepowered.despector.ast.members.insn.function.StaticMethodInvoke;
 import org.spongepowered.despector.ast.members.insn.misc.Increment;
 import org.spongepowered.despector.ast.members.insn.misc.Return;
 import org.spongepowered.despector.ast.members.insn.misc.Throw;
+import org.spongepowered.despector.decompiler.ir.Insn;
 import org.spongepowered.despector.decompiler.method.graph.data.opcode.OpcodeBlock;
 import org.spongepowered.despector.util.AstUtil;
 import org.spongepowered.despector.util.TypeHelper;
@@ -99,14 +84,7 @@ public final class StatementBuilder {
 
         for (int index = 0; index < op.getOpcodes().size(); index++) {
             int label_index = op.getBreakpoint() - (op.getOpcodes().size() - index);
-            AbstractInsnNode next = op.getOpcodes().get(index);
-            if (next instanceof LabelNode) {
-                continue;
-            } else if (next instanceof FrameNode) {
-                continue;
-            } else if (next instanceof LineNumberNode) {
-                continue;
-            }
+            Insn next = op.getOpcodes().get(index);
 
             switch (next.getOpcode()) {
             case NOP:

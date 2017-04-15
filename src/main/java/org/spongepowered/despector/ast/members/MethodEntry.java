@@ -34,6 +34,7 @@ import org.spongepowered.despector.ast.SourceSet;
 import org.spongepowered.despector.ast.generic.MethodSignature;
 import org.spongepowered.despector.ast.generic.TypeSignature;
 import org.spongepowered.despector.ast.members.insn.StatementBlock;
+import org.spongepowered.despector.decompiler.ir.InsnBlock;
 import org.spongepowered.despector.util.TypeHelper;
 import org.spongepowered.despector.util.serialization.AstSerializer;
 import org.spongepowered.despector.util.serialization.MessagePacker;
@@ -67,6 +68,7 @@ public class MethodEntry extends AstEntry {
     protected boolean is_synthetic;
     protected boolean is_bridge;
 
+    protected InsnBlock ir;
     protected StatementBlock instructions = null;
 
     protected MethodSignature sig;
@@ -201,6 +203,14 @@ public class MethodEntry extends AstEntry {
      */
     public void setInstructions(StatementBlock block) {
         this.instructions = block;
+    }
+
+    public InsnBlock getIR() {
+        return this.ir;
+    }
+
+    public void setIR(InsnBlock block) {
+        this.ir = block;
     }
 
     public Annotation getAnnotation(AnnotationType type) {
