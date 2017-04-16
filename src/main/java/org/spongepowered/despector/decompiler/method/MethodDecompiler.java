@@ -302,18 +302,18 @@ public class MethodDecompiler {
         for (int brk : sorted_break_points) {
             // accumulate the opcodes beween the next breakpoint and the last
             // breakpoint.
-            OpcodeBlock block = new BodyOpcodeBlock(brk);
+            OpcodeBlock block = new BodyOpcodeBlock(last_brk);
             block_list.add(block);
             for (int i = last_brk; i <= brk; i++) {
                 block.getOpcodes().add(instructions.get(i));
             }
-            blocks.put(brk, block);
+            blocks.put(last_brk, block);
             last_brk = brk + 1;
         }
 
         for (int i = 0; i < block_list.size() - 1; i++) {
             OpcodeBlock next = block_list.get(i);
-            if (!(next.getLast() instanceof JumpInsn) || !(next.getLast() instanceof SwitchInsn)) {
+            if (!(next.getLast() instanceof JumpInsn) && !(next.getLast() instanceof SwitchInsn)) {
                 next.setTarget(block_list.get(i + 1));
             }
         }

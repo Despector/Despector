@@ -89,7 +89,7 @@ public final class StatementBuilder {
         // Decompiles a set of opcodes into statements.
 
         for (int index = 0; index < op.getOpcodes().size(); index++) {
-            int label_index = op.getBreakpoint() - (op.getOpcodes().size() - index);
+            int label_index = op.getBreakpoint() + index;
             Insn next = op.getOpcodes().get(index);
             switch (next.getOpcode()) {
             case Insn.NOOP:
@@ -108,9 +108,9 @@ public final class StatementBuilder {
                 break;
             case Insn.PUSH: {
                 LdcInsn ldc = (LdcInsn) next;
-                if(ldc.getConstant() == null) {
+                if (ldc.getConstant() == null) {
                     stack.push(NullConstant.NULL);
-                } else if(ldc.getConstant() instanceof String) {
+                } else if (ldc.getConstant() instanceof String) {
                     stack.push(new StringConstant((String) ldc.getConstant()));
                 } else {
                     throw new IllegalStateException("Unsupported ldc constant: " + ldc.getConstant().getClass().getName());
@@ -475,6 +475,18 @@ public final class StatementBuilder {
                 stack.push(new InstanceOf(val, type));
                 break;
             }
+            case Insn.IFEQ:
+            case Insn.IFNE:
+            case Insn.IF_CMPEQ:
+            case Insn.IF_CMPNE:
+            case Insn.IF_CMPLT:
+            case Insn.IF_CMPGE:
+            case Insn.IF_CMPGT:
+            case Insn.IF_CMPLE:
+            case Insn.GOTO:
+                // All jumps are handled by the implicit structure of the
+                // graph
+                break;
             default:
                 System.err.println("Unsupported opcode: " + next.getOpcode());
                 throw new IllegalStateException();

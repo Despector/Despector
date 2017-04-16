@@ -52,9 +52,9 @@ public class SwitchGraphProducerStep implements GraphProducerStep {
                 break_points.add(i);
                 SwitchInsn ts = (SwitchInsn) next;
                 for (int l : ts.getTargets().values()) {
-                    break_points.add(l);
+                    break_points.add(l - 1);
                 }
-                break_points.add(ts.getDefault());
+                break_points.add(ts.getDefault() - 1);
             }
         }
     }

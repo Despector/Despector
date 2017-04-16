@@ -55,7 +55,7 @@ public class JumpGraphProducerStep implements GraphProducerStep {
                 // also break before labels targetted by jump opcodes to have a
                 // break between the body of an if block and the statements
                 // after it
-                break_points.add(((JumpInsn) next).getTarget());
+                break_points.add(((JumpInsn) next).getTarget() - 1);
                 continue;
             }
             int op = next.getOpcode();
@@ -78,15 +78,15 @@ public class JumpGraphProducerStep implements GraphProducerStep {
                     e.setValue(replacement);
                     block_list.set(block_list.indexOf(block), replacement);
                     replacement.getOpcodes().addAll(block.getOpcodes());
-                    replacement.setTarget(blocks.get(sorted_break_points.get(sorted_break_points.indexOf(label) + 1)));
+                    replacement.setTarget(blocks.get(label));
                     GraphOperation.remap(block_list, block, replacement);
                 } else {
                     ConditionalOpcodeBlock replacement = new ConditionalOpcodeBlock(block.getBreakpoint());
                     e.setValue(replacement);
+                    OpcodeBlock next = block_list.get(block_list.indexOf(block) + 1);
                     block_list.set(block_list.indexOf(block), replacement);
                     replacement.getOpcodes().addAll(block.getOpcodes());
-                    replacement.setTarget(blocks.get(sorted_break_points.get(sorted_break_points.indexOf(label) + 1)));
-                    OpcodeBlock next = blocks.get(sorted_break_points.get(sorted_break_points.indexOf(e.getKey()) + 1));
+                    replacement.setTarget(blocks.get(label));
                     replacement.setElseTarget(next);
                     GraphOperation.remap(block_list, block, replacement);
                 }

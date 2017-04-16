@@ -52,6 +52,10 @@ public class JumpSeparateOperation implements GraphOperation {
         for (OpcodeBlock block : blocks) {
             if (block instanceof GotoOpcodeBlock) {
                 OpcodeBlock header = new BodyOpcodeBlock(block.getBreakpoint());
+                if(block.getOpcodes().size() == 1) {
+                    fblocks.add(block);
+                    continue;
+                }
                 for(int i = 0; i < block.getOpcodes().size() - 1; i++) {
                     header.getOpcodes().add(block.getOpcodes().get(i));
                 }

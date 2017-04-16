@@ -51,8 +51,10 @@ public class TryCatchGraphProducerStep implements GraphProducerStep {
         Locals locals = partial.getLocals();
 
         for (TryCatchRegion tc : partial.getCatchRegions()) {
-            break_points.add(tc.getStart());
-            break_points.add(tc.getEnd());
+            if (tc.getStart() > 0) {
+                break_points.add(tc.getStart() - 1);
+            }
+            break_points.add(tc.getEnd() - 1);
             break_points.add(tc.getCatch());
 
             LocalInstance local = null;
@@ -85,9 +87,14 @@ public class TryCatchGraphProducerStep implements GraphProducerStep {
             end_marker.setStartMarker(start_marker);
             handler_marker.setStartMarker(start_marker);
             handler_marker.setEndMarker(end_marker);
-            OpcodeBlock start = blocks.get(sorted_break_points.get(sorted_break_points.indexOf(tc.getStart()) + 1));
-            OpcodeBlock end = blocks.get(sorted_break_points.get(sorted_break_points.indexOf(tc.getEnd()) + 1));
-            OpcodeBlock handler = blocks.get(sorted_break_points.get(sorted_break_points.indexOf(tc.getCatch()) + 1));
+            OpcodeBlock start;
+            if (tc.getStart() == 0) {
+                start = blocks.get(0);
+            } else {
+                start = blocks.get(sorted_break_points.get(sorted_break_points.indexOf(tc.getStart()) + 1));
+            }
+            OpcodeBlock end = blocks.get(sorted_break_points.get(sorted_break_points.indexOf(tc.getEnd() - 1) + 1));
+            OpcodeBlock handler = blocks.get(tc.getCatch());
             block_list.add(block_list.indexOf(start), start_marker);
             block_list.add(block_list.indexOf(end), end_marker);
             block_list.add(block_list.indexOf(handler), handler_marker);
