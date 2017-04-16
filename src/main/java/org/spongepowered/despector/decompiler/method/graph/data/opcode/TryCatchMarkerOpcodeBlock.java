@@ -24,7 +24,7 @@
  */
 package org.spongepowered.despector.decompiler.method.graph.data.opcode;
 
-import org.objectweb.asm.tree.TryCatchBlockNode;
+import org.spongepowered.despector.decompiler.method.PartialMethod.TryCatchRegion;
 import org.spongepowered.despector.decompiler.method.graph.data.TryCatchMarkerType;
 import org.spongepowered.despector.decompiler.method.graph.data.block.BlockSection;
 
@@ -36,12 +36,12 @@ import org.spongepowered.despector.decompiler.method.graph.data.block.BlockSecti
 public class TryCatchMarkerOpcodeBlock extends OpcodeBlock {
 
     private final TryCatchMarkerType marker_type;
-    private final TryCatchBlockNode tc_node;
+    private final TryCatchRegion tc_node;
 
     private TryCatchMarkerOpcodeBlock start;
     private TryCatchMarkerOpcodeBlock end;
 
-    public TryCatchMarkerOpcodeBlock(TryCatchMarkerType marker, TryCatchBlockNode tc) {
+    public TryCatchMarkerOpcodeBlock(TryCatchMarkerType marker, TryCatchRegion tc) {
         super(-1);
         this.marker_type = marker;
         this.tc_node = tc;
@@ -60,9 +60,9 @@ public class TryCatchMarkerOpcodeBlock extends OpcodeBlock {
     }
 
     /**
-     * Gets the {@link TryCatchBlockNode} that this marker is from.
+     * Gets the {@link TryCatchRegion} that this marker is from.
      */
-    public TryCatchBlockNode getAsmNode() {
+    public TryCatchRegion getAsmNode() {
         return this.tc_node;
     }
 

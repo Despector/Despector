@@ -26,24 +26,35 @@ package org.spongepowered.despector.decompiler.ir;
 
 import org.spongepowered.despector.util.DebugUtil;
 
-public class TypeInsn extends Insn {
+import java.util.Map;
 
-    private String type;
+public class SwitchInsn extends Insn {
 
-    public TypeInsn(int op, String type) {
+    private final Map<Integer, Integer> targets;
+    private int dflt;
+
+    public SwitchInsn(int op, Map<Integer, Integer> targets, int dflt) {
         super(op);
-        this.type = type;
+        this.targets = targets;
+        this.dflt = dflt;
     }
 
-    public String getType() {
-        return this.type;
+    public Map<Integer, Integer> getTargets() {
+        return this.targets;
+    }
+
+    public int getDefault() {
+        return this.dflt;
+    }
+
+    public void setDefault(int target) {
+        this.dflt = target;
     }
 
     @Override
     public String toString() {
         StringBuilder str = new StringBuilder();
         str.append(DebugUtil.opcodeToString(this.opcode));
-        str.append(" ").append(this.type);
         return str.toString();
     }
 

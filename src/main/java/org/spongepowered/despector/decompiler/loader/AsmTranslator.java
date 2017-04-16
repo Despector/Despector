@@ -34,17 +34,33 @@ import org.objectweb.asm.tree.IincInsnNode;
 import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.InsnNode;
 import org.objectweb.asm.tree.IntInsnNode;
+import org.objectweb.asm.tree.JumpInsnNode;
 import org.objectweb.asm.tree.LabelNode;
 import org.objectweb.asm.tree.LineNumberNode;
+import org.objectweb.asm.tree.LookupSwitchInsnNode;
+import org.objectweb.asm.tree.MethodInsnNode;
+import org.objectweb.asm.tree.MethodNode;
+import org.objectweb.asm.tree.TableSwitchInsnNode;
+import org.objectweb.asm.tree.TryCatchBlockNode;
+import org.objectweb.asm.tree.TypeInsnNode;
+import org.objectweb.asm.tree.VarInsnNode;
 import org.spongepowered.despector.decompiler.ir.FieldInsn;
 import org.spongepowered.despector.decompiler.ir.Insn;
 import org.spongepowered.despector.decompiler.ir.InsnBlock;
 import org.spongepowered.despector.decompiler.ir.IntInsn;
+import org.spongepowered.despector.decompiler.ir.JumpInsn;
+import org.spongepowered.despector.decompiler.ir.LdcInsn;
+import org.spongepowered.despector.decompiler.ir.MethodInsn;
 import org.spongepowered.despector.decompiler.ir.OpInsn;
+import org.spongepowered.despector.decompiler.ir.SwitchInsn;
 import org.spongepowered.despector.decompiler.ir.TypeInsn;
 import org.spongepowered.despector.decompiler.ir.VarIntInsn;
 import org.spongepowered.despector.decompiler.method.PartialMethod;
+import org.spongepowered.despector.decompiler.method.PartialMethod.TryCatchRegion;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class AsmTranslator {
@@ -156,6 +172,8 @@ public class AsmTranslator {
         op_translation[Opcodes.IF_ICMPGE] = Insn.IF_CMPGE;
         op_translation[Opcodes.IF_ACMPEQ] = Insn.IF_CMPEQ;
         op_translation[Opcodes.IF_ACMPNE] = Insn.IF_CMPNE;
+        op_translation[Opcodes.IFNULL] = Insn.IF_CMPEQ;
+        op_translation[Opcodes.IFNONNULL] = Insn.IF_CMPNE;
         op_translation[Opcodes.GOTO] = Insn.GOTO;
         op_translation[Opcodes.IRETURN] = Insn.ARETURN;
         op_translation[Opcodes.LRETURN] = Insn.ARETURN;
@@ -172,30 +190,41 @@ public class AsmTranslator {
         op_translation[Opcodes.INVOKESTATIC] = Insn.INVOKESTATIC;
         op_translation[Opcodes.INVOKEINTERFACE] = Insn.INVOKE;
         op_translation[Opcodes.NEW] = Insn.NEW;
-        op_translation[Opcodes.NEW] = Insn.NEWARRAY;
+        op_translation[Opcodes.NEWARRAY] = Insn.NEWARRAY;
         op_translation[Opcodes.ANEWARRAY] = Insn.NEWARRAY;
         op_translation[Opcodes.ATHROW] = Insn.THROW;
         op_translation[Opcodes.CHECKCAST] = Insn.CAST;
+        op_translation[Opcodes.INSTANCEOF] = Insn.INSTANCEOF;
     }
 
     private static int translate(int op) {
         return op_translation[op];
     }
 
-    public static InsnBlock convert(PartialMethod partial, InsnList asm_ops) {
+    @SuppressWarnings("unchecked")
+    public static InsnBlock convert(PartialMethod partial, MethodNode asm) {
+        InsnList asm_ops = asm.instructions;
+        // TODO:
+        // Not the most efficient conversion in the world, but this is just a
+        // temporary shim until I finish the class loader which will replace asm
+        // entirely.
         Map<Label, Integer> label_indices = Maps.newHashMap();
         InsnBlock block = new InsnBlock();
+        List<Label> seen = new ArrayList<>();
+        int index = 0;
         for (int i = 0; i < asm_ops.size(); i++) {
             AbstractInsnNode next = asm_ops.get(i);
             if (next instanceof LabelNode) {
-                label_indices.put(((LabelNode) next).getLabel(), i);
+                label_indices.put(((LabelNode) next).getLabel(), index);
             } else if (next instanceof FrameNode || next instanceof LineNumberNode) {
             } else if (next instanceof FieldInsnNode) {
                 FieldInsnNode node = (FieldInsnNode) next;
                 block.append(new FieldInsn(translate(node.getOpcode()), node.owner, node.name, node.desc));
+                index++;
             } else if (next instanceof IincInsnNode) {
                 IincInsnNode iinc = (IincInsnNode) next;
                 block.append(new VarIntInsn(Insn.IINC, iinc.var, iinc.incr));
+                index++;
             } else if (next instanceof InsnNode) {
                 InsnNode insn = (InsnNode) next;
                 if (insn.getOpcode() == Opcodes.L2I || insn.getOpcode() == Opcodes.F2I || insn.getOpcode() == Opcodes.D2I) {
@@ -212,19 +241,126 @@ public class AsmTranslator {
                     block.append(new TypeInsn(Insn.CAST, "C"));
                 } else if (insn.getOpcode() == Opcodes.I2S) {
                     block.append(new TypeInsn(Insn.CAST, "S"));
+                } else if (insn.getOpcode() == Opcodes.POP2) {
+                    block.append(new OpInsn(Insn.POP));
+                    block.append(new OpInsn(Insn.POP));
+                    index++;
+                } else if (insn.getOpcode() == Opcodes.ARRAYLENGTH) {
+                    block.append(new FieldInsn(Insn.GETFIELD, "", "length", "I"));
                 } else {
                     block.append(new OpInsn(translate(insn.getOpcode())));
                 }
+                index++;
             } else if (next instanceof IntInsnNode) {
                 IntInsnNode insn = (IntInsnNode) next;
                 if (insn.getOpcode() == Opcodes.BIPUSH || insn.getOpcode() == Opcodes.SIPUSH) {
                     block.append(new IntInsn(Insn.ICONST, insn.operand));
+                    index++;
                 } else {
                     throw new IllegalStateException();
                 }
+            } else if (next instanceof VarInsnNode) {
+                VarInsnNode insn = (VarInsnNode) next;
+                if (insn.getOpcode() >= Opcodes.ILOAD && insn.getOpcode() <= Opcodes.ALOAD) {
+                    block.append(new IntInsn(Insn.LOCAL_LOAD, insn.var));
+                } else {
+                    block.append(new IntInsn(Insn.LOCAL_STORE, insn.var));
+                }
+                index++;
+            } else if (next instanceof MethodInsnNode) {
+                MethodInsnNode node = (MethodInsnNode) next;
+                block.append(new MethodInsn(translate(node.getOpcode()), node.owner, node.name, node.desc));
+                index++;
+            } else if (next instanceof TypeInsnNode) {
+                block.append(new TypeInsn(translate(next.getOpcode()), ((TypeInsnNode) next).desc));
+                index++;
+            } else if (next instanceof JumpInsnNode) {
+                JumpInsnNode jump = (JumpInsnNode) next;
+                if (jump.getOpcode() >= Opcodes.IFLT && jump.getOpcode() <= Opcodes.IFLE) {
+                    block.append(new IntInsn(Insn.ICONST, 0));
+                    index++;
+                } else if (jump.getOpcode() == Opcodes.IFNULL || jump.getOpcode() == Opcodes.IFNONNULL) {
+                    block.append(new LdcInsn(Insn.PUSH, null));
+                    index++;
+                }
+                Label target = jump.label.getLabel();
+                int t = seen.indexOf(target);
+                if (t == -1) {
+                    seen.add(target);
+                    t = seen.size() - 1;
+                }
+                block.append(new JumpInsn(translate(jump.getOpcode()), t));
+                index++;
+            } else if (next instanceof TableSwitchInsnNode) {
+                TableSwitchInsnNode sw = (TableSwitchInsnNode) next;
+                Map<Integer, Integer> targets = new HashMap<>();
+                for (int j = 0; j < sw.labels.size(); j++) {
+                    Label target = ((LabelNode) sw.labels.get(j)).getLabel();
+                    int t = seen.indexOf(target);
+                    if (t == -1) {
+                        seen.add(target);
+                        t = seen.size() - 1;
+                    }
+                    targets.put(sw.min + j, t);
+                }
+                Label target = sw.dflt.getLabel();
+                int t = seen.indexOf(target);
+                if (t == -1) {
+                    seen.add(target);
+                    t = seen.size() - 1;
+                }
+                block.append(new SwitchInsn(Insn.SWITCH, targets, t));
+                index++;
+            } else if (next instanceof LookupSwitchInsnNode) {
+                LookupSwitchInsnNode sw = (LookupSwitchInsnNode) next;
+                Map<Integer, Integer> targets = new HashMap<>();
+                for (int j = 0; j < sw.labels.size(); j++) {
+                    Label target = ((LabelNode) sw.labels.get(j)).getLabel();
+                    int t = seen.indexOf(target);
+                    if (t == -1) {
+                        seen.add(target);
+                        t = seen.size() - 1;
+                    }
+                    targets.put((Integer) sw.keys.get(j), t);
+                }
+                Label target = sw.dflt.getLabel();
+                int t = seen.indexOf(target);
+                if (t == -1) {
+                    seen.add(target);
+                    t = seen.size() - 1;
+                }
+                block.append(new SwitchInsn(Insn.SWITCH, targets, t));
+                index++;
             } else {
                 throw new IllegalStateException();
             }
+        }
+
+        for (Insn insn : block) {
+            if (insn instanceof JumpInsn) {
+                JumpInsn jump = (JumpInsn) insn;
+                int target = label_indices.get(seen.get(jump.getTarget()));
+                jump.setTarget(target);
+            } else if (insn instanceof SwitchInsn) {
+                SwitchInsn s = (SwitchInsn) insn;
+                Map<Integer, Integer> final_targets = new HashMap<>();
+                for (Map.Entry<Integer, Integer> e : s.getTargets().entrySet()) {
+                    int target = label_indices.get(seen.get(e.getValue()));
+                    final_targets.put(e.getKey(), target);
+                }
+                s.getTargets().clear();
+                s.getTargets().putAll(final_targets);
+                int target = label_indices.get(seen.get(s.getDefault()));
+                s.setDefault(target);
+            }
+        }
+
+        for (TryCatchBlockNode node : (List<TryCatchBlockNode>) asm.tryCatchBlocks) {
+            int start_pc = label_indices.get(node.start.getLabel());
+            int end_pc = label_indices.get(node.end.getLabel());
+            int catch_pc = label_indices.get(node.handler.getLabel());
+            partial.getCatchRegions().add(new TryCatchRegion(start_pc, end_pc, catch_pc, node.type));
+            // TODO annotations
         }
 
         partial.getLocals().bakeInstances(label_indices);

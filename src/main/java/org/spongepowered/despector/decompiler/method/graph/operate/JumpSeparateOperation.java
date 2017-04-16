@@ -24,7 +24,7 @@
  */
 package org.spongepowered.despector.decompiler.method.graph.operate;
 
-import org.objectweb.asm.tree.AbstractInsnNode;
+import org.spongepowered.despector.decompiler.ir.Insn;
 import org.spongepowered.despector.decompiler.method.PartialMethod;
 import org.spongepowered.despector.decompiler.method.graph.GraphOperation;
 import org.spongepowered.despector.decompiler.method.graph.data.opcode.BodyOpcodeBlock;
@@ -51,15 +51,11 @@ public class JumpSeparateOperation implements GraphOperation {
         List<OpcodeBlock> fblocks = new ArrayList<>();
         for (OpcodeBlock block : blocks) {
             if (block instanceof GotoOpcodeBlock) {
-                if (AstUtil.isEmptyOfLogic(block.getOpcodes(), block.getOpcodes().size() - 1)) {
-                    fblocks.add(block);
-                    continue;
-                }
                 OpcodeBlock header = new BodyOpcodeBlock(block.getBreakpoint());
                 for(int i = 0; i < block.getOpcodes().size() - 1; i++) {
                     header.getOpcodes().add(block.getOpcodes().get(i));
                 }
-                AbstractInsnNode ggoto = block.getOpcodes().get(block.getOpcodes().size() - 1);
+                Insn ggoto = block.getOpcodes().get(block.getOpcodes().size() - 1);
                 block.getOpcodes().clear();
                 block.getOpcodes().add(ggoto);
                 // Have to ensure that we remap any blocks that were
@@ -75,12 +71,6 @@ public class JumpSeparateOperation implements GraphOperation {
                     OpcodeBlock header = new BodyOpcodeBlock(block.getBreakpoint());
                     for (int i = 0; i < cond_start; i++) {
                         header.getOpcodes().add(block.getOpcodes().get(i));
-                    }
-                    if (AstUtil.isEmptyOfLogic(header.getOpcodes())) {
-                        // If there are no useful opcodes left in the header
-                        // then we do not perform the split.
-                        fblocks.add(block);
-                        continue;
                     }
                     for (int i = cond_start - 1; i >= 0; i--) {
                         block.getOpcodes().remove(i);

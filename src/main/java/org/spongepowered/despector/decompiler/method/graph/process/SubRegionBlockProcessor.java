@@ -24,8 +24,8 @@
  */
 package org.spongepowered.despector.decompiler.method.graph.process;
 
-import org.objectweb.asm.tree.AbstractInsnNode;
 import org.spongepowered.despector.config.ConfigManager;
+import org.spongepowered.despector.decompiler.ir.Insn;
 import org.spongepowered.despector.decompiler.method.PartialMethod;
 import org.spongepowered.despector.decompiler.method.graph.GraphProcessor;
 import org.spongepowered.despector.decompiler.method.graph.RegionProcessor;
@@ -124,15 +124,15 @@ public class SubRegionBlockProcessor implements GraphProcessor {
                 List<String> comment = new ArrayList<>();
                 for (OpcodeBlock op : region) {
                     comment.add(op.getDebugHeader());
-                    for (AbstractInsnNode insn : op.getOpcodes()) {
-                        comment.add(AstUtil.insnToString(insn));
+                    for (Insn insn : op.getOpcodes()) {
+                        comment.add(insn.toString());
                     }
                 }
                 OpcodeBlock op = blocks.get(end);
                 if (targeted_in_future && op instanceof GotoOpcodeBlock) {
                     comment.add(op.getDebugHeader());
-                    for (AbstractInsnNode insn : op.getOpcodes()) {
-                        comment.add(AstUtil.insnToString(insn));
+                    for (Insn insn : op.getOpcodes()) {
+                        comment.add(insn.toString());
                     }
                 }
                 final_blocks.add(new CommentBlockSection(comment));

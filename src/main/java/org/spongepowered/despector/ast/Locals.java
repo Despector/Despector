@@ -112,7 +112,7 @@ public class Locals {
     /**
      * Fines a local from the given start point with the given type.
      */
-    public LocalInstance findLocal(Label start, String type) {
+    public LocalInstance findLocal(int start, String type) {
         for (Local local : this.locals) {
             LocalInstance i = local.find(start, type);
             if (i != null) {
@@ -182,7 +182,7 @@ public class Locals {
         public void bakeInstances(Map<Label, Integer> label_indices) {
             if (this.lvt.isEmpty()) {
                 if (this.index == 0) {
-                    this.instances.add(new LocalInstance(this, null, "this", ClassTypeSignature.OBJECT, -1, Short.MAX_VALUE));
+                    this.instances.add(new LocalInstance(this, "this", ClassTypeSignature.OBJECT, -1, Short.MAX_VALUE));
                 }
             }
             for (LocalVariableNode l : this.lvt) {
@@ -194,7 +194,7 @@ public class Locals {
                 } else {
                     sig = ClassTypeSignature.of(l.desc);
                 }
-                LocalInstance insn = new LocalInstance(this, l, l.name, sig, start - 1, end);
+                LocalInstance insn = new LocalInstance(this, l.name, sig, start - 1, end);
                 this.instances.add(insn);
             }
         }
@@ -212,7 +212,7 @@ public class Locals {
                 return this.parameter_instance;
             }
             // No LVT entry for this local!
-            this.parameter_instance = new LocalInstance(this, null, "param" + this.index, null, -1, -1);
+            this.parameter_instance = new LocalInstance(this, "param" + this.index, null, -1, -1);
             return this.parameter_instance;
         }
 
@@ -238,15 +238,10 @@ public class Locals {
         /**
          * Finds an instance for the given label and type.
          */
-        public LocalInstance find(Label start, String type) {
-            for (LocalVariableNode lvn : this.lvt) {
-                if (lvn.start.getLabel() == start && lvn.desc.equals(type)) {
-                    for (LocalInstance i : this.instances) {
-                        if (lvn == i.getLVN()) {
-                            return i;
-                        }
-                    }
-                    throw new IllegalStateException();
+        public LocalInstance find(int start, String type) {
+            for (LocalInstance local : this.instances) {
+                if (local.getStart() == start && local.getType().getDescriptor().equals(type)) {
+                    return local;
                 }
             }
             return null;
@@ -273,26 +268,20 @@ public class Locals {
         private TypeSignature type;
         private int start;
         private int end;
-        private LocalVariableNode lvn;
         private boolean effectively_final = false;
 
         private final List<Annotation> annotations = new ArrayList<>();
 
-        public LocalInstance(Local l, LocalVariableNode lvn, String n, TypeSignature t, int start, int end) {
+        public LocalInstance(Local l, String n, TypeSignature t, int start, int end) {
             this.local = l;
             this.name = n;
             this.type = t;
             this.start = start;
             this.end = end;
-            this.lvn = lvn;
         }
 
         public Local getLocal() {
             return this.local;
-        }
-
-        public LocalVariableNode getLVN() {
-            return this.lvn;
         }
 
         /**

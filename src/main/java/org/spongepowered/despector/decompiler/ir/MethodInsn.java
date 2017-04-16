@@ -26,24 +26,38 @@ package org.spongepowered.despector.decompiler.ir;
 
 import org.spongepowered.despector.util.DebugUtil;
 
-public class TypeInsn extends Insn {
+public class MethodInsn extends Insn {
 
-    private String type;
+    private String owner;
+    private String name;
+    private String desc;
 
-    public TypeInsn(int op, String type) {
+    public MethodInsn(int op, String owner, String name, String desc) {
         super(op);
-        this.type = type;
+        this.owner = owner;
+        this.name = name;
+        this.desc = desc;
     }
 
-    public String getType() {
-        return this.type;
+    public String getOwner() {
+        return this.owner;
+    }
+
+    public String getName() {
+        return this.name;
+    }
+
+    public String getDescription() {
+        return this.desc;
     }
 
     @Override
     public String toString() {
         StringBuilder str = new StringBuilder();
         str.append(DebugUtil.opcodeToString(this.opcode));
-        str.append(" ").append(this.type);
+        str.append(" ").append(this.owner);
+        str.append(" ").append(this.name);
+        str.append(" ").append(this.desc);
         return str.toString();
     }
 

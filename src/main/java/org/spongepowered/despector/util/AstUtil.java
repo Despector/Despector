@@ -31,7 +31,6 @@ import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.FrameNode;
 import org.objectweb.asm.tree.LabelNode;
 import org.objectweb.asm.tree.LineNumberNode;
-import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.util.Printer;
 import org.objectweb.asm.util.Textifier;
 import org.objectweb.asm.util.TraceMethodVisitor;
@@ -40,6 +39,8 @@ import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
 import org.spongepowered.despector.ast.members.insn.Statement;
 import org.spongepowered.despector.ast.members.insn.arg.Instruction;
 import org.spongepowered.despector.ast.members.insn.branch.condition.Condition;
+import org.spongepowered.despector.decompiler.ir.Insn;
+import org.spongepowered.despector.decompiler.ir.MethodInsn;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -139,186 +140,83 @@ public final class AstUtil {
     /**
      * Gets the count of values consumed from the stack by the given opcode.
      */
-    public static int getStackRequirementsSize(AbstractInsnNode next) {
+    public static int getStackRequirementsSize(Insn next) {
         if (next == null) {
             return 0;
         }
         switch (next.getOpcode()) {
         case -1:
             return 0;
-        case IASTORE:
-        case LASTORE:
-        case FASTORE:
-        case DASTORE:
-        case AASTORE:
-        case BASTORE:
-        case CASTORE:
-        case SASTORE:
+        case Insn.ARRAY_STORE:
             return 3;
-        case DUP2:
-        case DUP2_X1:
-        case DUP2_X2:
-        case IALOAD:
-        case LALOAD:
-        case FALOAD:
-        case DALOAD:
-        case AALOAD:
-        case BALOAD:
-        case CALOAD:
-        case SALOAD:
-        case IADD:
-        case LADD:
-        case FADD:
-        case DADD:
-        case ISUB:
-        case LSUB:
-        case FSUB:
-        case DSUB:
-        case IMUL:
-        case LMUL:
-        case FMUL:
-        case DMUL:
-        case IDIV:
-        case LDIV:
-        case FDIV:
-        case DDIV:
-        case IREM:
-        case LREM:
-        case FREM:
-        case DREM:
-        case ISHL:
-        case LSHL:
-        case ISHR:
-        case LSHR:
-        case IUSHR:
-        case LUSHR:
-        case IAND:
-        case LAND:
-        case IOR:
-        case LOR:
-        case IXOR:
-        case LXOR:
-        case LCMP:
-        case FCMPL:
-        case FCMPG:
-        case DCMPL:
-        case DCMPG:
-        case POP2:
-        case IF_ICMPEQ:
-        case IF_ICMPNE:
-        case IF_ICMPLT:
-        case IF_ICMPGE:
-        case IF_ICMPGT:
-        case IF_ICMPLE:
-        case IF_ACMPEQ:
-        case IF_ACMPNE:
-        case PUTFIELD:
+        case Insn.DUP2:
+        case Insn.DUP2_X1:
+        case Insn.DUP2_X2:
+        case Insn.ARRAY_LOAD:
+        case Insn.ADD:
+        case Insn.SUB:
+        case Insn.MUL:
+        case Insn.DIV:
+        case Insn.REM:
+        case Insn.SHL:
+        case Insn.SHR:
+        case Insn.USHR:
+        case Insn.AND:
+        case Insn.OR:
+        case Insn.XOR:
+        case Insn.CMP:
+        case Insn.IF_CMPEQ:
+        case Insn.IF_CMPNE:
+        case Insn.IF_CMPLT:
+        case Insn.IF_CMPGE:
+        case Insn.IF_CMPGT:
+        case Insn.IF_CMPLE:
+        case Insn.PUTFIELD:
             return 2;
-        case DUP:
-        case DUP_X1:
-        case DUP_X2:
-        case SWAP:
-        case INEG:
-        case LNEG:
-        case FNEG:
-        case DNEG:
-        case L2I:
-        case F2I:
-        case D2I:
-        case I2L:
-        case F2L:
-        case D2L:
-        case I2F:
-        case L2F:
-        case D2F:
-        case I2D:
-        case F2D:
-        case L2D:
-        case I2B:
-        case I2C:
-        case I2S:
-        case GETFIELD:
-        case NEWARRAY:
-        case ANEWARRAY:
-        case ARRAYLENGTH:
-        case CHECKCAST:
-        case INSTANCEOF:
-        case ISTORE:
-        case LSTORE:
-        case FSTORE:
-        case DSTORE:
-        case ASTORE:
-        case POP:
-        case IFEQ:
-        case IFNE:
-        case IFLT:
-        case IFGE:
-        case IFGT:
-        case IFLE:
-        case IFNULL:
-        case IFNONNULL:
-        case IRETURN:
-        case LRETURN:
-        case FRETURN:
-        case DRETURN:
-        case ARETURN:
-        case PUTSTATIC:
-        case ATHROW:
-        case TABLESWITCH:
-        case LOOKUPSWITCH:
+        case Insn.DUP:
+        case Insn.DUP_X1:
+        case Insn.DUP_X2:
+        case Insn.SWAP:
+        case Insn.NEG:
+        case Insn.GETFIELD:
+        case Insn.NEWARRAY:
+        case Insn.CAST:
+        case Insn.INSTANCEOF:
+        case Insn.LOCAL_STORE:
+        case Insn.POP:
+        case Insn.IFEQ:
+        case Insn.IFNE:
+        case Insn.ARETURN:
+        case Insn.PUTSTATIC:
+        case Insn.THROW:
+        case Insn.SWITCH:
             return 1;
-        case ACONST_NULL:
-        case ICONST_M1:
-        case ICONST_0:
-        case ICONST_1:
-        case ICONST_2:
-        case ICONST_3:
-        case ICONST_4:
-        case ICONST_5:
-        case LCONST_0:
-        case LCONST_1:
-        case FCONST_0:
-        case FCONST_1:
-        case FCONST_2:
-        case DCONST_0:
-        case DCONST_1:
-        case BIPUSH:
-        case SIPUSH:
-        case LDC:
-        case ILOAD:
-        case LLOAD:
-        case FLOAD:
-        case DLOAD:
-        case ALOAD:
-        case GETSTATIC:
-        case NEW:
-        case NOP:
-        case IINC:
-        case GOTO:
-        case JSR:
-        case RET:
-        case RETURN:
-        case INVOKEDYNAMIC:
+        case Insn.PUSH:
+        case Insn.ICONST:
+        case Insn.LCONST:
+        case Insn.FCONST:
+        case Insn.DCONST:
+        case Insn.LOCAL_LOAD:
+        case Insn.GETSTATIC:
+        case Insn.NEW:
+        case Insn.NOOP:
+        case Insn.IINC:
+        case Insn.GOTO:
+        case Insn.RETURN:
+//        case Insn.INVOKEDYNAMIC:
             return 0;
-        case INVOKESPECIAL:
-        case INVOKEVIRTUAL:
-        case INVOKEINTERFACE: {
-            MethodInsnNode method = (MethodInsnNode) next;
-            int count = TypeHelper.paramCount(method.desc);
+        case Insn.INVOKE: {
+            MethodInsn method = (MethodInsn) next;
+            int count = TypeHelper.paramCount(method.getDescription());
             // the object ref
             count++;
             return count;
         }
-        case INVOKESTATIC: {
-            MethodInsnNode method = (MethodInsnNode) next;
-            int count = TypeHelper.paramCount(method.desc);
+        case Insn.INVOKESTATIC: {
+            MethodInsn method = (MethodInsn) next;
+            int count = TypeHelper.paramCount(method.getDescription());
             return count;
         }
-        case MONITORENTER:
-        case MONITOREXIT:
-        case MULTIANEWARRAY:
-            // TODO
-            throw new IllegalArgumentException();
         default:
             System.err.println("Unsupported opcode: " + next.getOpcode());
             throw new IllegalStateException();
@@ -328,182 +226,79 @@ public final class AstUtil {
     /**
      * Gets the count of values pushed to the stack by the given opcode.
      */
-    public static int getStackResultSize(AbstractInsnNode next) {
+    public static int getStackResultSize(Insn next) {
         if (next == null) {
             return 0;
         }
         switch (next.getOpcode()) {
         case -1:
             return 0;
-        case DUP2:
-        case DUP2_X1:
-        case DUP2_X2:
+        case Insn.DUP2:
+        case Insn.DUP2_X1:
+        case Insn.DUP2_X2:
             return 3;
-        case DUP:
-        case DUP_X1:
-        case DUP_X2:
+        case Insn.DUP:
+        case Insn.DUP_X1:
+        case Insn.DUP_X2:
             return 2;
-        case ACONST_NULL:
-        case ICONST_M1:
-        case ICONST_0:
-        case ICONST_1:
-        case ICONST_2:
-        case ICONST_3:
-        case ICONST_4:
-        case ICONST_5:
-        case LCONST_0:
-        case LCONST_1:
-        case FCONST_0:
-        case FCONST_1:
-        case FCONST_2:
-        case DCONST_0:
-        case DCONST_1:
-        case BIPUSH:
-        case SIPUSH:
-        case LDC:
-        case ILOAD:
-        case LLOAD:
-        case FLOAD:
-        case DLOAD:
-        case ALOAD:
-        case GETSTATIC:
-        case NEW:
-        case SWAP:
-        case INEG:
-        case LNEG:
-        case FNEG:
-        case DNEG:
-        case L2I:
-        case F2I:
-        case D2I:
-        case I2L:
-        case F2L:
-        case D2L:
-        case I2F:
-        case L2F:
-        case D2F:
-        case I2D:
-        case F2D:
-        case L2D:
-        case I2B:
-        case I2C:
-        case I2S:
-        case GETFIELD:
-        case NEWARRAY:
-        case ANEWARRAY:
-        case ARRAYLENGTH:
-        case CHECKCAST:
-        case INSTANCEOF:
-        case IALOAD:
-        case LALOAD:
-        case FALOAD:
-        case DALOAD:
-        case AALOAD:
-        case BALOAD:
-        case CALOAD:
-        case SALOAD:
-        case IADD:
-        case LADD:
-        case FADD:
-        case DADD:
-        case ISUB:
-        case LSUB:
-        case FSUB:
-        case DSUB:
-        case IMUL:
-        case LMUL:
-        case FMUL:
-        case DMUL:
-        case IDIV:
-        case LDIV:
-        case FDIV:
-        case DDIV:
-        case IREM:
-        case LREM:
-        case FREM:
-        case DREM:
-        case ISHL:
-        case LSHL:
-        case ISHR:
-        case LSHR:
-        case IUSHR:
-        case LUSHR:
-        case IAND:
-        case LAND:
-        case IOR:
-        case LOR:
-        case IXOR:
-        case LXOR:
-        case LCMP:
-        case FCMPL:
-        case FCMPG:
-        case DCMPL:
-        case DCMPG:
-        case INVOKEDYNAMIC:
+        case Insn.PUSH:
+        case Insn.ICONST:
+        case Insn.LCONST:
+        case Insn.FCONST:
+        case Insn.DCONST:
+        case Insn.LOCAL_LOAD:
+        case Insn.GETSTATIC:
+        case Insn.NEW:
+        case Insn.SWAP:
+        case Insn.NEG:
+        case Insn.GETFIELD:
+        case Insn.NEWARRAY:
+        case Insn.CAST:
+        case Insn.INSTANCEOF:
+        case Insn.ARRAY_LOAD:
+        case Insn.ADD:
+        case Insn.SUB:
+        case Insn.MUL:
+        case Insn.DIV:
+        case Insn.REM:
+        case Insn.SHL:
+        case Insn.SHR:
+        case Insn.USHR:
+        case Insn.AND:
+        case Insn.OR:
+        case Insn.XOR:
+        case Insn.CMP:
+//        case Insn.INVOKEDYNAMIC:
             return 1;
-        case NOP:
-        case IINC:
-        case GOTO:
-        case JSR:
-        case RET:
-        case RETURN:
-        case ISTORE:
-        case LSTORE:
-        case FSTORE:
-        case DSTORE:
-        case ASTORE:
-        case POP:
-        case IFEQ:
-        case IFNE:
-        case IFLT:
-        case IFGE:
-        case IFGT:
-        case IFLE:
-        case IFNULL:
-        case IFNONNULL:
-        case IRETURN:
-        case LRETURN:
-        case FRETURN:
-        case DRETURN:
-        case ARETURN:
-        case PUTSTATIC:
-        case ATHROW:
-        case TABLESWITCH:
-        case LOOKUPSWITCH:
-        case POP2:
-        case IF_ICMPEQ:
-        case IF_ICMPNE:
-        case IF_ICMPLT:
-        case IF_ICMPGE:
-        case IF_ICMPGT:
-        case IF_ICMPLE:
-        case IF_ACMPEQ:
-        case IF_ACMPNE:
-        case PUTFIELD:
-        case IASTORE:
-        case LASTORE:
-        case FASTORE:
-        case DASTORE:
-        case AASTORE:
-        case BASTORE:
-        case CASTORE:
-        case SASTORE:
+        case Insn.NOOP:
+        case Insn.IINC:
+        case Insn.GOTO:
+        case Insn.RETURN:
+        case Insn.LOCAL_STORE:
+        case Insn.POP:
+        case Insn.IFEQ:
+        case Insn.IFNE:
+        case Insn.ARETURN:
+        case Insn.PUTSTATIC:
+        case Insn.THROW:
+        case Insn.SWITCH:
+        case Insn.IF_CMPEQ:
+        case Insn.IF_CMPNE:
+        case Insn.IF_CMPLT:
+        case Insn.IF_CMPGE:
+        case Insn.IF_CMPGT:
+        case Insn.IF_CMPLE:
+        case Insn.PUTFIELD:
+        case Insn.ARRAY_STORE:
             return 0;
-        case INVOKESPECIAL:
-        case INVOKEVIRTUAL:
-        case INVOKESTATIC:
-        case INVOKEINTERFACE: {
-            MethodInsnNode method = (MethodInsnNode) next;
-            if (!TypeHelper.getRet(method.desc).equals("V")) {
+        case Insn.INVOKE:
+        case Insn.INVOKESTATIC: {
+            MethodInsn method = (MethodInsn) next;
+            if (!TypeHelper.getRet(method.getDescription()).equals("V")) {
                 return 1;
             }
             return 0;
         }
-        case MONITORENTER:
-        case MONITOREXIT:
-        case MULTIANEWARRAY:
-            // TODO
-            throw new IllegalArgumentException();
         default:
             System.err.println("Unsupported opcode: " + next.getOpcode());
             throw new IllegalStateException();
@@ -513,7 +308,7 @@ public final class AstUtil {
     /**
      * Gets the change in stack size from the given opcode.
      */
-    public static int getStackDelta(AbstractInsnNode next) {
+    public static int getStackDelta(Insn next) {
         return getStackResultSize(next) - getStackRequirementsSize(next);
     }
 
@@ -536,31 +331,13 @@ public final class AstUtil {
     }
 
     /**
-     * Gets the last non-meta opcode in the given list of opcodes.
-     */
-    public static AbstractInsnNode getLastOpcode(List<AbstractInsnNode> opcodes) {
-        for (int index = opcodes.size() - 1; index >= 0; index--) {
-            AbstractInsnNode next = opcodes.get(index);
-            if (next instanceof LabelNode) {
-                continue;
-            } else if (next instanceof FrameNode) {
-                continue;
-            } else if (next instanceof LineNumberNode) {
-                continue;
-            }
-            return next;
-        }
-        return null;
-    }
-
-    /**
      * Gets if the given list of opcodes requires values on the stack from
      * before it starts.
      */
-    public static boolean hasStartingRequirement(List<AbstractInsnNode> opcodes) {
+    public static boolean hasStartingRequirement(List<Insn> opcodes) {
         int size = 0;
         for (int i = 0; i < opcodes.size(); i++) {
-            AbstractInsnNode next = opcodes.get(i);
+            Insn next = opcodes.get(i);
             size += getStackDelta(next);
             if (size < 0) {
                 return true;
@@ -573,22 +350,14 @@ public final class AstUtil {
      * Returns the index of the opcode that is the start of the last statement
      * in the given list of opcodes.
      */
-    public static int findStartLastStatement(List<AbstractInsnNode> opcodes) {
+    public static int findStartLastStatement(List<Insn> opcodes) {
         int required_stack = getStackDelta(opcodes.get(opcodes.size() - 1));
         for (int index = opcodes.size() - 2; index >= 0; index--) {
             if (required_stack == 0) {
                 return index + 1;
             }
-            AbstractInsnNode next = opcodes.get(index);
-            if (next instanceof LabelNode) {
-                continue;
-            } else if (next instanceof FrameNode) {
-                continue;
-            } else if (next instanceof LineNumberNode) {
-                continue;
-            }
+            Insn next = opcodes.get(index);
             required_stack += getStackDelta(next);
-//            System.out.println(AstUtil.insnToString(next) + " now " + required_stack);
         }
         return 0;
     }

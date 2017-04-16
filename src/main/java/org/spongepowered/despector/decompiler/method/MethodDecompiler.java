@@ -30,13 +30,9 @@ import static org.objectweb.asm.Opcodes.ASTORE;
 import static org.objectweb.asm.Opcodes.ILOAD;
 import static org.objectweb.asm.Opcodes.ISTORE;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import javax.annotation.Nullable;
-import org.objectweb.asm.Label;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.AbstractInsnNode;
-import org.objectweb.asm.tree.LabelNode;
 import org.objectweb.asm.tree.LocalVariableNode;
 import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.VarInsnNode;
@@ -49,6 +45,8 @@ import org.spongepowered.despector.ast.members.MethodEntry;
 import org.spongepowered.despector.ast.members.insn.StatementBlock;
 import org.spongepowered.despector.ast.members.insn.arg.Instruction;
 import org.spongepowered.despector.decompiler.ir.InsnBlock;
+import org.spongepowered.despector.decompiler.ir.JumpInsn;
+import org.spongepowered.despector.decompiler.ir.SwitchInsn;
 import org.spongepowered.despector.decompiler.loader.AsmTranslator;
 import org.spongepowered.despector.decompiler.method.graph.GraphOperation;
 import org.spongepowered.despector.decompiler.method.graph.GraphProcessor;
@@ -163,9 +161,9 @@ public class MethodDecompiler {
             local.setAsParameter();
             if (local.getLVT().isEmpty()) {
                 if (i < offs) {
-                    local.setParameterInstance(new LocalInstance(local, null, "this", ClassTypeSignature.of(entry.getOwner()), -1, -1));
+                    local.setParameterInstance(new LocalInstance(local, "this", ClassTypeSignature.of(entry.getOwner()), -1, -1));
                 } else {
-                    local.setParameterInstance(new LocalInstance(local, null, "param" + i, ClassTypeSignature.of(param_types.get(i - offs)), -1, -1));
+                    local.setParameterInstance(new LocalInstance(local, "param" + i, ClassTypeSignature.of(param_types.get(i - offs)), -1, -1));
                 }
             } else {
                 LocalVariableNode lvt = local.getLVT().get(0);
@@ -175,15 +173,15 @@ public class MethodDecompiler {
                 } else {
                     sig = ClassTypeSignature.of(lvt.desc);
                 }
-                LocalInstance insn = new LocalInstance(local, lvt, lvt.name, sig, -1, -1);
+                LocalInstance insn = new LocalInstance(local, lvt.name, sig, -1, -1);
                 local.setParameterInstance(insn);
             }
         }
 
-        LocalsProcessor proc = getSpecialProcessor(LocalsProcessor.class);
-        if (proc != null) {
-            proc.process(asm, locals);
-        }
+//        LocalsProcessor proc = getSpecialProcessor(LocalsProcessor.class);
+//        if (proc != null) {
+//            proc.process(asm, locals);
+//        }
 
         Iterator<AbstractInsnNode> it = asm.instructions.iterator();
         if (it.hasNext()) {
@@ -196,7 +194,7 @@ public class MethodDecompiler {
                     LocalInstance store = store_local.getInstance(i);
                     LocalInstance load = locals.getLocal(((VarInsnNode) last).var).getInstance(i);
                     if (store == null && load != null) {
-                        LocalInstance new_insn = new LocalInstance(store_local, load.getLVN(), load.getName(),
+                        LocalInstance new_insn = new LocalInstance(store_local, load.getName(),
                                 load.getType(), load.getStart(), load.getEnd());
                         store_local.addInstance(new_insn);
                     }
@@ -212,7 +210,6 @@ public class MethodDecompiler {
     /**
      * Decompiles the given asm method to a statement block.
      */
-    @SuppressWarnings("unchecked")
     public StatementBlock decompile(MethodEntry entry, MethodNode asm, Locals locals) {
         if (asm.instructions.size() == 0) {
             return null;
@@ -224,7 +221,7 @@ public class MethodDecompiler {
 
         // Convert the instructions linked list to an array list for easier
         // processing
-        InsnBlock ops = AsmTranslator.convert(partial, asm.instructions);
+        InsnBlock ops = AsmTranslator.convert(partial, asm);
         partial.setOpcodes(ops);
         StatementBlock block = new StatementBlock(StatementBlock.Type.METHOD, partial.getLocals());
         partial.setBlock(block);
@@ -316,7 +313,7 @@ public class MethodDecompiler {
 
         for (int i = 0; i < block_list.size() - 1; i++) {
             OpcodeBlock next = block_list.get(i);
-            if (next.getLast() instanceof LabelNode) {
+            if (!(next.getLast() instanceof JumpInsn) || !(next.getLast() instanceof SwitchInsn)) {
                 next.setTarget(block_list.get(i + 1));
             }
         }

@@ -24,7 +24,6 @@
  */
 package org.spongepowered.despector.decompiler.method.graph.data.opcode;
 
-import org.objectweb.asm.Label;
 import org.spongepowered.despector.decompiler.method.graph.data.block.BlockSection;
 
 import java.util.HashMap;
@@ -35,7 +34,7 @@ import java.util.Map;
  */
 public class SwitchOpcodeBlock extends OpcodeBlock {
 
-    private final Map<Label, OpcodeBlock> additional_targets = new HashMap<>();
+    private final Map<Integer, OpcodeBlock> additional_targets = new HashMap<>();
 
     public SwitchOpcodeBlock(int br) {
         super(br);
@@ -45,7 +44,7 @@ public class SwitchOpcodeBlock extends OpcodeBlock {
      * Gets a map of any additional target blocks. Used by switches to represent
      * the blocks targetted by the various cases.
      */
-    public Map<Label, OpcodeBlock> getAdditionalTargets() {
+    public Map<Integer, OpcodeBlock> getAdditionalTargets() {
         return this.additional_targets;
     }
 

@@ -24,34 +24,17 @@
  */
 package org.spongepowered.despector.decompiler.method;
 
-import static org.objectweb.asm.Opcodes.IFEQ;
-import static org.objectweb.asm.Opcodes.IFGE;
-import static org.objectweb.asm.Opcodes.IFGT;
-import static org.objectweb.asm.Opcodes.IFLE;
-import static org.objectweb.asm.Opcodes.IFLT;
-import static org.objectweb.asm.Opcodes.IFNE;
-import static org.objectweb.asm.Opcodes.IFNONNULL;
-import static org.objectweb.asm.Opcodes.IFNULL;
-import static org.objectweb.asm.Opcodes.IF_ACMPEQ;
-import static org.objectweb.asm.Opcodes.IF_ACMPNE;
-import static org.objectweb.asm.Opcodes.IF_ICMPEQ;
-import static org.objectweb.asm.Opcodes.IF_ICMPGE;
-import static org.objectweb.asm.Opcodes.IF_ICMPGT;
-import static org.objectweb.asm.Opcodes.IF_ICMPLE;
-import static org.objectweb.asm.Opcodes.IF_ICMPLT;
-import static org.objectweb.asm.Opcodes.IF_ICMPNE;
 import static org.spongepowered.despector.util.ConditionUtil.inverse;
 
 import org.spongepowered.despector.ast.Locals;
 import org.spongepowered.despector.ast.members.insn.StatementBlock;
 import org.spongepowered.despector.ast.members.insn.arg.Instruction;
-import org.spongepowered.despector.ast.members.insn.arg.cst.IntConstant;
-import org.spongepowered.despector.ast.members.insn.arg.cst.NullConstant;
 import org.spongepowered.despector.ast.members.insn.branch.condition.AndCondition;
 import org.spongepowered.despector.ast.members.insn.branch.condition.BooleanCondition;
 import org.spongepowered.despector.ast.members.insn.branch.condition.CompareCondition;
 import org.spongepowered.despector.ast.members.insn.branch.condition.Condition;
 import org.spongepowered.despector.ast.members.insn.branch.condition.OrCondition;
+import org.spongepowered.despector.decompiler.ir.Insn;
 import org.spongepowered.despector.decompiler.method.graph.data.opcode.ConditionalOpcodeBlock;
 import org.spongepowered.despector.decompiler.method.graph.data.opcode.OpcodeBlock;
 import org.spongepowered.despector.util.ConditionUtil;
@@ -82,58 +65,32 @@ public final class ConditionBuilder {
         StatementBuilder.appendBlock(block, dummy, locals, dummy_stack);
 
         switch (block.getLast().getOpcode()) {
-        case IFEQ: {
+        case Insn.IFEQ: {
             if (dummy_stack.size() != 1) {
                 throw new IllegalStateException();
             }
             Instruction val = dummy_stack.pop();
             return new BooleanCondition(val, true);
         }
-        case IFNE: {
+        case Insn.IFNE: {
             if (dummy_stack.size() != 1) {
                 throw new IllegalStateException();
             }
             Instruction val = dummy_stack.pop();
             return new BooleanCondition(val, false);
         }
-        case IFLT:
-        case IFLE:
-        case IFGT:
-        case IFGE: {
-            if (dummy_stack.size() != 1) {
-                throw new IllegalStateException();
-            }
-            Instruction val = dummy_stack.pop();
-            return new CompareCondition(val, new IntConstant(0), CompareCondition.fromOpcode(block.getLast().getOpcode()));
-        }
-        case IF_ICMPEQ:
-        case IF_ICMPNE:
-        case IF_ICMPLT:
-        case IF_ICMPLE:
-        case IF_ICMPGT:
-        case IF_ICMPGE:
-        case IF_ACMPEQ:
-        case IF_ACMPNE: {
+        case Insn.IF_CMPEQ:
+        case Insn.IF_CMPNE:
+        case Insn.IF_CMPLT:
+        case Insn.IF_CMPLE:
+        case Insn.IF_CMPGT:
+        case Insn.IF_CMPGE: {
             if (dummy_stack.size() != 2) {
                 throw new IllegalStateException();
             }
             Instruction b = dummy_stack.pop();
             Instruction a = dummy_stack.pop();
             return new CompareCondition(a, b, CompareCondition.fromOpcode(block.getLast().getOpcode()));
-        }
-        case IFNULL: {
-            if (dummy_stack.size() == 0) {
-                throw new IllegalStateException();
-            }
-            Instruction val = dummy_stack.pop();
-            return new CompareCondition(val, NullConstant.NULL, CompareCondition.CompareOperator.EQUAL);
-        }
-        case IFNONNULL: {
-            if (dummy_stack.size() != 1) {
-                throw new IllegalStateException();
-            }
-            Instruction val = dummy_stack.pop();
-            return new CompareCondition(val, NullConstant.NULL, CompareCondition.CompareOperator.NOT_EQUAL);
         }
         default:
             throw new IllegalStateException("Unsupported conditional jump opcode " + block.getLast().getOpcode());

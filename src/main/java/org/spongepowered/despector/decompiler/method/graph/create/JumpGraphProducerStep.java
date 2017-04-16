@@ -24,14 +24,9 @@
  */
 package org.spongepowered.despector.decompiler.method.graph.create;
 
-import static org.objectweb.asm.Opcodes.ATHROW;
-import static org.objectweb.asm.Opcodes.GOTO;
-import static org.objectweb.asm.Opcodes.IRETURN;
-import static org.objectweb.asm.Opcodes.RETURN;
-
-import org.objectweb.asm.Label;
-import org.objectweb.asm.tree.AbstractInsnNode;
-import org.objectweb.asm.tree.JumpInsnNode;
+import org.spongepowered.despector.decompiler.ir.Insn;
+import org.spongepowered.despector.decompiler.ir.InsnBlock;
+import org.spongepowered.despector.decompiler.ir.JumpInsn;
 import org.spongepowered.despector.decompiler.method.PartialMethod;
 import org.spongepowered.despector.decompiler.method.graph.GraphOperation;
 import org.spongepowered.despector.decompiler.method.graph.GraphProducerStep;
@@ -51,21 +46,20 @@ public class JumpGraphProducerStep implements GraphProducerStep {
 
     @Override
     public void collectBreakpoints(PartialMethod partial, Set<Integer> break_points) {
-        List<AbstractInsnNode> instructions = partial.getOpcodes();
-        Map<Label, Integer> label_indices = partial.getLabelIndices();
+        InsnBlock instructions = partial.getOpcodes();
 
         for (int i = 0; i < instructions.size(); i++) {
-            AbstractInsnNode next = instructions.get(i);
-            if (next instanceof JumpInsnNode) {
+            Insn next = instructions.get(i);
+            if (next instanceof JumpInsn) {
                 break_points.add(i);
                 // also break before labels targetted by jump opcodes to have a
                 // break between the body of an if block and the statements
                 // after it
-                break_points.add(label_indices.get(((JumpInsnNode) next).label.getLabel()));
+                break_points.add(((JumpInsn) next).getTarget());
                 continue;
             }
             int op = next.getOpcode();
-            if (op <= RETURN && op >= IRETURN || op == ATHROW) {
+            if (op == Insn.RETURN || op == Insn.ARETURN) {
                 break_points.add(i);
             }
         }
@@ -73,26 +67,25 @@ public class JumpGraphProducerStep implements GraphProducerStep {
 
     @Override
     public void formEdges(PartialMethod partial, Map<Integer, OpcodeBlock> blocks, List<Integer> sorted_break_points, List<OpcodeBlock> block_list) {
-        Map<Label, Integer> label_indices = partial.getLabelIndices();
         for (Map.Entry<Integer, OpcodeBlock> e : blocks.entrySet()) {
             // Now we go through and form an edge from any block and the block
             // it flows (or jumps) into next.
             OpcodeBlock block = e.getValue();
-            if (block.getLast() instanceof JumpInsnNode) {
-                Label label = ((JumpInsnNode) block.getLast()).label.getLabel();
-                if(block.getLast().getOpcode() == GOTO) {
+            if (block.getLast() instanceof JumpInsn) {
+                int label = ((JumpInsn) block.getLast()).getTarget();
+                if(block.getLast().getOpcode() == Insn.GOTO) {
                     GotoOpcodeBlock replacement = new GotoOpcodeBlock(block.getBreakpoint());
                     e.setValue(replacement);
                     block_list.set(block_list.indexOf(block), replacement);
                     replacement.getOpcodes().addAll(block.getOpcodes());
-                    replacement.setTarget(blocks.get(sorted_break_points.get(sorted_break_points.indexOf(label_indices.get(label)) + 1)));
+                    replacement.setTarget(blocks.get(sorted_break_points.get(sorted_break_points.indexOf(label) + 1)));
                     GraphOperation.remap(block_list, block, replacement);
                 } else {
                     ConditionalOpcodeBlock replacement = new ConditionalOpcodeBlock(block.getBreakpoint());
                     e.setValue(replacement);
                     block_list.set(block_list.indexOf(block), replacement);
                     replacement.getOpcodes().addAll(block.getOpcodes());
-                    replacement.setTarget(blocks.get(sorted_break_points.get(sorted_break_points.indexOf(label_indices.get(label)) + 1)));
+                    replacement.setTarget(blocks.get(sorted_break_points.get(sorted_break_points.indexOf(label) + 1)));
                     OpcodeBlock next = blocks.get(sorted_break_points.get(sorted_break_points.indexOf(e.getKey()) + 1));
                     replacement.setElseTarget(next);
                     GraphOperation.remap(block_list, block, replacement);

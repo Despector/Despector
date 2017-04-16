@@ -50,6 +50,7 @@ public abstract class Insn {
     public static final int RETURN = 25;
     public static final int ARETURN = 26;
     public static final int CAST = 27;
+    public static final int INSTANCEOF = 28;
 
     public static final int POP = 30;
     public static final int DUP = 31;

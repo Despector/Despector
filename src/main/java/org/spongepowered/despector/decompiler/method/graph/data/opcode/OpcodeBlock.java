@@ -24,11 +24,8 @@
  */
 package org.spongepowered.despector.decompiler.method.graph.data.opcode;
 
-import org.objectweb.asm.tree.AbstractInsnNode;
 import org.spongepowered.despector.decompiler.ir.Insn;
 import org.spongepowered.despector.decompiler.method.graph.data.block.BlockSection;
-import org.spongepowered.despector.util.AstUtil;
-import org.spongepowered.despector.util.DebugUtil;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -70,7 +67,7 @@ public abstract class OpcodeBlock {
         return this.opcodes;
     }
 
-    public AbstractInsnNode getLast() {
+    public Insn getLast() {
         return this.opcodes.get(this.opcodes.size() - 1);
     }
 

@@ -25,18 +25,10 @@
 package org.spongepowered.despector.decompiler.kotlin.method.graph.create;
 
 import static com.google.common.base.Preconditions.checkState;
-import static org.objectweb.asm.Opcodes.DUP;
-import static org.objectweb.asm.Opcodes.GOTO;
-import static org.objectweb.asm.Opcodes.IFEQ;
-import static org.objectweb.asm.Opcodes.IFNONNULL;
-import static org.objectweb.asm.Opcodes.IFNULL;
-import static org.objectweb.asm.Opcodes.IF_ACMPNE;
-import static org.objectweb.asm.Opcodes.POP;
 
-import org.objectweb.asm.Label;
-import org.objectweb.asm.tree.AbstractInsnNode;
-import org.objectweb.asm.tree.JumpInsnNode;
-import org.objectweb.asm.tree.LabelNode;
+import org.spongepowered.despector.decompiler.ir.Insn;
+import org.spongepowered.despector.decompiler.ir.InsnBlock;
+import org.spongepowered.despector.decompiler.ir.JumpInsn;
 import org.spongepowered.despector.decompiler.kotlin.method.graph.data.ElvisBlockSection;
 import org.spongepowered.despector.decompiler.method.PartialMethod;
 import org.spongepowered.despector.decompiler.method.graph.GraphOperation;
@@ -62,8 +54,8 @@ public class ElvisGraphProducerStep implements GraphProducerStep {
     @Override
     public void collectBreakpoints(PartialMethod partial, Set<Integer> break_points) {
         this.sections.clear();
-        List<AbstractInsnNode> ops = partial.getOpcodes();
-        if (ops.isEmpty()) {
+        InsnBlock ops = partial.getOpcodes();
+        if (ops.size() == 0) {
             return;
         }
         int last = ops.get(0).getOpcode();
@@ -72,26 +64,26 @@ public class ElvisGraphProducerStep implements GraphProducerStep {
             //
             // Example: var a = b ?: ""
             //
-            //   ALOAD 0     the arg of the elvis
-            //   DUP
-            //   IFNULL L1   might be a numerical comparison as well
-            //   GOTO L2
+            // ALOAD 0 the arg of the elvis
+            // DUP
+            // IFNULL L1 might be a numerical comparison as well
+            // GOTO L2
             // L1
-            //   POP
-            //   LDC ""      the default value
+            // POP
+            // LDC "" the default value
             // L2
-            //   ASTORE 1    the consumer of the value
+            // ASTORE 1 the consumer of the value
             //
             // Sometimes with the condition inverted and the else case placed
             // before the GOTO
             int next = ops.get(i).getOpcode();
-            if (last == DUP && ((next >= IFEQ && next <= IF_ACMPNE) || next == IFNULL || next == IFNONNULL)) {
+            if (last == Insn.DUP && ((next >= Insn.IFEQ && next <= Insn.IF_CMPNE))) {
                 // Hello elvis
                 int o = i;
                 int start = i - 1;
-                AbstractInsnNode search = ops.get(o++);
-                Label target = ((JumpInsnNode) search).label.getLabel();
-                JumpInsnNode ggoto = null;
+                Insn search = ops.get(o++);
+                int target = ((JumpInsn) search).getTarget();
+                JumpInsn ggoto = null;
                 // loop forwards and look for the label we're targeting with the
                 // check, and pick up the last goto on the way
                 //
@@ -100,29 +92,25 @@ public class ElvisGraphProducerStep implements GraphProducerStep {
                 // of decompiling.
                 while (true) {
                     search = ops.get(o++);
-                    if (search instanceof LabelNode) {
-                        if (((LabelNode) search).getLabel() == target) {
-                            break;
-                        }
-                    } else if (search.getOpcode() == GOTO) {
-                        ggoto = (JumpInsnNode) search;
+                    if (o - 1 == target) {
+                        break;
+                    } else if (search.getOpcode() == Insn.GOTO) {
+                        ggoto = (JumpInsn) search;
                     }
                 }
                 checkState(ggoto != null);
                 // The target will be the end of the else body
-                target = ggoto.label.getLabel();
-                List<AbstractInsnNode> else_body = new ArrayList<>();
+                target = ggoto.getTarget();
+                List<Insn> else_body = new ArrayList<>();
                 boolean first_pop = false;
                 while (true) {
                     search = ops.get(o++);
-                    if (search instanceof LabelNode) {
-                        if (((LabelNode) search).getLabel() == target) {
-                            break;
-                        }
+                    if (o - 1 == target) {
+                        break;
                     }
                     // we ignore the first pop which is removing the checked
                     // value from the stack
-                    if (search.getOpcode() == POP && !first_pop) {
+                    if (search.getOpcode() == Insn.POP && !first_pop) {
                         first_pop = true;
                     } else {
                         else_body.add(search);

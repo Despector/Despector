@@ -25,10 +25,10 @@
 package org.spongepowered.despector.ast.members.insn.branch.condition;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.objectweb.asm.Opcodes.*;
 
 import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
 import org.spongepowered.despector.ast.members.insn.arg.Instruction;
+import org.spongepowered.despector.decompiler.ir.Insn;
 import org.spongepowered.despector.util.serialization.AstSerializer;
 import org.spongepowered.despector.util.serialization.MessagePacker;
 
@@ -44,25 +44,19 @@ public class CompareCondition extends Condition {
      */
     public static CompareOperator fromOpcode(int op) {
         switch (op) {
-        case IFEQ:
-        case IF_ACMPEQ:
-        case IF_ICMPEQ:
+        case Insn.IFEQ:
+        case Insn.IF_CMPEQ:
             return CompareOperator.EQUAL;
-        case IFNE:
-        case IF_ACMPNE:
-        case IF_ICMPNE:
+        case Insn.IFNE:
+        case Insn.IF_CMPNE:
             return CompareOperator.NOT_EQUAL;
-        case IFGE:
-        case IF_ICMPGE:
+        case Insn.IF_CMPGE:
             return CompareOperator.GREATER_EQUAL;
-        case IFGT:
-        case IF_ICMPGT:
+        case Insn.IF_CMPGT:
             return CompareOperator.GREATER;
-        case IFLE:
-        case IF_ICMPLE:
+        case Insn.IF_CMPLE:
             return CompareOperator.LESS_EQUAL;
-        case IFLT:
-        case IF_ICMPLT:
+        case Insn.IF_CMPLT:
             return CompareOperator.LESS;
         default:
             throw new UnsupportedOperationException("Not a conditional jump opcode: " + op);

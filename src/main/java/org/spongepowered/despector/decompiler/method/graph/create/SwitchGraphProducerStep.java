@@ -24,11 +24,9 @@
  */
 package org.spongepowered.despector.decompiler.method.graph.create;
 
-import org.objectweb.asm.Label;
-import org.objectweb.asm.tree.AbstractInsnNode;
-import org.objectweb.asm.tree.LabelNode;
-import org.objectweb.asm.tree.LookupSwitchInsnNode;
-import org.objectweb.asm.tree.TableSwitchInsnNode;
+import org.spongepowered.despector.decompiler.ir.Insn;
+import org.spongepowered.despector.decompiler.ir.InsnBlock;
+import org.spongepowered.despector.decompiler.ir.SwitchInsn;
 import org.spongepowered.despector.decompiler.method.PartialMethod;
 import org.spongepowered.despector.decompiler.method.graph.GraphOperation;
 import org.spongepowered.despector.decompiler.method.graph.GraphProducerStep;
@@ -44,41 +42,30 @@ import java.util.Set;
  */
 public class SwitchGraphProducerStep implements GraphProducerStep {
 
-    @SuppressWarnings("unchecked")
     @Override
     public void collectBreakpoints(PartialMethod partial, Set<Integer> break_points) {
-        List<AbstractInsnNode> instructions = partial.getOpcodes();
-        Map<Label, Integer> label_indices = partial.getLabelIndices();
+        InsnBlock instructions = partial.getOpcodes();
 
         for (int i = 0; i < instructions.size(); i++) {
-            AbstractInsnNode next = instructions.get(i);
-            if (next instanceof TableSwitchInsnNode) {
+            Insn next = instructions.get(i);
+            if (next instanceof SwitchInsn) {
                 break_points.add(i);
-                TableSwitchInsnNode ts = (TableSwitchInsnNode) next;
-                for (LabelNode l : (List<LabelNode>) ts.labels) {
-                    break_points.add(label_indices.get(l.getLabel()));
+                SwitchInsn ts = (SwitchInsn) next;
+                for (int l : ts.getTargets().values()) {
+                    break_points.add(l);
                 }
-                break_points.add(label_indices.get(ts.dflt.getLabel()));
-            } else if (next instanceof LookupSwitchInsnNode) {
-                break_points.add(i);
-                LookupSwitchInsnNode ts = (LookupSwitchInsnNode) next;
-                for (LabelNode l : (List<LabelNode>) ts.labels) {
-                    break_points.add(label_indices.get(l.getLabel()));
-                }
-                break_points.add(label_indices.get(ts.dflt.getLabel()));
+                break_points.add(ts.getDefault());
             }
         }
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public void formEdges(PartialMethod partial, Map<Integer, OpcodeBlock> blocks, List<Integer> sorted_break_points, List<OpcodeBlock> block_list) {
-        Map<Label, Integer> label_indices = partial.getLabelIndices();
         for (Map.Entry<Integer, OpcodeBlock> e : blocks.entrySet()) {
             // Now we go through and form an edge from any block and the block
             // it flows (or jumps) into next.
             OpcodeBlock block = e.getValue();
-            if (!(block.getLast() instanceof TableSwitchInsnNode) && !(block.getLast() instanceof LookupSwitchInsnNode)) {
+            if (!(block.getLast() instanceof SwitchInsn)) {
                 continue;
             }
             SwitchOpcodeBlock replacement = new SwitchOpcodeBlock(block.getBreakpoint());
@@ -87,27 +74,12 @@ public class SwitchGraphProducerStep implements GraphProducerStep {
             block_list.set(block_list.indexOf(block), replacement);
             e.setValue(replacement);
             GraphOperation.remap(block_list, block, replacement);
-            if (block.getLast() instanceof TableSwitchInsnNode) {
-                TableSwitchInsnNode ts = (TableSwitchInsnNode) block.getLast();
-                for (LabelNode l : (List<LabelNode>) ts.labels) {
-                    Label label = l.getLabel();
-                    replacement.getAdditionalTargets().put(label,
-                            blocks.get(sorted_break_points.get(sorted_break_points.indexOf(label_indices.get(label)) + 1)));
-                }
-                Label label = ts.dflt.getLabel();
-                replacement.getAdditionalTargets().put(label,
-                        blocks.get(sorted_break_points.get(sorted_break_points.indexOf(label_indices.get(label)) + 1)));
-            } else if (block.getLast() instanceof LookupSwitchInsnNode) {
-                LookupSwitchInsnNode ts = (LookupSwitchInsnNode) block.getLast();
-                for (LabelNode l : (List<LabelNode>) ts.labels) {
-                    Label label = l.getLabel();
-                    replacement.getAdditionalTargets().put(label,
-                            blocks.get(sorted_break_points.get(sorted_break_points.indexOf(label_indices.get(label)) + 1)));
-                }
-                Label label = ts.dflt.getLabel();
-                replacement.getAdditionalTargets().put(label,
-                        blocks.get(sorted_break_points.get(sorted_break_points.indexOf(label_indices.get(label)) + 1)));
+            SwitchInsn ts = (SwitchInsn) block.getLast();
+            for (Map.Entry<Integer, Integer> r : ts.getTargets().entrySet()) {
+                replacement.getAdditionalTargets().put(r.getKey(),
+                        blocks.get(sorted_break_points.get(sorted_break_points.indexOf(r.getValue()) + 1)));
             }
+            replacement.getAdditionalTargets().put(-1, blocks.get(sorted_break_points.get(sorted_break_points.indexOf(ts.getDefault()) + 1)));
         }
     }
 

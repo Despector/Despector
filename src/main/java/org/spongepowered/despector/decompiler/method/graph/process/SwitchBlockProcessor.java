@@ -27,13 +27,10 @@ package org.spongepowered.despector.decompiler.method.graph.process;
 import static org.objectweb.asm.Opcodes.IRETURN;
 import static org.objectweb.asm.Opcodes.RETURN;
 
-import org.objectweb.asm.Label;
-import org.objectweb.asm.tree.AbstractInsnNode;
-import org.objectweb.asm.tree.JumpInsnNode;
-import org.objectweb.asm.tree.LabelNode;
-import org.objectweb.asm.tree.LookupSwitchInsnNode;
-import org.objectweb.asm.tree.TableSwitchInsnNode;
 import org.spongepowered.despector.config.ConfigManager;
+import org.spongepowered.despector.decompiler.ir.Insn;
+import org.spongepowered.despector.decompiler.ir.JumpInsn;
+import org.spongepowered.despector.decompiler.ir.SwitchInsn;
 import org.spongepowered.despector.decompiler.method.PartialMethod;
 import org.spongepowered.despector.decompiler.method.graph.GraphProcessor;
 import org.spongepowered.despector.decompiler.method.graph.data.block.BlockSection;
@@ -44,7 +41,6 @@ import org.spongepowered.despector.decompiler.method.graph.data.opcode.BodyOpcod
 import org.spongepowered.despector.decompiler.method.graph.data.opcode.GotoOpcodeBlock;
 import org.spongepowered.despector.decompiler.method.graph.data.opcode.OpcodeBlock;
 import org.spongepowered.despector.decompiler.method.graph.data.opcode.SwitchOpcodeBlock;
-import org.spongepowered.despector.util.AstUtil;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -56,49 +52,31 @@ import java.util.Map;
  */
 public class SwitchBlockProcessor implements GraphProcessor {
 
-    @SuppressWarnings("unchecked")
     @Override
     public int process(PartialMethod partial, List<OpcodeBlock> blocks, OpcodeBlock region_start, List<BlockSection> final_blocks) {
         if (region_start instanceof SwitchOpcodeBlock) {
             SwitchOpcodeBlock sblock = (SwitchOpcodeBlock) region_start;
-            List<LabelNode> labels = null;
-            List<Integer> keys = null;
-            LabelNode dflt = null;
-            if (sblock.getLast() instanceof TableSwitchInsnNode) {
-                TableSwitchInsnNode ts = (TableSwitchInsnNode) sblock.getLast();
-                labels = ts.labels;
-                dflt = ts.dflt;
-                keys = new ArrayList<>();
-                for (int k = ts.min; k <= ts.max; k++) {
-                    keys.add(k);
-                }
-            } else if (sblock.getLast() instanceof LookupSwitchInsnNode) {
-                LookupSwitchInsnNode ts = (LookupSwitchInsnNode) sblock.getLast();
-                labels = ts.labels;
-                dflt = ts.dflt;
-                keys = ts.keys;
-            }
+            SwitchInsn ts = (SwitchInsn) sblock.getLast();
             SwitchBlockSection sswitch = new SwitchBlockSection(region_start);
             final_blocks.add(sswitch);
-            Map<Label, SwitchCaseBlockSection> cases = new HashMap<>();
-            int index = 0;
+            Map<Integer, SwitchCaseBlockSection> cases = new HashMap<>();
             OpcodeBlock end = null;
-            Label end_label = null;
+            int end_label = -1;
             OpcodeBlock fartherst = null;
             int farthest_break = 0;
             boolean all_return = true;
-            for (LabelNode l : labels) {
-                SwitchCaseBlockSection cs = cases.get(l.getLabel());
+            for (Map.Entry<Integer, Integer> l : ts.getTargets().entrySet()) {
+                SwitchCaseBlockSection cs = cases.get(l.getKey());
                 if (cs != null) {
-                    cs.getTargets().add(keys.get(index++));
+                    cs.getTargets().add(l.getValue());
                     continue;
                 }
                 cs = sswitch.new SwitchCaseBlockSection();
                 sswitch.addCase(cs);
-                cases.put(l.getLabel(), cs);
-                cs.getTargets().add(keys.get(index++));
+                cases.put(l.getKey(), cs);
+                cs.getTargets().add(l.getValue());
                 List<OpcodeBlock> case_region = new ArrayList<>();
-                OpcodeBlock block = sblock.getAdditionalTargets().get(l.getLabel());
+                OpcodeBlock block = sblock.getAdditionalTargets().get(l.getKey());
                 case_region.add(block);
                 int start = blocks.indexOf(block) + 1;
                 if (start < blocks.size()) {
@@ -119,7 +97,7 @@ public class SwitchBlockProcessor implements GraphProcessor {
                     farthest_break = last.getBreakpoint();
                 }
                 if (last instanceof BodyOpcodeBlock) {
-                    int op = AstUtil.getLastOpcode(last.getOpcodes()).getOpcode();
+                    int op = last.getLast().getOpcode();
                     if (op < IRETURN || op > RETURN) {
                         all_return = false;
                     }
@@ -128,7 +106,7 @@ public class SwitchBlockProcessor implements GraphProcessor {
                 }
                 if (last instanceof GotoOpcodeBlock) {
                     end = last.getTarget();
-                    end_label = ((JumpInsnNode) last.getLast()).label.getLabel();
+                    end_label = ((JumpInsn) last.getLast()).getTarget();
                     case_region.remove(last);
                     cs.setBreaks(true);
                 }
@@ -139,8 +117,8 @@ public class SwitchBlockProcessor implements GraphProcessor {
                         List<String> comment = new ArrayList<>();
                         for (OpcodeBlock op : case_region) {
                             comment.add(op.getDebugHeader());
-                            for (AbstractInsnNode insn : op.getOpcodes()) {
-                                comment.add(AstUtil.insnToString(insn));
+                            for (Insn insn : op.getOpcodes()) {
+                                comment.add(insn.toString());
                             }
                         }
                         cs.getBody().add(new CommentBlockSection(comment));
@@ -149,15 +127,15 @@ public class SwitchBlockProcessor implements GraphProcessor {
                     }
                 }
             }
-            SwitchCaseBlockSection cs = cases.get(dflt.getLabel());
+            SwitchCaseBlockSection cs = cases.get(ts.getDefault());
             if (cs != null) {
                 cs.setDefault(true);
-            } else if (!all_return && end_label != dflt.getLabel()) {
+            } else if (!all_return && end_label != ts.getDefault()) {
                 cs = sswitch.new SwitchCaseBlockSection();
-                cases.put(dflt.getLabel(), cs);
+                cases.put(ts.getDefault(), cs);
                 sswitch.addCase(cs);
                 List<OpcodeBlock> case_region = new ArrayList<>();
-                OpcodeBlock block = sblock.getAdditionalTargets().get(dflt.getLabel());
+                OpcodeBlock block = sblock.getAdditionalTargets().get(ts.getDefault());
                 case_region.add(block);
                 int start = blocks.indexOf(block) + 1;
                 if (start < blocks.size()) {
@@ -184,8 +162,8 @@ public class SwitchBlockProcessor implements GraphProcessor {
                         List<String> comment = new ArrayList<>();
                         for (OpcodeBlock op : case_region) {
                             comment.add(op.getDebugHeader());
-                            for (AbstractInsnNode insn : op.getOpcodes()) {
-                                comment.add(AstUtil.insnToString(insn));
+                            for (Insn insn : op.getOpcodes()) {
+                                comment.add(insn.toString());
                             }
                         }
                         cs.getBody().add(new CommentBlockSection(comment));

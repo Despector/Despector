@@ -41,7 +41,6 @@ import org.spongepowered.despector.ast.members.insn.arg.cst.IntConstant;
 import org.spongepowered.despector.ast.members.insn.arg.cst.LongConstant;
 import org.spongepowered.despector.ast.members.insn.arg.cst.NullConstant;
 import org.spongepowered.despector.ast.members.insn.arg.cst.StringConstant;
-import org.spongepowered.despector.ast.members.insn.arg.cst.TypeConstant;
 import org.spongepowered.despector.ast.members.insn.arg.field.ArrayAccess;
 import org.spongepowered.despector.ast.members.insn.arg.field.FieldAccess;
 import org.spongepowered.despector.ast.members.insn.arg.field.InstanceFieldAccess;
@@ -55,7 +54,6 @@ import org.spongepowered.despector.ast.members.insn.assign.FieldAssignment;
 import org.spongepowered.despector.ast.members.insn.assign.InstanceFieldAssignment;
 import org.spongepowered.despector.ast.members.insn.assign.LocalAssignment;
 import org.spongepowered.despector.ast.members.insn.assign.StaticFieldAssignment;
-import org.spongepowered.despector.ast.members.insn.function.DynamicInvokeHandle;
 import org.spongepowered.despector.ast.members.insn.function.InstanceMethodInvoke;
 import org.spongepowered.despector.ast.members.insn.function.InvokeStatement;
 import org.spongepowered.despector.ast.members.insn.function.New;
@@ -63,9 +61,17 @@ import org.spongepowered.despector.ast.members.insn.function.StaticMethodInvoke;
 import org.spongepowered.despector.ast.members.insn.misc.Increment;
 import org.spongepowered.despector.ast.members.insn.misc.Return;
 import org.spongepowered.despector.ast.members.insn.misc.Throw;
+import org.spongepowered.despector.decompiler.ir.DoubleInsn;
+import org.spongepowered.despector.decompiler.ir.FieldInsn;
+import org.spongepowered.despector.decompiler.ir.FloatInsn;
 import org.spongepowered.despector.decompiler.ir.Insn;
+import org.spongepowered.despector.decompiler.ir.IntInsn;
+import org.spongepowered.despector.decompiler.ir.LdcInsn;
+import org.spongepowered.despector.decompiler.ir.LongInsn;
+import org.spongepowered.despector.decompiler.ir.MethodInsn;
+import org.spongepowered.despector.decompiler.ir.TypeInsn;
+import org.spongepowered.despector.decompiler.ir.VarIntInsn;
 import org.spongepowered.despector.decompiler.method.graph.data.opcode.OpcodeBlock;
-import org.spongepowered.despector.util.AstUtil;
 import org.spongepowered.despector.util.TypeHelper;
 
 import java.util.Deque;
@@ -85,114 +91,42 @@ public final class StatementBuilder {
         for (int index = 0; index < op.getOpcodes().size(); index++) {
             int label_index = op.getBreakpoint() - (op.getOpcodes().size() - index);
             Insn next = op.getOpcodes().get(index);
-
             switch (next.getOpcode()) {
-            case NOP:
+            case Insn.NOOP:
                 break;
-            case ACONST_NULL:
-                stack.push(NullConstant.NULL);
+            case Insn.ICONST:
+                stack.push(new IntConstant(((IntInsn) next).getValue()));
                 break;
-            case ICONST_M1:
-                stack.push(new IntConstant(-1));
+            case Insn.LCONST:
+                stack.push(new LongConstant(((LongInsn) next).getValue()));
                 break;
-            case ICONST_0:
-                stack.push(new IntConstant(0));
+            case Insn.FCONST:
+                stack.push(new FloatConstant(((FloatInsn) next).getValue()));
                 break;
-            case ICONST_1:
-                stack.push(new IntConstant(1));
+            case Insn.DCONST:
+                stack.push(new DoubleConstant(((DoubleInsn) next).getValue()));
                 break;
-            case ICONST_2:
-                stack.push(new IntConstant(2));
-                break;
-            case ICONST_3:
-                stack.push(new IntConstant(3));
-                break;
-            case ICONST_4:
-                stack.push(new IntConstant(4));
-                break;
-            case ICONST_5:
-                stack.push(new IntConstant(5));
-                break;
-            case LCONST_0:
-                stack.push(new LongConstant(0));
-                break;
-            case LCONST_1:
-                stack.push(new LongConstant(1));
-                break;
-            case FCONST_0:
-                stack.push(new FloatConstant(0));
-                break;
-            case FCONST_1:
-                stack.push(new FloatConstant(1));
-                break;
-            case FCONST_2:
-                stack.push(new FloatConstant(2));
-                break;
-            case DCONST_0:
-                stack.push(new DoubleConstant(0));
-                break;
-            case DCONST_1:
-                stack.push(new DoubleConstant(1));
-                break;
-            case BIPUSH:
-            case SIPUSH: {
-                IntInsnNode insn = (IntInsnNode) next;
-                stack.push(new IntConstant(insn.operand));
-                break;
-            }
-            case LDC: {
-                LdcInsnNode ldc = (LdcInsnNode) next;
-                if (ldc.cst instanceof String) {
-                    stack.push(new StringConstant((String) ldc.cst));
-                } else if (ldc.cst instanceof Integer) {
-                    stack.push(new IntConstant((Integer) ldc.cst));
-                } else if (ldc.cst instanceof Float) {
-                    stack.push(new FloatConstant((Float) ldc.cst));
-                } else if (ldc.cst instanceof Long) {
-                    // LDC_W appears to be merged with this opcode by asm so
-                    // long
-                    // and double constants will also be here
-                    stack.push(new LongConstant((Long) ldc.cst));
-                } else if (ldc.cst instanceof Double) {
-                    stack.push(new DoubleConstant((Double) ldc.cst));
-                } else if (ldc.cst instanceof Type) {
-                    stack.push(new TypeConstant((Type) ldc.cst));
+            case Insn.PUSH: {
+                LdcInsn ldc = (LdcInsn) next;
+                if(ldc.getConstant() == null) {
+                    stack.push(NullConstant.NULL);
+                } else if(ldc.getConstant() instanceof String) {
+                    stack.push(new StringConstant((String) ldc.getConstant()));
                 } else {
-                    throw new IllegalStateException("Unsupported ldc constant: " + ldc.cst);
+                    throw new IllegalStateException("Unsupported ldc constant: " + ldc.getConstant().getClass().getName());
                 }
                 break;
             }
-            case ILOAD:
-            case LLOAD:
-            case FLOAD:
-            case DLOAD:
-            case ALOAD: {
-                VarInsnNode var = (VarInsnNode) next;
-                Local local = locals.getLocal(var.var);
+            case Insn.LOCAL_LOAD: {
+                IntInsn var = (IntInsn) next;
+                Local local = locals.getLocal(var.getValue());
                 stack.push(new LocalAccess(local.getInstance(label_index)));
                 break;
             }
-            case IALOAD:
-            case LALOAD:
-            case FALOAD:
-            case DALOAD:
-            case AALOAD:
-            case BALOAD:
-            case CALOAD:
-            case SALOAD: {
-                Instruction index_arg = stack.pop();
-                Instruction var = stack.pop();
-                stack.push(new ArrayAccess(var, index_arg));
-                break;
-            }
-            case ISTORE:
-            case LSTORE:
-            case FSTORE:
-            case DSTORE:
-            case ASTORE: {
-                VarInsnNode var = (VarInsnNode) next;
+            case Insn.LOCAL_STORE: {
+                IntInsn var = (IntInsn) next;
                 Instruction val = stack.pop();
-                Local local = locals.getLocal(var.var);
+                Local local = locals.getLocal(var.getValue());
                 LocalInstance instance = local.getInstance(label_index);
                 if (!local.isParameter() && local.getParameterInstance() != null) {
                     instance.setType(val.inferType());
@@ -200,14 +134,13 @@ public final class StatementBuilder {
                 block.append(new LocalAssignment(instance, val));
                 break;
             }
-            case IASTORE:
-            case LASTORE:
-            case FASTORE:
-            case DASTORE:
-            case AASTORE:
-            case BASTORE:
-            case CASTORE:
-            case SASTORE: {
+            case Insn.ARRAY_LOAD: {
+                Instruction index_arg = stack.pop();
+                Instruction var = stack.pop();
+                stack.push(new ArrayAccess(var, index_arg));
+                break;
+            }
+            case Insn.ARRAY_STORE: {
                 Instruction val = stack.pop();
                 Instruction index_arg = stack.pop();
                 Instruction var = stack.pop();
@@ -228,27 +161,18 @@ public final class StatementBuilder {
                 block.append(new ArrayAssignment(var, index_arg, val));
                 break;
             }
-            case POP: {
+            case Insn.POP: {
                 Instruction arg = stack.pop();
                 if (arg instanceof InstanceMethodInvoke || arg instanceof StaticMethodInvoke) {
                     block.append(new InvokeStatement(arg));
                 }
                 break;
             }
-            case POP2: {
-                for (int i = 0; i < 2; i++) {
-                    Instruction arg = stack.pop();
-                    if (arg instanceof InstanceMethodInvoke || arg instanceof StaticMethodInvoke) {
-                        block.append(new InvokeStatement(arg));
-                    }
-                }
-                break;
-            }
-            case DUP: {
+            case Insn.DUP: {
                 stack.push(stack.peek());
                 break;
             }
-            case DUP_X1: {
+            case Insn.DUP_X1: {
                 Instruction val = stack.pop();
                 Instruction val2 = stack.pop();
                 stack.push(val);
@@ -256,7 +180,7 @@ public final class StatementBuilder {
                 stack.push(val);
                 break;
             }
-            case DUP_X2: {
+            case Insn.DUP_X2: {
                 Instruction val = stack.pop();
                 Instruction val2 = stack.pop();
                 Instruction val3 = stack.pop();
@@ -266,7 +190,7 @@ public final class StatementBuilder {
                 stack.push(val);
                 break;
             }
-            case DUP2: {
+            case Insn.DUP2: {
                 Instruction val = stack.pop();
                 Instruction val2 = stack.peek();
                 stack.push(val);
@@ -274,7 +198,7 @@ public final class StatementBuilder {
                 stack.push(val);
                 break;
             }
-            case DUP2_X1: {
+            case Insn.DUP2_X1: {
                 Instruction val = stack.pop();
                 Instruction val2 = stack.pop();
                 Instruction val3 = stack.pop();
@@ -285,7 +209,7 @@ public final class StatementBuilder {
                 stack.push(val);
                 break;
             }
-            case DUP2_X2: {
+            case Insn.DUP2_X2: {
                 Instruction val = stack.pop();
                 Instruction val2 = stack.pop();
                 Instruction val3 = stack.pop();
@@ -298,233 +222,150 @@ public final class StatementBuilder {
                 stack.push(val);
                 break;
             }
-            case SWAP: {
+            case Insn.SWAP: {
                 Instruction val = stack.pop();
                 Instruction val2 = stack.pop();
                 stack.push(val);
                 stack.push(val2);
                 break;
             }
-            case IADD:
-            case LADD:
-            case FADD:
-            case DADD: {
+            case Insn.ADD: {
                 Instruction right = stack.pop();
                 Instruction left = stack.pop();
                 stack.push(new Operator(OperatorType.ADD, left, right));
                 break;
             }
-            case ISUB:
-            case LSUB:
-            case FSUB:
-            case DSUB: {
+            case Insn.SUB: {
                 Instruction right = stack.pop();
                 Instruction left = stack.pop();
                 stack.push(new Operator(OperatorType.SUBTRACT, left, right));
                 break;
             }
-            case IMUL:
-            case LMUL:
-            case FMUL:
-            case DMUL: {
+            case Insn.MUL: {
                 Instruction right = stack.pop();
                 Instruction left = stack.pop();
                 stack.push(new Operator(OperatorType.MULTIPLY, left, right));
                 break;
             }
-            case IDIV:
-            case LDIV:
-            case FDIV:
-            case DDIV: {
+            case Insn.DIV: {
                 Instruction right = stack.pop();
                 Instruction left = stack.pop();
                 stack.push(new Operator(OperatorType.DIVIDE, left, right));
                 break;
             }
-            case IREM:
-            case LREM:
-            case FREM:
-            case DREM: {
+            case Insn.REM: {
                 Instruction right = stack.pop();
                 Instruction left = stack.pop();
                 stack.push(new Operator(OperatorType.REMAINDER, left, right));
                 break;
             }
-            case INEG:
-            case LNEG:
-            case FNEG:
-            case DNEG: {
+            case Insn.NEG: {
                 Instruction right = stack.pop();
                 stack.push(new NegativeOperator(right));
                 break;
             }
-            case ISHL:
-            case LSHL: {
+            case Insn.SHL: {
                 Instruction right = stack.pop();
                 Instruction left = stack.pop();
                 stack.push(new Operator(OperatorType.SHIFT_LEFT, left, right));
                 break;
             }
-            case ISHR:
-            case LSHR: {
+            case Insn.SHR: {
                 Instruction right = stack.pop();
                 Instruction left = stack.pop();
                 stack.push(new Operator(OperatorType.SHIFT_RIGHT, left, right));
                 break;
             }
-            case IUSHR:
-            case LUSHR: {
+            case Insn.USHR: {
                 Instruction right = stack.pop();
                 Instruction left = stack.pop();
                 stack.push(new Operator(OperatorType.UNSIGNED_SHIFT_RIGHT, left, right));
                 break;
             }
-            case IAND:
-            case LAND: {
+            case Insn.AND: {
                 Instruction right = stack.pop();
                 Instruction left = stack.pop();
                 stack.push(new Operator(OperatorType.AND, left, right));
                 break;
             }
-            case IOR:
-            case LOR: {
+            case Insn.OR: {
                 Instruction right = stack.pop();
                 Instruction left = stack.pop();
                 stack.push(new Operator(OperatorType.OR, left, right));
                 break;
             }
-            case IXOR:
-            case LXOR: {
+            case Insn.XOR: {
                 Instruction right = stack.pop();
                 Instruction left = stack.pop();
                 stack.push(new Operator(OperatorType.XOR, left, right));
                 break;
             }
-            case IINC: {
-                IincInsnNode inc = (IincInsnNode) next;
-                Local local = locals.getLocal(inc.var);
-                Increment insn = new Increment(local.getInstance(label_index), inc.incr);
+            case Insn.IINC: {
+                VarIntInsn inc = (VarIntInsn) next;
+                Local local = locals.getLocal(inc.getLocal());
+                Increment insn = new Increment(local.getInstance(label_index), inc.getValue());
                 block.append(insn);
                 break;
             }
-            case L2I:
-            case F2I:
-            case D2I:
-                stack.push(new Cast(ClassTypeSignature.INT, stack.pop()));
-                break;
-            case I2L:
-            case F2L:
-            case D2L:
-                stack.push(new Cast(ClassTypeSignature.LONG, stack.pop()));
-                break;
-            case I2F:
-            case L2F:
-            case D2F:
-                stack.push(new Cast(ClassTypeSignature.FLOAT, stack.pop()));
-                break;
-            case I2D:
-            case F2D:
-            case L2D:
-                stack.push(new Cast(ClassTypeSignature.DOUBLE, stack.pop()));
-                break;
-            case I2B:
-                stack.push(new Cast(ClassTypeSignature.BYTE, stack.pop()));
-                break;
-            case I2C:
-                stack.push(new Cast(ClassTypeSignature.CHAR, stack.pop()));
-                break;
-            case I2S:
-                stack.push(new Cast(ClassTypeSignature.SHORT, stack.pop()));
-                break;
-            case LCMP:
-            case FCMPL:
-            case FCMPG:
-            case DCMPL:
-            case DCMPG: {
+            case Insn.CMP: {
                 Instruction right = stack.pop();
                 Instruction left = stack.pop();
                 stack.push(new NumberCompare(left, right));
                 break;
             }
-            case IFEQ:
-            case IFNE:
-            case IFLT:
-            case IFGE:
-            case IFGT:
-            case IFLE:
-            case IF_ICMPEQ:
-            case IF_ICMPNE:
-            case IF_ICMPLT:
-            case IF_ICMPGE:
-            case IF_ICMPGT:
-            case IF_ICMPLE:
-            case IF_ACMPEQ:
-            case IF_ACMPNE:
-            case GOTO:
-            case JSR:
-            case RET:
-            case IFNULL:
-            case IFNONNULL:
-                // All jumps are handled by the implicit structure of the
-                // graph
-                break;
-            case IRETURN:
-            case LRETURN:
-            case FRETURN:
-            case DRETURN:
-            case ARETURN:
+            case Insn.ARETURN:
                 block.append(new Return(stack.pop()));
                 break;
-            case RETURN:
+            case Insn.RETURN:
                 block.append(new Return());
                 break;
-            case GETSTATIC: {
-                FieldInsnNode field = (FieldInsnNode) next;
-                String owner = field.owner;
+            case Insn.GETSTATIC: {
+                FieldInsn field = (FieldInsn) next;
+                String owner = field.getOwner();
                 if (!owner.startsWith("[")) {
                     owner = "L" + owner + ";";
                 }
-                FieldAccess arg = new StaticFieldAccess(field.name, ClassTypeSignature.of(field.desc), owner);
+                FieldAccess arg = new StaticFieldAccess(field.getName(), ClassTypeSignature.of(field.getDescription()), owner);
                 stack.push(arg);
                 break;
             }
-            case PUTSTATIC: {
-                FieldInsnNode field = (FieldInsnNode) next;
+            case Insn.PUTSTATIC: {
+                FieldInsn field = (FieldInsn) next;
                 Instruction val = stack.pop();
-                String owner = field.owner;
+                String owner = field.getOwner();
                 if (!owner.startsWith("[")) {
                     owner = "L" + owner + ";";
                 }
-                FieldAssignment assign = new StaticFieldAssignment(field.name, field.desc, owner, val);
+                FieldAssignment assign = new StaticFieldAssignment(field.getName(), field.getDescription(), owner, val);
                 block.append(assign);
                 break;
             }
-            case GETFIELD: {
-                FieldInsnNode field = (FieldInsnNode) next;
-                String owner = field.owner;
+            case Insn.GETFIELD: {
+                FieldInsn field = (FieldInsn) next;
+                String owner = field.getOwner();
                 if (!owner.startsWith("[")) {
                     owner = "L" + owner + ";";
                 }
-                FieldAccess arg = new InstanceFieldAccess(field.name, ClassTypeSignature.of(field.desc), owner, stack.pop());
+                FieldAccess arg = new InstanceFieldAccess(field.getName(), ClassTypeSignature.of(field.getDescription()), owner, stack.pop());
                 stack.push(arg);
                 break;
             }
-            case PUTFIELD: {
-                FieldInsnNode field = (FieldInsnNode) next;
+            case Insn.PUTFIELD: {
+                FieldInsn field = (FieldInsn) next;
                 Instruction val = stack.pop();
                 Instruction owner = stack.pop();
-                String owner_t = field.owner;
+                String owner_t = field.getOwner();
                 if (!owner_t.startsWith("[")) {
                     owner_t = "L" + owner_t + ";";
                 }
-                FieldAssignment assign = new InstanceFieldAssignment(field.name, field.desc, owner_t, owner, val);
+                FieldAssignment assign = new InstanceFieldAssignment(field.getName(), field.getDescription(), owner_t, owner, val);
                 block.append(assign);
                 break;
             }
-            case INVOKESPECIAL: {
-                MethodInsnNode ctor = (MethodInsnNode) next;
-                if (ctor.name.equals("<init>")) {
-                    Instruction[] args = new Instruction[TypeHelper.paramCount(ctor.desc)];
+            case Insn.INVOKE: {
+                MethodInsn method = (MethodInsn) next;
+                if (method.getName().equals("<init>")) {
+                    Instruction[] args = new Instruction[TypeHelper.paramCount(method.getDescription())];
                     for (int i = args.length - 1; i >= 0; i--) {
                         args[i] = stack.pop();
                     }
@@ -533,43 +374,39 @@ public final class StatementBuilder {
                         if (stack.peek() instanceof New) {
                             New new_arg2 = (New) stack.pop();
                             if (new_arg2 == new_arg) {
-                                new_arg.setCtorDescription(ctor.desc);
+                                new_arg.setCtorDescription(method.getDescription());
                                 new_arg.setParameters(args);
                                 stack.push(new_arg);
                                 break;
                             }
                             stack.push(new_arg2);
                         }
-                        New insn = new New(new_arg.getType(), ctor.desc, args);
+                        New insn = new New(new_arg.getType(), method.getDescription(), args);
                         block.append(new InvokeStatement(insn));
                         break;
                     } else if (stack.peek() instanceof LocalAccess) {
                         LocalAccess callee = (LocalAccess) stack.pop();
-                        String owner = ctor.owner;
+                        String owner = method.getOwner();
                         if (!owner.startsWith("[")) {
                             owner = "L" + owner + ";";
                         }
-                        InstanceMethodInvoke arg = new InstanceMethodInvoke(ctor.name, ctor.desc, owner, args, callee);
+                        InstanceMethodInvoke arg = new InstanceMethodInvoke(method.getName(), method.getDescription(), owner, args, callee);
                         block.append(new InvokeStatement(arg));
                         break;
                     }
                     throw new IllegalStateException("Callee of call to <init> was " + stack.pop());
                 }
-            }
-            case INVOKEVIRTUAL:
-            case INVOKEINTERFACE: {
-                MethodInsnNode method = (MethodInsnNode) next;
-                String ret = TypeHelper.getRet(method.desc);
-                Instruction[] args = new Instruction[TypeHelper.paramCount(method.desc)];
+                String ret = TypeHelper.getRet(method.getDescription());
+                Instruction[] args = new Instruction[TypeHelper.paramCount(method.getDescription())];
                 for (int i = args.length - 1; i >= 0; i--) {
                     args[i] = stack.pop();
                 }
                 Instruction callee = stack.pop();
-                String owner = method.owner;
+                String owner = method.getOwner();
                 if (!owner.startsWith("[")) {
                     owner = "L" + owner + ";";
                 }
-                InstanceMethodInvoke arg = new InstanceMethodInvoke(method.name, method.desc, owner, args, callee);
+                InstanceMethodInvoke arg = new InstanceMethodInvoke(method.getName(), method.getDescription(), owner, args, callee);
                 if (ret.equals("V")) {
                     block.append(new InvokeStatement(arg));
                 } else {
@@ -577,18 +414,18 @@ public final class StatementBuilder {
                 }
                 break;
             }
-            case INVOKESTATIC: {
-                MethodInsnNode method = (MethodInsnNode) next;
-                String ret = TypeHelper.getRet(method.desc);
-                Instruction[] args = new Instruction[TypeHelper.paramCount(method.desc)];
+            case Insn.INVOKESTATIC: {
+                MethodInsn method = (MethodInsn) next;
+                String ret = TypeHelper.getRet(method.getDescription());
+                Instruction[] args = new Instruction[TypeHelper.paramCount(method.getDescription())];
                 for (int i = args.length - 1; i >= 0; i--) {
                     args[i] = stack.pop();
                 }
-                String owner = method.owner;
+                String owner = method.getOwner();
                 if (!owner.startsWith("[")) {
                     owner = "L" + owner + ";";
                 }
-                StaticMethodInvoke arg = new StaticMethodInvoke(method.name, method.desc, owner, args);
+                StaticMethodInvoke arg = new StaticMethodInvoke(method.getName(), method.getDescription(), owner, args);
                 if (ret.equals("V")) {
                     block.append(new InvokeStatement(arg));
                 } else {
@@ -596,67 +433,48 @@ public final class StatementBuilder {
                 }
                 break;
             }
-            case INVOKEDYNAMIC: {
-                InvokeDynamicInsnNode invoke = (InvokeDynamicInsnNode) next;
-                Handle lambda = (Handle) invoke.bsmArgs[1];
-                TypeSignature type = ClassTypeSignature.of(invoke.desc);
-                String method = invoke.name;
-                DynamicInvokeHandle handle = new DynamicInvokeHandle(lambda.getOwner(), lambda.getName(), lambda.getDesc(), type, method);
-                stack.push(handle);
-                break;
-            }
-            case NEW: {
-                TypeSignature type = ClassTypeSignature.of("L" + ((TypeInsnNode) next).desc + ";");
+//            case INVOKEDYNAMIC: {
+//                InvokeDynamicInsnNode invoke = (InvokeDynamicInsnNode) next;
+//                Handle lambda = (Handle) invoke.bsmArgs[1];
+//                TypeSignature type = ClassTypeSignature.of(invoke.desc);
+//                String method = invoke.name;
+//                DynamicInvokeHandle handle = new DynamicInvokeHandle(lambda.getOwner(), lambda.getName(), lambda.getDesc(), type, method);
+//                stack.push(handle);
+//                break;
+//            }
+            case Insn.NEW: {
+                TypeSignature type = ClassTypeSignature.of("L" + ((TypeInsn) next).getType() + ";");
                 stack.push(new New(type, null, null));
                 break;
             }
-            case NEWARRAY:
-            case ANEWARRAY: {
+            case Insn.NEWARRAY: {
                 Instruction size = stack.pop();
-                String array_type = null;
-                if (next instanceof IntInsnNode) {
-                    IntInsnNode array = (IntInsnNode) next;
-                    array_type = AstUtil.opcodeToType(array.operand);
-                } else if (next instanceof TypeInsnNode) {
-                    TypeInsnNode array = (TypeInsnNode) next;
-                    array_type = array.desc;
-                }
-                stack.push(new NewArray(array_type, size, null));
+                TypeInsn array = (TypeInsn) next;
+                stack.push(new NewArray(array.getType(), size, null));
                 break;
             }
-            case ARRAYLENGTH:
-                stack.push(new InstanceFieldAccess("length", ClassTypeSignature.INT, "hidden-array-field", stack.pop()));
-                break;
-            case ATHROW:
+            case Insn.THROW:
                 block.append(new Throw(stack.pop()));
                 break;
-            case CHECKCAST: {
-                TypeInsnNode cast = (TypeInsnNode) next;
-                String desc = cast.desc;
+            case Insn.CAST: {
+                TypeInsn cast = (TypeInsn) next;
+                String desc = cast.getType();
                 if (!desc.startsWith("[")) {
                     desc = "L" + desc + ";";
                 }
                 stack.push(new Cast(ClassTypeSignature.of(desc), stack.pop()));
                 break;
             }
-            case INSTANCEOF: {
-                TypeInsnNode insn = (TypeInsnNode) next;
+            case Insn.INSTANCEOF: {
+                TypeInsn insn = (TypeInsn) next;
                 Instruction val = stack.pop();
-                String type = insn.desc;
+                String type = insn.getType();
                 if (!type.startsWith("[")) {
-                    type = "L" + insn.desc + ";";
+                    type = "L" + type + ";";
                 }
                 stack.push(new InstanceOf(val, type));
                 break;
             }
-            case MONITORENTER:
-            case MONITOREXIT:
-                // TODO synchronized
-                throw new IllegalStateException();
-                // break;
-            case MULTIANEWARRAY:
-                // TODO
-                throw new IllegalStateException();
             default:
                 System.err.println("Unsupported opcode: " + next.getOpcode());
                 throw new IllegalStateException();

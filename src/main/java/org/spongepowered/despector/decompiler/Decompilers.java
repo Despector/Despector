@@ -36,7 +36,6 @@ import org.spongepowered.despector.decompiler.method.graph.create.SwitchGraphPro
 import org.spongepowered.despector.decompiler.method.graph.create.TryCatchGraphProducerStep;
 import org.spongepowered.despector.decompiler.method.graph.operate.BlockTargetOperation;
 import org.spongepowered.despector.decompiler.method.graph.operate.BreakPrePassOperation;
-import org.spongepowered.despector.decompiler.method.graph.operate.EmptyBlockClearOperation;
 import org.spongepowered.despector.decompiler.method.graph.operate.JumpSeparateOperation;
 import org.spongepowered.despector.decompiler.method.graph.operate.TernaryPrePassOperation;
 import org.spongepowered.despector.decompiler.method.graph.process.InternalBlockProcessor;
@@ -86,7 +85,6 @@ public final class Decompilers {
         JAVA_METHOD.addGraphProducer(new JumpGraphProducerStep());
         JAVA_METHOD.addGraphProducer(new SwitchGraphProducerStep());
         JAVA_METHOD.addGraphProducer(new TryCatchGraphProducerStep());
-        JAVA_METHOD.addCleanupOperation(new EmptyBlockClearOperation());
         JAVA_METHOD.addCleanupOperation(new JumpSeparateOperation());
         JAVA_METHOD.addCleanupOperation(new BlockTargetOperation());
         JAVA_METHOD.addCleanupOperation(new TernaryPrePassOperation());
@@ -107,7 +105,6 @@ public final class Decompilers {
         KOTLIN_METHOD.addGraphProducer(new SwitchGraphProducerStep());
         KOTLIN_METHOD.addGraphProducer(new TryCatchGraphProducerStep());
         KOTLIN_METHOD.addGraphProducer(new ElvisGraphProducerStep());
-        KOTLIN_METHOD.addCleanupOperation(new EmptyBlockClearOperation());
         KOTLIN_METHOD.addCleanupOperation(new JumpSeparateOperation());
         KOTLIN_METHOD.addCleanupOperation(new BlockTargetOperation());
         KOTLIN_METHOD.addCleanupOperation(new BreakPrePassOperation());

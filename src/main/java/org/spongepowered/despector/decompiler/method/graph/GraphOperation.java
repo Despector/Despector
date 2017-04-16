@@ -24,7 +24,6 @@
  */
 package org.spongepowered.despector.decompiler.method.graph;
 
-import org.objectweb.asm.Label;
 import org.spongepowered.despector.decompiler.method.PartialMethod;
 import org.spongepowered.despector.decompiler.method.graph.data.opcode.ConditionalOpcodeBlock;
 import org.spongepowered.despector.decompiler.method.graph.data.opcode.OpcodeBlock;
@@ -63,7 +62,7 @@ public interface GraphOperation {
             }
             if (other instanceof SwitchOpcodeBlock) {
                 SwitchOpcodeBlock sswitch = (SwitchOpcodeBlock) other;
-                for (Map.Entry<Label, OpcodeBlock> e : sswitch.getAdditionalTargets().entrySet()) {
+                for (Map.Entry<Integer, OpcodeBlock> e : sswitch.getAdditionalTargets().entrySet()) {
                     if (e.getValue() == from) {
                         sswitch.getAdditionalTargets().put(e.getKey(), to);
                     }

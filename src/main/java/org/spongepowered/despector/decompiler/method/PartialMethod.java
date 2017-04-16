@@ -48,6 +48,7 @@ public class PartialMethod {
     private StatementBlock block;
     private List<OpcodeBlock> graph;
     private List<BlockSection> final_blocks = new ArrayList<>();
+    private List<TryCatchRegion> catch_regions = new ArrayList<>();
 
     public PartialMethod(MethodDecompiler decompiler, MethodEntry method) {
         this.decompiler = decompiler;
@@ -130,6 +131,42 @@ public class PartialMethod {
      */
     public List<BlockSection> getFinalBlocks() {
         return this.final_blocks;
+    }
+
+    public List<TryCatchRegion> getCatchRegions() {
+        return this.catch_regions;
+    }
+
+    public static class TryCatchRegion {
+
+        private int start_pc;
+        private int end_pc;
+        private int catch_pc;
+        private String ex;
+
+        public TryCatchRegion(int start_pc, int end_pc, int catch_pc, String ex) {
+            this.start_pc = start_pc;
+            this.end_pc = end_pc;
+            this.catch_pc = catch_pc;
+            this.ex = ex;
+        }
+
+        public int getStart() {
+            return this.start_pc;
+        }
+
+        public int getEnd() {
+            return this.end_pc;
+        }
+
+        public int getCatch() {
+            return this.catch_pc;
+        }
+
+        public String getException() {
+            return this.ex;
+        }
+
     }
 
 }

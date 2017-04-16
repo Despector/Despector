@@ -25,12 +25,13 @@
 package org.spongepowered.despector.decompiler.method.graph.process;
 
 import static com.google.common.base.Preconditions.checkState;
-import static org.objectweb.asm.Opcodes.*;
+import static org.objectweb.asm.Opcodes.ASTORE;
+import static org.objectweb.asm.Opcodes.POP;
 
-import org.objectweb.asm.tree.AbstractInsnNode;
-import org.objectweb.asm.tree.VarInsnNode;
 import org.spongepowered.despector.ast.Locals;
 import org.spongepowered.despector.config.ConfigManager;
+import org.spongepowered.despector.decompiler.ir.Insn;
+import org.spongepowered.despector.decompiler.ir.IntInsn;
 import org.spongepowered.despector.decompiler.method.PartialMethod;
 import org.spongepowered.despector.decompiler.method.graph.GraphProcessor;
 import org.spongepowered.despector.decompiler.method.graph.data.TryCatchMarkerType;
@@ -41,7 +42,6 @@ import org.spongepowered.despector.decompiler.method.graph.data.block.TryCatchBl
 import org.spongepowered.despector.decompiler.method.graph.data.opcode.GotoOpcodeBlock;
 import org.spongepowered.despector.decompiler.method.graph.data.opcode.OpcodeBlock;
 import org.spongepowered.despector.decompiler.method.graph.data.opcode.TryCatchMarkerOpcodeBlock;
-import org.spongepowered.despector.util.AstUtil;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -100,8 +100,8 @@ public class TryCatchBlockProcessor implements GraphProcessor {
                     List<String> comment = new ArrayList<>();
                     for (OpcodeBlock op : body) {
                         comment.add(op.getDebugHeader());
-                        for (AbstractInsnNode insn : op.getOpcodes()) {
-                            comment.add(AstUtil.insnToString(insn));
+                        for (Insn insn : op.getOpcodes()) {
+                            comment.add(insn.toString());
                         }
                     }
                     try_section.getBody().add(new CommentBlockSection(comment));
@@ -130,7 +130,7 @@ public class TryCatchBlockProcessor implements GraphProcessor {
                                 }
                             }
                             checkState(found);
-                            extra_exceptions.add(cnext_marker.getAsmNode().type);
+                            extra_exceptions.add(cnext_marker.getAsmNode().getException());
                         } else {
                             end--;
                             break;
@@ -141,10 +141,10 @@ public class TryCatchBlockProcessor implements GraphProcessor {
                     int local_num = -1;
                     OpcodeBlock catch_start = blocks.get(end++);
                     int k = 0;
-                    for (Iterator<AbstractInsnNode> it = catch_start.getOpcodes().iterator(); it.hasNext();) {
-                        AbstractInsnNode op = it.next();
+                    for (Iterator<Insn> it = catch_start.getOpcodes().iterator(); it.hasNext();) {
+                        Insn op = it.next();
                         if (op.getOpcode() == ASTORE) {
-                            local_num = ((VarInsnNode) op).var;
+                            local_num = ((IntInsn) op).getValue();
                             label_index = catch_start.getBreakpoint() - (catch_start.getOpcodes().size() - k);
                             it.remove();
                             break;
@@ -196,8 +196,8 @@ public class TryCatchBlockProcessor implements GraphProcessor {
                             List<String> comment = new ArrayList<>();
                             for (OpcodeBlock op : catch_body) {
                                 comment.add(op.getDebugHeader());
-                                for (AbstractInsnNode insn : op.getOpcodes()) {
-                                    comment.add(AstUtil.insnToString(insn));
+                                for (Insn insn : op.getOpcodes()) {
+                                    comment.add(insn.toString());
                                 }
                             }
                             cblock.getBody().add(new CommentBlockSection(comment));

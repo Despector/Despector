@@ -26,11 +26,11 @@ package org.spongepowered.despector.decompiler.method.graph.operate;
 
 import static com.google.common.base.Preconditions.checkState;
 
-import org.objectweb.asm.tree.TryCatchBlockNode;
 import org.spongepowered.despector.ast.Locals;
 import org.spongepowered.despector.ast.members.insn.branch.condition.Condition;
 import org.spongepowered.despector.decompiler.method.ConditionBuilder;
 import org.spongepowered.despector.decompiler.method.PartialMethod;
+import org.spongepowered.despector.decompiler.method.PartialMethod.TryCatchRegion;
 import org.spongepowered.despector.decompiler.method.graph.GraphOperation;
 import org.spongepowered.despector.decompiler.method.graph.data.TryCatchMarkerType;
 import org.spongepowered.despector.decompiler.method.graph.data.block.InlineBlockSection;
@@ -84,7 +84,7 @@ public class TernaryPrePassOperation implements GraphOperation {
         int start = end - 1;
         List<OpcodeBlock> true_blocks = new ArrayList<>();
         OpcodeBlock tr = blocks.get(start--);
-        TryCatchBlockNode tr_end = null;
+        TryCatchRegion tr_end = null;
         if (tr instanceof TryCatchMarkerOpcodeBlock) {
             tr_end = ((TryCatchMarkerOpcodeBlock) tr).getAsmNode();
             tr = blocks.get(start--);
@@ -93,7 +93,7 @@ public class TernaryPrePassOperation implements GraphOperation {
         OpcodeBlock go = blocks.get(start--);
         while (!(go instanceof GotoOpcodeBlock) || go.getTarget() != consumer) {
             if (go instanceof TryCatchMarkerOpcodeBlock) {
-                TryCatchBlockNode go_tr = ((TryCatchMarkerOpcodeBlock) go).getAsmNode();
+                TryCatchRegion go_tr = ((TryCatchMarkerOpcodeBlock) go).getAsmNode();
                 if (go_tr == tr_end) {
                     return 0;
                 }
