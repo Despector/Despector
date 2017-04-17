@@ -66,15 +66,15 @@ public class SwitchBlockProcessor implements GraphProcessor {
             int farthest_break = 0;
             boolean all_return = true;
             for (Map.Entry<Integer, Integer> l : ts.getTargets().entrySet()) {
-                SwitchCaseBlockSection cs = cases.get(l.getKey());
+                SwitchCaseBlockSection cs = cases.get(l.getValue());
                 if (cs != null) {
-                    cs.getTargets().add(l.getValue());
+                    cs.getTargets().add(l.getKey());
                     continue;
                 }
                 cs = sswitch.new SwitchCaseBlockSection();
                 sswitch.addCase(cs);
-                cases.put(l.getKey(), cs);
-                cs.getTargets().add(l.getValue());
+                cases.put(l.getValue(), cs);
+                cs.getTargets().add(l.getKey());
                 List<OpcodeBlock> case_region = new ArrayList<>();
                 OpcodeBlock block = sblock.getAdditionalTargets().get(l.getKey());
                 case_region.add(block);
@@ -135,7 +135,7 @@ public class SwitchBlockProcessor implements GraphProcessor {
                 cases.put(ts.getDefault(), cs);
                 sswitch.addCase(cs);
                 List<OpcodeBlock> case_region = new ArrayList<>();
-                OpcodeBlock block = sblock.getAdditionalTargets().get(ts.getDefault());
+                OpcodeBlock block = sblock.getAdditionalTargets().get(-1);
                 case_region.add(block);
                 int start = blocks.indexOf(block) + 1;
                 if (start < blocks.size()) {

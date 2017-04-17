@@ -76,10 +76,9 @@ public class SwitchGraphProducerStep implements GraphProducerStep {
             GraphOperation.remap(block_list, block, replacement);
             SwitchInsn ts = (SwitchInsn) block.getLast();
             for (Map.Entry<Integer, Integer> r : ts.getTargets().entrySet()) {
-                replacement.getAdditionalTargets().put(r.getKey(),
-                        blocks.get(sorted_break_points.get(sorted_break_points.indexOf(r.getValue()) + 1)));
+                replacement.getAdditionalTargets().put(r.getKey(), blocks.get(r.getValue()));
             }
-            replacement.getAdditionalTargets().put(-1, blocks.get(sorted_break_points.get(sorted_break_points.indexOf(ts.getDefault()) + 1)));
+            replacement.getAdditionalTargets().put(-1, blocks.get(ts.getDefault()));
         }
     }
 

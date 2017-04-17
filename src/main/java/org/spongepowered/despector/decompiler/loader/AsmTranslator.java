@@ -347,10 +347,39 @@ public class AsmTranslator {
                 IntInsnNode insn = (IntInsnNode) next;
                 if (insn.getOpcode() == BIPUSH || insn.getOpcode() == SIPUSH) {
                     block.append(new IntInsn(Insn.ICONST, insn.operand));
-                    index++;
+                } else if (insn.getOpcode() == NEWARRAY) {
+                    switch (insn.operand) {
+                    case T_BOOLEAN:
+                        block.append(new TypeInsn(Insn.NEWARRAY, "Z"));
+                        break;
+                    case T_CHAR:
+                        block.append(new TypeInsn(Insn.NEWARRAY, "C"));
+                        break;
+                    case T_FLOAT:
+                        block.append(new TypeInsn(Insn.NEWARRAY, "F"));
+                        break;
+                    case T_DOUBLE:
+                        block.append(new TypeInsn(Insn.NEWARRAY, "D"));
+                        break;
+                    case T_BYTE:
+                        block.append(new TypeInsn(Insn.NEWARRAY, "B"));
+                        break;
+                    case T_SHORT:
+                        block.append(new TypeInsn(Insn.NEWARRAY, "S"));
+                        break;
+                    case T_INT:
+                        block.append(new TypeInsn(Insn.NEWARRAY, "I"));
+                        break;
+                    case T_LONG:
+                        block.append(new TypeInsn(Insn.NEWARRAY, "J"));
+                        break;
+                    default:
+                        throw new IllegalStateException("Unsupported type in NEWARRAY: " + insn.getOpcode());
+                    }
                 } else {
-                    throw new IllegalStateException();
+                    throw new IllegalStateException("Unsupported int insn: " + insn.getOpcode());
                 }
+                index++;
             } else if (next instanceof VarInsnNode) {
                 VarInsnNode insn = (VarInsnNode) next;
                 if (insn.getOpcode() >= ILOAD && insn.getOpcode() <= ALOAD) {
