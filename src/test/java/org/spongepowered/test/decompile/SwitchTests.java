@@ -244,8 +244,10 @@ public class SwitchTests {
                 + "case EIGHT:\n"
                 + "    org.spongepowered.test.decompile.SwitchTests.body();\n"
                 + "    return;\n"
-                + "}\n\n"
-                + "org.spongepowered.test.decompile.SwitchTests.body();";
+                + "default:\n"
+                + "    org.spongepowered.test.decompile.SwitchTests.body();\n"
+                + "    return;\n"
+                + "}";
         Assert.assertEquals(good, insn);
     }
 

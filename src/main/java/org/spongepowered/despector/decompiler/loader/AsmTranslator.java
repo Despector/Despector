@@ -75,7 +75,6 @@ public class AsmTranslator {
 
     static {
         op_translation[NOP] = Insn.NOOP;
-        op_translation[ACONST_NULL] = Insn.PUSH;
         op_translation[ICONST_M1] = Insn.ICONST;
         op_translation[ICONST_0] = Insn.ICONST;
         op_translation[ICONST_1] = Insn.ICONST;
@@ -338,6 +337,9 @@ public class AsmTranslator {
                         }
                         continue outer;
                     }
+                case ACONST_NULL:
+                    block.append(new LdcInsn(Insn.PUSH, null));
+                    break;
                 default:
                     block.append(new OpInsn(translate(insn.getOpcode())));
                     break;
