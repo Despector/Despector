@@ -76,7 +76,7 @@ public class RangeTests {
 
         String insn = KotlinTestHelper.getMethodAsString(builder.finish(), "decimalDigitValue");
         String good = "fun decimalDigitValue(c: Char): Int {\n"
-                + "    if (c !in '0'..'9') {\n"
+                + "    if (param1 !in '0'..'9') {\n"
                 + "        throw IllegalArgumentException(\"Out of range\")\n"
                 + "    }\n\n"
                 + "    return c - 48\n"

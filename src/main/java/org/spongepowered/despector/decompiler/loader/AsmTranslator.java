@@ -27,6 +27,7 @@ package org.spongepowered.despector.decompiler.loader;
 import static org.objectweb.asm.Opcodes.*;
 
 import com.google.common.collect.Maps;
+import org.objectweb.asm.Handle;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.AbstractInsnNode;
@@ -36,6 +37,7 @@ import org.objectweb.asm.tree.IincInsnNode;
 import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.InsnNode;
 import org.objectweb.asm.tree.IntInsnNode;
+import org.objectweb.asm.tree.InvokeDynamicInsnNode;
 import org.objectweb.asm.tree.JumpInsnNode;
 import org.objectweb.asm.tree.LabelNode;
 import org.objectweb.asm.tree.LdcInsnNode;
@@ -53,6 +55,7 @@ import org.spongepowered.despector.decompiler.ir.FloatInsn;
 import org.spongepowered.despector.decompiler.ir.Insn;
 import org.spongepowered.despector.decompiler.ir.InsnBlock;
 import org.spongepowered.despector.decompiler.ir.IntInsn;
+import org.spongepowered.despector.decompiler.ir.InvokeDynamicInsn;
 import org.spongepowered.despector.decompiler.ir.JumpInsn;
 import org.spongepowered.despector.decompiler.ir.LdcInsn;
 import org.spongepowered.despector.decompiler.ir.LongInsn;
@@ -232,7 +235,6 @@ public class AsmTranslator {
                 index++;
             } else if (next instanceof InsnNode) {
                 InsnNode insn = (InsnNode) next;
-                int var = 0;
                 switch (insn.getOpcode()) {
                 case L2I:
                 case F2I:
@@ -465,6 +467,12 @@ public class AsmTranslator {
                 } else if (ldc.cst instanceof Double) {
                     block.append(new DoubleInsn(Insn.DCONST, (Double) ldc.cst));
                 }
+                index++;
+            } else if (next instanceof InvokeDynamicInsnNode) {
+                InvokeDynamicInsnNode invoke = (InvokeDynamicInsnNode) next;
+                Handle handle = (Handle) invoke.bsmArgs[1];
+                block.append(
+                        new InvokeDynamicInsn(Insn.INVOKEDYNAMIC, handle.getOwner(), handle.getName(), handle.getDesc(), invoke.name, invoke.desc));
                 index++;
             } else {
                 throw new IllegalStateException(next.getClass().getName());

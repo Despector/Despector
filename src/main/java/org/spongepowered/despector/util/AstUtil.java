@@ -203,7 +203,7 @@ public final class AstUtil {
         case Insn.IINC:
         case Insn.GOTO:
         case Insn.RETURN:
-//        case Insn.INVOKEDYNAMIC:
+        case Insn.INVOKEDYNAMIC:
             return 0;
         case Insn.INVOKE: {
             MethodInsn method = (MethodInsn) next;
@@ -268,7 +268,7 @@ public final class AstUtil {
         case Insn.OR:
         case Insn.XOR:
         case Insn.CMP:
-//        case Insn.INVOKEDYNAMIC:
+        case Insn.INVOKEDYNAMIC:
             return 1;
         case Insn.NOOP:
         case Insn.IINC:

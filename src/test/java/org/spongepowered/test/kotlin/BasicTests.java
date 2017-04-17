@@ -72,7 +72,8 @@ public class BasicTests {
 
         String insn = KotlinTestHelper.getMethodAsString(builder.finish(), "main");
         String good = "fun main() {\n"
-                + "    println(\"Hello\")\n"
+                + "    val param1: String = \"Hello\"\n"
+                + "    println(param1)\n"
                 + "}";
         Assert.assertEquals(good, insn);
     }

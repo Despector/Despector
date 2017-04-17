@@ -44,13 +44,14 @@ public abstract class Insn {
 
     public static final int INVOKE = 20;
     public static final int INVOKESTATIC = 21;
-    public static final int NEW = 22;
-    public static final int NEWARRAY = 23;
-    public static final int THROW = 24;
-    public static final int RETURN = 25;
-    public static final int ARETURN = 26;
-    public static final int CAST = 27;
-    public static final int INSTANCEOF = 28;
+    public static final int INVOKEDYNAMIC = 22;
+    public static final int NEW = 23;
+    public static final int NEWARRAY = 24;
+    public static final int THROW = 25;
+    public static final int RETURN = 26;
+    public static final int ARETURN = 27;
+    public static final int CAST = 28;
+    public static final int INSTANCEOF = 29;
 
     public static final int POP = 30;
     public static final int DUP = 31;

@@ -54,6 +54,7 @@ import org.spongepowered.despector.ast.members.insn.assign.FieldAssignment;
 import org.spongepowered.despector.ast.members.insn.assign.InstanceFieldAssignment;
 import org.spongepowered.despector.ast.members.insn.assign.LocalAssignment;
 import org.spongepowered.despector.ast.members.insn.assign.StaticFieldAssignment;
+import org.spongepowered.despector.ast.members.insn.function.DynamicInvokeHandle;
 import org.spongepowered.despector.ast.members.insn.function.InstanceMethodInvoke;
 import org.spongepowered.despector.ast.members.insn.function.InvokeStatement;
 import org.spongepowered.despector.ast.members.insn.function.New;
@@ -66,6 +67,7 @@ import org.spongepowered.despector.decompiler.ir.FieldInsn;
 import org.spongepowered.despector.decompiler.ir.FloatInsn;
 import org.spongepowered.despector.decompiler.ir.Insn;
 import org.spongepowered.despector.decompiler.ir.IntInsn;
+import org.spongepowered.despector.decompiler.ir.InvokeDynamicInsn;
 import org.spongepowered.despector.decompiler.ir.LdcInsn;
 import org.spongepowered.despector.decompiler.ir.LongInsn;
 import org.spongepowered.despector.decompiler.ir.MethodInsn;
@@ -433,15 +435,14 @@ public final class StatementBuilder {
                 }
                 break;
             }
-//            case INVOKEDYNAMIC: {
-//                InvokeDynamicInsnNode invoke = (InvokeDynamicInsnNode) next;
-//                Handle lambda = (Handle) invoke.bsmArgs[1];
-//                TypeSignature type = ClassTypeSignature.of(invoke.desc);
-//                String method = invoke.name;
-//                DynamicInvokeHandle handle = new DynamicInvokeHandle(lambda.getOwner(), lambda.getName(), lambda.getDesc(), type, method);
-//                stack.push(handle);
-//                break;
-//            }
+            case Insn.INVOKEDYNAMIC: {
+                InvokeDynamicInsn invoke = (InvokeDynamicInsn) next;
+                TypeSignature type = ClassTypeSignature.of(invoke.getType());
+                DynamicInvokeHandle handle = new DynamicInvokeHandle(invoke.getLambdaOwner(), invoke.getLambdaName(), invoke.getLambdaDescription(),
+                        type, invoke.getName());
+                stack.push(handle);
+                break;
+            }
             case Insn.NEW: {
                 TypeSignature type = ClassTypeSignature.of("L" + ((TypeInsn) next).getType() + ";");
                 stack.push(new New(type, null, null));
