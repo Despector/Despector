@@ -55,7 +55,10 @@ public class JumpGraphProducerStep implements GraphProducerStep {
                 // also break before labels targetted by jump opcodes to have a
                 // break between the body of an if block and the statements
                 // after it
-                break_points.add(((JumpInsn) next).getTarget() - 1);
+                int target = ((JumpInsn) next).getTarget() - 1;
+                if(target >= 0) {
+                    break_points.add(target);
+                }
                 continue;
             }
             int op = next.getOpcode();
