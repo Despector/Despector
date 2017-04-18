@@ -30,7 +30,6 @@ import static org.objectweb.asm.Opcodes.ASTORE;
 import static org.objectweb.asm.Opcodes.ILOAD;
 import static org.objectweb.asm.Opcodes.ISTORE;
 
-import javax.annotation.Nullable;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.LocalVariableNode;
@@ -56,7 +55,6 @@ import org.spongepowered.despector.decompiler.method.graph.data.block.BlockSecti
 import org.spongepowered.despector.decompiler.method.graph.data.opcode.BodyOpcodeBlock;
 import org.spongepowered.despector.decompiler.method.graph.data.opcode.OpcodeBlock;
 import org.spongepowered.despector.decompiler.method.postprocess.StatementPostProcessor;
-import org.spongepowered.despector.decompiler.method.special.LocalsProcessor;
 import org.spongepowered.despector.decompiler.method.special.SpecialMethodProcessor;
 import org.spongepowered.despector.util.SignatureParser;
 import org.spongepowered.despector.util.TypeHelper;
@@ -71,6 +69,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import javax.annotation.Nullable;
 
 /**
  * A decompiler for method bodies.

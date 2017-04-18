@@ -27,7 +27,6 @@ package org.spongepowered.despector.ast;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.spongepowered.despector.Language;
-import org.spongepowered.despector.ast.type.ArrayTypeEntry;
 import org.spongepowered.despector.ast.type.EnumEntry;
 import org.spongepowered.despector.ast.type.InterfaceEntry;
 import org.spongepowered.despector.ast.type.TypeEntry;
@@ -54,7 +53,6 @@ public class SourceSet {
     private final Map<String, TypeEntry> classes = new HashMap<>();
     private final Map<String, EnumEntry> enums = new HashMap<>();
     private final Map<String, InterfaceEntry> interfaces = new HashMap<>();
-    private final Map<String, ArrayTypeEntry> array_types = new HashMap<>();
 
     private final Map<String, AnnotationType> annotations = new HashMap<>();
 
@@ -88,13 +86,7 @@ public class SourceSet {
     public TypeEntry get(String name) {
         checkNotNull(name);
         if (name.endsWith("[]")) {
-            ArrayTypeEntry entry = this.array_types.get(name);
-            if (entry == null) {
-                TypeEntry comp = get(name.substring(0, name.length() - 2));
-                entry = new ArrayTypeEntry(this, Language.ANY, comp.getName());
-                this.array_types.put(name, entry);
-            }
-            return entry;
+            return get(name.substring(0, name.length() - 2));
         }
         TypeEntry entry = this.classes.get(name);
         if (entry == null && this.loader != null && !this.load_failed_cache.contains(name)) {
