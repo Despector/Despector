@@ -24,7 +24,7 @@
  */
 package org.spongepowered.despector.emitter;
 
-import org.spongepowered.despector.ast.members.insn.branch.condition.Condition;
+import org.spongepowered.despector.ast.insn.condition.Condition;
 
 /**
  * An emitter for a condition.

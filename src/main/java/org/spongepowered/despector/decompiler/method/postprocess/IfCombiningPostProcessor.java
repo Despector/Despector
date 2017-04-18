@@ -24,18 +24,18 @@
  */
 package org.spongepowered.despector.decompiler.method.postprocess;
 
-import org.spongepowered.despector.ast.members.insn.Statement;
-import org.spongepowered.despector.ast.members.insn.StatementBlock;
-import org.spongepowered.despector.ast.members.insn.branch.DoWhile;
-import org.spongepowered.despector.ast.members.insn.branch.For;
-import org.spongepowered.despector.ast.members.insn.branch.If;
-import org.spongepowered.despector.ast.members.insn.branch.If.Elif;
-import org.spongepowered.despector.ast.members.insn.branch.Switch;
-import org.spongepowered.despector.ast.members.insn.branch.Switch.Case;
-import org.spongepowered.despector.ast.members.insn.branch.TryCatch;
-import org.spongepowered.despector.ast.members.insn.branch.TryCatch.CatchBlock;
-import org.spongepowered.despector.ast.members.insn.branch.While;
-import org.spongepowered.despector.ast.members.insn.branch.condition.AndCondition;
+import org.spongepowered.despector.ast.insn.condition.AndCondition;
+import org.spongepowered.despector.ast.stmt.Statement;
+import org.spongepowered.despector.ast.stmt.StatementBlock;
+import org.spongepowered.despector.ast.stmt.branch.DoWhile;
+import org.spongepowered.despector.ast.stmt.branch.For;
+import org.spongepowered.despector.ast.stmt.branch.If;
+import org.spongepowered.despector.ast.stmt.branch.Switch;
+import org.spongepowered.despector.ast.stmt.branch.TryCatch;
+import org.spongepowered.despector.ast.stmt.branch.While;
+import org.spongepowered.despector.ast.stmt.branch.If.Elif;
+import org.spongepowered.despector.ast.stmt.branch.Switch.Case;
+import org.spongepowered.despector.ast.stmt.branch.TryCatch.CatchBlock;
 
 /**
  * A post processor which cleans up nested if statements that can be simplified.

@@ -27,10 +27,10 @@ package org.spongepowered.despector.emitter.instruction;
 import org.spongepowered.despector.ast.Locals.Local;
 import org.spongepowered.despector.ast.Locals.LocalInstance;
 import org.spongepowered.despector.ast.generic.TypeSignature;
-import org.spongepowered.despector.ast.members.MethodEntry;
-import org.spongepowered.despector.ast.members.insn.StatementBlock;
-import org.spongepowered.despector.ast.members.insn.function.DynamicInvokeHandle;
-import org.spongepowered.despector.ast.members.insn.misc.Return;
+import org.spongepowered.despector.ast.stmt.StatementBlock;
+import org.spongepowered.despector.ast.stmt.invoke.DynamicInvoke;
+import org.spongepowered.despector.ast.stmt.misc.Return;
+import org.spongepowered.despector.ast.type.MethodEntry;
 import org.spongepowered.despector.ast.type.TypeEntry;
 import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.InstructionEmitter;
@@ -38,10 +38,10 @@ import org.spongepowered.despector.emitter.InstructionEmitter;
 /**
  * An emitter for a dynamic invoke.
  */
-public class DynamicInvokeEmitter implements InstructionEmitter<DynamicInvokeHandle> {
+public class DynamicInvokeEmitter implements InstructionEmitter<DynamicInvoke> {
 
     @Override
-    public void emit(EmitterContext ctx, DynamicInvokeHandle arg, TypeSignature type) {
+    public void emit(EmitterContext ctx, DynamicInvoke arg, TypeSignature type) {
 
         TypeEntry owner = ctx.getType().getSource().get(arg.getLambdaOwner());
         MethodEntry method = owner.getStaticMethodSafe(arg.getLambdaMethod());

@@ -24,9 +24,9 @@
  */
 package org.spongepowered.despector.emitter.statement;
 
-import org.spongepowered.despector.ast.members.insn.arg.Instruction;
-import org.spongepowered.despector.ast.members.insn.function.InstanceMethodInvoke;
-import org.spongepowered.despector.ast.members.insn.function.InvokeStatement;
+import org.spongepowered.despector.ast.insn.Instruction;
+import org.spongepowered.despector.ast.stmt.invoke.InstanceMethodInvoke;
+import org.spongepowered.despector.ast.stmt.invoke.InvokeStatement;
 import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.StatementEmitter;
 

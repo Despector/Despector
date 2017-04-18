@@ -26,13 +26,13 @@ package org.spongepowered.despector.ast.kotlin;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import org.spongepowered.despector.ast.AstVisitor;
 import org.spongepowered.despector.ast.Locals.LocalInstance;
 import org.spongepowered.despector.ast.generic.TypeSignature;
-import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
-import org.spongepowered.despector.ast.members.insn.Statement;
-import org.spongepowered.despector.ast.members.insn.StatementBlock;
-import org.spongepowered.despector.ast.members.insn.arg.Instruction;
-import org.spongepowered.despector.ast.members.insn.branch.condition.Condition;
+import org.spongepowered.despector.ast.insn.Instruction;
+import org.spongepowered.despector.ast.insn.condition.Condition;
+import org.spongepowered.despector.ast.stmt.Statement;
+import org.spongepowered.despector.ast.stmt.StatementBlock;
 import org.spongepowered.despector.util.serialization.MessagePacker;
 
 import java.io.IOException;
@@ -120,7 +120,7 @@ public class When implements Instruction {
     }
 
     @Override
-    public void accept(InstructionVisitor visitor) {
+    public void accept(AstVisitor visitor) {
         // TODO
     }
 

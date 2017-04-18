@@ -25,7 +25,7 @@
 package org.spongepowered.despector.emitter.statement;
 
 import org.spongepowered.despector.ast.generic.TypeSignature;
-import org.spongepowered.despector.ast.members.insn.misc.Return;
+import org.spongepowered.despector.ast.stmt.misc.Return;
 import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.StatementEmitter;
 

@@ -24,9 +24,9 @@
  */
 package org.spongepowered.despector.emitter.kotlin.condition;
 
-import org.spongepowered.despector.ast.members.insn.arg.NumberCompare;
-import org.spongepowered.despector.ast.members.insn.branch.condition.CompareCondition;
-import org.spongepowered.despector.ast.members.insn.branch.condition.CompareCondition.CompareOperator;
+import org.spongepowered.despector.ast.insn.condition.CompareCondition;
+import org.spongepowered.despector.ast.insn.condition.CompareCondition.CompareOperator;
+import org.spongepowered.despector.ast.insn.misc.NumberCompare;
 import org.spongepowered.despector.emitter.ConditionEmitter;
 import org.spongepowered.despector.emitter.EmitterContext;
 

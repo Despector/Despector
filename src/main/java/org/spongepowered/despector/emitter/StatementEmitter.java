@@ -24,7 +24,7 @@
  */
 package org.spongepowered.despector.emitter;
 
-import org.spongepowered.despector.ast.members.insn.Statement;
+import org.spongepowered.despector.ast.stmt.Statement;
 
 /**
  * An emitter for a particular statement type.

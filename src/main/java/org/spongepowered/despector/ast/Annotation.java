@@ -28,6 +28,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.objectweb.asm.Type;
+import org.spongepowered.despector.ast.type.TypeVisitor;
 import org.spongepowered.despector.util.serialization.AstSerializer;
 import org.spongepowered.despector.util.serialization.MessagePacker;
 
@@ -159,6 +160,12 @@ public class Annotation {
             writeObj(this.values.get(key), pack);
         }
         pack.writeString("runtime").writeBool(this.type.isRuntimeVisible());
+    }
+
+    public void accept(AstVisitor visitor) {
+        if (visitor instanceof TypeVisitor) {
+            ((TypeVisitor) visitor).visitAnnotation(this);
+        }
     }
 
 }

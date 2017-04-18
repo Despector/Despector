@@ -25,7 +25,7 @@
 package org.spongepowered.despector.emitter.statement;
 
 import org.spongepowered.despector.ast.Locals.LocalInstance;
-import org.spongepowered.despector.ast.members.insn.branch.ForEach;
+import org.spongepowered.despector.ast.stmt.branch.ForEach;
 import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.StatementEmitter;
 import org.spongepowered.despector.emitter.special.GenericsEmitter;

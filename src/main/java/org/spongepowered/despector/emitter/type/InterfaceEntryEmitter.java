@@ -26,9 +26,9 @@ package org.spongepowered.despector.emitter.type;
 
 import org.spongepowered.despector.ast.AccessModifier;
 import org.spongepowered.despector.ast.Annotation;
-import org.spongepowered.despector.ast.members.FieldEntry;
-import org.spongepowered.despector.ast.members.MethodEntry;
+import org.spongepowered.despector.ast.type.FieldEntry;
 import org.spongepowered.despector.ast.type.InterfaceEntry;
+import org.spongepowered.despector.ast.type.MethodEntry;
 import org.spongepowered.despector.ast.type.TypeEntry;
 import org.spongepowered.despector.ast.type.TypeEntry.InnerClassInfo;
 import org.spongepowered.despector.config.ConfigManager;

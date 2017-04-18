@@ -25,8 +25,8 @@
 package org.spongepowered.despector.decompiler.method;
 
 import org.spongepowered.despector.ast.Locals;
-import org.spongepowered.despector.ast.members.MethodEntry;
-import org.spongepowered.despector.ast.members.insn.StatementBlock;
+import org.spongepowered.despector.ast.stmt.StatementBlock;
+import org.spongepowered.despector.ast.type.MethodEntry;
 import org.spongepowered.despector.decompiler.ir.InsnBlock;
 import org.spongepowered.despector.decompiler.method.graph.data.block.BlockSection;
 import org.spongepowered.despector.decompiler.method.graph.data.opcode.OpcodeBlock;

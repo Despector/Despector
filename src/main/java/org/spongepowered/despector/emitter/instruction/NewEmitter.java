@@ -26,9 +26,9 @@ package org.spongepowered.despector.emitter.instruction;
 
 import org.spongepowered.despector.ast.generic.ClassTypeSignature;
 import org.spongepowered.despector.ast.generic.TypeSignature;
-import org.spongepowered.despector.ast.members.insn.arg.Instruction;
-import org.spongepowered.despector.ast.members.insn.assign.LocalAssignment;
-import org.spongepowered.despector.ast.members.insn.function.New;
+import org.spongepowered.despector.ast.insn.Instruction;
+import org.spongepowered.despector.ast.stmt.assign.LocalAssignment;
+import org.spongepowered.despector.ast.stmt.invoke.New;
 import org.spongepowered.despector.ast.type.ClassEntry;
 import org.spongepowered.despector.ast.type.TypeEntry;
 import org.spongepowered.despector.emitter.EmitterContext;

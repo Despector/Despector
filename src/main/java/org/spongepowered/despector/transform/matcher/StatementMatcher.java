@@ -24,7 +24,7 @@
  */
 package org.spongepowered.despector.transform.matcher;
 
-import org.spongepowered.despector.ast.members.insn.Statement;
+import org.spongepowered.despector.ast.stmt.Statement;
 import org.spongepowered.despector.transform.matcher.statement.ForEachMatcher;
 import org.spongepowered.despector.transform.matcher.statement.ForLoopMatcher;
 import org.spongepowered.despector.transform.matcher.statement.IncrementMatcher;

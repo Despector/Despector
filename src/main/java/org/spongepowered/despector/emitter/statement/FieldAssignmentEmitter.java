@@ -25,14 +25,14 @@
 package org.spongepowered.despector.emitter.statement;
 
 import org.spongepowered.despector.ast.generic.ClassTypeSignature;
-import org.spongepowered.despector.ast.members.insn.arg.Instruction;
-import org.spongepowered.despector.ast.members.insn.arg.cst.IntConstant;
-import org.spongepowered.despector.ast.members.insn.arg.field.InstanceFieldAccess;
-import org.spongepowered.despector.ast.members.insn.arg.field.LocalAccess;
-import org.spongepowered.despector.ast.members.insn.arg.operator.Operator;
-import org.spongepowered.despector.ast.members.insn.assign.FieldAssignment;
-import org.spongepowered.despector.ast.members.insn.assign.InstanceFieldAssignment;
-import org.spongepowered.despector.ast.members.insn.assign.StaticFieldAssignment;
+import org.spongepowered.despector.ast.insn.Instruction;
+import org.spongepowered.despector.ast.insn.cst.IntConstant;
+import org.spongepowered.despector.ast.insn.op.Operator;
+import org.spongepowered.despector.ast.insn.var.InstanceFieldAccess;
+import org.spongepowered.despector.ast.insn.var.LocalAccess;
+import org.spongepowered.despector.ast.stmt.assign.FieldAssignment;
+import org.spongepowered.despector.ast.stmt.assign.InstanceFieldAssignment;
+import org.spongepowered.despector.ast.stmt.assign.StaticFieldAssignment;
 import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.StatementEmitter;
 

@@ -24,8 +24,8 @@
  */
 package org.spongepowered.despector.transform.matcher.instruction;
 
-import org.spongepowered.despector.ast.members.insn.arg.Instruction;
-import org.spongepowered.despector.ast.members.insn.arg.cst.IntConstant;
+import org.spongepowered.despector.ast.insn.Instruction;
+import org.spongepowered.despector.ast.insn.cst.IntConstant;
 import org.spongepowered.despector.transform.matcher.InstructionMatcher;
 import org.spongepowered.despector.transform.matcher.MatchContext;
 

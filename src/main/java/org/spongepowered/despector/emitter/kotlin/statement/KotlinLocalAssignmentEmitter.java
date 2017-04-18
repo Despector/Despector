@@ -25,7 +25,7 @@
 package org.spongepowered.despector.emitter.kotlin.statement;
 
 import org.spongepowered.despector.ast.Locals.LocalInstance;
-import org.spongepowered.despector.ast.members.insn.assign.LocalAssignment;
+import org.spongepowered.despector.ast.stmt.assign.LocalAssignment;
 import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.kotlin.KotlinEmitterUtil;
 import org.spongepowered.despector.emitter.statement.LocalAssignmentEmitter;

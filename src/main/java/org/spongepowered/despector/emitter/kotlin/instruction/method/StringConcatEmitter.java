@@ -27,12 +27,12 @@ package org.spongepowered.despector.emitter.kotlin.instruction.method;
 import com.google.common.collect.Lists;
 import org.spongepowered.despector.ast.generic.ClassTypeSignature;
 import org.spongepowered.despector.ast.generic.TypeSignature;
-import org.spongepowered.despector.ast.members.insn.arg.Instruction;
-import org.spongepowered.despector.ast.members.insn.arg.cst.StringConstant;
-import org.spongepowered.despector.ast.members.insn.arg.field.LocalAccess;
-import org.spongepowered.despector.ast.members.insn.function.InstanceMethodInvoke;
-import org.spongepowered.despector.ast.members.insn.function.New;
-import org.spongepowered.despector.ast.members.insn.function.StaticMethodInvoke;
+import org.spongepowered.despector.ast.insn.Instruction;
+import org.spongepowered.despector.ast.insn.cst.StringConstant;
+import org.spongepowered.despector.ast.insn.var.LocalAccess;
+import org.spongepowered.despector.ast.stmt.invoke.InstanceMethodInvoke;
+import org.spongepowered.despector.ast.stmt.invoke.New;
+import org.spongepowered.despector.ast.stmt.invoke.StaticMethodInvoke;
 import org.spongepowered.despector.emitter.EmitterContext;
 
 import java.util.List;

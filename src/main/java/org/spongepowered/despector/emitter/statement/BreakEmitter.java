@@ -24,7 +24,7 @@
  */
 package org.spongepowered.despector.emitter.statement;
 
-import org.spongepowered.despector.ast.members.insn.branch.Break;
+import org.spongepowered.despector.ast.stmt.branch.Break;
 import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.StatementEmitter;
 

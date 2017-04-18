@@ -35,7 +35,7 @@ import org.spongepowered.despector.ast.AccessModifier;
 import org.spongepowered.despector.ast.Annotation;
 import org.spongepowered.despector.ast.generic.ClassTypeSignature;
 import org.spongepowered.despector.ast.generic.TypeSignature;
-import org.spongepowered.despector.ast.members.FieldEntry;
+import org.spongepowered.despector.ast.type.FieldEntry;
 import org.spongepowered.despector.ast.type.TypeEntry;
 import org.spongepowered.despector.decompiler.BaseDecompiler;
 import org.spongepowered.despector.decompiler.DecompilerStep;

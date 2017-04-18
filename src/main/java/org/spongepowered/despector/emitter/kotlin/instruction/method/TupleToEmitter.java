@@ -25,7 +25,7 @@
 package org.spongepowered.despector.emitter.kotlin.instruction.method;
 
 import org.spongepowered.despector.ast.generic.TypeSignature;
-import org.spongepowered.despector.ast.members.insn.function.StaticMethodInvoke;
+import org.spongepowered.despector.ast.stmt.invoke.StaticMethodInvoke;
 import org.spongepowered.despector.emitter.EmitterContext;
 
 /**

@@ -26,9 +26,9 @@ package org.spongepowered.despector.decompiler.kotlin.method.graph.data;
 
 import static com.google.common.base.Preconditions.checkState;
 
+import org.spongepowered.despector.ast.insn.Instruction;
 import org.spongepowered.despector.ast.kotlin.Elvis;
-import org.spongepowered.despector.ast.members.insn.StatementBlock;
-import org.spongepowered.despector.ast.members.insn.arg.Instruction;
+import org.spongepowered.despector.ast.stmt.StatementBlock;
 import org.spongepowered.despector.decompiler.method.StatementBuilder;
 import org.spongepowered.despector.decompiler.method.graph.data.block.BlockSection;
 import org.spongepowered.despector.decompiler.method.graph.data.opcode.OpcodeBlock;

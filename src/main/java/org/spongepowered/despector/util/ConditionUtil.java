@@ -24,12 +24,12 @@
  */
 package org.spongepowered.despector.util;
 
-import org.spongepowered.despector.ast.members.insn.branch.condition.AndCondition;
-import org.spongepowered.despector.ast.members.insn.branch.condition.BooleanCondition;
-import org.spongepowered.despector.ast.members.insn.branch.condition.CompareCondition;
-import org.spongepowered.despector.ast.members.insn.branch.condition.Condition;
-import org.spongepowered.despector.ast.members.insn.branch.condition.InverseCondition;
-import org.spongepowered.despector.ast.members.insn.branch.condition.OrCondition;
+import org.spongepowered.despector.ast.insn.condition.AndCondition;
+import org.spongepowered.despector.ast.insn.condition.BooleanCondition;
+import org.spongepowered.despector.ast.insn.condition.CompareCondition;
+import org.spongepowered.despector.ast.insn.condition.Condition;
+import org.spongepowered.despector.ast.insn.condition.InverseCondition;
+import org.spongepowered.despector.ast.insn.condition.OrCondition;
 
 import java.util.ArrayList;
 import java.util.Arrays;

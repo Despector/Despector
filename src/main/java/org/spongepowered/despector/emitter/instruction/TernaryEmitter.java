@@ -26,9 +26,9 @@ package org.spongepowered.despector.emitter.instruction;
 
 import org.spongepowered.despector.ast.generic.ClassTypeSignature;
 import org.spongepowered.despector.ast.generic.TypeSignature;
-import org.spongepowered.despector.ast.members.insn.arg.cst.IntConstant;
-import org.spongepowered.despector.ast.members.insn.branch.Ternary;
-import org.spongepowered.despector.ast.members.insn.branch.condition.CompareCondition;
+import org.spongepowered.despector.ast.insn.condition.CompareCondition;
+import org.spongepowered.despector.ast.insn.cst.IntConstant;
+import org.spongepowered.despector.ast.insn.misc.Ternary;
 import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.InstructionEmitter;
 

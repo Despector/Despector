@@ -24,9 +24,9 @@
  */
 package org.spongepowered.despector.emitter.condition;
 
-import org.spongepowered.despector.ast.members.insn.branch.condition.AndCondition;
-import org.spongepowered.despector.ast.members.insn.branch.condition.Condition;
-import org.spongepowered.despector.ast.members.insn.branch.condition.OrCondition;
+import org.spongepowered.despector.ast.insn.condition.AndCondition;
+import org.spongepowered.despector.ast.insn.condition.Condition;
+import org.spongepowered.despector.ast.insn.condition.OrCondition;
 import org.spongepowered.despector.emitter.ConditionEmitter;
 import org.spongepowered.despector.emitter.EmitterContext;
 

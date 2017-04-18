@@ -24,7 +24,7 @@
  */
 package org.spongepowered.despector.decompiler.method.postprocess;
 
-import org.spongepowered.despector.ast.members.insn.StatementBlock;
+import org.spongepowered.despector.ast.stmt.StatementBlock;
 
 /**
  * A post processor for performing final operations to a statement block just

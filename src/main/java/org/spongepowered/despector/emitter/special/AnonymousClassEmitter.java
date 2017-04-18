@@ -28,11 +28,11 @@ import static com.google.common.base.Preconditions.checkArgument;
 
 import org.spongepowered.despector.ast.generic.ClassTypeSignature;
 import org.spongepowered.despector.ast.generic.TypeSignature;
-import org.spongepowered.despector.ast.members.FieldEntry;
-import org.spongepowered.despector.ast.members.MethodEntry;
-import org.spongepowered.despector.ast.members.insn.arg.Instruction;
-import org.spongepowered.despector.ast.members.insn.function.New;
+import org.spongepowered.despector.ast.insn.Instruction;
+import org.spongepowered.despector.ast.stmt.invoke.New;
 import org.spongepowered.despector.ast.type.ClassEntry;
+import org.spongepowered.despector.ast.type.FieldEntry;
+import org.spongepowered.despector.ast.type.MethodEntry;
 import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.type.ClassEntryEmitter;
 import org.spongepowered.despector.util.TypeHelper;

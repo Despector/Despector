@@ -25,8 +25,8 @@
 package org.spongepowered.despector.emitter.kotlin.instruction;
 
 import org.spongepowered.despector.ast.generic.TypeSignature;
-import org.spongepowered.despector.ast.members.insn.arg.operator.Operator;
-import org.spongepowered.despector.ast.members.insn.arg.operator.OperatorType;
+import org.spongepowered.despector.ast.insn.op.Operator;
+import org.spongepowered.despector.ast.insn.op.OperatorType;
 import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.InstructionEmitter;
 

@@ -25,10 +25,10 @@
 package org.spongepowered.despector.transform.matcher.statement;
 
 import org.spongepowered.despector.ast.generic.TypeSignature;
-import org.spongepowered.despector.ast.members.insn.Statement;
-import org.spongepowered.despector.ast.members.insn.arg.Cast;
-import org.spongepowered.despector.ast.members.insn.arg.Instruction;
-import org.spongepowered.despector.ast.members.insn.assign.LocalAssignment;
+import org.spongepowered.despector.ast.insn.Instruction;
+import org.spongepowered.despector.ast.insn.misc.Cast;
+import org.spongepowered.despector.ast.stmt.Statement;
+import org.spongepowered.despector.ast.stmt.assign.LocalAssignment;
 import org.spongepowered.despector.transform.matcher.InstructionMatcher;
 import org.spongepowered.despector.transform.matcher.MatchContext;
 import org.spongepowered.despector.transform.matcher.StatementMatcher;

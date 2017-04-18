@@ -25,8 +25,8 @@
 package org.spongepowered.despector.transform.matcher.statement;
 
 import org.spongepowered.despector.ast.Locals.LocalInstance;
-import org.spongepowered.despector.ast.members.insn.Statement;
-import org.spongepowered.despector.ast.members.insn.branch.ForEach;
+import org.spongepowered.despector.ast.stmt.Statement;
+import org.spongepowered.despector.ast.stmt.branch.ForEach;
 import org.spongepowered.despector.transform.matcher.InstructionMatcher;
 import org.spongepowered.despector.transform.matcher.MatchContext;
 import org.spongepowered.despector.transform.matcher.StatementMatcher;

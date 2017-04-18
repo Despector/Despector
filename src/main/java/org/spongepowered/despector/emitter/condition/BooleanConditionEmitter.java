@@ -25,12 +25,12 @@
 package org.spongepowered.despector.emitter.condition;
 
 import org.spongepowered.despector.ast.generic.ClassTypeSignature;
-import org.spongepowered.despector.ast.members.insn.arg.InstanceOf;
-import org.spongepowered.despector.ast.members.insn.arg.Instruction;
-import org.spongepowered.despector.ast.members.insn.arg.cst.IntConstant;
-import org.spongepowered.despector.ast.members.insn.arg.operator.Operator;
-import org.spongepowered.despector.ast.members.insn.branch.Ternary;
-import org.spongepowered.despector.ast.members.insn.branch.condition.BooleanCondition;
+import org.spongepowered.despector.ast.insn.Instruction;
+import org.spongepowered.despector.ast.insn.condition.BooleanCondition;
+import org.spongepowered.despector.ast.insn.cst.IntConstant;
+import org.spongepowered.despector.ast.insn.misc.InstanceOf;
+import org.spongepowered.despector.ast.insn.misc.Ternary;
+import org.spongepowered.despector.ast.insn.op.Operator;
 import org.spongepowered.despector.emitter.ConditionEmitter;
 import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.InstructionEmitter;

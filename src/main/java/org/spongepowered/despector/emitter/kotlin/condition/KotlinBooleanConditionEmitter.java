@@ -25,8 +25,8 @@
 package org.spongepowered.despector.emitter.kotlin.condition;
 
 import org.spongepowered.despector.ast.generic.ClassTypeSignature;
-import org.spongepowered.despector.ast.members.insn.arg.InstanceOf;
-import org.spongepowered.despector.ast.members.insn.branch.condition.BooleanCondition;
+import org.spongepowered.despector.ast.insn.condition.BooleanCondition;
+import org.spongepowered.despector.ast.insn.misc.InstanceOf;
 import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.condition.BooleanConditionEmitter;
 

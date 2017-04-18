@@ -38,10 +38,9 @@ import org.spongepowered.despector.ast.AccessModifier;
 import org.spongepowered.despector.ast.Annotation;
 import org.spongepowered.despector.ast.AnnotationType;
 import org.spongepowered.despector.ast.AstEntry;
+import org.spongepowered.despector.ast.AstVisitor;
 import org.spongepowered.despector.ast.SourceSet;
 import org.spongepowered.despector.ast.generic.ClassSignature;
-import org.spongepowered.despector.ast.members.FieldEntry;
-import org.spongepowered.despector.ast.members.MethodEntry;
 import org.spongepowered.despector.util.TypeHelper;
 import org.spongepowered.despector.util.serialization.MessagePacker;
 
@@ -422,6 +421,8 @@ public abstract class TypeEntry extends AstEntry {
     public void addInnerClass(String name, String simple, String outer, int acc) {
         this.inner_classes.put(name, new InnerClassInfo(name, simple, outer, acc));
     }
+
+    public abstract void accept(AstVisitor visitor);
 
     @Override
     public String toString() {

@@ -25,11 +25,11 @@
 package org.spongepowered.despector.emitter.statement;
 
 import org.spongepowered.despector.ast.Locals.LocalInstance;
-import org.spongepowered.despector.ast.members.insn.arg.Instruction;
-import org.spongepowered.despector.ast.members.insn.arg.cst.IntConstant;
-import org.spongepowered.despector.ast.members.insn.arg.field.LocalAccess;
-import org.spongepowered.despector.ast.members.insn.arg.operator.Operator;
-import org.spongepowered.despector.ast.members.insn.assign.LocalAssignment;
+import org.spongepowered.despector.ast.insn.Instruction;
+import org.spongepowered.despector.ast.insn.cst.IntConstant;
+import org.spongepowered.despector.ast.insn.op.Operator;
+import org.spongepowered.despector.ast.insn.var.LocalAccess;
+import org.spongepowered.despector.ast.stmt.assign.LocalAssignment;
 import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.StatementEmitter;
 import org.spongepowered.despector.emitter.special.GenericsEmitter;

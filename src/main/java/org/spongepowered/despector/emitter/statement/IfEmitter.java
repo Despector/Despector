@@ -24,10 +24,10 @@
  */
 package org.spongepowered.despector.emitter.statement;
 
-import org.spongepowered.despector.ast.members.insn.StatementBlock;
-import org.spongepowered.despector.ast.members.insn.branch.If;
-import org.spongepowered.despector.ast.members.insn.branch.If.Elif;
-import org.spongepowered.despector.ast.members.insn.branch.If.Else;
+import org.spongepowered.despector.ast.stmt.StatementBlock;
+import org.spongepowered.despector.ast.stmt.branch.If;
+import org.spongepowered.despector.ast.stmt.branch.If.Elif;
+import org.spongepowered.despector.ast.stmt.branch.If.Else;
 import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.StatementEmitter;
 

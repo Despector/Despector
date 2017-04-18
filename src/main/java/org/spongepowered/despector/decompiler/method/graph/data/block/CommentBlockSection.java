@@ -24,9 +24,9 @@
  */
 package org.spongepowered.despector.decompiler.method.graph.data.block;
 
-import org.spongepowered.despector.ast.members.insn.Comment;
-import org.spongepowered.despector.ast.members.insn.StatementBlock;
-import org.spongepowered.despector.ast.members.insn.arg.Instruction;
+import org.spongepowered.despector.ast.insn.Instruction;
+import org.spongepowered.despector.ast.stmt.StatementBlock;
+import org.spongepowered.despector.ast.stmt.misc.Comment;
 
 import java.util.ArrayList;
 import java.util.Deque;

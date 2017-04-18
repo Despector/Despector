@@ -26,11 +26,11 @@ package org.spongepowered.despector.decompiler.method.graph.data.block;
 
 import static com.google.common.base.Preconditions.checkState;
 
-import org.spongepowered.despector.ast.members.insn.StatementBlock;
-import org.spongepowered.despector.ast.members.insn.arg.Instruction;
-import org.spongepowered.despector.ast.members.insn.branch.If;
-import org.spongepowered.despector.ast.members.insn.branch.If.Elif;
-import org.spongepowered.despector.ast.members.insn.branch.condition.Condition;
+import org.spongepowered.despector.ast.insn.Instruction;
+import org.spongepowered.despector.ast.insn.condition.Condition;
+import org.spongepowered.despector.ast.stmt.StatementBlock;
+import org.spongepowered.despector.ast.stmt.branch.If;
+import org.spongepowered.despector.ast.stmt.branch.If.Elif;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;

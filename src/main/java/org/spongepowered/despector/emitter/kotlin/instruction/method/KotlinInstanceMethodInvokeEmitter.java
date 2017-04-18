@@ -26,10 +26,10 @@ package org.spongepowered.despector.emitter.kotlin.instruction.method;
 
 import org.spongepowered.despector.ast.generic.ClassTypeSignature;
 import org.spongepowered.despector.ast.generic.TypeSignature;
-import org.spongepowered.despector.ast.members.insn.arg.Instruction;
-import org.spongepowered.despector.ast.members.insn.arg.NewArray;
-import org.spongepowered.despector.ast.members.insn.arg.field.LocalAccess;
-import org.spongepowered.despector.ast.members.insn.function.InstanceMethodInvoke;
+import org.spongepowered.despector.ast.insn.Instruction;
+import org.spongepowered.despector.ast.insn.misc.NewArray;
+import org.spongepowered.despector.ast.insn.var.LocalAccess;
+import org.spongepowered.despector.ast.stmt.invoke.InstanceMethodInvoke;
 import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.instruction.InstanceMethodInvokeEmitter;
 import org.spongepowered.despector.util.TypeHelper;

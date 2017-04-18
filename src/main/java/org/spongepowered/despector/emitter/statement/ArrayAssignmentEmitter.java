@@ -25,7 +25,7 @@
 package org.spongepowered.despector.emitter.statement;
 
 import org.spongepowered.despector.ast.generic.ClassTypeSignature;
-import org.spongepowered.despector.ast.members.insn.assign.ArrayAssignment;
+import org.spongepowered.despector.ast.stmt.assign.ArrayAssignment;
 import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.StatementEmitter;
 

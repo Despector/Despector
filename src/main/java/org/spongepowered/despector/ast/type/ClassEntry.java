@@ -25,6 +25,8 @@
 package org.spongepowered.despector.ast.type;
 
 import org.spongepowered.despector.Language;
+import org.spongepowered.despector.ast.Annotation;
+import org.spongepowered.despector.ast.AstVisitor;
 import org.spongepowered.despector.ast.SourceSet;
 import org.spongepowered.despector.util.TypeHelper;
 import org.spongepowered.despector.util.serialization.AstSerializer;
@@ -68,6 +70,28 @@ public class ClassEntry extends TypeEntry {
     public void writeTo(MessagePacker pack) throws IOException {
         super.writeTo(pack, 1, AstSerializer.ENTRY_ID_CLASS);
         pack.writeString("supername").writeString(this.superclass);
+    }
+
+    @Override
+    public void accept(AstVisitor visitor) {
+        if (visitor instanceof TypeVisitor) {
+            ((TypeVisitor) visitor).visitClassEntry(this);
+        }
+        for (FieldEntry field : this.fields.values()) {
+            field.accept(visitor);
+        }
+        for (FieldEntry field : this.static_fields.values()) {
+            field.accept(visitor);
+        }
+        for (MethodEntry method : this.methods.values()) {
+            method.accept(visitor);
+        }
+        for (MethodEntry method : this.static_methods.values()) {
+            method.accept(visitor);
+        }
+        for (Annotation anno : this.annotations.values()) {
+            anno.accept(visitor);
+        }
     }
 
 }

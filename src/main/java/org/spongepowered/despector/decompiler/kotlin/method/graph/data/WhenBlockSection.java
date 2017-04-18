@@ -26,15 +26,15 @@ package org.spongepowered.despector.decompiler.kotlin.method.graph.data;
 
 import static com.google.common.base.Preconditions.checkState;
 
+import org.spongepowered.despector.ast.insn.Instruction;
+import org.spongepowered.despector.ast.insn.condition.Condition;
 import org.spongepowered.despector.ast.kotlin.When;
 import org.spongepowered.despector.ast.kotlin.When.Case;
-import org.spongepowered.despector.ast.members.insn.Statement;
-import org.spongepowered.despector.ast.members.insn.StatementBlock;
-import org.spongepowered.despector.ast.members.insn.StatementBlock.Type;
-import org.spongepowered.despector.ast.members.insn.arg.Instruction;
-import org.spongepowered.despector.ast.members.insn.assign.LocalAssignment;
-import org.spongepowered.despector.ast.members.insn.branch.condition.Condition;
-import org.spongepowered.despector.ast.members.insn.function.InvokeStatement;
+import org.spongepowered.despector.ast.stmt.Statement;
+import org.spongepowered.despector.ast.stmt.StatementBlock;
+import org.spongepowered.despector.ast.stmt.StatementBlock.Type;
+import org.spongepowered.despector.ast.stmt.assign.LocalAssignment;
+import org.spongepowered.despector.ast.stmt.invoke.InvokeStatement;
 import org.spongepowered.despector.decompiler.method.graph.data.block.BlockSection;
 
 import java.util.ArrayDeque;

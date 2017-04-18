@@ -25,11 +25,11 @@
 package org.spongepowered.despector.decompiler.step;
 
 import org.objectweb.asm.tree.ClassNode;
-import org.spongepowered.despector.ast.members.MethodEntry;
-import org.spongepowered.despector.ast.members.insn.Statement;
-import org.spongepowered.despector.ast.members.insn.assign.StaticFieldAssignment;
-import org.spongepowered.despector.ast.members.insn.function.New;
+import org.spongepowered.despector.ast.stmt.Statement;
+import org.spongepowered.despector.ast.stmt.assign.StaticFieldAssignment;
+import org.spongepowered.despector.ast.stmt.invoke.New;
 import org.spongepowered.despector.ast.type.EnumEntry;
+import org.spongepowered.despector.ast.type.MethodEntry;
 import org.spongepowered.despector.ast.type.TypeEntry;
 import org.spongepowered.despector.decompiler.DecompilerStep;
 import org.spongepowered.despector.util.TypeHelper;

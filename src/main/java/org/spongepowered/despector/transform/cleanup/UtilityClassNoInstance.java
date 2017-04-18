@@ -25,8 +25,8 @@
 package org.spongepowered.despector.transform.cleanup;
 
 import org.spongepowered.despector.ast.AccessModifier;
-import org.spongepowered.despector.ast.members.MethodEntry;
 import org.spongepowered.despector.ast.type.ClassEntry;
+import org.spongepowered.despector.ast.type.MethodEntry;
 import org.spongepowered.despector.ast.type.TypeEntry;
 import org.spongepowered.despector.transform.TypeTransformer;
 

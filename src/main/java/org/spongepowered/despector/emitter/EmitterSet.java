@@ -25,9 +25,9 @@
 package org.spongepowered.despector.emitter;
 
 import org.spongepowered.despector.ast.AstEntry;
-import org.spongepowered.despector.ast.members.insn.Statement;
-import org.spongepowered.despector.ast.members.insn.arg.Instruction;
-import org.spongepowered.despector.ast.members.insn.branch.condition.Condition;
+import org.spongepowered.despector.ast.insn.Instruction;
+import org.spongepowered.despector.ast.insn.condition.Condition;
+import org.spongepowered.despector.ast.stmt.Statement;
 import org.spongepowered.despector.emitter.format.EmitterFormat;
 import org.spongepowered.despector.emitter.special.SpecialEmitter;
 

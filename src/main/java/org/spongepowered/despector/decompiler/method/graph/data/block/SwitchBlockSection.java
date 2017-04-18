@@ -26,9 +26,9 @@ package org.spongepowered.despector.decompiler.method.graph.data.block;
 
 import static com.google.common.base.Preconditions.checkState;
 
-import org.spongepowered.despector.ast.members.insn.StatementBlock;
-import org.spongepowered.despector.ast.members.insn.arg.Instruction;
-import org.spongepowered.despector.ast.members.insn.branch.Switch;
+import org.spongepowered.despector.ast.insn.Instruction;
+import org.spongepowered.despector.ast.stmt.StatementBlock;
+import org.spongepowered.despector.ast.stmt.branch.Switch;
 import org.spongepowered.despector.decompiler.ir.Insn;
 import org.spongepowered.despector.decompiler.method.StatementBuilder;
 import org.spongepowered.despector.decompiler.method.graph.data.opcode.OpcodeBlock;

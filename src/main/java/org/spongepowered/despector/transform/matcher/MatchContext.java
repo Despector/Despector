@@ -25,9 +25,9 @@
 package org.spongepowered.despector.transform.matcher;
 
 import org.spongepowered.despector.ast.Locals.LocalInstance;
-import org.spongepowered.despector.ast.members.insn.Statement;
-import org.spongepowered.despector.ast.members.insn.assign.LocalAssignment;
-import org.spongepowered.despector.ast.members.insn.branch.ForEach;
+import org.spongepowered.despector.ast.stmt.Statement;
+import org.spongepowered.despector.ast.stmt.assign.LocalAssignment;
+import org.spongepowered.despector.ast.stmt.branch.ForEach;
 
 import java.util.HashMap;
 import java.util.Map;

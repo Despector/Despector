@@ -26,10 +26,10 @@ package org.spongepowered.despector.emitter.kotlin.statement;
 
 import org.spongepowered.despector.ast.Locals.LocalInstance;
 import org.spongepowered.despector.ast.generic.ClassTypeSignature;
-import org.spongepowered.despector.ast.members.insn.arg.Instruction;
-import org.spongepowered.despector.ast.members.insn.assign.LocalAssignment;
-import org.spongepowered.despector.ast.members.insn.branch.For;
-import org.spongepowered.despector.ast.members.insn.function.StaticMethodInvoke;
+import org.spongepowered.despector.ast.insn.Instruction;
+import org.spongepowered.despector.ast.stmt.assign.LocalAssignment;
+import org.spongepowered.despector.ast.stmt.branch.For;
+import org.spongepowered.despector.ast.stmt.invoke.StaticMethodInvoke;
 import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.statement.ForEmitter;
 import org.spongepowered.despector.transform.matcher.ConditionMatcher;

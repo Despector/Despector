@@ -25,7 +25,7 @@
 package org.spongepowered.despector.emitter;
 
 import org.spongepowered.despector.ast.generic.TypeSignature;
-import org.spongepowered.despector.ast.members.insn.arg.Instruction;
+import org.spongepowered.despector.ast.insn.Instruction;
 
 /**
  * An emitter for a particular instruction type.

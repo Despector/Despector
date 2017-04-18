@@ -24,13 +24,13 @@
  */
 package org.spongepowered.despector.decompiler.method.graph.data.block;
 
-import org.spongepowered.despector.ast.members.insn.StatementBlock;
-import org.spongepowered.despector.ast.members.insn.arg.Instruction;
-import org.spongepowered.despector.ast.members.insn.branch.Break;
-import org.spongepowered.despector.ast.members.insn.branch.Break.Breakable;
-import org.spongepowered.despector.ast.members.insn.branch.Break.Type;
-import org.spongepowered.despector.ast.members.insn.branch.If;
-import org.spongepowered.despector.ast.members.insn.branch.condition.Condition;
+import org.spongepowered.despector.ast.insn.Instruction;
+import org.spongepowered.despector.ast.insn.condition.Condition;
+import org.spongepowered.despector.ast.stmt.StatementBlock;
+import org.spongepowered.despector.ast.stmt.branch.Break;
+import org.spongepowered.despector.ast.stmt.branch.If;
+import org.spongepowered.despector.ast.stmt.branch.Break.Breakable;
+import org.spongepowered.despector.ast.stmt.branch.Break.Type;
 import org.spongepowered.despector.decompiler.method.ConditionBuilder;
 import org.spongepowered.despector.decompiler.method.graph.data.opcode.BreakMarkerOpcodeBlock;
 import org.spongepowered.despector.decompiler.method.graph.data.opcode.BreakMarkerOpcodeBlock.MarkerType;

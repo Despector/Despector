@@ -25,7 +25,7 @@
 package org.spongepowered.despector.emitter.instruction;
 
 import org.spongepowered.despector.ast.generic.TypeSignature;
-import org.spongepowered.despector.ast.members.insn.arg.cst.StringConstant;
+import org.spongepowered.despector.ast.insn.cst.StringConstant;
 import org.spongepowered.despector.config.ConfigManager;
 import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.InstructionEmitter;

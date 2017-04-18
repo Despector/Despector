@@ -27,14 +27,14 @@ package org.spongepowered.test.ast;
 import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
+import org.spongepowered.despector.ast.AstVisitor;
 import org.spongepowered.despector.ast.generic.ClassTypeSignature;
 import org.spongepowered.despector.ast.generic.TypeSignature;
-import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
-import org.spongepowered.despector.ast.members.insn.arg.Instruction;
-import org.spongepowered.despector.ast.members.insn.branch.condition.AndCondition;
-import org.spongepowered.despector.ast.members.insn.branch.condition.BooleanCondition;
-import org.spongepowered.despector.ast.members.insn.branch.condition.Condition;
-import org.spongepowered.despector.ast.members.insn.branch.condition.OrCondition;
+import org.spongepowered.despector.ast.insn.Instruction;
+import org.spongepowered.despector.ast.insn.condition.AndCondition;
+import org.spongepowered.despector.ast.insn.condition.BooleanCondition;
+import org.spongepowered.despector.ast.insn.condition.Condition;
+import org.spongepowered.despector.ast.insn.condition.OrCondition;
 import org.spongepowered.despector.util.ConditionUtil;
 import org.spongepowered.despector.util.serialization.MessagePacker;
 
@@ -160,7 +160,7 @@ public class ConditionSimplificationTest {
         }
 
         @Override
-        public void accept(InstructionVisitor visitor) {
+        public void accept(AstVisitor visitor) {
         }
 
         @Override

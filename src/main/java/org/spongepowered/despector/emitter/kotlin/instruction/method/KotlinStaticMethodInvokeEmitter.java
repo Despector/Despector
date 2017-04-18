@@ -26,10 +26,10 @@ package org.spongepowered.despector.emitter.kotlin.instruction.method;
 
 import org.spongepowered.despector.ast.generic.ClassTypeSignature;
 import org.spongepowered.despector.ast.generic.TypeSignature;
-import org.spongepowered.despector.ast.members.insn.arg.Instruction;
-import org.spongepowered.despector.ast.members.insn.arg.NewArray;
-import org.spongepowered.despector.ast.members.insn.arg.cst.IntConstant;
-import org.spongepowered.despector.ast.members.insn.function.StaticMethodInvoke;
+import org.spongepowered.despector.ast.insn.Instruction;
+import org.spongepowered.despector.ast.insn.cst.IntConstant;
+import org.spongepowered.despector.ast.insn.misc.NewArray;
+import org.spongepowered.despector.ast.stmt.invoke.StaticMethodInvoke;
 import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.instruction.StaticMethodInvokeEmitter;
 import org.spongepowered.despector.util.TypeHelper;

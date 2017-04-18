@@ -24,8 +24,8 @@
  */
 package org.spongepowered.despector.decompiler.method.graph.data.block;
 
-import org.spongepowered.despector.ast.members.insn.StatementBlock;
-import org.spongepowered.despector.ast.members.insn.arg.Instruction;
+import org.spongepowered.despector.ast.insn.Instruction;
+import org.spongepowered.despector.ast.stmt.StatementBlock;
 
 import java.util.Deque;
 

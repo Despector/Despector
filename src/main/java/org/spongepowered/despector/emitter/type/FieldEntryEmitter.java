@@ -25,7 +25,7 @@
 package org.spongepowered.despector.emitter.type;
 
 import org.spongepowered.despector.ast.Annotation;
-import org.spongepowered.despector.ast.members.FieldEntry;
+import org.spongepowered.despector.ast.type.FieldEntry;
 import org.spongepowered.despector.config.ConfigManager;
 import org.spongepowered.despector.emitter.AstEmitter;
 import org.spongepowered.despector.emitter.EmitterContext;

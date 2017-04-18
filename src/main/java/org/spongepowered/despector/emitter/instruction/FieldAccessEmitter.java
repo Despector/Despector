@@ -26,11 +26,11 @@ package org.spongepowered.despector.emitter.instruction;
 
 import org.spongepowered.despector.ast.generic.ClassTypeSignature;
 import org.spongepowered.despector.ast.generic.TypeSignature;
-import org.spongepowered.despector.ast.members.insn.arg.Instruction;
-import org.spongepowered.despector.ast.members.insn.arg.field.FieldAccess;
-import org.spongepowered.despector.ast.members.insn.arg.field.InstanceFieldAccess;
-import org.spongepowered.despector.ast.members.insn.arg.field.LocalAccess;
-import org.spongepowered.despector.ast.members.insn.arg.field.StaticFieldAccess;
+import org.spongepowered.despector.ast.insn.Instruction;
+import org.spongepowered.despector.ast.insn.var.FieldAccess;
+import org.spongepowered.despector.ast.insn.var.InstanceFieldAccess;
+import org.spongepowered.despector.ast.insn.var.LocalAccess;
+import org.spongepowered.despector.ast.insn.var.StaticFieldAccess;
 import org.spongepowered.despector.config.ConfigManager;
 import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.InstructionEmitter;

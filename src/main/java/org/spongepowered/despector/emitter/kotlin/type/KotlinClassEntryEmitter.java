@@ -25,13 +25,13 @@
 package org.spongepowered.despector.emitter.kotlin.type;
 
 import org.spongepowered.despector.ast.Annotation;
-import org.spongepowered.despector.ast.members.FieldEntry;
-import org.spongepowered.despector.ast.members.MethodEntry;
-import org.spongepowered.despector.ast.members.insn.Statement;
-import org.spongepowered.despector.ast.members.insn.arg.Instruction;
-import org.spongepowered.despector.ast.members.insn.assign.FieldAssignment;
-import org.spongepowered.despector.ast.members.insn.assign.StaticFieldAssignment;
+import org.spongepowered.despector.ast.insn.Instruction;
+import org.spongepowered.despector.ast.stmt.Statement;
+import org.spongepowered.despector.ast.stmt.assign.FieldAssignment;
+import org.spongepowered.despector.ast.stmt.assign.StaticFieldAssignment;
 import org.spongepowered.despector.ast.type.ClassEntry;
+import org.spongepowered.despector.ast.type.FieldEntry;
+import org.spongepowered.despector.ast.type.MethodEntry;
 import org.spongepowered.despector.ast.type.TypeEntry;
 import org.spongepowered.despector.ast.type.TypeEntry.InnerClassInfo;
 import org.spongepowered.despector.config.ConfigManager;

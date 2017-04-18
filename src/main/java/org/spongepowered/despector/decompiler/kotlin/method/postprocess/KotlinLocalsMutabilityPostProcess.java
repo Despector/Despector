@@ -25,10 +25,29 @@
 package org.spongepowered.despector.decompiler.kotlin.method.postprocess;
 
 import org.spongepowered.despector.ast.Locals.LocalInstance;
-import org.spongepowered.despector.ast.members.insn.InstructionVisitor;
-import org.spongepowered.despector.ast.members.insn.StatementBlock;
-import org.spongepowered.despector.ast.members.insn.assign.LocalAssignment;
-import org.spongepowered.despector.ast.members.insn.misc.Increment;
+import org.spongepowered.despector.ast.stmt.StatementBlock;
+import org.spongepowered.despector.ast.stmt.StatementVisitor;
+import org.spongepowered.despector.ast.stmt.assign.ArrayAssignment;
+import org.spongepowered.despector.ast.stmt.assign.InstanceFieldAssignment;
+import org.spongepowered.despector.ast.stmt.assign.LocalAssignment;
+import org.spongepowered.despector.ast.stmt.assign.StaticFieldAssignment;
+import org.spongepowered.despector.ast.stmt.branch.Break;
+import org.spongepowered.despector.ast.stmt.branch.DoWhile;
+import org.spongepowered.despector.ast.stmt.branch.For;
+import org.spongepowered.despector.ast.stmt.branch.ForEach;
+import org.spongepowered.despector.ast.stmt.branch.If;
+import org.spongepowered.despector.ast.stmt.branch.If.Elif;
+import org.spongepowered.despector.ast.stmt.branch.If.Else;
+import org.spongepowered.despector.ast.stmt.branch.Switch;
+import org.spongepowered.despector.ast.stmt.branch.Switch.Case;
+import org.spongepowered.despector.ast.stmt.branch.TryCatch;
+import org.spongepowered.despector.ast.stmt.branch.TryCatch.CatchBlock;
+import org.spongepowered.despector.ast.stmt.branch.While;
+import org.spongepowered.despector.ast.stmt.invoke.InvokeStatement;
+import org.spongepowered.despector.ast.stmt.misc.Comment;
+import org.spongepowered.despector.ast.stmt.misc.Increment;
+import org.spongepowered.despector.ast.stmt.misc.Return;
+import org.spongepowered.despector.ast.stmt.misc.Throw;
 import org.spongepowered.despector.decompiler.method.postprocess.StatementPostProcessor;
 
 import java.util.HashSet;
@@ -49,7 +68,7 @@ public class KotlinLocalsMutabilityPostProcess implements StatementPostProcessor
     /**
      * An instruction visitor for determining which locals are mutated.
      */
-    private static class LocalMutabilityVisitor extends InstructionVisitor {
+    private static class LocalMutabilityVisitor implements StatementVisitor {
 
         private final Set<LocalInstance> defined = new HashSet<>();
 
@@ -76,6 +95,82 @@ public class KotlinLocalsMutabilityPostProcess implements StatementPostProcessor
         public void visitIncrement(Increment incr) {
             LocalInstance local = incr.getLocal();
             check(local);
+        }
+
+        @Override
+        public void visitArrayAssignment(ArrayAssignment arrayAssign) {
+        }
+
+        @Override
+        public void visitBreak(Break breakStatement) {
+        }
+
+        @Override
+        public void visitCatchBlock(CatchBlock catchBlock) {
+        }
+
+        @Override
+        public void visitComment(Comment comment) {
+        }
+
+        @Override
+        public void visitDoWhile(DoWhile doWhileLoop) {
+        }
+
+        @Override
+        public void visitElif(Elif elseBlock) {
+        }
+
+        @Override
+        public void visitElse(Else elseBlock) {
+        }
+
+        @Override
+        public void visitFor(For forLoop) {
+        }
+
+        @Override
+        public void visitForEach(ForEach forLoop) {
+        }
+
+        @Override
+        public void visitIf(If ifBlock) {
+        }
+
+        @Override
+        public void visitInstanceFieldAssignment(InstanceFieldAssignment stmt) {
+        }
+
+        @Override
+        public void visitInvoke(InvokeStatement stmt) {
+        }
+
+        @Override
+        public void visitReturn(Return returnValue) {
+        }
+
+        @Override
+        public void visitStaticFieldAssignment(StaticFieldAssignment staticFieldAssign) {
+        }
+
+        @Override
+        public void visitSwitch(Switch tableSwitch) {
+        }
+
+        @Override
+        public void visitSwitchCase(Case case1) {
+        }
+
+        @Override
+        public void visitThrow(Throw throwException) {
+        }
+
+        @Override
+        public void visitTryCatch(TryCatch tryBlock) {
+        }
+
+        @Override
+        public void visitWhile(While whileLoop) {
         }
 
     }

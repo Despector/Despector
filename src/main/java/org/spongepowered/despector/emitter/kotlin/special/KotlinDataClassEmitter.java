@@ -25,15 +25,15 @@
 package org.spongepowered.despector.emitter.kotlin.special;
 
 import org.spongepowered.despector.ast.generic.TypeSignature;
-import org.spongepowered.despector.ast.members.FieldEntry;
-import org.spongepowered.despector.ast.members.MethodEntry;
-import org.spongepowered.despector.ast.members.insn.Statement;
-import org.spongepowered.despector.ast.members.insn.arg.Instruction;
-import org.spongepowered.despector.ast.members.insn.arg.field.LocalAccess;
-import org.spongepowered.despector.ast.members.insn.assign.FieldAssignment;
-import org.spongepowered.despector.ast.members.insn.assign.LocalAssignment;
-import org.spongepowered.despector.ast.members.insn.branch.If;
+import org.spongepowered.despector.ast.insn.Instruction;
+import org.spongepowered.despector.ast.insn.var.LocalAccess;
+import org.spongepowered.despector.ast.stmt.Statement;
+import org.spongepowered.despector.ast.stmt.assign.FieldAssignment;
+import org.spongepowered.despector.ast.stmt.assign.LocalAssignment;
+import org.spongepowered.despector.ast.stmt.branch.If;
 import org.spongepowered.despector.ast.type.ClassEntry;
+import org.spongepowered.despector.ast.type.FieldEntry;
+import org.spongepowered.despector.ast.type.MethodEntry;
 import org.spongepowered.despector.ast.type.TypeEntry.InnerClassInfo;
 import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.kotlin.KotlinEmitterUtil;

@@ -24,9 +24,9 @@
  */
 package org.spongepowered.despector.transform.matcher;
 
-import org.spongepowered.despector.ast.members.insn.arg.Cast;
-import org.spongepowered.despector.ast.members.insn.arg.Instruction;
-import org.spongepowered.despector.ast.members.insn.function.InstanceMethodInvoke;
+import org.spongepowered.despector.ast.insn.Instruction;
+import org.spongepowered.despector.ast.insn.misc.Cast;
+import org.spongepowered.despector.ast.stmt.invoke.InstanceMethodInvoke;
 import org.spongepowered.despector.transform.matcher.instruction.ArrayAccessMatcher;
 import org.spongepowered.despector.transform.matcher.instruction.InstanceFieldMatcher;
 import org.spongepowered.despector.transform.matcher.instruction.InstanceInvokeMatcher;

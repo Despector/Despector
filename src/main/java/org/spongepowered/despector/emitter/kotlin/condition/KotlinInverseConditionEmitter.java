@@ -24,7 +24,7 @@
  */
 package org.spongepowered.despector.emitter.kotlin.condition;
 
-import org.spongepowered.despector.ast.members.insn.branch.condition.InverseCondition;
+import org.spongepowered.despector.ast.insn.condition.InverseCondition;
 import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.condition.InverseConditionEmitter;
 import org.spongepowered.despector.emitter.kotlin.special.KotlinRangeEmitter;

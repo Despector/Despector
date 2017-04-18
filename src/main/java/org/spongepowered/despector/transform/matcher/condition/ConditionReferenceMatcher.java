@@ -25,7 +25,7 @@
 package org.spongepowered.despector.transform.matcher.condition;
 
 import org.spongepowered.despector.ast.Locals.LocalInstance;
-import org.spongepowered.despector.ast.members.insn.branch.condition.Condition;
+import org.spongepowered.despector.ast.insn.condition.Condition;
 import org.spongepowered.despector.transform.matcher.ConditionMatcher;
 import org.spongepowered.despector.transform.matcher.MatchContext;
 import org.spongepowered.despector.util.AstUtil;

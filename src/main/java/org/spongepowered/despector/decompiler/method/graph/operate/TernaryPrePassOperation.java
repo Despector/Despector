@@ -27,7 +27,7 @@ package org.spongepowered.despector.decompiler.method.graph.operate;
 import static com.google.common.base.Preconditions.checkState;
 
 import org.spongepowered.despector.ast.Locals;
-import org.spongepowered.despector.ast.members.insn.branch.condition.Condition;
+import org.spongepowered.despector.ast.insn.condition.Condition;
 import org.spongepowered.despector.decompiler.method.ConditionBuilder;
 import org.spongepowered.despector.decompiler.method.PartialMethod;
 import org.spongepowered.despector.decompiler.method.PartialMethod.TryCatchRegion;
