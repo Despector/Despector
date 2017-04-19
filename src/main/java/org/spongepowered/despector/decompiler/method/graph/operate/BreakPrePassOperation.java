@@ -52,7 +52,7 @@ public class BreakPrePassOperation implements GraphOperation {
         search: for (GotoOpcodeBlock ggoto : candidates) {
             OpcodeBlock target = ggoto.getTarget();
             int target_index = blocks.indexOf(target);
-            if (target.getBreakpoint() < ggoto.getBreakpoint()) {
+            if (target.getStart() < ggoto.getStart()) {
                 // a back edge is either a while loop or a continue statement
                 List<GotoOpcodeBlock> others = target.getTargettedBy().stream().filter((op) -> op instanceof GotoOpcodeBlock)
                         .map((op) -> (GotoOpcodeBlock) op).collect(Collectors.toList());
@@ -120,13 +120,13 @@ public class BreakPrePassOperation implements GraphOperation {
                 continue;
             }
             ConditionalOpcodeBlock cond = (ConditionalOpcodeBlock) block;
-            if (cond.getTarget().getBreakpoint() < cond.getBreakpoint()) {
+            if (cond.getTarget().getStart() < cond.getStart()) {
                 int i = blocks.indexOf(cond);
                 OpcodeBlock prev = blocks.get(i);
                 ConditionalOpcodeBlock first = cond;
                 while (prev instanceof ConditionalOpcodeBlock) {
                     OpcodeBlock target = prev.getTarget();
-                    if (target.getBreakpoint() < prev.getBreakpoint()) {
+                    if (target.getStart() < prev.getStart()) {
                         break;
                     }
                     first = (ConditionalOpcodeBlock) prev;
@@ -178,7 +178,7 @@ public class BreakPrePassOperation implements GraphOperation {
                 }
             }
             if (type != null) {
-                BreakMarkerOpcodeBlock replacement = new BreakMarkerOpcodeBlock(ggoto.getBreakpoint(), type);
+                BreakMarkerOpcodeBlock replacement = new BreakMarkerOpcodeBlock(ggoto.getStart(), ggoto.getEnd(), type);
                 replacement.setTarget(ggoto.getTarget());
                 replacement.getOpcodes().addAll(ggoto.getOpcodes());
                 replacement.setMarked(found.condition);

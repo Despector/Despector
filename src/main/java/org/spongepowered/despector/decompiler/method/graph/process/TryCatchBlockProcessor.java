@@ -65,6 +65,9 @@ public class TryCatchBlockProcessor implements GraphProcessor {
                     break;
                 }
                 TryCatchMarkerOpcodeBlock next_marker = (TryCatchMarkerOpcodeBlock) next_end;
+                if (next_marker.getType() == TryCatchMarkerType.CATCH) {
+                    break;
+                }
                 checkState(next_marker.getType() == TryCatchMarkerType.END);
                 all_ends.add(next_marker);
             }
@@ -88,7 +91,7 @@ public class TryCatchBlockProcessor implements GraphProcessor {
                     }
                 }
             } else {
-                body.add(next);
+                end--;
             }
             TryCatchBlockSection try_section = new TryCatchBlockSection();
             try {
@@ -143,7 +146,7 @@ public class TryCatchBlockProcessor implements GraphProcessor {
                         Insn op = it.next();
                         if (op.getOpcode() == Insn.LOCAL_STORE) {
                             local_num = ((IntInsn) op).getValue();
-                            label_index = catch_start.getBreakpoint() - (catch_start.getOpcodes().size() - k);
+                            label_index = catch_start.getStart() - (catch_start.getOpcodes().size() - k);
                             it.remove();
                             break;
                         } else if (op.getOpcode() == Insn.POP) {
@@ -177,7 +180,7 @@ public class TryCatchBlockProcessor implements GraphProcessor {
                         // last used and stopping there
                         for (int j = end; j < blocks.size(); j++) {
                             OpcodeBlock cnext = blocks.get(j);
-                            if (cnext.getBreakpoint() > local.getEnd()) {
+                            if (cnext.getEnd() > local.getEnd()) {
                                 break;
                             }
                             catch_body.add(cnext);

@@ -34,8 +34,8 @@ public class ConditionalOpcodeBlock extends OpcodeBlock {
     private OpcodeBlock else_target;
     private OpcodeBlock prefix;
 
-    public ConditionalOpcodeBlock(int br) {
-        super(br);
+    public ConditionalOpcodeBlock(int start, int end) {
+        super(start, end);
     }
 
     /**
@@ -77,13 +77,13 @@ public class ConditionalOpcodeBlock extends OpcodeBlock {
     @Override
     public void print() {
         super.print();
-        System.out.println("    Target: " + (this.target != null ? this.target.break_point : -1));
-        System.out.println("    Else Target: " + (this.else_target != null ? this.else_target.break_point : -1));
+        System.out.println("    Target: " + (this.target != null ? this.target.getStart() : -1));
+        System.out.println("    Else Target: " + (this.else_target != null ? this.else_target.getStart() : -1));
     }
 
     @Override
     public String getDebugHeader() {
-        return "Conditional: " + this.break_point + " (target: " + (this.target != null ? this.target.getBreakpoint() : -1) + ", else_target: "
-                + (this.else_target != null ? this.else_target.getBreakpoint() : -1) + ")";
+        return "Conditional: " + this.start_pc + "-" + this.end_pc + " (target: " + (this.target != null ? this.target.getStart() : -1) + ", else_target: "
+                + (this.else_target != null ? this.else_target.getEnd() : -1) + ")";
     }
 }

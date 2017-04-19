@@ -116,7 +116,7 @@ public class ElvisGraphProducerStep implements GraphProducerStep {
                         else_body.add(search);
                     }
                 }
-                OpcodeBlock holder = new BodyOpcodeBlock(0);
+                OpcodeBlock holder = new BodyOpcodeBlock(0, 0);
                 holder.getOpcodes().addAll(else_body);
                 // remove any break points that were placed inside the elvis
                 for (int l = start; l < o; l++) {
@@ -139,14 +139,14 @@ public class ElvisGraphProducerStep implements GraphProducerStep {
     }
 
     @Override
-    public void formEdges(PartialMethod partial, Map<Integer, OpcodeBlock> blocks, List<Integer> sorted_break_points, List<OpcodeBlock> block_list) {
-        for (Map.Entry<Integer, OpcodeBlock> e : blocks.entrySet()) {
-            ElvisBlockSection elvis = this.sections.get(e.getKey());
+    public void formEdges(PartialMethod partial, List<Integer> sorted_break_points, List<OpcodeBlock> block_list) {
+        for (int i = 0; i < block_list.size(); i++) {
+                OpcodeBlock block = block_list.get(i);
+            ElvisBlockSection elvis = this.sections.get(block.getStart());
             // Now we loop through the break points and find any that we
             // compiled an elvis statement for to create the block section.
             if (elvis != null) {
-                OpcodeBlock block = e.getValue();
-                ProcessedOpcodeBlock replacement = new ProcessedOpcodeBlock(block.getBreakpoint(), elvis);
+                ProcessedOpcodeBlock replacement = new ProcessedOpcodeBlock(block.getStart(), block.getEnd(), elvis);
                 replacement.setTarget(block.getTarget());
                 block_list.set(block_list.indexOf(block), replacement);
                 // omit the next block from the ternary check as it will look

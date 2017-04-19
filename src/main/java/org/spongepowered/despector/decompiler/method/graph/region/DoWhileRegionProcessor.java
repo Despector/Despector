@@ -74,7 +74,7 @@ public class DoWhileRegionProcessor implements RegionProcessor {
             cond = ConditionBuilder.makeCondition(condition_blocks, partial.getLocals(), start, ret);
 
             boolean targetted_by_previous_jump = condition_blocks.get(0).getTargettedBy().stream()
-                    .filter((b) -> b.getBreakpoint() < start.getBreakpoint()).findAny().isPresent();
+                    .filter((b) -> b.getStart() < start.getStart()).findAny().isPresent();
 
             if (targetted_by_previous_jump) {
                 WhileBlockSection section = new WhileBlockSection(cond);

@@ -28,7 +28,6 @@ import org.spongepowered.despector.decompiler.method.PartialMethod;
 import org.spongepowered.despector.decompiler.method.graph.data.opcode.OpcodeBlock;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 /**
@@ -46,5 +45,14 @@ public interface GraphProducerStep {
     /**
      * Forms edges between blocks in the graph.
      */
-    void formEdges(PartialMethod partial, Map<Integer, OpcodeBlock> blocks, List<Integer> sorted_break_points, List<OpcodeBlock> block_list);
+    void formEdges(PartialMethod partial, List<Integer> sorted_break_points, List<OpcodeBlock> block_list);
+
+    static OpcodeBlock find(List<OpcodeBlock> blocks, int op) {
+        for (OpcodeBlock block : blocks) {
+            if (block.getStart() <= op && block.getEnd() >= op) {
+                return block;
+            }
+        }
+        throw new IllegalStateException();
+    }
 }

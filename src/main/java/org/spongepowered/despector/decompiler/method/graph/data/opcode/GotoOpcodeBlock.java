@@ -31,8 +31,8 @@ import org.spongepowered.despector.decompiler.method.graph.data.block.BlockSecti
  */
 public class GotoOpcodeBlock extends OpcodeBlock {
 
-    public GotoOpcodeBlock(int br) {
-        super(br);
+    public GotoOpcodeBlock(int start, int end) {
+        super(start, end);
     }
 
     @Override
@@ -42,7 +42,7 @@ public class GotoOpcodeBlock extends OpcodeBlock {
 
     @Override
     public String getDebugHeader() {
-        return "Goto: " + this.break_point + " (target: " + (this.target != null ? this.target.getBreakpoint() : -1) + ")";
+        return "Goto: " + this.start_pc + "-" + this.end_pc + " (target: " + (this.target != null ? this.target.getStart() : -1) + ")";
     }
 
 }

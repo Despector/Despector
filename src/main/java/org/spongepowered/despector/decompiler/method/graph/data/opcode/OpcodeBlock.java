@@ -40,15 +40,17 @@ import java.util.Set;
  */
 public abstract class OpcodeBlock {
 
-    protected final int break_point;
+    protected int start_pc;
+    protected int end_pc;
     protected final List<Insn> opcodes = new ArrayList<>();
     protected OpcodeBlock target;
 
     protected Set<OpcodeBlock> targetted_by = new HashSet<>();
     protected boolean exclude_from_ternary_check = false;
 
-    public OpcodeBlock(int br) {
-        this.break_point = br;
+    public OpcodeBlock(int start, int end) {
+        this.start_pc = start;
+        this.end_pc = end;
     }
 
     /**
@@ -56,8 +58,17 @@ public abstract class OpcodeBlock {
      * be used as a general method of ordering blocks but beware as it is not
      * recalculated if block are split or joined.
      */
-    public int getBreakpoint() {
-        return this.break_point;
+    public int getStart() {
+        return this.start_pc;
+    }
+
+    public int getEnd() {
+        return this.end_pc;
+    }
+
+    public void setBounds(int start, int end) {
+        this.start_pc = start;
+        this.end_pc = end;
     }
 
     /**

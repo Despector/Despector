@@ -35,7 +35,6 @@ import org.spongepowered.despector.decompiler.method.graph.data.opcode.GotoOpcod
 import org.spongepowered.despector.decompiler.method.graph.data.opcode.OpcodeBlock;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 /**
@@ -51,45 +50,42 @@ public class JumpGraphProducerStep implements GraphProducerStep {
         for (int i = 0; i < instructions.size(); i++) {
             Insn next = instructions.get(i);
             if (next instanceof JumpInsn) {
+                if(next.getOpcode() == Insn.GOTO && i > 0) {
+                    break_points.add(i - 1);
+                }
                 break_points.add(i);
                 // also break before labels targetted by jump opcodes to have a
                 // break between the body of an if block and the statements
                 // after it
                 int target = ((JumpInsn) next).getTarget() - 1;
-                if(target >= 0) {
+                if (target >= 0) {
                     break_points.add(target);
                 }
                 continue;
-            }
-            int op = next.getOpcode();
-            if (op == Insn.RETURN || op == Insn.ARETURN) {
-                break_points.add(i);
             }
         }
     }
 
     @Override
-    public void formEdges(PartialMethod partial, Map<Integer, OpcodeBlock> blocks, List<Integer> sorted_break_points, List<OpcodeBlock> block_list) {
-        for (Map.Entry<Integer, OpcodeBlock> e : blocks.entrySet()) {
+    public void formEdges(PartialMethod partial, List<Integer> sorted_break_points, List<OpcodeBlock> block_list) {
+        for (int i = 0; i < block_list.size(); i++) {
             // Now we go through and form an edge from any block and the block
             // it flows (or jumps) into next.
-            OpcodeBlock block = e.getValue();
+            OpcodeBlock block = block_list.get(i);
             if (block.getLast() instanceof JumpInsn) {
                 int label = ((JumpInsn) block.getLast()).getTarget();
-                if(block.getLast().getOpcode() == Insn.GOTO) {
-                    GotoOpcodeBlock replacement = new GotoOpcodeBlock(block.getBreakpoint());
-                    e.setValue(replacement);
-                    block_list.set(block_list.indexOf(block), replacement);
+                if (block.getLast().getOpcode() == Insn.GOTO) {
+                    GotoOpcodeBlock replacement = new GotoOpcodeBlock(block.getStart(), block.getEnd());
+                    block_list.set(i, replacement);
                     replacement.getOpcodes().addAll(block.getOpcodes());
-                    replacement.setTarget(blocks.get(label));
+                    replacement.setTarget(GraphProducerStep.find(block_list, label));
                     GraphOperation.remap(block_list, block, replacement);
                 } else {
-                    ConditionalOpcodeBlock replacement = new ConditionalOpcodeBlock(block.getBreakpoint());
-                    e.setValue(replacement);
+                    ConditionalOpcodeBlock replacement = new ConditionalOpcodeBlock(block.getStart(), block.getEnd());
                     OpcodeBlock next = block_list.get(block_list.indexOf(block) + 1);
-                    block_list.set(block_list.indexOf(block), replacement);
+                    block_list.set(i, replacement);
                     replacement.getOpcodes().addAll(block.getOpcodes());
-                    replacement.setTarget(blocks.get(label));
+                    replacement.setTarget(GraphProducerStep.find(block_list, label));
                     replacement.setElseTarget(next);
                     GraphOperation.remap(block_list, block, replacement);
                 }

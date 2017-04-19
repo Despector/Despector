@@ -36,8 +36,8 @@ public class SwitchOpcodeBlock extends OpcodeBlock {
 
     private final Map<Integer, OpcodeBlock> additional_targets = new HashMap<>();
 
-    public SwitchOpcodeBlock(int br) {
-        super(br);
+    public SwitchOpcodeBlock(int start, int end) {
+        super(start, end);
     }
 
     /**
@@ -55,7 +55,7 @@ public class SwitchOpcodeBlock extends OpcodeBlock {
 
     @Override
     public String getDebugHeader() {
-        return "Switch: " + this.break_point + " (target: " + (this.target != null ? this.target.getBreakpoint() : -1) + ")";
+        return "Switch: " + this.start_pc + "-" + this.end_pc + " (target: " + (this.target != null ? this.target.getStart() : -1) + ")";
     }
 
 }

@@ -168,7 +168,7 @@ public class TernaryPrePassOperation implements GraphOperation {
             }
         }
         OpcodeBlock first = condition_blocks.get(0);
-        OpcodeBlock replacement = new ProcessedOpcodeBlock(first.getBreakpoint(), ternary);
+        OpcodeBlock replacement = new ProcessedOpcodeBlock(first.getStart(), first.getEnd(), ternary);
         replacement.setTarget(consumer);
         start = blocks.indexOf(first);
         int removed = has_more ? 1 : 0;

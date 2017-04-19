@@ -52,7 +52,7 @@ public class ChildRegionProcessor implements RegionProcessor {
     public BlockSection process(PartialMethod partial, List<OpcodeBlock> region, OpcodeBlock ret, int body_start) {
 
         if (partial.getEntry().getName().equals(MethodDecompiler.targeted_breakpoint)) {
-            System.out.println("Searching for child region in range " + region.get(body_start).getBreakpoint() + " to " + ret.getBreakpoint());
+            System.out.println("Searching for child region in range " + region.get(body_start).getStart() + " to " + ret.getStart());
         }
 
         // The first step is to find any points within the region that are sub
@@ -104,7 +104,7 @@ public class ChildRegionProcessor implements RegionProcessor {
                 checkState(secs.size() == 1);
                 // the first block is set to the condensed subregion block and
                 // the rest if the blocks in the subregion are removed.
-                ProcessedOpcodeBlock replacement = new ProcessedOpcodeBlock(region.get(i).getBreakpoint(), secs.get(0));
+                ProcessedOpcodeBlock replacement = new ProcessedOpcodeBlock(region.get(i).getStart(), region.get(last).getEnd(), secs.get(0));
                 replacement.setTarget(sub_ret);
                 GraphOperation.remap(region, region.get(i), replacement);
                 region.set(i, replacement);
@@ -163,10 +163,10 @@ public class ChildRegionProcessor implements RegionProcessor {
                             continue;
                         }
                         if (sec == null) {
-                            sec = new BreakBlockSection(new BreakMarkerOpcodeBlock(next.getBreakpoint(), BreakMarkerOpcodeBlock.MarkerType.BREAK),
+                            sec = new BreakBlockSection(new BreakMarkerOpcodeBlock(next.getStart(), next.getStart(), BreakMarkerOpcodeBlock.MarkerType.BREAK),
                                     BreakMarkerOpcodeBlock.MarkerType.BREAK);
                             sec.getInlinedConditions().add((ConditionalOpcodeBlock) next);
-                            OpcodeBlock replace = new ProcessedOpcodeBlock(next.getBreakpoint(), sec);
+                            OpcodeBlock replace = new ProcessedOpcodeBlock(next.getStart(), next.getStart(), sec);
                             region.set(i, replace);
                             GraphOperation.remap(region, next, replace);
                         } else {
@@ -181,14 +181,14 @@ public class ChildRegionProcessor implements RegionProcessor {
                     for (OpcodeBlock targeting : ret.getTargettedBy()) {
                         if (targeting instanceof GotoOpcodeBlock) {
                             GotoOpcodeBlock ggoto = (GotoOpcodeBlock) targeting;
-                            if (ggoto.getBreakpoint() < sstart.getTarget().getBreakpoint() && ggoto.getBreakpoint() > next.getBreakpoint()
-                                    && (pos == null || ggoto.getBreakpoint() < pos.getBreakpoint())) {
+                            if (ggoto.getEnd() < sstart.getTarget().getStart() && ggoto.getStart() > next.getEnd()
+                                    && (pos == null || ggoto.getStart() < pos.getStart())) {
                                 pos = ggoto;
                             }
                         } else if (targeting instanceof BreakMarkerOpcodeBlock) {
                             BreakMarkerOpcodeBlock bbreak = (BreakMarkerOpcodeBlock) targeting;
-                            if (bbreak.getBreakpoint() < sstart.getTarget().getBreakpoint() && bbreak.getBreakpoint() > next.getBreakpoint()
-                                    && (pos == null || bbreak.getBreakpoint() < pos.getBreakpoint())) {
+                            if (bbreak.getEnd() < sstart.getTarget().getStart() && bbreak.getStart() > next.getEnd()
+                                    && (pos == null || bbreak.getStart() < pos.getStart())) {
                                 pos = bbreak;
                             }
                         }
@@ -222,10 +222,10 @@ public class ChildRegionProcessor implements RegionProcessor {
                     }
                 }
                 if (sec == null) {
-                    sec = new BreakBlockSection(new BreakMarkerOpcodeBlock(next.getBreakpoint(), BreakMarkerOpcodeBlock.MarkerType.CONTINUE),
+                    sec = new BreakBlockSection(new BreakMarkerOpcodeBlock(next.getStart(), next.getEnd(), BreakMarkerOpcodeBlock.MarkerType.CONTINUE),
                             BreakMarkerOpcodeBlock.MarkerType.CONTINUE);
                     sec.getInlinedConditions().add((ConditionalOpcodeBlock) next);
-                    OpcodeBlock replace = new ProcessedOpcodeBlock(next.getBreakpoint(), sec);
+                    OpcodeBlock replace = new ProcessedOpcodeBlock(next.getStart(), next.getEnd(), sec);
                     region.set(i, replace);
                     GraphOperation.remap(region, next, replace);
                 } else {
@@ -235,7 +235,7 @@ public class ChildRegionProcessor implements RegionProcessor {
                 }
                 OpcodeBlock last = region.get(region.size() - 1);
                 if (!(last instanceof GotoOpcodeBlock) && sstart instanceof ConditionalOpcodeBlock) {
-                    GotoOpcodeBlock fake_loop = new GotoOpcodeBlock(last.getBreakpoint());
+                    GotoOpcodeBlock fake_loop = new GotoOpcodeBlock(last.getStart(), last.getEnd());
                     fake_loop.setTarget(sstart);
                     region.add(fake_loop);
                 }
@@ -246,7 +246,7 @@ public class ChildRegionProcessor implements RegionProcessor {
 
             if (end != -1) {
                 if (partial.getEntry().getName().equals(MethodDecompiler.targeted_breakpoint)) {
-                    System.out.println("Child region found from " + next.getBreakpoint() + " to " + region.get(end - 1).getBreakpoint());
+                    System.out.println("Child region found from " + next.getStart() + " to " + region.get(end - 1).getStart());
                 }
 
                 List<OpcodeBlock> subregion = new ArrayList<>();
@@ -260,9 +260,10 @@ public class ChildRegionProcessor implements RegionProcessor {
 
                 // the first block is set to the condensed subregion block and
                 // the rest if the blocks in the subregion are removed.
-                ProcessedOpcodeBlock replacement = new ProcessedOpcodeBlock(region.get(i).getBreakpoint(), s);
+                OpcodeBlock region_start = region.get(i);
+                ProcessedOpcodeBlock replacement = new ProcessedOpcodeBlock(region_start.getStart(), region_start.getEnd(), s);
                 replacement.setTarget(sub_ret);
-                GraphOperation.remap(region, region.get(i), replacement);
+                GraphOperation.remap(region, region_start, replacement);
                 region.set(i, replacement);
                 for (int o = end - 1; o > i; o--) {
                     region.remove(o);

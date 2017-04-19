@@ -30,6 +30,7 @@ import static org.objectweb.asm.Opcodes.ASTORE;
 import static org.objectweb.asm.Opcodes.ILOAD;
 import static org.objectweb.asm.Opcodes.ISTORE;
 
+import javax.annotation.Nullable;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.LocalVariableNode;
@@ -41,6 +42,7 @@ import org.spongepowered.despector.ast.Locals.LocalInstance;
 import org.spongepowered.despector.ast.generic.ClassTypeSignature;
 import org.spongepowered.despector.ast.generic.TypeSignature;
 import org.spongepowered.despector.ast.insn.Instruction;
+import org.spongepowered.despector.ast.insn.var.LocalAccess;
 import org.spongepowered.despector.ast.stmt.StatementBlock;
 import org.spongepowered.despector.ast.type.MethodEntry;
 import org.spongepowered.despector.decompiler.ir.InsnBlock;
@@ -54,6 +56,8 @@ import org.spongepowered.despector.decompiler.method.graph.RegionProcessor;
 import org.spongepowered.despector.decompiler.method.graph.data.block.BlockSection;
 import org.spongepowered.despector.decompiler.method.graph.data.opcode.BodyOpcodeBlock;
 import org.spongepowered.despector.decompiler.method.graph.data.opcode.OpcodeBlock;
+import org.spongepowered.despector.decompiler.method.graph.data.opcode.SwitchOpcodeBlock;
+import org.spongepowered.despector.decompiler.method.graph.data.opcode.TryCatchMarkerOpcodeBlock;
 import org.spongepowered.despector.decompiler.method.postprocess.StatementPostProcessor;
 import org.spongepowered.despector.decompiler.method.special.SpecialMethodProcessor;
 import org.spongepowered.despector.util.SignatureParser;
@@ -69,8 +73,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import javax.annotation.Nullable;
 
 /**
  * A decompiler for method bodies.
@@ -230,6 +232,17 @@ public class MethodDecompiler {
         List<OpcodeBlock> graph = makeGraph(partial);
         partial.setGraph(graph);
 
+        for (int i = 0; i < graph.size() - 1; i++) {
+            OpcodeBlock b = graph.get(i);
+            if (b.getTarget() == null && !(b instanceof SwitchOpcodeBlock) && !(b instanceof TryCatchMarkerOpcodeBlock)) {
+                System.err.println("Block with null target: " + b.getStart());
+                for (OpcodeBlock bl : graph) {
+                    System.out.print(bl.toString());
+                }
+                throw new IllegalStateException();
+            }
+        }
+
         if (partial.getEntry().getName().equals(targeted_breakpoint)) {
             System.out.println();
         }
@@ -261,7 +274,11 @@ public class MethodDecompiler {
         //
         // TODO We should add a processor that can handle this even in java to
         // produce almost correct code rather than erroring
-        int start = entry.getName().startsWith("$SWITCH_TABLE$") ? 2 : 0;
+        int start = 0;
+        if (entry.getName().startsWith("$SWITCH_TABLE$")) {
+            start = 2;
+            stack.push(new LocalAccess(block.getLocals().getLocal(0).getInstance(0)));
+        }
         for (int i = start; i < flat_graph.size(); i++) {
             BlockSection op = flat_graph.get(i);
             op.appendTo(block, stack);
@@ -293,7 +310,6 @@ public class MethodDecompiler {
         // Sort the break points
         List<Integer> sorted_break_points = new ArrayList<>(break_points);
         sorted_break_points.sort(Comparator.naturalOrder());
-        Map<Integer, OpcodeBlock> blocks = new HashMap<>();
         List<OpcodeBlock> block_list = new ArrayList<>();
 
         // turn all blocks to the basic body opcode block, the various
@@ -302,13 +318,20 @@ public class MethodDecompiler {
         for (int brk : sorted_break_points) {
             // accumulate the opcodes beween the next breakpoint and the last
             // breakpoint.
-            OpcodeBlock block = new BodyOpcodeBlock(last_brk);
+            OpcodeBlock block = new BodyOpcodeBlock(last_brk, brk);
             block_list.add(block);
             for (int i = last_brk; i <= brk; i++) {
                 block.getOpcodes().add(instructions.get(i));
             }
-            blocks.put(last_brk, block);
             last_brk = brk + 1;
+        }
+
+        if (last_brk < instructions.size()) {
+            OpcodeBlock block = new BodyOpcodeBlock(last_brk, instructions.size() - 1);
+            block_list.add(block);
+            for (int i = last_brk; i < instructions.size(); i++) {
+                block.getOpcodes().add(instructions.get(i));
+            }
         }
 
         for (int i = 0; i < block_list.size() - 1; i++) {
@@ -320,7 +343,7 @@ public class MethodDecompiler {
 
         // form the edges of the graph
         for (GraphProducerStep step : this.graph_producers) {
-            step.formEdges(partial, blocks, sorted_break_points, block_list);
+            step.formEdges(partial, sorted_break_points, block_list);
         }
 
         return block_list;

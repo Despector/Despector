@@ -33,8 +33,8 @@ import org.spongepowered.despector.decompiler.method.graph.data.block.InlineBloc
  */
 public class BodyOpcodeBlock extends OpcodeBlock {
 
-    public BodyOpcodeBlock(int br) {
-        super(br);
+    public BodyOpcodeBlock(int start, int end) {
+        super(start, end);
     }
 
     @Override
@@ -44,7 +44,7 @@ public class BodyOpcodeBlock extends OpcodeBlock {
 
     @Override
     public String getDebugHeader() {
-        return "Body: " + this.break_point + " (target: " + (this.target != null ? this.target.getBreakpoint() : -1) + ")";
+        return "Body: " + this.start_pc + "-" + this.end_pc + " (target: " + (this.target != null ? this.target.getStart() : -1) + ")";
     }
 
 }

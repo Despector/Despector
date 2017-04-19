@@ -92,9 +92,9 @@ public class SwitchBlockProcessor implements GraphProcessor {
                 }
 
                 OpcodeBlock last = case_region.get(case_region.size() - 1);
-                if (last.getBreakpoint() > farthest_break) {
+                if (last.getStart() > farthest_break) {
                     fartherst = last;
-                    farthest_break = last.getBreakpoint();
+                    farthest_break = last.getStart();
                 }
                 if (last instanceof BodyOpcodeBlock) {
                     int op = last.getLast().getOpcode();
@@ -150,9 +150,9 @@ public class SwitchBlockProcessor implements GraphProcessor {
                     }
                 }
                 OpcodeBlock last = case_region.get(case_region.size() - 1);
-                if (last.getBreakpoint() > farthest_break) {
+                if (last.getStart() > farthest_break) {
                     fartherst = last;
-                    farthest_break = last.getBreakpoint();
+                    farthest_break = last.getStart();
                 }
                 cs.setDefault(true);
                 try {

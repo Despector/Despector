@@ -51,7 +51,7 @@ public class JumpSeparateOperation implements GraphOperation {
         List<OpcodeBlock> fblocks = new ArrayList<>();
         for (OpcodeBlock block : blocks) {
             if (block instanceof GotoOpcodeBlock) {
-                OpcodeBlock header = new BodyOpcodeBlock(block.getBreakpoint());
+                OpcodeBlock header = new BodyOpcodeBlock(block.getStart(), block.getEnd() - 1);
                 if(block.getOpcodes().size() == 1) {
                     fblocks.add(block);
                     continue;
@@ -62,6 +62,7 @@ public class JumpSeparateOperation implements GraphOperation {
                 Insn ggoto = block.getOpcodes().get(block.getOpcodes().size() - 1);
                 block.getOpcodes().clear();
                 block.getOpcodes().add(ggoto);
+                block.setBounds(block.getEnd(), block.getEnd());
                 // Have to ensure that we remap any blocks that were
                 // targeting this block to target the header.
                 GraphOperation.remap(blocks, block, header);
@@ -72,7 +73,8 @@ public class JumpSeparateOperation implements GraphOperation {
             } else if (block instanceof ConditionalOpcodeBlock || block instanceof SwitchOpcodeBlock) {
                 int cond_start = AstUtil.findStartLastStatement(block.getOpcodes());
                 if (cond_start > 0) {
-                    OpcodeBlock header = new BodyOpcodeBlock(block.getBreakpoint());
+                    OpcodeBlock header = new BodyOpcodeBlock(block.getStart(), block.getStart() + cond_start - 1);
+                    block.setBounds(block.getStart() + cond_start, block.getEnd());
                     for (int i = 0; i < cond_start; i++) {
                         header.getOpcodes().add(block.getOpcodes().get(i));
                     }

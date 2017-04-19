@@ -42,7 +42,7 @@ public class TryCatchMarkerOpcodeBlock extends OpcodeBlock {
     private TryCatchMarkerOpcodeBlock end;
 
     public TryCatchMarkerOpcodeBlock(TryCatchMarkerType marker, TryCatchRegion tc) {
-        super(-1);
+        super(-1, -1);
         this.marker_type = marker;
         this.tc_node = tc;
         if (this.marker_type == TryCatchMarkerType.START) {
@@ -107,7 +107,7 @@ public class TryCatchMarkerOpcodeBlock extends OpcodeBlock {
 
     @Override
     public String getDebugHeader() {
-        return "TryCatch: " + this.break_point + " (target: " + (this.target != null ? this.target.getBreakpoint() : -1) + ", marker: "
+        return "TryCatch: " + this.start_pc + "-" + this.end_pc + " (target: " + (this.target != null ? this.target.getStart() : -1) + ", marker: "
                 + this.marker_type.name() + ")";
     }
 }

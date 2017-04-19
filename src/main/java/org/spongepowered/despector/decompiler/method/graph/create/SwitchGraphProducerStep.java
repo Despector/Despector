@@ -60,25 +60,24 @@ public class SwitchGraphProducerStep implements GraphProducerStep {
     }
 
     @Override
-    public void formEdges(PartialMethod partial, Map<Integer, OpcodeBlock> blocks, List<Integer> sorted_break_points, List<OpcodeBlock> block_list) {
-        for (Map.Entry<Integer, OpcodeBlock> e : blocks.entrySet()) {
+    public void formEdges(PartialMethod partial, List<Integer> sorted_break_points, List<OpcodeBlock> block_list) {
+        for (int i = 0; i < block_list.size(); i++) {
             // Now we go through and form an edge from any block and the block
             // it flows (or jumps) into next.
-            OpcodeBlock block = e.getValue();
+            OpcodeBlock block = block_list.get(i);
             if (!(block.getLast() instanceof SwitchInsn)) {
                 continue;
             }
-            SwitchOpcodeBlock replacement = new SwitchOpcodeBlock(block.getBreakpoint());
+            SwitchOpcodeBlock replacement = new SwitchOpcodeBlock(block.getStart(), block.getEnd());
             replacement.getOpcodes().addAll(block.getOpcodes());
             replacement.setTarget(block.getTarget());
-            block_list.set(block_list.indexOf(block), replacement);
-            e.setValue(replacement);
+            block_list.set(i, replacement);
             GraphOperation.remap(block_list, block, replacement);
             SwitchInsn ts = (SwitchInsn) block.getLast();
             for (Map.Entry<Integer, Integer> r : ts.getTargets().entrySet()) {
-                replacement.getAdditionalTargets().put(r.getKey(), blocks.get(r.getValue()));
+                replacement.getAdditionalTargets().put(r.getKey(), GraphProducerStep.find(block_list, r.getValue()));
             }
-            replacement.getAdditionalTargets().put(-1, blocks.get(ts.getDefault()));
+            replacement.getAdditionalTargets().put(-1, GraphProducerStep.find(block_list, ts.getDefault()));
         }
     }
 

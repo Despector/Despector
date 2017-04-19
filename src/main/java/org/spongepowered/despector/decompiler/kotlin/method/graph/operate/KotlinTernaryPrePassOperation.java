@@ -176,7 +176,7 @@ public class KotlinTernaryPrePassOperation implements GraphOperation {
                 }
                 when.getConditions().add(when_cond);
             }
-            replacement = new ProcessedOpcodeBlock(first.getBreakpoint(), when);
+            replacement = new ProcessedOpcodeBlock(first.getStart(), first.getEnd(), when);
         } else {
             // with only a single case we have a ternary
             TernaryBlockSection ternary = new TernaryBlockSection(conditions.get(0).getCondition());
@@ -207,7 +207,7 @@ public class KotlinTernaryPrePassOperation implements GraphOperation {
                     ternary.getTrueBody().add(new InlineBlockSection(t));
                 }
             }
-            replacement = new ProcessedOpcodeBlock(first.getBreakpoint(), ternary);
+            replacement = new ProcessedOpcodeBlock(first.getStart(), first.getEnd(), ternary);
         }
         replacement.setTarget(consumer);
         start = blocks.indexOf(first);

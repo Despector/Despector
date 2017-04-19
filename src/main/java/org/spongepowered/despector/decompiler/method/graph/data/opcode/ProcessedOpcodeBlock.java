@@ -33,8 +33,8 @@ public class ProcessedOpcodeBlock extends OpcodeBlock {
 
     private BlockSection internal = null;
 
-    public ProcessedOpcodeBlock(int br, BlockSection internal) {
-        super(br);
+    public ProcessedOpcodeBlock(int start, int end, BlockSection internal) {
+        super(start, end);
         this.internal = internal;
     }
 
@@ -59,7 +59,7 @@ public class ProcessedOpcodeBlock extends OpcodeBlock {
 
     @Override
     public String getDebugHeader() {
-        return "Processed: " + this.break_point + " (target: " + (this.target != null ? this.target.getBreakpoint() : -1) + ", internal: "
+        return "Processed: " + this.start_pc + "-" + this.end_pc + " (target: " + (this.target != null ? this.target.getStart() : -1) + ", internal: "
                 + this.internal.getClass().getSimpleName() + ")";
     }
 

@@ -69,12 +69,12 @@ public interface RegionProcessor {
         if (region_start instanceof ConditionalOpcodeBlock) {
             ConditionalOpcodeBlock cond = (ConditionalOpcodeBlock) region_start;
             int end_a = blocks.indexOf(cond.getTarget());
-            if (cond.getTarget().getBreakpoint() <= region_start.getBreakpoint()) {
+            if (cond.getTarget().getStart() <= region_start.getStart()) {
                 boolean found = false;
                 if (cond.getTarget() instanceof ConditionalOpcodeBlock) {
                     ConditionalOpcodeBlock target = (ConditionalOpcodeBlock) cond.getTarget();
                     for (OpcodeBlock op : target.getTargettedBy()) {
-                        if (op instanceof GotoOpcodeBlock && op.getBreakpoint() > cond.getBreakpoint()) {
+                        if (op instanceof GotoOpcodeBlock && op.getStart() > cond.getStart()) {
                             end_a = blocks.indexOf(op);
                             found = true;
                             break;
@@ -88,8 +88,8 @@ public interface RegionProcessor {
             if (end_a > start) {
                 if (cond.getTarget() instanceof ConditionalOpcodeBlock) {
                     ConditionalOpcodeBlock cond_target = (ConditionalOpcodeBlock) cond.getTarget();
-                    if (cond_target.getTarget().getBreakpoint() < cond_target.getBreakpoint()
-                            && cond_target.getTarget().getBreakpoint() > region_start.getBreakpoint()) {
+                    if (cond_target.getTarget().getStart() < cond_target.getStart()
+                            && cond_target.getTarget().getStart() > region_start.getStart()) {
                         end_a = blocks.indexOf(cond_target.getTarget());
                     }
                 }
@@ -97,7 +97,7 @@ public interface RegionProcessor {
             if (end_a < start && cond.getTarget() instanceof ConditionalOpcodeBlock) {
                 ConditionalOpcodeBlock target = (ConditionalOpcodeBlock) cond.getTarget();
                 for (OpcodeBlock op : target.getTargettedBy()) {
-                    if (op instanceof GotoOpcodeBlock && op.getBreakpoint() > cond.getBreakpoint()) {
+                    if (op instanceof GotoOpcodeBlock && op.getStart() > cond.getStart()) {
                         end_a = blocks.indexOf(op);
                         break;
                     }
@@ -149,7 +149,7 @@ public interface RegionProcessor {
                     if (end_a < o && next.getTarget() instanceof ConditionalOpcodeBlock) {
                         ConditionalOpcodeBlock target = (ConditionalOpcodeBlock) next.getTarget();
                         for (OpcodeBlock op : target.getTargettedBy()) {
-                            if (op instanceof GotoOpcodeBlock && op.getBreakpoint() > next.getBreakpoint()) {
+                            if (op instanceof GotoOpcodeBlock && op.getStart() > next.getStart()) {
                                 end_a = blocks.indexOf(op);
                                 break;
                             }

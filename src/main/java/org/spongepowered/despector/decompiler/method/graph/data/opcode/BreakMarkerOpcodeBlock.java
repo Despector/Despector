@@ -35,8 +35,8 @@ public class BreakMarkerOpcodeBlock extends OpcodeBlock {
     private MarkerType type;
     private OpcodeBlock marked;
 
-    public BreakMarkerOpcodeBlock(int br, MarkerType type) {
-        super(br);
+    public BreakMarkerOpcodeBlock(int start, int end, MarkerType type) {
+        super(start, end);
         this.type = type;
     }
 
@@ -94,8 +94,8 @@ public class BreakMarkerOpcodeBlock extends OpcodeBlock {
 
     @Override
     public String getDebugHeader() {
-        return "Break: " + this.break_point + " (target: " + (this.target != null ? this.target.getBreakpoint() : -1) + ", marker: "
-                + this.type.name() + ", marked: " + (this.marked != null ? this.marked.getBreakpoint() : -1) + ")";
+        return "Break: " + this.start_pc + "-" + this.end_pc + " (target: " + (this.target != null ? this.target.getStart() : -1) + ", marker: "
+                + this.type.name() + ", marked: " + (this.marked != null ? this.marked.getStart() : -1) + ")";
     }
 
     /**

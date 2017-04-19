@@ -26,6 +26,7 @@ package org.spongepowered.despector.decompiler.method.graph.create;
 
 import org.spongepowered.despector.ast.Locals;
 import org.spongepowered.despector.ast.Locals.LocalInstance;
+import org.spongepowered.despector.decompiler.ir.Insn;
 import org.spongepowered.despector.decompiler.ir.InsnBlock;
 import org.spongepowered.despector.decompiler.method.PartialMethod;
 import org.spongepowered.despector.decompiler.method.PartialMethod.TryCatchRegion;
@@ -35,7 +36,6 @@ import org.spongepowered.despector.decompiler.method.graph.data.opcode.OpcodeBlo
 import org.spongepowered.despector.decompiler.method.graph.data.opcode.TryCatchMarkerOpcodeBlock;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 /**
@@ -54,7 +54,7 @@ public class TryCatchGraphProducerStep implements GraphProducerStep {
             if (tc.getStart() > 0) {
                 break_points.add(tc.getStart() - 1);
             }
-            break_points.add(tc.getEnd() - 1);
+            break_points.add(tc.getEnd());
             break_points.add(tc.getCatch());
 
             LocalInstance local = null;
@@ -77,7 +77,7 @@ public class TryCatchGraphProducerStep implements GraphProducerStep {
     }
 
     @Override
-    public void formEdges(PartialMethod partial, Map<Integer, OpcodeBlock> blocks, List<Integer> sorted_break_points, List<OpcodeBlock> block_list) {
+    public void formEdges(PartialMethod partial, List<Integer> sorted_break_points, List<OpcodeBlock> block_list) {
         for (int i = partial.getCatchRegions().size() - 1; i >= 0; i--) {
             TryCatchRegion tc = partial.getCatchRegions().get(i);
             TryCatchMarkerOpcodeBlock start_marker = new TryCatchMarkerOpcodeBlock(TryCatchMarkerType.START, tc);
@@ -89,12 +89,16 @@ public class TryCatchGraphProducerStep implements GraphProducerStep {
             handler_marker.setEndMarker(end_marker);
             OpcodeBlock start;
             if (tc.getStart() == 0) {
-                start = blocks.get(0);
+                start = GraphProducerStep.find(block_list, 0);
             } else {
-                start = blocks.get(tc.getStart());
+                start = GraphProducerStep.find(block_list, tc.getStart());
             }
-            OpcodeBlock end = block_list.get(block_list.indexOf(blocks.get(tc.getEnd())));
-            OpcodeBlock handler = blocks.get(tc.getCatch());
+            OpcodeBlock end = block_list.get(block_list.indexOf(GraphProducerStep.find(block_list, tc.getEnd())));
+            OpcodeBlock handler = GraphProducerStep.find(block_list, tc.getCatch());
+            if (end.getEnd() == tc.getEnd() && end.getLast().getOpcode() == Insn.ARETURN) {
+                end = block_list.get(block_list.indexOf(GraphProducerStep.find(block_list, tc.getEnd() + 1)));
+                handler = GraphProducerStep.find(block_list, tc.getCatch() + 1);
+            }
             block_list.add(block_list.indexOf(start), start_marker);
             block_list.add(block_list.indexOf(end), end_marker);
             block_list.add(block_list.indexOf(handler), handler_marker);

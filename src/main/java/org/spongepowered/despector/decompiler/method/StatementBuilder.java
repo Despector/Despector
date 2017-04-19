@@ -93,7 +93,7 @@ public final class StatementBuilder {
         // Decompiles a set of opcodes into statements.
 
         for (int index = 0; index < op.getOpcodes().size(); index++) {
-            int label_index = op.getBreakpoint() + index;
+            int label_index = op.getStart() + index;
             Insn next = op.getOpcodes().get(index);
             switch (next.getOpcode()) {
             case Insn.NOOP:
