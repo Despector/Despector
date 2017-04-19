@@ -181,7 +181,9 @@ public class ImportManager {
         for (Annotation anno : method.getAnnotations()) {
             check(anno);
         }
-        method.getInstructions().accept(walker);
+        if (!method.isAbstract()) {
+            method.getInstructions().accept(walker);
+        }
         check(method.getReturnType());
         for (TypeSignature param : method.getParamTypes()) {
             check(param);

@@ -462,10 +462,16 @@ public class AsmTranslator {
                     block.append(new LdcInsn(Insn.PUSH, ldc.cst));
                 } else if (ldc.cst instanceof Type) {
                     block.append(new LdcInsn(Insn.PUSH, ldc.cst));
+                } else if (ldc.cst instanceof Integer) {
+                    block.append(new IntInsn(Insn.ICONST, (Integer) ldc.cst));
                 } else if (ldc.cst instanceof Long) {
                     block.append(new LongInsn(Insn.LCONST, (Long) ldc.cst));
+                } else if (ldc.cst instanceof Float) {
+                    block.append(new FloatInsn(Insn.FCONST, (Float) ldc.cst));
                 } else if (ldc.cst instanceof Double) {
                     block.append(new DoubleInsn(Insn.DCONST, (Double) ldc.cst));
+                } else {
+                    throw new IllegalStateException("Unsupported asm ldc constant type " + ldc.cst.getClass().getName());
                 }
                 index++;
             } else if (next instanceof InvokeDynamicInsnNode) {
