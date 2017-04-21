@@ -22,27 +22,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.despector.ast.type;
+package org.spongepowered.despector.transform.verify;
 
-import org.spongepowered.despector.ast.Annotation;
-import org.spongepowered.despector.ast.AstVisitor;
+public class VerificationFailedException extends RuntimeException {
 
-public interface TypeVisitor extends AstVisitor {
+    private static final long serialVersionUID = 1L;
 
-    void visitClassEntry(ClassEntry type);
+    public VerificationFailedException() {
+        super();
+    }
 
-    void visitEnumEntry(EnumEntry type);
+    public VerificationFailedException(String msg) {
+        super(msg);
+    }
 
-    void visitInterfaceEntry(InterfaceEntry type);
+    public VerificationFailedException(Throwable cause) {
+        super(cause);
+    }
 
-    void visitAnnotation(Annotation annotation);
-
-    void visitMethod(MethodEntry mth);
-
-    void visitMethodEnd();
-
-    void visitField(FieldEntry fld);
-
-    void visitTypeEnd();
+    public VerificationFailedException(String msg, Throwable cause) {
+        super(msg, cause);
+    }
 
 }

@@ -253,6 +253,9 @@ public class MethodEntry extends AstEntry {
             ((TypeVisitor) visitor).visitMethod(this);
         }
         this.instructions.accept(visitor);
+        if (visitor instanceof TypeVisitor) {
+            ((TypeVisitor) visitor).visitMethodEnd();
+        }
     }
 
     @Override

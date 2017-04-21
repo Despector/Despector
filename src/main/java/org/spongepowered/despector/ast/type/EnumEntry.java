@@ -96,6 +96,9 @@ public class EnumEntry extends TypeEntry {
         for (Annotation anno : this.annotations.values()) {
             anno.accept(visitor);
         }
+        if (visitor instanceof TypeVisitor) {
+            ((TypeVisitor) visitor).visitTypeEnd();
+        }
     }
 
 }

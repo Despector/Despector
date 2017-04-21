@@ -22,27 +22,5 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.despector.ast.type;
-
-import org.spongepowered.despector.ast.Annotation;
-import org.spongepowered.despector.ast.AstVisitor;
-
-public interface TypeVisitor extends AstVisitor {
-
-    void visitClassEntry(ClassEntry type);
-
-    void visitEnumEntry(EnumEntry type);
-
-    void visitInterfaceEntry(InterfaceEntry type);
-
-    void visitAnnotation(Annotation annotation);
-
-    void visitMethod(MethodEntry mth);
-
-    void visitMethodEnd();
-
-    void visitField(FieldEntry fld);
-
-    void visitTypeEnd();
-
-}
+@org.spongepowered.despector.util.NonnullByDefault
+package org.spongepowered.despector.transform.verify;
