@@ -26,16 +26,16 @@ package org.spongepowered.despector.emitter.kotlin.instruction;
 
 import org.spongepowered.despector.ast.generic.TypeSignature;
 import org.spongepowered.despector.ast.insn.misc.InstanceOf;
-import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.InstructionEmitter;
+import org.spongepowered.despector.emitter.java.JavaEmitterContext;
 
 /**
  * An emitter for kotlin instanceof instructions.
  */
-public class KotlinInstanceOfEmitter implements InstructionEmitter<InstanceOf> {
+public class KotlinInstanceOfEmitter implements InstructionEmitter<JavaEmitterContext, InstanceOf> {
 
     @Override
-    public void emit(EmitterContext ctx, InstanceOf arg, TypeSignature type) {
+    public void emit(JavaEmitterContext ctx, InstanceOf arg, TypeSignature type) {
         ctx.emit(arg.getCheckedValue(), null);
         ctx.printString(" is ");
         ctx.emitType(arg.getType());

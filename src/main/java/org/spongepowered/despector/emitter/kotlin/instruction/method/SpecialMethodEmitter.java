@@ -26,7 +26,7 @@ package org.spongepowered.despector.emitter.kotlin.instruction.method;
 
 import org.spongepowered.despector.ast.generic.TypeSignature;
 import org.spongepowered.despector.ast.stmt.invoke.MethodInvoke;
-import org.spongepowered.despector.emitter.EmitterContext;
+import org.spongepowered.despector.emitter.java.JavaEmitterContext;
 
 /**
  * A special method emitter for custom handling of certain methods.
@@ -36,6 +36,6 @@ public interface SpecialMethodEmitter<T extends MethodInvoke> {
     /**
      * Emits the given method.
      */
-    boolean emit(EmitterContext ctx, T arg, TypeSignature type);
+    boolean emit(JavaEmitterContext ctx, T arg, TypeSignature type);
 
 }

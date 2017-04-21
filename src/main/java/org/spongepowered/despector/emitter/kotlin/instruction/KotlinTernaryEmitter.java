@@ -28,8 +28,8 @@ import org.spongepowered.despector.ast.generic.ClassTypeSignature;
 import org.spongepowered.despector.ast.generic.TypeSignature;
 import org.spongepowered.despector.ast.insn.condition.CompareCondition;
 import org.spongepowered.despector.ast.insn.misc.Ternary;
-import org.spongepowered.despector.emitter.EmitterContext;
-import org.spongepowered.despector.emitter.instruction.TernaryEmitter;
+import org.spongepowered.despector.emitter.java.JavaEmitterContext;
+import org.spongepowered.despector.emitter.java.instruction.TernaryEmitter;
 import org.spongepowered.despector.emitter.kotlin.special.KotlinRangeEmitter;
 
 /**
@@ -38,7 +38,7 @@ import org.spongepowered.despector.emitter.kotlin.special.KotlinRangeEmitter;
 public class KotlinTernaryEmitter extends TernaryEmitter {
 
     @Override
-    public void emit(EmitterContext ctx, Ternary ternary, TypeSignature type) {
+    public void emit(JavaEmitterContext ctx, Ternary ternary, TypeSignature type) {
         if (type == ClassTypeSignature.BOOLEAN && checkBooleanExpression(ctx, ternary)) {
             return;
         }
@@ -57,7 +57,7 @@ public class KotlinTernaryEmitter extends TernaryEmitter {
     }
 
     @Override
-    public boolean checkBooleanExpression(EmitterContext ctx, Ternary ternary) {
+    public boolean checkBooleanExpression(JavaEmitterContext ctx, Ternary ternary) {
         if (KotlinRangeEmitter.checkRangeTernary(ctx, ternary)) {
             return true;
         }

@@ -32,9 +32,9 @@ import org.spongepowered.despector.Language;
 import org.spongepowered.despector.ast.SourceSet;
 import org.spongepowered.despector.ast.type.TypeEntry;
 import org.spongepowered.despector.decompiler.Decompilers;
-import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.Emitters;
 import org.spongepowered.despector.emitter.format.EmitterFormat;
+import org.spongepowered.despector.emitter.java.JavaEmitterContext;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -68,7 +68,7 @@ public class FullClassTests {
         SourceSet src = new SourceSet();
         TypeEntry type = Decompilers.get(lang).decompile(cn, src);
         StringWriter writer = new StringWriter();
-        EmitterContext ctx = new EmitterContext(writer, EmitterFormat.defaults());
+        JavaEmitterContext ctx = new JavaEmitterContext(writer, EmitterFormat.defaults());
         Emitters.get(lang).emit(ctx, type);
         String source_str = new String(Files.readAllBytes(Paths.get(source.toURI()))).replaceAll("\r\n", "\n");
         Assert.assertEquals(source_str, writer.toString());

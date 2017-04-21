@@ -39,7 +39,7 @@ import org.spongepowered.despector.ast.type.TypeEntry;
 import org.spongepowered.despector.ast.type.TypeEntry.InnerClassInfo;
 import org.spongepowered.despector.config.ConfigManager;
 import org.spongepowered.despector.emitter.AstEmitter;
-import org.spongepowered.despector.emitter.EmitterContext;
+import org.spongepowered.despector.emitter.java.JavaEmitterContext;
 import org.spongepowered.despector.emitter.kotlin.KotlinEmitterUtil;
 import org.spongepowered.despector.util.TypeHelper;
 
@@ -53,7 +53,7 @@ import java.util.Set;
 /**
  * An emitter for kotlin enum types.
  */
-public class KotlinEnumEntryEmitter implements AstEmitter<EnumEntry> {
+public class KotlinEnumEntryEmitter implements AstEmitter<JavaEmitterContext, EnumEntry> {
 
     private static final Set<String> HIDDEN_ANNOTATIONS = new HashSet<>();
 
@@ -62,7 +62,7 @@ public class KotlinEnumEntryEmitter implements AstEmitter<EnumEntry> {
     }
 
     @Override
-    public boolean emit(EmitterContext ctx, EnumEntry type) {
+    public boolean emit(JavaEmitterContext ctx, EnumEntry type) {
 
         for (Annotation anno : type.getAnnotations()) {
             if (HIDDEN_ANNOTATIONS.contains(anno.getType().getName())) {

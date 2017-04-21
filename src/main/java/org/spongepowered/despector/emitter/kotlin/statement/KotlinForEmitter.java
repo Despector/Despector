@@ -30,8 +30,8 @@ import org.spongepowered.despector.ast.insn.Instruction;
 import org.spongepowered.despector.ast.stmt.assign.LocalAssignment;
 import org.spongepowered.despector.ast.stmt.branch.For;
 import org.spongepowered.despector.ast.stmt.invoke.StaticMethodInvoke;
-import org.spongepowered.despector.emitter.EmitterContext;
-import org.spongepowered.despector.emitter.statement.ForEmitter;
+import org.spongepowered.despector.emitter.java.JavaEmitterContext;
+import org.spongepowered.despector.emitter.java.statement.ForEmitter;
 import org.spongepowered.despector.transform.matcher.ConditionMatcher;
 import org.spongepowered.despector.transform.matcher.InstructionMatcher;
 import org.spongepowered.despector.transform.matcher.MatchContext;
@@ -73,7 +73,7 @@ public class KotlinForEmitter extends ForEmitter {
             .build();
 
     @Override
-    public void emit(EmitterContext ctx, For loop, boolean semicolon) {
+    public void emit(JavaEmitterContext ctx, For loop, boolean semicolon) {
         if (checkCharIterator(ctx, loop)) {
             return;
         }
@@ -83,7 +83,7 @@ public class KotlinForEmitter extends ForEmitter {
     /**
      * Checks if the given for loop is an iterator over characters in a string.
      */
-    public boolean checkCharIterator(EmitterContext ctx, For loop) {
+    public boolean checkCharIterator(JavaEmitterContext ctx, For loop) {
         if (!CHAR_ITERATOR.matches(MatchContext.create(), loop)) {
             return false;
         }

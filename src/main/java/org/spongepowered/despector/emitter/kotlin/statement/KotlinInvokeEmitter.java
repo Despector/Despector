@@ -28,16 +28,16 @@ import org.spongepowered.despector.ast.insn.Instruction;
 import org.spongepowered.despector.ast.stmt.invoke.InstanceMethodInvoke;
 import org.spongepowered.despector.ast.stmt.invoke.InvokeStatement;
 import org.spongepowered.despector.ast.stmt.invoke.StaticMethodInvoke;
-import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.StatementEmitter;
+import org.spongepowered.despector.emitter.java.JavaEmitterContext;
 
 /**
  * An emitter kotlin invoke statements.
  */
-public class KotlinInvokeEmitter implements StatementEmitter<InvokeStatement> {
+public class KotlinInvokeEmitter implements StatementEmitter<JavaEmitterContext, InvokeStatement> {
 
     @Override
-    public void emit(EmitterContext ctx, InvokeStatement insn, boolean semicolon) {
+    public void emit(JavaEmitterContext ctx, InvokeStatement insn, boolean semicolon) {
         Instruction i = insn.getInstruction();
         if (i instanceof InstanceMethodInvoke) {
             InstanceMethodInvoke mth = (InstanceMethodInvoke) i;

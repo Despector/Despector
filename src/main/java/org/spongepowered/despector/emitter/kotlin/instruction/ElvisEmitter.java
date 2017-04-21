@@ -26,16 +26,16 @@ package org.spongepowered.despector.emitter.kotlin.instruction;
 
 import org.spongepowered.despector.ast.generic.TypeSignature;
 import org.spongepowered.despector.ast.kotlin.Elvis;
-import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.InstructionEmitter;
+import org.spongepowered.despector.emitter.java.JavaEmitterContext;
 
 /**
  * An emitter for kotlin elvis instructions.
  */
-public class ElvisEmitter implements InstructionEmitter<Elvis> {
+public class ElvisEmitter implements InstructionEmitter<JavaEmitterContext, Elvis> {
 
     @Override
-    public void emit(EmitterContext ctx, Elvis arg, TypeSignature type) {
+    public void emit(JavaEmitterContext ctx, Elvis arg, TypeSignature type) {
         ctx.emit(arg.getArg(), type);
         ctx.printString(" ?: ");
         ctx.markWrapPoint();

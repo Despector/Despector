@@ -30,9 +30,9 @@ import org.spongepowered.despector.ast.SourceSet;
 import org.spongepowered.despector.ast.type.MethodEntry;
 import org.spongepowered.despector.ast.type.TypeEntry;
 import org.spongepowered.despector.decompiler.Decompilers;
-import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.Emitters;
 import org.spongepowered.despector.emitter.format.EmitterFormat;
+import org.spongepowered.despector.emitter.java.JavaEmitterContext;
 
 import java.io.StringWriter;
 
@@ -51,7 +51,7 @@ public class KotlinTestHelper {
 
     public static String getMethodAsString(TypeEntry type, MethodEntry method) {
         StringWriter writer = new StringWriter();
-        EmitterContext emitter = new EmitterContext(writer, EmitterFormat.defaults());
+        JavaEmitterContext emitter = new JavaEmitterContext(writer, EmitterFormat.defaults());
         Emitters.KOTLIN.setup(emitter);
         emitter.setType(type);
         emitter.emit(method);

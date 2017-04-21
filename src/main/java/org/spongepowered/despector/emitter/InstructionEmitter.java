@@ -30,11 +30,11 @@ import org.spongepowered.despector.ast.insn.Instruction;
 /**
  * An emitter for a particular instruction type.
  */
-public interface InstructionEmitter<T extends Instruction> {
+public interface InstructionEmitter<C extends AbstractEmitterContext, T extends Instruction> {
 
     /**
      * Emits the given instruction.
      */
-    void emit(EmitterContext ctx, T arg, TypeSignature type);
+    void emit(C ctx, T arg, TypeSignature type);
 
 }

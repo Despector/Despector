@@ -30,8 +30,8 @@ import org.spongepowered.despector.ast.insn.Instruction;
 import org.spongepowered.despector.ast.insn.misc.NewArray;
 import org.spongepowered.despector.ast.insn.var.LocalAccess;
 import org.spongepowered.despector.ast.stmt.invoke.InstanceMethodInvoke;
-import org.spongepowered.despector.emitter.EmitterContext;
-import org.spongepowered.despector.emitter.instruction.InstanceMethodInvokeEmitter;
+import org.spongepowered.despector.emitter.java.JavaEmitterContext;
+import org.spongepowered.despector.emitter.java.instruction.InstanceMethodInvokeEmitter;
 import org.spongepowered.despector.util.TypeHelper;
 
 import java.util.HashMap;
@@ -68,7 +68,7 @@ public class KotlinInstanceMethodInvokeEmitter extends InstanceMethodInvokeEmitt
     }
 
     @Override
-    public void emit(EmitterContext ctx, InstanceMethodInvoke arg, TypeSignature type) {
+    public void emit(JavaEmitterContext ctx, InstanceMethodInvoke arg, TypeSignature type) {
         String key = arg.getOwner() + arg.getMethodName();
         SpecialMethodEmitter<InstanceMethodInvoke> special = SPECIAL.get(key);
         if (special != null && special.emit(ctx, arg, type)) {

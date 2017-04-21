@@ -26,6 +26,7 @@ package org.spongepowered.despector.emitter;
 
 import org.spongepowered.despector.Language;
 import org.spongepowered.despector.ast.type.TypeEntry;
+import org.spongepowered.despector.emitter.java.JavaEmitterContext;
 
 /**
  * An emitter than emits based on the type's detected language.
@@ -33,11 +34,11 @@ import org.spongepowered.despector.ast.type.TypeEntry;
 public class WildEmitter implements Emitter {
 
     @Override
-    public void setup(EmitterContext ctx) {
+    public void setup(JavaEmitterContext ctx) {
     }
 
     @Override
-    public void emit(EmitterContext ctx, TypeEntry type) {
+    public void emit(JavaEmitterContext ctx, TypeEntry type) {
         if (type.getLanguage() == Language.KOTLIN) {
             Emitters.KOTLIN.emit(ctx, type);
         }

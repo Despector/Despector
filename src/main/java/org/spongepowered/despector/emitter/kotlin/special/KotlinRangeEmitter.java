@@ -30,7 +30,7 @@ import org.spongepowered.despector.ast.insn.condition.CompareCondition;
 import org.spongepowered.despector.ast.insn.condition.Condition;
 import org.spongepowered.despector.ast.insn.cst.IntConstant;
 import org.spongepowered.despector.ast.insn.misc.Ternary;
-import org.spongepowered.despector.emitter.EmitterContext;
+import org.spongepowered.despector.emitter.java.JavaEmitterContext;
 import org.spongepowered.despector.transform.matcher.ConditionMatcher;
 import org.spongepowered.despector.transform.matcher.InstructionMatcher;
 
@@ -45,7 +45,7 @@ public class KotlinRangeEmitter {
                     .build())
             .build();
 
-    public static boolean checkRange(EmitterContext ctx, Condition cond, boolean inverse) {
+    public static boolean checkRange(JavaEmitterContext ctx, Condition cond, boolean inverse) {
         if (!RANGE_MATCHER.matches(cond)) {
             return false;
         }
@@ -66,7 +66,7 @@ public class KotlinRangeEmitter {
         return true;
     }
 
-    public static boolean checkRangeTernary(EmitterContext ctx, Ternary ternary) {
+    public static boolean checkRangeTernary(JavaEmitterContext ctx, Ternary ternary) {
         if (!(ternary.getFalseValue() instanceof IntConstant) || !(ternary.getTrueValue() instanceof IntConstant)) {
             return false;
         }

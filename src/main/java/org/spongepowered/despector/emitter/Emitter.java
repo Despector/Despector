@@ -25,6 +25,7 @@
 package org.spongepowered.despector.emitter;
 
 import org.spongepowered.despector.ast.type.TypeEntry;
+import org.spongepowered.despector.emitter.java.JavaEmitterContext;
 
 /**
  * A source emitter.
@@ -32,13 +33,13 @@ import org.spongepowered.despector.ast.type.TypeEntry;
 public interface Emitter {
 
     /**
-     * Initializes the given {@link EmitterContext} for this emitter type.
+     * Initializes the given {@link JavaEmitterContext} for this emitter type.
      */
-    void setup(EmitterContext ctx);
+    void setup(JavaEmitterContext ctx);
 
     /**
-     * Emits the given type to the given {@link EmitterContext}.
+     * Emits the given type to the given {@link JavaEmitterContext}.
      */
-    void emit(EmitterContext ctx, TypeEntry type);
+    void emit(JavaEmitterContext ctx, TypeEntry type);
 
 }

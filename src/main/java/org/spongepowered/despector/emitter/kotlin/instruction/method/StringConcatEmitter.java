@@ -33,7 +33,7 @@ import org.spongepowered.despector.ast.insn.var.LocalAccess;
 import org.spongepowered.despector.ast.stmt.invoke.InstanceMethodInvoke;
 import org.spongepowered.despector.ast.stmt.invoke.New;
 import org.spongepowered.despector.ast.stmt.invoke.StaticMethodInvoke;
-import org.spongepowered.despector.emitter.EmitterContext;
+import org.spongepowered.despector.emitter.java.JavaEmitterContext;
 
 import java.util.List;
 
@@ -44,7 +44,7 @@ import java.util.List;
 public class StringConcatEmitter implements SpecialMethodEmitter<InstanceMethodInvoke> {
 
     @Override
-    public boolean emit(EmitterContext ctx, InstanceMethodInvoke arg, TypeSignature type) {
+    public boolean emit(JavaEmitterContext ctx, InstanceMethodInvoke arg, TypeSignature type) {
         // We detect and collapse string builder chains used to perform
         // string concatentation into simple "foo" + "bar" form
         boolean valid = true;

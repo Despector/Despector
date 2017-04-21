@@ -29,7 +29,6 @@ import org.spongepowered.despector.ast.insn.Instruction;
 import org.spongepowered.despector.ast.insn.condition.Condition;
 import org.spongepowered.despector.ast.stmt.Statement;
 import org.spongepowered.despector.emitter.format.EmitterFormat;
-import org.spongepowered.despector.emitter.special.SpecialEmitter;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -39,10 +38,10 @@ import java.util.Map;
  */
 public class EmitterSet {
 
-    private final Map<Class<?>, AstEmitter<?>> emitters = new HashMap<>();
-    private final Map<Class<?>, StatementEmitter<?>> stmt_emitters = new HashMap<>();
-    private final Map<Class<?>, InstructionEmitter<?>> insn_emitters = new HashMap<>();
-    private final Map<Class<?>, ConditionEmitter<?>> cond_emitters = new HashMap<>();
+    private final Map<Class<?>, AstEmitter<?,?>> emitters = new HashMap<>();
+    private final Map<Class<?>, StatementEmitter<?,?>> stmt_emitters = new HashMap<>();
+    private final Map<Class<?>, InstructionEmitter<?,?>> insn_emitters = new HashMap<>();
+    private final Map<Class<?>, ConditionEmitter<?,?>> cond_emitters = new HashMap<>();
     private final Map<Class<?>, SpecialEmitter> special_emitters = new HashMap<>();
 
     public EmitterSet() {
@@ -53,14 +52,14 @@ public class EmitterSet {
      * Gets the given ast emitter for the given type.
      */
     @SuppressWarnings("unchecked")
-    public <T extends AstEntry> AstEmitter<T> getAstEmitter(Class<T> type) {
-        return (AstEmitter<T>) this.emitters.get(type);
+    public <C extends AbstractEmitterContext, T extends AstEntry> AstEmitter<C, T> getAstEmitter(Class<T> type) {
+        return (AstEmitter<C, T>) this.emitters.get(type);
     }
 
     /**
      * Sets the given ast emitter for the given type.
      */
-    public <T extends AstEntry> void setAstEmitter(Class<? extends T> type, AstEmitter<T> emitter) {
+    public <T extends AstEntry> void setAstEmitter(Class<? extends T> type, AstEmitter<?, T> emitter) {
         this.emitters.put(type, emitter);
     }
 
@@ -68,14 +67,14 @@ public class EmitterSet {
      * Gets the given statement emitter for the given type.
      */
     @SuppressWarnings("unchecked")
-    public <T extends Statement> StatementEmitter<T> getStatementEmitter(Class<T> type) {
-        return (StatementEmitter<T>) this.stmt_emitters.get(type);
+    public <C extends AbstractEmitterContext, T extends Statement> StatementEmitter<C, T> getStatementEmitter(Class<T> type) {
+        return (StatementEmitter<C, T>) this.stmt_emitters.get(type);
     }
 
     /**
      * Sets the given statement emitter for the given type.
      */
-    public <T extends Statement> void setStatementEmitter(Class<? extends T> type, StatementEmitter<T> emitter) {
+    public <T extends Statement> void setStatementEmitter(Class<? extends T> type, StatementEmitter<?, T> emitter) {
         this.stmt_emitters.put(type, emitter);
     }
 
@@ -83,14 +82,14 @@ public class EmitterSet {
      * Gets the given instruction emitter for the given type.
      */
     @SuppressWarnings("unchecked")
-    public <T extends Instruction> InstructionEmitter<T> getInstructionEmitter(Class<T> type) {
-        return (InstructionEmitter<T>) this.insn_emitters.get(type);
+    public <C extends AbstractEmitterContext, T extends Instruction> InstructionEmitter<C, T> getInstructionEmitter(Class<T> type) {
+        return (InstructionEmitter<C, T>) this.insn_emitters.get(type);
     }
 
     /**
      * Sets the given instruction emitter for the given type.
      */
-    public <T extends Instruction> void setInstructionEmitter(Class<? extends T> type, InstructionEmitter<T> emitter) {
+    public <T extends Instruction> void setInstructionEmitter(Class<? extends T> type, InstructionEmitter<?, T> emitter) {
         this.insn_emitters.put(type, emitter);
     }
 
@@ -98,14 +97,14 @@ public class EmitterSet {
      * Gets the given condition emitter for the given type.
      */
     @SuppressWarnings("unchecked")
-    public <T extends Condition> ConditionEmitter<T> getConditionEmitter(Class<T> type) {
-        return (ConditionEmitter<T>) this.cond_emitters.get(type);
+    public <C extends AbstractEmitterContext, T extends Condition> ConditionEmitter<C, T> getConditionEmitter(Class<T> type) {
+        return (ConditionEmitter<C, T>) this.cond_emitters.get(type);
     }
 
     /**
      * Sets the given condition emitter for the given type.
      */
-    public <T extends Condition> void setConditionEmitter(Class<T> type, ConditionEmitter<T> emitter) {
+    public <T extends Condition> void setConditionEmitter(Class<T> type, ConditionEmitter<?, T> emitter) {
         this.cond_emitters.put(type, emitter);
     }
 

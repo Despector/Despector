@@ -29,8 +29,8 @@ import org.spongepowered.despector.ast.insn.Instruction;
 import org.spongepowered.despector.ast.stmt.assign.LocalAssignment;
 import org.spongepowered.despector.ast.stmt.branch.ForEach;
 import org.spongepowered.despector.ast.stmt.invoke.InstanceMethodInvoke;
-import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.StatementEmitter;
+import org.spongepowered.despector.emitter.java.JavaEmitterContext;
 import org.spongepowered.despector.transform.matcher.InstructionMatcher;
 import org.spongepowered.despector.transform.matcher.MatchContext;
 import org.spongepowered.despector.transform.matcher.StatementMatcher;
@@ -38,7 +38,7 @@ import org.spongepowered.despector.transform.matcher.StatementMatcher;
 /**
  * An emitter for kotlin for-each loops.
  */
-public class KotlinForEachEmitter implements StatementEmitter<ForEach> {
+public class KotlinForEachEmitter implements StatementEmitter<JavaEmitterContext, ForEach> {
 
     private static final StatementMatcher<ForEach> MAP_ITERATOR = MatchContext.storeLocal("loop_value", StatementMatcher.foreach()
             .value(InstructionMatcher.instanceinvoke()
@@ -68,7 +68,7 @@ public class KotlinForEachEmitter implements StatementEmitter<ForEach> {
             .build());
 
     @Override
-    public void emit(EmitterContext ctx, ForEach loop, boolean semicolon) {
+    public void emit(JavaEmitterContext ctx, ForEach loop, boolean semicolon) {
         if (checkMapIterator(ctx, loop)) {
             return;
         }
@@ -92,7 +92,7 @@ public class KotlinForEachEmitter implements StatementEmitter<ForEach> {
     /**
      * Checks if the given for-each loop is over a map iterator.
      */
-    public boolean checkMapIterator(EmitterContext ctx, ForEach loop) {
+    public boolean checkMapIterator(JavaEmitterContext ctx, ForEach loop) {
         if (!MAP_ITERATOR.matches(MatchContext.create(), loop)) {
             return false;
         }

@@ -36,10 +36,10 @@ import org.spongepowered.despector.ast.type.TypeEntry;
 import org.spongepowered.despector.ast.type.TypeEntry.InnerClassInfo;
 import org.spongepowered.despector.config.ConfigManager;
 import org.spongepowered.despector.emitter.AstEmitter;
-import org.spongepowered.despector.emitter.EmitterContext;
+import org.spongepowered.despector.emitter.java.JavaEmitterContext;
+import org.spongepowered.despector.emitter.java.special.GenericsEmitter;
 import org.spongepowered.despector.emitter.kotlin.special.KotlinCompanionClassEmitter;
 import org.spongepowered.despector.emitter.kotlin.special.KotlinDataClassEmitter;
-import org.spongepowered.despector.emitter.special.GenericsEmitter;
 import org.spongepowered.despector.util.AstUtil;
 
 import java.util.Collection;
@@ -53,7 +53,7 @@ import java.util.stream.Collectors;
 /**
  * An emitter for kotlin casts.
  */
-public class KotlinClassEntryEmitter implements AstEmitter<ClassEntry> {
+public class KotlinClassEntryEmitter implements AstEmitter<JavaEmitterContext, ClassEntry> {
 
     private static final Set<String> HIDDEN_ANNOTATIONS = new HashSet<>();
 
@@ -62,7 +62,7 @@ public class KotlinClassEntryEmitter implements AstEmitter<ClassEntry> {
     }
 
     @Override
-    public boolean emit(EmitterContext ctx, ClassEntry type) {
+    public boolean emit(JavaEmitterContext ctx, ClassEntry type) {
 
         if (type.getStaticMethodSafe("copy$default") != null) {
             KotlinDataClassEmitter data_emitter = ctx.getEmitterSet().getSpecialEmitter(KotlinDataClassEmitter.class);
@@ -162,7 +162,7 @@ public class KotlinClassEntryEmitter implements AstEmitter<ClassEntry> {
     /**
      * Emits the static fields of the given type.
      */
-    public void emitStaticFields(EmitterContext ctx, ClassEntry type) {
+    public void emitStaticFields(JavaEmitterContext ctx, ClassEntry type) {
         if (!type.getStaticFields().isEmpty()) {
 
             Map<String, Instruction> static_initializers = new HashMap<>();
@@ -211,7 +211,7 @@ public class KotlinClassEntryEmitter implements AstEmitter<ClassEntry> {
     /**
      * Emits the static methods of the given type.
      */
-    public void emitStaticMethods(EmitterContext ctx, ClassEntry type) {
+    public void emitStaticMethods(JavaEmitterContext ctx, ClassEntry type) {
         if (!type.getStaticMethods().isEmpty()) {
             for (MethodEntry mth : type.getStaticMethods()) {
                 if (mth.isSynthetic()) {
@@ -234,7 +234,7 @@ public class KotlinClassEntryEmitter implements AstEmitter<ClassEntry> {
     /**
      * Emits the instance fields of the given type.
      */
-    public void emitFields(EmitterContext ctx, ClassEntry type) {
+    public void emitFields(JavaEmitterContext ctx, ClassEntry type) {
         if (!type.getFields().isEmpty()) {
 
             List<MethodEntry> inits = type.getMethods().stream().filter((m) -> m.getName().equals("<init>")).collect(Collectors.toList());
@@ -287,7 +287,7 @@ public class KotlinClassEntryEmitter implements AstEmitter<ClassEntry> {
     /**
      * Emits the instance methods of the given type.
      */
-    public void emitMethods(EmitterContext ctx, ClassEntry type) {
+    public void emitMethods(JavaEmitterContext ctx, ClassEntry type) {
         if (!type.getMethods().isEmpty()) {
             for (MethodEntry mth : type.getMethods()) {
                 if (mth.isSynthetic() || mth.getName().equals("<init>")) {

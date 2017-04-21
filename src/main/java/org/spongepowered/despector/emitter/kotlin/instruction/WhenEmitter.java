@@ -35,8 +35,8 @@ import org.spongepowered.despector.ast.insn.misc.InstanceOf;
 import org.spongepowered.despector.ast.kotlin.When;
 import org.spongepowered.despector.ast.kotlin.When.Case;
 import org.spongepowered.despector.ast.stmt.invoke.StaticMethodInvoke;
-import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.InstructionEmitter;
+import org.spongepowered.despector.emitter.java.JavaEmitterContext;
 import org.spongepowered.despector.emitter.kotlin.KotlinEmitterUtil;
 
 import java.util.List;
@@ -44,9 +44,9 @@ import java.util.List;
 /**
  * An emitter of a kotlin when instruction.
  */
-public class WhenEmitter implements InstructionEmitter<When> {
+public class WhenEmitter implements InstructionEmitter<JavaEmitterContext, When> {
 
-    private void emit(EmitterContext ctx, Condition cond, LocalInstance local) {
+    private void emit(JavaEmitterContext ctx, Condition cond, LocalInstance local) {
         if (cond instanceof BooleanCondition) {
             Instruction val = ((BooleanCondition) cond).getConditionValue();
             if (val instanceof StaticMethodInvoke) {
@@ -75,7 +75,7 @@ public class WhenEmitter implements InstructionEmitter<When> {
     }
 
     @Override
-    public void emit(EmitterContext ctx, When arg, TypeSignature type) {
+    public void emit(JavaEmitterContext ctx, When arg, TypeSignature type) {
         ctx.printString("when (");
         ctx.emit(arg.getArg(), null);
         ctx.printString(") {");

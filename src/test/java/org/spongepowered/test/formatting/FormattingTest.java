@@ -25,9 +25,9 @@
 package org.spongepowered.test.formatting;
 
 import org.spongepowered.despector.ast.type.TypeEntry;
-import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.Emitters;
 import org.spongepowered.despector.emitter.format.EmitterFormat;
+import org.spongepowered.despector.emitter.java.JavaEmitterContext;
 import org.spongepowered.test.util.TestHelper;
 
 import java.io.StringWriter;
@@ -46,7 +46,7 @@ public class FormattingTest {
         // Configure format for testing here
 
         StringWriter writer = new StringWriter();
-        EmitterContext emitter = new EmitterContext(writer, format);
+        JavaEmitterContext emitter = new JavaEmitterContext(writer, format);
         emitter.setEmitterSet(Emitters.JAVA_SET);
         emitter.emitOuterType(type);
         emitter.flush();

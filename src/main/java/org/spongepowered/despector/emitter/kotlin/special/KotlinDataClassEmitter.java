@@ -35,9 +35,9 @@ import org.spongepowered.despector.ast.type.ClassEntry;
 import org.spongepowered.despector.ast.type.FieldEntry;
 import org.spongepowered.despector.ast.type.MethodEntry;
 import org.spongepowered.despector.ast.type.TypeEntry.InnerClassInfo;
-import org.spongepowered.despector.emitter.EmitterContext;
+import org.spongepowered.despector.emitter.SpecialEmitter;
+import org.spongepowered.despector.emitter.java.JavaEmitterContext;
 import org.spongepowered.despector.emitter.kotlin.KotlinEmitterUtil;
-import org.spongepowered.despector.emitter.special.SpecialEmitter;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -50,7 +50,7 @@ public class KotlinDataClassEmitter implements SpecialEmitter {
     /**
      * Emits the given data class.
      */
-    public void emit(EmitterContext ctx, ClassEntry type) {
+    public void emit(JavaEmitterContext ctx, ClassEntry type) {
         ctx.printIndentation();
         ctx.printString("data class ");
         InnerClassInfo inner_info = null;

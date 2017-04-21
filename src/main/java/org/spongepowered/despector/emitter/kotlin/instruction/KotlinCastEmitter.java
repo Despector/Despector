@@ -27,16 +27,16 @@ package org.spongepowered.despector.emitter.kotlin.instruction;
 import org.spongepowered.despector.ast.generic.TypeSignature;
 import org.spongepowered.despector.ast.insn.misc.Cast;
 import org.spongepowered.despector.ast.insn.op.Operator;
-import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.InstructionEmitter;
+import org.spongepowered.despector.emitter.java.JavaEmitterContext;
 
 /**
  * An emitter for kotlin casts.
  */
-public class KotlinCastEmitter implements InstructionEmitter<Cast> {
+public class KotlinCastEmitter implements InstructionEmitter<JavaEmitterContext, Cast> {
 
     @Override
-    public void emit(EmitterContext ctx, Cast arg, TypeSignature type) {
+    public void emit(JavaEmitterContext ctx, Cast arg, TypeSignature type) {
         if (type.equals(arg.inferType())) {
             ctx.emit(arg.getValue(), type);
             return;

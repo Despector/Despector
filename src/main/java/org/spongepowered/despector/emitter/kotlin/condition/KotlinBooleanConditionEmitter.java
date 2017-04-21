@@ -27,8 +27,8 @@ package org.spongepowered.despector.emitter.kotlin.condition;
 import org.spongepowered.despector.ast.generic.ClassTypeSignature;
 import org.spongepowered.despector.ast.insn.condition.BooleanCondition;
 import org.spongepowered.despector.ast.insn.misc.InstanceOf;
-import org.spongepowered.despector.emitter.EmitterContext;
-import org.spongepowered.despector.emitter.condition.BooleanConditionEmitter;
+import org.spongepowered.despector.emitter.java.JavaEmitterContext;
+import org.spongepowered.despector.emitter.java.condition.BooleanConditionEmitter;
 
 /**
  * An emitter for kotlin boolean conditions.
@@ -36,7 +36,7 @@ import org.spongepowered.despector.emitter.condition.BooleanConditionEmitter;
 public class KotlinBooleanConditionEmitter extends BooleanConditionEmitter {
 
     @Override
-    public void emit(EmitterContext ctx, BooleanCondition bool) {
+    public void emit(JavaEmitterContext ctx, BooleanCondition bool) {
         if (checkConstant(ctx, bool)) {
             return;
         }

@@ -29,11 +29,11 @@ import org.spongepowered.despector.ast.stmt.Statement;
 /**
  * An emitter for a particular statement type.
  */
-public interface StatementEmitter<T extends Statement> {
+public interface StatementEmitter<C extends AbstractEmitterContext, T extends Statement> {
 
     /**
      * Emits the given statement.
      */
-    void emit(EmitterContext ctx, T stmt, boolean semicolon);
+    void emit(C ctx, T stmt, boolean semicolon);
 
 }

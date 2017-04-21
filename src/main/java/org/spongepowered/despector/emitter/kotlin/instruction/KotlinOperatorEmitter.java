@@ -27,13 +27,13 @@ package org.spongepowered.despector.emitter.kotlin.instruction;
 import org.spongepowered.despector.ast.generic.TypeSignature;
 import org.spongepowered.despector.ast.insn.op.Operator;
 import org.spongepowered.despector.ast.insn.op.OperatorType;
-import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.InstructionEmitter;
+import org.spongepowered.despector.emitter.java.JavaEmitterContext;
 
 /**
  * An emitter for kotlin operators.
  */
-public class KotlinOperatorEmitter implements InstructionEmitter<Operator> {
+public class KotlinOperatorEmitter implements InstructionEmitter<JavaEmitterContext, Operator> {
 
     /**
      * Gets if the given operator needs to be wrapped in parens.
@@ -60,7 +60,7 @@ public class KotlinOperatorEmitter implements InstructionEmitter<Operator> {
     /**
      * Emits the given operator.
      */
-    public void emitOp(EmitterContext ctx, OperatorType op) {
+    public void emitOp(JavaEmitterContext ctx, OperatorType op) {
         switch (op) {
         case AND:
             ctx.printString(" and ");
@@ -87,7 +87,7 @@ public class KotlinOperatorEmitter implements InstructionEmitter<Operator> {
     }
 
     @Override
-    public void emit(EmitterContext ctx, Operator arg, TypeSignature type) {
+    public void emit(JavaEmitterContext ctx, Operator arg, TypeSignature type) {
         if (arg.getLeftOperand() instanceof Operator) {
             Operator right = (Operator) arg.getLeftOperand();
             if (arg.getOperator().getPrecedence() > right.getOperator().getPrecedence()) {

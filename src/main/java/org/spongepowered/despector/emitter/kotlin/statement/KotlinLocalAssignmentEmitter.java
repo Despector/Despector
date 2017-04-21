@@ -26,9 +26,9 @@ package org.spongepowered.despector.emitter.kotlin.statement;
 
 import org.spongepowered.despector.ast.Locals.LocalInstance;
 import org.spongepowered.despector.ast.stmt.assign.LocalAssignment;
-import org.spongepowered.despector.emitter.EmitterContext;
+import org.spongepowered.despector.emitter.java.JavaEmitterContext;
+import org.spongepowered.despector.emitter.java.statement.LocalAssignmentEmitter;
 import org.spongepowered.despector.emitter.kotlin.KotlinEmitterUtil;
-import org.spongepowered.despector.emitter.statement.LocalAssignmentEmitter;
 
 /**
  * An emitter for kotlin local assignments.
@@ -36,7 +36,7 @@ import org.spongepowered.despector.emitter.statement.LocalAssignmentEmitter;
 public class KotlinLocalAssignmentEmitter extends LocalAssignmentEmitter {
 
     @Override
-    public void emit(EmitterContext ctx, LocalAssignment insn, boolean semicolon) {
+    public void emit(JavaEmitterContext ctx, LocalAssignment insn, boolean semicolon) {
         if (!insn.getLocal().getLocal().isParameter() && !ctx.isDefined(insn.getLocal())) {
             if (insn.getLocal().isEffectivelyFinal()) {
                 ctx.printString("val ");

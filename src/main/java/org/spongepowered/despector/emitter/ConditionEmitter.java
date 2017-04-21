@@ -29,11 +29,11 @@ import org.spongepowered.despector.ast.insn.condition.Condition;
 /**
  * An emitter for a condition.
  */
-public interface ConditionEmitter<T extends Condition> {
+public interface ConditionEmitter<C extends AbstractEmitterContext, T extends Condition> {
 
     /**
      * Emits the given condition.
      */
-    void emit(EmitterContext ctx, T condition);
+    void emit(C ctx, T condition);
 
 }

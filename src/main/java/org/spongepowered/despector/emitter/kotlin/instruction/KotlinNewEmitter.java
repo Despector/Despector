@@ -31,9 +31,9 @@ import org.spongepowered.despector.ast.stmt.assign.LocalAssignment;
 import org.spongepowered.despector.ast.stmt.invoke.New;
 import org.spongepowered.despector.ast.type.ClassEntry;
 import org.spongepowered.despector.ast.type.TypeEntry;
-import org.spongepowered.despector.emitter.EmitterContext;
 import org.spongepowered.despector.emitter.InstructionEmitter;
-import org.spongepowered.despector.emitter.special.AnonymousClassEmitter;
+import org.spongepowered.despector.emitter.java.JavaEmitterContext;
+import org.spongepowered.despector.emitter.java.special.AnonymousClassEmitter;
 import org.spongepowered.despector.util.TypeHelper;
 
 import java.util.List;
@@ -41,10 +41,10 @@ import java.util.List;
 /**
  * An emitter for a new instruction.
  */
-public class KotlinNewEmitter implements InstructionEmitter<New> {
+public class KotlinNewEmitter implements InstructionEmitter<JavaEmitterContext, New> {
 
     @Override
-    public void emit(EmitterContext ctx, New arg, TypeSignature type) {
+    public void emit(JavaEmitterContext ctx, New arg, TypeSignature type) {
 
         if (arg.getType().getName().contains("$")) {
             String last = arg.getType().getName();

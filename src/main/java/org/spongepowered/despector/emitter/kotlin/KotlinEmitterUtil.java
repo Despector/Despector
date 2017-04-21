@@ -26,7 +26,7 @@ package org.spongepowered.despector.emitter.kotlin;
 
 import org.spongepowered.despector.ast.generic.ClassTypeSignature;
 import org.spongepowered.despector.ast.generic.TypeSignature;
-import org.spongepowered.despector.emitter.EmitterContext;
+import org.spongepowered.despector.emitter.java.JavaEmitterContext;
 
 /**
  * A utility for the kotlin emitter.
@@ -36,7 +36,7 @@ public final class KotlinEmitterUtil {
     /**
      * Emits the given type.
      */
-    public static void emitParamType(EmitterContext ctx, TypeSignature type) {
+    public static void emitParamType(JavaEmitterContext ctx, TypeSignature type) {
         if (type.isArray()) {
             ctx.printString("Array<");
             emitParamType(ctx, TypeSignature.getArrayComponent(type));
@@ -51,7 +51,7 @@ public final class KotlinEmitterUtil {
     /**
      * Emits the given parameter type.
      */
-    public static void emitParamType(EmitterContext ctx, String type) {
+    public static void emitParamType(JavaEmitterContext ctx, String type) {
         if ("Ljava/lang/Object;".equals(type)) {
             ctx.printString("Any");
         } else {
@@ -62,7 +62,7 @@ public final class KotlinEmitterUtil {
     /**
      * Emits the given type.
      */
-    public static void emitType(EmitterContext ctx, TypeSignature type) {
+    public static void emitType(JavaEmitterContext ctx, TypeSignature type) {
         if (type.isArray()) {
             ctx.printString("Array<");
             emitType(ctx, TypeSignature.getArrayComponent(type));
@@ -91,7 +91,7 @@ public final class KotlinEmitterUtil {
     /**
      * Emits the given type.
      */
-    public static void emitType(EmitterContext ctx, String type) {
+    public static void emitType(JavaEmitterContext ctx, String type) {
         if (type.startsWith("[")) {
             ctx.printString("Array<");
             emitType(ctx, type.substring(1));

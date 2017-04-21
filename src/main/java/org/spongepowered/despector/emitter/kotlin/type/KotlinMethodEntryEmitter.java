@@ -40,10 +40,10 @@ import org.spongepowered.despector.ast.stmt.misc.Return;
 import org.spongepowered.despector.ast.type.MethodEntry;
 import org.spongepowered.despector.ast.type.TypeEntry;
 import org.spongepowered.despector.config.ConfigManager;
-import org.spongepowered.despector.emitter.EmitterContext;
+import org.spongepowered.despector.emitter.java.JavaEmitterContext;
+import org.spongepowered.despector.emitter.java.special.GenericsEmitter;
+import org.spongepowered.despector.emitter.java.type.MethodEntryEmitter;
 import org.spongepowered.despector.emitter.kotlin.KotlinEmitterUtil;
-import org.spongepowered.despector.emitter.special.GenericsEmitter;
-import org.spongepowered.despector.emitter.type.MethodEntryEmitter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -65,7 +65,7 @@ public class KotlinMethodEntryEmitter extends MethodEntryEmitter {
     }
 
     @Override
-    public boolean emit(EmitterContext ctx, MethodEntry method) {
+    public boolean emit(JavaEmitterContext ctx, MethodEntry method) {
 
         boolean nullable_return = false;
 

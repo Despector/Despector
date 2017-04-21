@@ -26,7 +26,7 @@ package org.spongepowered.despector.emitter.kotlin.instruction.method;
 
 import org.spongepowered.despector.ast.generic.TypeSignature;
 import org.spongepowered.despector.ast.stmt.invoke.InstanceMethodInvoke;
-import org.spongepowered.despector.emitter.EmitterContext;
+import org.spongepowered.despector.emitter.java.JavaEmitterContext;
 
 /**
  * An emitter for kotlin map getters.
@@ -34,7 +34,7 @@ import org.spongepowered.despector.emitter.EmitterContext;
 public class MapGetEmitter implements SpecialMethodEmitter<InstanceMethodInvoke> {
 
     @Override
-    public boolean emit(EmitterContext ctx, InstanceMethodInvoke arg, TypeSignature type) {
+    public boolean emit(JavaEmitterContext ctx, InstanceMethodInvoke arg, TypeSignature type) {
         if (arg.getParams().length != 1) {
             return false;
         }

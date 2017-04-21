@@ -24,8 +24,8 @@
  */
 package org.spongepowered.despector.emitter.kotlin.special;
 
-import org.spongepowered.despector.emitter.EmitterContext;
-import org.spongepowered.despector.emitter.special.PackageEmitter;
+import org.spongepowered.despector.emitter.java.JavaEmitterContext;
+import org.spongepowered.despector.emitter.java.special.PackageEmitter;
 
 /**
  * Emits a kotlin package.
@@ -33,7 +33,7 @@ import org.spongepowered.despector.emitter.special.PackageEmitter;
 public class KotlinPackageEmitter extends PackageEmitter {
 
     @Override
-    public void emitPackage(EmitterContext ctx, String pkg) {
+    public void emitPackage(JavaEmitterContext ctx, String pkg) {
         ctx.printString("package ");
         ctx.printString(pkg);
     }

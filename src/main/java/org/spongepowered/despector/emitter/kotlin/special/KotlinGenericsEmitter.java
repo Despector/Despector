@@ -28,9 +28,9 @@ import org.spongepowered.despector.ast.generic.ClassTypeSignature;
 import org.spongepowered.despector.ast.generic.TypeSignature;
 import org.spongepowered.despector.ast.generic.TypeVariableSignature;
 import org.spongepowered.despector.ast.generic.VoidTypeSignature;
-import org.spongepowered.despector.emitter.EmitterContext;
+import org.spongepowered.despector.emitter.java.JavaEmitterContext;
+import org.spongepowered.despector.emitter.java.special.GenericsEmitter;
 import org.spongepowered.despector.emitter.kotlin.KotlinEmitterUtil;
-import org.spongepowered.despector.emitter.special.GenericsEmitter;
 
 /**
  * An emitter for kotlin generics.
@@ -38,7 +38,7 @@ import org.spongepowered.despector.emitter.special.GenericsEmitter;
 public class KotlinGenericsEmitter extends GenericsEmitter {
 
     @Override
-    public void emitTypeSignature(EmitterContext ctx, TypeSignature sig) {
+    public void emitTypeSignature(JavaEmitterContext ctx, TypeSignature sig) {
         if (sig instanceof TypeVariableSignature) {
             String desc = ((TypeVariableSignature) sig).getIdentifier();
             ctx.printString(desc.substring(1, desc.length() - 1));

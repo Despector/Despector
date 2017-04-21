@@ -25,14 +25,14 @@
 package org.spongepowered.despector.emitter.kotlin.condition;
 
 import org.spongepowered.despector.ast.insn.condition.InverseCondition;
-import org.spongepowered.despector.emitter.EmitterContext;
-import org.spongepowered.despector.emitter.condition.InverseConditionEmitter;
+import org.spongepowered.despector.emitter.java.JavaEmitterContext;
+import org.spongepowered.despector.emitter.java.condition.InverseConditionEmitter;
 import org.spongepowered.despector.emitter.kotlin.special.KotlinRangeEmitter;
 
 public class KotlinInverseConditionEmitter extends InverseConditionEmitter {
 
     @Override
-    public void emit(EmitterContext ctx, InverseCondition inv) {
+    public void emit(JavaEmitterContext ctx, InverseCondition inv) {
         if (KotlinRangeEmitter.checkRange(ctx, inv.getConditionValue(), true)) {
             return;
         }

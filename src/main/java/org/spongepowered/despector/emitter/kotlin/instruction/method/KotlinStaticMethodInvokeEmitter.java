@@ -30,8 +30,8 @@ import org.spongepowered.despector.ast.insn.Instruction;
 import org.spongepowered.despector.ast.insn.cst.IntConstant;
 import org.spongepowered.despector.ast.insn.misc.NewArray;
 import org.spongepowered.despector.ast.stmt.invoke.StaticMethodInvoke;
-import org.spongepowered.despector.emitter.EmitterContext;
-import org.spongepowered.despector.emitter.instruction.StaticMethodInvokeEmitter;
+import org.spongepowered.despector.emitter.java.JavaEmitterContext;
+import org.spongepowered.despector.emitter.java.instruction.StaticMethodInvokeEmitter;
 import org.spongepowered.despector.util.TypeHelper;
 
 import java.util.HashMap;
@@ -61,7 +61,7 @@ public class KotlinStaticMethodInvokeEmitter extends StaticMethodInvokeEmitter {
     }
 
     @Override
-    public void emit(EmitterContext ctx, StaticMethodInvoke arg, TypeSignature type) {
+    public void emit(JavaEmitterContext ctx, StaticMethodInvoke arg, TypeSignature type) {
         String key = arg.getOwner() + arg.getMethodName();
         SpecialMethodEmitter<StaticMethodInvoke> special = SPECIAL.get(key);
         if (special != null && special.emit(ctx, arg, type)) {
@@ -114,7 +114,7 @@ public class KotlinStaticMethodInvokeEmitter extends StaticMethodInvokeEmitter {
      * Unwraps a call to a default method to determine the default parameter
      * values.
      */
-    public void callDefaultMethod(EmitterContext ctx, StaticMethodInvoke call) {
+    public void callDefaultMethod(JavaEmitterContext ctx, StaticMethodInvoke call) {
         Instruction callee = call.getParams()[0];
         int set = ((IntConstant) call.getParams()[call.getParams().length - 2]).getConstant();
         int total_args = call.getParams().length - 3;

@@ -34,9 +34,9 @@ import org.spongepowered.despector.ast.stmt.invoke.StaticMethodInvoke;
 import org.spongepowered.despector.ast.stmt.misc.Return;
 import org.spongepowered.despector.ast.type.ClassEntry;
 import org.spongepowered.despector.ast.type.MethodEntry;
-import org.spongepowered.despector.emitter.EmitterContext;
+import org.spongepowered.despector.emitter.SpecialEmitter;
+import org.spongepowered.despector.emitter.java.JavaEmitterContext;
 import org.spongepowered.despector.emitter.kotlin.KotlinEmitterUtil;
-import org.spongepowered.despector.emitter.special.SpecialEmitter;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -51,7 +51,7 @@ public class KotlinCompanionClassEmitter implements SpecialEmitter {
     /**
      * Emits the given companion class.
      */
-    public void emit(EmitterContext ctx, ClassEntry type) {
+    public void emit(JavaEmitterContext ctx, ClassEntry type) {
         ctx.printIndentation();
         ctx.printString("companion object {");
         ctx.newLine().indent();

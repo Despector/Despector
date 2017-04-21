@@ -28,15 +28,15 @@ import org.spongepowered.despector.ast.insn.condition.CompareCondition;
 import org.spongepowered.despector.ast.insn.condition.CompareCondition.CompareOperator;
 import org.spongepowered.despector.ast.insn.misc.NumberCompare;
 import org.spongepowered.despector.emitter.ConditionEmitter;
-import org.spongepowered.despector.emitter.EmitterContext;
+import org.spongepowered.despector.emitter.java.JavaEmitterContext;
 
 /**
  * An emitter for kotlin compare conditions.
  */
-public class KotlinCompareConditionEmitter implements ConditionEmitter<CompareCondition> {
+public class KotlinCompareConditionEmitter implements ConditionEmitter<JavaEmitterContext, CompareCondition> {
 
     @Override
-    public void emit(EmitterContext ctx, CompareCondition compare) {
+    public void emit(JavaEmitterContext ctx, CompareCondition compare) {
         if (compare.getLeft() instanceof NumberCompare) {
             NumberCompare cmp = (NumberCompare) compare.getLeft();
             ctx.emit(cmp.getLeftOperand(), null);

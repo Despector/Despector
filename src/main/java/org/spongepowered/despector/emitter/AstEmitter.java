@@ -29,11 +29,11 @@ import org.spongepowered.despector.ast.AstEntry;
 /**
  * An emitter for an {@link AstEntry}.
  */
-public interface AstEmitter<T extends AstEntry> {
+public interface AstEmitter<C extends AbstractEmitterContext, T extends AstEntry> {
 
     /**
      * Emits the given entry.
      */
-    boolean emit(EmitterContext ctx, T ast);
+    boolean emit(C ctx, T ast);
 
 }
