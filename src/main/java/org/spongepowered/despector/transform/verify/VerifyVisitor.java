@@ -73,6 +73,7 @@ import org.spongepowered.despector.ast.stmt.misc.Comment;
 import org.spongepowered.despector.ast.stmt.misc.Increment;
 import org.spongepowered.despector.ast.stmt.misc.Return;
 import org.spongepowered.despector.ast.stmt.misc.Throw;
+import org.spongepowered.despector.ast.type.AnnotationEntry;
 import org.spongepowered.despector.ast.type.ClassEntry;
 import org.spongepowered.despector.ast.type.EnumEntry;
 import org.spongepowered.despector.ast.type.FieldEntry;
@@ -372,6 +373,12 @@ public class VerifyVisitor implements TypeVisitor, StatementVisitor, Instruction
     @Override
     public void visitTypeEnd() {
         this.type = null;
+    }
+
+    @Override
+    public void visitAnnotationEntry(AnnotationEntry type) {
+        // TODO Auto-generated method stub
+        
     }
 
 }

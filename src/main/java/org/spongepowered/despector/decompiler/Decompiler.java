@@ -24,7 +24,6 @@
  */
 package org.spongepowered.despector.decompiler;
 
-import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.despector.ast.SourceSet;
 import org.spongepowered.despector.ast.type.TypeEntry;
 
@@ -52,10 +51,5 @@ public interface Decompiler {
      * Decompiles the class file in the given input stream.
      */
     TypeEntry decompile(InputStream cls_path, SourceSet source) throws IOException;
-
-    /**
-     * Decompiles the given asm class node.
-     */
-    TypeEntry decompile(ClassNode cn, SourceSet source);
 
 }

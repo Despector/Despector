@@ -28,6 +28,7 @@ import org.objectweb.asm.Type;
 import org.spongepowered.despector.ast.Annotation;
 import org.spongepowered.despector.emitter.SpecialEmitter;
 import org.spongepowered.despector.emitter.java.JavaEmitterContext;
+import org.spongepowered.despector.emitter.java.instruction.StringConstantEmitter;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -75,9 +76,21 @@ public class AnnotationEmitter implements SpecialEmitter {
         });
         value_emitters.put(String.class, (ctx, value) -> {
             ctx.printString("\"");
-            // TODO escape string
-            ctx.printString((String) value);
+            ctx.printString(StringConstantEmitter.escape((String) value));
             ctx.printString("\"");
+        });
+        value_emitters.put(String[].class, (ctx, value) -> {
+            String[] values = (String[]) value;
+            ctx.printString("{");
+            for (int i = 0; i < values.length; i++) {
+                if (i > 0) {
+                    ctx.printString(", ");
+                }
+                ctx.printString("\"");
+                ctx.printString(StringConstantEmitter.escape(values[i]));
+                ctx.printString("\"");
+            }
+            ctx.printString("}");
         });
         value_emitters.put(Type.class, (ctx, value) -> ctx.emitTypeName(((Type) value).getInternalName()));
     }

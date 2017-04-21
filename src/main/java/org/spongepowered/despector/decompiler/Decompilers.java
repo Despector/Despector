@@ -29,7 +29,6 @@ import org.spongepowered.despector.decompiler.kotlin.method.graph.create.ElvisGr
 import org.spongepowered.despector.decompiler.kotlin.method.graph.operate.KotlinTernaryPrePassOperation;
 import org.spongepowered.despector.decompiler.kotlin.method.postprocess.KotlinLocalsMutabilityPostProcess;
 import org.spongepowered.despector.decompiler.kotlin.method.special.KotlinLocalsProcessor;
-import org.spongepowered.despector.decompiler.kotlin.step.KotlinMethodInfoStep;
 import org.spongepowered.despector.decompiler.method.MethodDecompiler;
 import org.spongepowered.despector.decompiler.method.graph.create.JumpGraphProducerStep;
 import org.spongepowered.despector.decompiler.method.graph.create.SwitchGraphProducerStep;
@@ -50,10 +49,6 @@ import org.spongepowered.despector.decompiler.method.postprocess.ForEachPostProc
 import org.spongepowered.despector.decompiler.method.postprocess.ForFromWhilePostProcessor;
 import org.spongepowered.despector.decompiler.method.postprocess.IfCombiningPostProcessor;
 import org.spongepowered.despector.decompiler.method.special.LocalsProcessor;
-import org.spongepowered.despector.decompiler.step.ClassInfoStep;
-import org.spongepowered.despector.decompiler.step.EnumConstantsStep;
-import org.spongepowered.despector.decompiler.step.FieldInfoStep;
-import org.spongepowered.despector.decompiler.step.MethodInfoStep;
 
 import java.util.EnumMap;
 
@@ -64,7 +59,7 @@ public final class Decompilers {
 
     public static final BaseDecompiler JAVA = new BaseDecompiler(Language.JAVA);
     public static final BaseDecompiler KOTLIN = new BaseDecompiler(Language.KOTLIN);
-    public static final WildDecompiler WILD = new WildDecompiler();
+    public static final BaseDecompiler WILD = new BaseDecompiler(Language.ANY);
 
     public static final MethodDecompiler JAVA_METHOD = new MethodDecompiler();
     public static final MethodDecompiler KOTLIN_METHOD = new MethodDecompiler();
@@ -72,16 +67,6 @@ public final class Decompilers {
     private static final EnumMap<Language, Decompiler> DECOMPILERS = new EnumMap<>(Language.class);
 
     static {
-        JAVA.addStep(new ClassInfoStep());
-        JAVA.addStep(new FieldInfoStep());
-        JAVA.addStep(new MethodInfoStep(JAVA_METHOD));
-        JAVA.addStep(new EnumConstantsStep());
-
-        KOTLIN.addStep(new ClassInfoStep());
-        KOTLIN.addStep(new FieldInfoStep());
-        KOTLIN.addStep(new KotlinMethodInfoStep(KOTLIN_METHOD));
-        KOTLIN.addStep(new EnumConstantsStep());
-
         JAVA_METHOD.addGraphProducer(new JumpGraphProducerStep());
         JAVA_METHOD.addGraphProducer(new SwitchGraphProducerStep());
         JAVA_METHOD.addGraphProducer(new TryCatchGraphProducerStep());

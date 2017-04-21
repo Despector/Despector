@@ -24,22 +24,31 @@
  */
 package org.spongepowered.despector.decompiler;
 
-import static org.objectweb.asm.Opcodes.ACC_ENUM;
-import static org.objectweb.asm.Opcodes.ACC_INTERFACE;
-
-import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.tree.AnnotationNode;
-import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.despector.Language;
+import org.spongepowered.despector.ast.AccessModifier;
 import org.spongepowered.despector.ast.Annotation;
 import org.spongepowered.despector.ast.AnnotationType;
+import org.spongepowered.despector.ast.Locals;
+import org.spongepowered.despector.ast.Locals.Local;
 import org.spongepowered.despector.ast.SourceSet;
+import org.spongepowered.despector.ast.generic.ClassTypeSignature;
+import org.spongepowered.despector.ast.generic.TypeSignature;
+import org.spongepowered.despector.ast.type.AnnotationEntry;
 import org.spongepowered.despector.ast.type.ClassEntry;
 import org.spongepowered.despector.ast.type.EnumEntry;
+import org.spongepowered.despector.ast.type.FieldEntry;
 import org.spongepowered.despector.ast.type.InterfaceEntry;
+import org.spongepowered.despector.ast.type.MethodEntry;
 import org.spongepowered.despector.ast.type.TypeEntry;
 import org.spongepowered.despector.config.LibraryConfiguration;
+import org.spongepowered.despector.decompiler.error.SourceFormatException;
+import org.spongepowered.despector.decompiler.loader.BytecodeTranslator;
+import org.spongepowered.despector.decompiler.loader.ClassConstantPool;
+import org.spongepowered.despector.decompiler.method.MethodDecompiler;
+import org.spongepowered.despector.util.TypeHelper;
 
+import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -53,25 +62,27 @@ import java.util.List;
  */
 public class BaseDecompiler implements Decompiler {
 
+    private static final boolean DUMP_IR_ON_LOAD = Boolean.getBoolean("despector.debug.dump_ir");
+
+    private static final int ACC_PUBLIC = 0x0001;
+    private static final int ACC_PRIVATE = 0x0002;
+    private static final int ACC_PROTECTED = 0x0004;
+    private static final int ACC_STATIC = 0x0008;
+    private static final int ACC_FINAL = 0x0010;
+    private static final int ACC_SUPER = 0x0020;
+    private static final int ACC_VOLATILE = 0x0040;
+    private static final int ACC_TRANSIENT = 0x0080;
+    private static final int ACC_INTERFACE = 0x0200;
+    private static final int ACC_ABSTRACT = 0x0400;
+    private static final int ACC_SYNTHETIC = 0x1000;
+    private static final int ACC_ANNOTATION = 0x2000;
+    private static final int ACC_ENUM = 0x4000;
+
+    private final BytecodeTranslator bytecode = new BytecodeTranslator();
     private final Language lang;
-    private final List<DecompilerStep> steps = new ArrayList<>();
 
     public BaseDecompiler(Language lang) {
         this.lang = lang;
-    }
-
-    /**
-     * Gets the decompilation steps.
-     */
-    public List<DecompilerStep> getSteps() {
-        return this.steps;
-    }
-
-    /**
-     * Adds the given step to this decompiler.
-     */
-    public void addStep(DecompilerStep step) {
-        this.steps.add(step);
     }
 
     @Override
@@ -85,34 +96,170 @@ public class BaseDecompiler implements Decompiler {
     }
 
     @Override
-    public TypeEntry decompile(InputStream cls_path, SourceSet source) throws IOException {
-        ClassReader reader = new ClassReader(cls_path);
-        ClassNode cn = new ClassNode();
-        reader.accept(cn, 0);
-        return decompile(cn, source);
-    }
+    public TypeEntry decompile(InputStream input, SourceSet set) throws IOException {
+        DataInputStream data = (input instanceof DataInputStream) ? (DataInputStream) input : new DataInputStream(input);
 
-    @Override
-    public TypeEntry decompile(ClassNode cn, SourceSet source) {
+        int magic = data.readInt();
+        if (magic != 0xCAFEBABE) {
+            throw new SourceFormatException("Not a java class file");
+        }
+
+        short minor = data.readShort();
+        short major = data.readShort();
+
+        // TODO support older versions
+        if (major != 52 && minor != 50) {
+            throw new SourceFormatException("Unsupported java class version " + major + "." + minor);
+        }
+
+        ClassConstantPool pool = new ClassConstantPool();
+        pool.load(data);
+
+        int access_flags = data.readUnsignedShort();
+
+        String name = pool.getClass(data.readUnsignedShort()).name;
         if (!LibraryConfiguration.quiet) {
-            System.out.println("Decompiling class " + cn.name);
+            System.out.println("Decompiling class " + name);
         }
-        int acc = cn.access;
+        int super_index = data.readUnsignedShort();
+        String supername = super_index != 0 ? pool.getClass(super_index).name : null;
+
+        int interfaces_count = data.readUnsignedShort();
+        List<String> interfaces = new ArrayList<>(interfaces_count);
+        for (int i = 0; i < interfaces_count; i++) {
+            interfaces.add(pool.getClass(data.readUnsignedShort()).name);
+        }
+
         TypeEntry entry = null;
-        if ((acc & ACC_ENUM) != 0) {
-            entry = new EnumEntry(source, this.lang, cn.name);
-        } else if ((acc & ACC_INTERFACE) != 0) {
-            entry = new InterfaceEntry(source, this.lang, cn.name);
+        if ((access_flags & ACC_ANNOTATION) != 0) {
+            entry = new AnnotationEntry(set, lang, name);
+        } else if ((access_flags & ACC_INTERFACE) != 0) {
+            entry = new InterfaceEntry(set, lang, name);
+        } else if ((access_flags & ACC_ENUM) != 0) {
+            entry = new EnumEntry(set, lang, name);
         } else {
-            entry = new ClassEntry(source, this.lang, cn.name);
-            ((ClassEntry) entry).setSuperclass("L" + cn.superName + ";");
+            entry = new ClassEntry(set, lang, name);
+        }
+        entry.setAccessModifier(AccessModifier.fromModifiers(access_flags));
+
+        int field_count = data.readUnsignedShort();
+        List<FieldEntry> fields = new ArrayList<>();
+        for (int i = 0; i < field_count; i++) {
+            int field_access = data.readUnsignedShort();
+            String field_name = pool.getUtf8(data.readUnsignedShort());
+            String field_desc = pool.getUtf8(data.readUnsignedShort());
+
+            FieldEntry field = new FieldEntry(set);
+            field.setName(field_name);
+            field.setType(ClassTypeSignature.of(field_desc));
+            fields.add(field);
+
+            int attribute_count = data.readUnsignedShort();
+            for (int a = 0; a < attribute_count; a++) {
+                String attribute_name = pool.getUtf8(data.readUnsignedShort());
+                int length = data.readInt();
+                System.err.println("Skipping unknown field attribute: " + attribute_name);
+                data.skipBytes(length);
+            }
         }
 
-        for (DecompilerStep step : this.steps) {
-            step.process(cn, entry);
+        int method_count = data.readUnsignedShort();
+        List<MethodEntry> methods = new ArrayList<>();
+        for (int i = 0; i < method_count; i++) {
+            int method_access = data.readUnsignedShort();
+            String method_name = pool.getUtf8(data.readUnsignedShort());
+            String method_desc = pool.getUtf8(data.readUnsignedShort());
+
+            List<TypeSignature> param_types = new ArrayList<>();
+            for (String t : TypeHelper.splitSig(method_desc)) {
+                param_types.add(ClassTypeSignature.of(t));
+            }
+            MethodEntry method = new MethodEntry(set);
+            method.setName(method_name);
+            method.setDescription(method_desc);
+            methods.add(method);
+            method.setStatic((method_access & ACC_STATIC) != 0);
+            Locals locals = new Locals();
+
+            int attribute_count = data.readUnsignedShort();
+            for (int a = 0; a < attribute_count; a++) {
+                String attribute_name = pool.getUtf8(data.readUnsignedShort());
+                int length = data.readInt();
+                if ("Code".equals(attribute_name)) {
+                    int max_stack = data.readUnsignedShort();
+                    int max_locals = data.readUnsignedShort();
+                    int code_length = data.readInt();
+                    byte[] code = new byte[code_length];
+                    data.read(code, 0, code_length);
+
+                    int exception_table_length = data.readUnsignedShort();
+                    for (int ex = 0; ex < exception_table_length; ex++) {
+                        data.skipBytes(8);
+                    }
+                    // TODO exceptions
+
+                    int code_attribute_count = data.readUnsignedShort();
+                    for (int ca = 0; ca < code_attribute_count; ca++) {
+                        String code_attribute_name = pool.getUtf8(data.readUnsignedShort());
+                        int clength = data.readInt();
+                        if ("LocalVariableTable".equals(code_attribute_name)) {
+                            int lvt_length = data.readUnsignedShort();
+                            int param_count = method.getParamTypes().size();
+                            if (!method.isStatic()) {
+                                param_count++;
+                            }
+                            for (int j = 0; j < lvt_length; j++) {
+                                int start_pc = data.readUnsignedShort();
+                                int local_length = data.readUnsignedShort();
+                                String local_name = pool.getUtf8(data.readUnsignedShort());
+                                String local_desc = pool.getUtf8(data.readUnsignedShort());
+                                int index = data.readUnsignedShort();
+                                Local loc = locals.getLocal(index);
+                                loc.
+                            }
+                        } else {
+                            System.err.println("Skipping unknown code attribute: " + code_attribute_name);
+                            data.skipBytes(clength);
+                        }
+
+                        method.setIR(this.bytecode.createIR(code, pool));
+
+                        if (DUMP_IR_ON_LOAD) {
+                            System.out.println("Instructions of " + method_name + " " + method_desc);
+                            System.out.println(method.getIR());
+                        }
+                    }
+
+                } else {
+                    System.err.println("Skipping unknown method attribute: " + attribute_name);
+                    data.skipBytes(length);
+                }
+            }
         }
 
-        source.add(entry);
+        for (MethodEntry mth : methods) {
+            entry.addMethod(mth);
+        }
+        for (FieldEntry fld : fields) {
+            entry.addField(fld);
+        }
+        MethodDecompiler mth_decomp = Decompilers.JAVA_METHOD;
+        if (this.lang == Language.KOTLIN) {
+            mth_decomp = Decompilers.KOTLIN_METHOD;
+        }
+        int class_attribute_count = data.readUnsignedShort();
+        for (int i = 0; i < class_attribute_count; i++) {
+            String attribute_name = pool.getUtf8(data.readUnsignedShort());
+            int length = data.readInt();
+            System.err.println("Skipping unknown class attribute: " + attribute_name);
+            data.skipBytes(length);
+            // TODO look for kotlin annotation and set method decomp if found and lang == ANY
+        }
+        
+        for(MethodEntry mth: entry.getMethods()) {
+            mth_decomp.decompile(mth, null, mth.getLocals());
+        }
+        set.add(entry);
         return entry;
     }
 

@@ -35,6 +35,8 @@ public interface TypeVisitor extends AstVisitor {
 
     void visitInterfaceEntry(InterfaceEntry type);
 
+    void visitAnnotationEntry(AnnotationEntry type);
+
     void visitAnnotation(Annotation annotation);
 
     void visitMethod(MethodEntry mth);

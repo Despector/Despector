@@ -31,6 +31,7 @@ import org.spongepowered.despector.ast.Annotation;
 import org.spongepowered.despector.ast.AnnotationType;
 import org.spongepowered.despector.ast.AstEntry;
 import org.spongepowered.despector.ast.AstVisitor;
+import org.spongepowered.despector.ast.Locals;
 import org.spongepowered.despector.ast.SourceSet;
 import org.spongepowered.despector.ast.generic.MethodSignature;
 import org.spongepowered.despector.ast.generic.TypeSignature;
@@ -70,6 +71,7 @@ public class MethodEntry extends AstEntry {
     protected boolean is_bridge;
 
     protected InsnBlock ir;
+    protected Locals locals;
     protected StatementBlock instructions = null;
 
     protected MethodSignature sig;
@@ -187,6 +189,14 @@ public class MethodEntry extends AstEntry {
 
     public void setMethodSignature(MethodSignature sig) {
         this.sig = sig;
+    }
+
+    public Locals getLocals() {
+        return this.locals;
+    }
+
+    public void setLocals(Locals locals) {
+        this.locals = locals;
     }
 
     /**

@@ -24,16 +24,12 @@
  */
 package org.spongepowered.despector.decompiler;
 
-import com.google.common.collect.Sets;
-import org.objectweb.asm.ClassReader;
-import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.despector.ast.SourceSet;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Set;
 import java.util.jar.JarInputStream;
 import java.util.zip.ZipEntry;
 
@@ -42,36 +38,6 @@ import java.util.zip.ZipEntry;
  * methods and finding string constants are also during this traversal.
  */
 public class JarWalker {
-
-    // TODO move to conf
-    private static final Set<String> EXCLUDES = Sets.newHashSet();
-    private static final Set<String> NON_OBF_NAMES = Sets.newHashSet();
-
-    static {
-        // shaded libs are excluded from our obfuscated source set because they
-        // are directly in the classpath
-        EXCLUDES.add("org/apache");
-        EXCLUDES.add("it/unimi");
-        EXCLUDES.add("io/netty");
-        EXCLUDES.add("com/mojang");
-        EXCLUDES.add("com/google");
-        EXCLUDES.add("javax/annotation");
-
-        // TODO move to a common location
-        NON_OBF_NAMES.add("call");
-        NON_OBF_NAMES.add("clone");
-        NON_OBF_NAMES.add("name");
-        NON_OBF_NAMES.add("ordinal");
-        NON_OBF_NAMES.add("run");
-        NON_OBF_NAMES.add("setPreferredSize");
-        NON_OBF_NAMES.add("setMinimumSize");
-        NON_OBF_NAMES.add("setMaximumSize");
-        NON_OBF_NAMES.add("setLayout");
-        NON_OBF_NAMES.add("add");
-        NON_OBF_NAMES.add("setBackground");
-        NON_OBF_NAMES.add("apply");
-        NON_OBF_NAMES.add("compare");
-    }
 
     private final Path jar;
 
@@ -112,15 +78,7 @@ public class JarWalker {
     }
 
     private void scanClassFile(JarInputStream input, SourceSet src, Decompiler decomp) throws IOException {
-        ClassReader reader = new ClassReader(input);
-        ClassNode cn = new ClassNode();
-        reader.accept(cn, 0);
-        for (String ex : EXCLUDES) {
-            if (cn.name.startsWith(ex)) {
-                return;
-            }
-        }
-        decomp.decompile(cn, src);
+        decomp.decompile(input, src);
     }
 
 }
