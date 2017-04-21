@@ -39,10 +39,6 @@ public class IfTests {
 
     private static final Type THIS_TYPE = Type.getType(IfTests.class);
 
-    public static void body() {
-
-    }
-
     @Test
     public void testSimple() {
         TestMethodBuilder builder = new TestMethodBuilder("test_mth", "(Z)V");
