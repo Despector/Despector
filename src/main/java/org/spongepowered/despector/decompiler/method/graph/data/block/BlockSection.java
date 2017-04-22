@@ -24,6 +24,7 @@
  */
 package org.spongepowered.despector.decompiler.method.graph.data.block;
 
+import org.spongepowered.despector.ast.Locals;
 import org.spongepowered.despector.ast.insn.Instruction;
 import org.spongepowered.despector.ast.stmt.StatementBlock;
 
@@ -40,6 +41,6 @@ public abstract class BlockSection {
      * @param block The statement block to append to
      * @param stack The current instruction stack
      */
-    public abstract void appendTo(StatementBlock block, Deque<Instruction> stack);
+    public abstract void appendTo(StatementBlock block, Locals locals, Deque<Instruction> stack);
 
 }

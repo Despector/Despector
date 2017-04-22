@@ -73,7 +73,7 @@ public class KotlinCompanionClassEmitter implements SpecialEmitter {
                 }
                 fld.type = mth.getReturnType();
 
-                fld.getter = new StatementBlock(Type.METHOD, mth.getInstructions().getLocals());
+                fld.getter = new StatementBlock(Type.METHOD);
                 for (Statement stmt : mth.getInstructions().getStatements()) {
                     if (stmt instanceof InvokeStatement) {
                         InvokeStatement istmt = (InvokeStatement) stmt;

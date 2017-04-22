@@ -24,8 +24,6 @@
  */
 package org.spongepowered.test.util;
 
-import org.objectweb.asm.ClassReader;
-import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.despector.ast.SourceSet;
 import org.spongepowered.despector.ast.type.MethodEntry;
 import org.spongepowered.despector.ast.type.TypeEntry;
@@ -34,6 +32,8 @@ import org.spongepowered.despector.emitter.Emitters;
 import org.spongepowered.despector.emitter.format.EmitterFormat;
 import org.spongepowered.despector.emitter.java.JavaEmitterContext;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.StringWriter;
 
 public class KotlinTestHelper {
@@ -41,10 +41,12 @@ public class KotlinTestHelper {
     private static final SourceSet DUMMY_SOURCE_SET = new SourceSet();
 
     public static String getMethodAsString(byte[] data, String method_name) {
-        ClassReader cr = new ClassReader(data);
-        ClassNode cn = new ClassNode();
-        cr.accept(cn, 0);
-        TypeEntry type = Decompilers.KOTLIN.decompile(cn, DUMMY_SOURCE_SET);
+        TypeEntry type = null;
+        try {
+            type = Decompilers.KOTLIN.decompile(new ByteArrayInputStream(data), DUMMY_SOURCE_SET);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         MethodEntry method = type.getStaticMethodSafe(method_name);
         return getMethodAsString(type, method);
     }

@@ -26,6 +26,7 @@ package org.spongepowered.despector.decompiler.kotlin.method.graph.data;
 
 import static com.google.common.base.Preconditions.checkState;
 
+import org.spongepowered.despector.ast.Locals;
 import org.spongepowered.despector.ast.insn.Instruction;
 import org.spongepowered.despector.ast.kotlin.Elvis;
 import org.spongepowered.despector.ast.stmt.StatementBlock;
@@ -55,12 +56,12 @@ public class ElvisBlockSection extends BlockSection {
     }
 
     @Override
-    public void appendTo(StatementBlock block, Deque<Instruction> stack) {
+    public void appendTo(StatementBlock block, Locals locals, Deque<Instruction> stack) {
         // The blocksection before this one should have been our processed elvis
         // and will have left the value to be null checked on the stack
-        StatementBlock dummy = new StatementBlock(StatementBlock.Type.IF, block.getLocals());
+        StatementBlock dummy = new StatementBlock(StatementBlock.Type.IF);
         Deque<Instruction> dummy_stack = new ArrayDeque<>();
-        StatementBuilder.appendBlock(this.block, dummy, block.getLocals(), dummy_stack);
+        StatementBuilder.appendBlock(this.block, dummy, locals, dummy_stack);
         checkState(dummy_stack.size() == 1);
         Elvis elvis = new Elvis(stack.pop(), dummy_stack.pop());
         stack.push(elvis);

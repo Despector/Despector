@@ -170,7 +170,7 @@ public class MethodEntryEmitter implements AstEmitter<JavaEmitterContext, Method
                 ctx.printString(" ");
                 ctx.printString("local" + param_index);
             } else {
-                Local local = block.getLocals().getLocal(param_index);
+                Local local = method.getLocals().getLocal(param_index);
                 LocalInstance insn = local.getParameterInstance();
                 for (Annotation anno : insn.getAnnotations()) {
                     ctx.emit(anno);

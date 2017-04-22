@@ -25,18 +25,14 @@
 package org.spongepowered.despector.ast;
 
 import com.google.common.collect.Lists;
-import org.objectweb.asm.Label;
-import org.objectweb.asm.tree.LocalVariableNode;
 import org.spongepowered.despector.ast.generic.ClassTypeSignature;
 import org.spongepowered.despector.ast.generic.TypeSignature;
-import org.spongepowered.despector.util.SignatureParser;
 import org.spongepowered.despector.util.serialization.MessagePacker;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
 /**
  * A tracker of local variables.
@@ -81,7 +77,7 @@ public class Locals {
     /**
      * Bakes the local instances using the given label indices.
      */
-    public void bakeInstances(Map<Label, Integer> label_indices) {
+    public void bakeInstances(List<Integer> label_indices) {
         for (Local local : this.locals) {
             local.bakeInstances(label_indices);
         }
@@ -149,7 +145,7 @@ public class Locals {
         private final int index;
         private boolean parameter = false;
         private LocalInstance parameter_instance = null;
-        private final List<LocalVariableNode> lvt = Lists.newArrayList();
+        private final List<LVT> lvt = Lists.newArrayList();
         private final List<LocalInstance> instances = Lists.newArrayList();
 
         public Local(int i) {
@@ -168,34 +164,29 @@ public class Locals {
             this.parameter = true;
         }
 
-        public void addLVT(LocalVariableNode node) {
-            this.lvt.add(node);
-        }
-
-        public List<LocalVariableNode> getLVT() {
-            return this.lvt;
+        public void addLVT(int s, int l, String n, String d) {
+            this.lvt.add(new LVT(s, l, n, d));
         }
 
         /**
          * Bakes the instances of this local.
          */
-        public void bakeInstances(Map<Label, Integer> label_indices) {
+        public void bakeInstances(List<Integer> label_indices) {
             if (this.lvt.isEmpty()) {
                 if (this.index == 0) {
                     this.instances.add(new LocalInstance(this, "this", ClassTypeSignature.OBJECT, -1, Short.MAX_VALUE));
                 }
             }
-            for (LocalVariableNode l : this.lvt) {
-                int start = label_indices.get(l.start.getLabel());
-                int end = label_indices.get(l.end.getLabel());
+            for (LVT l : this.lvt) {
+                int start = label_indices.indexOf(l.start_pc);
+                int end = label_indices.indexOf(l.start_pc + l.length);
                 TypeSignature sig = null;
-                if (l.signature != null) {
-                    sig = SignatureParser.parseFieldTypeSignature(l.signature);
-                } else {
-                    sig = ClassTypeSignature.of(l.desc);
-                }
+                sig = ClassTypeSignature.of(l.desc);
                 LocalInstance insn = new LocalInstance(this, l.name, sig, start - 1, end);
                 this.instances.add(insn);
+            }
+            if (this.parameter) {
+                this.parameter_instance = this.instances.get(0);
             }
         }
 
@@ -363,6 +354,21 @@ public class Locals {
             return this.name != null ? this.name : this.local.toString();
         }
 
+    }
+
+    private static class LVT {
+
+        public int start_pc;
+        public int length;
+        public String name;
+        public String desc;
+
+        public LVT(int s, int l, String n, String d) {
+            this.start_pc = s;
+            this.length = l;
+            this.name = n;
+            this.desc = d;
+        }
     }
 
 }

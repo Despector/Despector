@@ -59,7 +59,7 @@ public class DynamicInvokeEmitter implements InstructionEmitter<JavaEmitterConte
             if (block == null) {
                 ctx.printString("local" + i);
             } else {
-                Local local = block.getLocals().getLocal(i);
+                Local local = method.getLocals().getLocal(i);
                 LocalInstance insn = local.getParameterInstance();
                 ctx.printString(insn.getName());
             }

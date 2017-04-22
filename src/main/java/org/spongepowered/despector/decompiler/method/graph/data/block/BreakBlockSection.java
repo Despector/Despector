@@ -24,13 +24,14 @@
  */
 package org.spongepowered.despector.decompiler.method.graph.data.block;
 
+import org.spongepowered.despector.ast.Locals;
 import org.spongepowered.despector.ast.insn.Instruction;
 import org.spongepowered.despector.ast.insn.condition.Condition;
 import org.spongepowered.despector.ast.stmt.StatementBlock;
 import org.spongepowered.despector.ast.stmt.branch.Break;
-import org.spongepowered.despector.ast.stmt.branch.If;
 import org.spongepowered.despector.ast.stmt.branch.Break.Breakable;
 import org.spongepowered.despector.ast.stmt.branch.Break.Type;
+import org.spongepowered.despector.ast.stmt.branch.If;
 import org.spongepowered.despector.decompiler.method.ConditionBuilder;
 import org.spongepowered.despector.decompiler.method.graph.data.opcode.BreakMarkerOpcodeBlock;
 import org.spongepowered.despector.decompiler.method.graph.data.opcode.BreakMarkerOpcodeBlock.MarkerType;
@@ -133,12 +134,12 @@ public class BreakBlockSection extends BlockSection {
     }
 
     @Override
-    public void appendTo(StatementBlock block, Deque<Instruction> stack) {
+    public void appendTo(StatementBlock block, Locals locals, Deque<Instruction> stack) {
         this.final_break = new Break(this.br, this.type == MarkerType.BREAK ? Type.BREAK : Type.CONTINUE, this.nested);
         if (!this.inlined.isEmpty()) {
             ConditionalOpcodeBlock last = this.inlined.get(this.inlined.size() - 1);
-            Condition cond = ConditionBuilder.makeCondition(this.inlined, block.getLocals(), last.getTarget(), last.getElseTarget());
-            StatementBlock inner = new StatementBlock(StatementBlock.Type.IF, block.getLocals());
+            Condition cond = ConditionBuilder.makeCondition(this.inlined, locals, last.getTarget(), last.getElseTarget());
+            StatementBlock inner = new StatementBlock(StatementBlock.Type.IF);
             inner.append(this.final_break);
             If ifblock = new If(cond, inner);
             block.append(ifblock);

@@ -155,7 +155,7 @@ public class KotlinMethodEntryEmitter extends MethodEntryEmitter {
                     KotlinEmitterUtil.emitParamType(ctx, method.getParamTypes().get(i));
                 }
             } else {
-                Local local = block.getLocals().getLocal(param_index);
+                Local local = method.getLocals().getLocal(param_index);
                 LocalInstance insn = local.getParameterInstance();
                 ctx.printString(insn.getName());
                 ctx.printString(": ");

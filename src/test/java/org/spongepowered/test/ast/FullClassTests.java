@@ -26,8 +26,6 @@ package org.spongepowered.test.ast;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.objectweb.asm.ClassReader;
-import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.despector.Language;
 import org.spongepowered.despector.ast.SourceSet;
 import org.spongepowered.despector.ast.type.TypeEntry;
@@ -61,12 +59,8 @@ public class FullClassTests {
         if (compiled == null) {
             Assert.fail("Resource not found " + classname + ".class.test");
         }
-
-        ClassReader cr = new ClassReader(compiled);
-        ClassNode cn = new ClassNode();
-        cr.accept(cn, 0);
         SourceSet src = new SourceSet();
-        TypeEntry type = Decompilers.get(lang).decompile(cn, src);
+        TypeEntry type = Decompilers.get(lang).decompile(compiled, src);
         StringWriter writer = new StringWriter();
         JavaEmitterContext ctx = new JavaEmitterContext(writer, EmitterFormat.defaults());
         Emitters.get(lang).emit(ctx, type);

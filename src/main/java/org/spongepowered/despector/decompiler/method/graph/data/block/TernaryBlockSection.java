@@ -26,6 +26,7 @@ package org.spongepowered.despector.decompiler.method.graph.data.block;
 
 import static com.google.common.base.Preconditions.checkState;
 
+import org.spongepowered.despector.ast.Locals;
 import org.spongepowered.despector.ast.insn.Instruction;
 import org.spongepowered.despector.ast.insn.condition.Condition;
 import org.spongepowered.despector.ast.insn.misc.Ternary;
@@ -71,16 +72,16 @@ public class TernaryBlockSection extends BlockSection {
     }
 
     @Override
-    public void appendTo(StatementBlock block, Deque<Instruction> stack) {
-        StatementBlock dummy = new StatementBlock(StatementBlock.Type.IF, block.getLocals());
+    public void appendTo(StatementBlock block, Locals locals, Deque<Instruction> stack) {
+        StatementBlock dummy = new StatementBlock(StatementBlock.Type.IF);
         Deque<Instruction> dummy_stack = new ArrayDeque<>();
         for (BlockSection sec : this.true_body) {
-            sec.appendTo(dummy, dummy_stack);
+            sec.appendTo(dummy, locals, dummy_stack);
         }
         checkState(dummy_stack.size() == 1);
         Instruction true_val = dummy_stack.pop();
         for (BlockSection sec : this.false_body) {
-            sec.appendTo(dummy, dummy_stack);
+            sec.appendTo(dummy, locals, dummy_stack);
         }
         checkState(dummy_stack.size() == 1);
         Instruction false_val = dummy_stack.pop();

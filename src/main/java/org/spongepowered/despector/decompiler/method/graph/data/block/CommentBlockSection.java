@@ -24,6 +24,7 @@
  */
 package org.spongepowered.despector.decompiler.method.graph.data.block;
 
+import org.spongepowered.despector.ast.Locals;
 import org.spongepowered.despector.ast.insn.Instruction;
 import org.spongepowered.despector.ast.stmt.StatementBlock;
 import org.spongepowered.despector.ast.stmt.misc.Comment;
@@ -44,7 +45,7 @@ public class CommentBlockSection extends BlockSection {
     }
 
     @Override
-    public void appendTo(StatementBlock block, Deque<Instruction> stack) {
+    public void appendTo(StatementBlock block, Locals locals, Deque<Instruction> stack) {
         block.append(new Comment(this.text));
     }
 

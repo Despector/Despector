@@ -26,6 +26,7 @@ package org.spongepowered.despector.decompiler.kotlin.method.graph.data;
 
 import static com.google.common.base.Preconditions.checkState;
 
+import org.spongepowered.despector.ast.Locals;
 import org.spongepowered.despector.ast.insn.Instruction;
 import org.spongepowered.despector.ast.insn.condition.Condition;
 import org.spongepowered.despector.ast.kotlin.When;
@@ -65,25 +66,25 @@ public class WhenBlockSection extends BlockSection {
     }
 
     @Override
-    public void appendTo(StatementBlock block, Deque<Instruction> stack) {
+    public void appendTo(StatementBlock block, Locals locals, Deque<Instruction> stack) {
         Statement last = block.popStatement();
         checkState(last instanceof LocalAssignment);
         When when = new When(((LocalAssignment) last).getLocal(), ((LocalAssignment) last).getValue());
         boolean has_last = false;
         for (WhenCondition cond : this.conditions) {
-            StatementBlock case_body = new StatementBlock(Type.SWITCH, block.getLocals());
+            StatementBlock case_body = new StatementBlock(Type.SWITCH);
             Deque<Instruction> case_stack = new ArrayDeque<>();
             for (BlockSection section : cond.getBody()) {
-                section.appendTo(case_body, case_stack);
+                section.appendTo(case_body, locals, case_stack);
             }
             Case cs = new Case(cond.getCondition(), case_body, case_stack.peek());
             has_last = cs.getLast() != null;
             when.getCases().add(cs);
         }
-        StatementBlock case_body = new StatementBlock(Type.SWITCH, block.getLocals());
+        StatementBlock case_body = new StatementBlock(Type.SWITCH);
         Deque<Instruction> case_stack = new ArrayDeque<>();
         for (BlockSection section : this.else_body) {
-            section.appendTo(case_body, case_stack);
+            section.appendTo(case_body, locals, case_stack);
         }
         when.setElseBody(case_body, case_stack.peek());
         if (has_last) {

@@ -26,6 +26,7 @@ package org.spongepowered.despector.decompiler.method.graph.data.block;
 
 import static com.google.common.base.Preconditions.checkState;
 
+import org.spongepowered.despector.ast.Locals;
 import org.spongepowered.despector.ast.insn.Instruction;
 import org.spongepowered.despector.ast.insn.condition.Condition;
 import org.spongepowered.despector.ast.stmt.StatementBlock;
@@ -76,15 +77,15 @@ public class WhileBlockSection extends BlockSection implements BreakableBlockSec
     }
 
     @Override
-    public void appendTo(StatementBlock block, Deque<Instruction> stack) {
-        StatementBlock body = new StatementBlock(StatementBlock.Type.WHILE, block.getLocals());
+    public void appendTo(StatementBlock block, Locals locals, Deque<Instruction> stack) {
+        StatementBlock body = new StatementBlock(StatementBlock.Type.WHILE);
         While wwhile = new While(this.condition, body);
         for (BreakBlockSection bbreak : this.breaks) {
             bbreak.setBreakable(wwhile);
         }
         Deque<Instruction> body_stack = new ArrayDeque<>();
         for (BlockSection body_section : this.body) {
-            body_section.appendTo(body, body_stack);
+            body_section.appendTo(body, locals, body_stack);
         }
         checkState(body_stack.isEmpty());
         block.append(wwhile);

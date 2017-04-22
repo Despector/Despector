@@ -28,7 +28,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.Lists;
 import org.spongepowered.despector.ast.AstVisitor;
-import org.spongepowered.despector.ast.Locals;
 import org.spongepowered.despector.ast.insn.InstructionVisitor;
 import org.spongepowered.despector.util.serialization.AstSerializer;
 import org.spongepowered.despector.util.serialization.MessagePacker;
@@ -56,18 +55,15 @@ public class StatementBlock {
     }
 
     private Type type;
-    private final Locals locals;
     private final List<Statement> statements;
 
-    public StatementBlock(Type type, Locals locals) {
+    public StatementBlock(Type type) {
         this.type = checkNotNull(type, "type");
-        this.locals = checkNotNull(locals, "locals");
         this.statements = Lists.newArrayList();
     }
 
     public StatementBlock(StatementBlock block) {
         this.type = block.type;
-        this.locals = new Locals(block.locals);
         this.statements = Lists.newArrayList(block.statements);
     }
 
@@ -83,13 +79,6 @@ public class StatementBlock {
      */
     public void setType(Type t) {
         this.type = checkNotNull(t, "type");
-    }
-
-    /**
-     * Gets the locals of this block.
-     */
-    public Locals getLocals() {
-        return this.locals;
     }
 
     /**
@@ -146,10 +135,6 @@ public class StatementBlock {
     public void writeTo(MessagePacker pack) throws IOException {
         pack.startMap(this.type == Type.METHOD ? 3 : 2);
         pack.writeString("id").writeInt(AstSerializer.ENTRY_ID_STATEMENT_BODY);
-        if (this.type == Type.METHOD) {
-            pack.writeString("locals");
-            this.locals.writeTo(pack);
-        }
         pack.writeString("instructions").startArray(this.statements.size());
         for (Statement stmt : this.statements) {
             stmt.writeTo(pack);

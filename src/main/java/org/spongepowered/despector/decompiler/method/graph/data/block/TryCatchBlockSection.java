@@ -62,20 +62,20 @@ public class TryCatchBlockSection extends BlockSection {
     }
 
     @Override
-    public void appendTo(StatementBlock block, Deque<Instruction> stack) {
-        StatementBlock body = new StatementBlock(StatementBlock.Type.TRY, block.getLocals());
+    public void appendTo(StatementBlock block, Locals locals, Deque<Instruction> stack) {
+        StatementBlock body = new StatementBlock(StatementBlock.Type.TRY);
         Deque<Instruction> body_stack = new ArrayDeque<>();
         for (BlockSection body_section : this.body) {
-            body_section.appendTo(body, body_stack);
+            body_section.appendTo(body, locals, body_stack);
         }
         checkState(body_stack.isEmpty());
         TryCatch ttry = new TryCatch(body);
         block.append(ttry);
         for (CatchBlockSection c : this.catches) {
-            StatementBlock cbody = new StatementBlock(StatementBlock.Type.WHILE, block.getLocals());
+            StatementBlock cbody = new StatementBlock(StatementBlock.Type.WHILE);
             Deque<Instruction> cbody_stack = new ArrayDeque<>();
             for (BlockSection body_section : c.getBody()) {
-                body_section.appendTo(cbody, cbody_stack);
+                body_section.appendTo(cbody, locals, cbody_stack);
             }
             checkState(cbody_stack.isEmpty());
             if (c.getLocal() != null) {

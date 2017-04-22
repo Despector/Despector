@@ -43,12 +43,9 @@ public class PartialMethod {
     private final MethodDecompiler decompiler;
     private final MethodEntry method;
 
-    private Locals locals;
-    private InsnBlock ops;
     private StatementBlock block;
     private List<OpcodeBlock> graph;
     private List<BlockSection> final_blocks = new ArrayList<>();
-    private List<TryCatchRegion> catch_regions = new ArrayList<>();
 
     public PartialMethod(MethodDecompiler decompiler, MethodEntry method) {
         this.decompiler = decompiler;
@@ -73,28 +70,14 @@ public class PartialMethod {
      * Gets the method locals.
      */
     public Locals getLocals() {
-        return this.locals;
-    }
-
-    /**
-     * Sets the method locals.
-     */
-    public void setLocals(Locals locals) {
-        this.locals = locals;
+        return this.method.getLocals();
     }
 
     /**
      * Gets the method's opcodes.
      */
     public InsnBlock getOpcodes() {
-        return this.ops;
-    }
-
-    /**
-     * Sets the method's opcodes.
-     */
-    public void setOpcodes(InsnBlock ops) {
-        this.ops = ops;
+        return this.method.getIR();
     }
 
     /**
@@ -131,10 +114,6 @@ public class PartialMethod {
      */
     public List<BlockSection> getFinalBlocks() {
         return this.final_blocks;
-    }
-
-    public List<TryCatchRegion> getCatchRegions() {
-        return this.catch_regions;
     }
 
     public static class TryCatchRegion {

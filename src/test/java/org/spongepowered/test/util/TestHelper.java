@@ -26,8 +26,6 @@ package org.spongepowered.test.util;
 
 import com.google.common.collect.Maps;
 import org.junit.Assert;
-import org.objectweb.asm.ClassReader;
-import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.despector.ast.SourceSet;
 import org.spongepowered.despector.ast.type.MethodEntry;
 import org.spongepowered.despector.ast.type.TypeEntry;
@@ -36,6 +34,7 @@ import org.spongepowered.despector.emitter.Emitters;
 import org.spongepowered.despector.emitter.format.EmitterFormat;
 import org.spongepowered.despector.emitter.java.JavaEmitterContext;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -90,10 +89,12 @@ public class TestHelper {
     }
 
     public static String getAsString(byte[] data, String method_name) {
-        ClassReader cr = new ClassReader(data);
-        ClassNode cn = new ClassNode();
-        cr.accept(cn, 0);
-        TypeEntry type = Decompilers.WILD.decompile(cn, DUMMY_SOURCE_SET);
+        TypeEntry type = null;
+        try {
+            type = Decompilers.WILD.decompile(new ByteArrayInputStream(data), DUMMY_SOURCE_SET);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         MethodEntry method = type.getStaticMethodSafe(method_name);
         return getAsString(type, method);
     }

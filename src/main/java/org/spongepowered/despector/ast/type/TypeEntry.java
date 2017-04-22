@@ -94,6 +94,10 @@ public abstract class TypeEntry extends AstEntry {
         return this.lang;
     }
 
+    public void setLanguage(Language lang) {
+        this.lang = lang;
+    }
+
     public AccessModifier getAccessModifier() {
         return this.access;
     }

@@ -24,6 +24,8 @@
  */
 package org.spongepowered.despector.decompiler.ir;
 
+import org.spongepowered.despector.decompiler.method.PartialMethod.TryCatchRegion;
+
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -31,6 +33,8 @@ import java.util.List;
 public class InsnBlock implements Iterable<Insn> {
 
     private final List<Insn> instructions;
+    private int[] op_indices;
+    private List<TryCatchRegion> catch_regions = new ArrayList<>();
 
     public InsnBlock() {
         this.instructions = new ArrayList<>();
@@ -50,6 +54,18 @@ public class InsnBlock implements Iterable<Insn> {
 
     public List<Insn> getInstructions() {
         return this.instructions;
+    }
+
+    public int[] getOpcodeIndices() {
+        return this.op_indices;
+    }
+
+    public void setOpcodeIndices(int[] op) {
+        this.op_indices = op;
+    }
+
+    public List<TryCatchRegion> getCatchRegions() {
+        return this.catch_regions;
     }
 
     @Override

@@ -24,16 +24,22 @@
  */
 package org.spongepowered.despector.decompiler;
 
-import org.objectweb.asm.tree.AnnotationNode;
+import static org.objectweb.asm.Opcodes.ACC_BRIDGE;
+
 import org.spongepowered.despector.Language;
 import org.spongepowered.despector.ast.AccessModifier;
-import org.spongepowered.despector.ast.Annotation;
-import org.spongepowered.despector.ast.AnnotationType;
 import org.spongepowered.despector.ast.Locals;
 import org.spongepowered.despector.ast.Locals.Local;
 import org.spongepowered.despector.ast.SourceSet;
 import org.spongepowered.despector.ast.generic.ClassTypeSignature;
+import org.spongepowered.despector.ast.generic.MethodSignature;
 import org.spongepowered.despector.ast.generic.TypeSignature;
+import org.spongepowered.despector.ast.stmt.Statement;
+import org.spongepowered.despector.ast.stmt.StatementBlock;
+import org.spongepowered.despector.ast.stmt.StatementBlock.Type;
+import org.spongepowered.despector.ast.stmt.assign.StaticFieldAssignment;
+import org.spongepowered.despector.ast.stmt.invoke.New;
+import org.spongepowered.despector.ast.stmt.misc.Comment;
 import org.spongepowered.despector.ast.type.AnnotationEntry;
 import org.spongepowered.despector.ast.type.ClassEntry;
 import org.spongepowered.despector.ast.type.EnumEntry;
@@ -41,11 +47,15 @@ import org.spongepowered.despector.ast.type.FieldEntry;
 import org.spongepowered.despector.ast.type.InterfaceEntry;
 import org.spongepowered.despector.ast.type.MethodEntry;
 import org.spongepowered.despector.ast.type.TypeEntry;
+import org.spongepowered.despector.config.ConfigManager;
 import org.spongepowered.despector.config.LibraryConfiguration;
 import org.spongepowered.despector.decompiler.error.SourceFormatException;
+import org.spongepowered.despector.decompiler.ir.Insn;
 import org.spongepowered.despector.decompiler.loader.BytecodeTranslator;
 import org.spongepowered.despector.decompiler.loader.ClassConstantPool;
 import org.spongepowered.despector.decompiler.method.MethodDecompiler;
+import org.spongepowered.despector.decompiler.method.PartialMethod.TryCatchRegion;
+import org.spongepowered.despector.util.SignatureParser;
 import org.spongepowered.despector.util.TypeHelper;
 
 import java.io.DataInputStream;
@@ -55,6 +65,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -130,29 +141,39 @@ public class BaseDecompiler implements Decompiler {
             interfaces.add(pool.getClass(data.readUnsignedShort()).name);
         }
 
+        Language actual_lang = Language.JAVA;
         TypeEntry entry = null;
         if ((access_flags & ACC_ANNOTATION) != 0) {
-            entry = new AnnotationEntry(set, lang, name);
+            entry = new AnnotationEntry(set, actual_lang, name);
         } else if ((access_flags & ACC_INTERFACE) != 0) {
-            entry = new InterfaceEntry(set, lang, name);
+            entry = new InterfaceEntry(set, actual_lang, name);
         } else if ((access_flags & ACC_ENUM) != 0) {
-            entry = new EnumEntry(set, lang, name);
+            entry = new EnumEntry(set, actual_lang, name);
         } else {
-            entry = new ClassEntry(set, lang, name);
+            entry = new ClassEntry(set, actual_lang, name);
+            ((ClassEntry) entry).setSuperclass(supername);
         }
         entry.setAccessModifier(AccessModifier.fromModifiers(access_flags));
+        entry.setFinal((access_flags & ACC_FINAL) != 0);
+        entry.setSynthetic((access_flags & ACC_SYNTHETIC) != 0);
+        entry.getInterfaces().addAll(interfaces);
 
         int field_count = data.readUnsignedShort();
-        List<FieldEntry> fields = new ArrayList<>();
         for (int i = 0; i < field_count; i++) {
             int field_access = data.readUnsignedShort();
             String field_name = pool.getUtf8(data.readUnsignedShort());
             String field_desc = pool.getUtf8(data.readUnsignedShort());
 
             FieldEntry field = new FieldEntry(set);
+            field.setAccessModifier(AccessModifier.fromModifiers(field_access));
+            field.setFinal((field_access & ACC_FINAL) != 0);
+            field.setName(field_name);
+            field.setOwner(name);
+            field.setStatic((field_access & ACC_STATIC) != 0);
+            field.setSynthetic((field_access & ACC_SYNTHETIC) != 0);
             field.setName(field_name);
             field.setType(ClassTypeSignature.of(field_desc));
-            fields.add(field);
+            entry.addField(field);
 
             int attribute_count = data.readUnsignedShort();
             for (int a = 0; a < attribute_count; a++) {
@@ -164,7 +185,6 @@ public class BaseDecompiler implements Decompiler {
         }
 
         int method_count = data.readUnsignedShort();
-        List<MethodEntry> methods = new ArrayList<>();
         for (int i = 0; i < method_count; i++) {
             int method_access = data.readUnsignedShort();
             String method_name = pool.getUtf8(data.readUnsignedShort());
@@ -177,10 +197,18 @@ public class BaseDecompiler implements Decompiler {
             MethodEntry method = new MethodEntry(set);
             method.setName(method_name);
             method.setDescription(method_desc);
-            methods.add(method);
+            method.setOwner(name);
+            method.setAbstract((method_access & ACC_ABSTRACT) != 0);
+            method.setAccessModifier(AccessModifier.fromModifiers(method_access));
+            method.setFinal((method_access & ACC_FINAL) != 0);
             method.setStatic((method_access & ACC_STATIC) != 0);
+            method.setSynthetic((method_access & ACC_SYNTHETIC) != 0);
+            method.setBridge((method_access & ACC_BRIDGE) != 0);
+            entry.addMethod(method);
             Locals locals = new Locals();
+            method.setLocals(locals);
 
+            String method_sig = null;
             int attribute_count = data.readUnsignedShort();
             for (int a = 0; a < attribute_count; a++) {
                 String attribute_name = pool.getUtf8(data.readUnsignedShort());
@@ -191,10 +219,14 @@ public class BaseDecompiler implements Decompiler {
                     int code_length = data.readInt();
                     byte[] code = new byte[code_length];
                     data.read(code, 0, code_length);
-
+                    List<TryCatchRegion> catch_regions = new ArrayList<>();
                     int exception_table_length = data.readUnsignedShort();
-                    for (int ex = 0; ex < exception_table_length; ex++) {
-                        data.skipBytes(8);
+                    for (int j = 0; j < exception_table_length; j++) {
+                        int start_pc = data.readUnsignedShort();
+                        int end_pc = data.readUnsignedShort();
+                        int catch_pc = data.readUnsignedShort();
+                        String ex = pool.getClass(data.readUnsignedShort()).name;
+                        catch_regions.add(new TryCatchRegion(start_pc, end_pc, catch_pc, ex));
                     }
                     // TODO exceptions
 
@@ -204,7 +236,7 @@ public class BaseDecompiler implements Decompiler {
                         int clength = data.readInt();
                         if ("LocalVariableTable".equals(code_attribute_name)) {
                             int lvt_length = data.readUnsignedShort();
-                            int param_count = method.getParamTypes().size();
+                            int param_count = TypeHelper.paramCount(method_desc);
                             if (!method.isStatic()) {
                                 param_count++;
                             }
@@ -215,33 +247,42 @@ public class BaseDecompiler implements Decompiler {
                                 String local_desc = pool.getUtf8(data.readUnsignedShort());
                                 int index = data.readUnsignedShort();
                                 Local loc = locals.getLocal(index);
-                                loc.
+                                loc.addLVT(start_pc, local_length, local_name, local_desc);
+                                if (index < param_count) {
+                                    loc.setAsParameter();
+                                }
                             }
                         } else {
                             System.err.println("Skipping unknown code attribute: " + code_attribute_name);
                             data.skipBytes(clength);
                         }
-
-                        method.setIR(this.bytecode.createIR(code, pool));
-
-                        if (DUMP_IR_ON_LOAD) {
-                            System.out.println("Instructions of " + method_name + " " + method_desc);
-                            System.out.println(method.getIR());
-                        }
                     }
 
+                    method.setIR(this.bytecode.createIR(code, locals, catch_regions, pool));
+
+                    if (DUMP_IR_ON_LOAD) {
+                        System.out.println("Instructions of " + method_name + " " + method_desc);
+                        System.out.println(method.getIR());
+                    }
+                } else if ("Signature".equals(attribute_name)) {
+                    method_sig = pool.getUtf8(data.readUnsignedShort());
                 } else {
                     System.err.println("Skipping unknown method attribute: " + attribute_name);
                     data.skipBytes(length);
                 }
             }
-        }
-
-        for (MethodEntry mth : methods) {
-            entry.addMethod(mth);
-        }
-        for (FieldEntry fld : fields) {
-            entry.addField(fld);
+            if (method_sig != null) {
+                method.setMethodSignature(SignatureParser.parseMethod(method_sig));
+            } else {
+                MethodSignature sig = SignatureParser.parseMethod(method_desc);
+                method.setMethodSignature(sig);
+                // TODO
+//                if (mn.exceptions != null && !mn.exceptions.isEmpty()) {
+//                    for (String ex : (List<String>) mn.exceptions) {
+//                        sig.getThrowsSignature().add(ClassTypeSignature.of(ex));
+//                    }
+//                }
+            }
         }
         MethodDecompiler mth_decomp = Decompilers.JAVA_METHOD;
         if (this.lang == Language.KOTLIN) {
@@ -253,12 +294,73 @@ public class BaseDecompiler implements Decompiler {
             int length = data.readInt();
             System.err.println("Skipping unknown class attribute: " + attribute_name);
             data.skipBytes(length);
-            // TODO look for kotlin annotation and set method decomp if found and lang == ANY
+            // TODO look for kotlin annotation and set method decomp if found
+            // and lang == ANY
         }
-        
-        for(MethodEntry mth: entry.getMethods()) {
-            mth_decomp.decompile(mth, null, mth.getLocals());
+
+        entry.setLanguage(actual_lang);
+
+        for (MethodEntry mth : entry.getMethods()) {
+            try {
+                StatementBlock block = mth_decomp.decompile(mth);
+                mth.setInstructions(block);
+            } catch (Exception ex) {
+                System.err.println("Error decompiling method body for " + name + " " + mth.toString());
+                ex.printStackTrace();
+                StatementBlock insns = new StatementBlock(Type.METHOD);
+                if (ConfigManager.getConfig().print_opcodes_on_error) {
+                    List<String> text = new ArrayList<>();
+                    text.add("Error decompiling block");
+                    for (Insn next : mth.getIR()) {
+                        text.add(next.toString());
+                    }
+                    insns.append(new Comment(text));
+                } else {
+                    insns.append(new Comment("Error decompiling block"));
+                }
+                mth.setInstructions(insns);
+            }
         }
+        for (MethodEntry mth : entry.getStaticMethods()) {
+            try {
+                StatementBlock block = mth_decomp.decompile(mth);
+                mth.setInstructions(block);
+            } catch (Exception ex) {
+                System.err.println("Error decompiling method body for " + name + " " + mth.toString());
+                ex.printStackTrace();
+                StatementBlock insns = new StatementBlock(Type.METHOD);
+                if (ConfigManager.getConfig().print_opcodes_on_error) {
+                    List<String> text = new ArrayList<>();
+                    text.add("Error decompiling block");
+                    for (Insn next : mth.getIR()) {
+                        text.add(next.toString());
+                    }
+                    insns.append(new Comment(text));
+                } else {
+                    insns.append(new Comment("Error decompiling block"));
+                }
+                mth.setInstructions(insns);
+            }
+        }
+
+        if (entry instanceof EnumEntry) {
+            MethodEntry clinit = entry.getStaticMethodSafe("<clinit>");
+            if (clinit != null && clinit.getInstructions() != null) {
+                Iterator<Statement> initializers = clinit.getInstructions().getStatements().iterator();
+                while (initializers.hasNext()) {
+                    Statement next = initializers.next();
+                    if (!(next instanceof StaticFieldAssignment)) {
+                        break;
+                    }
+                    StaticFieldAssignment assign = (StaticFieldAssignment) next;
+                    if (!TypeHelper.descToType(assign.getOwnerType()).equals(entry.getName()) || !(assign.getValue() instanceof New)) {
+                        break;
+                    }
+                    ((EnumEntry) entry).addEnumConstant(assign.getFieldName());
+                }
+            }
+        }
+
         set.add(entry);
         return entry;
     }
@@ -266,17 +368,17 @@ public class BaseDecompiler implements Decompiler {
     /**
      * Creates a new annotation instance for the given annotation node.
      */
-    public static Annotation createAnnotation(SourceSet src, AnnotationNode an) {
-        AnnotationType anno_type = src.getAnnotationType(an.desc);
-        Annotation anno = new Annotation(anno_type);
-        if (an.values != null) {
-            for (int i = 0; i * 2 < an.values.size(); i += 2) {
-                String key = (String) an.values.get(i * 2);
-                Object value = an.values.get(i * 2 + 1);
-                anno.setValue(key, value);
-            }
-        }
-        return anno;
-    }
+//    public static Annotation createAnnotation(SourceSet src, AnnotationNode an) {
+//        AnnotationType anno_type = src.getAnnotationType(an.desc);
+//        Annotation anno = new Annotation(anno_type);
+//        if (an.values != null) {
+//            for (int i = 0; i * 2 < an.values.size(); i += 2) {
+//                String key = (String) an.values.get(i * 2);
+//                Object value = an.values.get(i * 2 + 1);
+//                anno.setValue(key, value);
+//            }
+//        }
+//        return anno;
+//    }
 
 }

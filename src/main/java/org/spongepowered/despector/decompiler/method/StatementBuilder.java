@@ -70,9 +70,9 @@ import org.spongepowered.despector.decompiler.ir.FloatInsn;
 import org.spongepowered.despector.decompiler.ir.Insn;
 import org.spongepowered.despector.decompiler.ir.IntInsn;
 import org.spongepowered.despector.decompiler.ir.InvokeDynamicInsn;
+import org.spongepowered.despector.decompiler.ir.InvokeInsn;
 import org.spongepowered.despector.decompiler.ir.LdcInsn;
 import org.spongepowered.despector.decompiler.ir.LongInsn;
-import org.spongepowered.despector.decompiler.ir.MethodInsn;
 import org.spongepowered.despector.decompiler.ir.TypeInsn;
 import org.spongepowered.despector.decompiler.ir.VarIntInsn;
 import org.spongepowered.despector.decompiler.method.graph.data.opcode.OpcodeBlock;
@@ -369,7 +369,7 @@ public final class StatementBuilder {
                 break;
             }
             case Insn.INVOKE: {
-                MethodInsn method = (MethodInsn) next;
+                InvokeInsn method = (InvokeInsn) next;
                 if (method.getName().equals("<init>")) {
                     Instruction[] args = new Instruction[TypeHelper.paramCount(method.getDescription())];
                     for (int i = args.length - 1; i >= 0; i--) {
@@ -421,7 +421,7 @@ public final class StatementBuilder {
                 break;
             }
             case Insn.INVOKESTATIC: {
-                MethodInsn method = (MethodInsn) next;
+                InvokeInsn method = (InvokeInsn) next;
                 String ret = TypeHelper.getRet(method.getDescription());
                 Instruction[] args = new Instruction[TypeHelper.paramCount(method.getDescription())];
                 for (int i = args.length - 1; i >= 0; i--) {

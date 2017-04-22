@@ -24,6 +24,7 @@
  */
 package org.spongepowered.despector.decompiler.method.graph.data.block;
 
+import org.spongepowered.despector.ast.Locals;
 import org.spongepowered.despector.ast.insn.Instruction;
 import org.spongepowered.despector.ast.stmt.StatementBlock;
 import org.spongepowered.despector.decompiler.method.StatementBuilder;
@@ -50,7 +51,7 @@ public class InlineBlockSection extends BlockSection {
     }
 
     @Override
-    public void appendTo(StatementBlock block, Deque<Instruction> stack) {
-        StatementBuilder.appendBlock(this.block, block, block.getLocals(), stack);
+    public void appendTo(StatementBlock block, Locals locals, Deque<Instruction> stack) {
+        StatementBuilder.appendBlock(this.block, block, locals, stack);
     }
 }

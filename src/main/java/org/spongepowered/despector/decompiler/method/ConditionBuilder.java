@@ -57,10 +57,10 @@ public final class ConditionBuilder {
         // This forms the condition representing the conditional jump of the
         // given block
 
-        StatementBlock dummy = new StatementBlock(StatementBlock.Type.IF, locals);
+        StatementBlock dummy = new StatementBlock(StatementBlock.Type.IF);
         Deque<Instruction> dummy_stack = new ArrayDeque<>();
         if (block.getPrefix() != null) {
-            block.getPrefix().toBlockSection().appendTo(dummy, dummy_stack);
+            block.getPrefix().toBlockSection().appendTo(dummy, locals, dummy_stack);
         }
         StatementBuilder.appendBlock(block, dummy, locals, dummy_stack);
 

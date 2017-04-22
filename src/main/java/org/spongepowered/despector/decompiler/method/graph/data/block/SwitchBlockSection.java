@@ -26,6 +26,7 @@ package org.spongepowered.despector.decompiler.method.graph.data.block;
 
 import static com.google.common.base.Preconditions.checkState;
 
+import org.spongepowered.despector.ast.Locals;
 import org.spongepowered.despector.ast.insn.Instruction;
 import org.spongepowered.despector.ast.stmt.StatementBlock;
 import org.spongepowered.despector.ast.stmt.branch.Switch;
@@ -72,17 +73,17 @@ public class SwitchBlockSection extends BlockSection {
     }
 
     @Override
-    public void appendTo(StatementBlock block, Deque<Instruction> stack) {
+    public void appendTo(StatementBlock block, Locals locals, Deque<Instruction> stack) {
         Insn last = this.switchblock.getLast();
         this.switchblock.getOpcodes().remove(last);
-        StatementBuilder.appendBlock(this.switchblock, block, block.getLocals(), stack);
+        StatementBuilder.appendBlock(this.switchblock, block, locals, stack);
         this.switchblock.getOpcodes().add(last);
         Switch sswitch = new Switch(stack.pop());
         for (SwitchCaseBlockSection cs : this.cases) {
-            StatementBlock body = new StatementBlock(StatementBlock.Type.SWITCH, block.getLocals());
+            StatementBlock body = new StatementBlock(StatementBlock.Type.SWITCH);
             Deque<Instruction> body_stack = new ArrayDeque<>();
             for (BlockSection body_section : cs.getBody()) {
-                body_section.appendTo(body, body_stack);
+                body_section.appendTo(body, locals, body_stack);
             }
             checkState(body_stack.isEmpty());
             sswitch.new Case(body, cs.doesBreak(), cs.isDefault(), cs.getTargets());

@@ -50,7 +50,7 @@ public class TryCatchGraphProducerStep implements GraphProducerStep {
         InsnBlock instructions = partial.getOpcodes();
         Locals locals = partial.getLocals();
 
-        for (TryCatchRegion tc : partial.getCatchRegions()) {
+        for (TryCatchRegion tc : partial.getOpcodes().getCatchRegions()) {
             if (tc.getStart() > 0) {
                 break_points.add(tc.getStart() - 1);
             }
@@ -78,8 +78,8 @@ public class TryCatchGraphProducerStep implements GraphProducerStep {
 
     @Override
     public void formEdges(PartialMethod partial, List<Integer> sorted_break_points, List<OpcodeBlock> block_list) {
-        for (int i = partial.getCatchRegions().size() - 1; i >= 0; i--) {
-            TryCatchRegion tc = partial.getCatchRegions().get(i);
+        for (int i = partial.getOpcodes().getCatchRegions().size() - 1; i >= 0; i--) {
+            TryCatchRegion tc = partial.getOpcodes().getCatchRegions().get(i);
             TryCatchMarkerOpcodeBlock start_marker = new TryCatchMarkerOpcodeBlock(TryCatchMarkerType.START, tc);
             TryCatchMarkerOpcodeBlock end_marker = new TryCatchMarkerOpcodeBlock(TryCatchMarkerType.END, tc);
             TryCatchMarkerOpcodeBlock handler_marker = new TryCatchMarkerOpcodeBlock(TryCatchMarkerType.CATCH, tc);

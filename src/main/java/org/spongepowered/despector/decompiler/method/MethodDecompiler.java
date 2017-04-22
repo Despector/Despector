@@ -25,22 +25,8 @@
 package org.spongepowered.despector.decompiler.method;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.objectweb.asm.Opcodes.ALOAD;
-import static org.objectweb.asm.Opcodes.ASTORE;
-import static org.objectweb.asm.Opcodes.ILOAD;
-import static org.objectweb.asm.Opcodes.ISTORE;
 
 import javax.annotation.Nullable;
-import org.objectweb.asm.Opcodes;
-import org.objectweb.asm.tree.AbstractInsnNode;
-import org.objectweb.asm.tree.LocalVariableNode;
-import org.objectweb.asm.tree.MethodNode;
-import org.objectweb.asm.tree.VarInsnNode;
-import org.spongepowered.despector.ast.Locals;
-import org.spongepowered.despector.ast.Locals.Local;
-import org.spongepowered.despector.ast.Locals.LocalInstance;
-import org.spongepowered.despector.ast.generic.ClassTypeSignature;
-import org.spongepowered.despector.ast.generic.TypeSignature;
 import org.spongepowered.despector.ast.insn.Instruction;
 import org.spongepowered.despector.ast.insn.var.LocalAccess;
 import org.spongepowered.despector.ast.stmt.StatementBlock;
@@ -48,7 +34,6 @@ import org.spongepowered.despector.ast.type.MethodEntry;
 import org.spongepowered.despector.decompiler.ir.InsnBlock;
 import org.spongepowered.despector.decompiler.ir.JumpInsn;
 import org.spongepowered.despector.decompiler.ir.SwitchInsn;
-import org.spongepowered.despector.decompiler.loader.AsmTranslator;
 import org.spongepowered.despector.decompiler.method.graph.GraphOperation;
 import org.spongepowered.despector.decompiler.method.graph.GraphProcessor;
 import org.spongepowered.despector.decompiler.method.graph.GraphProducerStep;
@@ -60,8 +45,6 @@ import org.spongepowered.despector.decompiler.method.graph.data.opcode.SwitchOpc
 import org.spongepowered.despector.decompiler.method.graph.data.opcode.TryCatchMarkerOpcodeBlock;
 import org.spongepowered.despector.decompiler.method.postprocess.StatementPostProcessor;
 import org.spongepowered.despector.decompiler.method.special.SpecialMethodProcessor;
-import org.spongepowered.despector.util.SignatureParser;
-import org.spongepowered.despector.util.TypeHelper;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -69,7 +52,6 @@ import java.util.Comparator;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -144,88 +126,19 @@ public class MethodDecompiler {
     }
 
     /**
-     * Creates the locals for the given method.
-     */
-    @SuppressWarnings("unchecked")
-    public Locals createLocals(MethodEntry entry, MethodNode asm) {
-        Locals locals = new Locals();
-        if (asm.localVariables != null) {
-            for (LocalVariableNode node : (List<LocalVariableNode>) asm.localVariables) {
-                Local local = locals.getLocal(node.index);
-                local.addLVT(node);
-            }
-        }
-        int offs = ((asm.access & Opcodes.ACC_STATIC) != 0) ? 0 : 1;
-        List<String> param_types = TypeHelper.splitSig(asm.desc);
-
-        for (int i = 0; i < param_types.size() + offs; i++) {
-            Local local = locals.getLocal(i);
-            local.setAsParameter();
-            if (local.getLVT().isEmpty()) {
-                if (i < offs) {
-                    local.setParameterInstance(new LocalInstance(local, "this", ClassTypeSignature.of(entry.getOwner()), -1, -1));
-                } else {
-                    local.setParameterInstance(new LocalInstance(local, "param" + i, ClassTypeSignature.of(param_types.get(i - offs)), -1, -1));
-                }
-            } else {
-                LocalVariableNode lvt = local.getLVT().get(0);
-                TypeSignature sig = null;
-                if (lvt.signature != null) {
-                    sig = SignatureParser.parseFieldTypeSignature(lvt.signature);
-                } else {
-                    sig = ClassTypeSignature.of(lvt.desc);
-                }
-                LocalInstance insn = new LocalInstance(local, lvt.name, sig, -1, -1);
-                local.setParameterInstance(insn);
-            }
-        }
-
-//        LocalsProcessor proc = getSpecialProcessor(LocalsProcessor.class);
-//        if (proc != null) {
-//            proc.process(asm, locals);
-//        }
-
-        Iterator<AbstractInsnNode> it = asm.instructions.iterator();
-        if (it.hasNext()) {
-            AbstractInsnNode last = it.next();
-            int i = 1;
-            while (it.hasNext()) {
-                AbstractInsnNode next = it.next();
-                if (next.getOpcode() >= ISTORE && next.getOpcode() <= ASTORE && last.getOpcode() >= ILOAD && last.getOpcode() <= ALOAD) {
-                    Local store_local = locals.getLocal(((VarInsnNode) next).var);
-                    LocalInstance store = store_local.getInstance(i);
-                    LocalInstance load = locals.getLocal(((VarInsnNode) last).var).getInstance(i);
-                    if (store == null && load != null) {
-                        LocalInstance new_insn = new LocalInstance(store_local, load.getName(),
-                                load.getType(), load.getStart(), load.getEnd());
-                        store_local.addInstance(new_insn);
-                    }
-                }
-                i++;
-            }
-
-        }
-
-        return locals;
-    }
-
-    /**
      * Decompiles the given asm method to a statement block.
      */
-    public StatementBlock decompile(MethodEntry entry, MethodNode asm, Locals locals) {
-        if (asm.instructions.size() == 0) {
+    public StatementBlock decompile(MethodEntry entry) {
+        if (entry.getIR() == null || entry.getIR().size() == 0) {
             return null;
         }
 
         // Setup the partial method
         PartialMethod partial = new PartialMethod(this, entry);
-        partial.setLocals(locals);
 
         // Convert the instructions linked list to an array list for easier
         // processing
-        InsnBlock ops = AsmTranslator.convert(partial, asm);
-        partial.setOpcodes(ops);
-        StatementBlock block = new StatementBlock(StatementBlock.Type.METHOD, partial.getLocals());
+        StatementBlock block = new StatementBlock(StatementBlock.Type.METHOD);
         partial.setBlock(block);
 
         // Creates the initial form of the control flow graph
@@ -277,11 +190,11 @@ public class MethodDecompiler {
         int start = 0;
         if (entry.getName().startsWith("$SWITCH_TABLE$")) {
             start = 2;
-            stack.push(new LocalAccess(block.getLocals().getLocal(0).getInstance(0)));
+            stack.push(new LocalAccess(entry.getLocals().getLocal(0).getInstance(0)));
         }
         for (int i = start; i < flat_graph.size(); i++) {
             BlockSection op = flat_graph.get(i);
-            op.appendTo(block, stack);
+            op.appendTo(block, entry.getLocals(), stack);
         }
 
         for (StatementPostProcessor post : this.post_processors) {

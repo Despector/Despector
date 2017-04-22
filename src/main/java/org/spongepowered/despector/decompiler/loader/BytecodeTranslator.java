@@ -24,6 +24,7 @@
  */
 package org.spongepowered.despector.decompiler.loader;
 
+import org.spongepowered.despector.ast.Locals;
 import org.spongepowered.despector.decompiler.error.SourceFormatException;
 import org.spongepowered.despector.decompiler.ir.DoubleInsn;
 import org.spongepowered.despector.decompiler.ir.FieldInsn;
@@ -36,15 +37,23 @@ import org.spongepowered.despector.decompiler.ir.JumpInsn;
 import org.spongepowered.despector.decompiler.ir.LdcInsn;
 import org.spongepowered.despector.decompiler.ir.LongInsn;
 import org.spongepowered.despector.decompiler.ir.OpInsn;
+import org.spongepowered.despector.decompiler.ir.SwitchInsn;
+import org.spongepowered.despector.decompiler.ir.TypeInsn;
+import org.spongepowered.despector.decompiler.ir.VarIntInsn;
+import org.spongepowered.despector.decompiler.loader.ClassConstantPool.ClassEntry;
 import org.spongepowered.despector.decompiler.loader.ClassConstantPool.Entry;
 import org.spongepowered.despector.decompiler.loader.ClassConstantPool.FieldRefEntry;
 import org.spongepowered.despector.decompiler.loader.ClassConstantPool.FloatEntry;
 import org.spongepowered.despector.decompiler.loader.ClassConstantPool.IntEntry;
+import org.spongepowered.despector.decompiler.loader.ClassConstantPool.InterfaceMethodRefEntry;
 import org.spongepowered.despector.decompiler.loader.ClassConstantPool.MethodRefEntry;
 import org.spongepowered.despector.decompiler.loader.ClassConstantPool.StringEntry;
+import org.spongepowered.despector.decompiler.method.PartialMethod.TryCatchRegion;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class BytecodeTranslator {
 
@@ -52,7 +61,7 @@ public class BytecodeTranslator {
 
     }
 
-    public InsnBlock createIR(byte[] code, ClassConstantPool pool) {
+    public InsnBlock createIR(byte[] code, Locals locals, List<TryCatchRegion> catch_regions, ClassConstantPool pool) {
         InsnBlock block = new InsnBlock();
         List<Integer> insn_starts = new ArrayList<>();
 
@@ -181,7 +190,8 @@ public class BytecodeTranslator {
             case 51: // BALOAD
             case 52: // CALOAD
             case 53: // SALOAD
-                throw new SourceFormatException("Unknown java opcode: " + next);
+                block.append(new OpInsn(Insn.ARRAY_LOAD));
+                break;
             case 54: { // ISTORE
                 int local = code[i++] & 0xFF;
                 block.append(new IntInsn(Insn.LOCAL_STORE, local));
@@ -231,12 +241,14 @@ public class BytecodeTranslator {
             case 84: // BASTORE
             case 85: // CASTORE
             case 86: // SASTORE
-                throw new SourceFormatException("Unknown java opcode: " + next);
+                block.append(new OpInsn(Insn.ARRAY_STORE));
+                break;
             case 87: // POP
                 block.append(new OpInsn(Insn.POP));
                 break;
             case 88: // POP2
                 block.append(new OpInsn(Insn.POP));
+                insn_starts.add(opcode_index);
                 block.append(new OpInsn(Insn.POP));
                 break;
             case 89: // DUP
@@ -320,63 +332,177 @@ public class BytecodeTranslator {
             case 131: // LXOR
                 block.append(new OpInsn(Insn.XOR));
                 break;
-            case 132: // IINC
-                block.append(new OpInsn(Insn.IINC));
+            case 132: {// IINC
+                int local = code[i++] & 0xFF;
+                int incr = code[i++];
+                block.append(new VarIntInsn(Insn.IINC, local, incr));
+                break;
+            }
+            case 136: // L2I
+            case 139: // F2I
+            case 142: // D2I
+                block.append(new TypeInsn(Insn.CAST, "I"));
                 break;
             case 133: // I2L
-            case 134: // I2F
-            case 135: // I2D
-            case 136: // L2I
-            case 137: // L2F
-            case 138: // L2D
-            case 139: // F2I
             case 140: // F2L
-            case 141: // F2D
-            case 142: // D2I
             case 143: // D2L
+                block.append(new TypeInsn(Insn.CAST, "J"));
+                break;
+            case 134: // I2F
+            case 137: // L2F
             case 144: // D2F
+                block.append(new TypeInsn(Insn.CAST, "F"));
+                break;
+            case 135: // I2D
+            case 138: // L2D
+            case 141: // F2D
+                block.append(new TypeInsn(Insn.CAST, "D"));
+                break;
             case 145: // I2B
+                block.append(new TypeInsn(Insn.CAST, "B"));
+                break;
             case 146: // I2C
+                block.append(new TypeInsn(Insn.CAST, "C"));
+                break;
             case 147: // I2S
+                block.append(new TypeInsn(Insn.CAST, "S"));
+                break;
             case 148: // LCMP
             case 149: // FCMPL
             case 150: // FCMPG
             case 151: // DCMPL
             case 152: // DCMPG
-                throw new SourceFormatException("Unknown java opcode: " + next);
+                block.append(new OpInsn(Insn.CMP));
+                break;
             case 153: {// IFEQ
-                int index = ((code[i++] & 0xFF) << 8) | (code[i++] & 0xFF);
+                short index = (short) (((code[i++] & 0xFF) << 8) | (code[i++] & 0xFF));
                 block.append(new JumpInsn(Insn.IFEQ, opcode_index + index));
                 break;
             }
             case 154: {// IFNE
-                int index = ((code[i++] & 0xFF) << 8) | (code[i++] & 0xFF);
+                short index = (short) (((code[i++] & 0xFF) << 8) | (code[i++] & 0xFF));
                 block.append(new JumpInsn(Insn.IFNE, opcode_index + index));
                 break;
             }
-            case 155: // IFLT
-            case 156: // IFGE
-            case 157: // IFGT
-            case 158: // IFLE
-            case 159: // IF_ICMPEQ
-            case 160: // IF_ICMPNE
-            case 161: // IF_ICMPLT
-            case 162: // IF_ICMPGE
-            case 163: // IF_ICMPGT
-            case 164: // IF_ICMPLE
-            case 165: // IF_ACMPEQ
-            case 166: // IF_ACMPNE
-            case 167: // GOTO
+            case 155: {// IFLT
+                block.append(new IntInsn(Insn.ICONST, 0));
+                insn_starts.add(opcode_index);
+                short index = (short) (((code[i++] & 0xFF) << 8) | (code[i++] & 0xFF));
+                block.append(new JumpInsn(Insn.IF_CMPLT, opcode_index + index));
+                break;
+            }
+            case 156: {// IFGE
+                block.append(new IntInsn(Insn.ICONST, 0));
+                insn_starts.add(opcode_index);
+                short index = (short) (((code[i++] & 0xFF) << 8) | (code[i++] & 0xFF));
+                block.append(new JumpInsn(Insn.IF_CMPGE, opcode_index + index));
+                break;
+            }
+            case 157: {// IFGT
+                block.append(new IntInsn(Insn.ICONST, 0));
+                insn_starts.add(opcode_index);
+                short index = (short) (((code[i++] & 0xFF) << 8) | (code[i++] & 0xFF));
+                block.append(new JumpInsn(Insn.IF_CMPGT, opcode_index + index));
+                break;
+            }
+            case 158: {// IFLE
+                block.append(new IntInsn(Insn.ICONST, 0));
+                insn_starts.add(opcode_index);
+                short index = (short) (((code[i++] & 0xFF) << 8) | (code[i++] & 0xFF));
+                block.append(new JumpInsn(Insn.IF_CMPLE, opcode_index + index));
+                break;
+            }
+            case 159: {// IF_ICMPEQ
+                short index = (short) (((code[i++] & 0xFF) << 8) | (code[i++] & 0xFF));
+                block.append(new JumpInsn(Insn.IF_CMPEQ, opcode_index + index));
+                break;
+            }
+            case 160: {// IF_ICMPNE
+                short index = (short) (((code[i++] & 0xFF) << 8) | (code[i++] & 0xFF));
+                block.append(new JumpInsn(Insn.IF_CMPNE, opcode_index + index));
+                break;
+            }
+            case 161: {// IF_ICMPLT
+                short index = (short) (((code[i++] & 0xFF) << 8) | (code[i++] & 0xFF));
+                block.append(new JumpInsn(Insn.IF_CMPLT, opcode_index + index));
+                break;
+            }
+            case 162: {// IF_ICMPGE
+                short index = (short) (((code[i++] & 0xFF) << 8) | (code[i++] & 0xFF));
+                block.append(new JumpInsn(Insn.IF_CMPGE, opcode_index + index));
+                break;
+            }
+            case 163: {// IF_ICMPGT
+                short index = (short) (((code[i++] & 0xFF) << 8) | (code[i++] & 0xFF));
+                block.append(new JumpInsn(Insn.IF_CMPGT, opcode_index + index));
+                break;
+            }
+            case 164: {// IF_ICMPLE
+                short index = (short) (((code[i++] & 0xFF) << 8) | (code[i++] & 0xFF));
+                block.append(new JumpInsn(Insn.IF_CMPLE, opcode_index + index));
+                break;
+            }
+            case 165: {// IF_ACMPEQ
+                short index = (short) (((code[i++] & 0xFF) << 8) | (code[i++] & 0xFF));
+                block.append(new JumpInsn(Insn.IF_CMPEQ, opcode_index + index));
+                break;
+            }
+            case 166: {// IF_ACMPNE
+                short index = (short) (((code[i++] & 0xFF) << 8) | (code[i++] & 0xFF));
+                block.append(new JumpInsn(Insn.IF_CMPNE, opcode_index + index));
+                break;
+            }
+            case 167: {// GOTO
+                short index = (short) (((code[i++] & 0xFF) << 8) | (code[i++] & 0xFF));
+                block.append(new JumpInsn(Insn.GOTO, opcode_index + index));
+                break;
+            }
             case 168: // JSR
             case 169: // RET
-            case 170: // TABLESWITCH
-            case 171: // LOOKUPSWITCH
+                throw new SourceFormatException("Unsupported java opcode: " + next);
+            case 170: {// TABLESWITCH
+                while (i % 4 != 0) {
+                    i++;
+                }
+                int def = opcode_index + readInt(code, i);
+                i += 4;
+                int low = readInt(code, i);
+                i += 4;
+                int high = readInt(code, i);
+                i += 4;
+                Map<Integer, Integer> targets = new HashMap<>();
+                for (int j = 0; j < high - low + 1; j++) {
+                    targets.put(low + j, opcode_index + readInt(code, i));
+                    i += 4;
+                }
+                block.append(new SwitchInsn(Insn.SWITCH, targets, def));
+                break;
+            }
+            case 171: {// LOOKUPSWITCH
+                while (i % 4 != 0) {
+                    i++;
+                }
+                int def = opcode_index + readInt(code, i);
+                i += 4;
+                int npairs = readInt(code, i);
+                i += 4;
+                Map<Integer, Integer> targets = new HashMap<>();
+                for (int j = 0; j < npairs; j++) {
+                    int key = readInt(code, i);
+                    i += 4;
+                    targets.put(key, opcode_index + readInt(code, i));
+                    i += 4;
+                }
+                block.append(new SwitchInsn(Insn.SWITCH, targets, def));
+                break;
+            }
             case 172: // IRETURN
             case 173: // LRETURN
             case 174: // FRETURN
             case 175: // DRETURN
             case 176: // ARETURN
-                throw new SourceFormatException("Unknown java opcode: " + next);
+                block.append(new OpInsn(Insn.ARETURN));
+                break;
             case 177: // RETURN
                 block.append(new OpInsn(Insn.RETURN));
                 break;
@@ -417,23 +543,102 @@ public class BytecodeTranslator {
                 block.append(new InvokeInsn(Insn.INVOKESTATIC, ref.cls, ref.name, ref.type));
                 break;
             }
-            case 185: // INVOKEINTERFACE
+            case 185: {// INVOKEINTERFACE
+                int index = ((code[i++] & 0xFF) << 8) | (code[i++] & 0xFF);
+                // skip count and constant 0 (historical)
+                i += 2;
+                InterfaceMethodRefEntry ref = pool.getInterfaceMethodRef(index);
+                block.append(new InvokeInsn(Insn.INVOKE, ref.cls, ref.name, ref.type));
+                break;
+            }
             case 186: // INVOKEDYNAMIC
-            case 187: // NEW
-            case 188: // NEWARRAY
-            case 189: // ANEWARRAY
+                throw new SourceFormatException("Unknown java opcode: " + next);
+            case 187: {// NEW
+                int index = ((code[i++] & 0xFF) << 8) | (code[i++] & 0xFF);
+                ClassEntry ref = pool.getClass(index);
+                block.append(new TypeInsn(Insn.NEW, ref.name));
+                break;
+            }
+            case 188: {// NEWARRAY
+                String type = null;
+                byte atype = code[i++];
+                switch (atype) {
+                case 4: // T_BOOLEAN
+                    type = "Z";
+                    break;
+                case 5: // T_CHAR
+                    type = "C";
+                    break;
+                case 6: // T_FLOAT
+                    type = "F";
+                    break;
+                case 7: // T_DOUBLE
+                    type = "D";
+                    break;
+                case 8: // T_BYTE
+                    type = "B";
+                    break;
+                case 9: // T_SHORT
+                    type = "S";
+                    break;
+                case 10: // T_INT
+                    type = "I";
+                    break;
+                case 11: // T_LONG
+                    type = "J";
+                    break;
+                default:
+                    throw new SourceFormatException("Unsupported NEWARRAY type value: " + atype);
+                }
+                block.append(new TypeInsn(Insn.NEWARRAY, type));
+                break;
+            }
+            case 189: {// ANEWARRAY
+                int index = ((code[i++] & 0xFF) << 8) | (code[i++] & 0xFF);
+                ClassEntry ref = pool.getClass(index);
+                block.append(new TypeInsn(Insn.NEWARRAY, ref.name));
+                break;
+            }
             case 190: // ARRAYLENGTH
+                block.append(new FieldInsn(Insn.GETFIELD, "", "length", "I"));
+                break;
             case 191: // ATHROW
-            case 192: // CHECKCAST
-            case 193: // INSTANCEOF
+                block.append(new OpInsn(Insn.THROW));
+                break;
+            case 192: {// CHECKCAST
+                int index = ((code[i++] & 0xFF) << 8) | (code[i++] & 0xFF);
+                ClassEntry ref = pool.getClass(index);
+                block.append(new TypeInsn(Insn.CAST, ref.name));
+                break;
+            }
+            case 193: {// INSTANCEOF
+                int index = ((code[i++] & 0xFF) << 8) | (code[i++] & 0xFF);
+                ClassEntry ref = pool.getClass(index);
+                block.append(new TypeInsn(Insn.INSTANCEOF, ref.name));
+                break;
+            }
             case 194: // MONITORENTER
             case 195: // MONITOREXIT
             case 196: // WIDE
             case 197: // MULTINEWARRAY
-            case 198: // IFNULL
-            case 199: // IFNONNULL
+                throw new SourceFormatException("Unsupported java opcode: " + next);
+            case 198: {// IFNULL
+                block.append(new LdcInsn(Insn.PUSH, null));
+                insn_starts.add(opcode_index);
+                short index = (short) (((code[i++] & 0xFF) << 8) | (code[i++] & 0xFF));
+                block.append(new JumpInsn(Insn.IF_CMPEQ, opcode_index + index));
+                break;
+            }
+            case 199: {// IFNONNULL
+                block.append(new LdcInsn(Insn.PUSH, null));
+                insn_starts.add(opcode_index);
+                short index = (short) (((code[i++] & 0xFF) << 8) | (code[i++] & 0xFF));
+                block.append(new JumpInsn(Insn.IF_CMPNE, opcode_index + index));
+                break;
+            }
             case 200: // GOTO_W
             case 201: // JSR_W
+                throw new SourceFormatException("Unsupported java opcode: " + next);
             default:
                 throw new SourceFormatException("Unknown java opcode: " + next);
             }
@@ -443,10 +648,36 @@ public class BytecodeTranslator {
             if (insn instanceof JumpInsn) {
                 JumpInsn jump = (JumpInsn) insn;
                 jump.setTarget(insn_starts.indexOf(jump.getTarget()));
+            } else if (insn instanceof SwitchInsn) {
+                SwitchInsn sw = (SwitchInsn) insn;
+                sw.setDefault(insn_starts.indexOf(sw.getDefault()));
+                Map<Integer, Integer> new_targets = new HashMap<>();
+                for (Map.Entry<Integer, Integer> e : sw.getTargets().entrySet()) {
+                    new_targets.put(e.getKey(), insn_starts.indexOf(e.getValue()));
+                }
+                sw.getTargets().clear();
+                sw.getTargets().putAll(new_targets);
             }
         }
 
+        for (TryCatchRegion region : catch_regions) {
+            int start_pc = insn_starts.indexOf(region.getStart());
+            int end_pc = insn_starts.indexOf(region.getEnd());
+            int catch_pc = insn_starts.indexOf(region.getCatch());
+            block.getCatchRegions().add(new TryCatchRegion(start_pc, end_pc, catch_pc, region.getException()));
+        }
+
+        locals.bakeInstances(insn_starts);
+
         return block;
+    }
+
+    private int readInt(byte[] code, int i) {
+        int byte1 = code[i++] & 0xFF;
+        int byte2 = code[i++] & 0xFF;
+        int byte3 = code[i++] & 0xFF;
+        int byte4 = code[i++] & 0xFF;
+        return (byte1 << 24) | (byte2 << 16) | (byte3 << 8) | byte4;
     }
 
 }

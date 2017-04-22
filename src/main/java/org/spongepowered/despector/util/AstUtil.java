@@ -62,7 +62,7 @@ import org.spongepowered.despector.ast.stmt.invoke.InstanceMethodInvoke;
 import org.spongepowered.despector.ast.stmt.invoke.New;
 import org.spongepowered.despector.ast.stmt.invoke.StaticMethodInvoke;
 import org.spongepowered.despector.decompiler.ir.Insn;
-import org.spongepowered.despector.decompiler.ir.MethodInsn;
+import org.spongepowered.despector.decompiler.ir.InvokeInsn;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -228,14 +228,14 @@ public final class AstUtil {
         case Insn.INVOKEDYNAMIC:
             return 0;
         case Insn.INVOKE: {
-            MethodInsn method = (MethodInsn) next;
+            InvokeInsn method = (InvokeInsn) next;
             int count = TypeHelper.paramCount(method.getDescription());
             // the object ref
             count++;
             return count;
         }
         case Insn.INVOKESTATIC: {
-            MethodInsn method = (MethodInsn) next;
+            InvokeInsn method = (InvokeInsn) next;
             int count = TypeHelper.paramCount(method.getDescription());
             return count;
         }
@@ -315,7 +315,7 @@ public final class AstUtil {
             return 0;
         case Insn.INVOKE:
         case Insn.INVOKESTATIC: {
-            MethodInsn method = (MethodInsn) next;
+            InvokeInsn method = (InvokeInsn) next;
             if (!TypeHelper.getRet(method.getDescription()).equals("V")) {
                 return 1;
             }

@@ -26,6 +26,7 @@ package org.spongepowered.despector.decompiler.method.graph.data.block;
 
 import static com.google.common.base.Preconditions.checkState;
 
+import org.spongepowered.despector.ast.Locals;
 import org.spongepowered.despector.ast.insn.Instruction;
 import org.spongepowered.despector.ast.insn.condition.Condition;
 import org.spongepowered.despector.ast.stmt.StatementBlock;
@@ -106,30 +107,30 @@ public class IfBlockSection extends BlockSection {
     }
 
     @Override
-    public void appendTo(StatementBlock block, Deque<Instruction> stack) {
-        StatementBlock body = new StatementBlock(StatementBlock.Type.IF, block.getLocals());
+    public void appendTo(StatementBlock block, Locals locals, Deque<Instruction> stack) {
+        StatementBlock body = new StatementBlock(StatementBlock.Type.IF);
         Deque<Instruction> body_stack = new ArrayDeque<>();
         for (BlockSection body_section : this.body) {
-            body_section.appendTo(body, body_stack);
+            body_section.appendTo(body, locals, body_stack);
         }
         if (!body_stack.isEmpty()) {
             throw new IllegalStateException();
         }
         If iff = new If(this.condition, body);
         for (ElifBlockSection elif : this.elif) {
-            StatementBlock elif_body = new StatementBlock(StatementBlock.Type.IF, block.getLocals());
+            StatementBlock elif_body = new StatementBlock(StatementBlock.Type.IF);
             Deque<Instruction> elif_stack = new ArrayDeque<>();
             for (BlockSection body_section : elif.getBody()) {
-                body_section.appendTo(elif_body, elif_stack);
+                body_section.appendTo(elif_body, locals, elif_stack);
             }
             checkState(elif_stack.isEmpty());
             iff.new Elif(elif.getCondition(), elif_body);
         }
         if (!this.else_.isEmpty()) {
-            StatementBlock else_body = new StatementBlock(StatementBlock.Type.IF, block.getLocals());
+            StatementBlock else_body = new StatementBlock(StatementBlock.Type.IF);
             Deque<Instruction> else_stack = new ArrayDeque<>();
             for (BlockSection body_section : this.else_) {
-                body_section.appendTo(else_body, else_stack);
+                body_section.appendTo(else_body, locals, else_stack);
             }
             checkState(else_stack.isEmpty());
 
