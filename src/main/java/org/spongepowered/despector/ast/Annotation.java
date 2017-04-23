@@ -50,6 +50,8 @@ public class Annotation {
         VALID_TYPES.add(String.class);
         VALID_TYPES.add(Type.class);
         VALID_TYPES.add(ArrayList.class);
+        VALID_TYPES.add(Annotation.class);
+        VALID_TYPES.add(EnumConstant.class);
 
         VALID_TYPES.add(Boolean.class);
         VALID_TYPES.add(Byte.class);
@@ -120,6 +122,8 @@ public class Annotation {
     }
 
     private void writeObj(Object o, MessagePacker pack) throws IOException {
+        // TODO looks like we're missing ArrayList, Type, EnumConstant, char,
+        // and nested annotations
         if (o instanceof Integer) {
             pack.writeInt(((Integer) o).intValue());
         } else if (o instanceof Byte) {
@@ -134,10 +138,6 @@ public class Annotation {
             pack.writeDouble(((Double) o).doubleValue());
         } else if (o instanceof String) {
             pack.writeString(((String) o));
-        } else if (o instanceof Class) {
-            pack.startMap(2);
-            pack.writeString("id").writeInt(AstSerializer.ENTRY_ID_CLASS);
-            pack.writeString("class").writeString(((Class<?>) o).getName());
         }
         throw new IllegalStateException("Cannot pack " + o.getClass().getSimpleName());
     }
@@ -165,6 +165,25 @@ public class Annotation {
     public void accept(AstVisitor visitor) {
         if (visitor instanceof TypeVisitor) {
             ((TypeVisitor) visitor).visitAnnotation(this);
+        }
+    }
+
+    public static class EnumConstant {
+
+        private final String type_name;
+        private final String constant;
+
+        public EnumConstant(String type, String cst) {
+            this.type_name = type;
+            this.constant = cst;
+        }
+
+        public String getEnumType() {
+            return this.type_name;
+        }
+
+        public String getConstantName() {
+            return this.constant;
         }
     }
 

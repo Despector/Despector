@@ -27,6 +27,7 @@ package org.spongepowered.despector.ast;
 import com.google.common.collect.Lists;
 import org.spongepowered.despector.ast.generic.ClassTypeSignature;
 import org.spongepowered.despector.ast.generic.TypeSignature;
+import org.spongepowered.despector.util.SignatureParser;
 import org.spongepowered.despector.util.serialization.MessagePacker;
 
 import java.io.IOException;
@@ -168,6 +169,15 @@ public class Locals {
             this.lvt.add(new LVT(s, l, n, d));
         }
 
+        public LVT getLVT(int s) {
+            for (LVT l : this.lvt) {
+                if (l.start_pc == s) {
+                    return l;
+                }
+            }
+            throw new IllegalStateException();
+        }
+
         /**
          * Bakes the instances of this local.
          */
@@ -180,8 +190,15 @@ public class Locals {
             for (LVT l : this.lvt) {
                 int start = label_indices.indexOf(l.start_pc);
                 int end = label_indices.indexOf(l.start_pc + l.length);
+                if (end == -1) {
+                    end = label_indices.get(label_indices.size() - 1);
+                }
                 TypeSignature sig = null;
-                sig = ClassTypeSignature.of(l.desc);
+                if (l.signature == null) {
+                    sig = ClassTypeSignature.of(l.desc);
+                } else {
+                    sig = SignatureParser.parseFieldTypeSignature(l.signature);
+                }
                 LocalInstance insn = new LocalInstance(this, l.name, sig, start - 1, end);
                 this.instances.add(insn);
             }
@@ -356,18 +373,23 @@ public class Locals {
 
     }
 
-    private static class LVT {
+    public static class LVT {
 
         public int start_pc;
         public int length;
         public String name;
         public String desc;
+        public String signature;
 
         public LVT(int s, int l, String n, String d) {
             this.start_pc = s;
             this.length = l;
             this.name = n;
             this.desc = d;
+        }
+
+        public void setSignature(String sig) {
+            this.signature = sig;
         }
     }
 

@@ -25,6 +25,7 @@
 package org.spongepowered.despector.decompiler.loader;
 
 import org.spongepowered.despector.ast.Locals;
+import org.spongepowered.despector.decompiler.BaseDecompiler.BootstrapMethod;
 import org.spongepowered.despector.decompiler.error.SourceFormatException;
 import org.spongepowered.despector.decompiler.ir.DoubleInsn;
 import org.spongepowered.despector.decompiler.ir.FieldInsn;
@@ -32,6 +33,7 @@ import org.spongepowered.despector.decompiler.ir.FloatInsn;
 import org.spongepowered.despector.decompiler.ir.Insn;
 import org.spongepowered.despector.decompiler.ir.InsnBlock;
 import org.spongepowered.despector.decompiler.ir.IntInsn;
+import org.spongepowered.despector.decompiler.ir.InvokeDynamicInsn;
 import org.spongepowered.despector.decompiler.ir.InvokeInsn;
 import org.spongepowered.despector.decompiler.ir.JumpInsn;
 import org.spongepowered.despector.decompiler.ir.LdcInsn;
@@ -45,7 +47,8 @@ import org.spongepowered.despector.decompiler.loader.ClassConstantPool.Entry;
 import org.spongepowered.despector.decompiler.loader.ClassConstantPool.FieldRefEntry;
 import org.spongepowered.despector.decompiler.loader.ClassConstantPool.FloatEntry;
 import org.spongepowered.despector.decompiler.loader.ClassConstantPool.IntEntry;
-import org.spongepowered.despector.decompiler.loader.ClassConstantPool.InterfaceMethodRefEntry;
+import org.spongepowered.despector.decompiler.loader.ClassConstantPool.InvokeDynamicEntry;
+import org.spongepowered.despector.decompiler.loader.ClassConstantPool.MethodHandleEntry;
 import org.spongepowered.despector.decompiler.loader.ClassConstantPool.MethodRefEntry;
 import org.spongepowered.despector.decompiler.loader.ClassConstantPool.StringEntry;
 import org.spongepowered.despector.decompiler.method.PartialMethod.TryCatchRegion;
@@ -61,7 +64,8 @@ public class BytecodeTranslator {
 
     }
 
-    public InsnBlock createIR(byte[] code, Locals locals, List<TryCatchRegion> catch_regions, ClassConstantPool pool) {
+    public InsnBlock createIR(byte[] code, Locals locals, List<TryCatchRegion> catch_regions, ClassConstantPool pool,
+            List<BootstrapMethod> bootstrap_methods) {
         InsnBlock block = new InsnBlock();
         List<Integer> insn_starts = new ArrayList<>();
 
@@ -547,12 +551,20 @@ public class BytecodeTranslator {
                 int index = ((code[i++] & 0xFF) << 8) | (code[i++] & 0xFF);
                 // skip count and constant 0 (historical)
                 i += 2;
-                InterfaceMethodRefEntry ref = pool.getInterfaceMethodRef(index);
+                MethodRefEntry ref = pool.getInterfaceMethodRef(index);
                 block.append(new InvokeInsn(Insn.INVOKE, ref.cls, ref.name, ref.type));
                 break;
             }
-            case 186: // INVOKEDYNAMIC
-                throw new SourceFormatException("Unknown java opcode: " + next);
+            case 186: {// INVOKEDYNAMIC
+                int index = ((code[i++] & 0xFF) << 8) | (code[i++] & 0xFF);
+                // skip constant 0 (historical)
+                i += 2;
+                InvokeDynamicEntry handle = pool.getInvokeDynamic(index);
+                BootstrapMethod bsm = bootstrap_methods.get(handle.bootstrap_index);
+                MethodRefEntry bsmArg = pool.getMethodRef(((MethodHandleEntry) bsm.arguments[1]).reference_index);
+                block.append(new InvokeDynamicInsn(Insn.INVOKEDYNAMIC, bsmArg.cls, bsmArg.name, bsmArg.type, handle.name, handle.type));
+                break;
+            }
             case 187: {// NEW
                 int index = ((code[i++] & 0xFF) << 8) | (code[i++] & 0xFF);
                 ClassEntry ref = pool.getClass(index);

@@ -64,7 +64,9 @@ public abstract class TypeEntry extends AstEntry {
 
     protected boolean is_synthetic;
     protected boolean is_final;
-    protected boolean inner_class;
+    protected boolean is_abstract;
+    protected boolean is_deprecated;
+    protected boolean is_inner_class;
 
     protected final String name;
 
@@ -87,7 +89,7 @@ public abstract class TypeEntry extends AstEntry {
         this.name = checkNotNull(name, "name");
         checkArgument(lang != Language.ANY, "Type language cannot be set to any");
         this.lang = lang;
-        this.inner_class = name.contains("$");
+        this.is_inner_class = name.contains("$");
     }
 
     public Language getLanguage() {
@@ -128,11 +130,27 @@ public abstract class TypeEntry extends AstEntry {
         this.is_synthetic = state;
     }
 
+    public boolean isAbstract() {
+        return this.is_abstract;
+    }
+
+    public void setAbstract(boolean state) {
+        this.is_abstract = state;
+    }
+
+    public boolean isDeprecated() {
+        return this.is_deprecated;
+    }
+
+    public void setDeprecated(boolean state) {
+        this.is_deprecated = state;
+    }
+
     /**
      * Gets if this type is an inner class of another type.
      */
     public boolean isInnerClass() {
-        return this.inner_class;
+        return this.is_inner_class;
     }
 
     /**

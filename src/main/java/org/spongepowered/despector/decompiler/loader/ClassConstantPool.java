@@ -141,7 +141,7 @@ public class ClassConstantPool {
                 break;
             }
             case INTERFACE_METHOD_REF: {
-                InterfaceMethodRefEntry f = new InterfaceMethodRefEntry();
+                MethodRefEntry f = new MethodRefEntry();
                 f.class_index = data.readUnsignedShort();
                 f.name_and_type_index = data.readUnsignedShort();
                 this.values[i] = f;
@@ -232,7 +232,7 @@ public class ClassConstantPool {
                 break;
             }
             case INTERFACE_METHOD_REF: {
-                InterfaceMethodRefEntry f = (InterfaceMethodRefEntry) e;
+                MethodRefEntry f = (MethodRefEntry) e;
                 f.cls = getUtf8(getClass(f.class_index).name_index);
                 f.name = getUtf8(getNameAndType(f.name_and_type_index).name_index);
                 f.type = getUtf8(getNameAndType(f.name_and_type_index).type_index);
@@ -251,8 +251,12 @@ public class ClassConstantPool {
                 t.desc = getUtf8(t.desc_index);
                 break;
             }
-            case INVOKE_DYNAMIC:
+            case INVOKE_DYNAMIC: {
+                InvokeDynamicEntry f = (InvokeDynamicEntry) e;
+                f.name = getUtf8(getNameAndType(f.name_and_type_index).name_index);
+                f.type = getUtf8(getNameAndType(f.name_and_type_index).type_index);
                 break;
+            }
             default:
                 throw new SourceFormatException("Illegal tag in constant pool");
             }
@@ -299,8 +303,16 @@ public class ClassConstantPool {
         return (MethodRefEntry) this.values[index - 1];
     }
 
-    public InterfaceMethodRefEntry getInterfaceMethodRef(int index) {
-        return (InterfaceMethodRefEntry) this.values[index - 1];
+    public MethodRefEntry getInterfaceMethodRef(int index) {
+        return (MethodRefEntry) this.values[index - 1];
+    }
+
+    public MethodHandleEntry getMethodHandle(int index) {
+        return (MethodHandleEntry) this.values[index - 1];
+    }
+
+    public InvokeDynamicEntry getInvokeDynamic(int index) {
+        return (InvokeDynamicEntry) this.values[index - 1];
     }
 
     public static abstract class Entry {
@@ -374,16 +386,6 @@ public class ClassConstantPool {
         public String type;
     }
 
-    public static class InterfaceMethodRefEntry extends Entry {
-
-        public int class_index;
-        public int name_and_type_index;
-
-        public String cls;
-        public String name;
-        public String type;
-    }
-
     public static class MethodHandleEntry extends Entry {
 
         public byte kind;
@@ -401,6 +403,9 @@ public class ClassConstantPool {
 
         public int bootstrap_index;
         public int name_and_type_index;
+
+        public String name;
+        public String type;
     }
 
     private static enum EntryType {
@@ -421,6 +426,7 @@ public class ClassConstantPool {
         _14,
         METHOD_HANDLE,
         METHOD_TYPE,
+        _17,
         INVOKE_DYNAMIC,
     }
 

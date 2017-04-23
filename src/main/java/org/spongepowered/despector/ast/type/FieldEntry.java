@@ -59,6 +59,9 @@ public class FieldEntry extends AstEntry {
     protected boolean is_final;
     protected boolean is_static;
     protected boolean is_synthetic;
+    protected boolean is_volatile;
+    protected boolean is_transient;
+    protected boolean is_deprecated;
 
     @Nullable
     protected Instruction init;
@@ -137,6 +140,30 @@ public class FieldEntry extends AstEntry {
      */
     public void setSynthetic(boolean state) {
         this.is_synthetic = state;
+    }
+
+    public boolean isVolatile() {
+        return this.is_volatile;
+    }
+
+    public void setVolatile(boolean state) {
+        this.is_volatile = state;
+    }
+
+    public boolean isTransient() {
+        return this.is_transient;
+    }
+
+    public void setTransient(boolean state) {
+        this.is_transient = state;
+    }
+
+    public boolean isDeprecated() {
+        return this.is_deprecated;
+    }
+
+    public void setDeprecated(boolean state) {
+        this.is_deprecated = state;
     }
 
     /**

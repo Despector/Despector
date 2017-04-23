@@ -69,6 +69,11 @@ public class MethodEntry extends AstEntry {
     protected boolean is_static;
     protected boolean is_synthetic;
     protected boolean is_bridge;
+    protected boolean is_synchronized;
+    protected boolean is_native;
+    protected boolean is_varargs;
+    protected boolean is_strictfp;
+    protected boolean is_deprecated;
 
     protected InsnBlock ir;
     protected Locals locals;
@@ -162,6 +167,46 @@ public class MethodEntry extends AstEntry {
 
     public void setBridge(boolean state) {
         this.is_bridge = state;
+    }
+
+    public boolean isSynchronized() {
+        return this.is_synchronized;
+    }
+
+    public void setSynchronized(boolean state) {
+        this.is_synchronized = state;
+    }
+
+    public boolean isNative() {
+        return this.is_native;
+    }
+
+    public void setNative(boolean state) {
+        this.is_native = state;
+    }
+
+    public boolean isVarargs() {
+        return this.is_varargs;
+    }
+
+    public void setVarargs(boolean state) {
+        this.is_varargs = state;
+    }
+
+    public boolean isStrictFp() {
+        return this.is_strictfp;
+    }
+
+    public void setStrictFp(boolean state) {
+        this.is_strictfp = state;
+    }
+
+    public boolean isDeprecated() {
+        return this.is_deprecated;
+    }
+
+    public void setDeprecated(boolean state) {
+        this.is_deprecated = state;
     }
 
     /**
