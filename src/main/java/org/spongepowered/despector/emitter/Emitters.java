@@ -72,6 +72,7 @@ import org.spongepowered.despector.ast.stmt.misc.Comment;
 import org.spongepowered.despector.ast.stmt.misc.Increment;
 import org.spongepowered.despector.ast.stmt.misc.Return;
 import org.spongepowered.despector.ast.stmt.misc.Throw;
+import org.spongepowered.despector.ast.type.AnnotationEntry;
 import org.spongepowered.despector.ast.type.ClassEntry;
 import org.spongepowered.despector.ast.type.EnumEntry;
 import org.spongepowered.despector.ast.type.FieldEntry;
@@ -125,6 +126,7 @@ import org.spongepowered.despector.emitter.java.statement.SwitchEmitter;
 import org.spongepowered.despector.emitter.java.statement.ThrowEmitter;
 import org.spongepowered.despector.emitter.java.statement.TryCatchEmitter;
 import org.spongepowered.despector.emitter.java.statement.WhileEmitter;
+import org.spongepowered.despector.emitter.java.type.AnnotationEntryEmitter;
 import org.spongepowered.despector.emitter.java.type.ClassEntryEmitter;
 import org.spongepowered.despector.emitter.java.type.EnumEntryEmitter;
 import org.spongepowered.despector.emitter.java.type.FieldEntryEmitter;
@@ -182,6 +184,7 @@ public final class Emitters {
         JAVA_SET.setAstEmitter(ClassEntry.class, new ClassEntryEmitter());
         JAVA_SET.setAstEmitter(EnumEntry.class, new EnumEntryEmitter());
         JAVA_SET.setAstEmitter(InterfaceEntry.class, new InterfaceEntryEmitter());
+        JAVA_SET.setAstEmitter(AnnotationEntry.class, new AnnotationEntryEmitter());
 
         JAVA_SET.setAstEmitter(FieldEntry.class, new FieldEntryEmitter());
         JAVA_SET.setAstEmitter(MethodEntry.class, new MethodEntryEmitter());

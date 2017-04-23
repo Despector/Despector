@@ -81,6 +81,7 @@ public class MethodEntry extends AstEntry {
 
     protected MethodSignature sig;
 
+    protected Object annotation_value = null;
     protected final Map<AnnotationType, Annotation> annotations = new LinkedHashMap<>();
 
     public MethodEntry(SourceSet source) {
@@ -279,6 +280,14 @@ public class MethodEntry extends AstEntry {
 
     public void addAnnotation(Annotation anno) {
         this.annotations.put(anno.getType(), anno);
+    }
+
+    public Object getAnnotationValue() {
+        return this.annotation_value;
+    }
+
+    public void setAnnotationValue(Object val) {
+        this.annotation_value = val;
     }
 
     @Override

@@ -122,7 +122,7 @@ public class BaseDecompiler implements Decompiler {
         short major = data.readShort();
 
         // TODO support older versions
-        if (major != 52 && minor != 50) {
+        if (major != 52 && major != 51 && major != 50 && minor != 50) {
             throw new SourceFormatException("Unsupported java class version " + major + "." + minor);
         }
 
@@ -367,8 +367,8 @@ public class BaseDecompiler implements Decompiler {
                         }
                     }
                 } else if ("AnnotationDefault".equals(attribute_name)) {
-                    // TODO
-                    data.skipBytes(length);
+                    Object val = readElementValue(data, pool, set);
+                    method.setAnnotationValue(val);
                 } else {
                     System.err.println("Skipping unknown method attribute: " + attribute_name);
                     data.skipBytes(length);

@@ -26,6 +26,7 @@ package org.spongepowered.despector.emitter.java;
 
 import com.google.common.collect.Lists;
 import org.spongepowered.despector.ast.Annotation;
+import org.spongepowered.despector.ast.Annotation.EnumConstant;
 import org.spongepowered.despector.ast.Locals.LocalInstance;
 import org.spongepowered.despector.ast.generic.ClassTypeSignature;
 import org.spongepowered.despector.ast.generic.GenericClassTypeSignature;
@@ -169,6 +170,10 @@ public class ImportManager {
     private void checkAnnotationValue(Object val) {
         if (val instanceof ClassTypeSignature) {
             add(((ClassTypeSignature) val).getDescriptor());
+        } else if (val instanceof GenericClassTypeSignature) {
+            add(((ClassTypeSignature) val).getDescriptor());
+        } else if (val instanceof EnumConstant) {
+            add(((EnumConstant) val).getEnumType());
         } else if (val instanceof List) {
             for (Object obj : (List<?>) val) {
                 checkAnnotationValue(obj);

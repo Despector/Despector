@@ -25,6 +25,7 @@
 package org.spongepowered.despector.emitter.java.special;
 
 import org.spongepowered.despector.ast.Annotation;
+import org.spongepowered.despector.ast.Annotation.EnumConstant;
 import org.spongepowered.despector.ast.generic.ClassTypeSignature;
 import org.spongepowered.despector.emitter.SpecialEmitter;
 import org.spongepowered.despector.emitter.java.JavaEmitterContext;
@@ -92,10 +93,16 @@ public class AnnotationEmitter implements SpecialEmitter {
             }
             ctx.printString("}");
         });
+        value_emitters.put(EnumConstant.class, (ctx, value) -> {
+            EnumConstant e = (EnumConstant) value;
+            ctx.emitType(e.getEnumType());
+            ctx.printString(".");
+            ctx.printString(e.getConstantName());
+        });
         value_emitters.put(ClassTypeSignature.class, (ctx, value) -> ctx.emitTypeName(((ClassTypeSignature) value).getName()));
     }
 
-    private static void emitValue(JavaEmitterContext ctx, Object value) {
+    public static void emitValue(JavaEmitterContext ctx, Object value) {
         BiConsumer<JavaEmitterContext, Object> emitter = value_emitters.get(value.getClass());
         if (emitter == null) {
             throw new IllegalStateException("Unknown annotation value type in emitter: " + value.getClass().getName());
