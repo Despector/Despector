@@ -24,16 +24,6 @@
  */
 package org.spongepowered.despector.util;
 
-import static org.objectweb.asm.Opcodes.*;
-
-import org.objectweb.asm.Opcodes;
-import org.objectweb.asm.tree.AbstractInsnNode;
-import org.objectweb.asm.tree.FrameNode;
-import org.objectweb.asm.tree.LabelNode;
-import org.objectweb.asm.tree.LineNumberNode;
-import org.objectweb.asm.util.Printer;
-import org.objectweb.asm.util.Textifier;
-import org.objectweb.asm.util.TraceMethodVisitor;
 import org.spongepowered.despector.ast.Locals.LocalInstance;
 import org.spongepowered.despector.ast.insn.Instruction;
 import org.spongepowered.despector.ast.insn.InstructionVisitor;
@@ -64,100 +54,12 @@ import org.spongepowered.despector.ast.stmt.invoke.StaticMethodInvoke;
 import org.spongepowered.despector.decompiler.ir.Insn;
 import org.spongepowered.despector.decompiler.ir.InvokeInsn;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.util.List;
 
 /**
  * Various utilities for working with AST elements.
  */
 public final class AstUtil {
-
-    /**
-     * Converts a type opcode to the string equivalent.
-     * 
-     * <p>eg. {@link Opcodes#T_INT} converts to 'I'.</p>
-     */
-    public static String opcodeToType(int op) {
-        switch (op) {
-        case T_BOOLEAN:
-            return "Z";
-        case T_BYTE:
-            return "B";
-        case T_CHAR:
-            return "C";
-        case T_DOUBLE:
-            return "D";
-        case T_FLOAT:
-            return "F";
-        case T_INT:
-            return "I";
-        case T_LONG:
-            return "J";
-        case T_SHORT:
-            return "S";
-        default:
-        }
-        throw new IllegalArgumentException("Unknown primative array type: " + op);
-    }
-
-    /**
-     * Converts a type opcode to the equivalent store opcode.
-     * 
-     * <p>eg. {@link Opcodes#T_DOUBLE} converts to {@link Opcodes#DASTORE}.</p>
-     */
-    public static int opcodeToArrayStore(int op) {
-        switch (op) {
-        case T_BOOLEAN:
-            return BASTORE;
-        case T_BYTE:
-            return BASTORE;
-        case T_CHAR:
-            return CASTORE;
-        case T_DOUBLE:
-            return DASTORE;
-        case T_FLOAT:
-            return FASTORE;
-        case T_INT:
-            return IASTORE;
-        case T_LONG:
-            return LASTORE;
-        case T_SHORT:
-            return SASTORE;
-        default:
-        }
-        throw new IllegalArgumentException("Unknown primative array type: " + op);
-    }
-
-    /**
-     * Converts an asm {@link AbstractInsnNode} to a string for debugging.
-     * 
-     * <p>This uses a static {@link Textifier} which means that all label
-     * numbers will be constantly incrementing as the program continues. Call
-     * {@link #__resetTextifier()} to reset label indices.</p>
-     */
-    public static String insnToString(AbstractInsnNode insn) {
-        insn.accept(mp);
-        StringWriter sw = new StringWriter();
-        printer.print(new PrintWriter(sw));
-        printer.getText().clear();
-        String s = sw.toString();
-        if (s.endsWith("\n")) {
-            s = s.substring(0, s.length() - 1);
-        }
-        return s;
-    }
-
-    /**
-     * Resets the {@link Textifier} instance used by
-     * {@link #insnToString(AbstractInsnNode)} to reset the label names.
-     */
-    public static void __resetTextifier() {
-        printer = new Textifier();
-    }
-
-    private static Printer printer = new Textifier();
-    private static TraceMethodVisitor mp = new TraceMethodVisitor(printer);
 
     /**
      * Gets the count of values consumed from the stack by the given opcode.
@@ -335,24 +237,6 @@ public final class AstUtil {
     }
 
     /**
-     * Gets the first non-meta opcode in the given list of opcodes.
-     */
-    public static AbstractInsnNode getFirstOpcode(List<AbstractInsnNode> opcodes) {
-        for (int index = 0; index < opcodes.size(); index++) {
-            AbstractInsnNode next = opcodes.get(index);
-            if (next instanceof LabelNode) {
-                continue;
-            } else if (next instanceof FrameNode) {
-                continue;
-            } else if (next instanceof LineNumberNode) {
-                continue;
-            }
-            return next;
-        }
-        return null;
-    }
-
-    /**
      * Gets if the given list of opcodes requires values on the stack from
      * before it starts.
      */
@@ -382,36 +266,6 @@ public final class AstUtil {
             required_stack += getStackDelta(next);
         }
         return 0;
-    }
-
-    /**
-     * Gets if a given list of opcodes contains purely supporting types and no
-     * actual opcodes. (eg. if the list contains only nodes that are one of
-     * {@link FrameNode}, {@link LabelNode}, or {@link LineNumberNode}).
-     */
-    public static boolean isEmptyOfLogic(List<AbstractInsnNode> opcodes) {
-        for (int i = 0; i < opcodes.size(); i++) {
-            AbstractInsnNode next = opcodes.get(i);
-            if (next instanceof FrameNode || next instanceof LabelNode || next instanceof LineNumberNode) {
-                continue;
-            }
-            return false;
-        }
-        return true;
-    }
-
-    /**
-     * Gets if the given list of opcodes is only metadata nodes.
-     */
-    public static boolean isEmptyOfLogic(List<AbstractInsnNode> opcodes, int size) {
-        for (int i = 0; i < size; i++) {
-            AbstractInsnNode next = opcodes.get(i);
-            if (next instanceof FrameNode || next instanceof LabelNode || next instanceof LineNumberNode) {
-                continue;
-            }
-            return false;
-        }
-        return true;
     }
 
     /**

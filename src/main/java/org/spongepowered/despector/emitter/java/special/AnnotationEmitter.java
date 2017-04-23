@@ -24,8 +24,8 @@
  */
 package org.spongepowered.despector.emitter.java.special;
 
-import org.objectweb.asm.Type;
 import org.spongepowered.despector.ast.Annotation;
+import org.spongepowered.despector.ast.generic.ClassTypeSignature;
 import org.spongepowered.despector.emitter.SpecialEmitter;
 import org.spongepowered.despector.emitter.java.JavaEmitterContext;
 import org.spongepowered.despector.emitter.java.instruction.StringConstantEmitter;
@@ -92,7 +92,7 @@ public class AnnotationEmitter implements SpecialEmitter {
             }
             ctx.printString("}");
         });
-        value_emitters.put(Type.class, (ctx, value) -> ctx.emitTypeName(((Type) value).getInternalName()));
+        value_emitters.put(ClassTypeSignature.class, (ctx, value) -> ctx.emitTypeName(((ClassTypeSignature) value).getName()));
     }
 
     private static void emitValue(JavaEmitterContext ctx, Object value) {

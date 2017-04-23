@@ -25,6 +25,7 @@
 package org.spongepowered.despector.emitter.java.instruction;
 
 import org.spongepowered.despector.ast.generic.ClassTypeSignature;
+import org.spongepowered.despector.ast.generic.GenericClassTypeSignature;
 import org.spongepowered.despector.ast.generic.TypeSignature;
 import org.spongepowered.despector.ast.insn.Instruction;
 import org.spongepowered.despector.ast.stmt.assign.LocalAssignment;
@@ -69,7 +70,7 @@ public class NewEmitter implements InstructionEmitter<JavaEmitterContext, New> {
         } else if (ctx.getStatement() != null && ctx.getStatement() instanceof LocalAssignment) {
             LocalAssignment assign = (LocalAssignment) ctx.getStatement();
             TypeSignature sig = assign.getLocal().getType();
-            if (sig != null && sig instanceof ClassTypeSignature && !((ClassTypeSignature) sig).getArguments().isEmpty()) {
+            if (sig != null && sig instanceof GenericClassTypeSignature && !((GenericClassTypeSignature) sig).getArguments().isEmpty()) {
                 ctx.printString("<>");
             }
         }

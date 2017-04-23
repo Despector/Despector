@@ -25,6 +25,7 @@
 package org.spongepowered.despector.emitter.java.special;
 
 import org.spongepowered.despector.ast.generic.ClassTypeSignature;
+import org.spongepowered.despector.ast.generic.GenericClassTypeSignature;
 import org.spongepowered.despector.ast.generic.TypeArgument;
 import org.spongepowered.despector.ast.generic.TypeParameter;
 import org.spongepowered.despector.ast.generic.TypeSignature;
@@ -49,7 +50,12 @@ public class GenericsEmitter implements SpecialEmitter {
         superclass: if (param.getClassBound() != null) {
             if (param.getClassBound() instanceof ClassTypeSignature) {
                 ClassTypeSignature cls = (ClassTypeSignature) param.getClassBound();
-                if (cls.getType().equals("Ljava/lang/Object;")) {
+                if (cls.getDescriptor().equals("Ljava/lang/Object;")) {
+                    break superclass;
+                }
+            } else if (param.getClassBound() instanceof GenericClassTypeSignature) {
+                GenericClassTypeSignature cls = (GenericClassTypeSignature) param.getClassBound();
+                if (cls.getDescriptor().equals("Ljava/lang/Object;")) {
                     break superclass;
                 }
             }
@@ -76,6 +82,21 @@ public class GenericsEmitter implements SpecialEmitter {
             ctx.printString(desc.substring(1, desc.length() - 1));
         } else if (sig instanceof ClassTypeSignature) {
             ClassTypeSignature cls = (ClassTypeSignature) sig;
+            int array_depth = 0;
+            String type = cls.getType();
+            while (type.startsWith("[")) {
+                array_depth++;
+                type = type.substring(1);
+            }
+            ctx.emitType(type);
+            for (int i = 0; i < array_depth; i++) {
+                ctx.printString(" ", ctx.getFormat().insert_space_before_opening_bracket_in_array_type_reference);
+                ctx.printString("[");
+                ctx.printString(" ", ctx.getFormat().insert_space_between_brackets_in_array_type_reference);
+                ctx.printString("]");
+            }
+        } else if (sig instanceof GenericClassTypeSignature) {
+            GenericClassTypeSignature cls = (GenericClassTypeSignature) sig;
             int array_depth = 0;
             String type = cls.getType();
             while (type.startsWith("[")) {
@@ -169,6 +190,10 @@ public class GenericsEmitter implements SpecialEmitter {
         }
         if (type instanceof ClassTypeSignature) {
             ClassTypeSignature cls = (ClassTypeSignature) type;
+            return ctx.getType(cls.getDescriptor()).length();
+        }
+        if (type instanceof GenericClassTypeSignature) {
+            GenericClassTypeSignature cls = (GenericClassTypeSignature) type;
             int length = ctx.getType(cls.getDescriptor()).length();
             if (!cls.getArguments().isEmpty()) {
                 for (TypeArgument arg : cls.getArguments()) {

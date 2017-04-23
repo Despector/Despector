@@ -26,10 +26,6 @@ package org.spongepowered.despector.ast.type;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.objectweb.asm.Opcodes.ACC_ABSTRACT;
-import static org.objectweb.asm.Opcodes.ACC_FINAL;
-import static org.objectweb.asm.Opcodes.ACC_STATIC;
-import static org.objectweb.asm.Opcodes.ACC_SYNTHETIC;
 
 import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Multimap;
@@ -41,6 +37,7 @@ import org.spongepowered.despector.ast.AstEntry;
 import org.spongepowered.despector.ast.AstVisitor;
 import org.spongepowered.despector.ast.SourceSet;
 import org.spongepowered.despector.ast.generic.ClassSignature;
+import org.spongepowered.despector.decompiler.BaseDecompiler;
 import org.spongepowered.despector.util.TypeHelper;
 import org.spongepowered.despector.util.serialization.MessagePacker;
 
@@ -520,10 +517,10 @@ public abstract class TypeEntry extends AstEntry {
             this.name = name;
             this.simple_name = simple;
             this.outer_name = outer;
-            this.is_static = (acc & ACC_STATIC) != 0;
-            this.is_final = (acc & ACC_FINAL) != 0;
-            this.is_abstract = (acc & ACC_ABSTRACT) != 0;
-            this.is_synthetic = (acc & ACC_SYNTHETIC) != 0;
+            this.is_static = (acc & BaseDecompiler.ACC_STATIC) != 0;
+            this.is_final = (acc & BaseDecompiler.ACC_FINAL) != 0;
+            this.is_abstract = (acc & BaseDecompiler.ACC_ABSTRACT) != 0;
+            this.is_synthetic = (acc & BaseDecompiler.ACC_SYNTHETIC) != 0;
             this.access = AccessModifier.fromModifiers(acc);
         }
 

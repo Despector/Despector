@@ -33,6 +33,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
+import org.objectweb.asm.Type;
 
 public class OperatorTests {
 
@@ -51,6 +52,24 @@ public class OperatorTests {
 
         String insn = TestHelper.getAsString(builder.finish(), "test_mth");
         String good = "i = 65;";
+        Assert.assertEquals(good, insn);
+    }
+
+    @Test
+    public void testTypeConstant() {
+        TestMethodBuilder builder = new TestMethodBuilder("test_mth", "(I)V");
+        MethodVisitor mv = builder.getGenerator();
+        Label start = new Label();
+        mv.visitLabel(start);
+        Label end = new Label();
+        mv.visitLdcInsn(Type.getType("Ljava/lang/String;"));
+        mv.visitIntInsn(ASTORE, 0);
+        mv.visitLabel(end);
+        mv.visitInsn(RETURN);
+        mv.visitLocalVariable("i", "Ljava/lang/Class;", null, start, end, 0);
+
+        String insn = TestHelper.getAsString(builder.finish(), "test_mth");
+        String good = "i = String.class;";
         Assert.assertEquals(good, insn);
     }
 

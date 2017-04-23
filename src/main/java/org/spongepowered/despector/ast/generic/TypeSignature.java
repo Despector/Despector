@@ -53,10 +53,14 @@ public abstract class TypeSignature {
      * Gets a {@link TypeSignature} which is an array of the given type.
      */
     public static TypeSignature arrayOf(TypeSignature type) {
-        if (type instanceof ClassTypeSignature) {
+        if (type instanceof GenericClassTypeSignature) {
+            GenericClassTypeSignature sig = (GenericClassTypeSignature) type;
+            GenericClassTypeSignature array = new GenericClassTypeSignature("[" + sig.getType());
+            array.getArguments().addAll(sig.getArguments());
+            return array;
+        } else if (type instanceof ClassTypeSignature) {
             ClassTypeSignature sig = (ClassTypeSignature) type;
             ClassTypeSignature array = ClassTypeSignature.of("[" + sig.getType());
-            array.getArguments().addAll(sig.getArguments());
             return array;
         } else if (type instanceof TypeVariableSignature) {
             TypeVariableSignature sig = (TypeVariableSignature) type;
@@ -70,10 +74,14 @@ public abstract class TypeSignature {
      * Gets the component {@link TypeSignature} of the given array type.
      */
     public static TypeSignature getArrayComponent(TypeSignature type) {
-        if (type instanceof ClassTypeSignature) {
+        if (type instanceof GenericClassTypeSignature) {
+            GenericClassTypeSignature sig = (GenericClassTypeSignature) type;
+            GenericClassTypeSignature array = new GenericClassTypeSignature(sig.getType().substring(1));
+            array.getArguments().addAll(sig.getArguments());
+            return array;
+        } else if (type instanceof ClassTypeSignature) {
             ClassTypeSignature sig = (ClassTypeSignature) type;
             ClassTypeSignature array = ClassTypeSignature.of(sig.getType().substring(1), true);
-            array.getArguments().addAll(sig.getArguments());
             return array;
         } else if (type instanceof TypeVariableSignature) {
             TypeVariableSignature sig = (TypeVariableSignature) type;

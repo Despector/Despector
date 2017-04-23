@@ -27,7 +27,7 @@ package org.spongepowered.despector.ast;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import org.objectweb.asm.Type;
+import org.spongepowered.despector.ast.generic.ClassTypeSignature;
 import org.spongepowered.despector.ast.type.TypeVisitor;
 import org.spongepowered.despector.util.serialization.AstSerializer;
 import org.spongepowered.despector.util.serialization.MessagePacker;
@@ -48,7 +48,7 @@ public class Annotation {
 
     static {
         VALID_TYPES.add(String.class);
-        VALID_TYPES.add(Type.class);
+        VALID_TYPES.add(ClassTypeSignature.class);
         VALID_TYPES.add(ArrayList.class);
         VALID_TYPES.add(Annotation.class);
         VALID_TYPES.add(EnumConstant.class);

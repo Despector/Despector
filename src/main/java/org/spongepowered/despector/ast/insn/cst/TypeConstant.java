@@ -26,7 +26,6 @@ package org.spongepowered.despector.ast.insn.cst;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import org.objectweb.asm.Type;
 import org.spongepowered.despector.ast.AstVisitor;
 import org.spongepowered.despector.ast.generic.ClassTypeSignature;
 import org.spongepowered.despector.ast.generic.TypeSignature;
@@ -41,23 +40,23 @@ import java.io.IOException;
  */
 public class TypeConstant extends Constant {
 
-    private Type cst;
+    private ClassTypeSignature cst;
 
-    public TypeConstant(Type cst) {
+    public TypeConstant(ClassTypeSignature cst) {
         this.cst = checkNotNull(cst, "type");
     }
 
     /**
      * Gets the constant value.
      */
-    public Type getConstant() {
+    public ClassTypeSignature getConstant() {
         return this.cst;
     }
 
     /**
      * Sets the constant value.
      */
-    public void setConstant(Type type) {
+    public void setConstant(ClassTypeSignature type) {
         this.cst = checkNotNull(type, "type");
     }
 

@@ -25,6 +25,7 @@
 package org.spongepowered.despector.emitter.kotlin.special;
 
 import org.spongepowered.despector.ast.generic.ClassTypeSignature;
+import org.spongepowered.despector.ast.generic.GenericClassTypeSignature;
 import org.spongepowered.despector.ast.generic.TypeSignature;
 import org.spongepowered.despector.ast.generic.TypeVariableSignature;
 import org.spongepowered.despector.ast.generic.VoidTypeSignature;
@@ -44,6 +45,19 @@ public class KotlinGenericsEmitter extends GenericsEmitter {
             ctx.printString(desc.substring(1, desc.length() - 1));
         } else if (sig instanceof ClassTypeSignature) {
             ClassTypeSignature cls = (ClassTypeSignature) sig;
+            int array_depth = 0;
+            String type = cls.getType();
+            while (type.startsWith("[")) {
+                array_depth++;
+                type = type.substring(1);
+                ctx.printString("Array<");
+            }
+            KotlinEmitterUtil.emitType(ctx, type);
+            for (int i = 0; i < array_depth; i++) {
+                ctx.printString(">");
+            }
+        } else if (sig instanceof GenericClassTypeSignature) {
+            GenericClassTypeSignature cls = (GenericClassTypeSignature) sig;
             int array_depth = 0;
             String type = cls.getType();
             while (type.startsWith("[")) {

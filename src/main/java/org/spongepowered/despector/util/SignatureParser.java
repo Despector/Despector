@@ -28,6 +28,7 @@ import static com.google.common.base.Preconditions.checkState;
 
 import org.spongepowered.despector.ast.generic.ClassSignature;
 import org.spongepowered.despector.ast.generic.ClassTypeSignature;
+import org.spongepowered.despector.ast.generic.GenericClassTypeSignature;
 import org.spongepowered.despector.ast.generic.MethodSignature;
 import org.spongepowered.despector.ast.generic.TypeArgument;
 import org.spongepowered.despector.ast.generic.TypeParameter;
@@ -55,10 +56,10 @@ public final class SignatureParser {
             parser.skip(1);
             parseFormalTypeParameters(parser, struct.getParameters());
         }
-        ClassTypeSignature superclass = parseClassTypeSignature(parser, "");
+        GenericClassTypeSignature superclass = parseClassTypeSignature(parser, "");
         struct.setSuperclassSignature(superclass);
         while (parser.hasNext()) {
-            ClassTypeSignature sig = parseClassTypeSignature(parser, "");
+            GenericClassTypeSignature sig = parseClassTypeSignature(parser, "");
             struct.getInterfaceSignatures().add(sig);
         }
         return struct;
@@ -143,12 +144,12 @@ public final class SignatureParser {
         return parseClassTypeSignature(parser, ident.toString());
     }
 
-    public static ClassTypeSignature parseClassTypeSignature(String sig) {
+    public static GenericClassTypeSignature parseClassTypeSignature(String sig) {
         Parser parser = new Parser(sig);
         return parseClassTypeSignature(parser, "");
     }
 
-    private static ClassTypeSignature parseClassTypeSignature(Parser parser, String prefix) {
+    private static GenericClassTypeSignature parseClassTypeSignature(Parser parser, String prefix) {
         StringBuilder ident = new StringBuilder(prefix);
         parser.expect('L');
         ident.append("L");
@@ -158,7 +159,7 @@ public final class SignatureParser {
             ident.append(parser.nextIdentifier());
         }
         ident.append(";");
-        ClassTypeSignature sig = ClassTypeSignature.of(ident.toString(), parser.peek() == '<');
+        GenericClassTypeSignature sig = new GenericClassTypeSignature(ident.toString());
         if (parser.check('<')) {
             while (!parser.check('>')) {
                 char wild = parser.peek();

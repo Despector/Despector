@@ -25,6 +25,7 @@
 package org.spongepowered.despector.decompiler.loader;
 
 import org.spongepowered.despector.ast.Locals;
+import org.spongepowered.despector.ast.generic.ClassTypeSignature;
 import org.spongepowered.despector.decompiler.BaseDecompiler.BootstrapMethod;
 import org.spongepowered.despector.decompiler.error.SourceFormatException;
 import org.spongepowered.despector.decompiler.ir.DoubleInsn;
@@ -141,6 +142,8 @@ public class BytecodeTranslator {
                     block.append(new FloatInsn(Insn.FCONST, ((FloatEntry) entry).value));
                 } else if (entry instanceof StringEntry) {
                     block.append(new LdcInsn(Insn.PUSH, ((StringEntry) entry).value));
+                } else if (entry instanceof ClassEntry) {
+                    block.append(new LdcInsn(Insn.PUSH, ClassTypeSignature.of("L" + ((ClassEntry) entry).name + ";")));
                 } else {
                     throw new IllegalStateException("Unsupported constant pool entry type in LDC node " + entry.getClass().getSimpleName());
                 }

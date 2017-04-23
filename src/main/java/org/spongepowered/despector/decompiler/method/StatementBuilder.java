@@ -24,7 +24,6 @@
  */
 package org.spongepowered.despector.decompiler.method;
 
-import org.objectweb.asm.Type;
 import org.spongepowered.despector.ast.Locals;
 import org.spongepowered.despector.ast.Locals.Local;
 import org.spongepowered.despector.ast.Locals.LocalInstance;
@@ -116,8 +115,8 @@ public final class StatementBuilder {
                     stack.push(NullConstant.NULL);
                 } else if (ldc.getConstant() instanceof String) {
                     stack.push(new StringConstant((String) ldc.getConstant()));
-                } else if (ldc.getConstant() instanceof Type) {
-                    stack.push(new TypeConstant((Type) ldc.getConstant()));
+                } else if (ldc.getConstant() instanceof ClassTypeSignature) {
+                    stack.push(new TypeConstant((ClassTypeSignature) ldc.getConstant()));
                 } else {
                     throw new IllegalStateException("Unsupported ldc constant: " + ldc.getConstant().getClass().getName());
                 }

@@ -41,8 +41,8 @@ public class ClassSignature {
 
     private final List<TypeParameter> parameters = new ArrayList<>();
     @Nullable
-    private ClassTypeSignature superclass;
-    private final List<ClassTypeSignature> interfaces = new ArrayList<>();
+    private GenericClassTypeSignature superclass;
+    private final List<GenericClassTypeSignature> interfaces = new ArrayList<>();
 
     public ClassSignature() {
     }
@@ -59,14 +59,14 @@ public class ClassSignature {
      * Gets the type signature of the direct superclass.
      */
     @Nullable
-    public ClassTypeSignature getSuperclassSignature() {
+    public GenericClassTypeSignature getSuperclassSignature() {
         return this.superclass;
     }
 
     /**
      * Sets the type signature of the direct superclass.
      */
-    public void setSuperclassSignature(@Nullable ClassTypeSignature sig) {
+    public void setSuperclassSignature(@Nullable GenericClassTypeSignature sig) {
         this.superclass = sig;
     }
 
@@ -74,7 +74,7 @@ public class ClassSignature {
      * Gets the type signatures of the direct superinterfaces. The returned
      * collection is mutable.
      */
-    public List<ClassTypeSignature> getInterfaceSignatures() {
+    public List<GenericClassTypeSignature> getInterfaceSignatures() {
         return this.interfaces;
     }
 
@@ -97,7 +97,7 @@ public class ClassSignature {
             this.superclass.writeTo(pack);
         }
         pack.writeString("interfaces").startArray(this.interfaces.size());
-        for (ClassTypeSignature sig : this.interfaces) {
+        for (GenericClassTypeSignature sig : this.interfaces) {
             sig.writeTo(pack);
         }
     }
@@ -113,7 +113,7 @@ public class ClassSignature {
             str.append(">");
         }
         str.append(this.superclass);
-        for (ClassTypeSignature inter : this.interfaces) {
+        for (GenericClassTypeSignature inter : this.interfaces) {
             str.append(inter);
         }
         return str.toString();

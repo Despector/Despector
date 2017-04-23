@@ -25,10 +25,10 @@
 package org.spongepowered.despector.emitter.java;
 
 import com.google.common.collect.Lists;
-import org.objectweb.asm.Type;
 import org.spongepowered.despector.ast.Annotation;
 import org.spongepowered.despector.ast.Locals.LocalInstance;
 import org.spongepowered.despector.ast.generic.ClassTypeSignature;
+import org.spongepowered.despector.ast.generic.GenericClassTypeSignature;
 import org.spongepowered.despector.ast.generic.TypeArgument;
 import org.spongepowered.despector.ast.generic.TypeParameter;
 import org.spongepowered.despector.ast.generic.TypeSignature;
@@ -167,8 +167,8 @@ public class ImportManager {
     }
 
     private void checkAnnotationValue(Object val) {
-        if (val instanceof Type) {
-            add(((Type) val).getDescriptor());
+        if (val instanceof ClassTypeSignature) {
+            add(((ClassTypeSignature) val).getDescriptor());
         } else if (val instanceof List) {
             for (Object obj : (List<?>) val) {
                 checkAnnotationValue(obj);
@@ -212,6 +212,9 @@ public class ImportManager {
     void check(TypeSignature sig) {
         if (sig instanceof ClassTypeSignature) {
             ClassTypeSignature cls = (ClassTypeSignature) sig;
+            add(cls.getDescriptor());
+        } else if (sig instanceof GenericClassTypeSignature) {
+            GenericClassTypeSignature cls = (GenericClassTypeSignature) sig;
             add(cls.getDescriptor());
             for (TypeArgument param : cls.getArguments()) {
                 check(param.getSignature());

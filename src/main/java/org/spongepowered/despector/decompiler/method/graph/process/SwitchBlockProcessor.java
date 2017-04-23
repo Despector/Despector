@@ -24,9 +24,6 @@
  */
 package org.spongepowered.despector.decompiler.method.graph.process;
 
-import static org.objectweb.asm.Opcodes.IRETURN;
-import static org.objectweb.asm.Opcodes.RETURN;
-
 import org.spongepowered.despector.config.ConfigManager;
 import org.spongepowered.despector.decompiler.ir.Insn;
 import org.spongepowered.despector.decompiler.ir.JumpInsn;
@@ -98,7 +95,7 @@ public class SwitchBlockProcessor implements GraphProcessor {
                 }
                 if (last instanceof BodyOpcodeBlock) {
                     int op = last.getLast().getOpcode();
-                    if (op < IRETURN || op > RETURN) {
+                    if (op == Insn.RETURN || op == Insn.ARETURN) {
                         all_return = false;
                     }
                 } else {

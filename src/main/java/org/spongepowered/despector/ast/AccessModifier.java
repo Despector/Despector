@@ -24,11 +24,7 @@
  */
 package org.spongepowered.despector.ast;
 
-import static org.objectweb.asm.Opcodes.ACC_PRIVATE;
-import static org.objectweb.asm.Opcodes.ACC_PROTECTED;
-import static org.objectweb.asm.Opcodes.ACC_PUBLIC;
-
-import org.objectweb.asm.Opcodes;
+import org.spongepowered.despector.decompiler.BaseDecompiler;
 
 /**
  * Represents the access modifier of a class member.
@@ -60,11 +56,11 @@ public enum AccessModifier {
      * as {@link #PACKAGE_PRIVATE}.
      */
     public static AccessModifier fromModifiers(int access) {
-        if ((access & ACC_PUBLIC) != 0) {
+        if ((access & BaseDecompiler.ACC_PUBLIC) != 0) {
             return PUBLIC;
-        } else if ((access & ACC_PROTECTED) != 0) {
+        } else if ((access & BaseDecompiler.ACC_PROTECTED) != 0) {
             return PROTECTED;
-        } else if ((access & ACC_PRIVATE) != 0) {
+        } else if ((access & BaseDecompiler.ACC_PRIVATE) != 0) {
             return PRIVATE;
         }
         return PACKAGE_PRIVATE;

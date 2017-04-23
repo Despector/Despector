@@ -24,8 +24,8 @@
  */
 package org.spongepowered.despector.emitter.java.special;
 
-import org.objectweb.asm.Type;
 import org.spongepowered.despector.ast.Annotation;
+import org.spongepowered.despector.ast.generic.ClassTypeSignature;
 import org.spongepowered.despector.ast.type.InterfaceEntry;
 import org.spongepowered.despector.emitter.SpecialEmitter;
 import org.spongepowered.despector.emitter.java.JavaEmitterContext;
@@ -81,8 +81,8 @@ public class PackageInfoEmitter implements SpecialEmitter {
                     emitValue(ctx, list.get(i));
                 }
             }
-        } else if (value instanceof Type) {
-            ctx.printString(((Type) value).getInternalName().replace('/', '.'));
+        } else if (value instanceof ClassTypeSignature) {
+            ctx.printString(((ClassTypeSignature) value).getClassName());
         } else {
             throw new IllegalStateException("Unknown annotation value type in emitter: " + value.getClass().getName());
         }

@@ -26,15 +26,12 @@ package org.spongepowered.despector.ast.generic;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.collect.ImmutableList;
 import org.spongepowered.despector.util.TypeHelper;
 import org.spongepowered.despector.util.serialization.AstSerializer;
 import org.spongepowered.despector.util.serialization.MessagePacker;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -42,25 +39,25 @@ import java.util.Map;
  */
 public class ClassTypeSignature extends TypeSignature {
 
-    public static final ClassTypeSignature BOOLEAN = new ImmutableClassTypeSignature("Z");
-    public static final ClassTypeSignature BYTE = new ImmutableClassTypeSignature("B");
-    public static final ClassTypeSignature SHORT = new ImmutableClassTypeSignature("S");
-    public static final ClassTypeSignature INT = new ImmutableClassTypeSignature("I");
-    public static final ClassTypeSignature LONG = new ImmutableClassTypeSignature("J");
-    public static final ClassTypeSignature FLOAT = new ImmutableClassTypeSignature("F");
-    public static final ClassTypeSignature DOUBLE = new ImmutableClassTypeSignature("D");
-    public static final ClassTypeSignature CHAR = new ImmutableClassTypeSignature("C");
-    public static final ClassTypeSignature OBJECT = new ImmutableClassTypeSignature("Ljava/lang/Object;");
-    public static final ClassTypeSignature STRING = new ImmutableClassTypeSignature("Ljava/lang/String;");
+    public static final ClassTypeSignature BOOLEAN = new ClassTypeSignature("Z");
+    public static final ClassTypeSignature BYTE = new ClassTypeSignature("B");
+    public static final ClassTypeSignature SHORT = new ClassTypeSignature("S");
+    public static final ClassTypeSignature INT = new ClassTypeSignature("I");
+    public static final ClassTypeSignature LONG = new ClassTypeSignature("J");
+    public static final ClassTypeSignature FLOAT = new ClassTypeSignature("F");
+    public static final ClassTypeSignature DOUBLE = new ClassTypeSignature("D");
+    public static final ClassTypeSignature CHAR = new ClassTypeSignature("C");
+    public static final ClassTypeSignature OBJECT = new ClassTypeSignature("Ljava/lang/Object;");
+    public static final ClassTypeSignature STRING = new ClassTypeSignature("Ljava/lang/String;");
 
-    public static final ClassTypeSignature BOOLEAN_OBJECT = new ImmutableClassTypeSignature("Ljava/lang/Boolean;");
-    public static final ClassTypeSignature BYTE_OBJECT = new ImmutableClassTypeSignature("Ljava/lang/Byte;");
-    public static final ClassTypeSignature SHORT_OBJECT = new ImmutableClassTypeSignature("Ljava/lang/Short;");
-    public static final ClassTypeSignature INTEGER_OBJECT = new ImmutableClassTypeSignature("Ljava/lang/Integer;");
-    public static final ClassTypeSignature LONG_OBJECT = new ImmutableClassTypeSignature("Ljava/lang/Long;");
-    public static final ClassTypeSignature FLOAT_OBJECT = new ImmutableClassTypeSignature("Ljava/lang/Float;");
-    public static final ClassTypeSignature DOUBLE_OBJECT = new ImmutableClassTypeSignature("Ljava/lang/Double;");
-    public static final ClassTypeSignature CHARACTER_OBJECT = new ImmutableClassTypeSignature("Ljava/lang/Character;");
+    public static final ClassTypeSignature BOOLEAN_OBJECT = new ClassTypeSignature("Ljava/lang/Boolean;");
+    public static final ClassTypeSignature BYTE_OBJECT = new ClassTypeSignature("Ljava/lang/Byte;");
+    public static final ClassTypeSignature SHORT_OBJECT = new ClassTypeSignature("Ljava/lang/Short;");
+    public static final ClassTypeSignature INTEGER_OBJECT = new ClassTypeSignature("Ljava/lang/Integer;");
+    public static final ClassTypeSignature LONG_OBJECT = new ClassTypeSignature("Ljava/lang/Long;");
+    public static final ClassTypeSignature FLOAT_OBJECT = new ClassTypeSignature("Ljava/lang/Float;");
+    public static final ClassTypeSignature DOUBLE_OBJECT = new ClassTypeSignature("Ljava/lang/Double;");
+    public static final ClassTypeSignature CHARACTER_OBJECT = new ClassTypeSignature("Ljava/lang/Character;");
 
     private static final Map<String, ClassTypeSignature> SPECIAL = new HashMap<>();
 
@@ -112,7 +109,6 @@ public class ClassTypeSignature extends TypeSignature {
     }
 
     protected String type_name;
-    private List<TypeArgument> args = new ArrayList<>();
 
     ClassTypeSignature(String type) {
         this.type_name = checkNotNull(type, "type");
@@ -132,21 +128,18 @@ public class ClassTypeSignature extends TypeSignature {
         this.type_name = checkNotNull(type, "type");
     }
 
-    /**
-     * Gets the type arguments.
-     */
-    public List<TypeArgument> getArguments() {
-        return this.args;
-    }
-
     @Override
     public boolean hasArguments() {
-        return !this.args.isEmpty();
+        return false;
     }
 
     @Override
     public String getName() {
         return TypeHelper.descToType(this.type_name);
+    }
+
+    public String getClassName() {
+        return getName().replace('/', '.');
     }
 
     @Override
@@ -161,86 +154,16 @@ public class ClassTypeSignature extends TypeSignature {
 
     @Override
     public void writeTo(MessagePacker pack) throws IOException {
-        pack.startMap(3);
+        pack.startMap(2);
         pack.writeString("id").writeInt(AstSerializer.SIGNATURE_ID_TYPECLASS);
         pack.writeString("type").writeString(this.type_name);
-        pack.writeString("args").startArray(this.args.size());
-        for (TypeArgument arg : this.args) {
-            arg.writeTo(pack);
-        }
     }
 
     @Override
     public String toString() {
         StringBuilder str = new StringBuilder();
         str.append(this.type_name);
-        if (!this.args.isEmpty()) {
-            str.append("<");
-            for (TypeArgument arg : this.args) {
-                str.append(arg);
-            }
-            str.append(">");
-        }
         return str.toString();
     }
 
-    /**
-     * An immutable class type signature.
-     */
-    private static class ImmutableClassTypeSignature extends ClassTypeSignature {
-
-        public ImmutableClassTypeSignature(String type) {
-            super(type);
-        }
-
-        /**
-         * Gets the type descriptor.
-         */
-        @Override
-        public String getType() {
-            return this.type_name;
-        }
-
-        /**
-         * Sets the type descriptor.
-         */
-        @Override
-        public void setType(String type) {
-            throw new IllegalStateException();
-        }
-
-        /**
-         * Gets the type arguments.
-         */
-        @Override
-        public List<TypeArgument> getArguments() {
-            return ImmutableList.of();
-        }
-
-        @Override
-        public boolean hasArguments() {
-            return false;
-        }
-
-        @Override
-        public String getName() {
-            return TypeHelper.descToType(this.type_name);
-        }
-
-        @Override
-        public String getDescriptor() {
-            return this.type_name;
-        }
-
-        @Override
-        public boolean isArray() {
-            return this.type_name.startsWith("[");
-        }
-
-        @Override
-        public String toString() {
-            return this.type_name;
-        }
-
-    }
 }
