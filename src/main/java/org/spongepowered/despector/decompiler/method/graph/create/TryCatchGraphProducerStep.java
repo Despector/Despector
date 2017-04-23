@@ -97,7 +97,6 @@ public class TryCatchGraphProducerStep implements GraphProducerStep {
             OpcodeBlock handler = GraphProducerStep.find(block_list, tc.getCatch());
             if (end.getEnd() == tc.getEnd() && end.getLast().getOpcode() == Insn.ARETURN) {
                 end = block_list.get(block_list.indexOf(GraphProducerStep.find(block_list, tc.getEnd() + 1)));
-                handler = GraphProducerStep.find(block_list, tc.getCatch() + 1);
             }
             block_list.add(block_list.indexOf(start), start_marker);
             block_list.add(block_list.indexOf(end), end_marker);

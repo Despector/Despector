@@ -95,7 +95,7 @@ public class SwitchBlockProcessor implements GraphProcessor {
                 }
                 if (last instanceof BodyOpcodeBlock) {
                     int op = last.getLast().getOpcode();
-                    if (op == Insn.RETURN || op == Insn.ARETURN) {
+                    if (op != Insn.RETURN && op != Insn.ARETURN) {
                         all_return = false;
                     }
                 } else {

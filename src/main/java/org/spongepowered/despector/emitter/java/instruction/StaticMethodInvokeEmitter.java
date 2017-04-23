@@ -62,12 +62,20 @@ public class StaticMethodInvokeEmitter implements InstructionEmitter<JavaEmitter
             ctx.emitTypeName(owner);
             ctx.printString(".");
         }
+        boolean is_varargs = false;
+        TypeEntry target = ctx.getType().getSource().get(arg.getOwnerType());
+        if (target != null) {
+            MethodEntry mth = target.getStaticMethodSafe(arg.getMethodName(), arg.getMethodDescription());
+            if (mth != null) {
+                is_varargs = mth.isVarargs();
+            }
+        }
         ctx.printString(arg.getMethodName());
         List<String> param_types = TypeHelper.splitSig(arg.getMethodDescription());
         ctx.printString("(");
         for (int i = 0; i < arg.getParams().length; i++) {
             Instruction param = arg.getParams()[i];
-            if (arg.getParams().length == 1 && param instanceof NewArray) {
+            if (is_varargs && i == arg.getParams().length - 1 && param instanceof NewArray) {
                 NewArray varargs = (NewArray) param;
                 for (int o = 0; o < varargs.getInitializer().length; o++) {
                     ctx.emit(varargs.getInitializer()[o], ClassTypeSignature.of(varargs.getType()));
@@ -114,7 +122,7 @@ public class StaticMethodInvokeEmitter implements InstructionEmitter<JavaEmitter
             if (arg.getParams().length == 1) {
                 replacement = new InstanceFieldAccess(getter.getFieldName(), getter.getTypeDescriptor(), getter.getOwnerType(), arg.getParams()[0]);
             } else {
-                replacement = new StaticFieldAccess(getter.getFieldName(),  getter.getTypeDescriptor(), getter.getOwnerType());
+                replacement = new StaticFieldAccess(getter.getFieldName(), getter.getTypeDescriptor(), getter.getOwnerType());
             }
             ctx.emit(replacement, null);
             return true;

@@ -244,7 +244,7 @@ public class BaseDecompiler implements Decompiler {
             method.setVarargs((method_access & ACC_VARARGS) != 0);
             method.setStrictFp((method_access & ACC_STRICT) != 0);
             entry.addMethod(method);
-            Locals locals = new Locals();
+            Locals locals = new Locals(method.isStatic());
             method.setLocals(locals);
 
             List<String> checked_exceptions = null;

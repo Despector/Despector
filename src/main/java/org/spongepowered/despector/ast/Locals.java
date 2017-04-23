@@ -41,9 +41,11 @@ import java.util.List;
 public class Locals {
 
     private Local[] locals;
+    private final boolean is_static;
 
-    public Locals() {
+    public Locals(boolean is_static) {
         this.locals = new Local[0];
+        this.is_static = is_static;
     }
 
     /**
@@ -55,6 +57,7 @@ public class Locals {
         for (int i = 0; i < other.locals.length; i++) {
             this.locals[i] = other.locals[i];
         }
+        this.is_static = other.is_static;
     }
 
     public int getLocalCount() {
@@ -69,7 +72,7 @@ public class Locals {
             int old = this.locals.length;
             this.locals = Arrays.copyOf(this.locals, i + 1);
             for (int o = old; o <= i; o++) {
-                this.locals[o] = new Local(o);
+                this.locals[o] = new Local(o, this.is_static);
             }
         }
         return this.locals[i];
@@ -143,14 +146,16 @@ public class Locals {
      */
     public static class Local {
 
+        private final boolean is_static;
         private final int index;
         private boolean parameter = false;
         private LocalInstance parameter_instance = null;
         private final List<LVT> lvt = Lists.newArrayList();
         private final List<LocalInstance> instances = Lists.newArrayList();
 
-        public Local(int i) {
+        public Local(int i, boolean is_static) {
             this.index = i;
+            this.is_static = is_static;
         }
 
         public int getIndex() {
@@ -182,11 +187,6 @@ public class Locals {
          * Bakes the instances of this local.
          */
         public void bakeInstances(List<Integer> label_indices) {
-            if (this.lvt.isEmpty()) {
-                if (this.index == 0) {
-                    this.instances.add(new LocalInstance(this, "this", ClassTypeSignature.OBJECT, -1, Short.MAX_VALUE));
-                }
-            }
             for (LVT l : this.lvt) {
                 int start = label_indices.indexOf(l.start_pc);
                 int end = label_indices.indexOf(l.start_pc + l.length);
@@ -220,7 +220,11 @@ public class Locals {
                 return this.parameter_instance;
             }
             // No LVT entry for this local!
-            this.parameter_instance = new LocalInstance(this, "param" + this.index, null, -1, -1);
+            String n = "param" + this.index;
+            if (!this.is_static && this.index == 0) {
+                n = "this";
+            }
+            this.parameter_instance = new LocalInstance(this, n, null, -1, -1);
             return this.parameter_instance;
         }
 

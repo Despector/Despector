@@ -34,6 +34,8 @@ import org.spongepowered.despector.ast.insn.var.LocalAccess;
 import org.spongepowered.despector.ast.stmt.invoke.InstanceMethodInvoke;
 import org.spongepowered.despector.ast.stmt.invoke.New;
 import org.spongepowered.despector.ast.stmt.invoke.StaticMethodInvoke;
+import org.spongepowered.despector.ast.type.MethodEntry;
+import org.spongepowered.despector.ast.type.TypeEntry;
 import org.spongepowered.despector.config.ConfigManager;
 import org.spongepowered.despector.emitter.InstructionEmitter;
 import org.spongepowered.despector.emitter.java.JavaEmitterContext;
@@ -84,11 +86,20 @@ public class InstanceMethodInvokeEmitter implements InstructionEmitter<JavaEmitt
             }
             ctx.printString(arg.getMethodName());
         }
+        boolean is_varargs = false;
+        TypeEntry target = ctx.getType().getSource().get(arg.getOwnerType());
+        if (target != null) {
+            MethodEntry mth = target.getMethodSafe(arg.getMethodName(), arg.getMethodDescription());
+            // TODO need to search up superclasses if not found
+            if (mth != null) {
+                is_varargs = mth.isVarargs();
+            }
+        }
         ctx.printString("(");
         List<String> param_types = TypeHelper.splitSig(arg.getMethodDescription());
         for (int i = 0; i < arg.getParams().length; i++) {
             Instruction param = arg.getParams()[i];
-            if (arg.getParams().length == 1 && param instanceof NewArray) {
+            if (is_varargs && i == arg.getParams().length - 1 && param instanceof NewArray) {
                 NewArray varargs = (NewArray) param;
                 for (int o = 0; o < varargs.getInitializer().length; o++) {
                     ctx.emit(varargs.getInitializer()[o], ClassTypeSignature.of(varargs.getType()));

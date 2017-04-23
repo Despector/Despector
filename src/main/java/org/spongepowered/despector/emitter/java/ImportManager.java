@@ -77,6 +77,7 @@ public class ImportManager {
 
     private final List<String> implicit_imports = new ArrayList<>();
     private final Set<String> imports = new HashSet<>();
+    private final Set<TypeEntry> checked = new HashSet<>();
 
     public ImportManager() {
         addImplicitImport("java/lang/");
@@ -87,6 +88,7 @@ public class ImportManager {
      */
     public void reset() {
         this.imports.clear();
+        this.checked.clear();
     }
 
     /**
@@ -107,7 +109,10 @@ public class ImportManager {
      * it.
      */
     public void calculateImports(TypeEntry type) {
-
+        if (this.checked.contains(type)) {
+            return;
+        }
+        this.checked.add(type);
         ImportWalker walker = new ImportWalker();
 
         for (Annotation anno : type.getAnnotations()) {
