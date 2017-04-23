@@ -251,7 +251,8 @@ public class JavaEmitterContext extends AbstractEmitterContext {
             if (this.block_statements.contains(insn.getClass())) {
                 if (i < instructions.getStatementCount() - 1) {
                     if (instructions.getType() == StatementBlock.Type.METHOD && i == instructions.getStatementCount() - 2) {
-                        if (((Return) instructions.getStatement(instructions.getStatementCount() - 1)).getValue().isPresent()) {
+                        Statement ret = instructions.getStatement(instructions.getStatementCount() - 1);
+                        if (ret instanceof Return && ((Return) ret).getValue().isPresent()) {
                             newLine();
                         }
                     } else {
@@ -272,7 +273,8 @@ public class JavaEmitterContext extends AbstractEmitterContext {
      */
     @SuppressWarnings("unchecked")
     public <T extends Statement> JavaEmitterContext emit(T obj, boolean semicolon) {
-        StatementEmitter<AbstractEmitterContext, T> emitter = (StatementEmitter<AbstractEmitterContext, T>) this.set.getStatementEmitter(obj.getClass());
+        StatementEmitter<AbstractEmitterContext, T> emitter =
+                (StatementEmitter<AbstractEmitterContext, T>) this.set.getStatementEmitter(obj.getClass());
         if (emitter == null) {
             throw new IllegalArgumentException("No emitter for statement " + obj.getClass().getName());
         }
@@ -288,7 +290,8 @@ public class JavaEmitterContext extends AbstractEmitterContext {
      */
     @SuppressWarnings("unchecked")
     public <T extends Instruction> JavaEmitterContext emit(T obj, TypeSignature type) {
-        InstructionEmitter<AbstractEmitterContext, T> emitter = (InstructionEmitter<AbstractEmitterContext, T>) this.set.getInstructionEmitter(obj.getClass());
+        InstructionEmitter<AbstractEmitterContext, T> emitter =
+                (InstructionEmitter<AbstractEmitterContext, T>) this.set.getInstructionEmitter(obj.getClass());
         if (emitter == null) {
             throw new IllegalArgumentException("No emitter for instruction " + obj.getClass().getName());
         }
@@ -306,7 +309,8 @@ public class JavaEmitterContext extends AbstractEmitterContext {
      */
     @SuppressWarnings("unchecked")
     public <T extends Condition> JavaEmitterContext emit(T condition) {
-        ConditionEmitter<AbstractEmitterContext, T> emitter = (ConditionEmitter<AbstractEmitterContext, T>) this.set.getConditionEmitter(condition.getClass());
+        ConditionEmitter<AbstractEmitterContext, T> emitter =
+                (ConditionEmitter<AbstractEmitterContext, T>) this.set.getConditionEmitter(condition.getClass());
         if (emitter == null) {
             throw new IllegalArgumentException("No emitter for condition " + condition.getClass().getName());
         }
@@ -413,9 +417,9 @@ public class JavaEmitterContext extends AbstractEmitterContext {
     /**
      * Emits the given type signature taking imports into account.
      */
-    public JavaEmitterContext emitType(TypeSignature sig) {
+    public JavaEmitterContext emitType(TypeSignature sig, boolean varargs) {
         GenericsEmitter generics = this.set.getSpecialEmitter(GenericsEmitter.class);
-        generics.emitTypeSignature(this, sig);
+        generics.emitTypeSignature(this, sig, varargs);
         return this;
     }
 

@@ -47,7 +47,7 @@ public class CastEmitter implements InstructionEmitter<JavaEmitterContext, Cast>
         if (!operator) {
             ctx.printString("(");
         }
-        ctx.emitType(arg.getType());
+        ctx.emitType(arg.getType(), false);
         ctx.printString(") ");
         if (operator) {
             ctx.printString("(");

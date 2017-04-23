@@ -63,7 +63,7 @@ public class NewEmitter implements InstructionEmitter<JavaEmitterContext, New> {
         }
 
         ctx.printString("new ");
-        ctx.emitType(arg.getType());
+        ctx.emitType(arg.getType(), false);
 
         if (ctx.getField() != null && ctx.getField().getType().hasArguments()) {
             ctx.printString("<>");

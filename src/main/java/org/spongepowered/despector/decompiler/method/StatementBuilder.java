@@ -463,9 +463,6 @@ public final class StatementBuilder {
             case Insn.CAST: {
                 TypeInsn cast = (TypeInsn) next;
                 String desc = cast.getType();
-                if (!desc.startsWith("[")) {
-                    desc = "L" + desc + ";";
-                }
                 stack.push(new Cast(ClassTypeSignature.of(desc), stack.pop()));
                 break;
             }

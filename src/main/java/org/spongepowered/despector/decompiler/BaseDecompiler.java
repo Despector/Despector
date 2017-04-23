@@ -64,7 +64,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * A language decompiler.
@@ -340,29 +342,40 @@ public class BaseDecompiler implements Decompiler {
                         anno.getType().setRuntimeVisible(false);
                     }
                 } else if ("RuntimeVisibleParameterAnnotations".equals(attribute_name)) {
+                    if (unfinished.parameter_annotations == null) {
+                        unfinished.parameter_annotations = new HashMap<>();
+                    }
                     int num_params = data.readUnsignedByte();
                     int offs = method.isStatic() ? 0 : 1;
                     for (int k = offs; k < num_params + offs; k++) {
-                        Local local = locals.getLocal(k);
-                        // TODO need something to handle this attribute coming
-                        // before the code attribute, or when there is no lvt
-                        // present
+                        List<Annotation> annos = unfinished.parameter_annotations.get(k);
+                        if (annos == null) {
+                            annos = new ArrayList<>();
+                            unfinished.parameter_annotations.put(k, annos);
+                        }
                         int annotation_count = data.readUnsignedShort();
                         for (int j = 0; j < annotation_count; j++) {
                             Annotation anno = readAnnotation(data, pool, set);
-                            local.getParameterInstance().getAnnotations().add(anno);
+                            annos.add(anno);
                             anno.getType().setRuntimeVisible(true);
                         }
                     }
                 } else if ("RuntimeInvisibleParameterAnnotations".equals(attribute_name)) {
+                    if (unfinished.parameter_annotations == null) {
+                        unfinished.parameter_annotations = new HashMap<>();
+                    }
                     int num_params = data.readUnsignedByte();
                     int offs = method.isStatic() ? 0 : 1;
                     for (int k = offs; k < num_params + offs; k++) {
-                        Local local = locals.getLocal(k);
+                        List<Annotation> annos = unfinished.parameter_annotations.get(k);
+                        if (annos == null) {
+                            annos = new ArrayList<>();
+                            unfinished.parameter_annotations.put(k, annos);
+                        }
                         int annotation_count = data.readUnsignedShort();
                         for (int j = 0; j < annotation_count; j++) {
                             Annotation anno = readAnnotation(data, pool, set);
-                            local.getParameterInstance().getAnnotations().add(anno);
+                            annos.add(anno);
                             anno.getType().setRuntimeVisible(false);
                         }
                     }
@@ -399,8 +412,10 @@ public class BaseDecompiler implements Decompiler {
                 int number_of_classes = data.readUnsignedShort();
                 for (int j = 0; j < number_of_classes; j++) {
                     String inner_cls = pool.getClass(data.readUnsignedShort()).name;
-                    String outer_cls = pool.getClass(data.readUnsignedShort()).name;
-                    String inner_name = pool.getUtf8(data.readUnsignedShort());
+                    int outer_index = data.readUnsignedShort();
+                    String outer_cls = outer_index == 0 ? null : pool.getClass(outer_index).name;
+                    int name_index = data.readUnsignedShort();
+                    String inner_name = name_index == 0 ? null : pool.getUtf8(name_index);
                     int acc = data.readUnsignedShort();
                     entry.addInnerClass(inner_cls, inner_name, outer_cls, acc);
                 }
@@ -459,6 +474,13 @@ public class BaseDecompiler implements Decompiler {
             }
             MethodEntry mth = unfinished.mth;
             mth.setIR(this.bytecode.createIR(unfinished.code, mth.getLocals(), unfinished.catch_regions, pool, bootstrap_methods));
+
+            if (unfinished.parameter_annotations != null) {
+                for (Map.Entry<Integer, List<Annotation>> e : unfinished.parameter_annotations.entrySet()) {
+                    Local loc = mth.getLocals().getLocal(e.getKey());
+                    loc.getInstance(0).getAnnotations().addAll(e.getValue());
+                }
+            }
 
             if (DUMP_IR_ON_LOAD) {
                 System.out.println("Instructions of " + mth.getName() + " " + mth.getDescription());
@@ -563,6 +585,7 @@ public class BaseDecompiler implements Decompiler {
         public MethodEntry mth;
         public byte[] code;
         public List<TryCatchRegion> catch_regions;
+        public Map<Integer, List<Annotation>> parameter_annotations;
     }
 
 }

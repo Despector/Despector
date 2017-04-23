@@ -62,7 +62,7 @@ public class KotlinNewEmitter implements InstructionEmitter<JavaEmitterContext, 
             }
         }
 
-        ctx.emitType(arg.getType());
+        ctx.emitType(arg.getType(), false);
 
         if (ctx.getField() != null && ctx.getField().getType().hasArguments()) {
             ctx.printString("<>");

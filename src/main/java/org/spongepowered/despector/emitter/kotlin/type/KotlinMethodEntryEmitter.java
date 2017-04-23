@@ -150,7 +150,7 @@ public class KotlinMethodEntryEmitter extends MethodEntryEmitter {
                 if (sig != null) {
                     // interfaces have no lvt for parameters, need to get
                     // generic types from the method signature
-                    generics.emitTypeSignature(ctx, sig.getParameters().get(i));
+                    generics.emitTypeSignature(ctx, sig.getParameters().get(i), false);
                 } else {
                     KotlinEmitterUtil.emitParamType(ctx, method.getParamTypes().get(i));
                 }
@@ -189,7 +189,7 @@ public class KotlinMethodEntryEmitter extends MethodEntryEmitter {
                     generics.emitTypeParameters(ctx, sig.getTypeParameters());
                     ctx.printString(" ");
                 }
-                generics.emitTypeSignature(ctx, sig.getReturnType());
+                generics.emitTypeSignature(ctx, sig.getReturnType(), false);
             } else {
                 KotlinEmitterUtil.emitType(ctx, method.getReturnType());
             }

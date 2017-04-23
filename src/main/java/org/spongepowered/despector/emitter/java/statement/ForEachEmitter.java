@@ -43,7 +43,7 @@ public class ForEachEmitter implements StatementEmitter<JavaEmitterContext, ForE
         ctx.printString(" ", ctx.getFormat().insert_space_after_opening_paren_in_for);
         LocalInstance local = loop.getValueAssignment();
         GenericsEmitter generics = ctx.getEmitterSet().getSpecialEmitter(GenericsEmitter.class);
-        generics.emitTypeSignature(ctx, local.getType());
+        generics.emitTypeSignature(ctx, local.getType(), false);
         ctx.printString(" ");
         ctx.printString(local.getName());
         ctx.printString(" ", ctx.getFormat().insert_space_before_colon_in_for);

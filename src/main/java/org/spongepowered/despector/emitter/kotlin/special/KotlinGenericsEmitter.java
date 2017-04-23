@@ -39,10 +39,19 @@ import org.spongepowered.despector.emitter.kotlin.KotlinEmitterUtil;
 public class KotlinGenericsEmitter extends GenericsEmitter {
 
     @Override
-    public void emitTypeSignature(JavaEmitterContext ctx, TypeSignature sig) {
+    public void emitTypeSignature(JavaEmitterContext ctx, TypeSignature sig, boolean is_varargs) {
         if (sig instanceof TypeVariableSignature) {
-            String desc = ((TypeVariableSignature) sig).getIdentifier();
-            ctx.printString(desc.substring(1, desc.length() - 1));
+            int array_depth = 0;
+            String type = ((TypeVariableSignature) sig).getIdentifier();
+            while (type.startsWith("[")) {
+                array_depth++;
+                type = type.substring(1);
+                ctx.printString("Array<");
+            }
+            ctx.printString(type.substring(1, type.length() - 1));
+            for (int i = 0; i < array_depth; i++) {
+                ctx.printString(">");
+            }
         } else if (sig instanceof ClassTypeSignature) {
             ClassTypeSignature cls = (ClassTypeSignature) sig;
             int array_depth = 0;

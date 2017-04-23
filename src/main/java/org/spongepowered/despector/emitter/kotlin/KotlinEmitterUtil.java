@@ -84,7 +84,7 @@ public final class KotlinEmitterUtil {
         } else if (type == ClassTypeSignature.CHAR || type == ClassTypeSignature.CHARACTER_OBJECT) {
             ctx.printString("Char");
         } else {
-            ctx.emitType(type);
+            ctx.emitType(type, false);
         }
     }
 

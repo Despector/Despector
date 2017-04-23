@@ -60,7 +60,7 @@ public class FieldEntryEmitter implements AstEmitter<JavaEmitterContext, FieldEn
             ctx.printString("final ");
         }
         GenericsEmitter generics = ctx.getEmitterSet().getSpecialEmitter(GenericsEmitter.class);
-        generics.emitTypeSignature(ctx, ast.getType());
+        generics.emitTypeSignature(ctx, ast.getType(), false);
         if (ctx.getFormat().align_type_members_on_columns && ctx.getType() != null) {
             int len = getMaxTypeLength(ctx, ast.isStatic() ? ctx.getType().getStaticFields() : ctx.getType().getFields());
             len -= getTypeLength(ctx, ast);

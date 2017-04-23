@@ -84,6 +84,10 @@ public abstract class AbstractEmitterContext {
         return this.outer_type;
     }
 
+    public void setOuterType(@Nullable TypeEntry type) {
+        this.outer_type = type;
+    }
+
     /**
      * Gets the current method being emitted.
      */

@@ -52,19 +52,6 @@ public class MethodEntryEmitter implements AstEmitter<JavaEmitterContext, Method
 
     @Override
     public boolean emit(JavaEmitterContext ctx, MethodEntry method) {
-
-        ctx.printIndentation();
-        for (Annotation anno : method.getAnnotations()) {
-            ctx.emit(anno);
-            if (ctx.getFormat().insert_new_line_after_annotation_on_method) {
-                ctx.newLine();
-                ctx.printIndentation();
-            } else {
-                ctx.printString(" ");
-            }
-        }
-
-        ctx.setMethod(method);
         if (method.getName().equals("<clinit>")) {
             int start = 0;
             if (method.getInstructions() != null) {
@@ -83,6 +70,7 @@ public class MethodEntryEmitter implements AstEmitter<JavaEmitterContext, Method
                     return false;
                 }
             }
+            ctx.setMethod(method);
             ctx.printString("static {");
             ctx.newLine();
             ctx.indent();
@@ -97,6 +85,7 @@ public class MethodEntryEmitter implements AstEmitter<JavaEmitterContext, Method
             ctx.dedent();
             ctx.printIndentation();
             ctx.printString("}");
+            ctx.setMethod(null);
             return true;
         }
         if ("<init>".equals(method.getName()) && method.getAccessModifier() == AccessModifier.PUBLIC && method.getParamTypes().isEmpty()
@@ -105,6 +94,19 @@ public class MethodEntryEmitter implements AstEmitter<JavaEmitterContext, Method
             // constants to the super ctor
             return false;
         }
+
+        ctx.printIndentation();
+        for (Annotation anno : method.getAnnotations()) {
+            ctx.emit(anno);
+            if (ctx.getFormat().insert_new_line_after_annotation_on_method) {
+                ctx.newLine();
+                ctx.printIndentation();
+            } else {
+                ctx.printString(" ");
+            }
+        }
+
+        ctx.setMethod(method);
         if (!(ctx.getType() instanceof InterfaceEntry) && !(ctx.getType() instanceof EnumEntry && method.getName().equals("<init>"))) {
             ctx.printString(method.getAccessModifier().asString());
             if (method.getAccessModifier() != AccessModifier.PACKAGE_PRIVATE) {
@@ -133,9 +135,9 @@ public class MethodEntryEmitter implements AstEmitter<JavaEmitterContext, Method
                     generics.emitTypeParameters(ctx, sig.getTypeParameters());
                     ctx.printString(" ");
                 }
-                generics.emitTypeSignature(ctx, sig.getReturnType());
+                generics.emitTypeSignature(ctx, sig.getReturnType(), false);
             } else {
-                ctx.emitType(method.getReturnType());
+                ctx.emitType(method.getReturnType(), false);
             }
 
             ctx.printString(" ");
@@ -159,13 +161,14 @@ public class MethodEntryEmitter implements AstEmitter<JavaEmitterContext, Method
             if (!method.isStatic()) {
                 param_index++;
             }
+            boolean varargs = method.isVarargs() && i == method.getParamTypes().size() - 1;
             if (block == null) {
                 if (sig != null) {
                     // interfaces have no lvt for parameters, need to get
                     // generic types from the method signature
-                    generics.emitTypeSignature(ctx, sig.getParameters().get(i));
+                    generics.emitTypeSignature(ctx, sig.getParameters().get(i), varargs);
                 } else {
-                    ctx.emitType(method.getParamTypes().get(i));
+                    ctx.emitType(method.getParamTypes().get(i), varargs);
                 }
                 ctx.printString(" ");
                 ctx.printString("local" + param_index);
@@ -185,7 +188,7 @@ public class MethodEntryEmitter implements AstEmitter<JavaEmitterContext, Method
                         ctx.printString(" ");
                     }
                 }
-                generics.emitTypeSignature(ctx, insn.getType());
+                generics.emitTypeSignature(ctx, insn.getType(), varargs);
                 ctx.printString(" ");
                 ctx.printString(insn.getName());
             }
@@ -209,7 +212,7 @@ public class MethodEntryEmitter implements AstEmitter<JavaEmitterContext, Method
                 } else {
                     first = false;
                 }
-                generics.emitTypeSignature(ctx, ex);
+                generics.emitTypeSignature(ctx, ex, false);
             }
         }
         if (!method.isAbstract()) {

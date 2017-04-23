@@ -31,9 +31,7 @@ import org.spongepowered.despector.ast.Locals.LocalInstance;
 import org.spongepowered.despector.ast.generic.MethodSignature;
 import org.spongepowered.despector.ast.stmt.StatementBlock;
 import org.spongepowered.despector.ast.type.AnnotationEntry;
-import org.spongepowered.despector.ast.type.EnumEntry;
 import org.spongepowered.despector.ast.type.FieldEntry;
-import org.spongepowered.despector.ast.type.InterfaceEntry;
 import org.spongepowered.despector.ast.type.MethodEntry;
 import org.spongepowered.despector.ast.type.TypeEntry;
 import org.spongepowered.despector.ast.type.TypeEntry.InnerClassInfo;
@@ -170,9 +168,9 @@ public class AnnotationEntryEmitter implements AstEmitter<JavaEmitterContext, An
                         generics.emitTypeParameters(ctx, sig.getTypeParameters());
                         ctx.printString(" ");
                     }
-                    generics.emitTypeSignature(ctx, sig.getReturnType());
+                    generics.emitTypeSignature(ctx, sig.getReturnType(), false);
                 } else {
-                    ctx.emitType(mth.getReturnType());
+                    ctx.emitType(mth.getReturnType(), false);
                 }
 
                 ctx.printString(" ");
@@ -185,14 +183,14 @@ public class AnnotationEntryEmitter implements AstEmitter<JavaEmitterContext, An
                 }
                 for (int i = 0; i < mth.getParamTypes().size(); i++) {
                     int param_index = i + 1;
+                    boolean varargs = mth.isVarargs() && i == mth.getParamTypes().size() - 1;
                     if (block == null) {
                         if (sig != null) {
                             // interfaces have no lvt for parameters, need to
-                            // get
-                            // generic types from the method signature
-                            generics.emitTypeSignature(ctx, sig.getParameters().get(i));
+                            // get generic types from the method signature
+                            generics.emitTypeSignature(ctx, sig.getParameters().get(i), varargs);
                         } else {
-                            ctx.emitType(mth.getParamTypes().get(i));
+                            ctx.emitType(mth.getParamTypes().get(i), varargs);
                         }
                         ctx.printString(" ");
                         ctx.printString("local" + param_index);
@@ -212,7 +210,7 @@ public class AnnotationEntryEmitter implements AstEmitter<JavaEmitterContext, An
                                 ctx.printString(" ");
                             }
                         }
-                        generics.emitTypeSignature(ctx, insn.getType());
+                        generics.emitTypeSignature(ctx, insn.getType(), varargs);
                         ctx.printString(" ");
                         ctx.printString(insn.getName());
                     }

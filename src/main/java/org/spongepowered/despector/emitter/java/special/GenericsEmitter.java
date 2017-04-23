@@ -60,7 +60,7 @@ public class GenericsEmitter implements SpecialEmitter {
                 }
             }
             ctx.printString(" extends ");
-            emitTypeSignature(ctx, param.getClassBound());
+            emitTypeSignature(ctx, param.getClassBound(), false);
             had_superclass = true;
         }
         for (TypeSignature ibound : param.getInterfaceBounds()) {
@@ -69,17 +69,34 @@ public class GenericsEmitter implements SpecialEmitter {
             } else {
                 ctx.printString(" & ");
             }
-            emitTypeSignature(ctx, ibound);
+            emitTypeSignature(ctx, ibound, false);
         }
     }
 
     /**
      * Emits the given type.
      */
-    public void emitTypeSignature(JavaEmitterContext ctx, TypeSignature sig) {
+    public void emitTypeSignature(JavaEmitterContext ctx, TypeSignature sig, boolean is_varargs) {
         if (sig instanceof TypeVariableSignature) {
-            String desc = ((TypeVariableSignature) sig).getIdentifier();
-            ctx.printString(desc.substring(1, desc.length() - 1));
+            int array_depth = 0;
+            String type = ((TypeVariableSignature) sig).getIdentifier();
+            while (type.startsWith("[")) {
+                array_depth++;
+                type = type.substring(1);
+            }
+            ctx.printString(type.substring(1, type.length() - 1));
+            if (is_varargs && array_depth > 0) {
+                array_depth--;
+            }
+            for (int i = 0; i < array_depth; i++) {
+                ctx.printString(" ", ctx.getFormat().insert_space_before_opening_bracket_in_array_type_reference);
+                ctx.printString("[");
+                ctx.printString(" ", ctx.getFormat().insert_space_between_brackets_in_array_type_reference);
+                ctx.printString("]");
+            }
+            if (is_varargs && array_depth >= 0) {
+                ctx.printString("...");
+            }
         } else if (sig instanceof ClassTypeSignature) {
             ClassTypeSignature cls = (ClassTypeSignature) sig;
             int array_depth = 0;
@@ -89,11 +106,17 @@ public class GenericsEmitter implements SpecialEmitter {
                 type = type.substring(1);
             }
             ctx.emitType(type);
+            if (is_varargs && array_depth > 0) {
+                array_depth--;
+            }
             for (int i = 0; i < array_depth; i++) {
                 ctx.printString(" ", ctx.getFormat().insert_space_before_opening_bracket_in_array_type_reference);
                 ctx.printString("[");
                 ctx.printString(" ", ctx.getFormat().insert_space_between_brackets_in_array_type_reference);
                 ctx.printString("]");
+            }
+            if (is_varargs && array_depth >= 0) {
+                ctx.printString("...");
             }
         } else if (sig instanceof GenericClassTypeSignature) {
             GenericClassTypeSignature cls = (GenericClassTypeSignature) sig;
@@ -105,11 +128,17 @@ public class GenericsEmitter implements SpecialEmitter {
             }
             ctx.emitType(type);
             emitTypeArguments(ctx, cls.getArguments());
+            if (is_varargs && array_depth > 0) {
+                array_depth--;
+            }
             for (int i = 0; i < array_depth; i++) {
                 ctx.printString(" ", ctx.getFormat().insert_space_before_opening_bracket_in_array_type_reference);
                 ctx.printString("[");
                 ctx.printString(" ", ctx.getFormat().insert_space_between_brackets_in_array_type_reference);
                 ctx.printString("]");
+            }
+            if (is_varargs && array_depth >= 0) {
+                ctx.printString("...");
             }
         } else if (sig instanceof VoidTypeSignature) {
             ctx.printString("void");
@@ -144,15 +173,15 @@ public class GenericsEmitter implements SpecialEmitter {
     public void emitTypeArgument(JavaEmitterContext ctx, TypeArgument arg) {
         switch (arg.getWildcard()) {
         case NONE:
-            emitTypeSignature(ctx, arg.getSignature());
+            emitTypeSignature(ctx, arg.getSignature(), false);
             break;
         case EXTENDS:
             ctx.printString("? extends ");
-            emitTypeSignature(ctx, arg.getSignature());
+            emitTypeSignature(ctx, arg.getSignature(), false);
             break;
         case SUPER:
             ctx.printString("? super ");
-            emitTypeSignature(ctx, arg.getSignature());
+            emitTypeSignature(ctx, arg.getSignature(), false);
             break;
         case STAR:
             ctx.printString("?");

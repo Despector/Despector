@@ -29,7 +29,6 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 import org.spongepowered.despector.ast.generic.ClassSignature;
-import org.spongepowered.despector.ast.generic.ClassTypeSignature;
 import org.spongepowered.despector.ast.generic.GenericClassTypeSignature;
 import org.spongepowered.despector.ast.generic.TypeParameter;
 import org.spongepowered.despector.ast.generic.TypeVariableSignature;

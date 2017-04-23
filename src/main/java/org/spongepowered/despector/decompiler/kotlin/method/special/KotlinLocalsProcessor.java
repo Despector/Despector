@@ -37,7 +37,6 @@ import org.spongepowered.despector.decompiler.method.special.LocalsProcessor;
  */
 public class KotlinLocalsProcessor implements LocalsProcessor {
 
-    @SuppressWarnings("unchecked")
     @Override
     public void process(PartialMethod mth, Locals locals) {
 //        InsnBlock insn = mth.getOpcodes();

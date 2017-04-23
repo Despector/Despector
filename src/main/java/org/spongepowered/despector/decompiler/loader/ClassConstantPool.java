@@ -83,7 +83,6 @@ public class ClassConstantPool {
                 long l = ((long) data.readInt() << 32);
                 l |= data.readInt();
                 c.value = l;
-                i++;
                 this.values[i] = c;
                 if (DUMP_CONSTANT_POOL) {
                     System.out.println(i + ": Long " + c.value);
@@ -95,7 +94,6 @@ public class ClassConstantPool {
                 long l = ((long) data.readInt() << 32);
                 l |= data.readInt();
                 c.value = Double.longBitsToDouble(l);
-                i++;
                 this.values[i] = c;
                 if (DUMP_CONSTANT_POOL) {
                     System.out.println(i + ": Double " + c.value);
@@ -193,11 +191,17 @@ public class ClassConstantPool {
                 throw new SourceFormatException("Illegal tag in constant pool");
             }
             this.values[i].type = type;
+            if (type == EntryType.LONG || type == EntryType.DOUBLE) {
+                i++;
+            }
         }
 
         // bake references
         for (int i = 0; i < entry_count - 1; i++) {
             Entry e = this.values[i];
+            if (e == null) {
+                continue;
+            }
             switch (e.type) {
             case UTF8:
             case INTEGER:

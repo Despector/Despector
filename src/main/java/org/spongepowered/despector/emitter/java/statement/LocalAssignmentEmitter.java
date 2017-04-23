@@ -44,7 +44,7 @@ public class LocalAssignmentEmitter implements StatementEmitter<JavaEmitterConte
         if (!insn.getLocal().getLocal().isParameter() && !ctx.isDefined(insn.getLocal())) {
             LocalInstance local = insn.getLocal();
             GenericsEmitter generics = ctx.getEmitterSet().getSpecialEmitter(GenericsEmitter.class);
-            generics.emitTypeSignature(ctx, local.getType());
+            generics.emitTypeSignature(ctx, local.getType(), false);
             ctx.printString(" ");
             ctx.markDefined(insn.getLocal());
         } else {

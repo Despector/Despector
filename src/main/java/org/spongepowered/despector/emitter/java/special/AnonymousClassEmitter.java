@@ -33,6 +33,7 @@ import org.spongepowered.despector.ast.stmt.invoke.New;
 import org.spongepowered.despector.ast.type.ClassEntry;
 import org.spongepowered.despector.ast.type.FieldEntry;
 import org.spongepowered.despector.ast.type.MethodEntry;
+import org.spongepowered.despector.ast.type.TypeEntry;
 import org.spongepowered.despector.emitter.SpecialEmitter;
 import org.spongepowered.despector.emitter.java.JavaEmitterContext;
 import org.spongepowered.despector.emitter.java.type.ClassEntryEmitter;
@@ -50,6 +51,10 @@ public class AnonymousClassEmitter implements SpecialEmitter {
      */
     public void emit(JavaEmitterContext ctx, ClassEntry type, New new_insn) {
         checkArgument(type.isAnonType());
+        TypeEntry old_outer = ctx.getOuterType();
+        TypeEntry old_type = ctx.getType();
+        ctx.setOuterType(old_type);
+        ctx.setType(type);
 
         TypeSignature actual_type = null;
         if (type.getSuperclassName().equals("java/lang/Object")) {
@@ -67,7 +72,7 @@ public class AnonymousClassEmitter implements SpecialEmitter {
         }
 
         ctx.printString("new ");
-        ctx.emitType(actual_type);
+        ctx.emitType(actual_type, false);
 
         int syn_field_count = 0;
         for (FieldEntry fld : type.getFields()) {
@@ -100,6 +105,9 @@ public class AnonymousClassEmitter implements SpecialEmitter {
         ctx.dedent();
         ctx.printIndentation();
         ctx.printString("}");
+
+        ctx.setOuterType(old_outer);
+        ctx.setType(old_type);
     }
 
     /**

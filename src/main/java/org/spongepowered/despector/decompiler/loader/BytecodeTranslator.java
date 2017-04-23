@@ -44,11 +44,13 @@ import org.spongepowered.despector.decompiler.ir.SwitchInsn;
 import org.spongepowered.despector.decompiler.ir.TypeInsn;
 import org.spongepowered.despector.decompiler.ir.VarIntInsn;
 import org.spongepowered.despector.decompiler.loader.ClassConstantPool.ClassEntry;
+import org.spongepowered.despector.decompiler.loader.ClassConstantPool.DoubleEntry;
 import org.spongepowered.despector.decompiler.loader.ClassConstantPool.Entry;
 import org.spongepowered.despector.decompiler.loader.ClassConstantPool.FieldRefEntry;
 import org.spongepowered.despector.decompiler.loader.ClassConstantPool.FloatEntry;
 import org.spongepowered.despector.decompiler.loader.ClassConstantPool.IntEntry;
 import org.spongepowered.despector.decompiler.loader.ClassConstantPool.InvokeDynamicEntry;
+import org.spongepowered.despector.decompiler.loader.ClassConstantPool.LongEntry;
 import org.spongepowered.despector.decompiler.loader.ClassConstantPool.MethodHandleEntry;
 import org.spongepowered.despector.decompiler.loader.ClassConstantPool.MethodRefEntry;
 import org.spongepowered.despector.decompiler.loader.ClassConstantPool.StringEntry;
@@ -129,7 +131,7 @@ public class BytecodeTranslator {
                 break;
             }
             case 17: {// SIPUSH
-                int val = code[i++];
+                short val = (short) (((code[i++] & 0xFF) << 8) | (code[i++] & 0xFF));
                 block.append(new IntInsn(Insn.ICONST, val));
                 break;
             }
@@ -149,9 +151,34 @@ public class BytecodeTranslator {
                 }
                 break;
             }
-            case 19: // LDC_W
-            case 20: // LDC2_W
-                throw new SourceFormatException("Unknown java opcode: " + next);
+            case 19: {// LDC_W
+                int index = ((code[i++] & 0xFF) << 8) | (code[i++] & 0xFF);
+                Entry entry = pool.getEntry(index);
+                if (entry instanceof IntEntry) {
+                    block.append(new IntInsn(Insn.ICONST, ((IntEntry) entry).value));
+                } else if (entry instanceof FloatEntry) {
+                    block.append(new FloatInsn(Insn.FCONST, ((FloatEntry) entry).value));
+                } else if (entry instanceof StringEntry) {
+                    block.append(new LdcInsn(Insn.PUSH, ((StringEntry) entry).value));
+                } else if (entry instanceof ClassEntry) {
+                    block.append(new LdcInsn(Insn.PUSH, ClassTypeSignature.of("L" + ((ClassEntry) entry).name + ";")));
+                } else {
+                    throw new IllegalStateException("Unsupported constant pool entry type in LDC node " + entry.getClass().getSimpleName());
+                }
+                break;
+            }
+            case 20: {// LDC2_W
+                int index = ((code[i++] & 0xFF) << 8) | (code[i++] & 0xFF);
+                Entry entry = pool.getEntry(index);
+                if (entry instanceof LongEntry) {
+                    block.append(new LongInsn(Insn.LCONST, ((LongEntry) entry).value));
+                } else if (entry instanceof DoubleEntry) {
+                    block.append(new DoubleInsn(Insn.DCONST, ((DoubleEntry) entry).value));
+                } else {
+                    throw new IllegalStateException("Unsupported constant pool entry type in LDC node " + entry.getClass().getSimpleName());
+                }
+                break;
+            }
             case 21: // ILOAD
             case 22: // LLOAD
             case 23: // FLOAD
@@ -623,7 +650,11 @@ public class BytecodeTranslator {
             case 192: {// CHECKCAST
                 int index = ((code[i++] & 0xFF) << 8) | (code[i++] & 0xFF);
                 ClassEntry ref = pool.getClass(index);
-                block.append(new TypeInsn(Insn.CAST, ref.name));
+                String desc = ref.name;
+                if (!desc.startsWith("[")) {
+                    desc = "L" + desc + ";";
+                }
+                block.append(new TypeInsn(Insn.CAST, desc));
                 break;
             }
             case 193: {// INSTANCEOF
