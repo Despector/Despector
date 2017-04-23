@@ -34,9 +34,11 @@ import org.spongepowered.despector.ast.insn.condition.OrCondition;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * A utility for operations on conditions.
@@ -115,9 +117,17 @@ public final class ConditionUtil {
     private static int[] encode(AndCondition and, Map<Condition, Integer> mapping) {
         int[] encoding = new int[and.getOperands().size()];
         int i = 0;
+        Set<Integer> seen = new HashSet<>();
         for (Condition c : and.getOperands()) {
             int m = getMapping(mapping, c);
+            if (seen.contains(m)) {
+                continue;
+            }
+            seen.add(m);
             encoding[i++] = m;
+        }
+        if (i < encoding.length) {
+            return Arrays.copyOf(encoding, i);
         }
         return encoding;
     }
@@ -126,6 +136,22 @@ public final class ConditionUtil {
      * Gets is the first param contains the inverse of the second param.
      */
     private static boolean containsInverse(int[] a, int[] b) {
+        outer: for (int i = 0; i < b.length; i++) {
+            int next = b[i];
+            for (int o = 0; o < a.length; o++) {
+                if (a[o] == -next) {
+                    continue outer;
+                }
+            }
+            return false;
+        }
+        return true;
+    }
+
+    private static boolean isInverse(int[] a, int[] b) {
+        if (a.length != b.length) {
+            return false;
+        }
         outer: for (int i = 0; i < b.length; i++) {
             int next = b[i];
             for (int o = 0; o < a.length; o++) {
@@ -215,11 +241,9 @@ public final class ConditionUtil {
 
         int[] remaining_a = remove(a, common);
         int[] remaining_b = remove(b, common);
-
-        if (containsInverse(remaining_a, remaining_b)) {
-            if (remaining_a.length == remaining_b.length) {
-                return new Pair<>(common, null);
-            }
+        if (isInverse(remaining_a, remaining_b)) {
+            return new Pair<>(common, null);
+        } else if (remaining_b.length == 1 && containsInverse(remaining_a, remaining_b)) {
             int[] new_m = new int[a.length - remaining_b.length];
             int d = 0;
             outer: for (int j = 0; j < a.length; j++) {
@@ -594,12 +618,9 @@ public final class ConditionUtil {
                             continue;
                         }
                         int[] m = encodings.get(l);
-                        if (m.length < n.length) {
-                            continue;
-                        }
                         // if m contains the inverse of n then those parts
                         // corresponding to n can be removed from m
-                        if (containsInverse(m, n)) {
+                        if (n.length == 1 && containsInverse(m, n)) {
                             int[] new_m = new int[m.length - n.length];
                             int d = 0;
                             outer: for (int u = 0; u < m.length; u++) {

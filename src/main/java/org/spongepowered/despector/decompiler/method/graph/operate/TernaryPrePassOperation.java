@@ -141,10 +141,13 @@ public class TernaryPrePassOperation implements GraphOperation {
         }
         Condition cond = ConditionBuilder.makeCondition(condition_blocks, locals, first_false, first_true);
         TernaryBlockSection ternary = new TernaryBlockSection(cond);
-        if (true_blocks.size() > 1) {
+        while (true_blocks.size() > 1) {
             true_blocks.add(consumer);
-            compileTernary(true_blocks, true_blocks.size() - 1, locals);
+            int n = compileTernary(true_blocks, true_blocks.size() - 1, locals);
             true_blocks.remove(consumer);
+            if (n == 0) {
+                break;
+            }
         }
         for (OpcodeBlock t : true_blocks) {
             if (t instanceof ProcessedOpcodeBlock) {
@@ -154,10 +157,13 @@ public class TernaryPrePassOperation implements GraphOperation {
                 ternary.getFalseBody().add(new InlineBlockSection(t));
             }
         }
-        if (false_blocks.size() > 1) {
+        while (false_blocks.size() > 1) {
             false_blocks.add(consumer);
-            compileTernary(false_blocks, false_blocks.size() - 1, locals);
+            int n = compileTernary(false_blocks, false_blocks.size() - 1, locals);
             false_blocks.remove(consumer);
+            if (n == 0) {
+                break;
+            }
         }
         for (OpcodeBlock t : false_blocks) {
             if (t instanceof ProcessedOpcodeBlock) {

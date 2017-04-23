@@ -31,8 +31,10 @@ import org.spongepowered.despector.ast.insn.Instruction;
 import org.spongepowered.despector.ast.insn.condition.AndCondition;
 import org.spongepowered.despector.ast.insn.condition.BooleanCondition;
 import org.spongepowered.despector.ast.insn.condition.CompareCondition;
+import org.spongepowered.despector.ast.insn.condition.CompareCondition.CompareOperator;
 import org.spongepowered.despector.ast.insn.condition.Condition;
 import org.spongepowered.despector.ast.insn.condition.OrCondition;
+import org.spongepowered.despector.ast.insn.misc.NumberCompare;
 import org.spongepowered.despector.ast.stmt.StatementBlock;
 import org.spongepowered.despector.decompiler.ir.Insn;
 import org.spongepowered.despector.decompiler.method.graph.data.opcode.ConditionalOpcodeBlock;
@@ -70,6 +72,10 @@ public final class ConditionBuilder {
                 throw new IllegalStateException();
             }
             Instruction val = dummy_stack.pop();
+            if (val instanceof NumberCompare) {
+                NumberCompare cmp = (NumberCompare) val;
+                return new CompareCondition(cmp.getLeftOperand(), cmp.getRightOperand(), CompareOperator.EQUAL);
+            }
             return new BooleanCondition(val, true);
         }
         case Insn.IFNE: {
@@ -77,6 +83,10 @@ public final class ConditionBuilder {
                 throw new IllegalStateException();
             }
             Instruction val = dummy_stack.pop();
+            if (val instanceof NumberCompare) {
+                NumberCompare cmp = (NumberCompare) val;
+                return new CompareCondition(cmp.getLeftOperand(), cmp.getRightOperand(), CompareOperator.NOT_EQUAL);
+            }
             return new BooleanCondition(val, false);
         }
         case Insn.IF_CMPEQ:

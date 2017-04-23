@@ -146,6 +146,14 @@ public class ConditionSimplificationTest {
         assertEquals(simple, simplified);
     }
 
+    @Test
+    public void testTrivial12() {
+        Condition complex = or(a, and(b, b));
+        Condition simple = or(a, b);
+        Condition simplified = ConditionUtil.simplifyCondition(complex);
+        assertEquals(simple, simplified);
+    }
+
     private static class MockInsn implements Instruction {
 
         private char c;

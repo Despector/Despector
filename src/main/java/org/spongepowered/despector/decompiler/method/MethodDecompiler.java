@@ -61,7 +61,7 @@ import java.util.Set;
  */
 public class MethodDecompiler {
 
-    public static final String targeted_breakpoint = "canPush";
+    public static final String targeted_breakpoint = "";
 
     private final List<GraphProducerStep> graph_producers = new ArrayList<>();
     private final List<GraphOperation> cleanup_operations = new ArrayList<>();
