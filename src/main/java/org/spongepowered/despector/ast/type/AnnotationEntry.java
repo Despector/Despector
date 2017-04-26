@@ -49,7 +49,7 @@ public class AnnotationEntry extends TypeEntry {
 
     @Override
     public void writeTo(MessagePacker pack) throws IOException {
-        super.writeTo(pack, 0, AstSerializer.ENTRY_ID_INTERFACE);
+        super.writeTo(pack, 0, AstSerializer.ENTRY_ID_ANNOTATIONTYPE);
     }
 
     @Override

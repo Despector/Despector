@@ -91,7 +91,10 @@ public class TryCatch implements Statement {
         pack.startMap(3);
         pack.writeString("id").writeInt(AstSerializer.STATEMENT_ID_TRY_CATCH);
         pack.writeString("body");
-        this.block.writeTo(pack);
+        pack.startArray(this.block.getStatementCount());
+        for (Statement stmt : this.block.getStatements()) {
+            stmt.writeTo(pack);
+        }
         pack.writeString("catch").startArray(this.catch_blocks.size());
         for (CatchBlock cat : this.catch_blocks) {
             pack.startMap(3);
@@ -100,7 +103,10 @@ public class TryCatch implements Statement {
                 pack.writeString(ex);
             }
             pack.writeString("block");
-            cat.getBlock().writeTo(pack);
+            pack.startArray(cat.getBlock().getStatementCount());
+            for (Statement stmt : cat.getBlock().getStatements()) {
+                stmt.writeTo(pack);
+            }
             if (cat.getExceptionLocal() != null) {
                 pack.writeString("local");
                 cat.getExceptionLocal().writeToSimple(pack);

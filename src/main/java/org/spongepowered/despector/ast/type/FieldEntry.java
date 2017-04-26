@@ -252,11 +252,7 @@ public class FieldEntry extends AstEntry {
 
     @Override
     public void writeTo(MessagePacker pack) throws IOException {
-        int len = 8;
-        if (this.init != null) {
-            len++;
-        }
-        pack.startMap(len);
+        pack.startMap(11);
         pack.writeString("id").writeInt(AstSerializer.ENTRY_ID_FIELD);
         pack.writeString("access").writeInt(this.access.ordinal());
         pack.writeString("name").writeString(this.name);
@@ -265,10 +261,9 @@ public class FieldEntry extends AstEntry {
         pack.writeString("final").writeBool(this.is_final);
         pack.writeString("static").writeBool(this.is_static);
         pack.writeString("synthetic").writeBool(this.is_synthetic);
-        if (this.init != null) {
-            pack.writeString("initializer");
-            this.init.writeTo(pack);
-        }
+        pack.writeString("volatile").writeBool(this.is_volatile);
+        pack.writeString("deprecated").writeBool(this.is_deprecated);
+        pack.writeString("transient").writeBool(this.is_transient);
         pack.writeString("annotations").startArray(this.annotations.size());
         for (Annotation anno : this.annotations.values()) {
             anno.writeTo(pack);

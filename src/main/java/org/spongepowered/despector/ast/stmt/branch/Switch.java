@@ -92,7 +92,10 @@ public class Switch implements Statement {
         for (Case cs : this.cases) {
             pack.startMap(4);
             pack.writeString("body");
-            cs.getBody().writeTo(pack);
+            pack.startArray(cs.getBody().getStatementCount());
+            for (Statement stmt : cs.getBody().getStatements()) {
+                stmt.writeTo(pack);
+            }
             pack.writeString("breaks").writeBool(cs.doesBreak());
             pack.writeString("default").writeBool(cs.isDefault());
             pack.writeString("indices").startArray(cs.getIndices().size());

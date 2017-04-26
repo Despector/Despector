@@ -158,7 +158,10 @@ public class For implements Statement, Breakable {
             pack.writeNil();
         }
         pack.writeString("body");
-        this.body.writeTo(pack);
+        pack.startArray(this.body.getStatementCount());
+        for (Statement stmt : this.body.getStatements()) {
+            stmt.writeTo(pack);
+        }
         pack.writeString("breakpoints").startArray(this.breaks.size());
         for (Break br : this.breaks) {
             pack.writeInt(((Object) br).hashCode());

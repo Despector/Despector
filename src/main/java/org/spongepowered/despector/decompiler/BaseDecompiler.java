@@ -474,20 +474,20 @@ public class BaseDecompiler implements Decompiler {
                 continue;
             }
             MethodEntry mth = unfinished.mth;
-            mth.setIR(this.bytecode.createIR(unfinished.code, mth.getLocals(), unfinished.catch_regions, pool, bootstrap_methods));
-
-            if (unfinished.parameter_annotations != null) {
-                for (Map.Entry<Integer, List<Annotation>> e : unfinished.parameter_annotations.entrySet()) {
-                    Local loc = mth.getLocals().getLocal(e.getKey());
-                    loc.getInstance(0).getAnnotations().addAll(e.getValue());
-                }
-            }
-
-            if (DUMP_IR_ON_LOAD) {
-                System.out.println("Instructions of " + mth.getName() + " " + mth.getDescription());
-                System.out.println(mth.getIR());
-            }
             try {
+                mth.setIR(this.bytecode.createIR(unfinished.code, mth.getLocals(), unfinished.catch_regions, pool, bootstrap_methods));
+
+                if (unfinished.parameter_annotations != null) {
+                    for (Map.Entry<Integer, List<Annotation>> e : unfinished.parameter_annotations.entrySet()) {
+                        Local loc = mth.getLocals().getLocal(e.getKey());
+                        loc.getInstance(0).getAnnotations().addAll(e.getValue());
+                    }
+                }
+
+                if (DUMP_IR_ON_LOAD) {
+                    System.out.println("Instructions of " + mth.getName() + " " + mth.getDescription());
+                    System.out.println(mth.getIR());
+                }
                 StatementBlock block = mth_decomp.decompile(mth);
                 mth.setInstructions(block);
             } catch (Exception ex) {

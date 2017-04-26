@@ -440,7 +440,7 @@ public abstract class TypeEntry extends AstEntry {
         private boolean is_synthetic;
 
         public InnerClassInfo(String name, String simple, String outer, int acc) {
-            this.name = name;
+            this.name = checkNotNull(name, "name");
             this.simple_name = simple;
             this.outer_name = outer;
             this.is_static = (acc & BaseDecompiler.ACC_STATIC) != 0;
@@ -456,8 +456,18 @@ public abstract class TypeEntry extends AstEntry {
         public void writeTo(MessagePacker pack) throws IOException {
             pack.startMap(8);
             pack.writeString("name").writeString(this.name);
-            pack.writeString("simple_name").writeString(this.simple_name);
-            pack.writeString("outer_name").writeString(this.outer_name);
+            pack.writeString("simple_name");
+            if (this.simple_name == null) {
+                pack.writeNil();
+            } else {
+                pack.writeString(this.simple_name);
+            }
+            pack.writeString("outer_name");
+            if (this.outer_name == null) {
+                pack.writeNil();
+            } else {
+                pack.writeString(this.outer_name);
+            }
             pack.writeString("static").writeBool(this.is_static);
             pack.writeString("final").writeBool(this.is_final);
             pack.writeString("abstract").writeBool(this.is_abstract);

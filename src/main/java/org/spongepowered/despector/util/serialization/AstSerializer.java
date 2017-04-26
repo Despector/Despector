@@ -39,6 +39,7 @@ public final class AstSerializer {
     public static final int ENTRY_ID_ARRAY = 0x05;
     public static final int ENTRY_ID_STATEMENT_BODY = 0x06;
     public static final int ENTRY_ID_ANNOTATION = 0x07;
+    public static final int ENTRY_ID_ANNOTATIONTYPE = 0x07;
 
     public static final int STATEMENT_ID_COMMENT = 0x10;
     public static final int STATEMENT_ID_INCREMENT = 0x11;

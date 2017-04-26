@@ -29,10 +29,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.common.collect.Lists;
 import org.spongepowered.despector.ast.AstVisitor;
 import org.spongepowered.despector.ast.insn.InstructionVisitor;
-import org.spongepowered.despector.util.serialization.AstSerializer;
-import org.spongepowered.despector.util.serialization.MessagePacker;
 
-import java.io.IOException;
 import java.util.List;
 
 /**
@@ -126,18 +123,6 @@ public class StatementBlock {
             for (Statement stmt : this.statements) {
                 stmt.accept(visitor);
             }
-        }
-    }
-
-    /**
-     * Writes this statement block to the given {@link MessagePacker}.
-     */
-    public void writeTo(MessagePacker pack) throws IOException {
-        pack.startMap(this.type == Type.METHOD ? 3 : 2);
-        pack.writeString("id").writeInt(AstSerializer.ENTRY_ID_STATEMENT_BODY);
-        pack.writeString("instructions").startArray(this.statements.size());
-        for (Statement stmt : this.statements) {
-            stmt.writeTo(pack);
         }
     }
 

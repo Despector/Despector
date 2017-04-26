@@ -35,6 +35,7 @@ import org.spongepowered.despector.ast.Locals;
 import org.spongepowered.despector.ast.SourceSet;
 import org.spongepowered.despector.ast.generic.MethodSignature;
 import org.spongepowered.despector.ast.generic.TypeSignature;
+import org.spongepowered.despector.ast.stmt.Statement;
 import org.spongepowered.despector.ast.stmt.StatementBlock;
 import org.spongepowered.despector.decompiler.ir.InsnBlock;
 import org.spongepowered.despector.util.TypeHelper;
@@ -292,20 +293,27 @@ public class MethodEntry extends AstEntry {
 
     @Override
     public void writeTo(MessagePacker pack) throws IOException {
-        pack.startMap(12);
+        pack.startMap(15);
         pack.writeString("id").writeInt(AstSerializer.ENTRY_ID_METHOD);
         pack.writeString("access").writeInt(this.access.ordinal());
         pack.writeString("owner").writeString(this.owner);
         pack.writeString("name").writeString(this.name);
+        pack.writeString("description").writeString(this.desc);
         pack.writeString("abstract").writeBool(this.is_abstract);
         pack.writeString("final").writeBool(this.is_final);
         pack.writeString("static").writeBool(this.is_static);
         pack.writeString("synthetic").writeBool(this.is_synthetic);
         pack.writeString("bridge").writeBool(this.is_bridge);
+        pack.writeString("varargs").writeBool(this.is_varargs);
+        pack.writeString("strictfp").writeBool(this.is_strictfp);
+        pack.writeString("synchronized").writeBool(this.is_synchronized);
+        pack.writeString("native").writeBool(this.is_native);
         pack.writeString("methodsignature");
         this.sig.writeTo(pack);
-        pack.writeString("instructions");
-        this.instructions.writeTo(pack);
+        pack.writeString("instructions").startArray(this.instructions.getStatementCount());
+        for (Statement stmt : this.instructions.getStatements()) {
+            stmt.writeTo(pack);
+        }
         pack.writeString("annotations").startArray(this.annotations.size());
         for (Annotation anno : this.annotations.values()) {
             anno.writeTo(pack);

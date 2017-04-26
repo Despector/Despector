@@ -137,18 +137,27 @@ public class If implements Statement {
         pack.writeString("condition");
         this.condition.writeTo(pack);
         pack.writeString("body");
-        this.block.writeTo(pack);
+        pack.startArray(this.block.getStatementCount());
+        for (Statement stmt : this.block.getStatements()) {
+            stmt.writeTo(pack);
+        }
         pack.writeString("elif").startArray(this.elif_blocks.size());
         for (Elif elif : this.elif_blocks) {
             pack.startMap(2);
             pack.writeString("condition");
             elif.getCondition().writeTo(pack);
             pack.writeString("body");
-            elif.getBody().writeTo(pack);
+            pack.startArray(elif.getBody().getStatementCount());
+            for (Statement stmt : elif.getBody().getStatements()) {
+                stmt.writeTo(pack);
+            }
         }
         if (this.else_block != null) {
             pack.writeString("else");
-            this.else_block.getElseBody().writeTo(pack);
+            pack.startArray(this.else_block.getElseBody().getStatementCount());
+            for (Statement stmt : this.else_block.getElseBody().getStatements()) {
+                stmt.writeTo(pack);
+            }
         }
     }
 

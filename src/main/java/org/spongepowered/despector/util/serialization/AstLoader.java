@@ -29,8 +29,13 @@ import org.spongepowered.despector.ast.AccessModifier;
 import org.spongepowered.despector.ast.Annotation;
 import org.spongepowered.despector.ast.SourceSet;
 import org.spongepowered.despector.ast.generic.ClassSignature;
+import org.spongepowered.despector.ast.generic.MethodSignature;
+import org.spongepowered.despector.ast.generic.TypeSignature;
+import org.spongepowered.despector.ast.type.AnnotationEntry;
 import org.spongepowered.despector.ast.type.ClassEntry;
+import org.spongepowered.despector.ast.type.EnumEntry;
 import org.spongepowered.despector.ast.type.FieldEntry;
+import org.spongepowered.despector.ast.type.InterfaceEntry;
 import org.spongepowered.despector.ast.type.MethodEntry;
 import org.spongepowered.despector.ast.type.TypeEntry;
 import org.spongepowered.despector.decompiler.BaseDecompiler;
@@ -74,12 +79,18 @@ public class AstLoader {
         unpack.readMap();
         expectKey(unpack, "id");
         int id = unpack.readInt();
+        expectKey(unpack, "language");
+        Language lang = Language.values()[unpack.readInt()];
+        expectKey(unpack, "name");
+        String name = unpack.readString();
         if (id == AstSerializer.ENTRY_ID_CLASS) {
-            expectKey(unpack, "lang");
-            Language lang = Language.values()[unpack.readInt()];
-            expectKey(unpack, "name");
-            String name = unpack.readString();
             entry = new ClassEntry(set, lang, name);
+        } else if (id == AstSerializer.ENTRY_ID_ENUM) {
+            entry = new EnumEntry(set, lang, name);
+        } else if (id == AstSerializer.ENTRY_ID_INTERFACE) {
+            entry = new InterfaceEntry(set, lang, name);
+        } else if (id == AstSerializer.ENTRY_ID_ANNOTATIONTYPE) {
+            entry = new AnnotationEntry(set, lang, name);
         }
         expectKey(unpack, "access");
         entry.setAccessModifier(AccessModifier.values()[unpack.readInt()]);
@@ -127,7 +138,7 @@ public class AstLoader {
         for (int i = 0; i < innerclasses; i++) {
             startMap(unpack, 8);
             expectKey(unpack, "name");
-            String name = unpack.readString();
+            String innername = unpack.readString();
             expectKey(unpack, "simple_name");
             String simple_name = unpack.readString();
             expectKey(unpack, "outer_name");
@@ -165,11 +176,18 @@ public class AstLoader {
             default:
                 break;
             }
-            entry.addInnerClass(name, simple_name, outer_name, acc);
+            entry.addInnerClass(innername, simple_name, outer_name, acc);
         }
         if (id == AstSerializer.ENTRY_ID_CLASS) {
             expectKey(unpack, "supername");
             ((ClassEntry) entry).setSuperclass(unpack.readString());
+        } else if (id == AstSerializer.ENTRY_ID_ENUM) {
+            expectKey(unpack, "enumconstants");
+            int csts = unpack.readArray();
+            EnumEntry e = (EnumEntry) entry;
+            for (int i = 0; i < csts; i++) {
+                e.addEnumConstant(unpack.readString());
+            }
         }
 
         return entry;
@@ -177,25 +195,106 @@ public class AstLoader {
 
     public static FieldEntry loadField(MessageUnpacker unpack, SourceSet set) throws IOException {
         unpack.readMap();
-
-        return null;
+        expectKey(unpack, "id");
+        int id = unpack.readInt();
+        if (id != AstSerializer.ENTRY_ID_FIELD) {
+            throw new IllegalStateException("Expected field");
+        }
+        FieldEntry entry = new FieldEntry(set);
+        expectKey(unpack, "access");
+        entry.setAccessModifier(AccessModifier.values()[unpack.readInt()]);
+        expectKey(unpack, "name");
+        entry.setName(unpack.readString());
+        expectKey(unpack, "type");
+        entry.setType(loadTypeSignature(unpack));
+        expectKey(unpack, "final");
+        entry.setFinal(unpack.readBool());
+        expectKey(unpack, "static");
+        entry.setStatic(unpack.readBool());
+        expectKey(unpack, "synthetic");
+        entry.setSynthetic(unpack.readBool());
+        expectKey(unpack, "volatile");
+        entry.setVolatile(unpack.readBool());
+        expectKey(unpack, "deprecated");
+        entry.setDeprecated(unpack.readBool());
+        expectKey(unpack, "transient");
+        entry.setTransient(unpack.readBool());
+        expectKey(unpack, "annotations");
+        int annotations = unpack.readArray();
+        for (int i = 0; i < annotations; i++) {
+            entry.addAnnotation(loadAnnotation(unpack, set));
+        }
+        return entry;
     }
 
     public static MethodEntry loadMethod(MessageUnpacker unpack, SourceSet set) throws IOException {
         unpack.readMap();
-
-        return null;
+        expectKey(unpack, "id");
+        int id = unpack.readInt();
+        if (id != AstSerializer.ENTRY_ID_METHOD) {
+            throw new IllegalStateException("Expected method");
+        }
+        MethodEntry entry = new MethodEntry(set);
+        expectKey(unpack, "access");
+        entry.setAccessModifier(AccessModifier.values()[unpack.readInt()]);
+        expectKey(unpack, "owner");
+        entry.setOwner(unpack.readString());
+        expectKey(unpack, "name");
+        entry.setName(unpack.readString());
+        expectKey(unpack, "desc");
+        entry.setDescription(unpack.readString());
+        expectKey(unpack, "abstract");
+        entry.setAbstract(unpack.readBool());
+        expectKey(unpack, "final");
+        entry.setFinal(unpack.readBool());
+        expectKey(unpack, "static");
+        entry.setStatic(unpack.readBool());
+        expectKey(unpack, "synthetic");
+        entry.setSynthetic(unpack.readBool());
+        expectKey(unpack, "bridge");
+        entry.setBridge(unpack.readBool());
+        expectKey(unpack, "varargs");
+        entry.setVarargs(unpack.readBool());
+        expectKey(unpack, "strictfp");
+        entry.setStrictFp(unpack.readBool());
+        expectKey(unpack, "synchronized");
+        entry.setSynchronized(unpack.readBool());
+        expectKey(unpack, "native");
+        entry.setNative(unpack.readBool());
+        expectKey(unpack, "methodsignature");
+        entry.setMethodSignature(loadMethodSignature(unpack));
+        expectKey(unpack, "instructions");
+        if (unpack.peekType() == MessageType.NIL) {
+            unpack.readNil();
+        } else {
+            throw new IllegalStateException();
+        }
+        expectKey(unpack, "annotations");
+        int annotations = unpack.readArray();
+        for (int i = 0; i < annotations; i++) {
+            entry.addAnnotation(loadAnnotation(unpack, set));
+        }
+        return entry;
     }
 
     public static Annotation loadAnnotation(MessageUnpacker unpack, SourceSet set) throws IOException {
         unpack.readMap();
-
-        return null;
+        throw new IllegalStateException();
     }
 
     public static ClassSignature loadClassSignature(MessageUnpacker unpack) {
 
-        return null;
+        throw new IllegalStateException();
+    }
+
+    public static MethodSignature loadMethodSignature(MessageUnpacker unpack) {
+
+        throw new IllegalStateException();
+    }
+
+    public static TypeSignature loadTypeSignature(MessageUnpacker unpack) {
+
+        throw new IllegalStateException();
     }
 
 }
