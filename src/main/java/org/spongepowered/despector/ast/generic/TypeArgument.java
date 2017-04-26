@@ -39,7 +39,8 @@ import javax.annotation.Nullable;
 public class TypeArgument {
 
     private WildcardType wildcard;
-    @Nullable private TypeSignature sig;
+    @Nullable
+    private TypeSignature sig;
 
     public TypeArgument(WildcardType wildcard, @Nullable TypeSignature sig) {
         this.wildcard = checkNotNull(wildcard, "wildcard");
@@ -98,6 +99,18 @@ public class TypeArgument {
         str.append(this.wildcard.getRepresentation());
         str.append(this.sig);
         return str.toString();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == this) {
+            return true;
+        }
+        if (!(o instanceof TypeArgument)) {
+            return false;
+        }
+        TypeArgument c = (TypeArgument) o;
+        return this.sig.equals(c.sig) && this.wildcard.equals(c.wildcard);
     }
 
 }

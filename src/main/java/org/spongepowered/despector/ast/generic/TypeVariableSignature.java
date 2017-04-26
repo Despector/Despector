@@ -91,4 +91,16 @@ public class TypeVariableSignature extends TypeSignature {
     public String toString() {
         return this.identifier;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == this) {
+            return true;
+        }
+        if (!(o instanceof TypeVariableSignature)) {
+            return false;
+        }
+        TypeVariableSignature c = (TypeVariableSignature) o;
+        return this.identifier.equals(c.identifier);
+    }
 }

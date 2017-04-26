@@ -65,7 +65,7 @@ public class StaticMethodInvokeEmitter implements InstructionEmitter<JavaEmitter
         boolean is_varargs = false;
         TypeEntry target = ctx.getType().getSource().get(arg.getOwnerType());
         if (target != null) {
-            MethodEntry mth = target.getStaticMethodSafe(arg.getMethodName(), arg.getMethodDescription());
+            MethodEntry mth = target.getStaticMethod(arg.getMethodName(), arg.getMethodDescription());
             if (mth != null) {
                 is_varargs = mth.isVarargs();
             }

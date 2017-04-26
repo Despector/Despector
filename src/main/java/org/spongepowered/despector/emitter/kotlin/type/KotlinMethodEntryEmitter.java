@@ -221,7 +221,7 @@ public class KotlinMethodEntryEmitter extends MethodEntryEmitter {
     }
 
     private List<Instruction> findDefaultValues(TypeEntry type, MethodEntry method) {
-        MethodEntry defaults = type.getStaticMethodSafe(method.getName() + "$default");
+        MethodEntry defaults = type.getStaticMethod(method.getName() + "$default");
         if (defaults == null) {
             return null;
         }

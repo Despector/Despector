@@ -218,87 +218,37 @@ public abstract class TypeEntry extends AstEntry {
     }
 
     /**
-     * Gets a static method with the given obfuscated name. If there is no
-     * method with this name then an {@link IllegalStateException} is thrown. If
-     * there are multiple methods defined with the same name then it is
-     * undefined which one is returned.
+     * Gets a static method with the given obfuscated name. If there are
+     * multiple methods defined with the same name then an exception may be
+     * thrown.
      */
     public MethodEntry getStaticMethod(String name) {
-        checkNotNull(name);
-        MethodEntry ret = findMethod(name, this.static_methods);
-        if (ret == null) {
-            throw new IllegalArgumentException("Unknown static method: " + name + " on class " + this);
-        }
-        return ret;
-    }
-
-    /**
-     * Gets a static method with the given obfuscated name and signature. If
-     * there is no method with this name then an {@link IllegalStateException}
-     * is thrown.
-     */
-    public MethodEntry getStaticMethod(String name, String sig) {
-        checkNotNull(name);
-        MethodEntry ret = findMethod(name, sig, this.static_methods);
-        if (ret == null) {
-            throw new IllegalArgumentException("Unknown single method: " + name + sig + " on class " + this);
-        }
-        return ret;
-    }
-
-    public MethodEntry getStaticMethodSafe(String name) {
         checkNotNull(name);
         return findMethod(name, this.static_methods);
     }
 
     /**
-     * Gets the static method with the given obfuscated name and signature, or
-     * null if not found.
+     * Gets a static method with the given obfuscated name and signature.
      */
-    public MethodEntry getStaticMethodSafe(String name, String sig) {
+    public MethodEntry getStaticMethod(String name, String sig) {
         checkNotNull(name);
         return findMethod(name, sig, this.static_methods);
     }
 
     /**
-     * Gets an instance method with the given name. If no method with the name
-     * is found then an {@link IllegalArgumentException} is thrown. If there are
-     * multiple instance methods with the same name then it is undefined which
-     * one is returned.
+     * Gets an instance method with the given name. If there are multiple
+     * instance methods with the same name then an exception may be thrown.
      */
     public MethodEntry getMethod(String name) {
-        checkNotNull(name);
-        MethodEntry ret = findMethod(name, this.methods);
-        if (ret == null) {
-            throw new IllegalArgumentException("Unknown method: " + name + " on class " + this);
-        }
-        return ret;
-    }
-
-    /**
-     * Gets the method with the given obfuscated name and signature from this
-     * type, if not found then an {@link IllegalArgumentException} is thrown.
-     */
-    public MethodEntry getMethod(String name, String sig) {
-        checkNotNull(name);
-        checkNotNull(sig);
-        MethodEntry ret = findMethod(name, sig, this.methods);
-        if (ret == null) {
-            throw new IllegalArgumentException("Unknown method: " + name + sig + " on class " + this);
-        }
-        return ret;
-    }
-
-    public MethodEntry getMethodSafe(String name) {
         checkNotNull(name);
         return findMethod(name, this.methods);
     }
 
     /**
-     * Gets the method with the given obfuscated name and signature from this
-     * type, or null if not found.
+     * Gets the method with the given name and signature from this type, or null
+     * if not found.
      */
-    public MethodEntry getMethodSafe(String name, String sig) {
+    public MethodEntry getMethod(String name, String sig) {
         checkNotNull(name);
         checkNotNull(sig);
         return findMethod(name, sig, this.methods);
@@ -310,13 +260,13 @@ public abstract class TypeEntry extends AstEntry {
     public void addMethod(MethodEntry m) {
         checkNotNull(m);
         if (m.isStatic()) {
-            MethodEntry existing = getStaticMethodSafe(m.getName(), m.getDescription());
+            MethodEntry existing = getStaticMethod(m.getName(), m.getDescription());
             if (existing != null) {
                 throw new IllegalArgumentException("Duplicate method " + existing);
             }
             this.static_methods.put(m.getName(), m);
         } else {
-            MethodEntry existing = getMethodSafe(m.getName(), m.getDescription());
+            MethodEntry existing = getMethod(m.getName(), m.getDescription());
             if (existing != null) {
                 throw new IllegalArgumentException("Duplicate method " + existing);
             }
@@ -340,27 +290,13 @@ public abstract class TypeEntry extends AstEntry {
         return this.static_methods.values();
     }
 
-    protected FieldEntry findField(String name, Map<String, FieldEntry> map) {
-        FieldEntry e = map.get(name);
-        return e;
-    }
-
     /**
      * Gets the static field with the given obfuscated name. If the field is not
      * found then an {@link IllegalStateException} is thrown.
      */
     public FieldEntry getStaticField(String name) {
         checkNotNull(name);
-        FieldEntry e = findField(name, this.static_fields);
-        if (e == null) {
-            throw new IllegalArgumentException("Unknown field: " + name + " on class " + this);
-        }
-        return e;
-    }
-
-    public FieldEntry getStaticFieldSafe(String name) {
-        checkNotNull(name);
-        return findField(name, this.static_fields);
+        return this.static_fields.get(name);
     }
 
     /**
@@ -369,16 +305,7 @@ public abstract class TypeEntry extends AstEntry {
      */
     public FieldEntry getField(String name) {
         checkNotNull(name);
-        FieldEntry e = findField(name, this.fields);
-        if (e == null) {
-            throw new IllegalArgumentException("Unknown field: " + name + " on class " + this);
-        }
-        return e;
-    }
-
-    public FieldEntry getFieldSafe(String name) {
-        checkNotNull(name);
-        return findField(name, this.fields);
+        return this.fields.get(name);
     }
 
     /**
@@ -460,11 +387,10 @@ public abstract class TypeEntry extends AstEntry {
         pack.startMap(len);
         pack.writeString("id").writeInt(id);
         pack.writeString("language").writeInt(this.lang.ordinal());
+        pack.writeString("name").writeString(this.name);
         pack.writeString("access").writeInt(this.access.ordinal());
         pack.writeString("synthetic").writeBool(this.is_synthetic);
         pack.writeString("final").writeBool(this.is_final);
-        pack.writeString("innerclass").writeBool(isInnerClass());
-        pack.writeString("name").writeString(this.name);
         pack.writeString("interfaces").startArray(this.interfaces.size());
         for (String inter : this.interfaces) {
             pack.writeString(inter);
@@ -569,6 +495,34 @@ public abstract class TypeEntry extends AstEntry {
 
         public boolean isSynthetic() {
             return this.is_synthetic;
+        }
+
+        @Override
+        public int hashCode() {
+            int h = 1;
+            h = h * 37 + this.name.hashCode();
+            h = h * 37 + this.simple_name.hashCode();
+            h = h * 37 + this.outer_name.hashCode();
+            h = h * 37 + this.access.ordinal();
+            h = h * 37 + (this.is_abstract ? 1 : 0);
+            h = h * 37 + (this.is_final ? 1 : 0);
+            h = h * 37 + (this.is_static ? 1 : 0);
+            h = h * 37 + (this.is_synthetic ? 1 : 0);
+            return h;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (o == this) {
+                return true;
+            }
+            if (!(o instanceof InnerClassInfo)) {
+                return false;
+            }
+            InnerClassInfo i = (InnerClassInfo) o;
+            return this.name.equals(i.name) && this.simple_name.equals(i.simple_name) && this.outer_name.equals(i.outer_name)
+                    && this.is_abstract == i.is_abstract && this.is_final == i.is_final && this.is_static == i.is_static
+                    && this.is_synthetic == i.is_synthetic && this.access == i.access;
         }
     }
 

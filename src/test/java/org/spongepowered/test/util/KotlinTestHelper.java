@@ -47,7 +47,7 @@ public class KotlinTestHelper {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        MethodEntry method = type.getStaticMethodSafe(method_name);
+        MethodEntry method = type.getStaticMethod(method_name);
         return getMethodAsString(type, method);
     }
 

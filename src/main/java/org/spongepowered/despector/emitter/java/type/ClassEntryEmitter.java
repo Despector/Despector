@@ -168,7 +168,7 @@ public class ClassEntryEmitter implements AstEmitter<JavaEmitterContext, ClassEn
 
             Map<String, Instruction> static_initializers = new HashMap<>();
 
-            MethodEntry static_init = type.getStaticMethodSafe("<clinit>");
+            MethodEntry static_init = type.getStaticMethod("<clinit>");
             if (static_init != null && static_init.getInstructions() != null) {
                 for (Statement stmt : static_init.getInstructions().getStatements()) {
                     if (!(stmt instanceof StaticFieldAssignment)) {

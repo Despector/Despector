@@ -114,6 +114,10 @@ public class Annotation {
         return this.values.get(key);
     }
 
+    public Map<String, Object> getValues() {
+        return this.values;
+    }
+
     /**
      * Gets all valid fields in this annotation.
      */

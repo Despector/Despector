@@ -112,7 +112,7 @@ public class KotlinEnumEntryEmitter implements AstEmitter<JavaEmitterContext, En
             efld.type = fld.getType();
             efld.is_final = fld.isFinal();
             fields.add(efld);
-            MethodEntry getter = type.getMethodSafe("get" + Character.toUpperCase(efld.name.charAt(0)) + efld.name.substring(1), "()" + efld.type);
+            MethodEntry getter = type.getMethod("get" + Character.toUpperCase(efld.name.charAt(0)) + efld.name.substring(1), "()" + efld.type);
             if (getter == null) {
                 efld.is_private = true;
             } else {

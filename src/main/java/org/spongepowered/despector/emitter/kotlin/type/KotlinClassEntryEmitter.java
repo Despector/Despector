@@ -64,7 +64,7 @@ public class KotlinClassEntryEmitter implements AstEmitter<JavaEmitterContext, C
     @Override
     public boolean emit(JavaEmitterContext ctx, ClassEntry type) {
 
-        if (type.getStaticMethodSafe("copy$default") != null) {
+        if (type.getStaticMethod("copy$default") != null) {
             KotlinDataClassEmitter data_emitter = ctx.getEmitterSet().getSpecialEmitter(KotlinDataClassEmitter.class);
             data_emitter.emit(ctx, type);
             return true;
@@ -167,7 +167,7 @@ public class KotlinClassEntryEmitter implements AstEmitter<JavaEmitterContext, C
 
             Map<String, Instruction> static_initializers = new HashMap<>();
 
-            MethodEntry static_init = type.getStaticMethodSafe("<clinit>");
+            MethodEntry static_init = type.getStaticMethod("<clinit>");
             if (static_init != null && static_init.getInstructions() != null) {
                 for (Statement stmt : static_init.getInstructions().getStatements()) {
                     if (!(stmt instanceof StaticFieldAssignment)) {

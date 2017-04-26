@@ -125,4 +125,16 @@ public class TypeParameter {
         return str.toString();
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (o == this) {
+            return true;
+        }
+        if (!(o instanceof TypeParameter)) {
+            return false;
+        }
+        TypeParameter c = (TypeParameter) o;
+        return this.class_bound.equals(c.class_bound) && this.identifier.equals(c.identifier) && this.interface_bounds.equals(c.interface_bounds);
+    }
+
 }

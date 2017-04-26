@@ -22,51 +22,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.despector.ast.generic;
+package org.spongepowered.test.serialization;
 
-import org.spongepowered.despector.util.serialization.AstSerializer;
-import org.spongepowered.despector.util.serialization.MessagePacker;
 
-import java.io.IOException;
+public class AstSerializationTest {
 
-/**
- * The void type signature.
- */
-public final class VoidTypeSignature extends TypeSignature {
-
-    public static final VoidTypeSignature VOID = new VoidTypeSignature();
-
-    private VoidTypeSignature() {
-    }
-
-    @Override
-    public boolean hasArguments() {
-        return false;
-    }
-
-    @Override
-    public String getName() {
-        return "void";
-    }
-
-    @Override
-    public String getDescriptor() {
-        return "V";
-    }
-
-    @Override
-    public void writeTo(MessagePacker pack) throws IOException {
-        pack.startMap(1);
-        pack.writeString("id").writeInt(AstSerializer.SIGNATURE_ID_TYPEVOID);
-    }
-
-    @Override
-    public String toString() {
-        return "void";
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        return o == VOID;
-    }
 }

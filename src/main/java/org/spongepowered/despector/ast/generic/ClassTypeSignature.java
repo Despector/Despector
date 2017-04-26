@@ -166,4 +166,20 @@ public class ClassTypeSignature extends TypeSignature {
         return str.toString();
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (o == this) {
+            return true;
+        }
+        if (!(o instanceof ClassTypeSignature)) {
+            if (o instanceof GenericClassTypeSignature) {
+                GenericClassTypeSignature g = (GenericClassTypeSignature) o;
+                return !g.hasArguments() && this.type_name.equals(g.getType());
+            }
+            return false;
+        }
+        ClassTypeSignature c = (ClassTypeSignature) o;
+        return c.type_name.equals(this.type_name);
+    }
+
 }

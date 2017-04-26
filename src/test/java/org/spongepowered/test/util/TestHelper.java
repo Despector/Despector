@@ -95,7 +95,7 @@ public class TestHelper {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        MethodEntry method = type.getStaticMethodSafe(method_name);
+        MethodEntry method = type.getStaticMethod(method_name);
         return getAsString(type, method);
     }
 
@@ -112,13 +112,13 @@ public class TestHelper {
 
     public static String getAsString(Class<?> cls, String method_name) {
         TypeEntry type = get(cls);
-        MethodEntry method = type.getMethodSafe(method_name);
+        MethodEntry method = type.getMethod(method_name);
         return getAsString(type, method);
     }
 
     public static void check(Class<?> cls, String method_name, String expected) {
         TypeEntry type = get(cls);
-        MethodEntry method = type.getMethodSafe(method_name);
+        MethodEntry method = type.getMethod(method_name);
         String actual = getAsString(type, method);
         if (!actual.equals(expected)) {
             System.err.println("Test " + method_name + " failed!");

@@ -140,4 +140,17 @@ public class MethodSignature {
         return str.toString();
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (o == this) {
+            return true;
+        }
+        if (!(o instanceof MethodSignature)) {
+            return false;
+        }
+        MethodSignature c = (MethodSignature) o;
+        return this.return_type.equals(c.return_type) && this.exceptions.equals(c.exceptions) && this.parameters.equals(c.parameters)
+                && this.type_parameters.equals(c.type_parameters);
+    }
+
 }

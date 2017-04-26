@@ -89,7 +89,7 @@ public class InstanceMethodInvokeEmitter implements InstructionEmitter<JavaEmitt
         boolean is_varargs = false;
         TypeEntry target = ctx.getType().getSource().get(arg.getOwnerType());
         if (target != null) {
-            MethodEntry mth = target.getMethodSafe(arg.getMethodName(), arg.getMethodDescription());
+            MethodEntry mth = target.getMethod(arg.getMethodName(), arg.getMethodDescription());
             // TODO need to search up superclasses if not found
             if (mth != null) {
                 is_varargs = mth.isVarargs();
