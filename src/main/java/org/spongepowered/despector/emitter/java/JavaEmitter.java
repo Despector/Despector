@@ -31,7 +31,7 @@ import org.spongepowered.despector.emitter.Emitters;
 /**
  * A java source emitter.
  */
-public class JavaEmitter implements Emitter {
+public class JavaEmitter implements Emitter<JavaEmitterContext> {
 
     @Override
     public void setup(JavaEmitterContext ctx) {

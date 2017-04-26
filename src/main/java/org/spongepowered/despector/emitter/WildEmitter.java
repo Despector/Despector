@@ -31,7 +31,7 @@ import org.spongepowered.despector.emitter.java.JavaEmitterContext;
 /**
  * An emitter than emits based on the type's detected language.
  */
-public class WildEmitter implements Emitter {
+public class WildEmitter implements Emitter<JavaEmitterContext> {
 
     @Override
     public void setup(JavaEmitterContext ctx) {

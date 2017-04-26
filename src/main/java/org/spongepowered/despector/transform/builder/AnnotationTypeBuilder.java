@@ -25,6 +25,10 @@
 package org.spongepowered.despector.transform.builder;
 
 
-public class AnnotationTypeBuilder extends TypeBuilder {
+public class AnnotationTypeBuilder extends TypeBuilder<AnnotationTypeBuilder> {
+
+    public AnnotationTypeBuilder(String name) {
+        super(name);
+    }
 
 }

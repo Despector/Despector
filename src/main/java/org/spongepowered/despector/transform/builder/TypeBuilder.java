@@ -24,6 +24,7 @@
  */
 package org.spongepowered.despector.transform.builder;
 
+import org.spongepowered.despector.ast.AccessModifier;
 import org.spongepowered.despector.ast.type.FieldEntry;
 import org.spongepowered.despector.ast.type.MethodEntry;
 import org.spongepowered.despector.ast.type.TypeEntry;
@@ -31,33 +32,53 @@ import org.spongepowered.despector.ast.type.TypeEntry;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class TypeBuilder {
+@SuppressWarnings("unchecked")
+public abstract class TypeBuilder<B extends TypeBuilder<B>> {
+
+    protected final String name;
+    private AccessModifier access;
 
     private final List<String> interfaces = new ArrayList<>();
 
     private final List<FieldEntry> fields = new ArrayList<>();
     private final List<MethodEntry> methods = new ArrayList<>();
 
-    public TypeBuilder implement(String inter) {
+    public TypeBuilder(String n) {
+        this.name = n;
+    }
+
+    public B implement(String inter) {
         this.interfaces.add(inter);
-        return this;
+        return (B) this;
+    }
+
+    public B access(AccessModifier acc) {
+        this.access = acc;
+        return (B) this;
     }
 
     public MethodBuilder method() {
-        return new MethodBuilder((m) -> this.methods.add(m));
+        return new MethodBuilder((m) -> {
+            this.methods.add(m);
+            m.setOwner(this.name);
+        });
     }
 
     public FieldBuilder field() {
-        return new FieldBuilder((m) -> this.fields.add(m));
+        return new FieldBuilder((m) -> {
+            this.fields.add(m);
+            m.setOwner(this.name);
+        });
     }
 
-    public TypeBuilder reset() {
+    public B reset() {
         this.interfaces.clear();
         this.methods.clear();
-        return this;
+        return (B) this;
     }
 
     protected void apply(TypeEntry type) {
+        type.setAccessModifier(this.access);
         type.getInterfaces().addAll(this.interfaces);
         for (MethodEntry m : this.methods) {
             type.addMethod(m);

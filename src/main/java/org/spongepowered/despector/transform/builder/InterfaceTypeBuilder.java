@@ -25,6 +25,10 @@
 package org.spongepowered.despector.transform.builder;
 
 
-public class InterfaceTypeBuilder extends TypeBuilder {
+public class InterfaceTypeBuilder extends TypeBuilder<InterfaceTypeBuilder> {
+
+    public InterfaceTypeBuilder(String name) {
+        super(name);
+    }
 
 }

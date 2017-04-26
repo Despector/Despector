@@ -24,12 +24,21 @@
  */
 package org.spongepowered.test.builder;
 
-import static org.spongepowered.despector.transform.builder.Builders.createClass;
+import static org.spongepowered.despector.transform.builder.Builders.*;
 
 import org.junit.Test;
+import org.spongepowered.despector.ast.AccessModifier;
+import org.spongepowered.despector.ast.Locals.LocalInstance;
 import org.spongepowered.despector.ast.SourceSet;
+import org.spongepowered.despector.ast.generic.ClassTypeSignature;
 import org.spongepowered.despector.ast.type.ClassEntry;
+import org.spongepowered.despector.emitter.Emitters;
+import org.spongepowered.despector.emitter.bytecode.BytecodeEmitterContext;
 import org.spongepowered.despector.transform.builder.ClassTypeBuilder;
+import org.spongepowered.despector.transform.builder.MethodBuilder;
+import org.spongepowered.test.util.TestHelper;
+
+import java.io.ByteArrayOutputStream;
 
 public class BuilderTest {
 
@@ -38,11 +47,20 @@ public class BuilderTest {
     @Test
     public void testSimple() {
         SourceSet set = new SourceSet();
-        ClassTypeBuilder builder = createClass("test.TestType");
-        builder.method().build(set);
+        ClassTypeBuilder builder = createClass("test/TestType").access(AccessModifier.PUBLIC);
+        MethodBuilder mth = builder.method().name("test_mth").desc("()V").setStatic(true);
+        LocalInstance i = mth.createLocal("i", ClassTypeSignature.INT);
+        mth.statement(localAssign(i, integer(65)))
+                .statement(returnVoid())
+                .build(set);
         ClassEntry entry = builder.build(set);
-        
-        // TODO bytecode emitter
+
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        BytecodeEmitterContext ctx = new BytecodeEmitterContext(out);
+        Emitters.BYTECODE.emit(ctx, entry);
+
+        String actual = TestHelper.getAsString(out.toByteArray(), "test_mth");
+        System.out.print(actual);
     }
 
     public static interface Built {

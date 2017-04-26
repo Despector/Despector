@@ -24,10 +24,28 @@
  */
 package org.spongepowered.despector.transform.builder;
 
+import org.spongepowered.despector.ast.Locals.LocalInstance;
+import org.spongepowered.despector.ast.insn.Instruction;
+import org.spongepowered.despector.ast.insn.cst.IntConstant;
+import org.spongepowered.despector.ast.stmt.assign.LocalAssignment;
+import org.spongepowered.despector.ast.stmt.misc.Return;
+
 public final class Builders {
 
     public static ClassTypeBuilder createClass(String name) {
         return new ClassTypeBuilder(name);
+    }
+
+    public static IntConstant integer(int val) {
+        return new IntConstant(val);
+    }
+
+    public static LocalAssignment localAssign(LocalInstance i, Instruction val) {
+        return new LocalAssignment(i, val);
+    }
+
+    public static Return returnVoid() {
+        return new Return();
     }
 
     private Builders() {

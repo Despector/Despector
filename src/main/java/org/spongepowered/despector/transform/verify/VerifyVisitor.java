@@ -336,6 +336,7 @@ public class VerifyVisitor implements TypeVisitor, StatementVisitor, Instruction
     @Override
     public void visitClassEntry(ClassEntry type) {
         this.type = type;
+        check(type.getSuperclass() != null, "Class supertype cannot be null");
     }
 
     @Override
@@ -378,7 +379,7 @@ public class VerifyVisitor implements TypeVisitor, StatementVisitor, Instruction
     @Override
     public void visitAnnotationEntry(AnnotationEntry type) {
         // TODO Auto-generated method stub
-        
+
     }
 
 }

@@ -28,13 +28,12 @@ import org.spongepowered.despector.Language;
 import org.spongepowered.despector.ast.SourceSet;
 import org.spongepowered.despector.ast.type.ClassEntry;
 
-public class ClassTypeBuilder extends TypeBuilder {
+public class ClassTypeBuilder extends TypeBuilder<ClassTypeBuilder> {
 
-    private final String name;
     private String supertype;
 
     public ClassTypeBuilder(String n) {
-        this.name = n;
+        super(n);
         reset();
     }
 

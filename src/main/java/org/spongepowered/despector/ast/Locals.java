@@ -122,6 +122,17 @@ public class Locals {
         return null;
     }
 
+    public List<LocalInstance> getAllInstances() {
+        List<LocalInstance> res = new ArrayList<>();
+        for (Local loc : this.locals) {
+            res.addAll(loc.getInstances());
+            if (loc.getParameterInstance() != null) {
+                res.add(loc.getParameterInstance());
+            }
+        }
+        return res;
+    }
+
     /**
      * Writes this locals set to the given {@link MessagePacker}.
      */

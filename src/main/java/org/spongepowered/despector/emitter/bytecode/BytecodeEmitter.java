@@ -22,24 +22,23 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.despector.emitter;
+package org.spongepowered.despector.emitter.bytecode;
 
 import org.spongepowered.despector.ast.type.TypeEntry;
-import org.spongepowered.despector.emitter.java.JavaEmitterContext;
+import org.spongepowered.despector.emitter.Emitter;
+import org.spongepowered.despector.emitter.Emitters;
 
-/**
- * A source emitter.
- */
-public interface Emitter<C extends AbstractEmitterContext> {
+public class BytecodeEmitter implements Emitter<BytecodeEmitterContext> {
 
-    /**
-     * Initializes the given {@link JavaEmitterContext} for this emitter type.
-     */
-    void setup(C ctx);
+    @Override
+    public void setup(BytecodeEmitterContext ctx) {
+        ctx.setEmitterSet(Emitters.BYTECODE_SET);
+    }
 
-    /**
-     * Emits the given type to the given {@link JavaEmitterContext}.
-     */
-    void emit(C ctx, TypeEntry type);
+    @Override
+    public void emit(BytecodeEmitterContext ctx, TypeEntry type) {
+        setup(ctx);
+        ctx.emitOuterType(type);
+    }
 
 }

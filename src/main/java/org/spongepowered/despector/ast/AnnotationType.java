@@ -28,8 +28,6 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
-import org.spongepowered.despector.ast.generic.GenericClassTypeSignature;
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -121,7 +119,7 @@ public class AnnotationType {
         if (o == this) {
             return true;
         }
-        if (!(o instanceof GenericClassTypeSignature)) {
+        if (!(o instanceof AnnotationType)) {
             return false;
         }
         AnnotationType c = (AnnotationType) o;

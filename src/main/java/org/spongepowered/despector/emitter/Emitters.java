@@ -78,7 +78,15 @@ import org.spongepowered.despector.ast.type.EnumEntry;
 import org.spongepowered.despector.ast.type.FieldEntry;
 import org.spongepowered.despector.ast.type.InterfaceEntry;
 import org.spongepowered.despector.ast.type.MethodEntry;
+import org.spongepowered.despector.emitter.bytecode.BytecodeEmitter;
+import org.spongepowered.despector.emitter.bytecode.BytecodeEmitterContext;
+import org.spongepowered.despector.emitter.bytecode.instruction.BytecodeIntConstantEmitter;
+import org.spongepowered.despector.emitter.bytecode.statement.BytecodeLocalAssignmentEmitter;
+import org.spongepowered.despector.emitter.bytecode.statement.BytecodeReturnEmitter;
+import org.spongepowered.despector.emitter.bytecode.type.BytecodeClassEntryEmitter;
+import org.spongepowered.despector.emitter.bytecode.type.BytecodeMethodEntryEmitter;
 import org.spongepowered.despector.emitter.java.JavaEmitter;
+import org.spongepowered.despector.emitter.java.JavaEmitterContext;
 import org.spongepowered.despector.emitter.java.condition.AndConditionEmitter;
 import org.spongepowered.despector.emitter.java.condition.BooleanConditionEmitter;
 import org.spongepowered.despector.emitter.java.condition.CompareConditionEmitter;
@@ -166,11 +174,14 @@ public final class Emitters {
 
     public static final EmitterSet JAVA_SET = new EmitterSet();
     public static final EmitterSet KOTLIN_SET = new EmitterSet();
+    public static final EmitterSet BYTECODE_SET = new EmitterSet();
 
-    public static final Emitter JAVA = new JavaEmitter();
-    public static final Emitter KOTLIN = new KotlinEmitter();
-    public static final Emitter WILD = new WildEmitter();
+    public static final Emitter<JavaEmitterContext> JAVA = new JavaEmitter();
+    public static final Emitter<JavaEmitterContext> KOTLIN = new KotlinEmitter();
+    public static final Emitter<?> WILD = new WildEmitter();
+    public static final Emitter<BytecodeEmitterContext> BYTECODE = new BytecodeEmitter();
 
+    @SuppressWarnings("rawtypes")
     private static final EnumMap<Language, Emitter> EMITTERS = new EnumMap<>(Language.class);
 
     static {
@@ -273,12 +284,21 @@ public final class Emitters {
         EMITTERS.put(Language.JAVA, JAVA);
         EMITTERS.put(Language.KOTLIN, KOTLIN);
         EMITTERS.put(Language.ANY, WILD);
+
+        BYTECODE_SET.setAstEmitter(ClassEntry.class, new BytecodeClassEntryEmitter());
+        BYTECODE_SET.setAstEmitter(MethodEntry.class, new BytecodeMethodEntryEmitter());
+
+        BYTECODE_SET.setStatementEmitter(LocalAssignment.class, new BytecodeLocalAssignmentEmitter());
+        BYTECODE_SET.setStatementEmitter(Return.class, new BytecodeReturnEmitter());
+
+        BYTECODE_SET.setInstructionEmitter(IntConstant.class, new BytecodeIntConstantEmitter());
     }
 
     /**
      * Gets the emitter for the given language.
      */
-    public static Emitter get(Language lang) {
+    @SuppressWarnings("unchecked")
+    public static <E extends AbstractEmitterContext> Emitter<E> get(Language lang) {
         return EMITTERS.get(lang);
     }
 

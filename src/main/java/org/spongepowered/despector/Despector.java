@@ -257,7 +257,7 @@ public final class Despector {
             }
         }
 
-        Emitter emitter = Emitters.get(LANGUAGE);
+        Emitter<JavaEmitterContext> emitter = Emitters.get(LANGUAGE);
 
         for (TypeEntry type : source.getAllClasses()) {
             if (type.isInnerClass() || type.isAnonType()) {

@@ -24,7 +24,10 @@
  */
 package org.spongepowered.despector.transform.builder;
 
+public class EnumTypeBuilder extends TypeBuilder<EnumTypeBuilder> {
 
-public class EnumTypeBuilder extends TypeBuilder {
+    public EnumTypeBuilder(String name) {
+        super(name);
+    }
 
 }
