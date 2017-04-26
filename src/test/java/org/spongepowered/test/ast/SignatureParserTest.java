@@ -29,9 +29,13 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 import org.spongepowered.despector.ast.generic.ClassSignature;
+import org.spongepowered.despector.ast.generic.ClassTypeSignature;
 import org.spongepowered.despector.ast.generic.GenericClassTypeSignature;
+import org.spongepowered.despector.ast.generic.TypeArgument;
 import org.spongepowered.despector.ast.generic.TypeParameter;
+import org.spongepowered.despector.ast.generic.TypeSignature;
 import org.spongepowered.despector.ast.generic.TypeVariableSignature;
+import org.spongepowered.despector.ast.generic.WildcardType;
 import org.spongepowered.despector.util.SignatureParser;
 
 public class SignatureParserTest {
@@ -68,6 +72,21 @@ public class SignatureParserTest {
         assertTrue(param1.getClassBound() instanceof GenericClassTypeSignature);
         GenericClassTypeSignature param1_classbound = (GenericClassTypeSignature) param1.getClassBound();
         assertEquals("Ljava/lang/Object;", param1_classbound.getType());
+    }
+
+    @Test
+    public void testBasic4() {
+        String sig = "Ljava/util/List<[I>;";
+        TypeSignature cls = SignatureParser.parseFieldTypeSignature(sig);
+        assertEquals(GenericClassTypeSignature.class, cls.getClass());
+        GenericClassTypeSignature g = (GenericClassTypeSignature) cls;
+        assertEquals("Ljava/util/List;", g.getDescriptor());
+        assertEquals(1, g.getArguments().size());
+        TypeArgument p = g.getArguments().get(0);
+        assertEquals(WildcardType.NONE, p.getWildcard());
+        TypeSignature ps = p.getSignature();
+        assertEquals(ClassTypeSignature.class, ps.getClass());
+        assertEquals("[I", ps.getDescriptor());
     }
 
 }

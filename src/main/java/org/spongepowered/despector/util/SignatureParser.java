@@ -128,6 +128,7 @@ public final class SignatureParser {
         if (ident.length() > 0) {
             if (VALID_PRIM.indexOf(next) != -1) {
                 ident.append(next);
+                parser.skip(1);
                 return ClassTypeSignature.of(ident.toString());
             }
         }
