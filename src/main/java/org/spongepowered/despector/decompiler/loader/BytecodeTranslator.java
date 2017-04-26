@@ -42,6 +42,7 @@ import org.spongepowered.despector.decompiler.ir.LongInsn;
 import org.spongepowered.despector.decompiler.ir.OpInsn;
 import org.spongepowered.despector.decompiler.ir.SwitchInsn;
 import org.spongepowered.despector.decompiler.ir.TypeInsn;
+import org.spongepowered.despector.decompiler.ir.TypeIntInsn;
 import org.spongepowered.despector.decompiler.ir.VarIntInsn;
 import org.spongepowered.despector.decompiler.loader.ClassConstantPool.ClassEntry;
 import org.spongepowered.despector.decompiler.loader.ClassConstantPool.DoubleEntry;
@@ -666,8 +667,14 @@ public class BytecodeTranslator {
             case 194: // MONITORENTER
             case 195: // MONITOREXIT
             case 196: // WIDE
-            case 197: // MULTINEWARRAY
                 throw new SourceFormatException("Unsupported java opcode: " + next);
+            case 197: {// MULTINEWARRAY
+                int index = ((code[i++] & 0xFF) << 8) | (code[i++] & 0xFF);
+                ClassEntry ref = pool.getClass(index);
+                int dims = code[i++] & 0xFF;
+                block.append(new TypeIntInsn(Insn.MULTINEWARRAY, ref.name, dims));
+                break;
+            }
             case 198: {// IFNULL
                 block.append(new LdcInsn(Insn.PUSH, null));
                 insn_starts.add(opcode_index);

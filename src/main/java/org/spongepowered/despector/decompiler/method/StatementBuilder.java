@@ -39,6 +39,7 @@ import org.spongepowered.despector.ast.insn.cst.StringConstant;
 import org.spongepowered.despector.ast.insn.cst.TypeConstant;
 import org.spongepowered.despector.ast.insn.misc.Cast;
 import org.spongepowered.despector.ast.insn.misc.InstanceOf;
+import org.spongepowered.despector.ast.insn.misc.MultiNewArray;
 import org.spongepowered.despector.ast.insn.misc.NewArray;
 import org.spongepowered.despector.ast.insn.misc.NumberCompare;
 import org.spongepowered.despector.ast.insn.op.NegativeOperator;
@@ -73,6 +74,7 @@ import org.spongepowered.despector.decompiler.ir.InvokeInsn;
 import org.spongepowered.despector.decompiler.ir.LdcInsn;
 import org.spongepowered.despector.decompiler.ir.LongInsn;
 import org.spongepowered.despector.decompiler.ir.TypeInsn;
+import org.spongepowered.despector.decompiler.ir.TypeIntInsn;
 import org.spongepowered.despector.decompiler.ir.VarIntInsn;
 import org.spongepowered.despector.decompiler.method.graph.data.opcode.OpcodeBlock;
 import org.spongepowered.despector.util.TypeHelper;
@@ -455,6 +457,15 @@ public final class StatementBuilder {
                 Instruction size = stack.pop();
                 TypeInsn array = (TypeInsn) next;
                 stack.push(new NewArray(array.getType(), size, null));
+                break;
+            }
+            case Insn.MULTINEWARRAY: {
+                TypeIntInsn array = (TypeIntInsn) next;
+                Instruction[] size = new Instruction[array.getValue()];
+                for (int i = 0; i < array.getValue(); i++) {
+                    size[i] = stack.pop();
+                }
+                stack.push(new MultiNewArray(array.getType(), size));
                 break;
             }
             case Insn.THROW:

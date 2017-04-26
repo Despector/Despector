@@ -172,7 +172,7 @@ public final class ConditionBuilder {
             } else {
                 int target = blocks.indexOf(next.getTarget());
                 if (target == -1) {
-                    System.err.println("Condition target was unknown block " + next.getTarget().getStart());
+                    throw new IllegalStateException("Condition target was unknown block " + next.getTarget().getStart());
                 }
                 node.setTarget(nodes.get(target));
             }

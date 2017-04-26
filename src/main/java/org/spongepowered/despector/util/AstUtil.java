@@ -37,6 +37,7 @@ import org.spongepowered.despector.ast.insn.cst.StringConstant;
 import org.spongepowered.despector.ast.insn.cst.TypeConstant;
 import org.spongepowered.despector.ast.insn.misc.Cast;
 import org.spongepowered.despector.ast.insn.misc.InstanceOf;
+import org.spongepowered.despector.ast.insn.misc.MultiNewArray;
 import org.spongepowered.despector.ast.insn.misc.NewArray;
 import org.spongepowered.despector.ast.insn.misc.NumberCompare;
 import org.spongepowered.despector.ast.insn.misc.Ternary;
@@ -404,6 +405,11 @@ public final class AstUtil {
 
         @Override
         public void visitTypeConstant(TypeConstant insn) {
+        }
+
+        @Override
+        public void visitMultiNewArray(MultiNewArray insn) {
+            
         }
 
     }

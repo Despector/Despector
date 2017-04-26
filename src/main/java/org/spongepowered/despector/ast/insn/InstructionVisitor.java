@@ -35,6 +35,7 @@ import org.spongepowered.despector.ast.insn.cst.StringConstant;
 import org.spongepowered.despector.ast.insn.cst.TypeConstant;
 import org.spongepowered.despector.ast.insn.misc.Cast;
 import org.spongepowered.despector.ast.insn.misc.InstanceOf;
+import org.spongepowered.despector.ast.insn.misc.MultiNewArray;
 import org.spongepowered.despector.ast.insn.misc.NewArray;
 import org.spongepowered.despector.ast.insn.misc.NumberCompare;
 import org.spongepowered.despector.ast.insn.misc.Ternary;
@@ -77,6 +78,8 @@ public interface InstructionVisitor extends AstVisitor {
     void visitLocalInstance(LocalInstance local);
 
     void visitLongConstant(LongConstant insn);
+
+    void visitMultiNewArray(MultiNewArray insn);
 
     void visitNegativeOperator(NegativeOperator insn);
 

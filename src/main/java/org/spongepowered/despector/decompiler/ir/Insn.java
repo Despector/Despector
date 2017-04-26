@@ -77,6 +77,7 @@ public abstract class Insn {
 
     public static final int IINC = 60;
     public static final int CMP = 61;
+    public static final int MULTINEWARRAY = 62;
 
     public static final int IFEQ = 70;
     public static final int IFNE = 71;

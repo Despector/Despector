@@ -38,6 +38,7 @@ import org.spongepowered.despector.ast.insn.cst.StringConstant;
 import org.spongepowered.despector.ast.insn.cst.TypeConstant;
 import org.spongepowered.despector.ast.insn.misc.Cast;
 import org.spongepowered.despector.ast.insn.misc.InstanceOf;
+import org.spongepowered.despector.ast.insn.misc.MultiNewArray;
 import org.spongepowered.despector.ast.insn.misc.NewArray;
 import org.spongepowered.despector.ast.insn.misc.NumberCompare;
 import org.spongepowered.despector.ast.insn.misc.Ternary;
@@ -380,6 +381,12 @@ public class VerifyVisitor implements TypeVisitor, StatementVisitor, Instruction
     public void visitAnnotationEntry(AnnotationEntry type) {
         // TODO Auto-generated method stub
 
+    }
+
+    @Override
+    public void visitMultiNewArray(MultiNewArray insn) {
+        // TODO Auto-generated method stub
+        
     }
 
 }

@@ -268,7 +268,8 @@ public class BaseDecompiler implements Decompiler {
                         int start_pc = data.readUnsignedShort();
                         int end_pc = data.readUnsignedShort();
                         int catch_pc = data.readUnsignedShort();
-                        String ex = pool.getClass(data.readUnsignedShort()).name;
+                        int ex_index = data.readUnsignedShort();
+                        String ex = ex_index != 0 ? pool.getClass(ex_index).name : "";
                         catch_regions.add(new TryCatchRegion(start_pc, end_pc, catch_pc, ex));
                     }
                     unfinished.code = code;
@@ -490,8 +491,10 @@ public class BaseDecompiler implements Decompiler {
                 StatementBlock block = mth_decomp.decompile(mth);
                 mth.setInstructions(block);
             } catch (Exception ex) {
-                System.err.println("Error decompiling method body for " + name + " " + mth.toString());
-                ex.printStackTrace();
+                if (!LibraryConfiguration.quiet) {
+                    System.err.println("Error decompiling method body for " + name + " " + mth.toString());
+                    ex.printStackTrace();
+                }
                 StatementBlock insns = new StatementBlock(StatementBlock.Type.METHOD);
                 if (ConfigManager.getConfig().print_opcodes_on_error) {
                     List<String> text = new ArrayList<>();
