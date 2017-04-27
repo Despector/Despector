@@ -197,6 +197,7 @@ public class AstLoader {
         String key = unpack.readString();
         if ("signature".equals(key)) {
             entry.setSignature(loadClassSignature(unpack));
+            expectKey(unpack, "annotations");
         } else if (!"annotations".equals(key)) {
             throw new IllegalStateException("Expected key annotations but was " + key);
         }
@@ -211,9 +212,19 @@ public class AstLoader {
             expectKey(unpack, "name");
             String innername = unpack.readString();
             expectKey(unpack, "simple_name");
-            String simple_name = unpack.readString();
+            String simple_name = null;
+            if (unpack.peekType() == MessageType.NIL) {
+                unpack.readNil();
+            } else {
+                simple_name = unpack.readString();
+            }
             expectKey(unpack, "outer_name");
-            String outer_name = unpack.readString();
+            String outer_name = null;
+            if (unpack.peekType() == MessageType.NIL) {
+                unpack.readNil();
+            } else {
+                outer_name = unpack.readString();
+            }
             int acc = 0;
             expectKey(unpack, "static");
             if (unpack.readBool()) {
@@ -299,7 +310,7 @@ public class AstLoader {
     }
 
     public static MethodEntry loadMethod(MessageUnpacker unpack, SourceSet set) throws IOException {
-        startMap(unpack, 16);
+        startMap(unpack, 18);
         expectKey(unpack, "id");
         int id = unpack.readInt();
         if (id != AstSerializer.ENTRY_ID_METHOD) {
@@ -312,7 +323,7 @@ public class AstLoader {
         entry.setOwner(unpack.readString());
         expectKey(unpack, "name");
         entry.setName(unpack.readString());
-        expectKey(unpack, "desc");
+        expectKey(unpack, "description");
         entry.setDescription(unpack.readString());
         expectKey(unpack, "abstract");
         entry.setAbstract(unpack.readBool());
@@ -353,7 +364,7 @@ public class AstLoader {
         return entry;
     }
 
-    private static Locals loadLocals(MessageUnpacker unpack, boolean is_static, SourceSet set) throws IOException {
+    public static Locals loadLocals(MessageUnpacker unpack, boolean is_static, SourceSet set) throws IOException {
         int size = unpack.readArray();
         Locals locals = new Locals(is_static);
 
@@ -383,6 +394,7 @@ public class AstLoader {
                 for (int k = 0; k < annotations; k++) {
                     insn.getAnnotations().add(loadAnnotation(unpack, set));
                 }
+                loc.addInstance(insn);
             }
         }
 
@@ -627,7 +639,12 @@ public class AstLoader {
         expectKey(unpack, "start");
         int start = unpack.readInt();
         expectKey(unpack, "type");
-        String type = unpack.readString();
+        String type = null;
+        if (unpack.peekType() != MessageType.NIL) {
+            type = unpack.readString();
+        } else {
+            unpack.readNil();
+        }
         Local loc = method_locals.getLocal(index);
         return loc.find(start, type);
     }
@@ -841,6 +858,7 @@ public class AstLoader {
                 expectKey(unpack, "elif");
                 int sz = unpack.readArray();
                 for (int i = 0; i < sz; i++) {
+                    startMap(unpack, 2);
                     expectKey(unpack, "condition");
                     Condition elif_cond = loadCondition(unpack);
                     expectKey(unpack, "body");
@@ -849,7 +867,9 @@ public class AstLoader {
                 }
                 expectKey(unpack, "else");
                 StatementBlock else_body = loadBlock(unpack, StatementBlock.Type.IF);
-                iif.new Else(else_body);
+                if (else_body != null) {
+                    iif.new Else(else_body);
+                }
                 return iif;
             } catch (IOException e) {
                 Throwables.propagate(e);
@@ -1037,6 +1057,7 @@ public class AstLoader {
                 expectKey(unpack, "size");
                 Instruction size = loadInstruction(unpack);
                 Instruction[] values = null;
+                expectKey(unpack, "values");
                 if (unpack.peekType() == MessageType.NIL) {
                     unpack.readNil();
                 } else {

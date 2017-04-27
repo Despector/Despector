@@ -152,6 +152,7 @@ public class Annotation {
             for (Object obj : lst) {
                 writeObj(obj, pack);
             }
+            pack.endArray();
         } else if (o instanceof ClassTypeSignature) {
             ((ClassTypeSignature) o).writeTo(pack);
         } else if (o instanceof Annotation) {
@@ -161,8 +162,11 @@ public class Annotation {
             EnumConstant e = (EnumConstant) o;
             pack.writeString("enumtype").writeString(e.getEnumType());
             pack.writeString("constant").writeString(e.getConstantName());
+            pack.endMap();
+        } else {
+            throw new IllegalStateException("Cannot pack " + o.getClass().getSimpleName());
         }
-        throw new IllegalStateException("Cannot pack " + o.getClass().getSimpleName());
+        pack.endMap();
     }
 
     /**
@@ -182,7 +186,10 @@ public class Annotation {
             writeObj(this.type.getDefaultValue(key), pack);
             pack.writeString("value");
             writeObj(this.values.get(key), pack);
+            pack.endMap();
         }
+        pack.endArray();
+        pack.endMap();
     }
 
     public void accept(AstVisitor visitor) {

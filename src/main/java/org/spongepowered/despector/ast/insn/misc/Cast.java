@@ -99,6 +99,7 @@ public class Cast implements Instruction {
         this.val.writeTo(pack);
         pack.writeString("type");
         this.type.writeTo(pack);
+        pack.endMap();
     }
 
     @Override

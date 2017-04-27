@@ -95,6 +95,7 @@ public class TryCatch implements Statement {
         for (Statement stmt : this.block.getStatements()) {
             stmt.writeTo(pack);
         }
+        pack.endArray();
         pack.writeString("catch").startArray(this.catch_blocks.size());
         for (CatchBlock cat : this.catch_blocks) {
             pack.startMap(3);
@@ -102,18 +103,23 @@ public class TryCatch implements Statement {
             for (String ex : cat.getExceptions()) {
                 pack.writeString(ex);
             }
+            pack.endArray();
             pack.writeString("block");
             pack.startArray(cat.getBlock().getStatementCount());
             for (Statement stmt : cat.getBlock().getStatements()) {
                 stmt.writeTo(pack);
             }
+            pack.endArray();
             if (cat.getExceptionLocal() != null) {
                 pack.writeString("local");
                 cat.getExceptionLocal().writeToSimple(pack);
             } else {
                 pack.writeString("dummy_name").writeString(cat.getDummyName());
             }
+            pack.endMap();
         }
+        pack.endArray();
+        pack.endMap();
     }
 
     @Override

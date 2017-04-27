@@ -141,6 +141,7 @@ public class If implements Statement {
         for (Statement stmt : this.block.getStatements()) {
             stmt.writeTo(pack);
         }
+        pack.endArray();
         pack.writeString("elif").startArray(this.elif_blocks.size());
         for (Elif elif : this.elif_blocks) {
             pack.startMap(2);
@@ -151,16 +152,21 @@ public class If implements Statement {
             for (Statement stmt : elif.getBody().getStatements()) {
                 stmt.writeTo(pack);
             }
+            pack.endArray();
+            pack.endMap();
         }
+        pack.endArray();
         pack.writeString("else");
         if (this.else_block != null) {
             pack.startArray(this.else_block.getElseBody().getStatementCount());
             for (Statement stmt : this.else_block.getElseBody().getStatements()) {
                 stmt.writeTo(pack);
             }
+            pack.endArray();
         } else {
             pack.writeNil();
         }
+        pack.endMap();
     }
 
     @Override

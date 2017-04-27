@@ -77,6 +77,8 @@ public class AndCondition extends Condition {
         for (Condition arg : this.args) {
             arg.writeTo(pack);
         }
+        pack.endArray();
+        pack.endMap();
     }
 
     @Override

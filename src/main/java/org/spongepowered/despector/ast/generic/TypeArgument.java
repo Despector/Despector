@@ -89,6 +89,7 @@ public class TypeArgument {
         } else {
             pack.writeNil();
         }
+        pack.endMap();
     }
 
     @Override

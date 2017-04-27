@@ -99,6 +99,7 @@ public class Increment implements Statement {
         pack.writeString("local");
         this.local.writeToSimple(pack);
         pack.writeString("increment").writeInt(this.val);
+        pack.endMap();
     }
 
     @Override

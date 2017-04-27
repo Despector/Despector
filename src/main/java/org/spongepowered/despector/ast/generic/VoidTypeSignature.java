@@ -58,6 +58,7 @@ public final class VoidTypeSignature extends TypeSignature {
     public void writeTo(MessagePacker pack) throws IOException {
         pack.startMap(1);
         pack.writeString("id").writeInt(AstSerializer.SIGNATURE_ID_TYPEVOID);
+        pack.endMap();
     }
 
     @Override

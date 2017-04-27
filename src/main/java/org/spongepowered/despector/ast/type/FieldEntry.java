@@ -268,6 +268,8 @@ public class FieldEntry extends AstEntry {
         for (Annotation anno : this.annotations.values()) {
             anno.writeTo(pack);
         }
+        pack.endArray();
+        pack.endMap();
     }
 
     public void accept(AstVisitor visitor) {

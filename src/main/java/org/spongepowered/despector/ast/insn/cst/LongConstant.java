@@ -75,6 +75,7 @@ public class LongConstant extends Constant {
         pack.startMap(2);
         pack.writeString("id").writeInt(AstSerializer.STATEMENT_ID_LONG_CONSTANT);
         pack.writeString("cst").writeInt(this.cst);
+        pack.endMap();
     }
 
     @Override

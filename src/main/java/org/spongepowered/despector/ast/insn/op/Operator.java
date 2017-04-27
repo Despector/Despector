@@ -114,6 +114,7 @@ public class Operator implements Instruction {
         pack.writeString("right");
         this.right.writeTo(pack);
         pack.writeString("operator").writeInt(this.operator.ordinal());
+        pack.endMap();
     }
 
     @Override

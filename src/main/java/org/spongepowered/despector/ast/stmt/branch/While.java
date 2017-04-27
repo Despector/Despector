@@ -107,11 +107,14 @@ public class While implements Statement, Breakable {
         for (Break br : this.breaks) {
             pack.writeInt(((Object) br).hashCode());
         }
+        pack.endArray();
         pack.writeString("body");
         pack.startArray(this.body.getStatementCount());
         for (Statement stmt : this.body.getStatements()) {
             stmt.writeTo(pack);
         }
+        pack.endArray();
+        pack.endMap();
     }
 
     @Override

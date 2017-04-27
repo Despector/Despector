@@ -89,6 +89,7 @@ public class BooleanCondition extends Condition {
         pack.writeString("val");
         this.value.writeTo(pack);
         pack.writeString("inverse").writeBool(this.inverse);
+        pack.endMap();
     }
 
     @Override

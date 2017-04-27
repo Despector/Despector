@@ -119,6 +119,8 @@ public class New implements Instruction {
         for (Instruction insn : this.params) {
             insn.writeTo(pack);
         }
+        pack.endArray();
+        pack.endMap();
     }
 
     @Override

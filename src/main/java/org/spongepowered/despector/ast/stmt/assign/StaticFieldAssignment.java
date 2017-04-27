@@ -59,6 +59,7 @@ public class StaticFieldAssignment extends FieldAssignment {
         pack.writeString("owner").writeString(this.owner_type);
         pack.writeString("val");
         this.val.writeTo(pack);
+        pack.endMap();
     }
 
     @Override

@@ -1,5 +1,4 @@
 /*
-
  * The MIT License (MIT)
  *
  * Copyright (c) Despector <https://despector.voxelgenesis.com>
@@ -81,6 +80,7 @@ public class LocalAccess implements Instruction {
         pack.writeString("id").writeInt(AstSerializer.STATEMENT_ID_LOCAL_ACCESS);
         pack.writeString("local");
         this.local.writeToSimple(pack);
+        pack.endMap();
     }
 
     @Override

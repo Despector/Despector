@@ -85,6 +85,7 @@ public class Return implements Statement {
         } else {
             pack.writeNil();
         }
+        pack.endMap();
     }
 
     @Override

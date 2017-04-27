@@ -73,6 +73,8 @@ public class StaticMethodInvoke extends MethodInvoke {
         for (Instruction insn : this.params) {
             insn.writeTo(pack);
         }
+        pack.endArray();
+        pack.endMap();
     }
 
 }

@@ -203,7 +203,7 @@ public class ForEachPostProcessor implements StatementPostProcessor {
         }
         LocalAssignment array_assign = (LocalAssignment) block.getStatement(i - 2);
         LocalInstance array = array_assign.getLocal();
-        if (!array.getType().isArray()) {
+        if (array.getType() == null || !array.getType().isArray()) {
             return false;
         }
         if (!ARRAY_ITERATOR_SIZE.matches(ctx, block.getStatement(i - 1))) {

@@ -24,7 +24,43 @@
  */
 package org.spongepowered.test.serialization;
 
+import org.junit.Assert;
+import org.junit.Test;
+import org.spongepowered.despector.ast.Locals;
+import org.spongepowered.despector.ast.Locals.Local;
+import org.spongepowered.despector.ast.Locals.LocalInstance;
+import org.spongepowered.despector.ast.SourceSet;
+import org.spongepowered.despector.ast.generic.ClassTypeSignature;
+import org.spongepowered.despector.util.serialization.AstLoader;
+import org.spongepowered.despector.util.serialization.MessagePacker;
+import org.spongepowered.despector.util.serialization.MessageUnpacker;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 
 public class AstSerializationTest {
+
+    @Test
+    public void testLocals() throws IOException {
+        Locals locals = new Locals(false);
+        Local l = locals.getLocal(0);
+        LocalInstance a = new LocalInstance(l, "this", null, -1, -1);
+        l.addInstance(a);
+        l = locals.getLocal(1);
+        LocalInstance b = new LocalInstance(l, "i", ClassTypeSignature.INT, -1, -1);
+        l.addInstance(b);
+
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        MessagePacker pack = new MessagePacker(out);
+        locals.writeTo(pack);
+        MessageUnpacker unpack = new MessageUnpacker(new ByteArrayInputStream(out.toByteArray()));
+        Locals loaded = AstLoader.loadLocals(unpack, false, new SourceSet());
+
+        l = loaded.getLocal(0);
+        Assert.assertEquals(a, l.getParameterInstance());
+        l = loaded.getLocal(1);
+        Assert.assertEquals(b, l.getParameterInstance());
+    }
 
 }

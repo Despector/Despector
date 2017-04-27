@@ -157,6 +157,7 @@ public class ClassTypeSignature extends TypeSignature {
         pack.startMap(2);
         pack.writeString("id").writeInt(AstSerializer.SIGNATURE_ID_TYPECLASS);
         pack.writeString("type").writeString(this.type_name);
+        pack.endMap();
     }
 
     @Override

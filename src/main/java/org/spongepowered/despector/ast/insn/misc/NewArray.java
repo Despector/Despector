@@ -128,9 +128,11 @@ public class NewArray implements Instruction {
             for (Instruction insn : this.values) {
                 insn.writeTo(pack);
             }
+            pack.endArray();
         } else {
             pack.writeNil();
         }
+        pack.endMap();
     }
 
     @Override

@@ -109,6 +109,7 @@ public class DynamicInvoke implements Instruction {
         pack.writeString("owner").writeString(this.lambda_owner);
         pack.writeString("method").writeString(this.lambda_method);
         pack.writeString("desc").writeString(this.lambda_desc);
+        pack.endMap();
     }
 
 }

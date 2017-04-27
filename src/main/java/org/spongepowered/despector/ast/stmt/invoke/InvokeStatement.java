@@ -81,6 +81,7 @@ public class InvokeStatement implements Statement {
         pack.writeString("id").writeInt(AstSerializer.STATEMENT_ID_INVOKE);
         pack.writeString("inner");
         this.inner.writeTo(pack);
+        pack.endMap();
     }
 
 }

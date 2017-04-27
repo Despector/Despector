@@ -80,8 +80,10 @@ public class InstanceMethodInvoke extends MethodInvoke {
         for (Instruction insn : this.params) {
             insn.writeTo(pack);
         }
+        pack.endArray();
         pack.writeString("callee");
         this.callee.writeTo(pack);
+        pack.endMap();
     }
 
     @Override

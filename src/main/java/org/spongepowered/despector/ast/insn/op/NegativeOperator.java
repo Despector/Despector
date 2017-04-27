@@ -79,6 +79,7 @@ public class NegativeOperator implements Instruction {
         pack.writeString("id").writeInt(AstSerializer.STATEMENT_ID_NEGATIVE_OPERATOR);
         pack.writeString("val");
         this.val.writeTo(pack);
+        pack.endMap();
     }
 
     @Override

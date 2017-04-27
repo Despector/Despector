@@ -75,6 +75,7 @@ public class DoubleConstant extends Constant {
         pack.startMap(2);
         pack.writeString("id").writeInt(AstSerializer.STATEMENT_ID_DOUBLE_CONSTANT);
         pack.writeString("cst").writeDouble(this.cst);
+        pack.endMap();
     }
 
     @Override

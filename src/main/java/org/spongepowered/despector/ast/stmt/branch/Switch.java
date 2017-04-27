@@ -96,13 +96,18 @@ public class Switch implements Statement {
             for (Statement stmt : cs.getBody().getStatements()) {
                 stmt.writeTo(pack);
             }
+            pack.endArray();
             pack.writeString("breaks").writeBool(cs.doesBreak());
             pack.writeString("default").writeBool(cs.isDefault());
             pack.writeString("indices").startArray(cs.getIndices().size());
             for (Integer index : cs.getIndices()) {
                 pack.writeInt(index);
             }
+            pack.endArray();
+            pack.endMap();
         }
+        pack.endArray();
+        pack.endMap();
     }
 
     @Override

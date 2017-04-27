@@ -175,6 +175,7 @@ public class CompareCondition extends Condition {
         pack.writeString("right");
         this.right.writeTo(pack);
         pack.writeString("op").writeInt(this.op.ordinal());
+        pack.endMap();
     }
 
     @Override

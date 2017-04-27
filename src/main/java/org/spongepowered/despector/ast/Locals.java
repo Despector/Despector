@@ -152,7 +152,10 @@ public class Locals {
             if (loc.isParameter()) {
                 loc.getParameterInstance().writeTo(pack);
             }
+            pack.endArray();
+            pack.endMap();
         }
+        pack.endArray();
     }
 
     /**
@@ -262,12 +265,14 @@ public class Locals {
          * Finds an instance for the given label and type.
          */
         public LocalInstance find(int start, String type) {
-            if (start == -1) {
+            if (start == -1 && this.parameter_instance != null) {
                 return this.parameter_instance;
             }
             for (LocalInstance local : this.instances) {
-                if (local.getStart() == start && local.getType().getDescriptor().equals(type)) {
-                    return local;
+                if (local.getStart() == start) {
+                    if (local.getType() == null || (local.getType().getDescriptor().equals(type))) {
+                        return local;
+                    }
                 }
             }
             return null;
@@ -365,7 +370,12 @@ public class Locals {
             pack.writeString("local").writeInt(this.local.getIndex());
             pack.writeString("start").writeInt(this.start);
             pack.writeString("type");
-            pack.writeString(this.type.getDescriptor());
+            if (this.type != null) {
+                pack.writeString(this.type.getDescriptor());
+            } else {
+                pack.writeNil();
+            }
+            pack.endMap();
         }
 
         /**
@@ -375,7 +385,11 @@ public class Locals {
             pack.startMap(6);
             pack.writeString("name").writeString(this.name);
             pack.writeString("type");
-            this.type.writeTo(pack);
+            if (this.type != null) {
+                this.type.writeTo(pack);
+            } else {
+                pack.writeNil();
+            }
             pack.writeString("start").writeInt(this.start);
             pack.writeString("end").writeInt(this.end);
             pack.writeString("final").writeBool(this.effectively_final);
@@ -383,11 +397,28 @@ public class Locals {
             for (Annotation anno : this.annotations) {
                 anno.writeTo(pack);
             }
+            pack.endArray();
+            pack.endMap();
         }
 
         @Override
         public String toString() {
             return this.name != null ? this.name : this.local.toString();
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (o == this) {
+                return true;
+            }
+            if (!(o instanceof LocalInstance)) {
+                return false;
+            }
+            LocalInstance l = (LocalInstance) o;
+            if (this.type != null && !this.type.equals(l.type)) {
+                return false;
+            }
+            return this.name.equals(l.name) && this.start == l.start && this.end == l.end;
         }
 
     }

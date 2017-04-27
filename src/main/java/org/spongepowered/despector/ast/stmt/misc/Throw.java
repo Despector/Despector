@@ -74,6 +74,7 @@ public class Throw implements Statement {
         pack.writeString("id").writeInt(AstSerializer.STATEMENT_ID_THROW);
         pack.writeString("ex");
         this.ex.writeTo(pack);
+        pack.endMap();
     }
 
     @Override

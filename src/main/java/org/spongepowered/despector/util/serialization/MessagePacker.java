@@ -31,6 +31,8 @@ import com.google.common.base.Charsets;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.ArrayDeque;
+import java.util.Deque;
 
 /**
  * A serializer for writing files using the messagepack format.
@@ -45,6 +47,7 @@ public class MessagePacker implements AutoCloseable {
     private static final int MAX_FIXSTRING_LENGTH = 31;
 
     private final DataOutputStream stream;
+    private final Deque<Frame> frames = new ArrayDeque<>();
 
     public MessagePacker(OutputStream str) {
         if (str instanceof DataOutputStream) {
@@ -52,6 +55,7 @@ public class MessagePacker implements AutoCloseable {
         } else {
             this.stream = new DataOutputStream(str);
         }
+        this.frames.push(new Frame(FrameType.MAP, 1));
     }
 
     @Override
@@ -63,6 +67,7 @@ public class MessagePacker implements AutoCloseable {
      * Writes a nil value.
      */
     public MessagePacker writeNil() throws IOException {
+        decreaseFrame();
         this.stream.writeByte(TYPE_NIL);
         return this;
     }
@@ -71,6 +76,7 @@ public class MessagePacker implements AutoCloseable {
      * Writes a boolean value.
      */
     public MessagePacker writeBool(boolean val) throws IOException {
+        decreaseFrame();
         this.stream.writeByte(val ? TYPE_BOOL_TRUE : TYPE_BOOL_FALSE);
         return this;
     }
@@ -79,6 +85,7 @@ public class MessagePacker implements AutoCloseable {
      * Writes an integer value.
      */
     public MessagePacker writeInt(long val) throws IOException {
+        decreaseFrame();
         if (val >= 0 && val <= MAX_POSITIVE_FIXINT) {
             this.stream.writeByte((int) (val & MAX_POSITIVE_FIXINT));
         } else if (val < 0 && val >= MIN_NEGATUVE_FIXINT) {
@@ -103,6 +110,7 @@ public class MessagePacker implements AutoCloseable {
      * Writes an unsigned integer value.
      */
     public MessagePacker writeUnsignedInt(long val) throws IOException {
+        decreaseFrame();
         if (val <= MAX_POSITIVE_FIXINT) {
             this.stream.writeByte((int) (val & MAX_POSITIVE_FIXINT));
         } else if (val <= BYTE_MASK) {
@@ -125,6 +133,7 @@ public class MessagePacker implements AutoCloseable {
      * Writes a 32-bit floating point value.
      */
     public MessagePacker writeFloat(float val) throws IOException {
+        decreaseFrame();
         this.stream.writeByte(TYPE_FLOAT);
         this.stream.writeFloat(val);
         return this;
@@ -134,6 +143,7 @@ public class MessagePacker implements AutoCloseable {
      * Writes a 64-bit floating point value.
      */
     public MessagePacker writeDouble(double val) throws IOException {
+        decreaseFrame();
         this.stream.writeByte(TYPE_DOUBLE);
         this.stream.writeDouble(val);
         return this;
@@ -143,19 +153,22 @@ public class MessagePacker implements AutoCloseable {
      * Writes a string value.
      */
     public MessagePacker writeString(String val) throws IOException {
-        if (val.length() <= MAX_FIXSTRING_LENGTH) {
-            this.stream.writeByte(TYPE_STR5_MASK | val.length());
-        } else if (val.length() < BYTE_MASK) {
+        decreaseStringFrame();
+        byte[] chars = val.getBytes(Charsets.UTF_8);
+        int len = chars.length;
+        if (len <= MAX_FIXSTRING_LENGTH) {
+            this.stream.writeByte(TYPE_STR5_MASK | len);
+        } else if (len < BYTE_MASK) {
             this.stream.writeByte(TYPE_STR8);
-            this.stream.writeByte(val.length());
-        } else if (val.length() < SHORT_MASK) {
+            this.stream.writeByte(len);
+        } else if (len < SHORT_MASK) {
             this.stream.writeByte(TYPE_STR16);
-            this.stream.writeShort(val.length());
+            this.stream.writeShort(len);
         } else {
             this.stream.writeByte(TYPE_STR32);
-            this.stream.writeInt(val.length());
+            this.stream.writeInt(len);
         }
-        this.stream.write(val.getBytes(Charsets.UTF_8));
+        this.stream.write(chars);
         return this;
     }
 
@@ -163,6 +176,7 @@ public class MessagePacker implements AutoCloseable {
      * Writes a binary value.
      */
     public MessagePacker writeBin(byte[] data) throws IOException {
+        decreaseFrame();
         if (data.length < BYTE_MASK) {
             this.stream.writeByte(TYPE_BIN8);
             this.stream.writeByte(data.length);
@@ -181,6 +195,7 @@ public class MessagePacker implements AutoCloseable {
      * Starts an array of values.
      */
     public MessagePacker startArray(int len) throws IOException {
+        decreaseFrame();
         if (len < NIBBLE_MASK) {
             this.stream.writeByte(TYPE_ARRAY8_MASK | len);
         } else if (len < SHORT_MASK) {
@@ -190,6 +205,18 @@ public class MessagePacker implements AutoCloseable {
             this.stream.writeByte(TYPE_ARRAY32);
             this.stream.writeInt(len);
         }
+        this.frames.push(new Frame(FrameType.ARRAY, len));
+        return this;
+    }
+
+    public MessagePacker endArray() {
+        Frame f = this.frames.pop();
+        if (f.type != FrameType.ARRAY) {
+            throw new IllegalStateException("Attempted to end map frame as array");
+        }
+        if (f.remaining != 0) {
+            throw new IllegalStateException("Frame underflow");
+        }
         return this;
     }
 
@@ -197,6 +224,7 @@ public class MessagePacker implements AutoCloseable {
      * Starts a map of key value pairs.
      */
     public MessagePacker startMap(int len) throws IOException {
+        decreaseFrame();
         if (len < NIBBLE_MASK) {
             this.stream.writeByte(TYPE_MAP8_MASK | len);
         } else if (len < SHORT_MASK) {
@@ -206,9 +234,56 @@ public class MessagePacker implements AutoCloseable {
             this.stream.writeByte(TYPE_MAP32);
             this.stream.writeInt(len);
         }
+        this.frames.push(new Frame(FrameType.MAP, len * 2));
         return this;
     }
 
+    public MessagePacker endMap() {
+        Frame f = this.frames.pop();
+        if (f.type != FrameType.MAP) {
+            throw new IllegalStateException("Attempted to end array frame as map");
+        }
+        if (f.remaining != 0) {
+            throw new IllegalStateException("Frame underflow");
+        }
+        return this;
+    }
+
+    private void decreaseFrame() {
+        Frame f = this.frames.peek();
+        if (f.type == FrameType.MAP && f.remaining % 2 == 0) {
+            throw new IllegalStateException("Expected map key");
+        }
+        f.remaining--;
+        if (f.remaining < 0) {
+            throw new IllegalStateException("Frame " + f.type.name() + " overflowed");
+        }
+    }
+
+    private void decreaseStringFrame() {
+        Frame f = this.frames.peek();
+        f.remaining--;
+        if (f.remaining < 0) {
+            throw new IllegalStateException("Frame " + f.type.name() + " overflowed");
+        }
+    }
+
     // TODO support EXT
+
+    private static class Frame {
+
+        public FrameType type;
+        public int remaining;
+
+        public Frame(FrameType type, int len) {
+            this.type = type;
+            this.remaining = len;
+        }
+    }
+
+    private static enum FrameType {
+        ARRAY,
+        MAP,
+    }
 
 }

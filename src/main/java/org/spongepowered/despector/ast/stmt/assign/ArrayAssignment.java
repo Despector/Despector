@@ -98,6 +98,7 @@ public class ArrayAssignment extends Assignment {
         this.index.writeTo(pack);
         pack.writeString("val");
         this.val.writeTo(pack);
+        pack.endMap();
     }
 
     @Override

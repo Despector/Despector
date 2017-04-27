@@ -77,6 +77,7 @@ public class TypeConstant extends Constant {
         pack.startMap(2);
         pack.writeString("id").writeInt(AstSerializer.STATEMENT_ID_TYPE_CONSTANT);
         pack.writeString("cst").writeString(this.cst.getDescriptor());
+        pack.endMap();
     }
 
     @Override

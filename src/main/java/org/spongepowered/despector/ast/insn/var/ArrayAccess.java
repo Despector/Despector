@@ -105,6 +105,7 @@ public class ArrayAccess implements Instruction {
         this.array.writeTo(pack);
         pack.writeString("index");
         this.index.writeTo(pack);
+        pack.endMap();
     }
 
     @Override

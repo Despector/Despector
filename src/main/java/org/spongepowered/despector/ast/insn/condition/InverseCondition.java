@@ -71,6 +71,7 @@ public class InverseCondition extends Condition {
         pack.writeString("id").writeInt(AstSerializer.CONDITION_ID_INVERSE);
         pack.writeString("val");
         this.value.writeTo(pack);
+        pack.endMap();
     }
 
     @Override

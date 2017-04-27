@@ -93,6 +93,7 @@ public class NumberCompare implements Instruction {
         this.left.writeTo(pack);
         pack.writeString("right");
         this.right.writeTo(pack);
+        pack.endMap();
     }
 
     @Override

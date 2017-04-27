@@ -88,6 +88,7 @@ public class ClassSignature {
         for (TypeParameter param : this.parameters) {
             param.writeTo(pack);
         }
+        pack.endArray();
         pack.writeString("superclass");
         if (this.superclass != null) {
             this.superclass.writeTo(pack);
@@ -98,6 +99,8 @@ public class ClassSignature {
         for (GenericClassTypeSignature sig : this.interfaces) {
             sig.writeTo(pack);
         }
+        pack.endArray();
+        pack.endMap();
     }
 
     @Override

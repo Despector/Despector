@@ -74,6 +74,8 @@ public class EnumEntry extends TypeEntry {
         for (String cst : this.enum_constants) {
             pack.writeString(cst);
         }
+        pack.endArray();
+        pack.endMap();
     }
 
     @Override

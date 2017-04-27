@@ -380,11 +380,7 @@ public abstract class TypeEntry extends AstEntry {
      * for how much extra space in the map to reserve for the subtypes values.
      */
     public void writeTo(MessagePacker pack, int extra, int id) throws IOException {
-        int len = 15 + extra;
-        if (this.signature != null) {
-            len++;
-        }
-        pack.startMap(len);
+        pack.startMap(14 + extra);
         pack.writeString("id").writeInt(id);
         pack.writeString("language").writeInt(this.lang.ordinal());
         pack.writeString("name").writeString(this.name);
@@ -395,34 +391,43 @@ public abstract class TypeEntry extends AstEntry {
         for (String inter : this.interfaces) {
             pack.writeString(inter);
         }
+        pack.endArray();
         pack.writeString("staticfields").startArray(this.static_fields.size());
         for (FieldEntry fld : this.static_fields.values()) {
             fld.writeTo(pack);
         }
+        pack.endArray();
         pack.writeString("fields").startArray(this.fields.size());
         for (FieldEntry fld : this.fields.values()) {
             fld.writeTo(pack);
         }
+        pack.endArray();
         pack.writeString("staticmethods").startArray(this.static_methods.size());
         for (MethodEntry mth : this.static_methods.values()) {
             mth.writeTo(pack);
         }
+        pack.endArray();
         pack.writeString("methods").startArray(this.methods.size());
         for (MethodEntry mth : this.methods.values()) {
             mth.writeTo(pack);
         }
+        pack.endArray();
+        pack.writeString("signature");
         if (this.signature != null) {
-            pack.writeString("signature");
             this.signature.writeTo(pack);
+        } else {
+            pack.writeNil();
         }
         pack.writeString("annotations").startArray(this.annotations.size());
         for (Annotation anno : this.annotations.values()) {
             anno.writeTo(pack);
         }
+        pack.endArray();
         pack.writeString("inner_classes").startArray(this.inner_classes.size());
         for (InnerClassInfo info : this.inner_classes.values()) {
             info.writeTo(pack);
         }
+        pack.endArray();
     }
 
     /**
@@ -473,6 +478,7 @@ public abstract class TypeEntry extends AstEntry {
             pack.writeString("abstract").writeBool(this.is_abstract);
             pack.writeString("synthetic").writeBool(this.is_synthetic);
             pack.writeString("access").writeInt(this.access.ordinal());
+            pack.endMap();
         }
 
         public String getName() {

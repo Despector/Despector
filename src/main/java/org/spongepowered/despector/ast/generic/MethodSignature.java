@@ -97,16 +97,20 @@ public class MethodSignature {
         for (TypeParameter param : this.type_parameters) {
             param.writeTo(pack);
         }
+        pack.endArray();
         pack.writeString("parameters").startArray(this.parameters.size());
         for (TypeSignature sig : this.parameters) {
             sig.writeTo(pack);
         }
+        pack.endArray();
         pack.writeString("exceptions").startArray(this.exceptions.size());
         for (TypeSignature sig : this.exceptions) {
             sig.writeTo(pack);
         }
+        pack.endArray();
         pack.writeString("returntype");
         this.return_type.writeTo(pack);
+        pack.endMap();
     }
 
     @Override

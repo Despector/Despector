@@ -74,6 +74,8 @@ public class Comment implements Statement {
         for (String line : this.comment_text) {
             pack.writeString(line);
         }
+        pack.endArray();
+        pack.endMap();
     }
 
     @Override

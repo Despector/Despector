@@ -57,6 +57,7 @@ public class StaticFieldAccess extends FieldAccess {
         pack.writeString("desc");
         this.field_desc.writeTo(pack);
         pack.writeString("owner").writeString(this.owner_type);
+        pack.endMap();
     }
 
     @Override

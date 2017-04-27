@@ -96,6 +96,8 @@ public class GenericClassTypeSignature extends TypeSignature {
         for (TypeArgument arg : this.args) {
             arg.writeTo(pack);
         }
+        pack.endArray();
+        pack.endMap();
     }
 
     @Override

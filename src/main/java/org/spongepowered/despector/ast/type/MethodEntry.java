@@ -293,7 +293,7 @@ public class MethodEntry extends AstEntry {
 
     @Override
     public void writeTo(MessagePacker pack) throws IOException {
-        pack.startMap(16);
+        pack.startMap(18);
         pack.writeString("id").writeInt(AstSerializer.ENTRY_ID_METHOD);
         pack.writeString("access").writeInt(this.access.ordinal());
         pack.writeString("owner").writeString(this.owner);
@@ -312,14 +312,22 @@ public class MethodEntry extends AstEntry {
         this.sig.writeTo(pack);
         pack.writeString("locals");
         this.locals.writeTo(pack);
-        pack.writeString("instructions").startArray(this.instructions.getStatementCount());
-        for (Statement stmt : this.instructions.getStatements()) {
-            stmt.writeTo(pack);
+        pack.writeString("instructions");
+        if (this.instructions != null) {
+            pack.startArray(this.instructions.getStatementCount());
+            for (Statement stmt : this.instructions.getStatements()) {
+                stmt.writeTo(pack);
+            }
+            pack.endArray();
+        } else {
+            pack.writeNil();
         }
         pack.writeString("annotations").startArray(this.annotations.size());
         for (Annotation anno : this.annotations.values()) {
             anno.writeTo(pack);
         }
+        pack.endArray();
+        pack.endMap();
     }
 
     public void accept(AstVisitor visitor) {

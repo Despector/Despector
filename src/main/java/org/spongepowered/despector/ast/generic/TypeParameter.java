@@ -103,6 +103,8 @@ public class TypeParameter {
         for (TypeSignature sig : this.interface_bounds) {
             sig.writeTo(pack);
         }
+        pack.endArray();
+        pack.endMap();
     }
 
     @Override

@@ -104,6 +104,8 @@ public class MultiNewArray implements Instruction {
         for (Instruction size : this.sizes) {
             size.writeTo(pack);
         }
+        pack.endArray();
+        pack.endMap();
     }
 
     @Override

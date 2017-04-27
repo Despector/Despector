@@ -80,6 +80,7 @@ public class InstanceFieldAssignment extends FieldAssignment {
         this.owner.writeTo(pack);
         pack.writeString("val");
         this.val.writeTo(pack);
+        pack.endMap();
     }
 
     @Override

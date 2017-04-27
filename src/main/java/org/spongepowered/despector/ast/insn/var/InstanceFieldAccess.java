@@ -79,6 +79,7 @@ public class InstanceFieldAccess extends FieldAccess {
         pack.writeString("owner").writeString(this.owner_type);
         pack.writeString("owner_val");
         this.owner.writeTo(pack);
+        pack.endMap();
     }
 
     @Override

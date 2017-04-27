@@ -81,6 +81,7 @@ public class LocalAssignment extends Assignment {
         this.local.writeToSimple(pack);
         pack.writeString("val");
         this.val.writeTo(pack);
+        pack.endMap();
     }
 
     @Override

@@ -106,6 +106,7 @@ public class Break implements Statement {
         pack.writeString("type").writeInt(this.type.ordinal());
         pack.writeString("nested").writeBool(this.nested);
         pack.writeString("break_id").writeInt(((Object) this).hashCode());
+        pack.endMap();
     }
 
     /**

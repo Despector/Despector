@@ -170,6 +170,8 @@ public class SourceSet {
         for (TypeEntry type : this.classes.values()) {
             type.writeTo(pack);
         }
+        pack.endArray();
+        pack.endMap();
     }
 
     /**

@@ -70,6 +70,7 @@ public class ClassEntry extends TypeEntry {
     public void writeTo(MessagePacker pack) throws IOException {
         super.writeTo(pack, 1, AstSerializer.ENTRY_ID_CLASS);
         pack.writeString("supername").writeString(this.superclass);
+        pack.endMap();
     }
 
     @Override

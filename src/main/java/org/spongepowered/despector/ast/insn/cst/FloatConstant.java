@@ -75,6 +75,7 @@ public class FloatConstant extends Constant {
         pack.startMap(2);
         pack.writeString("id").writeInt(AstSerializer.STATEMENT_ID_FLOAT_CONSTANT);
         pack.writeString("cst").writeFloat(this.cst);
+        pack.endMap();
     }
 
     @Override

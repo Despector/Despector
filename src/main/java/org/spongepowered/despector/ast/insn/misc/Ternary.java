@@ -118,6 +118,7 @@ public class Ternary implements Instruction {
         this.true_val.writeTo(pack);
         pack.writeString("false");
         this.false_val.writeTo(pack);
+        pack.endMap();
     }
 
     @Override

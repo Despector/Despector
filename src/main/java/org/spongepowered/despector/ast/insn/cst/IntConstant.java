@@ -86,6 +86,7 @@ public class IntConstant extends Constant {
         pack.startMap(2);
         pack.writeString("id").writeInt(AstSerializer.STATEMENT_ID_INT_CONSTANT);
         pack.writeString("cst").writeInt(this.cst);
+        pack.endMap();
     }
 
     @Override
