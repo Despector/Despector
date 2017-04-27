@@ -117,16 +117,19 @@ public class NewArray implements Instruction {
 
     @Override
     public void writeTo(MessagePacker pack) throws IOException {
-        pack.startMap(this.values == null ? 3 : 4);
+        pack.startMap(4);
         pack.writeString("id").writeInt(AstSerializer.STATEMENT_ID_NEW_ARRAY);
         pack.writeString("type").writeString(this.type);
         pack.writeString("size");
         this.size.writeTo(pack);
+        pack.writeString("values");
         if (this.values != null) {
-            pack.writeString("values").startArray(this.values.length);
+            pack.startArray(this.values.length);
             for (Instruction insn : this.values) {
                 insn.writeTo(pack);
             }
+        } else {
+            pack.writeNil();
         }
     }
 

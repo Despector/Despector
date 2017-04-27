@@ -24,8 +24,7 @@
  */
 package org.spongepowered.despector.ast.stmt.misc;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
+import javax.annotation.Nullable;
 import org.spongepowered.despector.ast.AstVisitor;
 import org.spongepowered.despector.ast.insn.Instruction;
 import org.spongepowered.despector.ast.stmt.Statement;
@@ -36,21 +35,20 @@ import org.spongepowered.despector.util.serialization.MessagePacker;
 import java.io.IOException;
 import java.util.Optional;
 
-import javax.annotation.Nullable;
-
 /**
  * A return statement which returns a value.
  */
 public class Return implements Statement {
 
-    @Nullable private Instruction value;
+    @Nullable
+    private Instruction value;
 
     public Return() {
         this.value = null;
     }
 
-    public Return(Instruction val) {
-        this.value = checkNotNull(val, "value");
+    public Return(@Nullable Instruction val) {
+        this.value = val;
     }
 
     /**
@@ -79,11 +77,13 @@ public class Return implements Statement {
 
     @Override
     public void writeTo(MessagePacker pack) throws IOException {
-        pack.startMap(this.value != null ? 2 : 1);
+        pack.startMap(2);
         pack.writeString("id").writeInt(AstSerializer.STATEMENT_ID_RETURN);
+        pack.writeString("value");
         if (this.value != null) {
-            pack.writeString("value");
             this.value.writeTo(pack);
+        } else {
+            pack.writeNil();
         }
     }
 

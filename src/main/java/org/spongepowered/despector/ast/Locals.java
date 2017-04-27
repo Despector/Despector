@@ -139,15 +139,18 @@ public class Locals {
     public void writeTo(MessagePacker pack) throws IOException {
         pack.startArray(this.locals.length);
         for (Local loc : this.locals) {
-            pack.startMap(loc.isParameter() ? 3 : 2);
+            pack.startMap(2);
             pack.writeString("index").writeInt(loc.getIndex());
+            int sz = loc.getInstances().size();
             if (loc.isParameter()) {
-                pack.writeString("parameter");
-                loc.getParameterInstance().writeTo(pack);
+                sz++;
             }
-            pack.writeString("instances").startArray(loc.getInstances().size());
+            pack.writeString("instances").startArray(sz);
             for (LocalInstance insn : loc.getInstances()) {
                 insn.writeTo(pack);
+            }
+            if (loc.isParameter()) {
+                loc.getParameterInstance().writeTo(pack);
             }
         }
     }
@@ -159,7 +162,6 @@ public class Locals {
 
         private final boolean is_static;
         private final int index;
-        private boolean parameter = false;
         private LocalInstance parameter_instance = null;
         private final List<LVT> lvt = Lists.newArrayList();
         private final List<LocalInstance> instances = Lists.newArrayList();
@@ -174,11 +176,7 @@ public class Locals {
         }
 
         public boolean isParameter() {
-            return this.parameter;
-        }
-
-        public void setAsParameter() {
-            this.parameter = true;
+            return this.parameter_instance != null;
         }
 
         public void addLVT(int s, int l, String n, String d) {
@@ -211,10 +209,12 @@ public class Locals {
                     sig = SignatureParser.parseFieldTypeSignature(l.signature);
                 }
                 LocalInstance insn = new LocalInstance(this, l.name, sig, start - 1, end);
-                this.instances.add(insn);
-            }
-            if (this.parameter) {
-                this.parameter_instance = this.instances.get(0);
+
+                if (start == 0) {
+                    this.parameter_instance = insn;
+                } else {
+                    this.instances.add(insn);
+                }
             }
         }
 
@@ -262,6 +262,9 @@ public class Locals {
          * Finds an instance for the given label and type.
          */
         public LocalInstance find(int start, String type) {
+            if (start == -1) {
+                return this.parameter_instance;
+            }
             for (LocalInstance local : this.instances) {
                 if (local.getStart() == start && local.getType().getDescriptor().equals(type)) {
                     return local;
@@ -361,7 +364,8 @@ public class Locals {
             pack.startMap(3);
             pack.writeString("local").writeInt(this.local.getIndex());
             pack.writeString("start").writeInt(this.start);
-            pack.writeString("end").writeInt(this.end);
+            pack.writeString("type");
+            pack.writeString(this.type.getDescriptor());
         }
 
         /**

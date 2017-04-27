@@ -132,7 +132,7 @@ public class If implements Statement {
 
     @Override
     public void writeTo(MessagePacker pack) throws IOException {
-        pack.startMap(this.else_block != null ? 5 : 4);
+        pack.startMap(5);
         pack.writeString("id").writeInt(AstSerializer.STATEMENT_ID_IF);
         pack.writeString("condition");
         this.condition.writeTo(pack);
@@ -152,12 +152,14 @@ public class If implements Statement {
                 stmt.writeTo(pack);
             }
         }
+        pack.writeString("else");
         if (this.else_block != null) {
-            pack.writeString("else");
             pack.startArray(this.else_block.getElseBody().getStatementCount());
             for (Statement stmt : this.else_block.getElseBody().getStatements()) {
                 stmt.writeTo(pack);
             }
+        } else {
+            pack.writeNil();
         }
     }
 

@@ -28,25 +28,60 @@ import com.google.common.base.Throwables;
 import org.spongepowered.despector.Language;
 import org.spongepowered.despector.ast.AccessModifier;
 import org.spongepowered.despector.ast.Annotation;
+import org.spongepowered.despector.ast.Locals;
+import org.spongepowered.despector.ast.Locals.Local;
+import org.spongepowered.despector.ast.Locals.LocalInstance;
 import org.spongepowered.despector.ast.SourceSet;
 import org.spongepowered.despector.ast.generic.ClassSignature;
+import org.spongepowered.despector.ast.generic.ClassTypeSignature;
 import org.spongepowered.despector.ast.generic.MethodSignature;
 import org.spongepowered.despector.ast.generic.TypeSignature;
 import org.spongepowered.despector.ast.insn.Instruction;
 import org.spongepowered.despector.ast.insn.condition.Condition;
 import org.spongepowered.despector.ast.insn.cst.DoubleConstant;
 import org.spongepowered.despector.ast.insn.cst.FloatConstant;
+import org.spongepowered.despector.ast.insn.cst.IntConstant;
+import org.spongepowered.despector.ast.insn.cst.LongConstant;
+import org.spongepowered.despector.ast.insn.cst.NullConstant;
+import org.spongepowered.despector.ast.insn.cst.StringConstant;
+import org.spongepowered.despector.ast.insn.cst.TypeConstant;
 import org.spongepowered.despector.ast.insn.misc.Cast;
+import org.spongepowered.despector.ast.insn.misc.InstanceOf;
+import org.spongepowered.despector.ast.insn.misc.MultiNewArray;
+import org.spongepowered.despector.ast.insn.misc.NewArray;
+import org.spongepowered.despector.ast.insn.misc.NumberCompare;
+import org.spongepowered.despector.ast.insn.misc.Ternary;
+import org.spongepowered.despector.ast.insn.op.NegativeOperator;
+import org.spongepowered.despector.ast.insn.op.Operator;
+import org.spongepowered.despector.ast.insn.op.OperatorType;
 import org.spongepowered.despector.ast.insn.var.ArrayAccess;
+import org.spongepowered.despector.ast.insn.var.InstanceFieldAccess;
+import org.spongepowered.despector.ast.insn.var.LocalAccess;
+import org.spongepowered.despector.ast.insn.var.StaticFieldAccess;
 import org.spongepowered.despector.ast.stmt.Statement;
 import org.spongepowered.despector.ast.stmt.StatementBlock;
 import org.spongepowered.despector.ast.stmt.assign.ArrayAssignment;
+import org.spongepowered.despector.ast.stmt.assign.InstanceFieldAssignment;
+import org.spongepowered.despector.ast.stmt.assign.LocalAssignment;
+import org.spongepowered.despector.ast.stmt.assign.StaticFieldAssignment;
 import org.spongepowered.despector.ast.stmt.branch.Break;
 import org.spongepowered.despector.ast.stmt.branch.Break.Breakable;
 import org.spongepowered.despector.ast.stmt.branch.DoWhile;
 import org.spongepowered.despector.ast.stmt.branch.For;
+import org.spongepowered.despector.ast.stmt.branch.ForEach;
+import org.spongepowered.despector.ast.stmt.branch.If;
+import org.spongepowered.despector.ast.stmt.branch.Switch;
+import org.spongepowered.despector.ast.stmt.branch.TryCatch;
+import org.spongepowered.despector.ast.stmt.branch.While;
 import org.spongepowered.despector.ast.stmt.invoke.DynamicInvoke;
+import org.spongepowered.despector.ast.stmt.invoke.InstanceMethodInvoke;
+import org.spongepowered.despector.ast.stmt.invoke.InvokeStatement;
+import org.spongepowered.despector.ast.stmt.invoke.New;
+import org.spongepowered.despector.ast.stmt.invoke.StaticMethodInvoke;
 import org.spongepowered.despector.ast.stmt.misc.Comment;
+import org.spongepowered.despector.ast.stmt.misc.Increment;
+import org.spongepowered.despector.ast.stmt.misc.Return;
+import org.spongepowered.despector.ast.stmt.misc.Throw;
 import org.spongepowered.despector.ast.type.AnnotationEntry;
 import org.spongepowered.despector.ast.type.ClassEntry;
 import org.spongepowered.despector.ast.type.EnumEntry;
@@ -285,6 +320,10 @@ public class AstLoader {
         entry.setNative(unpack.readBool());
         expectKey(unpack, "methodsignature");
         entry.setMethodSignature(loadMethodSignature(unpack));
+        expectKey(unpack, "locals");
+        Locals locals = loadLocals(unpack, entry.isStatic(), set);
+        method_locals = locals;
+        entry.setLocals(locals);
         expectKey(unpack, "instructions");
         if (unpack.peekType() == MessageType.NIL) {
             unpack.readNil();
@@ -298,6 +337,42 @@ public class AstLoader {
             entry.addAnnotation(loadAnnotation(unpack, set));
         }
         return entry;
+    }
+
+    private static Locals loadLocals(MessageUnpacker unpack, boolean is_static, SourceSet set) throws IOException {
+        int size = unpack.readArray();
+        Locals locals = new Locals(is_static);
+
+        for (int i = 0; i < size; i++) {
+            unpack.readMap();
+            expectKey(unpack, "index");
+            int index = unpack.readInt();
+            Local loc = locals.getLocal(index);
+            expectKey(unpack, "instances");
+            int sz = unpack.readArray();
+            for (int j = 0; j < sz; j++) {
+                unpack.readMap();
+                expectKey(unpack, "name");
+                String name = unpack.readString();
+                expectKey(unpack, "type");
+                TypeSignature type = loadTypeSignature(unpack);
+                expectKey(unpack, "start");
+                int start = unpack.readInt();
+                expectKey(unpack, "end");
+                int end = unpack.readInt();
+                expectKey(unpack, "final");
+                boolean efinal = unpack.readBool();
+                LocalInstance insn = new LocalInstance(loc, name, type, start, end);
+                insn.setEffectivelyFinal(efinal);
+                expectKey(unpack, "annotations");
+                int annotations = unpack.readArray();
+                for (int k = 0; k < annotations; k++) {
+                    insn.getAnnotations().add(loadAnnotation(unpack, set));
+                }
+            }
+        }
+
+        return locals;
     }
 
     private static StatementBlock loadBlock(MessageUnpacker unpack, StatementBlock.Type type) throws IOException {
@@ -369,15 +444,29 @@ public class AstLoader {
         throw new IllegalStateException();
     }
 
+    private static LocalInstance loadLocal(MessageUnpacker unpack) throws IOException {
+        unpack.readMap();
+        expectKey(unpack, "local");
+        int index = unpack.readInt();
+        expectKey(unpack, "start");
+        int start = unpack.readInt();
+        expectKey(unpack, "type");
+        String type = unpack.readString();
+        Local loc = method_locals.getLocal(index);
+        return loc.find(start, type);
+    }
+
     private static final Map<Integer, Function<MessageUnpacker, Statement>> statement_loaders;
     private static final Map<Integer, Function<MessageUnpacker, Instruction>> instruction_loaders;
     private static final Map<Integer, Function<MessageUnpacker, Condition>> condition_loaders;
 
     private static final Map<Integer, Breakable> breakables = new HashMap<>();
+    private static Locals method_locals;
 
     static {
         statement_loaders = new HashMap<>();
         instruction_loaders = new HashMap<>();
+        condition_loaders = new HashMap<>();
         instruction_loaders.put(AstSerializer.STATEMENT_ID_ARRAY_ACCESS, (unpack) -> {
             try {
                 expectKey(unpack, "array");
@@ -539,7 +628,11 @@ public class AstLoader {
         });
         statement_loaders.put(AstSerializer.STATEMENT_ID_FOREACH, (unpack) -> {
             try {
-                ForEach loop = new ForEach(init, condition, incr, new StatementBlock(StatementBlock.Type.WHILE));
+                expectKey(unpack, "local");
+                LocalInstance loc = loadLocal(unpack);
+                expectKey(unpack, "collection");
+                Instruction col = loadInstruction(unpack);
+                ForEach loop = new ForEach(col, loc, new StatementBlock(StatementBlock.Type.WHILE));
                 expectKey(unpack, "breakpoints");
                 int brk_size = unpack.readArray();
                 for (int i = 0; i < brk_size; i++) {
@@ -562,7 +655,24 @@ public class AstLoader {
         });
         statement_loaders.put(AstSerializer.STATEMENT_ID_IF, (unpack) -> {
             try {
-                return stmt;
+                expectKey(unpack, "condition");
+                Condition cond = loadCondition(unpack);
+                expectKey(unpack, "body");
+                StatementBlock body = loadBlock(unpack, StatementBlock.Type.IF);
+                If iif = new If(cond, body);
+                expectKey(unpack, "elif");
+                int sz = unpack.readArray();
+                for (int i = 0; i < sz; i++) {
+                    expectKey(unpack, "condition");
+                    Condition elif_cond = loadCondition(unpack);
+                    expectKey(unpack, "body");
+                    StatementBlock elif_body = loadBlock(unpack, StatementBlock.Type.IF);
+                    iif.new Elif(elif_cond, elif_body);
+                }
+                expectKey(unpack, "else");
+                StatementBlock else_body = loadBlock(unpack, StatementBlock.Type.IF);
+                iif.new Else(else_body);
+                return iif;
             } catch (IOException e) {
                 Throwables.propagate(e);
             }
@@ -570,7 +680,11 @@ public class AstLoader {
         });
         statement_loaders.put(AstSerializer.STATEMENT_ID_INCREMENT, (unpack) -> {
             try {
-                return stmt;
+                expectKey(unpack, "local");
+                LocalInstance loc = loadLocal(unpack);
+                expectKey(unpack, "increment");
+                int incr = unpack.readInt();
+                return new Increment(loc, incr);
             } catch (IOException e) {
                 Throwables.propagate(e);
             }
@@ -578,7 +692,15 @@ public class AstLoader {
         });
         instruction_loaders.put(AstSerializer.STATEMENT_ID_INSTANCE_FIELD_ACCESS, (unpack) -> {
             try {
-                return stmt;
+                expectKey(unpack, "name");
+                String name = unpack.readString();
+                expectKey(unpack, "desc");
+                TypeSignature type = loadTypeSignature(unpack);
+                expectKey(unpack, "owner");
+                String owner = unpack.readString();
+                expectKey(unpack, "owner_val");
+                Instruction oval = loadInstruction(unpack);
+                return new InstanceFieldAccess(name, type, owner, oval);
             } catch (IOException e) {
                 Throwables.propagate(e);
             }
@@ -586,7 +708,17 @@ public class AstLoader {
         });
         statement_loaders.put(AstSerializer.STATEMENT_ID_INSTANCE_FIELD_ASSIGN, (unpack) -> {
             try {
-                return stmt;
+                expectKey(unpack, "name");
+                String name = unpack.readString();
+                expectKey(unpack, "type");
+                String type = unpack.readString();
+                expectKey(unpack, "owner");
+                String owner = unpack.readString();
+                expectKey(unpack, "owner_val");
+                Instruction oval = loadInstruction(unpack);
+                expectKey(unpack, "val");
+                Instruction val = loadInstruction(unpack);
+                return new InstanceFieldAssignment(name, type, owner, oval, val);
             } catch (IOException e) {
                 Throwables.propagate(e);
             }
@@ -594,7 +726,21 @@ public class AstLoader {
         });
         instruction_loaders.put(AstSerializer.STATEMENT_ID_INSTANCE_INVOKE, (unpack) -> {
             try {
-                return stmt;
+                expectKey(unpack, "name");
+                String name = unpack.readString();
+                expectKey(unpack, "owner");
+                String owner = unpack.readString();
+                expectKey(unpack, "desc");
+                String desc = unpack.readString();
+                expectKey(unpack, "params");
+                int sz = unpack.readArray();
+                Instruction[] args = new Instruction[sz];
+                for (int i = 0; i < sz; i++) {
+                    args[i] = loadInstruction(unpack);
+                }
+                expectKey(unpack, "callee");
+                Instruction callee = loadInstruction(unpack);
+                return new InstanceMethodInvoke(name, desc, owner, args, callee);
             } catch (IOException e) {
                 Throwables.propagate(e);
             }
@@ -602,7 +748,11 @@ public class AstLoader {
         });
         instruction_loaders.put(AstSerializer.STATEMENT_ID_INSTANCE_OF, (unpack) -> {
             try {
-                return stmt;
+                expectKey(unpack, "val");
+                Instruction val = loadInstruction(unpack);
+                expectKey(unpack, "type");
+                String type = unpack.readString();
+                return new InstanceOf(val, type);
             } catch (IOException e) {
                 Throwables.propagate(e);
             }
@@ -610,15 +760,18 @@ public class AstLoader {
         });
         instruction_loaders.put(AstSerializer.STATEMENT_ID_INT_CONSTANT, (unpack) -> {
             try {
-                return stmt;
+                expectKey(unpack, "cst");
+                return new IntConstant(unpack.readInt());
             } catch (IOException e) {
                 Throwables.propagate(e);
             }
             return null;
         });
-        instruction_loaders.put(AstSerializer.STATEMENT_ID_INVOKE, (unpack) -> {
+        statement_loaders.put(AstSerializer.STATEMENT_ID_INVOKE, (unpack) -> {
             try {
-                return stmt;
+                expectKey(unpack, "inner");
+                Instruction inner = loadInstruction(unpack);
+                return new InvokeStatement(inner);
             } catch (IOException e) {
                 Throwables.propagate(e);
             }
@@ -626,7 +779,9 @@ public class AstLoader {
         });
         instruction_loaders.put(AstSerializer.STATEMENT_ID_LOCAL_ACCESS, (unpack) -> {
             try {
-                return stmt;
+                expectKey(unpack, "local");
+                LocalInstance loc = loadLocal(unpack);
+                return new LocalAccess(loc);
             } catch (IOException e) {
                 Throwables.propagate(e);
             }
@@ -634,7 +789,11 @@ public class AstLoader {
         });
         statement_loaders.put(AstSerializer.STATEMENT_ID_LOCAL_ASSIGN, (unpack) -> {
             try {
-                return stmt;
+                expectKey(unpack, "local");
+                LocalInstance loc = loadLocal(unpack);
+                expectKey(unpack, "val");
+                Instruction val = loadInstruction(unpack);
+                return new LocalAssignment(loc, val);
             } catch (IOException e) {
                 Throwables.propagate(e);
             }
@@ -642,7 +801,8 @@ public class AstLoader {
         });
         instruction_loaders.put(AstSerializer.STATEMENT_ID_LONG_CONSTANT, (unpack) -> {
             try {
-                return stmt;
+                expectKey(unpack, "cst");
+                return new LongConstant(unpack.readLong());
             } catch (IOException e) {
                 Throwables.propagate(e);
             }
@@ -650,7 +810,15 @@ public class AstLoader {
         });
         instruction_loaders.put(AstSerializer.STATEMENT_ID_MULTI_NEW_ARRAY, (unpack) -> {
             try {
-                return stmt;
+                expectKey(unpack, "type");
+                String type = unpack.readString();
+                expectKey(unpack, "sizes");
+                int sz = unpack.readArray();
+                Instruction[] sizes = new Instruction[sz];
+                for (int i = 0; i < sz; i++) {
+                    sizes[i] = loadInstruction(unpack);
+                }
+                return new MultiNewArray(type, sizes);
             } catch (IOException e) {
                 Throwables.propagate(e);
             }
@@ -658,7 +826,9 @@ public class AstLoader {
         });
         instruction_loaders.put(AstSerializer.STATEMENT_ID_NEGATIVE_OPERATOR, (unpack) -> {
             try {
-                return stmt;
+                expectKey(unpack, "val");
+                Instruction val = loadInstruction(unpack);
+                return new NegativeOperator(val);
             } catch (IOException e) {
                 Throwables.propagate(e);
             }
@@ -666,7 +836,17 @@ public class AstLoader {
         });
         instruction_loaders.put(AstSerializer.STATEMENT_ID_NEW, (unpack) -> {
             try {
-                return stmt;
+                expectKey(unpack, "type");
+                TypeSignature type = loadTypeSignature(unpack);
+                expectKey(unpack, "ctor");
+                String ctor = unpack.readString();
+                expectKey(unpack, "params");
+                int sz = unpack.readArray();
+                Instruction[] params = new Instruction[sz];
+                for (int i = 0; i < sz; i++) {
+                    params[i] = loadInstruction(unpack);
+                }
+                return new New(type, ctor, params);
             } catch (IOException e) {
                 Throwables.propagate(e);
             }
@@ -674,23 +854,36 @@ public class AstLoader {
         });
         instruction_loaders.put(AstSerializer.STATEMENT_ID_NEW_ARRAY, (unpack) -> {
             try {
-                return stmt;
+                expectKey(unpack, "type");
+                String type = unpack.readString();
+                expectKey(unpack, "size");
+                Instruction size = loadInstruction(unpack);
+                Instruction[] values = null;
+                if (unpack.peekType() == MessageType.NIL) {
+                    unpack.readNil();
+                } else {
+                    int sz = unpack.readArray();
+                    values = new Instruction[sz];
+                    for (int i = 0; i < sz; i++) {
+                        values[i] = loadInstruction(unpack);
+                    }
+                }
+                return new NewArray(type, size, values);
             } catch (IOException e) {
                 Throwables.propagate(e);
             }
             return null;
         });
-        statement_loaders.put(AstSerializer.STATEMENT_ID_NULL_CONSTANT, (unpack) -> {
-            try {
-                return stmt;
-            } catch (IOException e) {
-                Throwables.propagate(e);
-            }
-            return null;
+        instruction_loaders.put(AstSerializer.STATEMENT_ID_NULL_CONSTANT, (unpack) -> {
+            return NullConstant.NULL;
         });
         instruction_loaders.put(AstSerializer.STATEMENT_ID_NUMBER_COMPARE, (unpack) -> {
             try {
-                return stmt;
+                expectKey(unpack, "left");
+                Instruction left = loadInstruction(unpack);
+                expectKey(unpack, "right");
+                Instruction right = loadInstruction(unpack);
+                return new NumberCompare(left, right);
             } catch (IOException e) {
                 Throwables.propagate(e);
             }
@@ -698,7 +891,13 @@ public class AstLoader {
         });
         instruction_loaders.put(AstSerializer.STATEMENT_ID_OPERATOR, (unpack) -> {
             try {
-                return stmt;
+                expectKey(unpack, "left");
+                Instruction left = loadInstruction(unpack);
+                expectKey(unpack, "right");
+                Instruction right = loadInstruction(unpack);
+                expectKey(unpack, "operator");
+                OperatorType op = OperatorType.values()[unpack.readInt()];
+                return new Operator(op, left, right);
             } catch (IOException e) {
                 Throwables.propagate(e);
             }
@@ -706,7 +905,14 @@ public class AstLoader {
         });
         statement_loaders.put(AstSerializer.STATEMENT_ID_RETURN, (unpack) -> {
             try {
-                return stmt;
+                expectKey(unpack, "value");
+                Instruction val = null;
+                if (unpack.peekType() == MessageType.NIL) {
+                    unpack.readNil();
+                } else {
+                    val = loadInstruction(unpack);
+                }
+                return new Return(val);
             } catch (IOException e) {
                 Throwables.propagate(e);
             }
@@ -714,7 +920,13 @@ public class AstLoader {
         });
         instruction_loaders.put(AstSerializer.STATEMENT_ID_STATIC_FIELD_ACCESS, (unpack) -> {
             try {
-                return stmt;
+                expectKey(unpack, "name");
+                String name = unpack.readString();
+                expectKey(unpack, "desc");
+                TypeSignature type = loadTypeSignature(unpack);
+                expectKey(unpack, "owner");
+                String owner = unpack.readString();
+                return new StaticFieldAccess(name, type, owner);
             } catch (IOException e) {
                 Throwables.propagate(e);
             }
@@ -722,7 +934,15 @@ public class AstLoader {
         });
         statement_loaders.put(AstSerializer.STATEMENT_ID_STATIC_FIELD_ASSIGN, (unpack) -> {
             try {
-                return stmt;
+                expectKey(unpack, "name");
+                String name = unpack.readString();
+                expectKey(unpack, "type");
+                String type = unpack.readString();
+                expectKey(unpack, "owner");
+                String owner = unpack.readString();
+                expectKey(unpack, "val");
+                Instruction val = loadInstruction(unpack);
+                return new StaticFieldAssignment(name, type, owner, val);
             } catch (IOException e) {
                 Throwables.propagate(e);
             }
@@ -730,7 +950,19 @@ public class AstLoader {
         });
         instruction_loaders.put(AstSerializer.STATEMENT_ID_STATIC_INVOKE, (unpack) -> {
             try {
-                return stmt;
+                expectKey(unpack, "name");
+                String name = unpack.readString();
+                expectKey(unpack, "owner");
+                String owner = unpack.readString();
+                expectKey(unpack, "desc");
+                String desc = unpack.readString();
+                expectKey(unpack, "params");
+                int sz = unpack.readArray();
+                Instruction[] args = new Instruction[sz];
+                for (int i = 0; i < sz; i++) {
+                    args[i] = loadInstruction(unpack);
+                }
+                return new StaticMethodInvoke(name, desc, owner, args);
             } catch (IOException e) {
                 Throwables.propagate(e);
             }
@@ -738,7 +970,8 @@ public class AstLoader {
         });
         instruction_loaders.put(AstSerializer.STATEMENT_ID_STRING_CONSTANT, (unpack) -> {
             try {
-                return stmt;
+                expectKey(unpack, "cst");
+                return new StringConstant(unpack.readString());
             } catch (IOException e) {
                 Throwables.propagate(e);
             }
@@ -746,7 +979,28 @@ public class AstLoader {
         });
         statement_loaders.put(AstSerializer.STATEMENT_ID_SWITCH, (unpack) -> {
             try {
-                return stmt;
+                expectKey(unpack, "var");
+                Instruction var = loadInstruction(unpack);
+                expectKey(unpack, "cases");
+                int sz = unpack.readArray();
+                Switch sw = new Switch(var);
+                for (int i = 0; i < sz; i++) {
+                    unpack.readMap();
+                    expectKey(unpack, "body");
+                    StatementBlock body = loadBlock(unpack, StatementBlock.Type.SWITCH);
+                    expectKey(unpack, "breaks");
+                    boolean breaks = unpack.readBool();
+                    expectKey(unpack, "default");
+                    boolean is_def = unpack.readBool();
+                    expectKey(unpack, "indices");
+                    List<Integer> index = new ArrayList<>();
+                    int s = unpack.readArray();
+                    for (int k = 0; k < s; k++) {
+                        index.add(unpack.readInt());
+                    }
+                    sw.new Case(body, breaks, is_def, index);
+                }
+                return sw;
             } catch (IOException e) {
                 Throwables.propagate(e);
             }
@@ -754,7 +1008,13 @@ public class AstLoader {
         });
         instruction_loaders.put(AstSerializer.STATEMENT_ID_TERNARY, (unpack) -> {
             try {
-                return stmt;
+                expectKey(unpack, "condition");
+                Condition cond = loadCondition(unpack);
+                expectKey(unpack, "true");
+                Instruction tr = loadInstruction(unpack);
+                expectKey(unpack, "false");
+                Instruction fl = loadInstruction(unpack);
+                return new Ternary(cond, tr, fl);
             } catch (IOException e) {
                 Throwables.propagate(e);
             }
@@ -762,7 +1022,9 @@ public class AstLoader {
         });
         statement_loaders.put(AstSerializer.STATEMENT_ID_THROW, (unpack) -> {
             try {
-                return stmt;
+                expectKey(unpack, "ex");
+                Instruction tr = loadInstruction(unpack);
+                return new Throw(tr);
             } catch (IOException e) {
                 Throwables.propagate(e);
             }
@@ -770,7 +1032,33 @@ public class AstLoader {
         });
         statement_loaders.put(AstSerializer.STATEMENT_ID_TRY_CATCH, (unpack) -> {
             try {
-                return stmt;
+                expectKey(unpack, "body");
+                StatementBlock body = loadBlock(unpack, StatementBlock.Type.TRY);
+                expectKey(unpack, "catch");
+                int catches = unpack.readArray();
+                TryCatch tr = new TryCatch(body);
+                for (int i = 0; i < catches; i++) {
+                    unpack.readMap();
+                    expectKey(unpack, "exceptions");
+                    int ex = unpack.readArray();
+                    List<String> exceptions = new ArrayList<>();
+                    for (int k = 0; k < ex; k++) {
+                        exceptions.add(unpack.readString());
+                    }
+                    expectKey(unpack, "block");
+                    StatementBlock catch_body = loadBlock(unpack, StatementBlock.Type.CATCH);
+                    String k = unpack.readString();
+                    if ("local".equals(k)) {
+                        LocalInstance loc = loadLocal(unpack);
+                        tr.new CatchBlock(loc, exceptions, catch_body);
+                    } else if ("dummy_name".equals(k)) {
+                        String dummy = unpack.readString();
+                        tr.new CatchBlock(dummy, exceptions, catch_body);
+                    } else {
+                        throw new IllegalStateException("Expected key local or dummy_name but was " + k);
+                    }
+                }
+                return tr;
             } catch (IOException e) {
                 Throwables.propagate(e);
             }
@@ -778,7 +1066,8 @@ public class AstLoader {
         });
         instruction_loaders.put(AstSerializer.STATEMENT_ID_TYPE_CONSTANT, (unpack) -> {
             try {
-                return stmt;
+                expectKey(unpack, "cst");
+                return new TypeConstant(ClassTypeSignature.of(unpack.readString()));
             } catch (IOException e) {
                 Throwables.propagate(e);
             }
@@ -786,7 +1075,24 @@ public class AstLoader {
         });
         statement_loaders.put(AstSerializer.STATEMENT_ID_WHILE, (unpack) -> {
             try {
-                return stmt;
+                expectKey(unpack, "condition");
+                Condition condition = loadCondition(unpack);
+                While loop = new While(condition, new StatementBlock(StatementBlock.Type.WHILE));
+                expectKey(unpack, "breakpoints");
+                int brk_size = unpack.readArray();
+                for (int i = 0; i < brk_size; i++) {
+                    breakables.put(unpack.readInt(), loop);
+                }
+                expectKey(unpack, "body");
+                StatementBlock body = loadBlock(unpack, StatementBlock.Type.WHILE);
+                loop.setBody(body);
+                for (Iterator<Map.Entry<Integer, Breakable>> it = breakables.entrySet().iterator(); it.hasNext();) {
+                    Map.Entry<Integer, Breakable> n = it.next();
+                    if (n.getValue() == loop) {
+                        it.remove();
+                    }
+                }
+                return loop;
             } catch (IOException e) {
                 Throwables.propagate(e);
             }

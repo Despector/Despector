@@ -280,10 +280,6 @@ public class BaseDecompiler implements Decompiler {
                         int clength = data.readInt();
                         if ("LocalVariableTable".equals(code_attribute_name)) {
                             int lvt_length = data.readUnsignedShort();
-                            int param_count = TypeHelper.paramCount(method_desc);
-                            if (!method.isStatic()) {
-                                param_count++;
-                            }
                             for (int j = 0; j < lvt_length; j++) {
                                 int start_pc = data.readUnsignedShort();
                                 int local_length = data.readUnsignedShort();
@@ -292,9 +288,6 @@ public class BaseDecompiler implements Decompiler {
                                 int index = data.readUnsignedShort();
                                 Local loc = locals.getLocal(index);
                                 loc.addLVT(start_pc, local_length, local_name, local_desc);
-                                if (index < param_count) {
-                                    loc.setAsParameter();
-                                }
                             }
                         } else if ("LineNumberTable".equals(code_attribute_name)) {
                             data.skipBytes(clength);

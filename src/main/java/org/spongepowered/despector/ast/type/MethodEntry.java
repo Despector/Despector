@@ -293,7 +293,7 @@ public class MethodEntry extends AstEntry {
 
     @Override
     public void writeTo(MessagePacker pack) throws IOException {
-        pack.startMap(15);
+        pack.startMap(16);
         pack.writeString("id").writeInt(AstSerializer.ENTRY_ID_METHOD);
         pack.writeString("access").writeInt(this.access.ordinal());
         pack.writeString("owner").writeString(this.owner);
@@ -310,6 +310,8 @@ public class MethodEntry extends AstEntry {
         pack.writeString("native").writeBool(this.is_native);
         pack.writeString("methodsignature");
         this.sig.writeTo(pack);
+        pack.writeString("locals");
+        this.locals.writeTo(pack);
         pack.writeString("instructions").startArray(this.instructions.getStatementCount());
         for (Statement stmt : this.instructions.getStatements()) {
             stmt.writeTo(pack);
