@@ -89,6 +89,7 @@ public final class AstSerializer {
     public static final int SIGNATURE_ID_PARAM = 0x84;
     public static final int SIGNATURE_ID_CLASS = 0x85;
     public static final int SIGNATURE_ID_METHOD = 0x86;
+    public static final int SIGNATURE_ID_TYPEGENERIC = 0x87;
 
     public static final int CONDITION_ID_AND = 0x90;
     public static final int CONDITION_ID_BOOL = 0x91;

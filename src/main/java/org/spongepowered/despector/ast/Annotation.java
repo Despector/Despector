@@ -36,6 +36,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -126,14 +127,17 @@ public class Annotation {
     }
 
     private void writeObj(Object o, MessagePacker pack) throws IOException {
-        // TODO looks like we're missing ArrayList, Type, EnumConstant, char,
-        // and nested annotations
+        pack.startMap(2);
+        pack.writeString("typename").writeString(o.getClass().getName());
+        pack.writeString("value");
         if (o instanceof Integer) {
             pack.writeInt(((Integer) o).intValue());
         } else if (o instanceof Byte) {
             pack.writeInt(((Byte) o).byteValue());
         } else if (o instanceof Short) {
             pack.writeInt(((Short) o).shortValue());
+        } else if (o instanceof Character) {
+            pack.writeUnsignedInt((char) o);
         } else if (o instanceof Long) {
             pack.writeInt(((Long) o).longValue());
         } else if (o instanceof Float) {
@@ -142,6 +146,21 @@ public class Annotation {
             pack.writeDouble(((Double) o).doubleValue());
         } else if (o instanceof String) {
             pack.writeString(((String) o));
+        } else if (o instanceof ArrayList) {
+            List<?> lst = (List<?>) o;
+            pack.startArray(lst.size());
+            for (Object obj : lst) {
+                writeObj(obj, pack);
+            }
+        } else if (o instanceof ClassTypeSignature) {
+            ((ClassTypeSignature) o).writeTo(pack);
+        } else if (o instanceof Annotation) {
+            ((Annotation) o).writeTo(pack);
+        } else if (o instanceof EnumConstant) {
+            pack.startMap(2);
+            EnumConstant e = (EnumConstant) o;
+            pack.writeString("enumtype").writeString(e.getEnumType());
+            pack.writeString("constant").writeString(e.getConstantName());
         }
         throw new IllegalStateException("Cannot pack " + o.getClass().getSimpleName());
     }
@@ -153,6 +172,7 @@ public class Annotation {
         pack.startMap(4);
         pack.writeString("id").writeInt(AstSerializer.ENTRY_ID_ANNOTATION);
         pack.writeString("typename").writeString(this.type.getName());
+        pack.writeString("runtime").writeBool(this.type.isRuntimeVisible());
         pack.writeString("values").startArray(this.values.size());
         for (String key : this.values.keySet()) {
             pack.startMap(4);
@@ -163,7 +183,6 @@ public class Annotation {
             pack.writeString("value");
             writeObj(this.values.get(key), pack);
         }
-        pack.writeString("runtime").writeBool(this.type.isRuntimeVisible());
     }
 
     public void accept(AstVisitor visitor) {

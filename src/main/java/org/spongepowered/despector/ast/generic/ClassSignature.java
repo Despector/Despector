@@ -82,19 +82,17 @@ public class ClassSignature {
      * Writes this signature to the given {@link MessagePacker}.
      */
     public void writeTo(MessagePacker pack) throws IOException {
-        int len = 3;
-        if (this.superclass != null) {
-            len++;
-        }
-        pack.startMap(len);
+        pack.startMap(4);
         pack.writeString("id").writeInt(AstSerializer.SIGNATURE_ID_CLASS);
         pack.writeString("parameters").startArray(this.parameters.size());
         for (TypeParameter param : this.parameters) {
             param.writeTo(pack);
         }
+        pack.writeString("superclass");
         if (this.superclass != null) {
-            pack.writeString("superclass");
             this.superclass.writeTo(pack);
+        } else {
+            pack.writeNil();
         }
         pack.writeString("interfaces").startArray(this.interfaces.size());
         for (GenericClassTypeSignature sig : this.interfaces) {

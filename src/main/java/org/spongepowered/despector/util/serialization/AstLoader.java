@@ -28,16 +28,30 @@ import com.google.common.base.Throwables;
 import org.spongepowered.despector.Language;
 import org.spongepowered.despector.ast.AccessModifier;
 import org.spongepowered.despector.ast.Annotation;
+import org.spongepowered.despector.ast.Annotation.EnumConstant;
+import org.spongepowered.despector.ast.AnnotationType;
 import org.spongepowered.despector.ast.Locals;
 import org.spongepowered.despector.ast.Locals.Local;
 import org.spongepowered.despector.ast.Locals.LocalInstance;
 import org.spongepowered.despector.ast.SourceSet;
 import org.spongepowered.despector.ast.generic.ClassSignature;
 import org.spongepowered.despector.ast.generic.ClassTypeSignature;
+import org.spongepowered.despector.ast.generic.GenericClassTypeSignature;
 import org.spongepowered.despector.ast.generic.MethodSignature;
+import org.spongepowered.despector.ast.generic.TypeArgument;
+import org.spongepowered.despector.ast.generic.TypeParameter;
 import org.spongepowered.despector.ast.generic.TypeSignature;
+import org.spongepowered.despector.ast.generic.TypeVariableSignature;
+import org.spongepowered.despector.ast.generic.VoidTypeSignature;
+import org.spongepowered.despector.ast.generic.WildcardType;
 import org.spongepowered.despector.ast.insn.Instruction;
+import org.spongepowered.despector.ast.insn.condition.AndCondition;
+import org.spongepowered.despector.ast.insn.condition.BooleanCondition;
+import org.spongepowered.despector.ast.insn.condition.CompareCondition;
+import org.spongepowered.despector.ast.insn.condition.CompareCondition.CompareOperator;
 import org.spongepowered.despector.ast.insn.condition.Condition;
+import org.spongepowered.despector.ast.insn.condition.InverseCondition;
+import org.spongepowered.despector.ast.insn.condition.OrCondition;
 import org.spongepowered.despector.ast.insn.cst.DoubleConstant;
 import org.spongepowered.despector.ast.insn.cst.FloatConstant;
 import org.spongepowered.despector.ast.insn.cst.IntConstant;
@@ -251,7 +265,7 @@ public class AstLoader {
     }
 
     public static FieldEntry loadField(MessageUnpacker unpack, SourceSet set) throws IOException {
-        unpack.readMap();
+        startMap(unpack, 11);
         expectKey(unpack, "id");
         int id = unpack.readInt();
         if (id != AstSerializer.ENTRY_ID_FIELD) {
@@ -285,7 +299,7 @@ public class AstLoader {
     }
 
     public static MethodEntry loadMethod(MessageUnpacker unpack, SourceSet set) throws IOException {
-        unpack.readMap();
+        startMap(unpack, 16);
         expectKey(unpack, "id");
         int id = unpack.readInt();
         if (id != AstSerializer.ENTRY_ID_METHOD) {
@@ -344,14 +358,14 @@ public class AstLoader {
         Locals locals = new Locals(is_static);
 
         for (int i = 0; i < size; i++) {
-            unpack.readMap();
+            startMap(unpack, 2);
             expectKey(unpack, "index");
             int index = unpack.readInt();
             Local loc = locals.getLocal(index);
             expectKey(unpack, "instances");
             int sz = unpack.readArray();
             for (int j = 0; j < sz; j++) {
-                unpack.readMap();
+                startMap(unpack, 6);
                 expectKey(unpack, "name");
                 String name = unpack.readString();
                 expectKey(unpack, "type");
@@ -425,27 +439,189 @@ public class AstLoader {
     }
 
     public static Annotation loadAnnotation(MessageUnpacker unpack, SourceSet set) throws IOException {
+        startMap(unpack, 4);
+        expectKey(unpack, "id");
+        int id = unpack.readInt();
+        if (id != AstSerializer.ENTRY_ID_ANNOTATION) {
+            throw new IllegalStateException("Expected annotation");
+        }
+        expectKey(unpack, "typename");
+        String typename = unpack.readString();
+        AnnotationType type = set.getAnnotationType(typename);
+        Annotation anno = new Annotation(type);
+        expectKey(unpack, "runtime");
+        type.setRuntimeVisible(unpack.readBool());
+        expectKey(unpack, "values");
+        int sz = unpack.readArray();
+        for (int i = 0; i < sz; i++) {
+            startMap(unpack, 4);
+            expectKey(unpack, "name");
+            String key = unpack.readString();
+            expectKey(unpack, "type");
+            String cl = unpack.readString();
+            Class<?> cls = null;
+            try {
+                cls = Class.forName(cl);
+                type.setType(key, cls);
+            } catch (ClassNotFoundException e) {
+                Throwables.propagate(e);
+            }
+            expectKey(unpack, "default");
+            Object def = loadAnnotationObject(unpack, set);
+            type.setDefault(key, def);
+            expectKey(unpack, "value");
+            Object val = loadAnnotationObject(unpack, set);
+            anno.setValue(key, val);
+        }
+        return anno;
+    }
+
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    private static Object loadAnnotationObject(MessageUnpacker unpack, SourceSet set) throws IOException {
+        startMap(unpack, 2);
+        expectKey(unpack, "typename");
+        String cl = unpack.readString();
+        Class<?> type = null;
+        try {
+            type = Class.forName(cl);
+        } catch (ClassNotFoundException e) {
+            Throwables.propagate(e);
+        }
+        expectKey(unpack, "value");
+        if (type == Integer.class) {
+            return unpack.readInt();
+        } else if (type == Byte.class) {
+            return unpack.readByte();
+        } else if (type == Short.class) {
+            return unpack.readShort();
+        } else if (type == Long.class) {
+            return unpack.readLong();
+        } else if (type == Float.class) {
+            return unpack.readFloat();
+        } else if (type == Double.class) {
+            return unpack.readDouble();
+        } else if (type == String.class) {
+            return unpack.readString();
+        } else if (type == ArrayList.class) {
+            int sz = unpack.readArray();
+            List lst = new ArrayList();
+            for (int i = 0; i < sz; i++) {
+                lst.add(loadAnnotationObject(unpack, set));
+            }
+        } else if (type == ClassTypeSignature.class) {
+            return loadTypeSignature(unpack);
+        } else if (type == Annotation.class) {
+            return loadAnnotation(unpack, set);
+        } else if (type == EnumConstant.class) {
+            unpack.readMap();
+            expectKey(unpack, "enumtype");
+            String enumtype = unpack.readString();
+            expectKey(unpack, "constant");
+            String cst = unpack.readString();
+            return new EnumConstant(enumtype, cst);
+        }
+        throw new IllegalStateException("Unsupported annotation value type " + type.getName());
+    }
+
+    public static ClassSignature loadClassSignature(MessageUnpacker unpack) throws IOException {
+        if (unpack.peekType() == MessageType.NIL) {
+            unpack.readNil();
+            return null;
+        }
+        startMap(unpack, 4);
+        expectKey(unpack, "id");
+        int id = unpack.readInt();
+        if (id != AstSerializer.SIGNATURE_ID_CLASS) {
+            throw new IllegalStateException("Expected class signature");
+        }
+        ClassSignature sig = new ClassSignature();
+        expectKey(unpack, "parameters");
+        int sz = unpack.readArray();
+        for (int i = 0; i < sz; i++) {
+            sig.getParameters().add(loadTypeParameter(unpack));
+        }
+        expectKey(unpack, "superclass");
+        sig.setSuperclassSignature((GenericClassTypeSignature) loadTypeSignature(unpack));
+        expectKey(unpack, "interfaces");
+        int interfaces = unpack.readArray();
+        for (int i = 0; i < interfaces; i++) {
+            sig.getInterfaceSignatures().add((GenericClassTypeSignature) loadTypeSignature(unpack));
+        }
+        return sig;
+    }
+
+    private static TypeParameter loadTypeParameter(MessageUnpacker unpack) throws IOException {
+        startMap(unpack, 4);
+        expectKey(unpack, "id");
+        int id = unpack.readInt();
+        if (id != AstSerializer.SIGNATURE_ID_PARAM) {
+            throw new IllegalStateException("Expected type parameter");
+        }
+        expectKey(unpack, "identifier");
+        String ident = unpack.readString();
+        expectKey(unpack, "classbound");
+        TypeSignature cl = loadTypeSignature(unpack);
+        TypeParameter param = new TypeParameter(ident, cl);
+        expectKey(unpack, "interfacebounds");
+        int sz = unpack.readArray();
+        for (int i = 0; i < sz; i++) {
+            param.getInterfaceBounds().add(loadTypeSignature(unpack));
+        }
+        return param;
+    }
+
+    public static MethodSignature loadMethodSignature(MessageUnpacker unpack) throws IOException {
+        if (unpack.peekType() == MessageType.NIL) {
+            unpack.readNil();
+            return null;
+        }
+        startMap(unpack, 5);
+        expectKey(unpack, "id");
+        int id = unpack.readInt();
+        if (id != AstSerializer.SIGNATURE_ID_METHOD) {
+            throw new IllegalStateException("Expected method signature");
+        }
+        MethodSignature sig = new MethodSignature();
+        expectKey(unpack, "type_parameters");
+        {
+            int sz = unpack.readArray();
+            for (int i = 0; i < sz; i++) {
+                sig.getTypeParameters().add(loadTypeParameter(unpack));
+            }
+        }
+        expectKey(unpack, "parameters");
+        {
+            int sz = unpack.readArray();
+            for (int i = 0; i < sz; i++) {
+                sig.getParameters().add(loadTypeSignature(unpack));
+            }
+        }
+        expectKey(unpack, "exceptions");
+        {
+            int sz = unpack.readArray();
+            for (int i = 0; i < sz; i++) {
+                sig.getThrowsSignature().add(loadTypeSignature(unpack));
+            }
+        }
+        expectKey(unpack, "returntype");
+        sig.setReturnType(loadTypeSignature(unpack));
+        return sig;
+    }
+
+    public static TypeSignature loadTypeSignature(MessageUnpacker unpack) throws IOException {
+        if (unpack.peekType() == MessageType.NIL) {
+            unpack.readNil();
+            return null;
+        }
         unpack.readMap();
-        throw new IllegalStateException();
-    }
-
-    public static ClassSignature loadClassSignature(MessageUnpacker unpack) {
-
-        throw new IllegalStateException();
-    }
-
-    public static MethodSignature loadMethodSignature(MessageUnpacker unpack) {
-
-        throw new IllegalStateException();
-    }
-
-    public static TypeSignature loadTypeSignature(MessageUnpacker unpack) {
-
-        throw new IllegalStateException();
+        expectKey(unpack, "id");
+        int id = unpack.readInt();
+        Function<MessageUnpacker, TypeSignature> loader = signature_loaders.get(id);
+        return loader.apply(unpack);
     }
 
     private static LocalInstance loadLocal(MessageUnpacker unpack) throws IOException {
-        unpack.readMap();
+        startMap(unpack, 3);
         expectKey(unpack, "local");
         int index = unpack.readInt();
         expectKey(unpack, "start");
@@ -459,6 +635,7 @@ public class AstLoader {
     private static final Map<Integer, Function<MessageUnpacker, Statement>> statement_loaders;
     private static final Map<Integer, Function<MessageUnpacker, Instruction>> instruction_loaders;
     private static final Map<Integer, Function<MessageUnpacker, Condition>> condition_loaders;
+    private static final Map<Integer, Function<MessageUnpacker, TypeSignature>> signature_loaders;
 
     private static final Map<Integer, Breakable> breakables = new HashMap<>();
     private static Locals method_locals;
@@ -467,6 +644,7 @@ public class AstLoader {
         statement_loaders = new HashMap<>();
         instruction_loaders = new HashMap<>();
         condition_loaders = new HashMap<>();
+        signature_loaders = new HashMap<>();
         instruction_loaders.put(AstSerializer.STATEMENT_ID_ARRAY_ACCESS, (unpack) -> {
             try {
                 expectKey(unpack, "array");
@@ -1093,6 +1271,116 @@ public class AstLoader {
                     }
                 }
                 return loop;
+            } catch (IOException e) {
+                Throwables.propagate(e);
+            }
+            return null;
+        });
+        condition_loaders.put(AstSerializer.CONDITION_ID_AND, (unpack) -> {
+            try {
+                expectKey(unpack, "args");
+                int sz = unpack.readArray();
+                Condition[] args = new Condition[sz];
+                for (int i = 0; i < sz; i++) {
+                    args[i] = loadCondition(unpack);
+                }
+                return new AndCondition(args);
+            } catch (IOException e) {
+                Throwables.propagate(e);
+            }
+            return null;
+        });
+        condition_loaders.put(AstSerializer.CONDITION_ID_BOOL, (unpack) -> {
+            try {
+                expectKey(unpack, "val");
+                Instruction val = loadInstruction(unpack);
+                expectKey(unpack, "inverse");
+                boolean inv = unpack.readBool();
+                return new BooleanCondition(val, inv);
+            } catch (IOException e) {
+                Throwables.propagate(e);
+            }
+            return null;
+        });
+        condition_loaders.put(AstSerializer.CONDITION_ID_COMPARE, (unpack) -> {
+            try {
+                expectKey(unpack, "left");
+                Instruction left = loadInstruction(unpack);
+                expectKey(unpack, "right");
+                Instruction right = loadInstruction(unpack);
+                expectKey(unpack, "op");
+                CompareOperator op = CompareOperator.values()[unpack.readInt()];
+                return new CompareCondition(left, right, op);
+            } catch (IOException e) {
+                Throwables.propagate(e);
+            }
+            return null;
+        });
+        condition_loaders.put(AstSerializer.CONDITION_ID_INVERSE, (unpack) -> {
+            try {
+                expectKey(unpack, "val");
+                Condition val = loadCondition(unpack);
+                return new InverseCondition(val);
+            } catch (IOException e) {
+                Throwables.propagate(e);
+            }
+            return null;
+        });
+        condition_loaders.put(AstSerializer.CONDITION_ID_OR, (unpack) -> {
+            try {
+                expectKey(unpack, "args");
+                int sz = unpack.readArray();
+                Condition[] args = new Condition[sz];
+                for (int i = 0; i < sz; i++) {
+                    args[i] = loadCondition(unpack);
+                }
+                return new OrCondition(args);
+            } catch (IOException e) {
+                Throwables.propagate(e);
+            }
+            return null;
+        });
+        signature_loaders.put(AstSerializer.SIGNATURE_ID_TYPECLASS, (unpack) -> {
+            try {
+                expectKey(unpack, "type");
+                return ClassTypeSignature.of(unpack.readString());
+            } catch (IOException e) {
+                Throwables.propagate(e);
+            }
+            return null;
+        });
+        signature_loaders.put(AstSerializer.SIGNATURE_ID_TYPEVOID, (unpack) -> {
+            return VoidTypeSignature.VOID;
+        });
+        signature_loaders.put(AstSerializer.SIGNATURE_ID_TYPEVAR, (unpack) -> {
+            try {
+                expectKey(unpack, "identifier");
+                return new TypeVariableSignature(unpack.readString());
+            } catch (IOException e) {
+                Throwables.propagate(e);
+            }
+            return null;
+        });
+        signature_loaders.put(AstSerializer.SIGNATURE_ID_TYPEGENERIC, (unpack) -> {
+            try {
+                expectKey(unpack, "type");
+                GenericClassTypeSignature sig = new GenericClassTypeSignature(unpack.readString());
+                expectKey(unpack, "args");
+                int sz = unpack.readArray();
+                for (int i = 0; i < sz; i++) {
+                    startMap(unpack, 3);
+                    expectKey(unpack, "id");
+                    int id = unpack.readInt();
+                    if (id != AstSerializer.SIGNATURE_ID_ARG) {
+                        throw new IllegalStateException("Expected type argument");
+                    }
+                    expectKey(unpack, "wildcard");
+                    WildcardType wild = WildcardType.values()[unpack.readInt()];
+                    expectKey(unpack, "signature");
+                    TypeSignature arg = loadTypeSignature(unpack);
+                    sig.getArguments().add(new TypeArgument(wild, arg));
+                }
+                return sig;
             } catch (IOException e) {
                 Throwables.propagate(e);
             }

@@ -90,7 +90,7 @@ public class GenericClassTypeSignature extends TypeSignature {
     @Override
     public void writeTo(MessagePacker pack) throws IOException {
         pack.startMap(3);
-        pack.writeString("id").writeInt(AstSerializer.SIGNATURE_ID_TYPECLASS);
+        pack.writeString("id").writeInt(AstSerializer.SIGNATURE_ID_TYPEGENERIC);
         pack.writeString("type").writeString(this.type_name);
         pack.writeString("args").startArray(this.args.size());
         for (TypeArgument arg : this.args) {

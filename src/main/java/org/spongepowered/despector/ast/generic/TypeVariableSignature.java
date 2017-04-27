@@ -84,7 +84,7 @@ public class TypeVariableSignature extends TypeSignature {
     public void writeTo(MessagePacker pack) throws IOException {
         pack.startMap(2);
         pack.writeString("id").writeInt(AstSerializer.SIGNATURE_ID_TYPEVAR);
-        pack.writeString(this.identifier);
+        pack.writeString("identifier").writeString(this.identifier);
     }
 
     @Override

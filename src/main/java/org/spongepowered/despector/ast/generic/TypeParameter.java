@@ -90,16 +90,14 @@ public class TypeParameter {
      * Writes this type parameter to the given {@link MessagePacker}.
      */
     public void writeTo(MessagePacker pack) throws IOException {
-        int len = 3;
-        if (this.class_bound != null) {
-            len++;
-        }
-        pack.startMap(len);
+        pack.startMap(4);
         pack.writeString("id").writeInt(AstSerializer.SIGNATURE_ID_PARAM);
         pack.writeString("identifier").writeString(this.identifier);
+        pack.writeString("classbound");
         if (this.class_bound != null) {
-            pack.writeString("classbound");
             this.class_bound.writeTo(pack);
+        } else {
+            pack.writeNil();
         }
         pack.writeString("interfacebounds").startArray(this.interface_bounds.size());
         for (TypeSignature sig : this.interface_bounds) {

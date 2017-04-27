@@ -80,16 +80,14 @@ public class TypeArgument {
      * Writes this type argument to the given {@link MessagePacker}.
      */
     public void writeTo(MessagePacker pack) throws IOException {
-        int len = 2;
-        if (this.sig != null) {
-            len++;
-        }
-        pack.startMap(len);
+        pack.startMap(3);
         pack.writeString("id").writeInt(AstSerializer.SIGNATURE_ID_ARG);
         pack.writeString("wildcard").writeInt(this.wildcard.ordinal());
+        pack.writeString("signature");
         if (this.sig != null) {
-            pack.writeString("signature");
             this.sig.writeTo(pack);
+        } else {
+            pack.writeNil();
         }
     }
 
