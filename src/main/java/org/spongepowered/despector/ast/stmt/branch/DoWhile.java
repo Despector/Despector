@@ -116,14 +116,14 @@ public class DoWhile implements Statement, Breakable {
         pack.writeString("id").writeInt(AstSerializer.STATEMENT_ID_DO_WHILE);
         pack.writeString("condition");
         this.condition.writeTo(pack);
+        pack.writeString("breakpoints").startArray(this.breaks.size());
+        for (Break br : this.breaks) {
+            pack.writeInt(((Object) br).hashCode());
+        }
         pack.writeString("body");
         pack.startArray(this.body.getStatementCount());
         for (Statement stmt : this.body.getStatements()) {
             stmt.writeTo(pack);
-        }
-        pack.writeString("breakpoints").startArray(this.breaks.size());
-        for (Break br : this.breaks) {
-            pack.writeInt(((Object) br).hashCode());
         }
     }
 

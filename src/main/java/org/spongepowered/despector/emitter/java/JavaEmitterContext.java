@@ -137,6 +137,10 @@ public class JavaEmitterContext extends AbstractEmitterContext {
     public void markDefined(LocalInstance local) {
         this.defined_locals.add(checkNotNull(local, "local"));
     }
+    
+    public void resetDefinedLocals() {
+        this.defined_locals.clear();
+    }
 
     /**
      * Marks the given statement type as a block statement.
@@ -227,9 +231,6 @@ public class JavaEmitterContext extends AbstractEmitterContext {
      * Emits the given body starting at the given start index.
      */
     public JavaEmitterContext emitBody(StatementBlock instructions, int start) {
-        if (instructions.getType() == StatementBlock.Type.METHOD) {
-            this.defined_locals.clear();
-        }
         boolean last_success = false;
         boolean should_indent = true;
         for (int i = start; i < instructions.getStatements().size(); i++) {

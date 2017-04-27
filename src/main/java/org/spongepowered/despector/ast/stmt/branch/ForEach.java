@@ -126,14 +126,14 @@ public class ForEach implements Statement, Breakable {
         this.val.writeToSimple(pack);
         pack.writeString("collection");
         this.collection.writeTo(pack);
+        pack.writeString("breakpoints").startArray(this.breaks.size());
+        for (Break br : this.breaks) {
+            pack.writeInt(((Object) br).hashCode());
+        }
         pack.writeString("body");
         pack.startArray(this.body.getStatementCount());
         for (Statement stmt : this.body.getStatements()) {
             stmt.writeTo(pack);
-        }
-        pack.writeString("breakpoints").startArray(this.breaks.size());
-        for (Break br : this.breaks) {
-            pack.writeInt(((Object) br).hashCode());
         }
     }
 

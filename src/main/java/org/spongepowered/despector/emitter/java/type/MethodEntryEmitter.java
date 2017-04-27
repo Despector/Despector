@@ -74,6 +74,7 @@ public class MethodEntryEmitter implements AstEmitter<JavaEmitterContext, Method
             ctx.printString("static {");
             ctx.newLine();
             ctx.indent();
+            ctx.resetDefinedLocals();
             if (method.getInstructions() == null) {
                 ctx.printIndentation();
                 ctx.printString("// Error decompiling block");

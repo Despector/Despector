@@ -99,14 +99,12 @@ public class ArrayAccess implements Instruction {
 
     @Override
     public void writeTo(MessagePacker pack) throws IOException {
-        pack.startMap(4);
+        pack.startMap(3);
         pack.writeString("id").writeInt(AstSerializer.STATEMENT_ID_ARRAY_ACCESS);
         pack.writeString("array");
         this.array.writeTo(pack);
         pack.writeString("index");
         this.index.writeTo(pack);
-        pack.writeString("signature");
-        inferType().writeTo(pack);
     }
 
     @Override
