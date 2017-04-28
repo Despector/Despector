@@ -30,12 +30,13 @@ import com.google.common.collect.Lists;
 import org.spongepowered.despector.ast.AstVisitor;
 import org.spongepowered.despector.ast.insn.InstructionVisitor;
 
+import java.util.Iterator;
 import java.util.List;
 
 /**
  * A block of statements.
  */
-public class StatementBlock {
+public class StatementBlock implements Iterable<Statement> {
 
     /**
      * The type of a block.
@@ -166,6 +167,27 @@ public class StatementBlock {
             h = h * 37 + stmt.hashCode();
         }
         return h;
+    }
+
+    @Override
+    public Iterator<Statement> iterator() {
+        return new Itr();
+    }
+
+    private class Itr implements Iterator<Statement> {
+
+        private int index;
+
+        @Override
+        public boolean hasNext() {
+            return StatementBlock.this.statements.size() > this.index;
+        }
+
+        @Override
+        public Statement next() {
+            return StatementBlock.this.statements.get(this.index++);
+        }
+
     }
 
 }

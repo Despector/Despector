@@ -35,7 +35,11 @@ import org.spongepowered.despector.ast.SourceSet;
 import org.spongepowered.despector.ast.generic.ClassTypeSignature;
 import org.spongepowered.despector.ast.generic.MethodSignature;
 import org.spongepowered.despector.ast.generic.TypeSignature;
+import org.spongepowered.despector.ast.insn.cst.StringConstant;
+import org.spongepowered.despector.ast.stmt.Statement;
 import org.spongepowered.despector.ast.stmt.StatementBlock;
+import org.spongepowered.despector.ast.stmt.assign.StaticFieldAssignment;
+import org.spongepowered.despector.ast.stmt.invoke.New;
 import org.spongepowered.despector.ast.stmt.misc.Comment;
 import org.spongepowered.despector.ast.type.AnnotationEntry;
 import org.spongepowered.despector.ast.type.ClassEntry;
@@ -65,8 +69,10 @@ import java.io.InputStream;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * A language decompiler.
@@ -483,6 +489,28 @@ public class BaseDecompiler implements Decompiler {
                 }
                 StatementBlock block = mth_decomp.decompile(mth);
                 mth.setInstructions(block);
+
+                if (entry instanceof EnumEntry && mth.getName().equals("<clinit>")) {
+                    EnumEntry e = (EnumEntry) entry;
+                    Set<String> names = new HashSet<>(e.getEnumConstants());
+                    e.getEnumConstants().clear();
+                    for (Statement stmt : block) {
+                        if (names.isEmpty() || !(stmt instanceof StaticFieldAssignment)) {
+                            break;
+                        }
+                        StaticFieldAssignment assign = (StaticFieldAssignment) stmt;
+                        if (!names.remove(assign.getFieldName())) {
+                            break;
+                        }
+                        New val = (New) assign.getValue();
+                        StringConstant cst = (StringConstant) val.getParameters()[0];
+                        e.addEnumConstant(cst.getConstant());
+                    }
+                    if (!names.isEmpty()) {
+                        System.err.println("Warning: Failed to find names for all enum constants in " + entry.getName());
+                    }
+                }
+
             } catch (Exception ex) {
                 if (!LibraryConfiguration.quiet) {
                     System.err.println("Error decompiling method body for " + name + " " + mth.toString());
