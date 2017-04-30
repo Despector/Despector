@@ -38,7 +38,7 @@ public class NewArrayEmitter implements InstructionEmitter<JavaEmitterContext, N
     @Override
     public void emit(JavaEmitterContext ctx, NewArray arg, TypeSignature type) {
         ctx.printString("new ");
-        ctx.emitType(arg.getType());
+        ctx.emitType(arg.getType().getDescriptor());
         if (arg.getInitializer() == null || arg.getInitializer().length == 0) {
             ctx.printString("[");
             ctx.printString(" ", ctx.getFormat().insert_space_after_opening_bracket_in_array_allocation_expression);
@@ -55,7 +55,7 @@ public class NewArrayEmitter implements InstructionEmitter<JavaEmitterContext, N
                 ctx.printIndentation();
             }
             for (int i = 0; i < arg.getInitializer().length; i++) {
-                ctx.emit(arg.getInitializer()[i], ClassTypeSignature.of(arg.getType()));
+                ctx.emit(arg.getInitializer()[i], arg.getType());
                 if (i < arg.getInitializer().length - 1) {
                     ctx.printString(" ", ctx.getFormat().insert_space_before_comma_in_array_initializer);
                     ctx.printString(",");

@@ -26,7 +26,6 @@ package org.spongepowered.despector.emitter;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import javax.annotation.Nullable;
 import org.spongepowered.despector.ast.insn.Instruction;
 import org.spongepowered.despector.ast.stmt.Statement;
 import org.spongepowered.despector.ast.type.FieldEntry;
@@ -35,6 +34,8 @@ import org.spongepowered.despector.ast.type.TypeEntry;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
+
+import javax.annotation.Nullable;
 
 public abstract class AbstractEmitterContext {
 

@@ -31,7 +31,6 @@ import org.spongepowered.despector.ast.generic.ClassTypeSignature;
 import org.spongepowered.despector.ast.generic.TypeSignature;
 import org.spongepowered.despector.ast.insn.Instruction;
 import org.spongepowered.despector.ast.insn.InstructionVisitor;
-import org.spongepowered.despector.util.TypeHelper;
 import org.spongepowered.despector.util.serialization.AstSerializer;
 import org.spongepowered.despector.util.serialization.MessagePacker;
 
@@ -44,11 +43,11 @@ import javax.annotation.Nullable;
  */
 public class NewArray implements Instruction {
 
-    private String type;
+    private ClassTypeSignature type;
     private Instruction size;
     private Instruction[] values;
 
-    public NewArray(String type, Instruction size, @Nullable Instruction[] values) {
+    public NewArray(ClassTypeSignature type, Instruction size, @Nullable Instruction[] values) {
         this.type = checkNotNull(type, "type");
         this.size = checkNotNull(size, "size");
         this.values = values;
@@ -57,14 +56,14 @@ public class NewArray implements Instruction {
     /**
      * Gets the component type of the new array.
      */
-    public String getType() {
+    public ClassTypeSignature getType() {
         return this.type;
     }
 
     /**
      * Sets the component type of the new array.
      */
-    public void setType(String type) {
+    public void setType(ClassTypeSignature type) {
         this.type = checkNotNull(type, "type");
     }
 
@@ -119,7 +118,7 @@ public class NewArray implements Instruction {
     public void writeTo(MessagePacker pack) throws IOException {
         pack.startMap(4);
         pack.writeString("id").writeInt(AstSerializer.STATEMENT_ID_NEW_ARRAY);
-        pack.writeString("type").writeString(this.type);
+        pack.writeString("type").writeString(this.type.getDescriptor());
         pack.writeString("size");
         this.size.writeTo(pack);
         pack.writeString("values");
@@ -138,9 +137,9 @@ public class NewArray implements Instruction {
     @Override
     public String toString() {
         if (this.values == null) {
-            return "new " + TypeHelper.descToType(this.type) + "[" + this.size + "]";
+            return "new " + this.type.getClassName() + "[" + this.size + "]";
         }
-        String result = "new " + TypeHelper.descToType(this.type) + "[] {";
+        String result = "new " + this.type.getClassName() + "[] {";
         for (int i = 0; i < this.values.length; i++) {
             result += this.values[i];
             if (i < this.values.length - 1) {

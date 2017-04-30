@@ -24,7 +24,6 @@
  */
 package org.spongepowered.despector.transform.matcher;
 
-import javax.annotation.Nullable;
 import org.spongepowered.despector.ast.Locals.LocalInstance;
 import org.spongepowered.despector.ast.insn.condition.Condition;
 import org.spongepowered.despector.transform.matcher.condition.AndConditionMatcher;
@@ -33,6 +32,8 @@ import org.spongepowered.despector.transform.matcher.condition.CompareConditionM
 import org.spongepowered.despector.transform.matcher.condition.ConditionReferenceMatcher;
 import org.spongepowered.despector.transform.matcher.condition.InverseConditionMatcher;
 import org.spongepowered.despector.transform.matcher.condition.OrConditionMatcher;
+
+import javax.annotation.Nullable;
 
 /**
  * A matcher for conditions.

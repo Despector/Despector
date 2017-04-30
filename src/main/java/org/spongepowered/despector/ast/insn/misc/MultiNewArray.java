@@ -31,7 +31,6 @@ import org.spongepowered.despector.ast.generic.ClassTypeSignature;
 import org.spongepowered.despector.ast.generic.TypeSignature;
 import org.spongepowered.despector.ast.insn.Instruction;
 import org.spongepowered.despector.ast.insn.InstructionVisitor;
-import org.spongepowered.despector.util.TypeHelper;
 import org.spongepowered.despector.util.serialization.AstSerializer;
 import org.spongepowered.despector.util.serialization.MessagePacker;
 
@@ -43,10 +42,10 @@ import java.util.Arrays;
  */
 public class MultiNewArray implements Instruction {
 
-    private String type;
+    private ClassTypeSignature type;
     private Instruction[] sizes;
 
-    public MultiNewArray(String type, Instruction[] sizes) {
+    public MultiNewArray(ClassTypeSignature type, Instruction[] sizes) {
         this.type = checkNotNull(type, "type");
         this.sizes = checkNotNull(sizes, "size");
     }
@@ -54,14 +53,14 @@ public class MultiNewArray implements Instruction {
     /**
      * Gets the component type of the new array.
      */
-    public String getType() {
+    public ClassTypeSignature getType() {
         return this.type;
     }
 
     /**
      * Sets the component type of the new array.
      */
-    public void setType(String type) {
+    public void setType(ClassTypeSignature type) {
         this.type = checkNotNull(type, "type");
     }
 
@@ -98,7 +97,7 @@ public class MultiNewArray implements Instruction {
     public void writeTo(MessagePacker pack) throws IOException {
         pack.startMap(4);
         pack.writeString("id").writeInt(AstSerializer.STATEMENT_ID_MULTI_NEW_ARRAY);
-        pack.writeString("type").writeString(this.type);
+        pack.writeString("type").writeString(this.type.getDescriptor());
         pack.writeString("sizes");
         pack.startArray(this.sizes.length);
         for (Instruction size : this.sizes) {
@@ -110,7 +109,7 @@ public class MultiNewArray implements Instruction {
 
     @Override
     public String toString() {
-        String result = "new " + TypeHelper.descToType(this.type);
+        String result = "new " + this.type.getClassName();
         for (int i = 0; i < this.sizes.length; i++) {
             result += "[";
             result += this.sizes[i];

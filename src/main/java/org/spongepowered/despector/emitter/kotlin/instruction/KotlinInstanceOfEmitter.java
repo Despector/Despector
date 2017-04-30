@@ -38,7 +38,7 @@ public class KotlinInstanceOfEmitter implements InstructionEmitter<JavaEmitterCo
     public void emit(JavaEmitterContext ctx, InstanceOf arg, TypeSignature type) {
         ctx.emit(arg.getCheckedValue(), null);
         ctx.printString(" is ");
-        ctx.emitType(arg.getType());
+        ctx.emitType(arg.getType().getDescriptor());
     }
 
 }

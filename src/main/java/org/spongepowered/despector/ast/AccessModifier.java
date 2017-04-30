@@ -24,6 +24,7 @@
  */
 package org.spongepowered.despector.ast;
 
+import org.objectweb.asm.Opcodes;
 import org.spongepowered.despector.decompiler.BaseDecompiler;
 
 /**

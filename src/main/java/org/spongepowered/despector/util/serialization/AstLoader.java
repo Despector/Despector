@@ -952,7 +952,7 @@ public class AstLoader {
                 Instruction val = loadInstruction(unpack);
                 expectKey(unpack, "type");
                 String type = unpack.readString();
-                return new InstanceOf(val, type);
+                return new InstanceOf(val, ClassTypeSignature.of(type));
             } catch (IOException e) {
                 Throwables.propagate(e);
             }
@@ -1018,7 +1018,7 @@ public class AstLoader {
                 for (int i = 0; i < sz; i++) {
                     sizes[i] = loadInstruction(unpack);
                 }
-                return new MultiNewArray(type, sizes);
+                return new MultiNewArray(ClassTypeSignature.of(type), sizes);
             } catch (IOException e) {
                 Throwables.propagate(e);
             }
@@ -1069,7 +1069,7 @@ public class AstLoader {
                         values[i] = loadInstruction(unpack);
                     }
                 }
-                return new NewArray(type, size, values);
+                return new NewArray(ClassTypeSignature.of(type), size, values);
             } catch (IOException e) {
                 Throwables.propagate(e);
             }

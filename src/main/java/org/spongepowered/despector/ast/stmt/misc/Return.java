@@ -24,7 +24,6 @@
  */
 package org.spongepowered.despector.ast.stmt.misc;
 
-import javax.annotation.Nullable;
 import org.spongepowered.despector.ast.AstVisitor;
 import org.spongepowered.despector.ast.insn.Instruction;
 import org.spongepowered.despector.ast.stmt.Statement;
@@ -34,6 +33,8 @@ import org.spongepowered.despector.util.serialization.MessagePacker;
 
 import java.io.IOException;
 import java.util.Optional;
+
+import javax.annotation.Nullable;
 
 /**
  * A return statement which returns a value.

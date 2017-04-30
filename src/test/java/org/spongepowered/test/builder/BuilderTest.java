@@ -24,7 +24,10 @@
  */
 package org.spongepowered.test.builder;
 
-import static org.spongepowered.despector.transform.builder.Builders.*;
+import static org.spongepowered.despector.transform.builder.Builders.createClass;
+import static org.spongepowered.despector.transform.builder.Builders.integer;
+import static org.spongepowered.despector.transform.builder.Builders.localAssign;
+import static org.spongepowered.despector.transform.builder.Builders.returnVoid;
 
 import org.junit.Test;
 import org.spongepowered.despector.ast.AccessModifier;

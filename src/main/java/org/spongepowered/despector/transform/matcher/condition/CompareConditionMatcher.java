@@ -24,14 +24,14 @@
  */
 package org.spongepowered.despector.transform.matcher.condition;
 
-import javax.annotation.Nullable;
-
 import org.spongepowered.despector.ast.insn.condition.CompareCondition;
-import org.spongepowered.despector.ast.insn.condition.Condition;
 import org.spongepowered.despector.ast.insn.condition.CompareCondition.CompareOperator;
+import org.spongepowered.despector.ast.insn.condition.Condition;
 import org.spongepowered.despector.transform.matcher.ConditionMatcher;
 import org.spongepowered.despector.transform.matcher.InstructionMatcher;
 import org.spongepowered.despector.transform.matcher.MatchContext;
+
+import javax.annotation.Nullable;
 
 /**
  * A matcher for compare conditions.

@@ -456,7 +456,7 @@ public final class StatementBuilder {
             case Insn.NEWARRAY: {
                 Instruction size = stack.pop();
                 TypeInsn array = (TypeInsn) next;
-                stack.push(new NewArray(array.getType(), size, null));
+                stack.push(new NewArray(ClassTypeSignature.of(array.getType()), size, null));
                 break;
             }
             case Insn.MULTINEWARRAY: {
@@ -465,7 +465,7 @@ public final class StatementBuilder {
                 for (int i = 0; i < array.getValue(); i++) {
                     size[i] = stack.pop();
                 }
-                stack.push(new MultiNewArray(array.getType(), size));
+                stack.push(new MultiNewArray(ClassTypeSignature.of(array.getType()), size));
                 break;
             }
             case Insn.THROW:
@@ -484,7 +484,7 @@ public final class StatementBuilder {
                 if (!type.startsWith("[")) {
                     type = "L" + type + ";";
                 }
-                stack.push(new InstanceOf(val, type));
+                stack.push(new InstanceOf(val, ClassTypeSignature.of(type)));
                 break;
             }
             case Insn.IFEQ:

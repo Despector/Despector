@@ -44,7 +44,7 @@ public class KotlinBooleanConditionEmitter extends BooleanConditionEmitter {
             InstanceOf arg = (InstanceOf) bool.getConditionValue();
             ctx.emit(arg.getCheckedValue(), null);
             ctx.printString(" !is ");
-            ctx.emitType(arg.getType());
+            ctx.emitType(arg.getType().getDescriptor());
             return;
         }
         if (bool.isInverse()) {

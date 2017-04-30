@@ -24,7 +24,10 @@
  */
 package org.spongepowered.test.kotlin;
 
-import static org.objectweb.asm.Opcodes.*;
+import static org.objectweb.asm.Opcodes.GOTO;
+import static org.objectweb.asm.Opcodes.IF_ICMPLE;
+import static org.objectweb.asm.Opcodes.ILOAD;
+import static org.objectweb.asm.Opcodes.IRETURN;
 
 import org.junit.Assert;
 import org.junit.Test;

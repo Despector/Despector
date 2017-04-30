@@ -94,7 +94,7 @@ public class KotlinStaticMethodInvokeEmitter extends StaticMethodInvokeEmitter {
                 NewArray varargs = (NewArray) param;
                 for (int o = 0; o < varargs.getInitializer().length; o++) {
                     ctx.markWrapPoint();
-                    ctx.emit(varargs.getInitializer()[o], ClassTypeSignature.of(varargs.getType()));
+                    ctx.emit(varargs.getInitializer()[o], varargs.getType());
                     if (o < varargs.getInitializer().length - 1) {
                         ctx.printString(", ");
                     }
@@ -139,7 +139,7 @@ public class KotlinStaticMethodInvokeEmitter extends StaticMethodInvokeEmitter {
                 NewArray varargs = (NewArray) param;
                 for (int o = 0; o < varargs.getInitializer().length; o++) {
                     ctx.markWrapPoint();
-                    ctx.emit(varargs.getInitializer()[o], ClassTypeSignature.of(varargs.getType()));
+                    ctx.emit(varargs.getInitializer()[o], varargs.getType());
                     if (o < varargs.getInitializer().length - 1) {
                         ctx.printString(", ");
                     }

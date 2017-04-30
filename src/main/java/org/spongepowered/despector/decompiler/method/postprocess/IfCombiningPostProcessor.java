@@ -30,12 +30,12 @@ import org.spongepowered.despector.ast.stmt.StatementBlock;
 import org.spongepowered.despector.ast.stmt.branch.DoWhile;
 import org.spongepowered.despector.ast.stmt.branch.For;
 import org.spongepowered.despector.ast.stmt.branch.If;
-import org.spongepowered.despector.ast.stmt.branch.Switch;
-import org.spongepowered.despector.ast.stmt.branch.TryCatch;
-import org.spongepowered.despector.ast.stmt.branch.While;
 import org.spongepowered.despector.ast.stmt.branch.If.Elif;
+import org.spongepowered.despector.ast.stmt.branch.Switch;
 import org.spongepowered.despector.ast.stmt.branch.Switch.Case;
+import org.spongepowered.despector.ast.stmt.branch.TryCatch;
 import org.spongepowered.despector.ast.stmt.branch.TryCatch.CatchBlock;
+import org.spongepowered.despector.ast.stmt.branch.While;
 
 /**
  * A post processor which cleans up nested if statements that can be simplified.

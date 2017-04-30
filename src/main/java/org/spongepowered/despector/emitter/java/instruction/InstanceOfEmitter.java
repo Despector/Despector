@@ -38,7 +38,7 @@ public class InstanceOfEmitter implements InstructionEmitter<JavaEmitterContext,
     public void emit(JavaEmitterContext ctx, InstanceOf arg, TypeSignature type) {
         ctx.emit(arg.getCheckedValue(), null);
         ctx.printString(" instanceof ");
-        ctx.emitType(arg.getType());
+        ctx.emitType(arg.getType().getDescriptor());
     }
 
 }

@@ -26,8 +26,6 @@ package org.spongepowered.test.decompile;
 
 import static org.objectweb.asm.Opcodes.*;
 
-import org.spongepowered.test.util.TestHelper;
-
 import org.junit.Assert;
 import org.junit.Test;
 import org.objectweb.asm.ClassWriter;
@@ -38,6 +36,7 @@ import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.GeneratorAdapter;
 import org.objectweb.asm.commons.Method;
+import org.spongepowered.test.util.TestHelper;
 
 public class SwitchTests {
 

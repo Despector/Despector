@@ -44,12 +44,12 @@ import java.io.IOException;
 public class InstanceOf implements Instruction {
 
     private Instruction check;
-    private String type;
+    private ClassTypeSignature type;
 
-    public InstanceOf(Instruction check, String type) {
+    public InstanceOf(Instruction check, ClassTypeSignature type) {
         this.check = checkNotNull(check, "check");
         this.type = checkNotNull(type, "type");
-        checkArgument(TypeHelper.IS_OBJECT_OR_ARRAY.test(this.type));
+        checkArgument(TypeHelper.IS_OBJECT_OR_ARRAY.test(this.type.getDescriptor()));
     }
 
     /**
@@ -69,7 +69,7 @@ public class InstanceOf implements Instruction {
     /**
      * Gets the type being tested for.
      */
-    public String getType() {
+    public ClassTypeSignature getType() {
         return this.type;
     }
 
@@ -77,11 +77,11 @@ public class InstanceOf implements Instruction {
      * Sets the type being tested for, must be an array or object.
      */
     public String getTypeName() {
-        return TypeHelper.descToType(this.type);
+        return this.type.getClassName();
     }
 
-    public void setType(String type) {
-        checkArgument(TypeHelper.IS_OBJECT_OR_ARRAY.test(type));
+    public void setType(ClassTypeSignature type) {
+        checkArgument(TypeHelper.IS_OBJECT_OR_ARRAY.test(type.getDescriptor()));
         this.type = checkNotNull(type, "type");
     }
 
@@ -104,7 +104,7 @@ public class InstanceOf implements Instruction {
         pack.writeString("id").writeInt(AstSerializer.STATEMENT_ID_INSTANCE_OF);
         pack.writeString("val");
         this.check.writeTo(pack);
-        pack.writeString("type").writeString(this.type);
+        pack.writeString("type").writeString(this.type.getDescriptor());
         pack.endMap();
     }
 

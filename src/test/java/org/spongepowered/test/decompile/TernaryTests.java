@@ -26,14 +26,13 @@ package org.spongepowered.test.decompile;
 
 import static org.objectweb.asm.Opcodes.*;
 
-import org.spongepowered.test.util.TestHelper;
-import org.spongepowered.test.util.TestMethodBuilder;
-
 import org.junit.Assert;
 import org.junit.Test;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Type;
+import org.spongepowered.test.util.TestHelper;
+import org.spongepowered.test.util.TestMethodBuilder;
 
 public class TernaryTests {
 
