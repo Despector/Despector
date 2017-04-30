@@ -276,7 +276,7 @@ public class AstLoader {
     }
 
     public static FieldEntry loadField(MessageUnpacker unpack, SourceSet set) throws IOException {
-        startMap(unpack, 11);
+        startMap(unpack, 12);
         expectKey(unpack, "id");
         int id = unpack.readInt();
         if (id != AstSerializer.ENTRY_ID_FIELD) {
@@ -287,6 +287,8 @@ public class AstLoader {
         entry.setAccessModifier(AccessModifier.values()[unpack.readInt()]);
         expectKey(unpack, "name");
         entry.setName(unpack.readString());
+        expectKey(unpack, "owner");
+        entry.setOwner(unpack.readString());
         expectKey(unpack, "type");
         entry.setType(loadTypeSignature(unpack));
         expectKey(unpack, "final");

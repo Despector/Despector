@@ -252,10 +252,11 @@ public class FieldEntry extends AstEntry {
 
     @Override
     public void writeTo(MessagePacker pack) throws IOException {
-        pack.startMap(11);
+        pack.startMap(12);
         pack.writeString("id").writeInt(AstSerializer.ENTRY_ID_FIELD);
         pack.writeString("access").writeInt(this.access.ordinal());
         pack.writeString("name").writeString(this.name);
+        pack.writeString("owner").writeString(this.owner);
         pack.writeString("type");
         this.type.writeTo(pack);
         pack.writeString("final").writeBool(this.is_final);
