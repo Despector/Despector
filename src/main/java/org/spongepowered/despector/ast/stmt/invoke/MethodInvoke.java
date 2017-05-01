@@ -112,7 +112,7 @@ public abstract class MethodInvoke implements Instruction {
     /**
      * Gets the parameters of this method call.
      */
-    public Instruction[] getParams() {
+    public Instruction[] getParameters() {
         return this.params;
     }
 

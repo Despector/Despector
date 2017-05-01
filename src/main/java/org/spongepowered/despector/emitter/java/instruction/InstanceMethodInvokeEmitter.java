@@ -97,9 +97,9 @@ public class InstanceMethodInvokeEmitter implements InstructionEmitter<JavaEmitt
         }
         ctx.printString("(");
         List<String> param_types = TypeHelper.splitSig(arg.getMethodDescription());
-        for (int i = 0; i < arg.getParams().length; i++) {
-            Instruction param = arg.getParams()[i];
-            if (is_varargs && i == arg.getParams().length - 1 && param instanceof NewArray) {
+        for (int i = 0; i < arg.getParameters().length; i++) {
+            Instruction param = arg.getParameters()[i];
+            if (is_varargs && i == arg.getParameters().length - 1 && param instanceof NewArray) {
                 NewArray varargs = (NewArray) param;
                 for (int o = 0; o < varargs.getInitializer().length; o++) {
                     ctx.emit(varargs.getInitializer()[o], varargs.getType());
@@ -111,7 +111,7 @@ public class InstanceMethodInvokeEmitter implements InstructionEmitter<JavaEmitt
                 break;
             }
             ctx.emit(param, ClassTypeSignature.of(param_types.get(i)));
-            if (i < arg.getParams().length - 1) {
+            if (i < arg.getParameters().length - 1) {
                 ctx.printString(", ");
                 ctx.markWrapPoint();
             }
@@ -131,8 +131,8 @@ public class InstanceMethodInvokeEmitter implements InstructionEmitter<JavaEmitt
         while (callee != null) {
             if (callee instanceof InstanceMethodInvoke) {
                 InstanceMethodInvoke call = (InstanceMethodInvoke) callee;
-                if (call.getParams().length == 1) {
-                    constants.add(0, call.getParams()[0]);
+                if (call.getParameters().length == 1) {
+                    constants.add(0, call.getParameters()[0]);
                     callee = call.getCallee();
                     continue;
                 }
@@ -144,7 +144,7 @@ public class InstanceMethodInvokeEmitter implements InstructionEmitter<JavaEmitt
                         if (initial instanceof StaticMethodInvoke) {
                             StaticMethodInvoke valueof = (StaticMethodInvoke) initial;
                             if (valueof.getMethodName().equals("valueOf") && valueof.getOwner().equals("Ljava/lang/String;")) {
-                                Instruction internal = valueof.getParams()[0];
+                                Instruction internal = valueof.getParameters()[0];
                                 if (internal instanceof StringConstant) {
                                     initial = internal;
                                 } else if (internal instanceof LocalAccess) {

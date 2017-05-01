@@ -41,7 +41,7 @@ public class KotlinInvokeEmitter implements StatementEmitter<JavaEmitterContext,
         Instruction i = insn.getInstruction();
         if (i instanceof InstanceMethodInvoke) {
             InstanceMethodInvoke mth = (InstanceMethodInvoke) i;
-            if (mth.getMethodName().equals("<init>") && mth.getParams().length == 0) {
+            if (mth.getMethodName().equals("<init>") && mth.getParameters().length == 0) {
                 return;
             }
         } else if (i instanceof StaticMethodInvoke) {

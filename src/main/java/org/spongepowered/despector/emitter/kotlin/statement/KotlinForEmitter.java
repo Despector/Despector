@@ -88,7 +88,7 @@ public class KotlinForEmitter extends ForEmitter {
             return false;
         }
         LocalInstance local = ((LocalAssignment) loop.getBody().getStatement(0)).getLocal();
-        Instruction str = ((StaticMethodInvoke) ((LocalAssignment) loop.getInit()).getValue()).getParams()[0];
+        Instruction str = ((StaticMethodInvoke) ((LocalAssignment) loop.getInit()).getValue()).getParameters()[0];
         ctx.printString("for (");
         ctx.printString(local.getName());
         ctx.printString(" in ");

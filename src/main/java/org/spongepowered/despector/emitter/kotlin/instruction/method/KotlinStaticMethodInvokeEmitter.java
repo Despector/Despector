@@ -67,8 +67,8 @@ public class KotlinStaticMethodInvokeEmitter extends StaticMethodInvokeEmitter {
         if (special != null && special.emit(ctx, arg, type)) {
             return;
         }
-        if (IGNORED_METHODS.contains(key) && arg.getParams().length == 1) {
-            ctx.emit(arg.getParams()[0], ClassTypeSignature.of(arg.getReturnType()));
+        if (IGNORED_METHODS.contains(key) && arg.getParameters().length == 1) {
+            ctx.emit(arg.getParameters()[0], ClassTypeSignature.of(arg.getReturnType()));
             return;
         }
         String owner = TypeHelper.descToType(arg.getOwner());
@@ -88,9 +88,9 @@ public class KotlinStaticMethodInvokeEmitter extends StaticMethodInvokeEmitter {
         ctx.printString(arg.getMethodName());
         List<String> param_types = TypeHelper.splitSig(arg.getMethodDescription());
         ctx.printString("(");
-        for (int i = 0; i < arg.getParams().length; i++) {
-            Instruction param = arg.getParams()[i];
-            if (i == arg.getParams().length - 1 && param instanceof NewArray) {
+        for (int i = 0; i < arg.getParameters().length; i++) {
+            Instruction param = arg.getParameters()[i];
+            if (i == arg.getParameters().length - 1 && param instanceof NewArray) {
                 NewArray varargs = (NewArray) param;
                 for (int o = 0; o < varargs.getInitializer().length; o++) {
                     ctx.markWrapPoint();
@@ -102,7 +102,7 @@ public class KotlinStaticMethodInvokeEmitter extends StaticMethodInvokeEmitter {
                 break;
             }
             ctx.emit(param, ClassTypeSignature.of(param_types.get(i)));
-            if (i < arg.getParams().length - 1) {
+            if (i < arg.getParameters().length - 1) {
                 ctx.printString(", ");
                 ctx.markWrapPoint();
             }
@@ -115,9 +115,9 @@ public class KotlinStaticMethodInvokeEmitter extends StaticMethodInvokeEmitter {
      * values.
      */
     public void callDefaultMethod(JavaEmitterContext ctx, StaticMethodInvoke call) {
-        Instruction callee = call.getParams()[0];
-        int set = ((IntConstant) call.getParams()[call.getParams().length - 2]).getConstant();
-        int total_args = call.getParams().length - 3;
+        Instruction callee = call.getParameters()[0];
+        int set = ((IntConstant) call.getParameters()[call.getParameters().length - 2]).getConstant();
+        int total_args = call.getParameters().length - 3;
 
         ctx.emit(callee, null);
         ctx.printString(".");
@@ -134,7 +134,7 @@ public class KotlinStaticMethodInvokeEmitter extends StaticMethodInvokeEmitter {
                 ctx.printString(", ");
                 ctx.markWrapPoint();
             }
-            Instruction param = call.getParams()[i + 1];
+            Instruction param = call.getParameters()[i + 1];
             if (i == total_args - 1 && param instanceof NewArray) {
                 NewArray varargs = (NewArray) param;
                 for (int o = 0; o < varargs.getInitializer().length; o++) {

@@ -73,9 +73,9 @@ public class StaticMethodInvokeEmitter implements InstructionEmitter<JavaEmitter
         ctx.printString(arg.getMethodName());
         List<String> param_types = TypeHelper.splitSig(arg.getMethodDescription());
         ctx.printString("(");
-        for (int i = 0; i < arg.getParams().length; i++) {
-            Instruction param = arg.getParams()[i];
-            if (is_varargs && i == arg.getParams().length - 1 && param instanceof NewArray) {
+        for (int i = 0; i < arg.getParameters().length; i++) {
+            Instruction param = arg.getParameters()[i];
+            if (is_varargs && i == arg.getParameters().length - 1 && param instanceof NewArray) {
                 NewArray varargs = (NewArray) param;
                 for (int o = 0; o < varargs.getInitializer().length; o++) {
                     ctx.emit(varargs.getInitializer()[o], varargs.getType());
@@ -87,7 +87,7 @@ public class StaticMethodInvokeEmitter implements InstructionEmitter<JavaEmitter
                 break;
             }
             ctx.emit(param, ClassTypeSignature.of(param_types.get(i)));
-            if (i < arg.getParams().length - 1) {
+            if (i < arg.getParameters().length - 1) {
                 ctx.printString(", ");
                 ctx.markWrapPoint();
             }
@@ -105,12 +105,12 @@ public class StaticMethodInvokeEmitter implements InstructionEmitter<JavaEmitter
                 // setter
                 FieldAssignment assign = (FieldAssignment) accessor.getInstructions().getStatements().get(0);
                 FieldAssignment replacement = null;
-                if (arg.getParams().length == 2) {
+                if (arg.getParameters().length == 2) {
                     replacement = new InstanceFieldAssignment(assign.getFieldName(), assign.getFieldDescription(), assign.getOwnerType(),
-                            arg.getParams()[0], arg.getParams()[1]);
+                            arg.getParameters()[0], arg.getParameters()[1]);
                 } else {
                     replacement = new StaticFieldAssignment(assign.getFieldName(), assign.getFieldDescription(), assign.getOwnerType(),
-                            arg.getParams()[0]);
+                            arg.getParameters()[0]);
                 }
                 ctx.emit(replacement, ctx.usesSemicolons());
                 return true;
@@ -119,8 +119,8 @@ public class StaticMethodInvokeEmitter implements InstructionEmitter<JavaEmitter
             Return ret = (Return) accessor.getInstructions().getStatements().get(0);
             FieldAccess getter = (FieldAccess) ret.getValue().get();
             FieldAccess replacement = null;
-            if (arg.getParams().length == 1) {
-                replacement = new InstanceFieldAccess(getter.getFieldName(), getter.getTypeDescriptor(), getter.getOwnerType(), arg.getParams()[0]);
+            if (arg.getParameters().length == 1) {
+                replacement = new InstanceFieldAccess(getter.getFieldName(), getter.getTypeDescriptor(), getter.getOwnerType(), arg.getParameters()[0]);
             } else {
                 replacement = new StaticFieldAccess(getter.getFieldName(), getter.getTypeDescriptor(), getter.getOwnerType());
             }

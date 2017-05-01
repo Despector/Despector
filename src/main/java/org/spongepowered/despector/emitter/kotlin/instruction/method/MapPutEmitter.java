@@ -35,14 +35,14 @@ public class MapPutEmitter implements SpecialMethodEmitter<InstanceMethodInvoke>
 
     @Override
     public boolean emit(JavaEmitterContext ctx, InstanceMethodInvoke arg, TypeSignature type) {
-        if (arg.getParams().length != 2) {
+        if (arg.getParameters().length != 2) {
             return false;
         }
         ctx.emit(arg.getCallee(), null);
         ctx.printString("[");
-        ctx.emit(arg.getParams()[0], null);
+        ctx.emit(arg.getParameters()[0], null);
         ctx.printString("] = ");
-        ctx.emit(arg.getParams()[1], null);
+        ctx.emit(arg.getParameters()[1], null);
         return true;
     }
 

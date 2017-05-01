@@ -273,7 +273,7 @@ public class MethodEntryEmitter implements AstEmitter<JavaEmitterContext, Method
             }
             InstanceMethodInvoke ctor = (InstanceMethodInvoke) invoke.getInstruction();
             Return ret = (Return) block.getStatement(block.getStatementCount() - 1);
-            return !ret.getValue().isPresent() && ctor.getParams().length == 0;
+            return !ret.getValue().isPresent() && ctor.getParameters().length == 0;
         }
         return false;
     }

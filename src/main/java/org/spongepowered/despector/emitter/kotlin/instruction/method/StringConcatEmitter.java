@@ -56,8 +56,8 @@ public class StringConcatEmitter implements SpecialMethodEmitter<InstanceMethodI
         while (callee != null) {
             if (callee instanceof InstanceMethodInvoke) {
                 InstanceMethodInvoke call = (InstanceMethodInvoke) callee;
-                if (call.getParams().length == 1) {
-                    constants.add(0, call.getParams()[0]);
+                if (call.getParameters().length == 1) {
+                    constants.add(0, call.getParameters()[0]);
                     callee = call.getCallee();
                     continue;
                 }
@@ -69,7 +69,7 @@ public class StringConcatEmitter implements SpecialMethodEmitter<InstanceMethodI
                         if (initial instanceof StaticMethodInvoke) {
                             StaticMethodInvoke valueof = (StaticMethodInvoke) initial;
                             if (valueof.getMethodName().equals("valueOf") && valueof.getOwner().equals("Ljava/lang/String;")) {
-                                Instruction internal = valueof.getParams()[0];
+                                Instruction internal = valueof.getParameters()[0];
                                 if (internal instanceof StringConstant) {
                                     initial = internal;
                                 } else if (internal instanceof LocalAccess) {
@@ -136,11 +136,11 @@ public class StringConcatEmitter implements SpecialMethodEmitter<InstanceMethodI
                             in_string = true;
                         }
                         ctx.printString("${");
-                        ctx.emit(mth.getParams()[0], ClassTypeSignature.STRING);
+                        ctx.emit(mth.getParameters()[0], ClassTypeSignature.STRING);
                         ctx.printString(".replace(");
-                        ctx.emit(mth.getParams()[1], ClassTypeSignature.STRING);
+                        ctx.emit(mth.getParameters()[1], ClassTypeSignature.STRING);
                         ctx.printString(", ");
-                        ctx.emit(mth.getParams()[2], ClassTypeSignature.STRING);
+                        ctx.emit(mth.getParameters()[2], ClassTypeSignature.STRING);
                         ctx.printString(")}");
                         continue;
                     }

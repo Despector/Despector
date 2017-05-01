@@ -52,7 +52,7 @@ public class WhenEmitter implements InstructionEmitter<JavaEmitterContext, When>
             if (val instanceof StaticMethodInvoke) {
                 StaticMethodInvoke mth = (StaticMethodInvoke) val;
                 if (mth.getMethodName().equals("areEqual") && mth.getOwner().equals("Lkotlin/jvm/internal/Intrinsics;")) {
-                    ctx.emit(mth.getParams()[1], null);
+                    ctx.emit(mth.getParameters()[1], null);
                 }
             } else if (val instanceof InstanceOf) {
                 ctx.printString("is ");
