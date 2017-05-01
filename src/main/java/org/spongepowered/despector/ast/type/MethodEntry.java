@@ -334,7 +334,9 @@ public class MethodEntry extends AstEntry {
         if (visitor instanceof TypeVisitor) {
             ((TypeVisitor) visitor).visitMethod(this);
         }
-        this.instructions.accept(visitor);
+        if (this.instructions != null) {
+            this.instructions.accept(visitor);
+        }
         if (visitor instanceof TypeVisitor) {
             ((TypeVisitor) visitor).visitMethodEnd();
         }
