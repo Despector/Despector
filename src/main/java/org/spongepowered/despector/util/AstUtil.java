@@ -54,6 +54,7 @@ import org.spongepowered.despector.ast.stmt.invoke.New;
 import org.spongepowered.despector.ast.stmt.invoke.StaticMethodInvoke;
 import org.spongepowered.despector.decompiler.ir.Insn;
 import org.spongepowered.despector.decompiler.ir.InvokeInsn;
+import org.spongepowered.despector.decompiler.ir.TypeIntInsn;
 
 import java.util.List;
 
@@ -142,6 +143,10 @@ public final class AstUtil {
             int count = TypeHelper.paramCount(method.getDescription());
             return count;
         }
+        case Insn.MULTINEWARRAY: {
+            TypeIntInsn array = (TypeIntInsn) next;
+            return array.getValue();
+        }
         default:
             System.err.println("Unsupported opcode: " + next.getOpcode());
             throw new IllegalStateException();
@@ -194,6 +199,7 @@ public final class AstUtil {
         case Insn.XOR:
         case Insn.CMP:
         case Insn.INVOKEDYNAMIC:
+        case Insn.MULTINEWARRAY:
             return 1;
         case Insn.NOOP:
         case Insn.IINC:
