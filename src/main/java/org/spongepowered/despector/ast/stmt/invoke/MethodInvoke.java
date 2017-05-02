@@ -98,7 +98,7 @@ public abstract class MethodInvoke implements Instruction {
     /**
      * Gets the internal name of the owner of the method being invoked.
      */
-    public String getOwnerType() {
+    public String getOwnerName() {
         return TypeHelper.descToType(this.method_owner);
     }
 

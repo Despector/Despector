@@ -48,37 +48,37 @@ import org.spongepowered.despector.ast.stmt.misc.Throw;
 
 public interface StatementVisitor extends AstVisitor {
 
-    void visitArrayAssignment(ArrayAssignment arrayAssign);
+    void visitArrayAssignment(ArrayAssignment stmt);
 
-    void visitBreak(Break breakStatement);
+    void visitBreak(Break stmt);
 
-    void visitCatchBlock(CatchBlock catchBlock);
+    void visitCatchBlock(CatchBlock stmt);
 
-    void visitComment(Comment comment);
+    void visitComment(Comment stmt);
 
-    void visitDoWhile(DoWhile doWhileLoop);
+    void visitDoWhile(DoWhile stmt);
 
-    void visitElif(Elif elseBlock);
+    void visitElif(Elif stmt);
 
-    void visitElse(Else elseBlock);
+    void visitElse(Else stmt);
 
-    void visitFor(For forLoop);
+    void visitFor(For stmt);
 
-    void visitForEach(ForEach forLoop);
+    void visitForEach(ForEach stmt);
 
-    void visitIf(If ifBlock);
+    void visitIf(If stmt);
 
-    void visitIncrement(Increment incrementStatement);
+    void visitIncrement(Increment stmt);
 
     void visitInstanceFieldAssignment(InstanceFieldAssignment stmt);
 
     void visitInvoke(InvokeStatement stmt);
 
-    void visitLocalAssignment(LocalAssignment localAssign);
+    void visitLocalAssignment(LocalAssignment stmt);
 
-    void visitReturn(Return returnValue);
+    void visitReturn(Return stmt);
 
-    void visitStaticFieldAssignment(StaticFieldAssignment staticFieldAssign);
+    void visitStaticFieldAssignment(StaticFieldAssignment stmt);
 
     void visitSwitch(Switch tableSwitch);
 

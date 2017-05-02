@@ -57,7 +57,7 @@ public class InstanceMethodInvokeEmitter implements InstructionEmitter<JavaEmitt
         }
         if (arg.getMethodName().equals("<init>")) {
             if (ctx.getType() != null) {
-                if (arg.getOwnerType().equals(ctx.getType().getName())) {
+                if (arg.getOwnerName().equals(ctx.getType().getName())) {
                     ctx.printString("this");
                 } else {
                     ctx.printString("super");
@@ -69,7 +69,7 @@ public class InstanceMethodInvokeEmitter implements InstructionEmitter<JavaEmitt
             if (arg.getCallee() instanceof LocalAccess && ctx.getMethod() != null && !ctx.getMethod().isStatic()) {
                 LocalAccess local = (LocalAccess) arg.getCallee();
                 if (local.getLocal().getIndex() == 0) {
-                    if (ctx.getType() != null && !arg.getOwnerType().equals(ctx.getType().getName())) {
+                    if (ctx.getType() != null && !arg.getOwnerName().equals(ctx.getType().getName())) {
                         ctx.printString("super.");
                     } else if (ConfigManager.getConfig().emitter.emit_this_for_methods) {
                         ctx.printString("this.");
@@ -87,7 +87,7 @@ public class InstanceMethodInvokeEmitter implements InstructionEmitter<JavaEmitt
             ctx.printString(arg.getMethodName());
         }
         boolean is_varargs = false;
-        TypeEntry target = ctx.getType().getSource().get(arg.getOwnerType());
+        TypeEntry target = ctx.getType().getSource().get(arg.getOwnerName());
         if (target != null) {
             MethodEntry mth = target.getMethod(arg.getMethodName(), arg.getMethodDescription());
             // TODO need to search up superclasses if not found

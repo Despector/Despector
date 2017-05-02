@@ -159,6 +159,12 @@ public class SourceSet {
         return this.annotations.values();
     }
 
+    public void accept(AstVisitor visitor) {
+        for (TypeEntry type : this.classes.values()) {
+            type.accept(visitor);
+        }
+    }
+
     /**
      * Writes this source set to the given {@link MessagePacker}.
      */

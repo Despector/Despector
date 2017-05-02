@@ -76,7 +76,7 @@ public class KotlinInstanceMethodInvokeEmitter extends InstanceMethodInvokeEmitt
         }
         if (arg.getMethodName().equals("<init>")) {
             if (ctx.getType() != null) {
-                if (arg.getOwnerType().equals(ctx.getType().getName())) {
+                if (arg.getOwnerName().equals(ctx.getType().getName())) {
                     ctx.printString("this");
                 } else {
                     ctx.printString("super");
@@ -89,7 +89,7 @@ public class KotlinInstanceMethodInvokeEmitter extends InstanceMethodInvokeEmitt
                 if (arg.getCallee() instanceof LocalAccess && ctx.getMethod() != null && !ctx.getMethod().isStatic()) {
                     LocalAccess local = (LocalAccess) arg.getCallee();
                     if (local.getLocal().getIndex() == 0) {
-                        if (ctx.getType() != null && !arg.getOwnerType().equals(ctx.getType().getName())) {
+                        if (ctx.getType() != null && !arg.getOwnerName().equals(ctx.getType().getName())) {
                             ctx.printString("super.");
                         }
                     } else {
