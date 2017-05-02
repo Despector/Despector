@@ -41,8 +41,9 @@ public class WildEmitter implements Emitter<JavaEmitterContext> {
     public void emit(JavaEmitterContext ctx, TypeEntry type) {
         if (type.getLanguage() == Language.KOTLIN) {
             Emitters.KOTLIN.emit(ctx, type);
+        } else {
+            Emitters.JAVA.emit(ctx, type);
         }
-        Emitters.JAVA.emit(ctx, type);
     }
 
 }
