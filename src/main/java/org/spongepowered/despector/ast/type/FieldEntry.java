@@ -184,15 +184,8 @@ public class FieldEntry extends AstEntry {
     /**
      * Gets the type description of the owner of this field.
      */
-    public String getOwner() {
-        return this.owner;
-    }
-
-    /**
-     * Gets the internal name of the owner of this field.
-     */
     public String getOwnerName() {
-        return TypeHelper.descToType(this.owner);
+        return this.owner;
     }
 
     /**

@@ -95,7 +95,7 @@ public class AstAsserts {
 
     public static void assertEquals(FieldEntry a, FieldEntry b) {
         Assert.assertEquals(a.getAccessModifier(), b.getAccessModifier());
-        Assert.assertEquals(a.getOwner(), b.getOwner());
+        Assert.assertEquals(a.getOwnerName(), b.getOwnerName());
         Assert.assertEquals(a.getType(), b.getType());
         Assert.assertEquals(a.getName(), b.getName());
         Assert.assertEquals(a.isFinal(), b.isFinal());
@@ -115,7 +115,7 @@ public class AstAsserts {
 
     public static void assertEquals(MethodEntry a, MethodEntry b) {
         Assert.assertEquals(a.getAccessModifier(), b.getAccessModifier());
-        Assert.assertEquals(a.getOwner(), b.getOwner());
+        Assert.assertEquals(a.getOwnerName(), b.getOwnerName());
         Assert.assertEquals(a.getName(), b.getName());
         Assert.assertEquals(a.getDescription(), b.getDescription());
         Assert.assertEquals(a.isAbstract(), b.isAbstract());

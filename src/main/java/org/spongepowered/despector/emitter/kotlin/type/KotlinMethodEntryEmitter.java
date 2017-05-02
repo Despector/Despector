@@ -91,7 +91,7 @@ public class KotlinMethodEntryEmitter extends MethodEntryEmitter {
                         break;
                     }
                     StaticFieldAssignment assign = (StaticFieldAssignment) stmt;
-                    if (!assign.getOwnerName().equals(method.getOwner())) {
+                    if (!assign.getOwnerName().equals(method.getOwnerName())) {
                         break;
                     }
                     start++;

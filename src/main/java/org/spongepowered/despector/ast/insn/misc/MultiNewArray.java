@@ -95,7 +95,7 @@ public class MultiNewArray implements Instruction {
 
     @Override
     public void writeTo(MessagePacker pack) throws IOException {
-        pack.startMap(4);
+        pack.startMap(3);
         pack.writeString("id").writeInt(AstSerializer.STATEMENT_ID_MULTI_NEW_ARRAY);
         pack.writeString("type").writeString(this.type.getDescriptor());
         pack.writeString("sizes");

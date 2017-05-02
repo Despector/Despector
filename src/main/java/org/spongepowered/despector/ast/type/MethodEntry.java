@@ -108,12 +108,8 @@ public class MethodEntry extends AstEntry {
     /**
      * Gets the type containing this method.
      */
-    public String getOwner() {
-        return this.owner;
-    }
-
     public String getOwnerName() {
-        return TypeHelper.descToType(this.owner);
+        return this.owner;
     }
 
     public void setOwner(String owner) {

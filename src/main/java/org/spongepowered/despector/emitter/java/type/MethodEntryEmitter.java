@@ -60,7 +60,7 @@ public class MethodEntryEmitter implements AstEmitter<JavaEmitterContext, Method
                         break;
                     }
                     StaticFieldAssignment assign = (StaticFieldAssignment) stmt;
-                    if (!assign.getOwnerName().equals(method.getOwner())) {
+                    if (!assign.getOwnerName().equals(method.getOwnerName())) {
                         break;
                     }
                     start++;
