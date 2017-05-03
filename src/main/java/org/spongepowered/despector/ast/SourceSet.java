@@ -85,6 +85,9 @@ public class SourceSet {
      */
     public TypeEntry get(String name) {
         checkNotNull(name);
+        if (name.endsWith(";") || name.startsWith("[") || (name.length() == 1 && "BSIJFDCZ".indexOf(name.charAt(0)) != -1)) {
+            throw new IllegalStateException(name + " is a descriptor not a type name");
+        }
         if (name.endsWith("[]")) {
             return get(name.substring(0, name.length() - 2));
         }
