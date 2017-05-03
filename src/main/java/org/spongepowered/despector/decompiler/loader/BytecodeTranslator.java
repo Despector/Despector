@@ -146,7 +146,11 @@ public class BytecodeTranslator {
                 } else if (entry instanceof StringEntry) {
                     block.append(new LdcInsn(Insn.PUSH, ((StringEntry) entry).value));
                 } else if (entry instanceof ClassEntry) {
-                    block.append(new LdcInsn(Insn.PUSH, ClassTypeSignature.of("L" + ((ClassEntry) entry).name + ";")));
+                    String type = ((ClassEntry) entry).name;
+                    if (!type.startsWith("[")) {
+                        type = "L" + type + ";";
+                    }
+                    block.append(new LdcInsn(Insn.PUSH, ClassTypeSignature.of(type)));
                 } else {
                     throw new IllegalStateException("Unsupported constant pool entry type in LDC node " + entry.getClass().getSimpleName());
                 }
