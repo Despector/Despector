@@ -32,7 +32,9 @@ import org.spongepowered.despector.ast.AnnotationType;
 import org.spongepowered.despector.ast.Locals;
 import org.spongepowered.despector.ast.Locals.Local;
 import org.spongepowered.despector.ast.SourceSet;
+import org.spongepowered.despector.ast.generic.ClassSignature;
 import org.spongepowered.despector.ast.generic.ClassTypeSignature;
+import org.spongepowered.despector.ast.generic.GenericClassTypeSignature;
 import org.spongepowered.despector.ast.generic.MethodSignature;
 import org.spongepowered.despector.ast.generic.TypeSignature;
 import org.spongepowered.despector.ast.insn.cst.StringConstant;
@@ -144,7 +146,7 @@ public class BaseDecompiler implements Decompiler {
             System.out.println("Decompiling class " + name);
         }
         int super_index = data.readUnsignedShort();
-        String supername = super_index != 0 ? "L" + pool.getClass(super_index).name + ";" : null;
+        String supername = super_index != 0 ? "L" + pool.getClass(super_index).name + ";" : "Ljava/lang/Object;";
 
         int interfaces_count = data.readUnsignedShort();
         List<String> interfaces = new ArrayList<>(interfaces_count);
@@ -464,6 +466,15 @@ public class BaseDecompiler implements Decompiler {
                 System.err.println("Skipping unknown class attribute: " + attribute_name);
                 data.skipBytes(length);
             }
+        }
+
+        if (entry.getSignature() == null) {
+            ClassSignature sig = new ClassSignature();
+            sig.setSuperclassSignature(new GenericClassTypeSignature(supername));
+            for (String intr : entry.getInterfaces()) {
+                sig.getInterfaceSignatures().add(new GenericClassTypeSignature("L" + intr + ";"));
+            }
+            entry.setSignature(sig);
         }
 
         entry.setLanguage(actual_lang);

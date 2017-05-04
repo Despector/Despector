@@ -196,7 +196,10 @@ public class AstLoader {
         }
         String key = unpack.readString();
         if ("signature".equals(key)) {
-            entry.setSignature(loadClassSignature(unpack));
+            ClassSignature sig = loadClassSignature(unpack);
+            if (sig != null) {
+                entry.setSignature(sig);
+            }
             expectKey(unpack, "annotations");
         } else if (!"annotations".equals(key)) {
             throw new IllegalStateException("Expected key annotations but was " + key);
@@ -270,6 +273,19 @@ public class AstLoader {
             for (int i = 0; i < csts; i++) {
                 e.addEnumConstant(unpack.readString());
             }
+        }
+
+        if (entry.getSignature() == null) {
+            ClassSignature sig = new ClassSignature();
+            if (entry instanceof ClassEntry) {
+                sig.setSuperclassSignature(new GenericClassTypeSignature(((ClassEntry) entry).getSuperclass()));
+            } else {
+                sig.setSuperclassSignature(new GenericClassTypeSignature("Ljava/lang/Object;"));
+            }
+            for (String intr : entry.getInterfaces()) {
+                sig.getInterfaceSignatures().add(new GenericClassTypeSignature("L" + intr + ";"));
+            }
+            entry.setSignature(sig);
         }
 
         return entry;

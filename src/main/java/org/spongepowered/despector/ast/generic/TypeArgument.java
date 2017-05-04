@@ -109,7 +109,14 @@ public class TypeArgument {
             return false;
         }
         TypeArgument c = (TypeArgument) o;
-        return this.sig.equals(c.sig) && this.wildcard.equals(c.wildcard);
+        if (this.sig != null) {
+            if (!this.sig.equals(c.sig)) {
+                return false;
+            }
+        } else if (c.sig != null) {
+            return false;
+        }
+        return this.wildcard.equals(c.wildcard);
     }
 
 }

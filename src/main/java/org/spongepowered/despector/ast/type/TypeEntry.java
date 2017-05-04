@@ -78,7 +78,6 @@ public abstract class TypeEntry extends AstEntry {
     protected final Map<AnnotationType, Annotation> annotations = new LinkedHashMap<>();
     protected final Map<String, InnerClassInfo> inner_classes = new LinkedHashMap<>();
 
-    @Nullable
     protected ClassSignature signature;
 
     public TypeEntry(SourceSet source, Language lang, String name) {
@@ -164,13 +163,12 @@ public abstract class TypeEntry extends AstEntry {
         return "L" + this.name + ";";
     }
 
-    @Nullable
     public ClassSignature getSignature() {
         return this.signature;
     }
 
-    public void setSignature(@Nullable ClassSignature signature) {
-        this.signature = signature;
+    public void setSignature(ClassSignature signature) {
+        this.signature = checkNotNull(signature, "signature");
     }
 
     /**
@@ -413,11 +411,7 @@ public abstract class TypeEntry extends AstEntry {
         }
         pack.endArray();
         pack.writeString("signature");
-        if (this.signature != null) {
-            this.signature.writeTo(pack);
-        } else {
-            pack.writeNil();
-        }
+        this.signature.writeTo(pack);
         pack.writeString("annotations").startArray(this.annotations.size());
         for (Annotation anno : this.annotations.values()) {
             anno.writeTo(pack);
