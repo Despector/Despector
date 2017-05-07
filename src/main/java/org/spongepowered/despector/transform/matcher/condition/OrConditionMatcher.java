@@ -48,7 +48,7 @@ public class OrConditionMatcher implements ConditionMatcher<OrCondition> {
 
     @Override
     public OrCondition match(MatchContext ctx, Condition cond) {
-        if (!(cond instanceof AndCondition)) {
+        if (!(cond instanceof OrCondition)) {
             return null;
         }
         OrCondition and = (OrCondition) cond;
