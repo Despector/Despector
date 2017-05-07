@@ -86,6 +86,7 @@ public class BytecodeMethodEntryEmitter implements AstEmitter<BytecodeEmitterCon
         mv.visitCode();
         Label start = new Label();
         mv.visitLabel(start);
+        ctx.resetMaxs();
         for (Statement stmt : ast.getInstructions().getStatements()) {
             ctx.emitStatement(stmt);
         }
@@ -94,14 +95,16 @@ public class BytecodeMethodEntryEmitter implements AstEmitter<BytecodeEmitterCon
 
         // TODO the indices we have for locals are in terms of the ir list and
         // are therefore useless now
+        int maxLocal = 0;
         for (LocalInstance local : ast.getLocals().getAllInstances()) {
             if (local.getType().getDescriptor().startsWith("L")) {
-                mv.visitLocalVariable(local.getName(), local.getTypeName(), local.getType().toString(), start, end, local.getIndex());
+                mv.visitLocalVariable(local.getName(), local.getType().getDescriptor(), local.getType().toString(), start, end, local.getIndex());
             } else {
-                mv.visitLocalVariable(local.getName(), local.getTypeName(), null, start, end, local.getIndex());
+                mv.visitLocalVariable(local.getName(), local.getType().getDescriptor(), null, start, end, local.getIndex());
             }
+            maxLocal = Math.max(maxLocal, local.getIndex() + 1);
         }
-        mv.visitMaxs(0, 0);
+        mv.visitMaxs(ctx.getMaxs(), maxLocal);
         mv.visitEnd();
         return true;
     }

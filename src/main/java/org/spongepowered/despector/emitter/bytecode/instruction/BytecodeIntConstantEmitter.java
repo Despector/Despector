@@ -58,7 +58,7 @@ public class BytecodeIntConstantEmitter implements InstructionEmitter<BytecodeEm
         } else {
             mv.visitLdcInsn(val);
         }
-
+        ctx.updateStack(1);
     }
 
 }

@@ -25,8 +25,10 @@
 package org.spongepowered.despector.emitter.bytecode;
 
 import com.google.common.base.Throwables;
+import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.MethodVisitor;
+import org.objectweb.asm.util.CheckClassAdapter;
 import org.spongepowered.despector.ast.AstEntry;
 import org.spongepowered.despector.ast.generic.TypeSignature;
 import org.spongepowered.despector.ast.insn.Instruction;
@@ -44,18 +46,40 @@ import java.io.OutputStream;
 
 public class BytecodeEmitterContext extends AbstractEmitterContext {
 
+    private static final boolean VERIFY_EMITTED_BYTECODE = Boolean.valueOf(System.getProperty("despect.bytecode.verify", "true"));
+
     private final OutputStream out;
 
-    private ClassWriter cw;
+    private ClassVisitor cw;
     private MethodVisitor mv;
+
+    private int maxs;
+    private int current_stack_size;
 
     public BytecodeEmitterContext(OutputStream out) {
         this.out = out;
     }
 
+    public void resetMaxs() {
+        this.maxs = 0;
+    }
+
+    public int getMaxs() {
+        return this.maxs;
+    }
+
+    public void updateStack(int delta) {
+        this.current_stack_size = delta;
+        this.maxs = Math.max(this.maxs, this.current_stack_size);
+    }
+
     @SuppressWarnings("unchecked")
     public <T extends TypeEntry> void emitOuterType(T ast) {
-        this.cw = new ClassWriter(ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES);
+        ClassWriter writer = new ClassWriter(ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES);
+        this.cw = writer;
+        if (VERIFY_EMITTED_BYTECODE) {
+            this.cw = new CheckClassAdapter(this.cw);
+        }
         AstEmitter<AbstractEmitterContext, T> emitter = (AstEmitter<AbstractEmitterContext, T>) this.set.getAstEmitter(ast.getClass());
         if (emitter == null) {
             throw new IllegalArgumentException("No emitter for ast entry " + ast.getClass().getName());
@@ -63,7 +87,7 @@ public class BytecodeEmitterContext extends AbstractEmitterContext {
         emitter.emit(this, ast);
         this.cw.visitEnd();
         try {
-            this.out.write(this.cw.toByteArray());
+            this.out.write(writer.toByteArray());
         } catch (IOException e) {
             Throwables.propagate(e);
         }
@@ -129,7 +153,7 @@ public class BytecodeEmitterContext extends AbstractEmitterContext {
         return this;
     }
 
-    public ClassWriter getClassWriter() {
+    public ClassVisitor getClassWriter() {
         return this.cw;
     }
 

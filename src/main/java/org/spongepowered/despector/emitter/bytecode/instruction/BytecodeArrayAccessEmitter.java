@@ -52,6 +52,7 @@ public class BytecodeArrayAccessEmitter implements InstructionEmitter<BytecodeEm
         } else {
             mv.visitInsn(Opcodes.AALOAD);
         }
+        ctx.updateStack(-1);
     }
 
 }

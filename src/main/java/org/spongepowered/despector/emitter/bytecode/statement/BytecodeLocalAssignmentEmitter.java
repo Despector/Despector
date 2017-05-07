@@ -41,16 +41,17 @@ public class BytecodeLocalAssignmentEmitter implements StatementEmitter<Bytecode
         ctx.emitInstruction(stmt.getValue(), type);
         if (type == ClassTypeSignature.INT || type == ClassTypeSignature.BOOLEAN || type == ClassTypeSignature.BYTE
                 || type == ClassTypeSignature.SHORT || type == ClassTypeSignature.CHAR) {
-            mv.visitIntInsn(Opcodes.ISTORE, stmt.getLocal().getIndex());
+            mv.visitVarInsn(Opcodes.ISTORE, stmt.getLocal().getIndex());
         } else if (type == ClassTypeSignature.LONG) {
-            mv.visitIntInsn(Opcodes.LSTORE, stmt.getLocal().getIndex());
+            mv.visitVarInsn(Opcodes.LSTORE, stmt.getLocal().getIndex());
         } else if (type == ClassTypeSignature.FLOAT) {
-            mv.visitIntInsn(Opcodes.FSTORE, stmt.getLocal().getIndex());
+            mv.visitVarInsn(Opcodes.FSTORE, stmt.getLocal().getIndex());
         } else if (type == ClassTypeSignature.DOUBLE) {
-            mv.visitIntInsn(Opcodes.DSTORE, stmt.getLocal().getIndex());
+            mv.visitVarInsn(Opcodes.DSTORE, stmt.getLocal().getIndex());
         } else {
-            mv.visitIntInsn(Opcodes.ISTORE, stmt.getLocal().getIndex());
+            mv.visitVarInsn(Opcodes.ISTORE, stmt.getLocal().getIndex());
         }
+        ctx.updateStack(-1);
     }
 
 }

@@ -41,6 +41,7 @@ public class BytecodeReturnEmitter implements StatementEmitter<BytecodeEmitterCo
         if (!stmt.getValue().isPresent()) {
             mv.visitInsn(Opcodes.RETURN);
         } else {
+            ctx.updateStack(-1);
             Instruction insn = stmt.getValue().get();
             ctx.emitInstruction(insn, ctx.getMethod().getReturnType());
             TypeSignature ret = ctx.getMethod().getReturnType();

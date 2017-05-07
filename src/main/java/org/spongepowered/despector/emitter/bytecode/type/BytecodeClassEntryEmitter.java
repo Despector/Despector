@@ -26,7 +26,7 @@ package org.spongepowered.despector.emitter.bytecode.type;
 
 import static org.objectweb.asm.Opcodes.*;
 
-import org.objectweb.asm.ClassWriter;
+import org.objectweb.asm.ClassVisitor;
 import org.spongepowered.despector.ast.type.ClassEntry;
 import org.spongepowered.despector.ast.type.FieldEntry;
 import org.spongepowered.despector.ast.type.MethodEntry;
@@ -37,7 +37,7 @@ public class BytecodeClassEntryEmitter implements AstEmitter<BytecodeEmitterCont
 
     @Override
     public boolean emit(BytecodeEmitterContext ctx, ClassEntry ast) {
-        ClassWriter cw = ctx.getClassWriter();
+        ClassVisitor cw = ctx.getClassWriter();
         int acc = ACC_SUPER;
         switch (ast.getAccessModifier()) {
         case PUBLIC:

@@ -45,8 +45,6 @@ import java.io.ByteArrayOutputStream;
 
 public class BuilderTest {
 
-    private static final DefineableClassLoader cl = new DefineableClassLoader();
-
     @Test
     public void testSimple() {
         SourceSet set = new SourceSet();
@@ -64,19 +62,6 @@ public class BuilderTest {
 
         String actual = TestHelper.getAsString(out.toByteArray(), "test_mth");
         System.out.print(actual);
-    }
-
-    public static interface Built {
-
-        Object call();
-    }
-
-    private static class DefineableClassLoader extends ClassLoader {
-
-        public Class<?> defineClass(String name, byte[] data) {
-            return super.defineClass(name, data, 0, data.length);
-        }
-
     }
 
 }
