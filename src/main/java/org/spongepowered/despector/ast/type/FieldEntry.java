@@ -33,8 +33,6 @@ import org.spongepowered.despector.ast.AstEntry;
 import org.spongepowered.despector.ast.AstVisitor;
 import org.spongepowered.despector.ast.SourceSet;
 import org.spongepowered.despector.ast.generic.TypeSignature;
-import org.spongepowered.despector.ast.insn.Instruction;
-import org.spongepowered.despector.util.TypeHelper;
 import org.spongepowered.despector.util.serialization.AstSerializer;
 import org.spongepowered.despector.util.serialization.MessagePacker;
 
@@ -62,9 +60,6 @@ public class FieldEntry extends AstEntry {
     protected boolean is_volatile;
     protected boolean is_transient;
     protected boolean is_deprecated;
-
-    @Nullable
-    protected Instruction init;
 
     protected final Map<AnnotationType, Annotation> annotations = new LinkedHashMap<>();
 
@@ -164,21 +159,6 @@ public class FieldEntry extends AstEntry {
 
     public void setDeprecated(boolean state) {
         this.is_deprecated = state;
-    }
-
-    /**
-     * Gets the initializer value of this field, if present.
-     */
-    @Nullable
-    public Instruction getInitializer() {
-        return this.init;
-    }
-
-    /**
-     * Sets the initializer value of this field.
-     */
-    public void setInitializer(@Nullable Instruction insn) {
-        this.init = insn;
     }
 
     /**

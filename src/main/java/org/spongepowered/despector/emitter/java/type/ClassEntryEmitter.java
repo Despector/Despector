@@ -240,7 +240,7 @@ public class ClassEntryEmitter implements AstEmitter<JavaEmitterContext, ClassEn
      */
     public void emitFields(JavaEmitterContext ctx, ClassEntry type) {
         if (!type.getFields().isEmpty()) {
-
+            Map<FieldEntry, Instruction> initializers = new HashMap<>();
             List<MethodEntry> inits = type.getMethods().stream().filter((m) -> m.getName().equals("<init>")).collect(Collectors.toList());
             MethodEntry main = null;
             if (inits.size() == 1) {
@@ -261,7 +261,7 @@ public class ClassEntryEmitter implements AstEmitter<JavaEmitterContext, ClassEn
                     }
                     assign.setInitializer(true);
                     FieldEntry fld = type.getField(assign.getFieldName());
-                    fld.setInitializer(assign.getValue());
+                    initializers.put(fld, assign.getValue());
                 }
             }
 
@@ -279,6 +279,23 @@ public class ClassEntryEmitter implements AstEmitter<JavaEmitterContext, ClassEn
                 at_least_one = true;
                 ctx.printIndentation();
                 ctx.emit(field);
+                Instruction init = initializers.get(field);
+                if(init != null) {
+                    ctx.setField(field);
+                    if (ctx.getFormat().align_type_members_on_columns && ctx.getType() != null) {
+                        int len = FieldEntryEmitter.getMaxNameLength(ctx, ctx.getType().getFields());
+                        len -= field.getName().length();
+                        len++;
+                        for (int i = 0; i < len; i++) {
+                            ctx.printString(" ");
+                        }
+                    } else {
+                        ctx.printString(" ");
+                    }
+                    ctx.printString("= ");
+                    ctx.emit(init, field.getType());
+                    ctx.setField(null);
+                }
                 ctx.printString(";");
                 ctx.newLine();
             }

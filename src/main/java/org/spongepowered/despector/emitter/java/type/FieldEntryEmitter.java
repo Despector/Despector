@@ -72,24 +72,10 @@ public class FieldEntryEmitter implements AstEmitter<JavaEmitterContext, FieldEn
             ctx.printString(" ");
         }
         ctx.printString(ast.getName());
-        if (ast.getInitializer() != null) {
-            if (ctx.getFormat().align_type_members_on_columns && ctx.getType() != null) {
-                int len = getMaxNameLength(ctx, ast.isStatic() ? ctx.getType().getStaticFields() : ctx.getType().getFields());
-                len -= ast.getName().length();
-                len++;
-                for (int i = 0; i < len; i++) {
-                    ctx.printString(" ");
-                }
-            } else {
-                ctx.printString(" ");
-            }
-            ctx.printString("= ");
-            ctx.emit(ast.getInitializer(), ast.getType());
-        }
         return true;
     }
 
-    private int getMaxTypeLength(JavaEmitterContext ctx, Collection<FieldEntry> fields) {
+    private static int getMaxTypeLength(JavaEmitterContext ctx, Collection<FieldEntry> fields) {
         int max = 0;
         for (FieldEntry fld : fields) {
             if (fld.isSynthetic() && !ConfigManager.getConfig().emitter.emit_synthetics) {
@@ -100,7 +86,7 @@ public class FieldEntryEmitter implements AstEmitter<JavaEmitterContext, FieldEn
         return max;
     }
 
-    private int getMaxNameLength(JavaEmitterContext ctx, Collection<FieldEntry> fields) {
+    public static int getMaxNameLength(JavaEmitterContext ctx, Collection<FieldEntry> fields) {
         int max = 0;
         for (FieldEntry fld : fields) {
             if (fld.isSynthetic() && !ConfigManager.getConfig().emitter.emit_synthetics) {
@@ -111,7 +97,7 @@ public class FieldEntryEmitter implements AstEmitter<JavaEmitterContext, FieldEn
         return max;
     }
 
-    private int getTypeLength(JavaEmitterContext ctx, FieldEntry field) {
+    private static int getTypeLength(JavaEmitterContext ctx, FieldEntry field) {
         int length = 0;
         length += field.getAccessModifier().asString().length();
         if (length > 0) {

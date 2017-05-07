@@ -38,7 +38,6 @@ import org.spongepowered.despector.ast.generic.TypeSignature;
 import org.spongepowered.despector.ast.stmt.Statement;
 import org.spongepowered.despector.ast.stmt.StatementBlock;
 import org.spongepowered.despector.decompiler.ir.InsnBlock;
-import org.spongepowered.despector.util.TypeHelper;
 import org.spongepowered.despector.util.serialization.AstSerializer;
 import org.spongepowered.despector.util.serialization.MessagePacker;
 
