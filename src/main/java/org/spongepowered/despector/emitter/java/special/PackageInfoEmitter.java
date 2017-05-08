@@ -29,7 +29,6 @@ import org.spongepowered.despector.ast.generic.ClassTypeSignature;
 import org.spongepowered.despector.ast.type.InterfaceEntry;
 import org.spongepowered.despector.emitter.SpecialEmitter;
 import org.spongepowered.despector.emitter.java.JavaEmitterContext;
-import org.spongepowered.despector.util.TypeHelper;
 
 import java.util.List;
 
@@ -93,7 +92,7 @@ public class PackageInfoEmitter implements SpecialEmitter {
      */
     public void emitAnnotation(JavaEmitterContext ctx, Annotation annotation) {
         ctx.printString("@");
-        ctx.printString(TypeHelper.descToType(annotation.getType().getName()).replace('/', '.'));
+        ctx.printString(annotation.getType().getName().replace('/', '.'));
         if (annotation.getKeys().isEmpty()) {
             return;
         } else if (annotation.getKeys().size() == 1 && "value".equals(annotation.getKeys().iterator().next())) {

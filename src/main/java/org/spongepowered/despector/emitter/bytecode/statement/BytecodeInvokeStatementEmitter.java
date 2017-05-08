@@ -22,50 +22,17 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.despector.decompiler.ir;
+package org.spongepowered.despector.emitter.bytecode.statement;
 
-import org.spongepowered.despector.ast.stmt.invoke.InstanceMethodInvoke;
-import org.spongepowered.despector.util.DebugUtil;
+import org.spongepowered.despector.ast.stmt.invoke.InvokeStatement;
+import org.spongepowered.despector.emitter.StatementEmitter;
+import org.spongepowered.despector.emitter.bytecode.BytecodeEmitterContext;
 
-public class InvokeInsn extends Insn {
-
-    private InstanceMethodInvoke.Type type;
-    private String owner;
-    private String name;
-    private String desc;
-
-    public InvokeInsn(int op, InstanceMethodInvoke.Type type, String owner, String name, String desc) {
-        super(op);
-        this.type = type;
-        this.owner = owner;
-        this.name = name;
-        this.desc = desc;
-    }
-
-    public InstanceMethodInvoke.Type getType() {
-        return this.type;
-    }
-
-    public String getOwner() {
-        return this.owner;
-    }
-
-    public String getName() {
-        return this.name;
-    }
-
-    public String getDescription() {
-        return this.desc;
-    }
+public class BytecodeInvokeStatementEmitter implements StatementEmitter<BytecodeEmitterContext, InvokeStatement> {
 
     @Override
-    public String toString() {
-        StringBuilder str = new StringBuilder();
-        str.append(DebugUtil.opcodeToString(this.opcode));
-        str.append(" ").append(this.owner);
-        str.append(" ").append(this.name);
-        str.append(" ").append(this.desc);
-        return str.toString();
+    public void emit(BytecodeEmitterContext ctx, InvokeStatement stmt, boolean semicolon) {
+        ctx.emitInstruction(stmt.getInstruction(), null);
     }
 
 }

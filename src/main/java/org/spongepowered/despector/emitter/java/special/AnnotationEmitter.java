@@ -115,7 +115,7 @@ public class AnnotationEmitter implements SpecialEmitter {
      */
     public void emit(JavaEmitterContext ctx, Annotation annotation) {
         ctx.printString("@");
-        ctx.emitType(annotation.getType().getName());
+        ctx.emitTypeName(annotation.getType().getName());
         if (annotation.getKeys().isEmpty()) {
             return;
         } else if (annotation.getKeys().size() == 1 && "value".equals(annotation.getKeys().iterator().next())) {

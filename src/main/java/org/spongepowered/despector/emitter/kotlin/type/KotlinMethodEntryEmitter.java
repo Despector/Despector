@@ -70,10 +70,10 @@ public class KotlinMethodEntryEmitter extends MethodEntryEmitter {
         boolean nullable_return = false;
 
         for (Annotation anno : method.getAnnotations()) {
-            if ("Lorg/jetbrains/annotations/NotNull;".equals(anno.getType().getName())) {
+            if ("org/jetbrains/annotations/NotNull".equals(anno.getType().getName())) {
                 continue;
             }
-            if ("Lorg/jetbrains/annotations/Nullable;".equals(anno.getType().getName())) {
+            if ("org/jetbrains/annotations/Nullable".equals(anno.getType().getName())) {
                 nullable_return = true;
                 continue;
             }

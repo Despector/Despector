@@ -26,6 +26,7 @@ package org.spongepowered.despector.decompiler.loader;
 
 import org.spongepowered.despector.ast.Locals;
 import org.spongepowered.despector.ast.generic.ClassTypeSignature;
+import org.spongepowered.despector.ast.stmt.invoke.InstanceMethodInvoke;
 import org.spongepowered.despector.decompiler.BaseDecompiler.BootstrapMethod;
 import org.spongepowered.despector.decompiler.error.SourceFormatException;
 import org.spongepowered.despector.decompiler.ir.DoubleInsn;
@@ -573,13 +574,14 @@ public class BytecodeTranslator {
             case 183: { // INVOKESPECIAL
                 int index = ((code[i++] & 0xFF) << 8) | (code[i++] & 0xFF);
                 MethodRefEntry ref = pool.getMethodRef(index);
-                block.append(new InvokeInsn(Insn.INVOKE, ref.cls, ref.name, ref.type));
+                InstanceMethodInvoke.Type t = next == 182 ? InstanceMethodInvoke.Type.VIRTUAL : InstanceMethodInvoke.Type.SPECIAL;
+                block.append(new InvokeInsn(Insn.INVOKE, t, ref.cls, ref.name, ref.type));
                 break;
             }
             case 184: { // INVOKESTATIC
                 int index = ((code[i++] & 0xFF) << 8) | (code[i++] & 0xFF);
                 MethodRefEntry ref = pool.getMethodRef(index);
-                block.append(new InvokeInsn(Insn.INVOKESTATIC, ref.cls, ref.name, ref.type));
+                block.append(new InvokeInsn(Insn.INVOKESTATIC, null, ref.cls, ref.name, ref.type));
                 break;
             }
             case 185: {// INVOKEINTERFACE
@@ -587,7 +589,7 @@ public class BytecodeTranslator {
                 // skip count and constant 0 (historical)
                 i += 2;
                 MethodRefEntry ref = pool.getInterfaceMethodRef(index);
-                block.append(new InvokeInsn(Insn.INVOKE, ref.cls, ref.name, ref.type));
+                block.append(new InvokeInsn(Insn.INVOKE, InstanceMethodInvoke.Type.INTERFACE, ref.cls, ref.name, ref.type));
                 break;
             }
             case 186: {// INVOKEDYNAMIC

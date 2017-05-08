@@ -69,7 +69,7 @@ public class BytecodeEmitterContext extends AbstractEmitterContext {
     }
 
     public void updateStack(int delta) {
-        this.current_stack_size = delta;
+        this.current_stack_size += delta;
         this.maxs = Math.max(this.maxs, this.current_stack_size);
     }
 

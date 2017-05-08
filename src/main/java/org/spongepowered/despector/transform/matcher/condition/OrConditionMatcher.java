@@ -26,7 +26,6 @@ package org.spongepowered.despector.transform.matcher.condition;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import org.spongepowered.despector.ast.insn.condition.AndCondition;
 import org.spongepowered.despector.ast.insn.condition.Condition;
 import org.spongepowered.despector.ast.insn.condition.OrCondition;
 import org.spongepowered.despector.transform.matcher.ConditionMatcher;

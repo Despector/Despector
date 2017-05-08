@@ -22,36 +22,35 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.despector.emitter.bytecode.statement;
+package org.spongepowered.despector.emitter.bytecode.instruction;
 
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.despector.ast.generic.ClassTypeSignature;
 import org.spongepowered.despector.ast.generic.TypeSignature;
-import org.spongepowered.despector.ast.stmt.assign.LocalAssignment;
-import org.spongepowered.despector.emitter.StatementEmitter;
+import org.spongepowered.despector.ast.insn.var.LocalAccess;
+import org.spongepowered.despector.emitter.InstructionEmitter;
 import org.spongepowered.despector.emitter.bytecode.BytecodeEmitterContext;
 
-public class BytecodeLocalAssignmentEmitter implements StatementEmitter<BytecodeEmitterContext, LocalAssignment> {
+public class BytecodeLocalAccessEmitter implements InstructionEmitter<BytecodeEmitterContext, LocalAccess> {
 
     @Override
-    public void emit(BytecodeEmitterContext ctx, LocalAssignment stmt, boolean semicolon) {
+    public void emit(BytecodeEmitterContext ctx, LocalAccess arg, TypeSignature t) {
         MethodVisitor mv = ctx.getMethodVisitor();
-        TypeSignature type = stmt.getLocal().getType();
-        ctx.emitInstruction(stmt.getValue(), type);
+        TypeSignature type = arg.getLocal().getType();
         if (type == ClassTypeSignature.INT || type == ClassTypeSignature.BOOLEAN || type == ClassTypeSignature.BYTE
                 || type == ClassTypeSignature.SHORT || type == ClassTypeSignature.CHAR) {
-            mv.visitVarInsn(Opcodes.ISTORE, stmt.getLocal().getIndex());
+            mv.visitVarInsn(Opcodes.ILOAD, arg.getLocal().getIndex());
         } else if (type == ClassTypeSignature.LONG) {
-            mv.visitVarInsn(Opcodes.LSTORE, stmt.getLocal().getIndex());
+            mv.visitVarInsn(Opcodes.LLOAD, arg.getLocal().getIndex());
         } else if (type == ClassTypeSignature.FLOAT) {
-            mv.visitVarInsn(Opcodes.FSTORE, stmt.getLocal().getIndex());
+            mv.visitVarInsn(Opcodes.FLOAD, arg.getLocal().getIndex());
         } else if (type == ClassTypeSignature.DOUBLE) {
-            mv.visitVarInsn(Opcodes.DSTORE, stmt.getLocal().getIndex());
+            mv.visitVarInsn(Opcodes.DLOAD, arg.getLocal().getIndex());
         } else {
-            mv.visitVarInsn(Opcodes.ASTORE, stmt.getLocal().getIndex());
+            mv.visitVarInsn(Opcodes.ALOAD, arg.getLocal().getIndex());
         }
-        ctx.updateStack(-1);
+        ctx.updateStack(1);
     }
 
 }

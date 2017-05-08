@@ -437,7 +437,7 @@ public class BaseDecompiler implements Decompiler {
                 int annotation_count = data.readUnsignedShort();
                 for (int j = 0; j < annotation_count; j++) {
                     Annotation anno = readAnnotation(data, pool, set);
-                    if (this.lang == Language.ANY && anno.getType().getName().startsWith("Lkotlin")) {
+                    if (this.lang == Language.ANY && anno.getType().getName().startsWith("kotlin")) {
                         actual_lang = Language.KOTLIN;
                     }
                     entry.addAnnotation(anno);
@@ -548,7 +548,7 @@ public class BaseDecompiler implements Decompiler {
 
     private Annotation readAnnotation(DataInputStream data, ClassConstantPool pool, SourceSet set) throws IOException {
         String anno_type_name = pool.getUtf8(data.readUnsignedShort());
-        AnnotationType anno_type = set.getAnnotationType(anno_type_name);
+        AnnotationType anno_type = set.getAnnotationType(TypeHelper.descToType(anno_type_name));
         Annotation anno = new Annotation(anno_type);
         int value_paris = data.readUnsignedShort();
         for (int k = 0; k < value_paris; k++) {

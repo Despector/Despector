@@ -22,36 +22,44 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.despector.emitter.bytecode.statement;
+package org.spongepowered.despector.emitter.bytecode.instruction;
 
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.despector.ast.generic.ClassTypeSignature;
 import org.spongepowered.despector.ast.generic.TypeSignature;
-import org.spongepowered.despector.ast.stmt.assign.LocalAssignment;
-import org.spongepowered.despector.emitter.StatementEmitter;
+import org.spongepowered.despector.ast.stmt.invoke.InstanceMethodInvoke;
+import org.spongepowered.despector.emitter.InstructionEmitter;
 import org.spongepowered.despector.emitter.bytecode.BytecodeEmitterContext;
 
-public class BytecodeLocalAssignmentEmitter implements StatementEmitter<BytecodeEmitterContext, LocalAssignment> {
+public class BytecodeInstanceMethodInvokeEmitter implements InstructionEmitter<BytecodeEmitterContext, InstanceMethodInvoke> {
 
     @Override
-    public void emit(BytecodeEmitterContext ctx, LocalAssignment stmt, boolean semicolon) {
+    public void emit(BytecodeEmitterContext ctx, InstanceMethodInvoke arg, TypeSignature type) {
         MethodVisitor mv = ctx.getMethodVisitor();
-        TypeSignature type = stmt.getLocal().getType();
-        ctx.emitInstruction(stmt.getValue(), type);
-        if (type == ClassTypeSignature.INT || type == ClassTypeSignature.BOOLEAN || type == ClassTypeSignature.BYTE
-                || type == ClassTypeSignature.SHORT || type == ClassTypeSignature.CHAR) {
-            mv.visitVarInsn(Opcodes.ISTORE, stmt.getLocal().getIndex());
-        } else if (type == ClassTypeSignature.LONG) {
-            mv.visitVarInsn(Opcodes.LSTORE, stmt.getLocal().getIndex());
-        } else if (type == ClassTypeSignature.FLOAT) {
-            mv.visitVarInsn(Opcodes.FSTORE, stmt.getLocal().getIndex());
-        } else if (type == ClassTypeSignature.DOUBLE) {
-            mv.visitVarInsn(Opcodes.DSTORE, stmt.getLocal().getIndex());
-        } else {
-            mv.visitVarInsn(Opcodes.ASTORE, stmt.getLocal().getIndex());
+        ctx.emitInstruction(arg.getCallee(), ClassTypeSignature.of(arg.getOwner()));
+        for (int i = 0; i < arg.getParameters().length; i++) {
+            ctx.emitInstruction(arg.getParameters()[i], null);
         }
-        ctx.updateStack(-1);
+        mv.visitMethodInsn(getOpcode(arg.getType()), arg.getOwnerName(), arg.getMethodName(), arg.getMethodDescription(),
+                arg.getType() == InstanceMethodInvoke.Type.INTERFACE);
+        int delta = -1 - arg.getParameters().length;
+        if (!arg.getReturnType().equals("V")) {
+            delta++;
+        }
+        ctx.updateStack(delta);
+    }
+
+    public int getOpcode(InstanceMethodInvoke.Type type) {
+        switch (type) {
+        case INTERFACE:
+            return Opcodes.INVOKEINTERFACE;
+        case SPECIAL:
+            return Opcodes.INVOKESPECIAL;
+        case VIRTUAL:
+        default:
+            return Opcodes.INVOKEVIRTUAL;
+        }
     }
 
 }

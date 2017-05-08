@@ -22,50 +22,22 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.despector.decompiler.ir;
+package org.spongepowered.despector.emitter.bytecode.instruction;
 
-import org.spongepowered.despector.ast.stmt.invoke.InstanceMethodInvoke;
-import org.spongepowered.despector.util.DebugUtil;
+import org.objectweb.asm.MethodVisitor;
+import org.objectweb.asm.Opcodes;
+import org.spongepowered.despector.ast.generic.TypeSignature;
+import org.spongepowered.despector.ast.insn.var.StaticFieldAccess;
+import org.spongepowered.despector.emitter.InstructionEmitter;
+import org.spongepowered.despector.emitter.bytecode.BytecodeEmitterContext;
 
-public class InvokeInsn extends Insn {
-
-    private InstanceMethodInvoke.Type type;
-    private String owner;
-    private String name;
-    private String desc;
-
-    public InvokeInsn(int op, InstanceMethodInvoke.Type type, String owner, String name, String desc) {
-        super(op);
-        this.type = type;
-        this.owner = owner;
-        this.name = name;
-        this.desc = desc;
-    }
-
-    public InstanceMethodInvoke.Type getType() {
-        return this.type;
-    }
-
-    public String getOwner() {
-        return this.owner;
-    }
-
-    public String getName() {
-        return this.name;
-    }
-
-    public String getDescription() {
-        return this.desc;
-    }
+public class BytecodeStaticFieldAccessEmitter implements InstructionEmitter<BytecodeEmitterContext, StaticFieldAccess> {
 
     @Override
-    public String toString() {
-        StringBuilder str = new StringBuilder();
-        str.append(DebugUtil.opcodeToString(this.opcode));
-        str.append(" ").append(this.owner);
-        str.append(" ").append(this.name);
-        str.append(" ").append(this.desc);
-        return str.toString();
+    public void emit(BytecodeEmitterContext ctx, StaticFieldAccess arg, TypeSignature type) {
+        MethodVisitor mv = ctx.getMethodVisitor();
+        mv.visitFieldInsn(Opcodes.GETSTATIC, arg.getOwnerName(), arg.getFieldName(), arg.getTypeDescriptor().getDescriptor());
+        ctx.updateStack(1);
     }
 
 }

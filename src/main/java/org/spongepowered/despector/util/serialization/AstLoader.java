@@ -942,6 +942,8 @@ public class AstLoader {
         });
         instruction_loaders.put(AstSerializer.STATEMENT_ID_INSTANCE_INVOKE, (unpack) -> {
             try {
+                expectKey(unpack, "type");
+                InstanceMethodInvoke.Type t = InstanceMethodInvoke.Type.values()[unpack.readInt()];
                 expectKey(unpack, "name");
                 String name = unpack.readString();
                 expectKey(unpack, "owner");
@@ -956,7 +958,7 @@ public class AstLoader {
                 }
                 expectKey(unpack, "callee");
                 Instruction callee = loadInstruction(unpack);
-                return new InstanceMethodInvoke(name, desc, owner, args, callee);
+                return new InstanceMethodInvoke(t, name, desc, owner, args, callee);
             } catch (IOException e) {
                 Throwables.propagate(e);
             }

@@ -397,7 +397,8 @@ public final class StatementBuilder {
                         if (!owner.startsWith("[")) {
                             owner = "L" + owner + ";";
                         }
-                        InstanceMethodInvoke arg = new InstanceMethodInvoke(method.getName(), method.getDescription(), owner, args, callee);
+                        InstanceMethodInvoke arg =
+                                new InstanceMethodInvoke(method.getType(), method.getName(), method.getDescription(), owner, args, callee);
                         block.append(new InvokeStatement(arg));
                         break;
                     }
@@ -413,7 +414,7 @@ public final class StatementBuilder {
                 if (!owner.startsWith("[")) {
                     owner = "L" + owner + ";";
                 }
-                InstanceMethodInvoke arg = new InstanceMethodInvoke(method.getName(), method.getDescription(), owner, args, callee);
+                InstanceMethodInvoke arg = new InstanceMethodInvoke(method.getType(), method.getName(), method.getDescription(), owner, args, callee);
                 if (ret.equals("V")) {
                     block.append(new InvokeStatement(arg));
                 } else {

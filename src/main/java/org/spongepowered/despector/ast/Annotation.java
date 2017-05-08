@@ -111,8 +111,9 @@ public class Annotation {
     /**
      * Gets the value of the given field.
      */
-    public Object getValue(String key) {
-        return this.values.get(key);
+    @SuppressWarnings("unchecked")
+    public <T> T getValue(String key) {
+        return (T) this.values.get(key);
     }
 
     public Map<String, Object> getValues() {

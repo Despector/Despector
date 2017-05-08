@@ -39,11 +39,17 @@ import java.io.IOException;
  */
 public class InstanceMethodInvoke extends MethodInvoke {
 
+    private Type type;
     private Instruction callee;
 
-    public InstanceMethodInvoke(String name, String desc, String owner, Instruction[] args, Instruction call) {
+    public InstanceMethodInvoke(Type type, String name, String desc, String owner, Instruction[] args, Instruction call) {
         super(name, desc, owner, args);
+        this.type = type;
         this.callee = checkNotNull(call, "callee");
+    }
+
+    public Type getType() {
+        return this.type;
     }
 
     /**
@@ -71,8 +77,9 @@ public class InstanceMethodInvoke extends MethodInvoke {
 
     @Override
     public void writeTo(MessagePacker pack) throws IOException {
-        pack.startMap(6);
+        pack.startMap(7);
         pack.writeString("id").writeInt(AstSerializer.STATEMENT_ID_INSTANCE_INVOKE);
+        pack.writeString("type").writeInt(this.type.ordinal());
         pack.writeString("name").writeString(this.method_name);
         pack.writeString("owner").writeString(this.method_owner);
         pack.writeString("desc").writeString(this.method_desc);
@@ -115,6 +122,12 @@ public class InstanceMethodInvoke extends MethodInvoke {
         int h = super.hashCode();
         h = h * 37 + this.callee.hashCode();
         return h;
+    }
+
+    public static enum Type {
+        VIRTUAL,
+        SPECIAL,
+        INTERFACE
     }
 
 }

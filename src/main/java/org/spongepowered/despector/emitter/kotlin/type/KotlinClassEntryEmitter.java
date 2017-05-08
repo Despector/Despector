@@ -59,7 +59,7 @@ public class KotlinClassEntryEmitter implements AstEmitter<JavaEmitterContext, C
     private static final Set<String> HIDDEN_ANNOTATIONS = new HashSet<>();
 
     static {
-        HIDDEN_ANNOTATIONS.add("Lkotlin/Metadata;");
+        HIDDEN_ANNOTATIONS.add("kotlin/Metadata");
     }
 
     @Override

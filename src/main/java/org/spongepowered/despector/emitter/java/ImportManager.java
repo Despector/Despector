@@ -166,7 +166,7 @@ public class ImportManager {
     }
 
     private void check(Annotation anno) {
-        add(anno.getType().getName());
+        add("L" + anno.getType().getName() + ";");
         for (String key : anno.getKeys()) {
             Object val = anno.getValue(key);
             checkAnnotationValue(val);

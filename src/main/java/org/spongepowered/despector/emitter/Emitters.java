@@ -80,7 +80,12 @@ import org.spongepowered.despector.ast.type.InterfaceEntry;
 import org.spongepowered.despector.ast.type.MethodEntry;
 import org.spongepowered.despector.emitter.bytecode.BytecodeEmitter;
 import org.spongepowered.despector.emitter.bytecode.BytecodeEmitterContext;
+import org.spongepowered.despector.emitter.bytecode.instruction.BytecodeInstanceMethodInvokeEmitter;
 import org.spongepowered.despector.emitter.bytecode.instruction.BytecodeIntConstantEmitter;
+import org.spongepowered.despector.emitter.bytecode.instruction.BytecodeLocalAccessEmitter;
+import org.spongepowered.despector.emitter.bytecode.instruction.BytecodeStaticFieldAccessEmitter;
+import org.spongepowered.despector.emitter.bytecode.instruction.BytecodeStringConstantEmitter;
+import org.spongepowered.despector.emitter.bytecode.statement.BytecodeInvokeStatementEmitter;
 import org.spongepowered.despector.emitter.bytecode.statement.BytecodeLocalAssignmentEmitter;
 import org.spongepowered.despector.emitter.bytecode.statement.BytecodeReturnEmitter;
 import org.spongepowered.despector.emitter.bytecode.type.BytecodeClassEntryEmitter;
@@ -290,8 +295,13 @@ public final class Emitters {
 
         BYTECODE_SET.setStatementEmitter(LocalAssignment.class, new BytecodeLocalAssignmentEmitter());
         BYTECODE_SET.setStatementEmitter(Return.class, new BytecodeReturnEmitter());
+        BYTECODE_SET.setStatementEmitter(InvokeStatement.class, new BytecodeInvokeStatementEmitter());
 
         BYTECODE_SET.setInstructionEmitter(IntConstant.class, new BytecodeIntConstantEmitter());
+        BYTECODE_SET.setInstructionEmitter(InstanceMethodInvoke.class, new BytecodeInstanceMethodInvokeEmitter());
+        BYTECODE_SET.setInstructionEmitter(LocalAccess.class, new BytecodeLocalAccessEmitter());
+        BYTECODE_SET.setInstructionEmitter(StringConstant.class, new BytecodeStringConstantEmitter());
+        BYTECODE_SET.setInstructionEmitter(StaticFieldAccess.class, new BytecodeStaticFieldAccessEmitter());
     }
 
     /**
