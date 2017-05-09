@@ -157,11 +157,11 @@ public class MethodEntryEmitter implements AstEmitter<JavaEmitterContext, Method
         if (start >= method.getParamTypes().size()) {
             ctx.printString(" ", ctx.getFormat().insert_space_between_empty_parens_in_method_declaration);
         }
+        int param_index = start;
+        if (!method.isStatic()) {
+            param_index++;
+        }
         for (int i = start; i < method.getParamTypes().size(); i++) {
-            int param_index = i;
-            if (!method.isStatic()) {
-                param_index++;
-            }
             boolean varargs = method.isVarargs() && i == method.getParamTypes().size() - 1;
             if (block == null) {
                 if (sig != null) {
@@ -198,6 +198,11 @@ public class MethodEntryEmitter implements AstEmitter<JavaEmitterContext, Method
                 ctx.printString(",");
                 ctx.printString(" ", ctx.getFormat().insert_space_after_comma_in_method_declaration_parameters);
                 ctx.markWrapPoint(ctx.getFormat().alignment_for_parameters_in_method_declaration, i + 1);
+            }
+            String desc = method.getParamTypes().get(i).getDescriptor();
+            param_index++;
+            if ("D".equals(desc) || "J".equals(desc)) {
+                param_index++;
             }
         }
         ctx.printString(" ", ctx.getFormat().insert_space_before_closing_paren_in_method_declaration);

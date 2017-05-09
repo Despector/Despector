@@ -246,7 +246,7 @@ public class Locals {
          * Adds the given instance to this local.
          */
         public void addInstance(LocalInstance insn) {
-            if (insn.getStart() == -1 && insn.getEnd() == -1) {
+            if (insn.getStart() == -1) {
                 this.parameter_instance = insn;
             } else {
                 this.instances.add(insn);

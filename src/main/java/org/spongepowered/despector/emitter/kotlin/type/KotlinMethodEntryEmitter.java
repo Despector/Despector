@@ -139,11 +139,11 @@ public class KotlinMethodEntryEmitter extends MethodEntryEmitter {
         List<Instruction> defaults = findDefaultValues(ctx.getType(), method);
         ctx.printString("(");
         StatementBlock block = method.getInstructions();
-        for (int i = 0; i < method.getParamTypes().size(); i++) {
-            int param_index = i;
+            int param_index = 0;
             if (!method.isStatic()) {
                 param_index++;
             }
+        for (int i = 0; i < method.getParamTypes().size(); i++) {
             if (block == null) {
                 ctx.printString("local" + param_index);
                 ctx.printString(": ");
@@ -169,6 +169,11 @@ public class KotlinMethodEntryEmitter extends MethodEntryEmitter {
             if (i < method.getParamTypes().size() - 1) {
                 ctx.printString(", ");
                 ctx.markWrapPoint();
+            }
+            String desc = method.getParamTypes().get(i).getDescriptor();
+            param_index++;
+            if ("D".equals(desc) || "J".equals(desc)) {
+                param_index++;
             }
         }
         ctx.printString(")");

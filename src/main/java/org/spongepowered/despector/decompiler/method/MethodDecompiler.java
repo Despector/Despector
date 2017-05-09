@@ -197,7 +197,6 @@ public class MethodDecompiler {
             BlockSection op = flat_graph.get(i);
             op.appendTo(block, entry.getLocals(), stack);
         }
-
         for (StatementPostProcessor post : this.post_processors) {
             try {
                 post.postprocess(block);

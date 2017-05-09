@@ -29,6 +29,6 @@ package org.spongepowered.despector.config;
  */
 public class LibraryConfiguration {
 
-    public static boolean quiet = false;
+    public static boolean quiet = true;
 
 }

@@ -37,6 +37,7 @@ import org.spongepowered.despector.emitter.Emitters;
 import org.spongepowered.despector.emitter.format.EmitterFormat;
 import org.spongepowered.despector.emitter.format.FormatLoader;
 import org.spongepowered.despector.emitter.java.JavaEmitterContext;
+import org.spongepowered.despector.parallel.Timing;
 import org.spongepowered.despector.transform.TypeTransformer;
 import org.spongepowered.despector.transform.cleanup.CleanupOperations;
 
@@ -272,6 +273,11 @@ public final class Despector {
                 emitter.emit(ctx, type);
             }
         }
+
+        System.out.println("Time spend decompiling: " + (Timing.time_decompiling / 1000000) + "ms");
+        System.out.println("Time spend decompiling methods: " + (Timing.time_decompiling_methods / 1000000) + "ms");
+        System.out.println("Time spend loading classes: " + (Timing.time_loading_classes / 1000000) + "ms");
+        System.out.println("Time spend emitting: " + (Timing.time_emitting / 1000000) + "ms");
 
     }
 

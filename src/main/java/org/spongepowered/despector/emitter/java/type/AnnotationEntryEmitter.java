@@ -181,8 +181,8 @@ public class AnnotationEntryEmitter implements AstEmitter<JavaEmitterContext, An
                 if (!mth.getParamTypes().isEmpty()) {
                     ctx.printString(" ", ctx.getFormat().insert_space_between_empty_parens_in_method_declaration);
                 }
+                int param_index = 1;
                 for (int i = 0; i < mth.getParamTypes().size(); i++) {
-                    int param_index = i + 1;
                     boolean varargs = mth.isVarargs() && i == mth.getParamTypes().size() - 1;
                     if (block == null) {
                         if (sig != null) {
@@ -219,6 +219,11 @@ public class AnnotationEntryEmitter implements AstEmitter<JavaEmitterContext, An
                         ctx.printString(",");
                         ctx.printString(" ", ctx.getFormat().insert_space_after_comma_in_method_declaration_parameters);
                         ctx.markWrapPoint(ctx.getFormat().alignment_for_parameters_in_method_declaration, i + 1);
+                    }
+                    String desc = mth.getParamTypes().get(i).getDescriptor();
+                    param_index++;
+                    if ("D".equals(desc) || "J".equals(desc)) {
+                        param_index++;
                     }
                 }
                 ctx.printString(" ", ctx.getFormat().insert_space_before_closing_paren_in_method_declaration);

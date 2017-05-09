@@ -65,6 +65,9 @@ public class MethodBuilder {
     public LocalInstance createLocal(String name, TypeSignature type) {
         Local local = this.locals.getLocal(this.next_local++);
         LocalInstance instance = new LocalInstance(local, name, type, -1, -1);
+        if (type.getDescriptor().equals("D") || type.getDescriptor().equals("J")) {
+            this.next_local++;
+        }
         local.addInstance(instance);
         return instance;
     }

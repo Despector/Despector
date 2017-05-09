@@ -60,6 +60,7 @@ import org.spongepowered.despector.decompiler.loader.ClassConstantPool.Entry;
 import org.spongepowered.despector.decompiler.loader.ClassConstantPool.MethodHandleEntry;
 import org.spongepowered.despector.decompiler.method.MethodDecompiler;
 import org.spongepowered.despector.decompiler.method.PartialMethod.TryCatchRegion;
+import org.spongepowered.despector.parallel.Timing;
 import org.spongepowered.despector.util.SignatureParser;
 import org.spongepowered.despector.util.TypeHelper;
 
@@ -122,7 +123,7 @@ public class BaseDecompiler implements Decompiler {
     @Override
     public TypeEntry decompile(InputStream input, SourceSet set) throws IOException {
         DataInputStream data = (input instanceof DataInputStream) ? (DataInputStream) input : new DataInputStream(input);
-
+        long decompile_start = System.nanoTime();
         int magic = data.readInt();
         if (magic != 0xCAFEBABE) {
             throw new SourceFormatException("Not a java class file");
@@ -476,9 +477,12 @@ public class BaseDecompiler implements Decompiler {
             }
             entry.setSignature(sig);
         }
+        
+        long classloading_time = System.nanoTime() - decompile_start;
+        Timing.time_loading_classes = classloading_time;
 
         entry.setLanguage(actual_lang);
-
+        long method_decompile_start = System.nanoTime();
         for (UnfinishedMethod unfinished : unfinished_methods) {
             if (unfinished.code == null) {
                 continue;
@@ -541,7 +545,10 @@ public class BaseDecompiler implements Decompiler {
                 mth.setInstructions(insns);
             }
         }
-
+        long method_decompile_time = System.nanoTime() - method_decompile_start;
+        long decompile_time = System.nanoTime() - decompile_start;
+        Timing.time_decompiling_methods += method_decompile_time;
+        Timing.time_decompiling += decompile_time;
         set.add(entry);
         return entry;
     }
@@ -621,6 +628,9 @@ public class BaseDecompiler implements Decompiler {
         public byte[] code;
         public List<TryCatchRegion> catch_regions;
         public Map<Integer, List<Annotation>> parameter_annotations;
+
+        UnfinishedMethod() {
+        }
     }
 
 }

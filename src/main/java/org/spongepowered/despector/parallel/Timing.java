@@ -22,30 +22,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.despector.emitter.java;
+package org.spongepowered.despector.parallel;
 
-import org.spongepowered.despector.ast.type.TypeEntry;
-import org.spongepowered.despector.emitter.Emitter;
-import org.spongepowered.despector.emitter.Emitters;
-import org.spongepowered.despector.parallel.Timing;
+public class Timing {
 
-/**
- * A java source emitter.
- */
-public class JavaEmitter implements Emitter<JavaEmitterContext> {
-
-    @Override
-    public void setup(JavaEmitterContext ctx) {
-        ctx.setSemicolons(true);
-        ctx.setEmitterSet(Emitters.JAVA_SET);
-    }
-
-    @Override
-    public void emit(JavaEmitterContext ctx, TypeEntry type) {
-        setup(ctx);
-        long emitting_start = System.nanoTime();
-        ctx.emitOuterType(type);
-        Timing.time_emitting += System.nanoTime() - emitting_start;
-    }
+    public static long time_decompiling = 0;
+    public static long time_decompiling_methods = 0;
+    public static long time_loading_classes = 0;
+    public static long time_emitting = 0;
 
 }
