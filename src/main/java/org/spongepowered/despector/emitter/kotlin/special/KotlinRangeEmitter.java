@@ -38,10 +38,10 @@ public class KotlinRangeEmitter {
 
     public static final ConditionMatcher<?> RANGE_MATCHER = ConditionMatcher.and()
             .operand(ConditionMatcher.compare()
-                    .left(InstructionMatcher.intconstant().build())
+                    .left(InstructionMatcher.intConstant().build())
                     .build())
             .operand(ConditionMatcher.compare()
-                    .right(InstructionMatcher.intconstant().build())
+                    .right(InstructionMatcher.intConstant().build())
                     .build())
             .build();
 

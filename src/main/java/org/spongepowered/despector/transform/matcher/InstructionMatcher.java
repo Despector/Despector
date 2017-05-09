@@ -69,27 +69,27 @@ public interface InstructionMatcher<T extends Instruction> {
      */
     static final InstructionMatcher<?> ANY = new Any();
 
-    public static StaticInvokeMatcher.Builder staticinvoke() {
+    public static StaticInvokeMatcher.Builder staticInvoke() {
         return new StaticInvokeMatcher.Builder();
     }
 
-    public static InstanceInvokeMatcher.Builder instanceinvoke() {
+    public static InstanceInvokeMatcher.Builder instanceInvoke() {
         return new InstanceInvokeMatcher.Builder();
     }
 
-    public static LocalAccessMatcher.Builder localaccess() {
+    public static LocalAccessMatcher.Builder localAccess() {
         return new LocalAccessMatcher.Builder();
     }
 
-    public static InstanceFieldMatcher.Builder instancefield() {
+    public static InstanceFieldMatcher.Builder instanceField() {
         return new InstanceFieldMatcher.Builder();
     }
 
-    public static IntConstantMatcher.Builder intconstant() {
+    public static IntConstantMatcher.Builder intConstant() {
         return new IntConstantMatcher.Builder();
     }
 
-    public static ArrayAccessMatcher.Builder arrayaccess() {
+    public static ArrayAccessMatcher.Builder arrayAccess() {
         return new ArrayAccessMatcher.Builder();
     }
 

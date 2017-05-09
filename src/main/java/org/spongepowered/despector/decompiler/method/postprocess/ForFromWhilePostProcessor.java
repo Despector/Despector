@@ -53,9 +53,9 @@ import java.util.List;
  */
 public class ForFromWhilePostProcessor implements StatementPostProcessor {
 
-    private static final StatementMatcher<?> STORE = MatchContext.storeLocal("loop_val", StatementMatcher.localassign()
+    private static final StatementMatcher<?> STORE = MatchContext.storeLocal("loop_val", StatementMatcher.localAssign()
             .build());
-    private static final StatementMatcher<?> LOOP = StatementMatcher.whileloop()
+    private static final StatementMatcher<?> LOOP = StatementMatcher.whileLoop()
             .condition(ConditionMatcher.references("loop_val"))
             .build();
 

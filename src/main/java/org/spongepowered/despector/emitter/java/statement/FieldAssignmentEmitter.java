@@ -62,7 +62,7 @@ public class FieldAssignmentEmitter implements StatementEmitter<JavaEmitterConte
             return;
         }
         ctx.printString(" = ");
-        ctx.emit(val, ClassTypeSignature.of(insn.getFieldDescription()));
+        ctx.emit(val, insn.getFieldDescription());
         if (semicolon) {
             ctx.printString(";");
         }
@@ -96,7 +96,7 @@ public class FieldAssignmentEmitter implements StatementEmitter<JavaEmitterConte
                                 return true;
                             }
                         }
-                        ctx.emit(right, ClassTypeSignature.of(insn.getFieldDescription()));
+                        ctx.emit(right, insn.getFieldDescription());
                         if (semicolon) {
                             ctx.printString(";");
                         }

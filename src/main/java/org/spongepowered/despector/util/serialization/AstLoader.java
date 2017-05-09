@@ -927,7 +927,7 @@ public class AstLoader {
                 expectKey(unpack, "name");
                 String name = unpack.readString();
                 expectKey(unpack, "type");
-                String type = unpack.readString();
+                TypeSignature type = loadTypeSignature(unpack);
                 expectKey(unpack, "owner");
                 String owner = unpack.readString();
                 expectKey(unpack, "owner_val");
@@ -1156,7 +1156,7 @@ public class AstLoader {
                 expectKey(unpack, "name");
                 String name = unpack.readString();
                 expectKey(unpack, "type");
-                String type = unpack.readString();
+                TypeSignature type = loadTypeSignature(unpack);
                 expectKey(unpack, "owner");
                 String owner = unpack.readString();
                 expectKey(unpack, "val");

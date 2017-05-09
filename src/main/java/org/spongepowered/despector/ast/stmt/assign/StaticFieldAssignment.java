@@ -25,6 +25,7 @@
 package org.spongepowered.despector.ast.stmt.assign;
 
 import org.spongepowered.despector.ast.AstVisitor;
+import org.spongepowered.despector.ast.generic.TypeSignature;
 import org.spongepowered.despector.ast.insn.Instruction;
 import org.spongepowered.despector.ast.stmt.StatementVisitor;
 import org.spongepowered.despector.util.TypeHelper;
@@ -38,7 +39,7 @@ import java.io.IOException;
  */
 public class StaticFieldAssignment extends FieldAssignment {
 
-    public StaticFieldAssignment(String field, String type_desc, String owner, Instruction val) {
+    public StaticFieldAssignment(String field, TypeSignature type_desc, String owner, Instruction val) {
         super(field, type_desc, owner, val);
     }
 
@@ -55,7 +56,8 @@ public class StaticFieldAssignment extends FieldAssignment {
         pack.startMap(5);
         pack.writeString("id").writeInt(AstSerializer.STATEMENT_ID_STATIC_FIELD_ASSIGN);
         pack.writeString("name").writeString(this.field_name);
-        pack.writeString("type").writeString(this.type_desc);
+        pack.writeString("type");
+        this.type_desc.writeTo(pack);
         pack.writeString("owner").writeString(this.owner_type);
         pack.writeString("val");
         this.val.writeTo(pack);

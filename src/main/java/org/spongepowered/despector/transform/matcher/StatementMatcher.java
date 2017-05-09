@@ -28,7 +28,9 @@ import org.spongepowered.despector.ast.stmt.Statement;
 import org.spongepowered.despector.transform.matcher.statement.ForEachMatcher;
 import org.spongepowered.despector.transform.matcher.statement.ForLoopMatcher;
 import org.spongepowered.despector.transform.matcher.statement.IncrementMatcher;
+import org.spongepowered.despector.transform.matcher.statement.InstanceFieldAssignmentMatcher;
 import org.spongepowered.despector.transform.matcher.statement.LocalAssignmentMatcher;
+import org.spongepowered.despector.transform.matcher.statement.StaticFieldAssignmentMatcher;
 import org.spongepowered.despector.transform.matcher.statement.WhileLoopMatcher;
 
 import javax.annotation.Nullable;
@@ -71,15 +73,15 @@ public interface StatementMatcher<T extends Statement> {
      */
     static final StatementMatcher<?> NONE = new None();
 
-    static ForEachMatcher.Builder foreach() {
+    static ForEachMatcher.Builder forEach() {
         return new ForEachMatcher.Builder();
     }
 
-    static ForLoopMatcher.Builder forloop() {
+    static ForLoopMatcher.Builder forLoop() {
         return new ForLoopMatcher.Builder();
     }
 
-    static LocalAssignmentMatcher.Builder localassign() {
+    static LocalAssignmentMatcher.Builder localAssign() {
         return new LocalAssignmentMatcher.Builder();
     }
 
@@ -87,8 +89,16 @@ public interface StatementMatcher<T extends Statement> {
         return new IncrementMatcher.Builder();
     }
 
-    static WhileLoopMatcher.Builder whileloop() {
+    static WhileLoopMatcher.Builder whileLoop() {
         return new WhileLoopMatcher.Builder();
+    }
+
+    static StaticFieldAssignmentMatcher.Builder staticFieldAssign() {
+        return new StaticFieldAssignmentMatcher.Builder();
+    }
+
+    static InstanceFieldAssignmentMatcher.Builder instanceFieldAssign() {
+        return new InstanceFieldAssignmentMatcher.Builder();
     }
 
     /**

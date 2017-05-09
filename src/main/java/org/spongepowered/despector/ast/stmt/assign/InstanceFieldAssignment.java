@@ -27,6 +27,7 @@ package org.spongepowered.despector.ast.stmt.assign;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.spongepowered.despector.ast.AstVisitor;
+import org.spongepowered.despector.ast.generic.TypeSignature;
 import org.spongepowered.despector.ast.insn.Instruction;
 import org.spongepowered.despector.ast.stmt.StatementVisitor;
 import org.spongepowered.despector.util.serialization.AstSerializer;
@@ -41,7 +42,7 @@ public class InstanceFieldAssignment extends FieldAssignment {
 
     private Instruction owner;
 
-    public InstanceFieldAssignment(String field_name, String type_desc, String owner_type, Instruction owner, Instruction val) {
+    public InstanceFieldAssignment(String field_name, TypeSignature type_desc, String owner_type, Instruction owner, Instruction val) {
         super(field_name, type_desc, owner_type, val);
         this.owner = checkNotNull(owner, "owner");
     }
@@ -74,7 +75,8 @@ public class InstanceFieldAssignment extends FieldAssignment {
         pack.startMap(6);
         pack.writeString("id").writeInt(AstSerializer.STATEMENT_ID_INSTANCE_FIELD_ASSIGN);
         pack.writeString("name").writeString(this.field_name);
-        pack.writeString("type").writeString(this.type_desc);
+        pack.writeString("type");
+        this.type_desc.writeTo(pack);
         pack.writeString("owner").writeString(this.owner_type);
         pack.writeString("owner_val");
         this.owner.writeTo(pack);

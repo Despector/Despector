@@ -26,6 +26,7 @@ package org.spongepowered.despector.ast.stmt.assign;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import org.spongepowered.despector.ast.generic.TypeSignature;
 import org.spongepowered.despector.ast.insn.Instruction;
 import org.spongepowered.despector.util.TypeHelper;
 
@@ -35,12 +36,12 @@ import org.spongepowered.despector.util.TypeHelper;
 public abstract class FieldAssignment extends Assignment {
 
     protected String field_name;
-    protected String type_desc;
+    protected TypeSignature type_desc;
     protected String owner_type;
 
     protected boolean initializer = false;
 
-    public FieldAssignment(String field, String type_desc, String owner, Instruction val) {
+    public FieldAssignment(String field, TypeSignature type_desc, String owner, Instruction val) {
         super(val);
         this.field_name = checkNotNull(field, "field");
         this.type_desc = checkNotNull(type_desc, "field_desc");
@@ -64,14 +65,14 @@ public abstract class FieldAssignment extends Assignment {
     /**
      * Gets the field's type description.
      */
-    public String getFieldDescription() {
+    public TypeSignature getFieldDescription() {
         return this.type_desc;
     }
 
     /**
      * Sets the field's type description.
      */
-    public void setFieldDescription(String desc) {
+    public void setFieldDescription(TypeSignature desc) {
         this.type_desc = checkNotNull(desc, "desc");
     }
 

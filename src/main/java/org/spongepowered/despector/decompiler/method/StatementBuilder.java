@@ -343,7 +343,7 @@ public final class StatementBuilder {
                 if (!owner.startsWith("[")) {
                     owner = "L" + owner + ";";
                 }
-                FieldAssignment assign = new StaticFieldAssignment(field.getName(), field.getDescription(), owner, val);
+                FieldAssignment assign = new StaticFieldAssignment(field.getName(), ClassTypeSignature.of(field.getDescription()), owner, val);
                 block.append(assign);
                 break;
             }
@@ -365,7 +365,8 @@ public final class StatementBuilder {
                 if (!owner_t.startsWith("[")) {
                     owner_t = "L" + owner_t + ";";
                 }
-                FieldAssignment assign = new InstanceFieldAssignment(field.getName(), field.getDescription(), owner_t, owner, val);
+                FieldAssignment assign =
+                        new InstanceFieldAssignment(field.getName(), ClassTypeSignature.of(field.getDescription()), owner_t, owner, val);
                 block.append(assign);
                 break;
             }
