@@ -53,7 +53,7 @@ public class StatementBlock implements Iterable<Statement> {
     }
 
     private Type type;
-    private final List<Statement> statements;
+    final List<Statement> statements;
 
     public StatementBlock(Type type) {
         this.type = checkNotNull(type, "type");
@@ -93,10 +93,18 @@ public class StatementBlock implements Iterable<Statement> {
         return this.statements.size();
     }
 
+    public int size() {
+        return this.statements.size();
+    }
+
     /**
      * Gets the given statement in this block.
      */
     public Statement getStatement(int i) {
+        return this.statements.get(i);
+    }
+
+    public Statement get(int i) {
         return this.statements.get(i);
     }
 
@@ -174,7 +182,7 @@ public class StatementBlock implements Iterable<Statement> {
         return new Itr();
     }
 
-    private class Itr implements Iterator<Statement> {
+    class Itr implements Iterator<Statement> {
 
         private int index;
 
