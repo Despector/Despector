@@ -28,6 +28,8 @@ import org.spongepowered.despector.ast.SourceSet;
 import org.spongepowered.despector.ast.type.TypeEntry;
 import org.spongepowered.despector.config.ConfigBase.CleanupConfigSection;
 import org.spongepowered.despector.config.ConfigManager;
+import org.spongepowered.despector.config.LibraryConfiguration;
+import org.spongepowered.despector.decompiler.BaseDecompiler;
 import org.spongepowered.despector.decompiler.Decompiler;
 import org.spongepowered.despector.decompiler.Decompilers;
 import org.spongepowered.despector.decompiler.DirectoryWalker;
@@ -187,6 +189,10 @@ public final class Despector {
 
         Decompiler decompiler = Decompilers.get(LANGUAGE);
 
+        if (LibraryConfiguration.parallel) {
+            System.out.println("Running parallel decompile with " + Runtime.getRuntime().availableProcessors());
+        }
+
         SourceSet source = new SourceSet();
         for (String s : sources) {
             Path path = Paths.get(s);
@@ -208,6 +214,9 @@ public final class Despector {
             } else {
                 System.err.println("Unknown source type: " + path.toAbsolutePath().toString() + " must be jar or directory");
             }
+        }
+        if (LibraryConfiguration.parallel && decompiler instanceof BaseDecompiler) {
+            ((BaseDecompiler) decompiler).flushTasks();
         }
 
         if (source.getAllClasses().isEmpty()) {

@@ -30,5 +30,6 @@ package org.spongepowered.despector.config;
 public class LibraryConfiguration {
 
     public static boolean quiet = true;
+    public static boolean parallel = true;
 
 }

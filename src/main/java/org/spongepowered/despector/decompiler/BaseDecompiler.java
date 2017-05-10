@@ -37,12 +37,6 @@ import org.spongepowered.despector.ast.generic.ClassTypeSignature;
 import org.spongepowered.despector.ast.generic.GenericClassTypeSignature;
 import org.spongepowered.despector.ast.generic.MethodSignature;
 import org.spongepowered.despector.ast.generic.TypeSignature;
-import org.spongepowered.despector.ast.insn.cst.StringConstant;
-import org.spongepowered.despector.ast.stmt.Statement;
-import org.spongepowered.despector.ast.stmt.StatementBlock;
-import org.spongepowered.despector.ast.stmt.assign.StaticFieldAssignment;
-import org.spongepowered.despector.ast.stmt.invoke.New;
-import org.spongepowered.despector.ast.stmt.misc.Comment;
 import org.spongepowered.despector.ast.type.AnnotationEntry;
 import org.spongepowered.despector.ast.type.ClassEntry;
 import org.spongepowered.despector.ast.type.EnumEntry;
@@ -50,16 +44,15 @@ import org.spongepowered.despector.ast.type.FieldEntry;
 import org.spongepowered.despector.ast.type.InterfaceEntry;
 import org.spongepowered.despector.ast.type.MethodEntry;
 import org.spongepowered.despector.ast.type.TypeEntry;
-import org.spongepowered.despector.config.ConfigManager;
 import org.spongepowered.despector.config.LibraryConfiguration;
 import org.spongepowered.despector.decompiler.error.SourceFormatException;
-import org.spongepowered.despector.decompiler.ir.Insn;
 import org.spongepowered.despector.decompiler.loader.BytecodeTranslator;
 import org.spongepowered.despector.decompiler.loader.ClassConstantPool;
 import org.spongepowered.despector.decompiler.loader.ClassConstantPool.Entry;
 import org.spongepowered.despector.decompiler.loader.ClassConstantPool.MethodHandleEntry;
-import org.spongepowered.despector.decompiler.method.MethodDecompiler;
 import org.spongepowered.despector.decompiler.method.PartialMethod.TryCatchRegion;
+import org.spongepowered.despector.parallel.MethodDecompileTask;
+import org.spongepowered.despector.parallel.Scheduler;
 import org.spongepowered.despector.parallel.Timing;
 import org.spongepowered.despector.util.SignatureParser;
 import org.spongepowered.despector.util.TypeHelper;
@@ -71,19 +64,16 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * A language decompiler.
  */
 public class BaseDecompiler implements Decompiler {
 
-    private static final boolean DUMP_IR_ON_LOAD = Boolean.getBoolean("despector.debug.dump_ir");
+    public static final boolean DUMP_IR_ON_LOAD = Boolean.getBoolean("despector.debug.dump_ir");
 
     public static final int ACC_PUBLIC = 0x0001;
     public static final int ACC_PRIVATE = 0x0002;
@@ -107,8 +97,13 @@ public class BaseDecompiler implements Decompiler {
     private final BytecodeTranslator bytecode = new BytecodeTranslator();
     private final Language lang;
 
+    private Scheduler<MethodDecompileTask> scheduler;
+
     public BaseDecompiler(Language lang) {
         this.lang = lang;
+        if (LibraryConfiguration.parallel) {
+            this.scheduler = new Scheduler<>(Runtime.getRuntime().availableProcessors());
+        }
     }
 
     @Override
@@ -405,10 +400,6 @@ public class BaseDecompiler implements Decompiler {
                 }
             }
         }
-        MethodDecompiler mth_decomp = Decompilers.JAVA_METHOD;
-        if (this.lang == Language.KOTLIN) {
-            mth_decomp = Decompilers.KOTLIN_METHOD;
-        }
         List<BootstrapMethod> bootstrap_methods = new ArrayList<>();
         int class_attribute_count = data.readUnsignedShort();
         for (int i = 0; i < class_attribute_count; i++) {
@@ -485,79 +476,33 @@ public class BaseDecompiler implements Decompiler {
         Timing.time_loading_classes += classloading_time;
 
         entry.setLanguage(actual_lang);
-        long method_decompile_start = System.nanoTime();
-        for (UnfinishedMethod unfinished : unfinished_methods) {
-            if (unfinished.code == null) {
-                continue;
-            }
-            MethodEntry mth = unfinished.mth;
-            try {
-                mth.setIR(this.bytecode.createIR(unfinished.code, mth.getLocals(), unfinished.catch_regions, pool, bootstrap_methods));
 
-                if (unfinished.parameter_annotations != null) {
-                    for (Map.Entry<Integer, List<Annotation>> e : unfinished.parameter_annotations.entrySet()) {
-                        Local loc = mth.getLocals().getLocal(e.getKey());
-                        loc.getInstance(0).getAnnotations().addAll(e.getValue());
-                    }
-                }
-
-                if (DUMP_IR_ON_LOAD) {
-                    System.out.println("Instructions of " + mth.getName() + " " + mth.getDescription());
-                    System.out.println(mth.getIR());
-                }
-                StatementBlock block = mth_decomp.decompile(mth);
-                mth.setInstructions(block);
-
-                if (entry instanceof EnumEntry && mth.getName().equals("<clinit>")) {
-                    EnumEntry e = (EnumEntry) entry;
-                    Set<String> names = new HashSet<>(e.getEnumConstants());
-                    e.getEnumConstants().clear();
-                    for (Statement stmt : block) {
-                        if (names.isEmpty() || !(stmt instanceof StaticFieldAssignment)) {
-                            break;
-                        }
-                        StaticFieldAssignment assign = (StaticFieldAssignment) stmt;
-                        if (!names.remove(assign.getFieldName())) {
-                            break;
-                        }
-                        New val = (New) assign.getValue();
-                        StringConstant cst = (StringConstant) val.getParameters()[0];
-                        e.addEnumConstant(cst.getConstant());
-                    }
-                    if (!names.isEmpty()) {
-                        System.err.println("Warning: Failed to find names for all enum constants in " + entry.getName());
-                    }
-                }
-
-            } catch (Exception ex) {
-                if (!LibraryConfiguration.quiet) {
-                    System.err.println("Error decompiling method body for " + name + " " + mth.toString());
-                    ex.printStackTrace();
-                }
-                StatementBlock insns = new StatementBlock(StatementBlock.Type.METHOD);
-                if (ConfigManager.getConfig().print_opcodes_on_error) {
-                    List<String> text = new ArrayList<>();
-                    text.add("Error decompiling block");
-                    if (mth.getIR() != null) {
-                        for (Insn next : mth.getIR()) {
-                            text.add(next.toString());
-                        }
-                    } else {
-                        mth.getLocals().bakeInstances(Collections.emptyList());
-                    }
-                    insns.append(new Comment(text));
-                } else {
-                    insns.append(new Comment("Error decompiling block"));
-                }
-                mth.setInstructions(insns);
-            }
+        MethodDecompileTask task = new MethodDecompileTask(entry, pool, unfinished_methods, this.bytecode, bootstrap_methods);
+        if (LibraryConfiguration.parallel) {
+            this.scheduler.add(task);
+        } else {
+            long method_decompile_start = System.nanoTime();
+            task.run();
+            set.add(entry);
+            long method_decompile_time = System.nanoTime() - method_decompile_start;
+            Timing.time_decompiling_methods += method_decompile_time;
         }
-        long method_decompile_time = System.nanoTime() - method_decompile_start;
         long decompile_time = System.nanoTime() - decompile_start;
-        Timing.time_decompiling_methods += method_decompile_time;
         Timing.time_decompiling += decompile_time;
-        set.add(entry);
         return entry;
+    }
+
+    public void flushTasks() {
+        if (LibraryConfiguration.parallel) {
+            long start = System.nanoTime();
+            this.scheduler.execute();
+            for (MethodDecompileTask task : this.scheduler.getTasks()) {
+                task.getEntry().getSource().add(task.getEntry());
+            }
+            long method_decompile_time = System.nanoTime() - start;
+            Timing.time_decompiling_methods += method_decompile_time;
+            this.scheduler.reset();
+        }
     }
 
     private Annotation readAnnotation(DataInputStream data, ClassConstantPool pool, SourceSet set) throws IOException {
@@ -629,7 +574,7 @@ public class BaseDecompiler implements Decompiler {
         public Entry[] arguments;
     }
 
-    private static class UnfinishedMethod {
+    public static class UnfinishedMethod {
 
         public MethodEntry mth;
         public byte[] code;
