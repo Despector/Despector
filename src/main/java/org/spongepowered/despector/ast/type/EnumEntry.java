@@ -56,7 +56,7 @@ public class EnumEntry extends TypeEntry {
     }
 
     /**
-     * Adds an enum consant to this enum. Can only be used pre lock.
+     * Adds an enum constant to this enum.
      */
     public void addEnumConstant(String cst) {
         this.enum_constants.add(checkNotNull(cst));
