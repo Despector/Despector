@@ -34,7 +34,6 @@ import org.spongepowered.despector.decompiler.method.graph.data.opcode.OpcodeBlo
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * A pre pass operation that identifies jumps that form control flow breaks.
@@ -44,8 +43,12 @@ public class BreakPrePassOperation implements GraphOperation {
     @Override
     public void process(PartialMethod partial) {
         List<OpcodeBlock> blocks = partial.getGraph();
-        List<GotoOpcodeBlock> candidates = blocks.stream().filter((op) -> op instanceof GotoOpcodeBlock).map((op) -> (GotoOpcodeBlock) op)
-                .collect(Collectors.toList());
+        List<GotoOpcodeBlock> candidates = new ArrayList<>();
+        for (OpcodeBlock block : blocks) {
+            if (block instanceof GotoOpcodeBlock) {
+                candidates.add((GotoOpcodeBlock) block);
+            }
+        }
 
         List<Loop> loops = new ArrayList<>();
 
@@ -54,8 +57,12 @@ public class BreakPrePassOperation implements GraphOperation {
             int target_index = blocks.indexOf(target);
             if (target.getStart() < ggoto.getStart()) {
                 // a back edge is either a while loop or a continue statement
-                List<GotoOpcodeBlock> others = target.getTargettedBy().stream().filter((op) -> op instanceof GotoOpcodeBlock)
-                        .map((op) -> (GotoOpcodeBlock) op).collect(Collectors.toList());
+                List<GotoOpcodeBlock> others = new ArrayList<>();
+                for (OpcodeBlock block : target.getTargettedBy()) {
+                    if (block instanceof GotoOpcodeBlock) {
+                        others.add((GotoOpcodeBlock) block);
+                    }
+                }
                 int goto_index = blocks.indexOf(ggoto);
                 for (GotoOpcodeBlock other : others) {
                     int other_index = blocks.indexOf(other);
@@ -95,8 +102,12 @@ public class BreakPrePassOperation implements GraphOperation {
                 if (!found) {
                     continue;
                 }
-                List<GotoOpcodeBlock> others = target.getTargettedBy().stream().filter((op) -> op instanceof GotoOpcodeBlock)
-                        .map((op) -> (GotoOpcodeBlock) op).collect(Collectors.toList());
+                List<GotoOpcodeBlock> others = new ArrayList<>();
+                for (OpcodeBlock block : target.getTargettedBy()) {
+                    if (block instanceof GotoOpcodeBlock) {
+                        others.add((GotoOpcodeBlock) block);
+                    }
+                }
                 int goto_index = blocks.indexOf(ggoto);
                 for (GotoOpcodeBlock other : others) {
                     int other_index = blocks.indexOf(other);

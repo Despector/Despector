@@ -130,8 +130,8 @@ public class BaseDecompiler implements Decompiler {
             throw new SourceFormatException("Not a java class file");
         }
 
-        short minor = data.readShort();
-        short major = data.readShort();
+        /* short minor = */ data.readShort();
+        /* short major = */ data.readShort();
 
         // TODO check versions and adapt loading to support a range of versions
 
