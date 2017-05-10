@@ -132,10 +132,7 @@ public class BaseDecompiler implements Decompiler {
         short minor = data.readShort();
         short major = data.readShort();
 
-        // TODO support older versions
-        if (major != 52 && major != 51 && major != 50 && minor != 50) {
-            throw new SourceFormatException("Unsupported java class version " + major + "." + minor);
-        }
+        // TODO check versions and adapt loading to support a range of versions
 
         ClassConstantPool pool = new ClassConstantPool();
         pool.load(data);
@@ -270,7 +267,12 @@ public class BaseDecompiler implements Decompiler {
                     /* int max_locals = */ data.readUnsignedShort();
                     int code_length = data.readInt();
                     byte[] code = new byte[code_length];
-                    data.read(code, 0, code_length);
+                    int offs = 0;
+                    while (code_length > 0) {
+                        int len = data.read(code, offs, code_length);
+                        code_length -= len;
+                        offs += len;
+                    }
                     List<TryCatchRegion> catch_regions = new ArrayList<>();
                     int exception_table_length = data.readUnsignedShort();
                     for (int j = 0; j < exception_table_length; j++) {
@@ -477,7 +479,7 @@ public class BaseDecompiler implements Decompiler {
             }
             entry.setSignature(sig);
         }
-        
+
         long classloading_time = System.nanoTime() - decompile_start;
         Timing.time_loading_classes = classloading_time;
 
@@ -535,8 +537,10 @@ public class BaseDecompiler implements Decompiler {
                 if (ConfigManager.getConfig().print_opcodes_on_error) {
                     List<String> text = new ArrayList<>();
                     text.add("Error decompiling block");
-                    for (Insn next : mth.getIR()) {
-                        text.add(next.toString());
+                    if (mth.getIR() != null) {
+                        for (Insn next : mth.getIR()) {
+                            text.add(next.toString());
+                        }
                     }
                     insns.append(new Comment(text));
                 } else {

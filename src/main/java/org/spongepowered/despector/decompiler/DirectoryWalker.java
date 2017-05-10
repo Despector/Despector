@@ -59,6 +59,9 @@ public class DirectoryWalker {
         } else {
             if (file.getName().endsWith(".class")) {
                 decomp.decompile(file, src);
+            } else if (file.getName().endsWith(".jar")) {
+                JarWalker walker = new JarWalker(file.toPath());
+                walker.walk(src, decomp);
             }
         }
     }

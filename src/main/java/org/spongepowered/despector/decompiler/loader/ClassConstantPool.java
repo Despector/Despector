@@ -52,7 +52,12 @@ public class ClassConstantPool {
                 Utf8Entry u = new Utf8Entry();
                 int len = data.readUnsignedShort();
                 byte[] bytes = new byte[len];
-                data.read(bytes, 0, len);
+                int offs = 0;
+                while (len > 0) {
+                    int read = data.read(bytes, offs, len);
+                    len -= read;
+                    offs += read;
+                }
                 u.value = new String(bytes, Charsets.UTF_8);
                 this.values[i] = u;
                 if (DUMP_CONSTANT_POOL) {

@@ -30,6 +30,7 @@ import org.spongepowered.despector.ast.insn.Instruction;
 import org.spongepowered.despector.ast.insn.var.LocalAccess;
 import org.spongepowered.despector.ast.stmt.StatementBlock;
 import org.spongepowered.despector.ast.type.MethodEntry;
+import org.spongepowered.despector.config.LibraryConfiguration;
 import org.spongepowered.despector.decompiler.ir.InsnBlock;
 import org.spongepowered.despector.decompiler.ir.JumpInsn;
 import org.spongepowered.despector.decompiler.ir.SwitchInsn;
@@ -201,8 +202,10 @@ public class MethodDecompiler {
             try {
                 post.postprocess(block);
             } catch (Exception e) {
-                System.err.println("Failed to apply post processor: " + post.getClass().getSimpleName());
-                e.printStackTrace();
+                if (!LibraryConfiguration.quiet) {
+                    System.err.println("Failed to apply post processor: " + post.getClass().getSimpleName());
+                    e.printStackTrace();
+                }
             }
         }
 

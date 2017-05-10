@@ -25,6 +25,7 @@
 package org.spongepowered.despector.decompiler.method.graph.process;
 
 import org.spongepowered.despector.config.ConfigManager;
+import org.spongepowered.despector.config.LibraryConfiguration;
 import org.spongepowered.despector.decompiler.ir.Insn;
 import org.spongepowered.despector.decompiler.method.PartialMethod;
 import org.spongepowered.despector.decompiler.method.graph.GraphProcessor;
@@ -109,7 +110,8 @@ public class SubRegionBlockProcessor implements GraphProcessor {
         }
 
         OpcodeBlock first = region.get(0);
-        if (first instanceof ConditionalOpcodeBlock && AstUtil.hasStartingRequirement(first.getOpcodes()) && ((ConditionalOpcodeBlock) first).getPrefix() == null) {
+        if (first instanceof ConditionalOpcodeBlock && AstUtil.hasStartingRequirement(first.getOpcodes())
+                && ((ConditionalOpcodeBlock) first).getPrefix() == null) {
             OpcodeBlock prev = blocks.get(i - 1);
             if (prev instanceof ProcessedOpcodeBlock) {
                 ((ConditionalOpcodeBlock) first).setPrefix(prev);
@@ -136,8 +138,10 @@ public class SubRegionBlockProcessor implements GraphProcessor {
                     }
                 }
                 final_blocks.add(new CommentBlockSection(comment));
-                System.err.println("Error decompiling subregion of " + partial.getEntry());
-                e.printStackTrace();
+                if (!LibraryConfiguration.quiet) {
+                    System.err.println("Error decompiling subregion of " + partial.getEntry());
+                    e.printStackTrace();
+                }
             } else {
                 throw e;
             }
