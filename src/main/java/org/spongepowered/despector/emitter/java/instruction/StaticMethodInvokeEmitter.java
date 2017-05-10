@@ -77,14 +77,16 @@ public class StaticMethodInvokeEmitter implements InstructionEmitter<JavaEmitter
             Instruction param = arg.getParameters()[i];
             if (is_varargs && i == arg.getParameters().length - 1 && param instanceof NewArray) {
                 NewArray varargs = (NewArray) param;
-                for (int o = 0; o < varargs.getInitializer().length; o++) {
-                    ctx.emit(varargs.getInitializer()[o], varargs.getType());
-                    if (o < varargs.getInitializer().length - 1) {
-                        ctx.printString(", ");
-                        ctx.markWrapPoint();
+                if (varargs.getInitializer() != null) {
+                    for (int o = 0; o < varargs.getInitializer().length; o++) {
+                        ctx.emit(varargs.getInitializer()[o], varargs.getType());
+                        if (o < varargs.getInitializer().length - 1) {
+                            ctx.printString(", ");
+                            ctx.markWrapPoint();
+                        }
                     }
+                    break;
                 }
-                break;
             }
             ctx.emit(param, ClassTypeSignature.of(param_types.get(i)));
             if (i < arg.getParameters().length - 1) {
@@ -120,7 +122,8 @@ public class StaticMethodInvokeEmitter implements InstructionEmitter<JavaEmitter
             FieldAccess getter = (FieldAccess) ret.getValue().get();
             FieldAccess replacement = null;
             if (arg.getParameters().length == 1) {
-                replacement = new InstanceFieldAccess(getter.getFieldName(), getter.getTypeDescriptor(), getter.getOwnerType(), arg.getParameters()[0]);
+                replacement =
+                        new InstanceFieldAccess(getter.getFieldName(), getter.getTypeDescriptor(), getter.getOwnerType(), arg.getParameters()[0]);
             } else {
                 replacement = new StaticFieldAccess(getter.getFieldName(), getter.getTypeDescriptor(), getter.getOwnerType());
             }

@@ -71,6 +71,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -481,7 +482,7 @@ public class BaseDecompiler implements Decompiler {
         }
 
         long classloading_time = System.nanoTime() - decompile_start;
-        Timing.time_loading_classes = classloading_time;
+        Timing.time_loading_classes += classloading_time;
 
         entry.setLanguage(actual_lang);
         long method_decompile_start = System.nanoTime();
@@ -541,6 +542,8 @@ public class BaseDecompiler implements Decompiler {
                         for (Insn next : mth.getIR()) {
                             text.add(next.toString());
                         }
+                    } else {
+                        mth.getLocals().bakeInstances(Collections.emptyList());
                     }
                     insns.append(new Comment(text));
                 } else {

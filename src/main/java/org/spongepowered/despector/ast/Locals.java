@@ -201,15 +201,22 @@ public class Locals {
         public void bakeInstances(List<Integer> label_indices) {
             for (LVT l : this.lvt) {
                 int start = label_indices.indexOf(l.start_pc);
+                if (start == -1) {
+                    start = 0;
+                }
                 int end = label_indices.indexOf(l.start_pc + l.length);
-                if (end == -1) {
+                if (end == -1 && !label_indices.isEmpty()) {
                     end = label_indices.get(label_indices.size() - 1);
                 }
                 TypeSignature sig = null;
                 if (l.signature == null) {
                     sig = ClassTypeSignature.of(l.desc);
                 } else {
-                    sig = SignatureParser.parseFieldTypeSignature(l.signature);
+                    try {
+                        sig = SignatureParser.parseFieldTypeSignature(l.signature);
+                    } catch (Exception e) {
+                        sig = ClassTypeSignature.of(l.desc);
+                    }
                 }
                 LocalInstance insn = new LocalInstance(this, l.name, sig, start - 1, end);
 

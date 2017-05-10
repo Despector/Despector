@@ -183,7 +183,6 @@ public final class SignatureParser {
         }
         if (parser.peek() == '.') {
             // TODO child class support
-            throw new IllegalStateException();
         }
         parser.expect(';');
         return sig;

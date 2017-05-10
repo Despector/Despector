@@ -44,6 +44,9 @@ import org.spongepowered.despector.emitter.AstEmitter;
 import org.spongepowered.despector.emitter.format.EmitterFormat.BracePosition;
 import org.spongepowered.despector.emitter.java.JavaEmitterContext;
 import org.spongepowered.despector.emitter.java.special.GenericsEmitter;
+import org.spongepowered.despector.util.TypeHelper;
+
+import java.util.List;
 
 /**
  * An emitter for methods.
@@ -148,28 +151,35 @@ public class MethodEntryEmitter implements AstEmitter<JavaEmitterContext, Method
         ctx.printString("(");
         StatementBlock block = method.getInstructions();
         int start = 0;
+        List<String> param_types = TypeHelper.splitSig(method.getDescription());
         if ("<init>".equals(method.getName()) && ctx.getType() instanceof EnumEntry) {
             // If this is an enum type then we skip the first two ctor
             // parameters
             // (which are the index and name of the enum constant)
             start += 2;
         }
-        if (start >= method.getParamTypes().size()) {
+        if (start >= param_types.size()) {
             ctx.printString(" ", ctx.getFormat().insert_space_between_empty_parens_in_method_declaration);
         }
         int param_index = start;
         if (!method.isStatic()) {
             param_index++;
         }
+        // TODO support synthetic parameters properly, their types will be
+        // missing from the signature, need to offset types when emitting
         for (int i = start; i < method.getParamTypes().size(); i++) {
-            boolean varargs = method.isVarargs() && i == method.getParamTypes().size() - 1;
+            boolean varargs = method.isVarargs() && i == param_types.size() - 1;
             if (block == null) {
                 if (sig != null) {
                     // interfaces have no lvt for parameters, need to get
                     // generic types from the method signature
                     generics.emitTypeSignature(ctx, sig.getParameters().get(i), varargs);
                 } else {
-                    ctx.emitType(method.getParamTypes().get(i), varargs);
+                    if (method.getParamTypes().size() != param_types.size()) {
+                        ctx.emitType(param_types.get(i));
+                    } else {
+                        ctx.emitType(method.getParamTypes().get(i), varargs);
+                    }
                 }
                 ctx.printString(" ");
                 ctx.printString("local" + param_index);
@@ -193,13 +203,13 @@ public class MethodEntryEmitter implements AstEmitter<JavaEmitterContext, Method
                 ctx.printString(" ");
                 ctx.printString(insn.getName());
             }
-            if (i < method.getParamTypes().size() - 1) {
+            if (i < param_types.size() - 1) {
                 ctx.printString(" ", ctx.getFormat().insert_space_before_comma_in_method_declaration_parameters);
                 ctx.printString(",");
                 ctx.printString(" ", ctx.getFormat().insert_space_after_comma_in_method_declaration_parameters);
                 ctx.markWrapPoint(ctx.getFormat().alignment_for_parameters_in_method_declaration, i + 1);
             }
-            String desc = method.getParamTypes().get(i).getDescriptor();
+            String desc = param_types.get(i);
             param_index++;
             if ("D".equals(desc) || "J".equals(desc)) {
                 param_index++;
