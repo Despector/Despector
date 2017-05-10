@@ -84,6 +84,7 @@ public class TestHelper {
         File file = new File(path, cls.getName().replace('.', '/') + ".class");
         try {
             type = Decompilers.WILD.decompile(file, DUMMY_SOURCE_SET);
+            Decompilers.WILD.flushTasks();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -95,6 +96,7 @@ public class TestHelper {
         TypeEntry type = null;
         try {
             type = Decompilers.WILD.decompile(new ByteArrayInputStream(data), DUMMY_SOURCE_SET);
+            Decompilers.WILD.flushTasks();
         } catch (IOException e) {
             e.printStackTrace();
         }

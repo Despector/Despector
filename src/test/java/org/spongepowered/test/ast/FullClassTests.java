@@ -25,10 +25,14 @@
 package org.spongepowered.test.ast;
 
 import org.junit.Assert;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.spongepowered.despector.Language;
 import org.spongepowered.despector.ast.SourceSet;
 import org.spongepowered.despector.ast.type.TypeEntry;
+import org.spongepowered.despector.config.LibraryConfiguration;
+import org.spongepowered.despector.decompiler.BaseDecompiler;
+import org.spongepowered.despector.decompiler.Decompiler;
 import org.spongepowered.despector.decompiler.Decompilers;
 import org.spongepowered.despector.emitter.Emitters;
 import org.spongepowered.despector.emitter.format.EmitterFormat;
@@ -43,6 +47,12 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 
 public class FullClassTests {
+
+    @BeforeClass
+    public static void setup() {
+        LibraryConfiguration.quiet = false;
+        LibraryConfiguration.parallel = false;
+    }
 
     @Test
     public void testGenerics() throws Exception {
@@ -60,7 +70,9 @@ public class FullClassTests {
             Assert.fail("Resource not found " + classname + ".class.test");
         }
         SourceSet src = new SourceSet();
-        TypeEntry type = Decompilers.get(lang).decompile(compiled, src);
+        Decompiler decomp = Decompilers.get(lang);
+        TypeEntry type = decomp.decompile(compiled, src);
+        ((BaseDecompiler) decomp).flushTasks();
         StringWriter writer = new StringWriter();
         JavaEmitterContext ctx = new JavaEmitterContext(writer, EmitterFormat.defaults());
         Emitters.get(lang).emit(ctx, type);

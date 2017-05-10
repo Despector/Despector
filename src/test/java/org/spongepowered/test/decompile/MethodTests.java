@@ -43,10 +43,6 @@ public class MethodTests {
         LibraryConfiguration.parallel = false;
     }
 
-    public static void test_mth() {
-        int[][] a = new int[5][6];
-    }
-
     @Test
     public void testStaticInvoke() {
         TestMethodBuilder builder = new TestMethodBuilder("test_mth", "()V");
@@ -59,10 +55,71 @@ public class MethodTests {
         mv.visitMethodInsn(INVOKEVIRTUAL, "java/io/PrintStream", "println", "(Ljava/lang/String;)V", false);
         mv.visitLabel(end);
         mv.visitInsn(RETURN);
-        mv.visitLocalVariable("i", "I", null, start, end, 0);
 
         String insn = TestHelper.getAsString(builder.finish(), "test_mth");
         String good = "System.out.println(\"Hello World!\");";
+        Assert.assertEquals(good, insn);
+    }
+
+    @Test
+    public void testInstanceInvoke() {
+        TestMethodBuilder builder = new TestMethodBuilder("test_mth", "()V");
+        MethodVisitor mv = builder.getGenerator();
+        Label start = new Label();
+        Label end = new Label();
+        mv.visitLabel(start);
+        mv.visitLdcInsn("Hello World!");
+        mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/String", "length", "()I", false);
+        mv.visitInsn(POP);
+        mv.visitLabel(end);
+        mv.visitInsn(RETURN);
+
+        String insn = TestHelper.getAsString(builder.finish(), "test_mth");
+        String good = "\"Hello World!\".length();";
+        Assert.assertEquals(good, insn);
+    }
+
+    @Test
+    public void testNew() {
+        TestMethodBuilder builder = new TestMethodBuilder("test_mth", "()V");
+        MethodVisitor mv = builder.getGenerator();
+        Label start = new Label();
+        Label l1 = new Label();
+        Label end = new Label();
+        mv.visitLabel(start);
+        mv.visitTypeInsn(NEW, "java/lang/String");
+        mv.visitInsn(DUP);
+        mv.visitLdcInsn("Hello World");
+        mv.visitMethodInsn(INVOKESPECIAL, "java/lang/String", "<init>", "(Ljava/lang/String;)V", false);
+        mv.visitVarInsn(ASTORE, 0);
+        mv.visitLabel(l1);
+        mv.visitInsn(RETURN);
+        mv.visitLabel(end);
+        mv.visitLocalVariable("a", "Ljava/lang/String;", null, l1, end, 0);
+
+        String insn = TestHelper.getAsString(builder.finish(), "test_mth");
+        String good = "String a = new String(\"Hello World\");";
+        Assert.assertEquals(good, insn);
+    }
+
+    @Test
+    public void testNewArray() {
+        TestMethodBuilder builder = new TestMethodBuilder("test_mth", "()V");
+        MethodVisitor mv = builder.getGenerator();
+        Label start = new Label();
+        Label l1 = new Label();
+        Label end = new Label();
+        mv.visitLabel(start);
+        mv.visitInsn(ICONST_5);
+        mv.visitIntInsn(NEWARRAY, T_INT);
+        mv.visitVarInsn(ASTORE, 0);
+        mv.visitLabel(l1);
+        mv.visitInsn(RETURN);
+        mv.visitLabel(end);
+        mv.visitLocalVariable("a", "[I", null, l1, end, 0);
+
+        String insn = TestHelper.getAsString(builder.finish(), "test_mth");
+        String good = "int[] a = new int[5];";
         Assert.assertEquals(good, insn);
     }
 

@@ -31,6 +31,8 @@ import java.util.concurrent.locks.ReentrantLock;
 
 public class Scheduler<T extends Runnable> {
 
+    private static final int PARALLEL_THRESHOLD = 100;
+
     private final Worker<T>[] workers;
     private final List<T> tasks = new ArrayList<>();
 
@@ -44,9 +46,6 @@ public class Scheduler<T extends Runnable> {
             workers = 1;
         }
         this.workers = new Worker[workers];
-        for (int i = 0; i < workers; i++) {
-            this.workers[i] = new Worker<>();
-        }
     }
 
     public void add(T task) {
@@ -58,6 +57,15 @@ public class Scheduler<T extends Runnable> {
     }
 
     public void execute() {
+        if (this.tasks.size() < PARALLEL_THRESHOLD) {
+            for (T task : this.tasks) {
+                task.run();
+            }
+            return;
+        }
+        for (int i = 0; i < this.workers.length; i++) {
+            this.workers[i] = new Worker<>();
+        }
         int i = 0;
         for (T task : this.tasks) {
             this.workers[i % this.workers.length].add(task);
@@ -75,13 +83,13 @@ public class Scheduler<T extends Runnable> {
         } finally {
             this.lock.unlock();
         }
+        for (int j = 0; j < this.workers.length; j++) {
+            this.workers[j] = null;
+        }
     }
 
     public void reset() {
         this.tasks.clear();
-        for (Worker<T> worker : this.workers) {
-            worker.reset();
-        }
     }
 
     void markWorkerDone() {
@@ -100,8 +108,7 @@ public class Scheduler<T extends Runnable> {
 
         private final List<T> tasks = new ArrayList<>();
 
-        public void reset() {
-            this.tasks.clear();
+        Worker() {
         }
 
         public void add(T task) {

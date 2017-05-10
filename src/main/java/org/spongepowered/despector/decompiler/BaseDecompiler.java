@@ -58,11 +58,8 @@ import org.spongepowered.despector.util.SignatureParser;
 import org.spongepowered.despector.util.TypeHelper;
 
 import java.io.DataInputStream;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -107,13 +104,8 @@ public class BaseDecompiler implements Decompiler {
     }
 
     @Override
-    public TypeEntry decompile(Path cls_path, SourceSet source) throws IOException {
-        return decompile(cls_path.toFile(), source);
-    }
-
-    @Override
-    public TypeEntry decompile(File cls_path, SourceSet source) throws IOException {
-        return decompile(new FileInputStream(cls_path), source);
+    public boolean isValid(String name) {
+        return name.endsWith(".class");
     }
 
     @Override

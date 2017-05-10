@@ -26,12 +26,20 @@ package org.spongepowered.test.ast;
 
 import static org.spongepowered.test.util.TestHelper.check;
 
+import org.junit.BeforeClass;
 import org.junit.Test;
+import org.spongepowered.despector.config.LibraryConfiguration;
 
 import java.util.concurrent.Callable;
 import java.util.function.Consumer;
 
 public class LambdaTest {
+
+    @BeforeClass
+    public static void setup() {
+        LibraryConfiguration.quiet = false;
+        LibraryConfiguration.parallel = false;
+    }
 
     public void test_lambda() {
         Runnable r = () -> System.out.println("Hello World");
@@ -67,6 +75,18 @@ public class LambdaTest {
         String good = "java.util.concurrent.Callable<Object> r = () -> null;\n"
                 + "r.call();";
         check(getClass(), "test_producer", good);
+    }
+
+    public void test_method_ref(Runnable r) {
+        Runnable a = r::run;
+        a.run();
+    }
+
+    @Test
+    public void testMethodRef() {
+        String good = "Runnable a = r::run;\n"
+                + "a.run();";
+        check(getClass(), "test_method_ref", good);
     }
 
 }

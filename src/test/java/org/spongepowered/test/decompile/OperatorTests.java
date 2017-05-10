@@ -27,14 +27,22 @@ package org.spongepowered.test.decompile;
 import static org.objectweb.asm.Opcodes.*;
 
 import org.junit.Assert;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Type;
+import org.spongepowered.despector.config.LibraryConfiguration;
 import org.spongepowered.test.util.TestHelper;
 import org.spongepowered.test.util.TestMethodBuilder;
 
 public class OperatorTests {
+
+    @BeforeClass
+    public static void setup() {
+        LibraryConfiguration.quiet = false;
+        LibraryConfiguration.parallel = false;
+    }
 
     @Test
     public void testIntConstant() {

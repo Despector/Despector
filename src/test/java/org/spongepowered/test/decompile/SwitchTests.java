@@ -27,6 +27,7 @@ package org.spongepowered.test.decompile;
 import static org.objectweb.asm.Opcodes.*;
 
 import org.junit.Assert;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.FieldVisitor;
@@ -36,9 +37,16 @@ import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.GeneratorAdapter;
 import org.objectweb.asm.commons.Method;
+import org.spongepowered.despector.config.LibraryConfiguration;
 import org.spongepowered.test.util.TestHelper;
 
 public class SwitchTests {
+
+    @BeforeClass
+    public static void setup() {
+        LibraryConfiguration.quiet = false;
+        LibraryConfiguration.parallel = false;
+    }
 
     private static enum TestEnum {
         ONE,

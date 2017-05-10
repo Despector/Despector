@@ -28,6 +28,7 @@ import org.spongepowered.despector.ast.SourceSet;
 import org.spongepowered.despector.ast.type.TypeEntry;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
@@ -38,14 +39,23 @@ import java.nio.file.Path;
 public interface Decompiler {
 
     /**
+     * Gets if the given file name is valid for this decompiler.
+     */
+    boolean isValid(String name);
+
+    /**
      * Decompiles the class file at the given path.
      */
-    TypeEntry decompile(Path cls_path, SourceSet source) throws IOException;
+    default TypeEntry decompile(Path cls_path, SourceSet source) throws IOException {
+        return decompile(new FileInputStream(cls_path.toFile()), source);
+    }
 
     /**
      * Decompiles the class file at the given file.
      */
-    TypeEntry decompile(File cls_path, SourceSet source) throws IOException;
+    default TypeEntry decompile(File cls_path, SourceSet source) throws IOException {
+        return decompile(new FileInputStream(cls_path), source);
+    }
 
     /**
      * Decompiles the class file in the given input stream.
