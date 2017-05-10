@@ -464,7 +464,7 @@ public final class StatementBuilder {
             case Insn.MULTINEWARRAY: {
                 TypeIntInsn array = (TypeIntInsn) next;
                 Instruction[] size = new Instruction[array.getValue()];
-                for (int i = 0; i < array.getValue(); i++) {
+                for (int i = array.getValue() - 1; i >= 0; i--) {
                     size[i] = stack.pop();
                 }
                 stack.push(new MultiNewArray(ClassTypeSignature.of(array.getType()), size));

@@ -63,6 +63,9 @@ public class TestHelper {
         @Override
         public InputStream find(String name) {
             File file = new File(this.path, name + ".class");
+            if (!file.exists()) {
+                return null;
+            }
             try {
                 return new FileInputStream(file);
             } catch (FileNotFoundException e) {

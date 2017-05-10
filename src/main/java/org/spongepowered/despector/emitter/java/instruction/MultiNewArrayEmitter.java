@@ -39,7 +39,14 @@ public class MultiNewArrayEmitter implements InstructionEmitter<JavaEmitterConte
     @Override
     public void emit(JavaEmitterContext ctx, MultiNewArray arg, TypeSignature type) {
         ctx.printString("new ");
-        ctx.emitType(arg.getType().getDescriptor());
+        String desc = arg.getType().getDescriptor();
+        for (int i = 0; i < arg.getSizes().length; i++) {
+            if (!desc.startsWith("[")) {
+                throw new IllegalStateException();
+            }
+            desc = desc.substring(1);
+        }
+        ctx.emitType(desc);
         for (Instruction size : arg.getSizes()) {
             ctx.printString("[");
             ctx.printString(" ", ctx.getFormat().insert_space_after_opening_bracket_in_array_allocation_expression);
