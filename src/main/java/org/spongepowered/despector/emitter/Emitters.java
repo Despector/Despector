@@ -39,6 +39,7 @@ import org.spongepowered.despector.ast.insn.cst.StringConstant;
 import org.spongepowered.despector.ast.insn.cst.TypeConstant;
 import org.spongepowered.despector.ast.insn.misc.Cast;
 import org.spongepowered.despector.ast.insn.misc.InstanceOf;
+import org.spongepowered.despector.ast.insn.misc.MultiNewArray;
 import org.spongepowered.despector.ast.insn.misc.NewArray;
 import org.spongepowered.despector.ast.insn.misc.NumberCompare;
 import org.spongepowered.despector.ast.insn.misc.Ternary;
@@ -109,6 +110,7 @@ import org.spongepowered.despector.emitter.java.instruction.InstanceOfEmitter;
 import org.spongepowered.despector.emitter.java.instruction.IntConstantEmitter;
 import org.spongepowered.despector.emitter.java.instruction.LocalAccessEmitter;
 import org.spongepowered.despector.emitter.java.instruction.LongConstantEmitter;
+import org.spongepowered.despector.emitter.java.instruction.MultiNewArrayEmitter;
 import org.spongepowered.despector.emitter.java.instruction.NegativeEmitter;
 import org.spongepowered.despector.emitter.java.instruction.NewArrayEmitter;
 import org.spongepowered.despector.emitter.java.instruction.NewEmitter;
@@ -249,6 +251,7 @@ public final class Emitters {
         JAVA_SET.setInstructionEmitter(TypeConstant.class, new TypeConstantEmitter());
         JAVA_SET.setInstructionEmitter(StaticFieldAccess.class, fld);
         JAVA_SET.setInstructionEmitter(DynamicInvoke.class, new DynamicInvokeEmitter());
+        JAVA_SET.setInstructionEmitter(MultiNewArray.class, new MultiNewArrayEmitter());
 
         JAVA_SET.setConditionEmitter(AndCondition.class, new AndConditionEmitter());
         JAVA_SET.setConditionEmitter(OrCondition.class, new OrConditionEmitter());
