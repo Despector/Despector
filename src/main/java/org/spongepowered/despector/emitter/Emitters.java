@@ -64,7 +64,7 @@ import org.spongepowered.despector.ast.stmt.branch.If;
 import org.spongepowered.despector.ast.stmt.branch.Switch;
 import org.spongepowered.despector.ast.stmt.branch.TryCatch;
 import org.spongepowered.despector.ast.stmt.branch.While;
-import org.spongepowered.despector.ast.stmt.invoke.DynamicInvoke;
+import org.spongepowered.despector.ast.stmt.invoke.Lambda;
 import org.spongepowered.despector.ast.stmt.invoke.InstanceMethodInvoke;
 import org.spongepowered.despector.ast.stmt.invoke.InvokeStatement;
 import org.spongepowered.despector.ast.stmt.invoke.New;
@@ -250,7 +250,7 @@ public final class Emitters {
         JAVA_SET.setInstructionEmitter(Ternary.class, new TernaryEmitter());
         JAVA_SET.setInstructionEmitter(TypeConstant.class, new TypeConstantEmitter());
         JAVA_SET.setInstructionEmitter(StaticFieldAccess.class, fld);
-        JAVA_SET.setInstructionEmitter(DynamicInvoke.class, new DynamicInvokeEmitter());
+        JAVA_SET.setInstructionEmitter(Lambda.class, new DynamicInvokeEmitter());
         JAVA_SET.setInstructionEmitter(MultiNewArray.class, new MultiNewArrayEmitter());
 
         JAVA_SET.setConditionEmitter(AndCondition.class, new AndConditionEmitter());

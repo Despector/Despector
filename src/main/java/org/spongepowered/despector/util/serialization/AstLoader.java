@@ -87,7 +87,7 @@ import org.spongepowered.despector.ast.stmt.branch.If;
 import org.spongepowered.despector.ast.stmt.branch.Switch;
 import org.spongepowered.despector.ast.stmt.branch.TryCatch;
 import org.spongepowered.despector.ast.stmt.branch.While;
-import org.spongepowered.despector.ast.stmt.invoke.DynamicInvoke;
+import org.spongepowered.despector.ast.stmt.invoke.Lambda;
 import org.spongepowered.despector.ast.stmt.invoke.InstanceMethodInvoke;
 import org.spongepowered.despector.ast.stmt.invoke.InvokeStatement;
 import org.spongepowered.despector.ast.stmt.invoke.New;
@@ -795,7 +795,7 @@ public class AstLoader {
                 String method = unpack.readString();
                 expectKey(unpack, "desc");
                 String desc = unpack.readString();
-                return new DynamicInvoke(owner, method, desc, type, name);
+                return new Lambda(owner, method, desc, type, name);
             } catch (IOException e) {
                 Throwables.propagate(e);
             }

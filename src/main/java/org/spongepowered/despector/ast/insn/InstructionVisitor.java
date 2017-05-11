@@ -45,8 +45,9 @@ import org.spongepowered.despector.ast.insn.var.ArrayAccess;
 import org.spongepowered.despector.ast.insn.var.InstanceFieldAccess;
 import org.spongepowered.despector.ast.insn.var.LocalAccess;
 import org.spongepowered.despector.ast.insn.var.StaticFieldAccess;
-import org.spongepowered.despector.ast.stmt.invoke.DynamicInvoke;
 import org.spongepowered.despector.ast.stmt.invoke.InstanceMethodInvoke;
+import org.spongepowered.despector.ast.stmt.invoke.Lambda;
+import org.spongepowered.despector.ast.stmt.invoke.MethodReference;
 import org.spongepowered.despector.ast.stmt.invoke.New;
 import org.spongepowered.despector.ast.stmt.invoke.StaticMethodInvoke;
 
@@ -61,7 +62,7 @@ public interface InstructionVisitor extends AstVisitor {
 
     void visitDoubleConstant(DoubleConstant insn);
 
-    void visitDynamicInvoke(DynamicInvoke insn);
+    void visitDynamicInvoke(Lambda insn);
 
     void visitFloatConstant(FloatConstant insn);
 
@@ -102,5 +103,7 @@ public interface InstructionVisitor extends AstVisitor {
     void visitTernary(Ternary insn);
 
     void visitTypeConstant(TypeConstant insn);
+
+    void visitMethodReference(MethodReference methodReference);
 
 }

@@ -46,7 +46,7 @@ import org.spongepowered.despector.ast.insn.var.ArrayAccess;
 import org.spongepowered.despector.ast.insn.var.InstanceFieldAccess;
 import org.spongepowered.despector.ast.insn.var.LocalAccess;
 import org.spongepowered.despector.ast.insn.var.StaticFieldAccess;
-import org.spongepowered.despector.ast.stmt.invoke.DynamicInvoke;
+import org.spongepowered.despector.ast.stmt.invoke.Lambda;
 import org.spongepowered.despector.ast.stmt.invoke.InstanceMethodInvoke;
 import org.spongepowered.despector.ast.stmt.invoke.New;
 import org.spongepowered.despector.ast.stmt.invoke.StaticMethodInvoke;
@@ -100,7 +100,7 @@ public class HexConstantsTransformer implements TypeTransformer {
         }
 
         @Override
-        public void visitDynamicInvoke(DynamicInvoke insn) {
+        public void visitDynamicInvoke(Lambda insn) {
         }
 
         @Override

@@ -65,7 +65,7 @@ import org.spongepowered.despector.ast.stmt.branch.Switch.Case;
 import org.spongepowered.despector.ast.stmt.branch.TryCatch;
 import org.spongepowered.despector.ast.stmt.branch.TryCatch.CatchBlock;
 import org.spongepowered.despector.ast.stmt.branch.While;
-import org.spongepowered.despector.ast.stmt.invoke.DynamicInvoke;
+import org.spongepowered.despector.ast.stmt.invoke.Lambda;
 import org.spongepowered.despector.ast.stmt.invoke.InstanceMethodInvoke;
 import org.spongepowered.despector.ast.stmt.invoke.InvokeStatement;
 import org.spongepowered.despector.ast.stmt.invoke.New;
@@ -126,7 +126,7 @@ public class VerifyVisitor implements TypeVisitor, StatementVisitor, Instruction
     }
 
     @Override
-    public void visitDynamicInvoke(DynamicInvoke insn) {
+    public void visitDynamicInvoke(Lambda insn) {
         // TODO check handle is valid
     }
 

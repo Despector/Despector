@@ -28,7 +28,7 @@ import org.spongepowered.despector.ast.Locals.Local;
 import org.spongepowered.despector.ast.Locals.LocalInstance;
 import org.spongepowered.despector.ast.generic.TypeSignature;
 import org.spongepowered.despector.ast.stmt.StatementBlock;
-import org.spongepowered.despector.ast.stmt.invoke.DynamicInvoke;
+import org.spongepowered.despector.ast.stmt.invoke.Lambda;
 import org.spongepowered.despector.ast.stmt.misc.Return;
 import org.spongepowered.despector.ast.type.MethodEntry;
 import org.spongepowered.despector.ast.type.TypeEntry;
@@ -38,10 +38,10 @@ import org.spongepowered.despector.emitter.java.JavaEmitterContext;
 /**
  * An emitter for a dynamic invoke.
  */
-public class DynamicInvokeEmitter implements InstructionEmitter<JavaEmitterContext, DynamicInvoke> {
+public class DynamicInvokeEmitter implements InstructionEmitter<JavaEmitterContext, Lambda> {
 
     @Override
-    public void emit(JavaEmitterContext ctx, DynamicInvoke arg, TypeSignature type) {
+    public void emit(JavaEmitterContext ctx, Lambda arg, TypeSignature type) {
 
         TypeEntry owner = ctx.getType().getSource().get(arg.getLambdaOwner());
         MethodEntry method = owner.getStaticMethod(arg.getLambdaMethod());

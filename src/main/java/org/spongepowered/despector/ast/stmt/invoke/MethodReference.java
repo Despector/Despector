@@ -36,20 +36,26 @@ import java.io.IOException;
 /**
  * A dynamic method invoke instruction.
  */
-public class DynamicInvoke implements Instruction {
+public class MethodReference implements Instruction {
 
+    private Instruction owner_val;
     private TypeSignature type;
     private String name;
     private String lambda_owner;
     private String lambda_method;
     private String lambda_desc;
 
-    public DynamicInvoke(String owner, String method, String desc, TypeSignature type, String name) {
+    public MethodReference(Instruction owner_val, String owner, String method, String desc, TypeSignature type, String name) {
+        this.owner_val = owner_val;
         this.lambda_owner = owner;
         this.lambda_method = method;
         this.lambda_desc = desc;
         this.type = type;
         this.name = name;
+    }
+
+    public Instruction getOwnerVal() {
+        return this.owner_val;
     }
 
     /**
@@ -95,20 +101,22 @@ public class DynamicInvoke implements Instruction {
     @Override
     public void accept(AstVisitor visitor) {
         if (visitor instanceof InstructionVisitor) {
-            ((InstructionVisitor) visitor).visitDynamicInvoke(this);
+            ((InstructionVisitor) visitor).visitMethodReference(this);
         }
     }
 
     @Override
     public void writeTo(MessagePacker pack) throws IOException {
-        pack.startMap(6);
-        pack.writeString("id").writeInt(AstSerializer.STATEMENT_ID_DYNAMIC_INVOKE);
+        pack.startMap(7);
+        pack.writeString("id").writeInt(AstSerializer.STATEMENT_ID_METHOD_REF);
         pack.writeString("type");
         this.type.writeTo(pack);
         pack.writeString("name").writeString(this.name);
         pack.writeString("owner").writeString(this.lambda_owner);
         pack.writeString("method").writeString(this.lambda_method);
         pack.writeString("desc").writeString(this.lambda_desc);
+        pack.writeString("owner_val");
+        this.owner_val.writeTo(pack);
         pack.endMap();
     }
 

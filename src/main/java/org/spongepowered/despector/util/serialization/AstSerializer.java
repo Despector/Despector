@@ -81,6 +81,7 @@ public final class AstSerializer {
     public static final int STATEMENT_ID_INVOKE = 0x35;
     public static final int STATEMENT_ID_BREAK = 0x36;
     public static final int STATEMENT_ID_MULTI_NEW_ARRAY = 0x37;
+    public static final int STATEMENT_ID_METHOD_REF = 0x38;
 
     public static final int SIGNATURE_ID_TYPEVOID = 0x80;
     public static final int SIGNATURE_ID_TYPECLASS = 0x81;

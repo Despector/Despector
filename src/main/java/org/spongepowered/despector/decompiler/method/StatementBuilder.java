@@ -56,7 +56,7 @@ import org.spongepowered.despector.ast.stmt.assign.FieldAssignment;
 import org.spongepowered.despector.ast.stmt.assign.InstanceFieldAssignment;
 import org.spongepowered.despector.ast.stmt.assign.LocalAssignment;
 import org.spongepowered.despector.ast.stmt.assign.StaticFieldAssignment;
-import org.spongepowered.despector.ast.stmt.invoke.DynamicInvoke;
+import org.spongepowered.despector.ast.stmt.invoke.Lambda;
 import org.spongepowered.despector.ast.stmt.invoke.InstanceMethodInvoke;
 import org.spongepowered.despector.ast.stmt.invoke.InvokeStatement;
 import org.spongepowered.despector.ast.stmt.invoke.New;
@@ -445,7 +445,7 @@ public final class StatementBuilder {
             case Insn.INVOKEDYNAMIC: {
                 InvokeDynamicInsn invoke = (InvokeDynamicInsn) next;
                 TypeSignature type = ClassTypeSignature.of(invoke.getType());
-                DynamicInvoke handle = new DynamicInvoke(invoke.getLambdaOwner(), invoke.getLambdaName(), invoke.getLambdaDescription(),
+                Lambda handle = new Lambda(invoke.getLambdaOwner(), invoke.getLambdaName(), invoke.getLambdaDescription(),
                         type, invoke.getName());
                 stack.push(handle);
                 break;
