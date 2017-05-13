@@ -47,6 +47,7 @@ import org.spongepowered.despector.ast.insn.var.InstanceFieldAccess;
 import org.spongepowered.despector.ast.insn.var.LocalAccess;
 import org.spongepowered.despector.ast.insn.var.StaticFieldAccess;
 import org.spongepowered.despector.ast.stmt.invoke.Lambda;
+import org.spongepowered.despector.ast.stmt.invoke.MethodReference;
 import org.spongepowered.despector.ast.stmt.invoke.InstanceMethodInvoke;
 import org.spongepowered.despector.ast.stmt.invoke.New;
 import org.spongepowered.despector.ast.stmt.invoke.StaticMethodInvoke;
@@ -177,8 +178,10 @@ public class HexConstantsTransformer implements TypeTransformer {
 
         @Override
         public void visitMultiNewArray(MultiNewArray insn) {
-            // TODO Auto-generated method stub
-            
+        }
+
+        @Override
+        public void visitMethodReference(MethodReference methodReference) {
         }
 
     }

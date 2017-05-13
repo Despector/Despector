@@ -66,6 +66,7 @@ import org.spongepowered.despector.ast.stmt.branch.TryCatch;
 import org.spongepowered.despector.ast.stmt.branch.TryCatch.CatchBlock;
 import org.spongepowered.despector.ast.stmt.branch.While;
 import org.spongepowered.despector.ast.stmt.invoke.Lambda;
+import org.spongepowered.despector.ast.stmt.invoke.MethodReference;
 import org.spongepowered.despector.ast.stmt.invoke.InstanceMethodInvoke;
 import org.spongepowered.despector.ast.stmt.invoke.InvokeStatement;
 import org.spongepowered.despector.ast.stmt.invoke.New;
@@ -352,8 +353,6 @@ public class VerifyVisitor implements TypeVisitor, StatementVisitor, Instruction
 
     @Override
     public void visitAnnotation(Annotation annotation) {
-        // TODO Auto-generated method stub
-
     }
 
     @Override
@@ -363,8 +362,6 @@ public class VerifyVisitor implements TypeVisitor, StatementVisitor, Instruction
 
     @Override
     public void visitField(FieldEntry fld) {
-        // TODO Auto-generated method stub
-
     }
 
     @Override
@@ -379,14 +376,14 @@ public class VerifyVisitor implements TypeVisitor, StatementVisitor, Instruction
 
     @Override
     public void visitAnnotationEntry(AnnotationEntry type) {
-        // TODO Auto-generated method stub
-
     }
 
     @Override
     public void visitMultiNewArray(MultiNewArray insn) {
-        // TODO Auto-generated method stub
-        
+    }
+
+    @Override
+    public void visitMethodReference(MethodReference methodReference) {
     }
 
 }

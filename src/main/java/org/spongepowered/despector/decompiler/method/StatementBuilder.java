@@ -57,6 +57,7 @@ import org.spongepowered.despector.ast.stmt.assign.InstanceFieldAssignment;
 import org.spongepowered.despector.ast.stmt.assign.LocalAssignment;
 import org.spongepowered.despector.ast.stmt.assign.StaticFieldAssignment;
 import org.spongepowered.despector.ast.stmt.invoke.Lambda;
+import org.spongepowered.despector.ast.stmt.invoke.MethodReference;
 import org.spongepowered.despector.ast.stmt.invoke.InstanceMethodInvoke;
 import org.spongepowered.despector.ast.stmt.invoke.InvokeStatement;
 import org.spongepowered.despector.ast.stmt.invoke.New;
@@ -445,9 +446,15 @@ public final class StatementBuilder {
             case Insn.INVOKEDYNAMIC: {
                 InvokeDynamicInsn invoke = (InvokeDynamicInsn) next;
                 TypeSignature type = ClassTypeSignature.of(invoke.getType());
-                Lambda handle = new Lambda(invoke.getLambdaOwner(), invoke.getLambdaName(), invoke.getLambdaDescription(),
-                        type, invoke.getName());
-                stack.push(handle);
+                if (invoke.isInterface()) {
+                    MethodReference handle = new MethodReference(stack.pop(), invoke.getLambdaOwner(), invoke.getLambdaName(),
+                            invoke.getLambdaDescription(), type, invoke.getName());
+                    stack.push(handle);
+                } else {
+                    Lambda handle = new Lambda(invoke.getLambdaOwner(), invoke.getLambdaName(), invoke.getLambdaDescription(),
+                            type, invoke.getName());
+                    stack.push(handle);
+                }
                 break;
             }
             case Insn.NEW: {

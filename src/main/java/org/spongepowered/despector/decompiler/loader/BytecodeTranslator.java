@@ -549,25 +549,25 @@ public class BytecodeTranslator {
             case 178: { // GETSTATIC
                 int index = ((code[i++] & 0xFF) << 8) | (code[i++] & 0xFF);
                 FieldRefEntry ref = pool.getFieldRef(index);
-                block.append(new FieldInsn(Insn.GETSTATIC, ref.cls, ref.name, ref.type));
+                block.append(new FieldInsn(Insn.GETSTATIC, ref.cls, ref.name, ref.type_name));
                 break;
             }
             case 179: { // PUTSTATIC
                 int index = ((code[i++] & 0xFF) << 8) | (code[i++] & 0xFF);
                 FieldRefEntry ref = pool.getFieldRef(index);
-                block.append(new FieldInsn(Insn.PUTSTATIC, ref.cls, ref.name, ref.type));
+                block.append(new FieldInsn(Insn.PUTSTATIC, ref.cls, ref.name, ref.type_name));
                 break;
             }
             case 180: { // GETFIELD
                 int index = ((code[i++] & 0xFF) << 8) | (code[i++] & 0xFF);
                 FieldRefEntry ref = pool.getFieldRef(index);
-                block.append(new FieldInsn(Insn.GETFIELD, ref.cls, ref.name, ref.type));
+                block.append(new FieldInsn(Insn.GETFIELD, ref.cls, ref.name, ref.type_name));
                 break;
             }
             case 181: { // PUTFIELD
                 int index = ((code[i++] & 0xFF) << 8) | (code[i++] & 0xFF);
                 FieldRefEntry ref = pool.getFieldRef(index);
-                block.append(new FieldInsn(Insn.PUTFIELD, ref.cls, ref.name, ref.type));
+                block.append(new FieldInsn(Insn.PUTFIELD, ref.cls, ref.name, ref.type_name));
                 break;
             }
             case 182: // INVOKEVIRTUAL
@@ -575,13 +575,13 @@ public class BytecodeTranslator {
                 int index = ((code[i++] & 0xFF) << 8) | (code[i++] & 0xFF);
                 MethodRefEntry ref = pool.getMethodRef(index);
                 InstanceMethodInvoke.Type t = next == 182 ? InstanceMethodInvoke.Type.VIRTUAL : InstanceMethodInvoke.Type.SPECIAL;
-                block.append(new InvokeInsn(Insn.INVOKE, t, ref.cls, ref.name, ref.type));
+                block.append(new InvokeInsn(Insn.INVOKE, t, ref.cls, ref.name, ref.type_name));
                 break;
             }
             case 184: { // INVOKESTATIC
                 int index = ((code[i++] & 0xFF) << 8) | (code[i++] & 0xFF);
                 MethodRefEntry ref = pool.getMethodRef(index);
-                block.append(new InvokeInsn(Insn.INVOKESTATIC, null, ref.cls, ref.name, ref.type));
+                block.append(new InvokeInsn(Insn.INVOKESTATIC, null, ref.cls, ref.name, ref.type_name));
                 break;
             }
             case 185: {// INVOKEINTERFACE
@@ -589,7 +589,7 @@ public class BytecodeTranslator {
                 // skip count and constant 0 (historical)
                 i += 2;
                 MethodRefEntry ref = pool.getInterfaceMethodRef(index);
-                block.append(new InvokeInsn(Insn.INVOKE, InstanceMethodInvoke.Type.INTERFACE, ref.cls, ref.name, ref.type));
+                block.append(new InvokeInsn(Insn.INVOKE, InstanceMethodInvoke.Type.INTERFACE, ref.cls, ref.name, ref.type_name));
                 break;
             }
             case 186: {// INVOKEDYNAMIC
@@ -599,7 +599,8 @@ public class BytecodeTranslator {
                 InvokeDynamicEntry handle = pool.getInvokeDynamic(index);
                 BootstrapMethod bsm = bootstrap_methods.get(handle.bootstrap_index);
                 MethodRefEntry bsmArg = pool.getMethodRef(((MethodHandleEntry) bsm.arguments[1]).reference_index);
-                block.append(new InvokeDynamicInsn(Insn.INVOKEDYNAMIC, bsmArg.cls, bsmArg.name, bsmArg.type, handle.name, handle.type));
+                block.append(new InvokeDynamicInsn(Insn.INVOKEDYNAMIC, bsmArg.cls, bsmArg.name, bsmArg.type_name, handle.name, handle.type_name,
+                        bsmArg.type == ClassConstantPool.EntryType.INTERFACE_METHOD_REF));
                 break;
             }
             case 187: {// NEW

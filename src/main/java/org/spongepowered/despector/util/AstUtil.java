@@ -49,6 +49,7 @@ import org.spongepowered.despector.ast.insn.var.LocalAccess;
 import org.spongepowered.despector.ast.insn.var.StaticFieldAccess;
 import org.spongepowered.despector.ast.stmt.Statement;
 import org.spongepowered.despector.ast.stmt.invoke.Lambda;
+import org.spongepowered.despector.ast.stmt.invoke.MethodReference;
 import org.spongepowered.despector.ast.stmt.invoke.InstanceMethodInvoke;
 import org.spongepowered.despector.ast.stmt.invoke.New;
 import org.spongepowered.despector.ast.stmt.invoke.StaticMethodInvoke;
@@ -415,7 +416,10 @@ public final class AstUtil {
 
         @Override
         public void visitMultiNewArray(MultiNewArray insn) {
-            
+        }
+
+        @Override
+        public void visitMethodReference(MethodReference methodReference) {
         }
 
     }

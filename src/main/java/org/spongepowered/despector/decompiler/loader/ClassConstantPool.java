@@ -230,27 +230,27 @@ public class ClassConstantPool {
                 FieldRefEntry f = (FieldRefEntry) e;
                 f.cls = getUtf8(getClass(f.class_index).name_index);
                 f.name = getUtf8(getNameAndType(f.name_and_type_index).name_index);
-                f.type = getUtf8(getNameAndType(f.name_and_type_index).type_index);
+                f.type_name = getUtf8(getNameAndType(f.name_and_type_index).type_index);
                 break;
             }
             case METHOD_REF: {
                 MethodRefEntry f = (MethodRefEntry) e;
                 f.cls = getUtf8(getClass(f.class_index).name_index);
                 f.name = getUtf8(getNameAndType(f.name_and_type_index).name_index);
-                f.type = getUtf8(getNameAndType(f.name_and_type_index).type_index);
+                f.type_name = getUtf8(getNameAndType(f.name_and_type_index).type_index);
                 break;
             }
             case INTERFACE_METHOD_REF: {
                 MethodRefEntry f = (MethodRefEntry) e;
                 f.cls = getUtf8(getClass(f.class_index).name_index);
                 f.name = getUtf8(getNameAndType(f.name_and_type_index).name_index);
-                f.type = getUtf8(getNameAndType(f.name_and_type_index).type_index);
+                f.type_name = getUtf8(getNameAndType(f.name_and_type_index).type_index);
                 break;
             }
             case NAME_AND_TYPE: {
                 NameAndTypeEntry n = (NameAndTypeEntry) e;
                 n.name = getUtf8(n.name_index);
-                n.type = getUtf8(n.type_index);
+                n.type_name = getUtf8(n.type_index);
                 break;
             }
             case METHOD_HANDLE:
@@ -263,7 +263,7 @@ public class ClassConstantPool {
             case INVOKE_DYNAMIC: {
                 InvokeDynamicEntry f = (InvokeDynamicEntry) e;
                 f.name = getUtf8(getNameAndType(f.name_and_type_index).name_index);
-                f.type = getUtf8(getNameAndType(f.name_and_type_index).type_index);
+                f.type_name = getUtf8(getNameAndType(f.name_and_type_index).type_index);
                 break;
             }
             default:
@@ -372,7 +372,7 @@ public class ClassConstantPool {
         public int type_index;
 
         public String name;
-        public String type;
+        public String type_name;
     }
 
     public static class FieldRefEntry extends Entry {
@@ -382,7 +382,7 @@ public class ClassConstantPool {
 
         public String cls;
         public String name;
-        public String type;
+        public String type_name;
     }
 
     public static class MethodRefEntry extends Entry {
@@ -392,7 +392,7 @@ public class ClassConstantPool {
 
         public String cls;
         public String name;
-        public String type;
+        public String type_name;
     }
 
     public static class MethodHandleEntry extends Entry {
@@ -414,10 +414,10 @@ public class ClassConstantPool {
         public int name_and_type_index;
 
         public String name;
-        public String type;
+        public String type_name;
     }
 
-    private static enum EntryType {
+    public static enum EntryType {
         _0,
         UTF8,
         _2,

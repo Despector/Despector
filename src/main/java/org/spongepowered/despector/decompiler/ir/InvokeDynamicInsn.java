@@ -33,14 +33,16 @@ public class InvokeDynamicInsn extends Insn {
     private String lambda_desc;
     private String name;
     private String type;
+    private boolean is_interface;
 
-    public InvokeDynamicInsn(int op, String lambda_owner, String lambda_name, String lambda_desc, String name, String type) {
+    public InvokeDynamicInsn(int op, String lambda_owner, String lambda_name, String lambda_desc, String name, String type, boolean intr) {
         super(op);
         this.lambda_owner = lambda_owner;
         this.lambda_name = lambda_name;
         this.lambda_desc = lambda_desc;
         this.name = name;
         this.type = type;
+        this.is_interface = intr;
     }
 
     public String getLambdaOwner() {
@@ -61,6 +63,10 @@ public class InvokeDynamicInsn extends Insn {
 
     public String getType() {
         return this.type;
+    }
+
+    public boolean isInterface() {
+        return this.is_interface;
     }
 
     @Override
