@@ -24,61 +24,41 @@
  */
 package org.spongepowered.despector.transform.matcher.statement;
 
-import org.spongepowered.despector.ast.generic.TypeSignature;
-import org.spongepowered.despector.ast.insn.Instruction;
-import org.spongepowered.despector.ast.insn.misc.Cast;
 import org.spongepowered.despector.ast.stmt.Statement;
-import org.spongepowered.despector.ast.stmt.assign.LocalAssignment;
+import org.spongepowered.despector.ast.stmt.invoke.InvokeStatement;
 import org.spongepowered.despector.transform.matcher.InstructionMatcher;
 import org.spongepowered.despector.transform.matcher.MatchContext;
 import org.spongepowered.despector.transform.matcher.StatementMatcher;
 
 /**
- * A matcher for local assignments.
+ * A matcher for increment statements.
  */
-public class LocalAssignmentMatcher implements StatementMatcher<LocalAssignment> {
+public class InvokeMatcher implements StatementMatcher<InvokeStatement> {
 
     private InstructionMatcher<?> value;
-    private boolean unwrap;
-    private TypeSignature type;
 
-    LocalAssignmentMatcher(InstructionMatcher<?> value, TypeSignature type, boolean unwrap) {
-        this.value = value == null ? InstructionMatcher.ANY : value;
-        this.type = type;
-        this.unwrap = unwrap;
-    }
-
-    public InstructionMatcher<?> getValueMatcher() {
-        return this.value;
+    InvokeMatcher(InstructionMatcher<?> value) {
+        this.value = value;
     }
 
     @Override
-    public LocalAssignment match(MatchContext ctx, Statement stmt) {
-        if (!(stmt instanceof LocalAssignment)) {
+    public InvokeStatement match(MatchContext ctx, Statement insn) {
+        if (!(insn instanceof InvokeStatement)) {
             return null;
         }
-        LocalAssignment assign = (LocalAssignment) stmt;
-        Instruction val = assign.getValue();
-        if (this.unwrap && val instanceof Cast) {
-            val = ((Cast) val).getValue();
-        }
-        if (!this.value.matches(ctx, val)) {
+        InvokeStatement invoke = (InvokeStatement) insn;
+        if (!this.value.matches(ctx, invoke.getInstruction())) {
             return null;
         }
-        if (this.type != null && !this.type.equals(assign.getLocal().getType())) {
-            return null;
-        }
-        return assign;
+        return invoke;
     }
 
     /**
-     * A matcher builder.
+     * A builder for increment matchers.
      */
     public static class Builder {
 
         private InstructionMatcher<?> value;
-        private TypeSignature type;
-        private boolean unwrap;
 
         public Builder() {
             reset();
@@ -89,28 +69,13 @@ public class LocalAssignmentMatcher implements StatementMatcher<LocalAssignment>
             return this;
         }
 
-        public Builder type(TypeSignature type) {
-            this.type = type;
-            return this;
-        }
-
-        public Builder autoUnwrap() {
-            this.unwrap = true;
-            return this;
-        }
-
-        /**
-         * Resets this builder.
-         */
         public Builder reset() {
             this.value = null;
-            this.type = null;
-            this.unwrap = false;
             return this;
         }
 
-        public LocalAssignmentMatcher build() {
-            return new LocalAssignmentMatcher(this.value, this.type, this.unwrap);
+        public InvokeMatcher build() {
+            return new InvokeMatcher(this.value);
         }
 
     }

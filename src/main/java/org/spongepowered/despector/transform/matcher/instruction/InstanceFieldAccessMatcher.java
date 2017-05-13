@@ -32,13 +32,13 @@ import org.spongepowered.despector.transform.matcher.MatchContext;
 /**
  * A matcher for instance field accesses.
  */
-public class InstanceFieldMatcher implements InstructionMatcher<InstanceFieldAccess> {
+public class InstanceFieldAccessMatcher implements InstructionMatcher<InstanceFieldAccess> {
 
     private InstructionMatcher<?> owner;
     private String name;
     private String desc;
 
-    InstanceFieldMatcher(InstructionMatcher<?> callee, String name, String desc) {
+    InstanceFieldAccessMatcher(InstructionMatcher<?> callee, String name, String desc) {
         this.owner = callee == null ? InstructionMatcher.ANY : callee;
         this.name = name;
         this.desc = desc;
@@ -100,8 +100,8 @@ public class InstanceFieldMatcher implements InstructionMatcher<InstanceFieldAcc
             return this;
         }
 
-        public InstanceFieldMatcher build() {
-            return new InstanceFieldMatcher(this.callee, this.name, this.desc);
+        public InstanceFieldAccessMatcher build() {
+            return new InstanceFieldAccessMatcher(this.callee, this.name, this.desc);
         }
 
     }

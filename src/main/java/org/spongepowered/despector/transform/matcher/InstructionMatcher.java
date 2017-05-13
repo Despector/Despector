@@ -28,11 +28,13 @@ import org.spongepowered.despector.ast.insn.Instruction;
 import org.spongepowered.despector.ast.insn.misc.Cast;
 import org.spongepowered.despector.ast.stmt.invoke.InstanceMethodInvoke;
 import org.spongepowered.despector.transform.matcher.instruction.ArrayAccessMatcher;
-import org.spongepowered.despector.transform.matcher.instruction.InstanceFieldMatcher;
-import org.spongepowered.despector.transform.matcher.instruction.InstanceInvokeMatcher;
+import org.spongepowered.despector.transform.matcher.instruction.InstanceFieldAccessMatcher;
+import org.spongepowered.despector.transform.matcher.instruction.InstanceMethodInvokeMatcher;
 import org.spongepowered.despector.transform.matcher.instruction.IntConstantMatcher;
 import org.spongepowered.despector.transform.matcher.instruction.LocalAccessMatcher;
+import org.spongepowered.despector.transform.matcher.instruction.StaticFieldAccessMatcher;
 import org.spongepowered.despector.transform.matcher.instruction.StaticInvokeMatcher;
+import org.spongepowered.despector.transform.matcher.instruction.StringConstantMatcher;
 
 import javax.annotation.Nullable;
 
@@ -73,16 +75,16 @@ public interface InstructionMatcher<T extends Instruction> {
         return new StaticInvokeMatcher.Builder();
     }
 
-    public static InstanceInvokeMatcher.Builder instanceInvoke() {
-        return new InstanceInvokeMatcher.Builder();
+    public static InstanceMethodInvokeMatcher.Builder instanceMethodInvoke() {
+        return new InstanceMethodInvokeMatcher.Builder();
     }
 
     public static LocalAccessMatcher.Builder localAccess() {
         return new LocalAccessMatcher.Builder();
     }
 
-    public static InstanceFieldMatcher.Builder instanceField() {
-        return new InstanceFieldMatcher.Builder();
+    public static InstanceFieldAccessMatcher.Builder instanceFieldAccess() {
+        return new InstanceFieldAccessMatcher.Builder();
     }
 
     public static IntConstantMatcher.Builder intConstant() {
@@ -91,6 +93,14 @@ public interface InstructionMatcher<T extends Instruction> {
 
     public static ArrayAccessMatcher.Builder arrayAccess() {
         return new ArrayAccessMatcher.Builder();
+    }
+
+    public static StaticFieldAccessMatcher.Builder staticFieldAccess() {
+        return new StaticFieldAccessMatcher.Builder();
+    }
+
+    public static StringConstantMatcher.Builder stringConstant() {
+        return new StringConstantMatcher.Builder();
     }
 
     /**

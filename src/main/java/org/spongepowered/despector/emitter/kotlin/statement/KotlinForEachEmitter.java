@@ -41,12 +41,12 @@ import org.spongepowered.despector.transform.matcher.StatementMatcher;
 public class KotlinForEachEmitter implements StatementEmitter<JavaEmitterContext, ForEach> {
 
     private static final StatementMatcher<ForEach> MAP_ITERATOR = MatchContext.storeLocal("loop_value", StatementMatcher.forEach()
-            .value(InstructionMatcher.instanceInvoke()
+            .value(InstructionMatcher.instanceMethodInvoke()
                     .name("entrySet")
                     .desc("()Ljava/lang/Set;")
                     .build())
             .body(0, StatementMatcher.localAssign()
-                    .value(InstructionMatcher.instanceInvoke()
+                    .value(InstructionMatcher.instanceMethodInvoke()
                             .name("getKey")
                             .desc("()Ljava/lang/Object;")
                             .callee(InstructionMatcher.localAccess()
@@ -56,7 +56,7 @@ public class KotlinForEachEmitter implements StatementEmitter<JavaEmitterContext
                             .build())
                     .build())
             .body(1, StatementMatcher.localAssign()
-                    .value(InstructionMatcher.instanceInvoke()
+                    .value(InstructionMatcher.instanceMethodInvoke()
                             .name("getValue")
                             .desc("()Ljava/lang/Object;")
                             .callee(InstructionMatcher.localAccess()

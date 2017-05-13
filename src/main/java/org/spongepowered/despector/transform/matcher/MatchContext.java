@@ -78,7 +78,7 @@ public class MatchContext {
      * <p>Only the local assigned to in a {@link LocalAssignment} or the loop
      * local of a {@link ForEach} loop is supported.</p>
      */
-    private static class LocalStoreMatcher<T extends Statement> implements StatementMatcher<T> {
+    public static class LocalStoreMatcher<T extends Statement> implements StatementMatcher<T> {
 
         private String identifier;
         private StatementMatcher<T> internal;
@@ -86,6 +86,10 @@ public class MatchContext {
         public LocalStoreMatcher(String identifier, StatementMatcher<T> inner) {
             this.identifier = identifier;
             this.internal = inner;
+        }
+
+        public StatementMatcher<T> getInternalMatcher() {
+            return this.internal;
         }
 
         @Override

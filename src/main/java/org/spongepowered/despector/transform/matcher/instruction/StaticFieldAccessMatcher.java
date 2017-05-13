@@ -24,50 +24,40 @@
  */
 package org.spongepowered.despector.transform.matcher.instruction;
 
+import org.spongepowered.despector.ast.generic.ClassTypeSignature;
 import org.spongepowered.despector.ast.insn.Instruction;
-import org.spongepowered.despector.ast.stmt.invoke.InstanceMethodInvoke;
+import org.spongepowered.despector.ast.insn.var.StaticFieldAccess;
 import org.spongepowered.despector.transform.matcher.InstructionMatcher;
 import org.spongepowered.despector.transform.matcher.MatchContext;
 
 /**
- * A matcher for instance method invokes.
+ * A matcher for instance field accesses.
  */
-public class InstanceInvokeMatcher implements InstructionMatcher<InstanceMethodInvoke> {
+public class StaticFieldAccessMatcher implements InstructionMatcher<StaticFieldAccess> {
 
-    private InstructionMatcher<?> callee;
-    private boolean unwrap;
-    private String owner;
+    private ClassTypeSignature owner;
     private String name;
     private String desc;
 
-    InstanceInvokeMatcher(InstructionMatcher<?> callee, String owner, String name, String desc, boolean unwrap) {
-        this.callee = callee == null ? InstructionMatcher.ANY : callee;
-        this.owner = owner;
+    StaticFieldAccessMatcher(ClassTypeSignature callee, String name, String desc) {
+        this.owner = callee;
         this.name = name;
         this.desc = desc;
-        this.unwrap = unwrap;
     }
 
     @Override
-    public InstanceMethodInvoke match(MatchContext ctx, Instruction insn) {
-        if (!(insn instanceof InstanceMethodInvoke)) {
+    public StaticFieldAccess match(MatchContext ctx, Instruction insn) {
+        if (!(insn instanceof StaticFieldAccess)) {
             return null;
         }
-        InstanceMethodInvoke invoke = (InstanceMethodInvoke) insn;
-        if (this.owner != null && !this.owner.equals(invoke.getOwner())) {
+        StaticFieldAccess invoke = (StaticFieldAccess) insn;
+        if (this.name != null && !this.name.equals(invoke.getFieldName())) {
             return null;
         }
-        if (this.name != null && !this.name.equals(invoke.getMethodName())) {
+        if (this.desc != null && !this.desc.equals(invoke.getTypeDescriptor())) {
             return null;
         }
-        if (this.desc != null && !this.desc.equals(invoke.getMethodDescription())) {
-            return null;
-        }
-        Instruction callee = invoke.getCallee();
-        if (this.unwrap) {
-            callee = InstructionMatcher.unwrapCast(callee);
-        }
-        if (!this.callee.matches(ctx, callee)) {
+        if (this.owner != null && !this.owner.getDescriptor().equals(invoke.getOwnerType())) {
             return null;
         }
         return invoke;
@@ -78,22 +68,15 @@ public class InstanceInvokeMatcher implements InstructionMatcher<InstanceMethodI
      */
     public static class Builder {
 
-        private InstructionMatcher<?> callee;
-        private String owner;
+        private ClassTypeSignature owner;
         private String name;
         private String desc;
-        private boolean unwrap;
 
         public Builder() {
             reset();
         }
 
-        public Builder callee(InstructionMatcher<?> callee) {
-            this.callee = callee;
-            return this;
-        }
-
-        public Builder owner(String owner) {
+        public Builder owner(ClassTypeSignature owner) {
             this.owner = owner;
             return this;
         }
@@ -108,25 +91,18 @@ public class InstanceInvokeMatcher implements InstructionMatcher<InstanceMethodI
             return this;
         }
 
-        public Builder autoUnwrap() {
-            this.unwrap = true;
-            return this;
-        }
-
         /**
          * Resets this builder.
          */
         public Builder reset() {
-            this.callee = null;
             this.owner = null;
             this.name = null;
             this.desc = null;
-            this.unwrap = false;
             return this;
         }
 
-        public InstanceInvokeMatcher build() {
-            return new InstanceInvokeMatcher(this.callee, this.owner, this.name, this.desc, this.unwrap);
+        public StaticFieldAccessMatcher build() {
+            return new StaticFieldAccessMatcher(this.owner, this.name, this.desc);
         }
 
     }

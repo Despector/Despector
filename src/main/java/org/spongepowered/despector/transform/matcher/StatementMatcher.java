@@ -29,6 +29,7 @@ import org.spongepowered.despector.transform.matcher.statement.ForEachMatcher;
 import org.spongepowered.despector.transform.matcher.statement.ForLoopMatcher;
 import org.spongepowered.despector.transform.matcher.statement.IncrementMatcher;
 import org.spongepowered.despector.transform.matcher.statement.InstanceFieldAssignmentMatcher;
+import org.spongepowered.despector.transform.matcher.statement.InvokeMatcher;
 import org.spongepowered.despector.transform.matcher.statement.LocalAssignmentMatcher;
 import org.spongepowered.despector.transform.matcher.statement.StaticFieldAssignmentMatcher;
 import org.spongepowered.despector.transform.matcher.statement.WhileLoopMatcher;
@@ -99,6 +100,10 @@ public interface StatementMatcher<T extends Statement> {
 
     static InstanceFieldAssignmentMatcher.Builder instanceFieldAssign() {
         return new InstanceFieldAssignmentMatcher.Builder();
+    }
+
+    static InvokeMatcher.Builder invoke() {
+        return new InvokeMatcher.Builder();
     }
 
     /**
