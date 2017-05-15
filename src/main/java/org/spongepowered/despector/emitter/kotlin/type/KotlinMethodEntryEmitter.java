@@ -235,7 +235,7 @@ public class KotlinMethodEntryEmitter extends MethodEntryEmitter {
             if (!(stmt instanceof If)) {
                 continue;
             }
-            LocalAssignment assign = (LocalAssignment) ((If) stmt).getIfBody().getStatement(0);
+            LocalAssignment assign = (LocalAssignment) ((If) stmt).getBody().getStatement(0);
             def.add(assign.getValue());
         }
         return def;

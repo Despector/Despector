@@ -46,9 +46,9 @@ public class IfEmitter implements StatementEmitter<JavaEmitterContext, If> {
         ctx.printString(" ", ctx.getFormat().insert_space_before_closing_paren_in_if);
         ctx.printString(") {");
         ctx.newLine();
-        if (!insn.getIfBody().getStatements().isEmpty()) {
+        if (!insn.getBody().getStatements().isEmpty()) {
             ctx.indent();
-            ctx.emitBody(insn.getIfBody());
+            ctx.emitBody(insn.getBody());
             ctx.dedent();
             ctx.newLine();
         }
@@ -71,7 +71,7 @@ public class IfEmitter implements StatementEmitter<JavaEmitterContext, If> {
         if (else_ == null) {
             ctx.printString("}");
         } else {
-            StatementBlock else_block = else_.getElseBody();
+            StatementBlock else_block = else_.getBody();
             if (ctx.getFormat().insert_new_line_before_else_in_if_statement) {
                 ctx.printString("}");
                 ctx.newIndentedLine();

@@ -115,7 +115,7 @@ public class KotlinDataClassEmitter implements SpecialEmitter {
                 if (!(stmt instanceof If)) {
                     continue;
                 }
-                LocalAssignment assign = (LocalAssignment) ((If) stmt).getIfBody().getStatement(0);
+                LocalAssignment assign = (LocalAssignment) ((If) stmt).getBody().getStatement(0);
                 fields_ordered[assign.getLocal().getIndex() - 1].default_val = assign.getValue();
             }
         }

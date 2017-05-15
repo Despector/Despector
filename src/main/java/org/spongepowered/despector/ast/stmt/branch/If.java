@@ -73,7 +73,7 @@ public class If implements Statement {
     /**
      * Gets the body of the if statement.
      */
-    public StatementBlock getIfBody() {
+    public StatementBlock getBody() {
         return this.block;
     }
 
@@ -158,8 +158,8 @@ public class If implements Statement {
         pack.endArray();
         pack.writeString("else");
         if (this.else_block != null) {
-            pack.startArray(this.else_block.getElseBody().getStatementCount());
-            for (Statement stmt : this.else_block.getElseBody().getStatements()) {
+            pack.startArray(this.else_block.getBody().getStatementCount());
+            for (Statement stmt : this.else_block.getBody().getStatements()) {
                 stmt.writeTo(pack);
             }
             pack.endArray();
@@ -318,14 +318,14 @@ public class If implements Statement {
         /**
          * Gets the body of this block.
          */
-        public StatementBlock getElseBody() {
+        public StatementBlock getBody() {
             return this.block;
         }
 
         /**
          * Sets the body of this block.
          */
-        public void setElseBody(StatementBlock block) {
+        public void setBody(StatementBlock block) {
             this.block = checkNotNull(block, "block");
         }
 

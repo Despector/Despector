@@ -76,20 +76,20 @@ public class IfCombiningPostProcessor implements StatementPostProcessor {
      */
     public void check(If ifblock) {
         if (ifblock.getElifBlocks().isEmpty() && ifblock.getElseBlock() == null) {
-            StatementBlock block = ifblock.getIfBody();
+            StatementBlock block = ifblock.getBody();
             if (block.getStatementCount() == 1 && block.getStatement(0) instanceof If) {
                 If inner = (If) block.getStatement(0);
                 if (inner.getElifBlocks().isEmpty() && inner.getElseBlock() == null) {
                     ifblock.setCondition(new AndCondition(ifblock.getCondition(), inner.getCondition()));
                     block.getStatements().clear();
-                    for (Statement stmt : inner.getIfBody().getStatements()) {
+                    for (Statement stmt : inner.getBody().getStatements()) {
                         block.append(stmt);
                     }
                     check(ifblock);
                 }
             }
         }
-        postprocess(ifblock.getIfBody());
+        postprocess(ifblock.getBody());
         if (!ifblock.getElifBlocks().isEmpty()) {
             for (int i = 0; i < ifblock.getElifBlocks().size() - 1; i++) {
                 postprocess(ifblock.getElifBlocks().get(i).getBody());
@@ -102,7 +102,7 @@ public class IfCombiningPostProcessor implements StatementPostProcessor {
                     if (inner.getElifBlocks().isEmpty() && inner.getElseBlock() == null) {
                         last_elif.setCondition(new AndCondition(last_elif.getCondition(), inner.getCondition()));
                         block.getStatements().clear();
-                        for (Statement stmt : inner.getIfBody().getStatements()) {
+                        for (Statement stmt : inner.getBody().getStatements()) {
                             block.append(stmt);
                         }
                     }
@@ -111,11 +111,11 @@ public class IfCombiningPostProcessor implements StatementPostProcessor {
             postprocess(block);
         }
         if (ifblock.getElseBlock() != null) {
-            StatementBlock block = ifblock.getElseBlock().getElseBody();
+            StatementBlock block = ifblock.getElseBlock().getBody();
             if (block.getStatementCount() == 1 && block.getStatement(0) instanceof If) {
                 If inner = (If) block.getStatement(0);
-                ifblock.new Elif(inner.getCondition(), inner.getIfBody());
-                postprocess(inner.getIfBody());
+                ifblock.new Elif(inner.getCondition(), inner.getBody());
+                postprocess(inner.getBody());
                 for (int i = 0; i < inner.getElifBlocks().size(); i++) {
                     Elif elif = inner.getElifBlocks().get(i);
                     postprocess(elif.getBody());
@@ -123,7 +123,7 @@ public class IfCombiningPostProcessor implements StatementPostProcessor {
                 }
                 block.getStatements().clear();
                 if (inner.getElseBlock() != null) {
-                    block.getStatements().addAll(inner.getElseBlock().getElseBody().getStatements());
+                    block.getStatements().addAll(inner.getElseBlock().getBody().getStatements());
                 } else {
                     ifblock.setElseBlock(null);
                 }

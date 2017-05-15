@@ -27,10 +27,12 @@ package org.spongepowered.despector.transform.matcher;
 import org.spongepowered.despector.ast.stmt.Statement;
 import org.spongepowered.despector.transform.matcher.statement.ForEachMatcher;
 import org.spongepowered.despector.transform.matcher.statement.ForLoopMatcher;
+import org.spongepowered.despector.transform.matcher.statement.IfMatcher;
 import org.spongepowered.despector.transform.matcher.statement.IncrementMatcher;
 import org.spongepowered.despector.transform.matcher.statement.InstanceFieldAssignmentMatcher;
 import org.spongepowered.despector.transform.matcher.statement.InvokeMatcher;
 import org.spongepowered.despector.transform.matcher.statement.LocalAssignmentMatcher;
+import org.spongepowered.despector.transform.matcher.statement.ReturnValueMatcher;
 import org.spongepowered.despector.transform.matcher.statement.StaticFieldAssignmentMatcher;
 import org.spongepowered.despector.transform.matcher.statement.WhileLoopMatcher;
 
@@ -104,6 +106,14 @@ public interface StatementMatcher<T extends Statement> {
 
     static InvokeMatcher.Builder invoke() {
         return new InvokeMatcher.Builder();
+    }
+
+    static IfMatcher.Builder ifThen() {
+        return new IfMatcher.Builder();
+    }
+
+    static ReturnValueMatcher.Builder returnValue() {
+        return new ReturnValueMatcher.Builder();
     }
 
     /**

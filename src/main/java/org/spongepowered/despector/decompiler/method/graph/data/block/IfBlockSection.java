@@ -136,12 +136,12 @@ public class IfBlockSection extends BlockSection {
 
             if (else_body.getStatements().size() == 1 && else_body.getStatements().get(0) instanceof If) {
                 If internal_if = (If) else_body.getStatements().get(0);
-                iff.new Elif(internal_if.getCondition(), internal_if.getIfBody());
+                iff.new Elif(internal_if.getCondition(), internal_if.getBody());
                 for (Elif el : internal_if.getElifBlocks()) {
                     iff.new Elif(el.getCondition(), el.getBody());
                 }
                 if (internal_if.getElseBlock() != null) {
-                    iff.new Else(internal_if.getElseBlock().getElseBody());
+                    iff.new Else(internal_if.getElseBlock().getBody());
                 }
             } else {
                 iff.new Else(else_body);

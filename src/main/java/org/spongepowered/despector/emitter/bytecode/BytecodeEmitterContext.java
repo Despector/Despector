@@ -25,10 +25,17 @@
 package org.spongepowered.despector.emitter.bytecode;
 
 import com.google.common.base.Throwables;
+import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.MethodVisitor;
+import org.objectweb.asm.tree.AbstractInsnNode;
+import org.objectweb.asm.tree.ClassNode;
+import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.util.CheckClassAdapter;
+import org.objectweb.asm.util.Printer;
+import org.objectweb.asm.util.Textifier;
+import org.objectweb.asm.util.TraceMethodVisitor;
 import org.spongepowered.despector.ast.AstEntry;
 import org.spongepowered.despector.ast.generic.TypeSignature;
 import org.spongepowered.despector.ast.insn.Instruction;
@@ -43,10 +50,15 @@ import org.spongepowered.despector.emitter.StatementEmitter;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.util.Iterator;
+import java.util.List;
 
 public class BytecodeEmitterContext extends AbstractEmitterContext {
 
     private static final boolean VERIFY_EMITTED_BYTECODE = Boolean.valueOf(System.getProperty("despect.bytecode.verify", "true"));
+    private static final boolean DUMP_INSTRUCTIONS_AFTER_WRITE = Boolean.getBoolean("despect.bytecode.dump_instructions");
 
     private final OutputStream out;
 
@@ -86,8 +98,32 @@ public class BytecodeEmitterContext extends AbstractEmitterContext {
         }
         emitter.emit(this, ast);
         this.cw.visitEnd();
+        byte[] clazz = writer.toByteArray();
+        if (DUMP_INSTRUCTIONS_AFTER_WRITE) {
+            ClassReader cr = new ClassReader(clazz);
+            ClassNode cn = new ClassNode();
+            cr.accept(cn, 0);
+            List<MethodNode> methods = cn.methods;
+            for (MethodNode mn : methods) {
+                System.out.println("Method: " + mn.name + mn.desc);
+                Printer printer = new Textifier();
+                TraceMethodVisitor mp = new TraceMethodVisitor(printer);
+                for (Iterator<AbstractInsnNode> it = mn.instructions.iterator(); it.hasNext();) {
+                    AbstractInsnNode insn = it.next();
+                    insn.accept(mp);
+                }
+                StringWriter sw = new StringWriter();
+                printer.print(new PrintWriter(sw));
+                String s = sw.toString();
+                if (s.endsWith("\n")) {
+                    s = s.substring(0, s.length() - 1);
+                }
+                System.out.println(s);
+                mn.instructions.accept(mp);
+            }
+        }
         try {
-            this.out.write(writer.toByteArray());
+            this.out.write(clazz);
         } catch (IOException e) {
             Throwables.propagate(e);
         }

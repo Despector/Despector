@@ -122,12 +122,12 @@ public class ForEachPostProcessor implements StatementPostProcessor {
         for (Statement stmt : block.getStatements()) {
             if (stmt instanceof If) {
                 If iif = (If) stmt;
-                postprocess(iif.getIfBody());
+                postprocess(iif.getBody());
                 for (Elif elif : iif.getElifBlocks()) {
                     postprocess(elif.getBody());
                 }
                 if (iif.getElseBlock() != null) {
-                    postprocess(iif.getElseBlock().getElseBody());
+                    postprocess(iif.getElseBlock().getBody());
                 }
             } else if (stmt instanceof While) {
                 While wwhile = (While) stmt;

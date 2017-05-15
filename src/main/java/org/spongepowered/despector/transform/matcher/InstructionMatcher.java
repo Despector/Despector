@@ -32,6 +32,7 @@ import org.spongepowered.despector.transform.matcher.instruction.InstanceFieldAc
 import org.spongepowered.despector.transform.matcher.instruction.InstanceMethodInvokeMatcher;
 import org.spongepowered.despector.transform.matcher.instruction.IntConstantMatcher;
 import org.spongepowered.despector.transform.matcher.instruction.LocalAccessMatcher;
+import org.spongepowered.despector.transform.matcher.instruction.NullConstantMatcher;
 import org.spongepowered.despector.transform.matcher.instruction.StaticFieldAccessMatcher;
 import org.spongepowered.despector.transform.matcher.instruction.StaticInvokeMatcher;
 import org.spongepowered.despector.transform.matcher.instruction.StringConstantMatcher;
@@ -101,6 +102,10 @@ public interface InstructionMatcher<T extends Instruction> {
 
     public static StringConstantMatcher.Builder stringConstant() {
         return new StringConstantMatcher.Builder();
+    }
+
+    public static NullConstantMatcher.Builder nullConstant() {
+        return new NullConstantMatcher.Builder();
     }
 
     /**

@@ -92,6 +92,7 @@ import org.spongepowered.despector.emitter.bytecode.instruction.BytecodeNullCons
 import org.spongepowered.despector.emitter.bytecode.instruction.BytecodeStaticFieldAccessEmitter;
 import org.spongepowered.despector.emitter.bytecode.instruction.BytecodeStringConstantEmitter;
 import org.spongepowered.despector.emitter.bytecode.instruction.BytecodeTypeConstantEmitter;
+import org.spongepowered.despector.emitter.bytecode.statement.BytecodeIfEmitter;
 import org.spongepowered.despector.emitter.bytecode.statement.BytecodeInvokeStatementEmitter;
 import org.spongepowered.despector.emitter.bytecode.statement.BytecodeLocalAssignmentEmitter;
 import org.spongepowered.despector.emitter.bytecode.statement.BytecodeReturnEmitter;
@@ -307,6 +308,7 @@ public final class Emitters {
         BYTECODE_SET.setStatementEmitter(LocalAssignment.class, new BytecodeLocalAssignmentEmitter());
         BYTECODE_SET.setStatementEmitter(Return.class, new BytecodeReturnEmitter());
         BYTECODE_SET.setStatementEmitter(InvokeStatement.class, new BytecodeInvokeStatementEmitter());
+        BYTECODE_SET.setStatementEmitter(If.class, new BytecodeIfEmitter());
 
         BYTECODE_SET.setInstructionEmitter(IntConstant.class, new BytecodeIntConstantEmitter());
         BYTECODE_SET.setInstructionEmitter(InstanceMethodInvoke.class, new BytecodeInstanceMethodInvokeEmitter());
