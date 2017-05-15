@@ -387,7 +387,7 @@ public class BaseDecompiler implements Decompiler {
                 method.setMethodSignature(sig);
                 if (checked_exceptions != null && !checked_exceptions.isEmpty()) {
                     for (String ex : checked_exceptions) {
-                        sig.getThrowsSignature().add(ClassTypeSignature.of(ex));
+                        sig.getThrowsSignature().add(ClassTypeSignature.of("L" + ex + ";"));
                     }
                 }
             }
