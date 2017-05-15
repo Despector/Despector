@@ -82,11 +82,16 @@ import org.spongepowered.despector.ast.type.InterfaceEntry;
 import org.spongepowered.despector.ast.type.MethodEntry;
 import org.spongepowered.despector.emitter.bytecode.BytecodeEmitter;
 import org.spongepowered.despector.emitter.bytecode.BytecodeEmitterContext;
+import org.spongepowered.despector.emitter.bytecode.instruction.BytecodeDoubleConstantEmitter;
+import org.spongepowered.despector.emitter.bytecode.instruction.BytecodeFloatConstantEmitter;
 import org.spongepowered.despector.emitter.bytecode.instruction.BytecodeInstanceMethodInvokeEmitter;
 import org.spongepowered.despector.emitter.bytecode.instruction.BytecodeIntConstantEmitter;
 import org.spongepowered.despector.emitter.bytecode.instruction.BytecodeLocalAccessEmitter;
+import org.spongepowered.despector.emitter.bytecode.instruction.BytecodeLongConstantEmitter;
+import org.spongepowered.despector.emitter.bytecode.instruction.BytecodeNullConstantEmitter;
 import org.spongepowered.despector.emitter.bytecode.instruction.BytecodeStaticFieldAccessEmitter;
 import org.spongepowered.despector.emitter.bytecode.instruction.BytecodeStringConstantEmitter;
+import org.spongepowered.despector.emitter.bytecode.instruction.BytecodeTypeConstantEmitter;
 import org.spongepowered.despector.emitter.bytecode.statement.BytecodeInvokeStatementEmitter;
 import org.spongepowered.despector.emitter.bytecode.statement.BytecodeLocalAssignmentEmitter;
 import org.spongepowered.despector.emitter.bytecode.statement.BytecodeReturnEmitter;
@@ -308,6 +313,11 @@ public final class Emitters {
         BYTECODE_SET.setInstructionEmitter(LocalAccess.class, new BytecodeLocalAccessEmitter());
         BYTECODE_SET.setInstructionEmitter(StringConstant.class, new BytecodeStringConstantEmitter());
         BYTECODE_SET.setInstructionEmitter(StaticFieldAccess.class, new BytecodeStaticFieldAccessEmitter());
+        BYTECODE_SET.setInstructionEmitter(FloatConstant.class, new BytecodeFloatConstantEmitter());
+        BYTECODE_SET.setInstructionEmitter(DoubleConstant.class, new BytecodeDoubleConstantEmitter());
+        BYTECODE_SET.setInstructionEmitter(LongConstant.class, new BytecodeLongConstantEmitter());
+        BYTECODE_SET.setInstructionEmitter(NullConstant.class, new BytecodeNullConstantEmitter());
+        BYTECODE_SET.setInstructionEmitter(TypeConstant.class, new BytecodeTypeConstantEmitter());
     }
 
     /**
