@@ -27,8 +27,8 @@ package org.spongepowered.despector.util;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
 
+import java.util.BitSet;
 import java.util.List;
-import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -266,16 +266,25 @@ public final class TypeHelper {
         return false;
     }
 
-    public static final Predicate<String> IS_NUMBER = (t) -> "BSIJFDC".indexOf(t.charAt(0)) != -1;
-    public static final Predicate<String> IS_NUMBER_OR_BOOL = (t) -> "ZBSIJFDC".indexOf(t.charAt(0)) != -1;
-    public static final Predicate<String> IS_OBJECT = (t) -> t.startsWith("L");
-    public static final Predicate<String> IS_ARRAY = (t) -> t.startsWith("[");
-    public static final Predicate<String> IS_OBJECT_OR_ARRAY = (t) -> {
-        while (t.startsWith("[")) {
-            t = t.substring(1);
-        }
-        return t.startsWith("L");
-    };
+    private static final BitSet DESCRIPTOR_CHARS = new BitSet();
+
+    public static boolean isDescriptor(String type) {
+        return DESCRIPTOR_CHARS.get(type.charAt(0));
+    }
+
+    static {
+        DESCRIPTOR_CHARS.set('[');
+        DESCRIPTOR_CHARS.set('L');
+        DESCRIPTOR_CHARS.set('B');
+        DESCRIPTOR_CHARS.set('C');
+        DESCRIPTOR_CHARS.set('S');
+        DESCRIPTOR_CHARS.set('I');
+        DESCRIPTOR_CHARS.set('J');
+        DESCRIPTOR_CHARS.set('F');
+        DESCRIPTOR_CHARS.set('D');
+        DESCRIPTOR_CHARS.set('Z');
+        DESCRIPTOR_CHARS.set('V');
+    }
 
     private TypeHelper() {
     }

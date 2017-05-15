@@ -99,6 +99,9 @@ public class ClassTypeSignature extends TypeSignature {
      * primative wrappers, object, and string) and the no_special flag is unset.
      */
     public static ClassTypeSignature of(String type, boolean no_special) {
+        if(!TypeHelper.isDescriptor(type)) {
+            throw new IllegalStateException("'" + type + "' is not a type descriptor");
+        }
         if (!no_special) {
             ClassTypeSignature sig = SPECIAL.get(type);
             if (sig != null) {

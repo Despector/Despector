@@ -24,7 +24,6 @@
  */
 package org.spongepowered.despector.ast.insn.misc;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.spongepowered.despector.ast.AstVisitor;
@@ -32,7 +31,6 @@ import org.spongepowered.despector.ast.generic.ClassTypeSignature;
 import org.spongepowered.despector.ast.generic.TypeSignature;
 import org.spongepowered.despector.ast.insn.Instruction;
 import org.spongepowered.despector.ast.insn.InstructionVisitor;
-import org.spongepowered.despector.util.TypeHelper;
 import org.spongepowered.despector.util.serialization.AstSerializer;
 import org.spongepowered.despector.util.serialization.MessagePacker;
 
@@ -49,7 +47,6 @@ public class InstanceOf implements Instruction {
     public InstanceOf(Instruction check, ClassTypeSignature type) {
         this.check = checkNotNull(check, "check");
         this.type = checkNotNull(type, "type");
-        checkArgument(TypeHelper.IS_OBJECT_OR_ARRAY.test(this.type.getDescriptor()));
     }
 
     /**
@@ -81,7 +78,6 @@ public class InstanceOf implements Instruction {
     }
 
     public void setType(ClassTypeSignature type) {
-        checkArgument(TypeHelper.IS_OBJECT_OR_ARRAY.test(type.getDescriptor()));
         this.type = checkNotNull(type, "type");
     }
 

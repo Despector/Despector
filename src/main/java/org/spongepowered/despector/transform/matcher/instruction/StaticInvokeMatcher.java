@@ -28,7 +28,6 @@ import org.spongepowered.despector.ast.insn.Instruction;
 import org.spongepowered.despector.ast.stmt.invoke.StaticMethodInvoke;
 import org.spongepowered.despector.transform.matcher.InstructionMatcher;
 import org.spongepowered.despector.transform.matcher.MatchContext;
-import org.spongepowered.despector.transform.matcher.instruction.InstanceMethodInvokeMatcher.Builder;
 
 import java.util.HashMap;
 import java.util.Map;
