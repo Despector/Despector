@@ -25,8 +25,9 @@
 package org.spongepowered.test.parse;
 
 import com.google.common.base.Charsets;
-import org.spongepowered.despector.source.SourceFile;
 import org.spongepowered.despector.source.SourceParsers;
+import org.spongepowered.despector.source.ast.SourceFile;
+import org.spongepowered.despector.source.ast.SourceFileSet;
 
 import java.io.File;
 import java.io.IOException;
@@ -35,10 +36,10 @@ import java.nio.file.Files;
 public class ParseTester {
 
     public static void main(String[] args) throws IOException {
-
+        SourceFileSet set = new SourceFileSet();
         File f = new File("src/main/java/org/spongepowered/despector/Despector.java");
         String input = new String(Files.readAllBytes(f.toPath()), Charsets.UTF_8);
-        SourceFile src = SourceParsers.JAVA.parse("Despector.java", input);
+        SourceFile src = SourceParsers.JAVA.parse(set, "org/spongepowered/despector/Despector.java", input);
 
     }
 

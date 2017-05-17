@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.despector.source;
+package org.spongepowered.despector.source.ast;
 
 import org.spongepowered.despector.ast.type.TypeEntry;
 
@@ -87,6 +87,16 @@ public class SourceFile {
 
     public void addImport(String im) {
         this.imports.add(im);
+    }
+
+    public String resolveType(String type) {
+        for (String im : this.imports) {
+            String last = im.substring(im.lastIndexOf('.') + 1);
+            if (last.equals(type)) {
+                return im.replace('.', '/');
+            }
+        }
+        return type.replace('.', '/');
     }
 
 }

@@ -48,6 +48,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.Nullable;
+
 /**
  * Represents a type, may be a class, interface, or enum.
  */
@@ -77,6 +79,8 @@ public abstract class TypeEntry extends AstEntry {
     protected final Map<String, InnerClassInfo> inner_classes = new LinkedHashMap<>();
 
     protected ClassSignature signature;
+
+    protected List<String> class_javadoc = null;
 
     public TypeEntry(SourceSet source, Language lang, String name) {
         super(source);
@@ -362,6 +366,15 @@ public abstract class TypeEntry extends AstEntry {
 
     public void addInnerClass(String name, String simple, String outer, int acc) {
         this.inner_classes.put(name, new InnerClassInfo(name, simple, outer, acc));
+    }
+
+    @Nullable
+    public List<String> getClassJavadoc() {
+        return this.class_javadoc;
+    }
+
+    public void setClassJavadoc(@Nullable List<String> jd) {
+        this.class_javadoc = jd;
     }
 
     public abstract void accept(AstVisitor visitor);

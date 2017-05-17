@@ -46,21 +46,21 @@ public class ClassEntry extends TypeEntry {
     }
 
     /**
-     * Gets the super class of this type.
+     * Gets the type descriptor super class of this type.
      */
     public String getSuperclass() {
         return this.superclass;
     }
 
     /**
-     * Gets the name of the superclass of this type.
+     * Gets the internal name of the superclass of this type.
      */
     public String getSuperclassName() {
         return TypeHelper.descToType(this.superclass);
     }
 
     /**
-     * Sets the super class of this entry.
+     * Sets the type descriptor of the super class of this entry.
      */
     public void setSuperclass(String c) {
         this.superclass = c;

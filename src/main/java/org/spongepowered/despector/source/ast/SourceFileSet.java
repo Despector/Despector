@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.despector.source;
+package org.spongepowered.despector.source.ast;
 
 import org.spongepowered.despector.ast.SourceSet;
 

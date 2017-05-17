@@ -24,8 +24,11 @@
  */
 package org.spongepowered.despector.source;
 
+import org.spongepowered.despector.source.ast.SourceFile;
+import org.spongepowered.despector.source.ast.SourceFileSet;
+
 public interface SourceParser {
 
-    SourceFile parse(String name, String input);
+    SourceFile parse(SourceFileSet set, String name, String input);
 
 }

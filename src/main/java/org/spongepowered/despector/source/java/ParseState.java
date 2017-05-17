@@ -24,18 +24,25 @@
  */
 package org.spongepowered.despector.source.java;
 
-import org.spongepowered.despector.source.SourceFile;
+import org.spongepowered.despector.source.ast.SourceFile;
+import org.spongepowered.despector.source.ast.SourceFileSet;
 
 public class ParseState {
 
     private final SourceFile file;
+    private final SourceFileSet set;
 
-    public ParseState(SourceFile src) {
+    public ParseState(SourceFileSet set, SourceFile src) {
         this.file = src;
+        this.set = set;
     }
 
     public SourceFile getSource() {
         return this.file;
+    }
+
+    public SourceFileSet getSourceSet() {
+        return this.set;
     }
 
 }

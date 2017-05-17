@@ -27,8 +27,16 @@ package org.spongepowered.despector.source.java;
 import static org.spongepowered.despector.source.parse.TokenType.*;
 
 import com.google.common.collect.Lists;
-import org.spongepowered.despector.source.SourceFile;
+import org.spongepowered.despector.Language;
+import org.spongepowered.despector.ast.AccessModifier;
+import org.spongepowered.despector.ast.type.AnnotationEntry;
+import org.spongepowered.despector.ast.type.ClassEntry;
+import org.spongepowered.despector.ast.type.EnumEntry;
+import org.spongepowered.despector.ast.type.InterfaceEntry;
+import org.spongepowered.despector.ast.type.TypeEntry;
 import org.spongepowered.despector.source.SourceParser;
+import org.spongepowered.despector.source.ast.SourceFile;
+import org.spongepowered.despector.source.ast.SourceFileSet;
 import org.spongepowered.despector.source.parse.Lexer;
 
 import java.util.List;
@@ -36,11 +44,11 @@ import java.util.List;
 public class JavaParser implements SourceParser {
 
     @Override
-    public SourceFile parse(String name, String input) {
+    public SourceFile parse(SourceFileSet set, String name, String input) {
         Lexer lexer = new Lexer(input);
 
         SourceFile src = new SourceFile(name);
-        ParseState state = new ParseState(src);
+        ParseState state = new ParseState(set, src);
 
         parseJavaSource(state, lexer);
 
@@ -80,11 +88,36 @@ public class JavaParser implements SourceParser {
             if (lexer.peekType() == FORWARD_SLASH) {
                 comment = parseComment(state, lexer);
             }
+            int mark = lexer.mark();
+            if (lexer.peekType() == AT) {
+                // TODO parse type annotations
+                lexer.pop();
+                String next = lexer.expect(IDENTIFIER).getString();
+                if (!next.equals("interface")) {
+                    throw new IllegalStateException();
+                }
+                lexer.reset(mark);
+                TypeEntry type = parseTopLevelType(state, lexer);
+                if (comment != null) {
+                    type.setClassJavadoc(comment);
+                    comment = null;
+                }
+                state.getSource().addTopLevelType(type);
+                continue;
+            }
             String next = lexer.expect(IDENTIFIER).getString();
             if ("package".equals(next)) {
                 state.getSource().setPackage(parsePackage(state, lexer));
             } else if ("import".equals(next)) {
                 state.getSource().addImport(parseImport(state, lexer));
+            } else if ("public".equals(next) || "final".equals(next) || "class".equals(next) || "enum".equals(next) || "interface".equals(next)) {
+                lexer.reset(mark);
+                TypeEntry type = parseTopLevelType(state, lexer);
+                if (comment != null) {
+                    type.setClassJavadoc(comment);
+                    comment = null;
+                }
+                state.getSource().addTopLevelType(type);
             } else {
                 throw new IllegalStateException("Unexpected identifier: '" + next + "'");
             }
@@ -116,6 +149,88 @@ public class JavaParser implements SourceParser {
         }
         lexer.expect(SEMICOLON);
         return pkg;
+    }
+
+    private AccessModifier parseAccessModifier(ParseState state, Lexer lexer) {
+        if (lexer.peekType() == IDENTIFIER) {
+            String next = lexer.peek().getString();
+            if ("public".equals(next)) {
+                lexer.pop();
+                return AccessModifier.PUBLIC;
+            } else if ("private".equals(next)) {
+                lexer.pop();
+                return AccessModifier.PRIVATE;
+            } else if ("protected".equals(next)) {
+                lexer.pop();
+                return AccessModifier.PROTECTED;
+            }
+        }
+        return AccessModifier.PACKAGE_PRIVATE;
+    }
+
+    private TypeEntry parseTopLevelType(ParseState state, Lexer lexer) {
+        AccessModifier acc = parseAccessModifier(state, lexer);
+        String type = null;
+        boolean is_final = false;
+        boolean is_abstract = false;
+        while (true) {
+            if (lexer.peekType() == AT) {
+                lexer.pop();
+                String next = lexer.expect(IDENTIFIER).getString();
+                if (!next.equals("interface")) {
+                    throw new IllegalStateException();
+                }
+                type = "@interface";
+                break;
+            }
+            String next = lexer.expect(IDENTIFIER).getString();
+            if ("final".equals(next)) {
+                is_final = true;
+            } else if ("abstract".equals(next)) {
+                is_abstract = true;
+            } else if ("class".equals(next) || "interface".equals(next) || "enum".equals(next)) {
+                type = next;
+                break;
+            } else {
+                throw new IllegalStateException("Unexpected identifier: " + next);
+            }
+        }
+        String name = lexer.expect(IDENTIFIER).getString();
+        TypeEntry entry = null;
+        if ("class".equals(type)) {
+            entry = new ClassEntry(state.getSourceSet(), Language.JAVA, name);
+        } else if ("enum".equals(type)) {
+            entry = new EnumEntry(state.getSourceSet(), Language.JAVA, name);
+        } else if ("interface".equals(type)) {
+            entry = new InterfaceEntry(state.getSourceSet(), Language.JAVA, name);
+        } else if ("@interface".equals(type)) {
+            entry = new AnnotationEntry(state.getSourceSet(), Language.JAVA, name);
+        }
+        entry.setAccessModifier(acc);
+        entry.setFinal(is_final);
+        entry.setAbstract(is_abstract);
+
+        // TODO generic signature
+
+        if (lexer.peekType() != BRACE_LEFT) {
+            String next = lexer.expect(IDENTIFIER).getString();
+            if (entry instanceof ClassEntry && "extends".equals(next)) {
+                ((ClassEntry) entry).setSuperclass("L" + state.getSource().resolveType(lexer.expect(IDENTIFIER).getString()) + ";");
+                // TODO superclass generics
+                if (lexer.peekType() == BRACE_LEFT) {
+                    next = null;
+                } else {
+                    next = lexer.expect(IDENTIFIER).getString();
+                }
+            }
+            if ("implements".equals(next)) {
+                // TODO interfaces
+            }
+        }
+
+        lexer.expect(BRACE_LEFT);
+
+        return entry;
     }
 
 }

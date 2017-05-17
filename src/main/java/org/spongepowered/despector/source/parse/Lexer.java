@@ -193,6 +193,12 @@ public class Lexer {
             case '*':
                 this.next = new ParseToken(TokenType.STAR);
                 break;
+            case '{':
+                this.next = new ParseToken(TokenType.BRACE_LEFT);
+                break;
+            case '}':
+                this.next = new ParseToken(TokenType.BRACE_RIGHT);
+                break;
             default:
                 throw new IllegalStateException("Unexpected symbol '" + n + "'");
             }
