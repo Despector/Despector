@@ -32,7 +32,9 @@ import org.spongepowered.despector.ast.AccessModifier;
 import org.spongepowered.despector.ast.type.AnnotationEntry;
 import org.spongepowered.despector.ast.type.ClassEntry;
 import org.spongepowered.despector.ast.type.EnumEntry;
+import org.spongepowered.despector.ast.type.FieldEntry;
 import org.spongepowered.despector.ast.type.InterfaceEntry;
+import org.spongepowered.despector.ast.type.MethodEntry;
 import org.spongepowered.despector.ast.type.TypeEntry;
 import org.spongepowered.despector.source.SourceParser;
 import org.spongepowered.despector.source.ast.SourceFile;
@@ -215,6 +217,7 @@ public class JavaParser implements SourceParser {
         if (lexer.peekType() != BRACE_LEFT) {
             String next = lexer.expect(IDENTIFIER).getString();
             if (entry instanceof ClassEntry && "extends".equals(next)) {
+                // TODO handle fully qualified types
                 ((ClassEntry) entry).setSuperclass("L" + state.getSource().resolveType(lexer.expect(IDENTIFIER).getString()) + ";");
                 // TODO superclass generics
                 if (lexer.peekType() == BRACE_LEFT) {
@@ -230,7 +233,90 @@ public class JavaParser implements SourceParser {
 
         lexer.expect(BRACE_LEFT);
 
+        while (lexer.peekType() != BRACE_RIGHT) {
+            // TODO check for annotation
+
+            int mark = lexer.mark();
+            while (lexer.peekType() == IDENTIFIER) {
+                lexer.pop();
+            }
+            if (lexer.peekType() == PAREN_LEFT) {
+                lexer.reset(mark);
+                MethodEntry mth = parseMethod(state, lexer);
+                entry.addMethod(mth);
+            } else if (lexer.peekType() == EQUALS || lexer.peekType() == SEMICOLON) {
+                lexer.reset(mark);
+                FieldEntry fld = parseField(state, lexer);
+                entry.addField(fld);
+            } else {
+                throw new IllegalStateException("Unexpected token: " + lexer.peek());
+            }
+        }
+
         return entry;
+    }
+
+    private FieldEntry parseField(ParseState state, Lexer lexer) {
+        FieldEntry fld = new FieldEntry(state.getSourceSet());
+        fld.setAccessModifier(AccessModifier.PACKAGE_PRIVATE);
+        while (true) {
+            String next = lexer.expect(IDENTIFIER).getString();
+            if ("final".equals(next)) {
+                fld.setFinal(true);
+            } else if ("static".equals(next)) {
+                fld.setStatic(true);
+            } else if ("volatile".equals(next)) {
+                fld.setVolatile(true);
+            } else if ("transient".equals(next)) {
+                fld.setTransient(true);
+            } else if ("public".equals(next)) {
+                fld.setAccessModifier(AccessModifier.PUBLIC);
+            } else if ("private".equals(next)) {
+                fld.setAccessModifier(AccessModifier.PRIVATE);
+            } else if ("protected".equals(next)) {
+                fld.setAccessModifier(AccessModifier.PROTECTED);
+            } else {
+                break;
+            }
+        }
+        // TODO handle fully qualified types
+        String type = lexer.expect(IDENTIFIER).getString();
+        // TODO parse generic
+        String name = lexer.expect(IDENTIFIER).getString();
+        fld.setName(name);
+        if (lexer.peekType() == EQUALS) {
+            // TODO parse value
+        }
+        lexer.expect(SEMICOLON);
+        return fld;
+    }
+
+    private MethodEntry parseMethod(ParseState state, Lexer lexer) {
+        MethodEntry mth = new MethodEntry(state.getSourceSet());
+        mth.setAccessModifier(AccessModifier.PACKAGE_PRIVATE);
+        while (true) {
+            String next = lexer.expect(IDENTIFIER).getString();
+            if ("final".equals(next)) {
+                mth.setFinal(true);
+            } else if ("static".equals(next)) {
+                mth.setStatic(true);
+            } else if ("strictfp".equals(next)) {
+                mth.setStrictFp(true);
+            } else if ("abstract".equals(next)) {
+                mth.setAbstract(true);
+            } else if ("public".equals(next)) {
+                mth.setAccessModifier(AccessModifier.PUBLIC);
+            } else if ("private".equals(next)) {
+                mth.setAccessModifier(AccessModifier.PRIVATE);
+            } else if ("protected".equals(next)) {
+                mth.setAccessModifier(AccessModifier.PROTECTED);
+            } else {
+                break;
+            }
+        }
+        String name = lexer.expect(IDENTIFIER).getString();
+        mth.setName(name);
+        return mth;
     }
 
 }
