@@ -24,7 +24,6 @@
  */
 package org.spongepowered.despector.emitter;
 
-import org.spongepowered.despector.Language;
 import org.spongepowered.despector.ast.insn.condition.AndCondition;
 import org.spongepowered.despector.ast.insn.condition.BooleanCondition;
 import org.spongepowered.despector.ast.insn.condition.CompareCondition;
@@ -180,8 +179,6 @@ import org.spongepowered.despector.emitter.kotlin.type.KotlinClassEntryEmitter;
 import org.spongepowered.despector.emitter.kotlin.type.KotlinEnumEntryEmitter;
 import org.spongepowered.despector.emitter.kotlin.type.KotlinMethodEntryEmitter;
 
-import java.util.EnumMap;
-
 /**
  * Standard emitters.
  */
@@ -195,9 +192,6 @@ public final class Emitters {
     public static final Emitter<JavaEmitterContext> KOTLIN = new KotlinEmitter();
     public static final Emitter<?> WILD = new WildEmitter();
     public static final Emitter<BytecodeEmitterContext> BYTECODE = new BytecodeEmitter();
-
-    @SuppressWarnings("rawtypes")
-    private static final EnumMap<Language, Emitter> EMITTERS = new EnumMap<>(Language.class);
 
     static {
 
@@ -298,10 +292,6 @@ public final class Emitters {
         KOTLIN_SET.setConditionEmitter(CompareCondition.class, new KotlinCompareConditionEmitter());
         KOTLIN_SET.setConditionEmitter(InverseCondition.class, new KotlinInverseConditionEmitter());
 
-        EMITTERS.put(Language.JAVA, JAVA);
-        EMITTERS.put(Language.KOTLIN, KOTLIN);
-        EMITTERS.put(Language.ANY, WILD);
-
         BYTECODE_SET.setAstEmitter(ClassEntry.class, new BytecodeClassEntryEmitter());
         BYTECODE_SET.setAstEmitter(MethodEntry.class, new BytecodeMethodEntryEmitter());
 
@@ -320,14 +310,6 @@ public final class Emitters {
         BYTECODE_SET.setInstructionEmitter(LongConstant.class, new BytecodeLongConstantEmitter());
         BYTECODE_SET.setInstructionEmitter(NullConstant.class, new BytecodeNullConstantEmitter());
         BYTECODE_SET.setInstructionEmitter(TypeConstant.class, new BytecodeTypeConstantEmitter());
-    }
-
-    /**
-     * Gets the emitter for the given language.
-     */
-    @SuppressWarnings("unchecked")
-    public static <E extends AbstractEmitterContext> Emitter<E> get(Language lang) {
-        return EMITTERS.get(lang);
     }
 
     private Emitters() {

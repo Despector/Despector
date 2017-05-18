@@ -25,20 +25,51 @@
 package org.spongepowered.despector;
 
 import org.spongepowered.despector.ast.type.TypeEntry;
+import org.spongepowered.despector.decompiler.Decompiler;
+import org.spongepowered.despector.decompiler.Decompilers;
+import org.spongepowered.despector.emitter.Emitter;
+import org.spongepowered.despector.emitter.Emitters;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Represents a source language.
  */
-public enum Language {
+public class Language {
 
-    JAVA(".java"),
-    KOTLIN(".kt"),
-    ANY(null);
+    private static final Map<String, Language> LANGUAGES = new HashMap<>();
 
+    public static final Language JAVA = new Language("java", ".java");
+    public static final Language KOTLIN = new Language("kotlin", ".kt");
+    public static final Language ANY = new Language("any", null);
+    
+    static {
+        JAVA.setDecompiler(Decompilers.JAVA);
+        JAVA.setEmitter(Emitters.JAVA);
+        KOTLIN.setDecompiler(Decompilers.KOTLIN);
+        KOTLIN.setEmitter(Emitters.KOTLIN);
+        ANY.setDecompiler(Decompilers.WILD);
+        ANY.setEmitter(Emitters.WILD);
+    }
+
+    public static Language get(String id) {
+        return LANGUAGES.get(id);
+    }
+
+    private final String id;
     private final String ext;
 
-    Language(String ext) {
+    private Decompiler decompiler;
+    private Emitter<?> emitter;
+
+    public Language(String id, String ext) {
+        this.id = id;
         this.ext = ext;
+    }
+
+    public String getId() {
+        return this.id;
     }
 
     /**
@@ -49,6 +80,22 @@ public enum Language {
             return this.ext;
         }
         return type.getLanguage().getExtension(type);
+    }
+
+    public Decompiler getDecompiler() {
+        return this.decompiler;
+    }
+
+    public void setDecompiler(Decompiler decomp) {
+        this.decompiler = decomp;
+    }
+
+    public Emitter<?> getEmitter() {
+        return this.emitter;
+    }
+
+    public void setEmitter(Emitter<?> em) {
+        this.emitter = em;
     }
 
 }

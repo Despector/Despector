@@ -151,7 +151,7 @@ public class AstLoader {
         expectKey(unpack, "id");
         int id = unpack.readInt();
         expectKey(unpack, "language");
-        Language lang = Language.values()[unpack.readInt()];
+        Language lang = Language.get(unpack.readString());
         expectKey(unpack, "name");
         String name = unpack.readString();
         if (id == AstSerializer.ENTRY_ID_CLASS) {

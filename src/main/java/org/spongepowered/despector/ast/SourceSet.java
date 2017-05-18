@@ -26,7 +26,6 @@ package org.spongepowered.despector.ast;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import org.spongepowered.despector.Language;
 import org.spongepowered.despector.ast.type.EnumEntry;
 import org.spongepowered.despector.ast.type.InterfaceEntry;
 import org.spongepowered.despector.ast.type.TypeEntry;
@@ -99,7 +98,7 @@ public class SourceSet {
                 return null;
             }
             try {
-                entry = Decompilers.get(Language.ANY).decompile(data, this);
+                entry = Decompilers.WILD.decompile(data, this);
             } catch (IOException e) {
                 e.printStackTrace();
                 this.load_failed_cache.add(name);

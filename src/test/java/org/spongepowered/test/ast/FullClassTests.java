@@ -33,8 +33,7 @@ import org.spongepowered.despector.ast.type.TypeEntry;
 import org.spongepowered.despector.config.LibraryConfiguration;
 import org.spongepowered.despector.decompiler.BaseDecompiler;
 import org.spongepowered.despector.decompiler.Decompiler;
-import org.spongepowered.despector.decompiler.Decompilers;
-import org.spongepowered.despector.emitter.Emitters;
+import org.spongepowered.despector.emitter.Emitter;
 import org.spongepowered.despector.emitter.format.EmitterFormat;
 import org.spongepowered.despector.emitter.java.JavaEmitterContext;
 
@@ -59,6 +58,7 @@ public class FullClassTests {
         compare("javaclasses/GenericsTestClass", Language.JAVA);
     }
 
+    @SuppressWarnings("unchecked")
     public static void compare(String classname, Language lang) throws IOException, URISyntaxException {
         URL source = Thread.currentThread().getContextClassLoader().getResource(classname + ".java.test");
         InputStream compiled = Thread.currentThread().getContextClassLoader().getResourceAsStream(classname + ".class.test");
@@ -70,12 +70,12 @@ public class FullClassTests {
             Assert.fail("Resource not found " + classname + ".class.test");
         }
         SourceSet src = new SourceSet();
-        Decompiler decomp = Decompilers.get(lang);
+        Decompiler decomp = lang.getDecompiler();
         TypeEntry type = decomp.decompile(compiled, src);
         ((BaseDecompiler) decomp).flushTasks();
         StringWriter writer = new StringWriter();
         JavaEmitterContext ctx = new JavaEmitterContext(writer, EmitterFormat.defaults());
-        Emitters.get(lang).emit(ctx, type);
+        ((Emitter<JavaEmitterContext>) lang.getEmitter()).emit(ctx, type);
         String source_str = new String(Files.readAllBytes(Paths.get(source.toURI()))).replaceAll("\r\n", "\n");
         Assert.assertEquals(source_str, writer.toString());
     }

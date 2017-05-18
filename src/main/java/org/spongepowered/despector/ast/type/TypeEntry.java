@@ -391,7 +391,7 @@ public abstract class TypeEntry extends AstEntry {
     public void writeTo(MessagePacker pack, int extra, int id) throws IOException {
         pack.startMap(14 + extra);
         pack.writeString("id").writeInt(id);
-        pack.writeString("language").writeInt(this.lang.ordinal());
+        pack.writeString("language").writeString(this.lang.getId());
         pack.writeString("name").writeString(this.name);
         pack.writeString("access").writeInt(this.access.ordinal());
         pack.writeString("synthetic").writeBool(this.is_synthetic);

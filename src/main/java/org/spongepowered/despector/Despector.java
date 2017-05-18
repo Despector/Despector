@@ -31,11 +31,9 @@ import org.spongepowered.despector.config.ConfigManager;
 import org.spongepowered.despector.config.LibraryConfiguration;
 import org.spongepowered.despector.decompiler.BaseDecompiler;
 import org.spongepowered.despector.decompiler.Decompiler;
-import org.spongepowered.despector.decompiler.Decompilers;
 import org.spongepowered.despector.decompiler.DirectoryWalker;
 import org.spongepowered.despector.decompiler.JarWalker;
 import org.spongepowered.despector.emitter.Emitter;
-import org.spongepowered.despector.emitter.Emitters;
 import org.spongepowered.despector.emitter.format.EmitterFormat;
 import org.spongepowered.despector.emitter.format.FormatLoader;
 import org.spongepowered.despector.emitter.java.JavaEmitterContext;
@@ -136,17 +134,18 @@ public final class Despector {
      * given source set.
      */
     public static TypeEntry decompile(InputStream input, SourceSet source, Language lang) throws IOException {
-        TypeEntry type = Decompilers.get(lang).decompile(input, source);
+        TypeEntry type = lang.getDecompiler().decompile(input, source);
         return type;
     }
 
     /**
      * Emits the given type entry to a string.
      */
+    @SuppressWarnings("unchecked")
     public static String emitToString(TypeEntry type) {
         StringWriter writer = new StringWriter();
         JavaEmitterContext ctx = new JavaEmitterContext(writer, EmitterFormat.defaults());
-        Emitters.get(type.getLanguage()).emit(ctx, type);
+        ((Emitter<JavaEmitterContext>) type.getLanguage().getEmitter()).emit(ctx, type);
         return writer.toString();
     }
 
@@ -187,7 +186,7 @@ public final class Despector {
             formatter_loader.load(formatter, formatter_path, importorder_path);
         }
 
-        Decompiler decompiler = Decompilers.get(LANGUAGE);
+        Decompiler decompiler = LANGUAGE.getDecompiler();
 
         if (LibraryConfiguration.parallel) {
             System.out.println("Running parallel decompile with " + Runtime.getRuntime().availableProcessors());
@@ -267,7 +266,8 @@ public final class Despector {
             }
         }
 
-        Emitter<JavaEmitterContext> emitter = Emitters.get(LANGUAGE);
+        @SuppressWarnings("unchecked")
+        Emitter<JavaEmitterContext> emitter = (Emitter<JavaEmitterContext>) LANGUAGE.getEmitter();
 
         for (TypeEntry type : source.getAllClasses()) {
             if (type.isInnerClass() || type.isAnonType()) {

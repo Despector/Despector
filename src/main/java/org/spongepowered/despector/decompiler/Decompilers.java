@@ -50,8 +50,6 @@ import org.spongepowered.despector.decompiler.method.postprocess.ForFromWhilePos
 import org.spongepowered.despector.decompiler.method.postprocess.IfCombiningPostProcessor;
 import org.spongepowered.despector.decompiler.method.special.LocalsProcessor;
 
-import java.util.EnumMap;
-
 /**
  * Standard decompilers.
  */
@@ -63,8 +61,6 @@ public final class Decompilers {
 
     public static final MethodDecompiler JAVA_METHOD = new MethodDecompiler();
     public static final MethodDecompiler KOTLIN_METHOD = new MethodDecompiler();
-
-    private static final EnumMap<Language, Decompiler> DECOMPILERS = new EnumMap<>(Language.class);
 
     static {
         JAVA_METHOD.addGraphProducer(new JumpGraphProducerStep());
@@ -107,16 +103,6 @@ public final class Decompilers {
         KOTLIN_METHOD.addPostProcessor(new KotlinLocalsMutabilityPostProcess());
         KOTLIN_METHOD.setSpecialProcessor(LocalsProcessor.class, new KotlinLocalsProcessor());
 
-        DECOMPILERS.put(Language.JAVA, JAVA);
-        DECOMPILERS.put(Language.KOTLIN, KOTLIN);
-        DECOMPILERS.put(Language.ANY, WILD);
-    }
-
-    /**
-     * Gets the decompiler for the given language.
-     */
-    public static Decompiler get(Language lang) {
-        return DECOMPILERS.get(lang);
     }
 
     private Decompilers() {
