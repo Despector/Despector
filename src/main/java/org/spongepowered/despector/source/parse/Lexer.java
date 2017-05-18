@@ -69,6 +69,57 @@ public class Lexer {
         while (Character.isWhitespace(n) && this.index < this.length) {
             n = this.str.charAt(this.index++);
         }
+        switch (n) {
+        case '$':
+            this.next = new ParseToken(TokenType.DOLLAR);
+            break;
+        case ';':
+            this.next = new ParseToken(TokenType.SEMICOLON);
+            break;
+        case '.':
+            this.next = new ParseToken(TokenType.DOT);
+            break;
+        case ',':
+            this.next = new ParseToken(TokenType.COMMA);
+            break;
+        case ':':
+            this.next = new ParseToken(TokenType.COLON);
+            break;
+        case '(':
+            this.next = new ParseToken(TokenType.PAREN_LEFT);
+            break;
+        case ')':
+            this.next = new ParseToken(TokenType.PAREN_RIGHT);
+            break;
+        case '/':
+            this.next = new ParseToken(TokenType.FORWARD_SLASH);
+            break;
+        case '=':
+            this.next = new ParseToken(TokenType.EQUALS);
+            break;
+        case '!':
+            this.next = new ParseToken(TokenType.NOT);
+            break;
+        case '*':
+            this.next = new ParseToken(TokenType.STAR);
+            break;
+        case '{':
+            this.next = new ParseToken(TokenType.BRACE_LEFT);
+            break;
+        case '}':
+            this.next = new ParseToken(TokenType.BRACE_RIGHT);
+            break;
+        case '[':
+            this.next = new ParseToken(TokenType.BRACKET_LEFT);
+            break;
+        case ']':
+            this.next = new ParseToken(TokenType.BRACKET_RIGHT);
+            break;
+        default:
+        }
+        if (this.next != null) {
+            return;
+        }
         if (ALPHA.get(n)) {
             StringBuilder token = new StringBuilder();
             token.append(n);
@@ -159,49 +210,7 @@ public class Lexer {
             }
             this.next = new ParseToken(TokenType.STRING_CONSTANT, str.toString());
         } else {
-            switch (n) {
-            case '$':
-                this.next = new ParseToken(TokenType.DOLLAR);
-                break;
-            case ';':
-                this.next = new ParseToken(TokenType.SEMICOLON);
-                break;
-            case '.':
-                this.next = new ParseToken(TokenType.DOT);
-                break;
-            case ',':
-                this.next = new ParseToken(TokenType.COMMA);
-                break;
-            case ':':
-                this.next = new ParseToken(TokenType.COLON);
-                break;
-            case '(':
-                this.next = new ParseToken(TokenType.PAREN_LEFT);
-                break;
-            case ')':
-                this.next = new ParseToken(TokenType.PAREN_RIGHT);
-                break;
-            case '/':
-                this.next = new ParseToken(TokenType.FORWARD_SLASH);
-                break;
-            case '=':
-                this.next = new ParseToken(TokenType.EQUALS);
-                break;
-            case '!':
-                this.next = new ParseToken(TokenType.NOT);
-                break;
-            case '*':
-                this.next = new ParseToken(TokenType.STAR);
-                break;
-            case '{':
-                this.next = new ParseToken(TokenType.BRACE_LEFT);
-                break;
-            case '}':
-                this.next = new ParseToken(TokenType.BRACE_RIGHT);
-                break;
-            default:
-                throw new IllegalStateException("Unexpected symbol '" + n + "'");
-            }
+            throw new IllegalStateException("Unexpected symbol '" + n + "'");
         }
     }
 
@@ -231,6 +240,17 @@ public class Lexer {
         ParseToken n = pop();
         if (n.getType() != type) {
             throw new IllegalStateException("Expected " + type + " but was " + n);
+        }
+        return n;
+    }
+
+    public ParseToken expect(TokenType type, String str) {
+        ParseToken n = pop();
+        if (n.getType() != type) {
+            throw new IllegalStateException("Expected " + type + " but was " + n);
+        }
+        if (!n.getString().equals(str)) {
+            throw new IllegalStateException("Expected '" + str + "' but was " + n);
         }
         return n;
     }

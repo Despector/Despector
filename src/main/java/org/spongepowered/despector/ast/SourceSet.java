@@ -26,8 +26,6 @@ package org.spongepowered.despector.ast;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import org.spongepowered.despector.ast.type.EnumEntry;
-import org.spongepowered.despector.ast.type.InterfaceEntry;
 import org.spongepowered.despector.ast.type.TypeEntry;
 import org.spongepowered.despector.decompiler.Decompilers;
 import org.spongepowered.despector.util.serialization.AstSerializer;
@@ -49,11 +47,8 @@ public class SourceSet {
     private Loader loader;
     private final Set<String> load_failed_cache = new HashSet<>();
 
-    private final Map<String, TypeEntry> classes = new HashMap<>();
-    private final Map<String, EnumEntry> enums = new HashMap<>();
-    private final Map<String, InterfaceEntry> interfaces = new HashMap<>();
-
-    private final Map<String, AnnotationType> annotations = new HashMap<>();
+    protected final Map<String, TypeEntry> classes = new HashMap<>();
+    protected final Map<String, AnnotationType> annotations = new HashMap<>();
 
     public SourceSet() {
     }
@@ -71,11 +66,6 @@ public class SourceSet {
      */
     public void add(TypeEntry e) {
         checkNotNull(e);
-        if (e instanceof EnumEntry) {
-            this.enums.put(e.getName(), (EnumEntry) e);
-        } else if (e instanceof InterfaceEntry) {
-            this.interfaces.put(e.getName(), (InterfaceEntry) e);
-        }
         this.classes.put(e.getName(), e);
     }
 
@@ -109,36 +99,11 @@ public class SourceSet {
         return entry;
     }
 
-    public EnumEntry getEnum(String name) {
-        EnumEntry entry = this.enums.get(name);
-        return entry;
-    }
-
-    public InterfaceEntry getInterface(String name) {
-        InterfaceEntry entry = this.interfaces.get(name);
-        return entry;
-    }
-
     /**
-     * Gets all classes in the source set. This also includes all interfaces and
-     * enums.
+     * Gets all types in the source set.
      */
-    public Collection<TypeEntry> getAllClasses() {
+    public Collection<TypeEntry> getAllTypes() {
         return this.classes.values();
-    }
-
-    /**
-     * Gets all enum types in the source set.
-     */
-    public Collection<EnumEntry> getAllEnums() {
-        return this.enums.values();
-    }
-
-    /**
-     * Gets all interface types in the source set.
-     */
-    public Collection<InterfaceEntry> getAllInterfaces() {
-        return this.interfaces.values();
     }
 
     public void addAnnotation(AnnotationType anno) {

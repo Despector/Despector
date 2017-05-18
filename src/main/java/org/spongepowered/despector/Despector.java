@@ -218,7 +218,7 @@ public final class Despector {
             ((BaseDecompiler) decompiler).flushTasks();
         }
 
-        if (source.getAllClasses().isEmpty()) {
+        if (source.getAllTypes().isEmpty()) {
             System.err.println("No sources found.");
             return;
         }
@@ -253,7 +253,7 @@ public final class Despector {
             }
         }
         if (!transformers.isEmpty() || !targeted_transformers.isEmpty()) {
-            for (TypeEntry type : source.getAllClasses()) {
+            for (TypeEntry type : source.getAllTypes()) {
                 for (TypeTransformer transformer : transformers) {
                     transformer.transform(type);
                 }
@@ -269,7 +269,7 @@ public final class Despector {
         @SuppressWarnings("unchecked")
         Emitter<JavaEmitterContext> emitter = (Emitter<JavaEmitterContext>) LANGUAGE.getEmitter();
 
-        for (TypeEntry type : source.getAllClasses()) {
+        for (TypeEntry type : source.getAllTypes()) {
             if (type.isInnerClass() || type.isAnonType()) {
                 continue;
             }

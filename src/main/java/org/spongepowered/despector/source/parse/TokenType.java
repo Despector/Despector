@@ -63,4 +63,6 @@ public enum TokenType {
     DOUBLE_QUOTE,
     PIPE,
     DOLLAR,
+    LESS,
+    GREATER,
 }

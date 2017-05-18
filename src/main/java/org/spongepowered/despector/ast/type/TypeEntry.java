@@ -282,8 +282,16 @@ public abstract class TypeEntry extends AstEntry {
         return this.static_methods.size();
     }
 
+    public Collection<MethodEntry> getMethods(String name) {
+        return this.methods.get(name);
+    }
+
     public Collection<MethodEntry> getMethods() {
         return this.methods.values();
+    }
+
+    public Collection<MethodEntry> getStaticMethods(String name) {
+        return this.static_methods.get(name);
     }
 
     public Collection<MethodEntry> getStaticMethods() {

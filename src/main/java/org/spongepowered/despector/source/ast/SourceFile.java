@@ -31,14 +31,14 @@ import java.util.List;
 
 public class SourceFile {
 
-    private final String name;
+    protected final String name;
 
-    private final List<TypeEntry> top_types = new ArrayList<>();
-    private final List<TypeEntry> all_types = new ArrayList<>();
+    protected final List<TypeEntry> top_types = new ArrayList<>();
+    protected final List<TypeEntry> all_types = new ArrayList<>();
 
-    private List<String> header;
-    private String pkg = "";
-    private final List<String> imports = new ArrayList<>();
+    protected List<String> header;
+    protected String pkg = "";
+    protected final List<String> imports = new ArrayList<>();
 
     public SourceFile(String name) {
         this.name = name;
@@ -91,12 +91,11 @@ public class SourceFile {
 
     public String resolveType(String type) {
         for (String im : this.imports) {
-            String last = im.substring(im.lastIndexOf('.') + 1);
-            if (last.equals(type)) {
+            if (im.endsWith(type) && im.charAt(im.length() - type.length()) == '.') {
                 return im.replace('.', '/');
             }
         }
-        return type.replace('.', '/');
+        return null;
     }
 
 }

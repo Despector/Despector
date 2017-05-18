@@ -25,6 +25,7 @@
 package org.spongepowered.despector.source.ast;
 
 import org.spongepowered.despector.ast.SourceSet;
+import org.spongepowered.despector.ast.type.TypeEntry;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -39,6 +40,9 @@ public class SourceFileSet extends SourceSet {
 
     public void addSource(SourceFile src) {
         this.sources.put(src.getName(), src);
+        for (TypeEntry type : src.getAllTypes()) {
+            super.add(type);
+        }
     }
 
 }
