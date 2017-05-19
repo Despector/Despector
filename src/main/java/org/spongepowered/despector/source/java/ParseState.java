@@ -24,13 +24,27 @@
  */
 package org.spongepowered.despector.source.java;
 
+import org.spongepowered.despector.ast.Locals;
+import org.spongepowered.despector.ast.insn.Instruction;
+import org.spongepowered.despector.ast.type.FieldEntry;
+import org.spongepowered.despector.ast.type.MethodEntry;
+import org.spongepowered.despector.ast.type.TypeEntry;
 import org.spongepowered.despector.source.ast.SourceFile;
 import org.spongepowered.despector.source.ast.SourceFileSet;
+
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 public class ParseState {
 
     private final SourceFile file;
     private final SourceFileSet set;
+
+    private TypeEntry current_type;
+    private MethodEntry current_method;
+    private Locals current_locals;
+
+    private final Map<FieldEntry, Instruction> initializers = new LinkedHashMap<>();
 
     public ParseState(SourceFileSet set, SourceFile src) {
         this.file = src;
@@ -43,6 +57,42 @@ public class ParseState {
 
     public SourceFileSet getSourceSet() {
         return this.set;
+    }
+
+    public TypeEntry getCurrentType() {
+        return this.current_type;
+    }
+
+    public void setCurrentType(TypeEntry type) {
+        this.current_type = type;
+    }
+
+    public MethodEntry getCurrentMethod() {
+        return this.current_method;
+    }
+
+    public void setCurrentMethod(MethodEntry mth) {
+        this.current_method = mth;
+    }
+
+    public Locals getCurrentLocals() {
+        return this.current_locals;
+    }
+
+    public void setCurrentLocals(Locals l) {
+        this.current_locals = l;
+    }
+
+    public void setFieldInitializer(FieldEntry fld, Instruction insn) {
+        this.initializers.put(fld, insn);
+    }
+
+    public Instruction getFieldInitializer(FieldEntry fld) {
+        return this.initializers.get(fld);
+    }
+
+    public Map<FieldEntry, Instruction> getFieldInitializers() {
+        return this.initializers;
     }
 
 }

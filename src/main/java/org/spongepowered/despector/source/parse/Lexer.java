@@ -115,6 +115,12 @@ public class Lexer {
         case ']':
             this.next = new ParseToken(TokenType.BRACKET_RIGHT);
             break;
+        case '<':
+            this.next = new ParseToken(TokenType.LESS);
+            break;
+        case '>':
+            this.next = new ParseToken(TokenType.GREATER);
+            break;
         default:
         }
         if (this.next != null) {

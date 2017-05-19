@@ -29,6 +29,28 @@ import static org.spongepowered.despector.source.parse.TokenType.*;
 import com.google.common.collect.Lists;
 import org.spongepowered.despector.Language;
 import org.spongepowered.despector.ast.AccessModifier;
+import org.spongepowered.despector.ast.Locals;
+import org.spongepowered.despector.ast.Locals.Local;
+import org.spongepowered.despector.ast.Locals.LocalInstance;
+import org.spongepowered.despector.ast.generic.ClassTypeSignature;
+import org.spongepowered.despector.ast.generic.GenericClassTypeSignature;
+import org.spongepowered.despector.ast.generic.MethodSignature;
+import org.spongepowered.despector.ast.generic.TypeArgument;
+import org.spongepowered.despector.ast.generic.TypeSignature;
+import org.spongepowered.despector.ast.generic.VoidTypeSignature;
+import org.spongepowered.despector.ast.generic.WildcardType;
+import org.spongepowered.despector.ast.insn.Instruction;
+import org.spongepowered.despector.ast.insn.cst.StringConstant;
+import org.spongepowered.despector.ast.insn.var.InstanceFieldAccess;
+import org.spongepowered.despector.ast.insn.var.StaticFieldAccess;
+import org.spongepowered.despector.ast.stmt.Statement;
+import org.spongepowered.despector.ast.stmt.StatementBlock;
+import org.spongepowered.despector.ast.stmt.assign.InstanceFieldAssignment;
+import org.spongepowered.despector.ast.stmt.assign.StaticFieldAssignment;
+import org.spongepowered.despector.ast.stmt.invoke.InstanceMethodInvoke;
+import org.spongepowered.despector.ast.stmt.invoke.InvokeStatement;
+import org.spongepowered.despector.ast.stmt.invoke.StaticMethodInvoke;
+import org.spongepowered.despector.ast.stmt.misc.Return;
 import org.spongepowered.despector.ast.type.AnnotationEntry;
 import org.spongepowered.despector.ast.type.ClassEntry;
 import org.spongepowered.despector.ast.type.EnumEntry;
@@ -40,7 +62,9 @@ import org.spongepowered.despector.source.SourceParser;
 import org.spongepowered.despector.source.ast.SourceFile;
 import org.spongepowered.despector.source.ast.SourceFileSet;
 import org.spongepowered.despector.source.parse.Lexer;
+import org.spongepowered.despector.source.parse.TokenType;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class JavaParser implements SourceParser {
@@ -208,6 +232,7 @@ public class JavaParser implements SourceParser {
         } else if ("@interface".equals(type)) {
             entry = new AnnotationEntry(state.getSourceSet(), Language.JAVA, name);
         }
+        state.setCurrentType(entry);
         entry.setAccessModifier(acc);
         entry.setFinal(is_final);
         entry.setAbstract(is_abstract);
@@ -237,7 +262,8 @@ public class JavaParser implements SourceParser {
             // TODO check for annotation
 
             int mark = lexer.mark();
-            while (lexer.peekType() == IDENTIFIER) {
+            while (lexer.peekType() == IDENTIFIER || lexer.peekType() == LESS || lexer.peekType() == GREATER || lexer.peekType() == COMMA
+                    || lexer.peekType() == DOT) {
                 lexer.pop();
             }
             if (lexer.peekType() == PAREN_LEFT) {
@@ -253,6 +279,8 @@ public class JavaParser implements SourceParser {
             }
         }
 
+        // TODO add field initializers to init/clinit
+
         return entry;
     }
 
@@ -260,6 +288,7 @@ public class JavaParser implements SourceParser {
         FieldEntry fld = new FieldEntry(state.getSourceSet());
         fld.setAccessModifier(AccessModifier.PACKAGE_PRIVATE);
         while (true) {
+            int mark = lexer.mark();
             String next = lexer.expect(IDENTIFIER).getString();
             if ("final".equals(next)) {
                 fld.setFinal(true);
@@ -276,16 +305,17 @@ public class JavaParser implements SourceParser {
             } else if ("protected".equals(next)) {
                 fld.setAccessModifier(AccessModifier.PROTECTED);
             } else {
+                lexer.reset(mark);
                 break;
             }
         }
-        // TODO handle fully qualified types
-        String type = lexer.expect(IDENTIFIER).getString();
-        // TODO parse generic
+        TypeSignature type = parseType(state, lexer);
+        fld.setType(type);
         String name = lexer.expect(IDENTIFIER).getString();
         fld.setName(name);
         if (lexer.peekType() == EQUALS) {
-            // TODO parse value
+            Instruction val = parseInstruction(state, lexer);
+            state.setFieldInitializer(fld, val);
         }
         lexer.expect(SEMICOLON);
         return fld;
@@ -316,7 +346,229 @@ public class JavaParser implements SourceParser {
         }
         String name = lexer.expect(IDENTIFIER).getString();
         mth.setName(name);
+        Locals locals = new Locals(true);
+        state.setCurrentLocals(locals);
+        String desc = "(";
+        lexer.expect(TokenType.PAREN_LEFT);
+        int i = 0;
+        MethodSignature sig = new MethodSignature();
+        while (lexer.peekType() != PAREN_RIGHT) {
+            TypeSignature param_type = parseType(state, lexer);
+            String param_name = lexer.expect(IDENTIFIER).getString();
+            Local l = locals.getLocal(i);
+            l.addInstance(new LocalInstance(l, param_name, param_type, -1, -1));
+            desc += param_type.getDescriptor();
+            sig.getParameters().add(param_type);
+        }
+        lexer.expect(PAREN_RIGHT);
+        desc += ")";
+        desc += "V";
+        sig.setReturnType(VoidTypeSignature.VOID);
+        mth.setMethodSignature(sig);
+        mth.setLocals(locals);
+        mth.setDescription(desc);
+        mth.setOwner(state.getCurrentType().getName());
+        lexer.expect(BRACE_LEFT);
+        StatementBlock block = new StatementBlock(StatementBlock.Type.METHOD);
+        while (lexer.peekType() != BRACE_RIGHT) {
+            Statement stmt = parseStatement(state, lexer);
+            block.append(stmt);
+        }
+        if (block.size() == 0 || !(block.get(block.size() - 1) instanceof Return)) {
+            block.append(new Return());
+        }
+        mth.setInstructions(block);
+        lexer.expect(BRACE_RIGHT);
         return mth;
+    }
+
+    private TypeArgument parseTypeArgument(ParseState state, Lexer lexer) {
+        WildcardType wild = WildcardType.NONE;
+        if (lexer.peekType() == QUESTION) {
+            lexer.pop();
+            if (lexer.peekType() == TokenType.IDENTIFIER) {
+                int mark = lexer.mark();
+                String next = lexer.pop().getString();
+                if ("extends".equals(next)) {
+                    wild = WildcardType.EXTENDS;
+                } else if ("super".equals(next)) {
+                    wild = WildcardType.SUPER;
+                } else {
+                    lexer.reset(mark);
+                }
+            } else if (lexer.peekType() == TokenType.GREATER || lexer.peekType() == COMMA) {
+                return new TypeArgument(WildcardType.STAR, null);
+            }
+        }
+
+        TypeSignature sig = parseType(state, lexer);
+        return new TypeArgument(wild, sig);
+    }
+
+    private TypeSignature parseType(ParseState state, Lexer lexer) {
+        if (lexer.peekType() == TokenType.IDENTIFIER) {
+            String next = lexer.expect(IDENTIFIER).getString();
+            // TODO check if token is a type parameter in scope
+            String sig = null;
+            List<TypeArgument> params = null;
+            if ("byte".equals(next)) {
+                sig = "B";
+            } else if ("short".equals(next)) {
+                sig = "S";
+            } else if ("int".equals(next)) {
+                sig = "I";
+            } else if ("long".equals(next)) {
+                sig = "J";
+            } else if ("float".equals(next)) {
+                sig = "F";
+            } else if ("double".equals(next)) {
+                sig = "D";
+            } else if ("char".equals(next)) {
+                sig = "C";
+            } else if ("boolean".equals(next)) {
+                sig = "Z";
+            } else {
+                sig = next;
+                while (lexer.peekType() == DOT) {
+                    lexer.expect(DOT);
+                    sig += ".";
+                    sig += lexer.expect(IDENTIFIER).getString();
+                }
+                sig = state.getSource().resolveType(sig);
+                if (sig == null) {
+                    throw new IllegalStateException(sig);
+                }
+                if (lexer.peekType() == LESS) {
+                    params = new ArrayList<>();
+                    lexer.pop();
+                    boolean first = true;
+                    while (first || lexer.peekType() != GREATER) {
+                        if (!first) {
+                            lexer.expect(COMMA);
+                        } else {
+                            first = false;
+                        }
+                        TypeArgument param = parseTypeArgument(state, lexer);
+                        params.add(param);
+                    }
+                    lexer.expect(GREATER);
+                }
+                // TODO generics
+                sig = "L" + sig + ";";
+            }
+            while (lexer.peekType() == BRACKET_LEFT) {
+                lexer.pop();
+                lexer.expect(BRACKET_RIGHT);
+                sig = "[" + sig;
+            }
+            if (params != null) {
+                GenericClassTypeSignature generic = new GenericClassTypeSignature(sig);
+                generic.getArguments().addAll(params);
+            }
+            return ClassTypeSignature.of(sig);
+        }
+        throw new IllegalStateException(lexer.peek().toString());
+    }
+
+    private Statement parseStatement(ParseState state, Lexer lexer) {
+        Instruction callee = null;
+        String static_type = null;
+        String accu = "";
+        while (true) {
+            String next = lexer.expect(IDENTIFIER).getString();
+            if (callee == null) {
+                if (static_type == null) {
+                    accu += next;
+                    String type = state.getSource().resolveType(accu);
+                    if (type != null) {
+                        static_type = type;
+                    } else {
+                        accu += ".";
+                    }
+                } else {
+                    if (lexer.peekType() == PAREN_LEFT) {
+                        lexer.expect(PAREN_LEFT);
+                        List<Instruction> args = new ArrayList<>();
+                        boolean first = true;
+                        String tmp_desc = "(";
+                        while (lexer.peekType() != PAREN_RIGHT) {
+                            if (!first) {
+                                lexer.expect(COMMA);
+                            } else {
+                                first = false;
+                            }
+                            Instruction arg = parseInstruction(state, lexer);
+                            tmp_desc += arg.inferType().getDescriptor();
+                            args.add(arg);
+                        }
+                        tmp_desc += ")";
+                        lexer.expect(PAREN_RIGHT);
+                        if (lexer.peekType() != SEMICOLON) {
+                            tmp_desc += "Ljava/lang/Object;";
+                        } else {
+                            tmp_desc += "V";
+                        }
+                        callee = new StaticMethodInvoke(next, tmp_desc, "L" + static_type + ";", args.toArray(new Instruction[args.size()]));
+                        if (lexer.peekType() == SEMICOLON) {
+                            lexer.expect(SEMICOLON);
+                            break;
+                        }
+                    } else if (lexer.peekType() == EQUALS) {
+                        Instruction val = parseInstruction(state, lexer);
+                        return new StaticFieldAssignment(next, null, "L" + static_type + ";", val);
+                    } else {
+                        callee = new StaticFieldAccess(next, null, "L" + static_type + ";");
+                    }
+                }
+            } else {
+                if (lexer.peekType() == PAREN_LEFT) {
+                    lexer.expect(PAREN_LEFT);
+                    List<Instruction> args = new ArrayList<>();
+                    boolean first = true;
+                    String tmp_desc = "(";
+                    while (lexer.peekType() != PAREN_RIGHT) {
+                        if (!first) {
+                            lexer.expect(COMMA);
+                        } else {
+                            first = false;
+                        }
+                        Instruction arg = parseInstruction(state, lexer);
+                        tmp_desc += arg.inferType().getDescriptor();
+                        args.add(arg);
+                    }
+                    tmp_desc += ")";
+                    lexer.expect(PAREN_RIGHT);
+                    if (lexer.peekType() != SEMICOLON) {
+                        tmp_desc += "Ljava/lang/Object;";
+                    } else {
+                        tmp_desc += "V";
+                    }
+                    callee = new InstanceMethodInvoke(null, next, tmp_desc, "incomplete", args.toArray(new Instruction[args.size()]),
+                            callee);
+                    if (lexer.peekType() == SEMICOLON) {
+                        lexer.expect(SEMICOLON);
+                        break;
+                    }
+                } else if (lexer.peekType() == EQUALS) {
+                    Instruction val = parseInstruction(state, lexer);
+                    return new InstanceFieldAssignment(next, null, "incomplete", callee, val);
+                } else {
+                    callee = new InstanceFieldAccess(next, null, "incomplete", callee);
+                }
+            }
+            lexer.expect(DOT);
+        }
+        if (callee != null) {
+            return new InvokeStatement(callee);
+        }
+        throw new IllegalStateException();
+    }
+
+    private Instruction parseInstruction(ParseState state, Lexer lexer) {
+        if (lexer.peekType() == STRING_CONSTANT) {
+            return new StringConstant(lexer.pop().getString());
+        }
+        throw new IllegalStateException();
     }
 
 }

@@ -89,6 +89,7 @@ import org.spongepowered.despector.emitter.bytecode.instruction.BytecodeLocalAcc
 import org.spongepowered.despector.emitter.bytecode.instruction.BytecodeLongConstantEmitter;
 import org.spongepowered.despector.emitter.bytecode.instruction.BytecodeNullConstantEmitter;
 import org.spongepowered.despector.emitter.bytecode.instruction.BytecodeStaticFieldAccessEmitter;
+import org.spongepowered.despector.emitter.bytecode.instruction.BytecodeStaticMethodInvokeEmitter;
 import org.spongepowered.despector.emitter.bytecode.instruction.BytecodeStringConstantEmitter;
 import org.spongepowered.despector.emitter.bytecode.instruction.BytecodeTypeConstantEmitter;
 import org.spongepowered.despector.emitter.bytecode.statement.BytecodeIfEmitter;
@@ -310,6 +311,7 @@ public final class Emitters {
         BYTECODE_SET.setInstructionEmitter(LongConstant.class, new BytecodeLongConstantEmitter());
         BYTECODE_SET.setInstructionEmitter(NullConstant.class, new BytecodeNullConstantEmitter());
         BYTECODE_SET.setInstructionEmitter(TypeConstant.class, new BytecodeTypeConstantEmitter());
+        BYTECODE_SET.setInstructionEmitter(StaticMethodInvoke.class, new BytecodeStaticMethodInvokeEmitter());
     }
 
     private Emitters() {
