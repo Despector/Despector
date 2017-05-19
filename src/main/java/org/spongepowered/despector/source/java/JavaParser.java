@@ -40,7 +40,6 @@ import org.spongepowered.despector.ast.generic.TypeSignature;
 import org.spongepowered.despector.ast.generic.VoidTypeSignature;
 import org.spongepowered.despector.ast.generic.WildcardType;
 import org.spongepowered.despector.ast.insn.Instruction;
-import org.spongepowered.despector.ast.insn.cst.StringConstant;
 import org.spongepowered.despector.ast.insn.var.InstanceFieldAccess;
 import org.spongepowered.despector.ast.insn.var.StaticFieldAccess;
 import org.spongepowered.despector.ast.stmt.Statement;
@@ -68,6 +67,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class JavaParser implements SourceParser {
+
+    private final ExpressionParser expr_parser = new ExpressionParser(this);
 
     @Override
     public SourceFile parse(SourceFileSet set, String name, String input) {
@@ -314,6 +315,7 @@ public class JavaParser implements SourceParser {
         String name = lexer.expect(IDENTIFIER).getString();
         fld.setName(name);
         if (lexer.peekType() == EQUALS) {
+            lexer.pop();
             Instruction val = parseInstruction(state, lexer);
             state.setFieldInitializer(fld, val);
         }
@@ -405,7 +407,7 @@ public class JavaParser implements SourceParser {
         return new TypeArgument(wild, sig);
     }
 
-    private TypeSignature parseType(ParseState state, Lexer lexer) {
+    TypeSignature parseType(ParseState state, Lexer lexer) {
         if (lexer.peekType() == TokenType.IDENTIFIER) {
             String next = lexer.expect(IDENTIFIER).getString();
             // TODO check if token is a type parameter in scope
@@ -464,6 +466,7 @@ public class JavaParser implements SourceParser {
             if (params != null) {
                 GenericClassTypeSignature generic = new GenericClassTypeSignature(sig);
                 generic.getArguments().addAll(params);
+                return generic;
             }
             return ClassTypeSignature.of(sig);
         }
@@ -565,10 +568,7 @@ public class JavaParser implements SourceParser {
     }
 
     private Instruction parseInstruction(ParseState state, Lexer lexer) {
-        if (lexer.peekType() == STRING_CONSTANT) {
-            return new StringConstant(lexer.pop().getString());
-        }
-        throw new IllegalStateException();
+        return this.expr_parser.parseExpression(state, lexer);
     }
 
 }

@@ -1,7 +1,7 @@
 /*
- * This file is part of SpongeAPI, licensed under the MIT License (MIT).
+ * The MIT License (MIT)
  *
- * Copyright (c) SpongePowered <https://www.spongepowered.org>
+ * Copyright (c) Despector <https://despector.voxelgenesis.com>
  * Copyright (c) contributors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy

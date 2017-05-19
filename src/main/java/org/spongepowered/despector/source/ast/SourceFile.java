@@ -202,7 +202,7 @@ public class SourceFile {
             return def;
         }
         for (String im : this.imports) {
-            if (im.endsWith(type) && im.charAt(im.length() - type.length()) == '.') {
+            if (im.endsWith(type) && im.charAt(im.length() - type.length() - 1) == '.') {
                 return im.replace('.', '/');
             }
         }
