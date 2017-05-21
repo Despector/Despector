@@ -438,13 +438,14 @@ public class JavaParser implements SourceParser {
                 }
                 sig = state.getSource().resolveType(sig);
                 if (sig == null) {
-                    throw new IllegalStateException(sig);
+                    // assume package local
+                    sig = state.getSource().getPackage().replace('/', '.') + "/" + sig;
                 }
                 if (lexer.peekType() == LESS) {
                     params = new ArrayList<>();
                     lexer.pop();
                     boolean first = true;
-                    while (first || lexer.peekType() != GREATER) {
+                    while (lexer.peekType() != GREATER) {
                         if (!first) {
                             lexer.expect(COMMA);
                         } else {
