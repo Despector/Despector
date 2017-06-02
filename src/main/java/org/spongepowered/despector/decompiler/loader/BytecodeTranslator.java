@@ -57,6 +57,7 @@ import org.spongepowered.despector.decompiler.loader.ClassConstantPool.MethodHan
 import org.spongepowered.despector.decompiler.loader.ClassConstantPool.MethodRefEntry;
 import org.spongepowered.despector.decompiler.loader.ClassConstantPool.StringEntry;
 import org.spongepowered.despector.decompiler.method.PartialMethod.TryCatchRegion;
+import org.spongepowered.despector.util.TypeHelper;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -599,8 +600,8 @@ public class BytecodeTranslator {
                 InvokeDynamicEntry handle = pool.getInvokeDynamic(index);
                 BootstrapMethod bsm = bootstrap_methods.get(handle.bootstrap_index);
                 MethodRefEntry bsmArg = pool.getMethodRef(((MethodHandleEntry) bsm.arguments[1]).reference_index);
-                block.append(new InvokeDynamicInsn(Insn.INVOKEDYNAMIC, bsmArg.cls, bsmArg.name, bsmArg.type_name, handle.name, handle.type_name,
-                        bsmArg.type == ClassConstantPool.EntryType.INTERFACE_METHOD_REF));
+                block.append(new InvokeDynamicInsn(Insn.INVOKEDYNAMIC, bsmArg.cls, bsmArg.name, bsmArg.type_name, handle.name,
+                        TypeHelper.getRet(handle.type_name), bsmArg.type == ClassConstantPool.EntryType.INTERFACE_METHOD_REF));
                 break;
             }
             case 187: {// NEW

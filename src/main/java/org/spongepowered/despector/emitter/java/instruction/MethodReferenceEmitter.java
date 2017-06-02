@@ -34,7 +34,7 @@ public class MethodReferenceEmitter implements InstructionEmitter<JavaEmitterCon
 
     @Override
     public void emit(JavaEmitterContext ctx, MethodReference arg, TypeSignature type) {
-        ctx.emit(arg.getOwnerVal(), ClassTypeSignature.of(arg.getLambdaOwner()));
+        ctx.emit(arg.getOwnerVal(), ClassTypeSignature.of("L" + arg.getLambdaOwner() + ";"));
         ctx.printString("::");
         ctx.printString(arg.getLambdaMethod());
     }

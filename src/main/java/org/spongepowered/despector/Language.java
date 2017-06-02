@@ -43,15 +43,6 @@ public class Language {
     public static final Language JAVA = new Language("java", ".java");
     public static final Language KOTLIN = new Language("kotlin", ".kt");
     public static final Language ANY = new Language("any", null);
-    
-    static {
-        JAVA.setDecompiler(Decompilers.JAVA);
-        JAVA.setEmitter(Emitters.JAVA);
-        KOTLIN.setDecompiler(Decompilers.KOTLIN);
-        KOTLIN.setEmitter(Emitters.KOTLIN);
-        ANY.setDecompiler(Decompilers.WILD);
-        ANY.setEmitter(Emitters.WILD);
-    }
 
     public static Language get(String id) {
         return LANGUAGES.get(id);
@@ -83,19 +74,29 @@ public class Language {
     }
 
     public Decompiler getDecompiler() {
+        if (this.decompiler == null) {
+            if (this == JAVA) {
+                this.decompiler = Decompilers.JAVA;
+            } else if (this == KOTLIN) {
+                this.decompiler = Decompilers.KOTLIN;
+            } else if (this == ANY) {
+                this.decompiler = Decompilers.WILD;
+            }
+        }
         return this.decompiler;
     }
 
-    public void setDecompiler(Decompiler decomp) {
-        this.decompiler = decomp;
-    }
-
     public Emitter<?> getEmitter() {
+        if (this.emitter == null) {
+            if (this == JAVA) {
+                this.emitter = Emitters.JAVA;
+            } else if (this == KOTLIN) {
+                this.emitter = Emitters.KOTLIN;
+            } else if (this == ANY) {
+                this.emitter = Emitters.WILD;
+            }
+        }
         return this.emitter;
-    }
-
-    public void setEmitter(Emitter<?> em) {
-        this.emitter = em;
     }
 
 }
