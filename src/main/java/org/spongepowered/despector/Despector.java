@@ -190,7 +190,7 @@ public final class Despector {
         Decompiler decompiler = Decompilers.get(LANGUAGE);
 
         if (LibraryConfiguration.parallel) {
-            System.out.println("Running parallel decompile with " + Runtime.getRuntime().availableProcessors());
+            System.out.println("Running parallel decompile with " + Runtime.getRuntime().availableProcessors() + " workers");
         }
 
         SourceSet source = new SourceSet();
@@ -283,10 +283,12 @@ public final class Despector {
             }
         }
 
-        System.out.println("Time spend decompiling: " + (Timing.time_decompiling / 1000000) + "ms");
-        System.out.println("Time spend decompiling methods: " + (Timing.time_decompiling_methods / 1000000) + "ms");
-        System.out.println("Time spend loading classes: " + (Timing.time_loading_classes / 1000000) + "ms");
-        System.out.println("Time spend emitting: " + (Timing.time_emitting / 1000000) + "ms");
+        if (LibraryConfiguration.print_times) {
+            System.out.println("Time spend decompiling: " + (Timing.time_decompiling / 1000000) + "ms");
+            System.out.println("Time spend decompiling methods: " + (Timing.time_decompiling_methods / 1000000) + "ms");
+            System.out.println("Time spend loading classes: " + (Timing.time_loading_classes / 1000000) + "ms");
+            System.out.println("Time spend emitting: " + (Timing.time_emitting / 1000000) + "ms");
+        }
 
     }
 

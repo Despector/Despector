@@ -465,7 +465,7 @@ public final class StatementBuilder {
             case Insn.NEWARRAY: {
                 Instruction size = stack.pop();
                 TypeInsn array = (TypeInsn) next;
-                stack.push(new NewArray(ClassTypeSignature.of(array.getType()), size, null));
+                stack.push(new NewArray(ClassTypeSignature.of("L" + array.getType() + ";"), size, null));
                 break;
             }
             case Insn.MULTINEWARRAY: {

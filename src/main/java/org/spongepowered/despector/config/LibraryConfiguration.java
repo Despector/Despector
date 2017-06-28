@@ -31,5 +31,6 @@ public class LibraryConfiguration {
 
     public static boolean quiet = false;
     public static boolean parallel = true;
+    public static boolean print_times = false;
 
 }
