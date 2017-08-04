@@ -34,6 +34,7 @@ import org.spongepowered.despector.ast.type.MethodEntry;
 import org.spongepowered.despector.ast.type.TypeEntry;
 import org.spongepowered.despector.emitter.InstructionEmitter;
 import org.spongepowered.despector.emitter.java.JavaEmitterContext;
+import org.spongepowered.despector.util.TypeHelper;
 
 /**
  * An emitter for a dynamic invoke.
@@ -42,8 +43,7 @@ public class DynamicInvokeEmitter implements InstructionEmitter<JavaEmitterConte
 
     @Override
     public void emit(JavaEmitterContext ctx, Lambda arg, TypeSignature type) {
-
-        TypeEntry owner = ctx.getType().getSource().get(arg.getLambdaOwner());
+        TypeEntry owner = ctx.getType().getSource().get(TypeHelper.descToType(arg.getLambdaOwner()));
         MethodEntry method = owner.getStaticMethod(arg.getLambdaMethod());
         if (method == null) {
             method = owner.getMethod(arg.getLambdaMethod());

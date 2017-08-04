@@ -252,7 +252,7 @@ public final class TypeHelper {
         if (matcher.find()) {
             return matcher.group(1);
         }
-        return "V";
+        throw new IllegalStateException("Expected return type, but '" + signature + "' is not a valid method signature");
     }
 
     /**

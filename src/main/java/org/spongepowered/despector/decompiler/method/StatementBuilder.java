@@ -445,7 +445,7 @@ public final class StatementBuilder {
             }
             case Insn.INVOKEDYNAMIC: {
                 InvokeDynamicInsn invoke = (InvokeDynamicInsn) next;
-                TypeSignature type = ClassTypeSignature.of(invoke.getType());
+                TypeSignature type = ClassTypeSignature.of(TypeHelper.getRet(invoke.getType()));
                 if (invoke.isInterface()) {
                     MethodReference handle = new MethodReference(stack.pop(), invoke.getLambdaOwner(), invoke.getLambdaName(),
                             invoke.getLambdaDescription(), type, invoke.getName());
@@ -490,9 +490,6 @@ public final class StatementBuilder {
                 TypeInsn insn = (TypeInsn) next;
                 Instruction val = stack.pop();
                 String type = insn.getType();
-                if (!type.startsWith("[")) {
-                    type = "L" + type + ";";
-                }
                 stack.push(new InstanceOf(val, ClassTypeSignature.of(type)));
                 break;
             }
