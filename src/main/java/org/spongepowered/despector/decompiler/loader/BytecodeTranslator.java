@@ -606,7 +606,7 @@ public class BytecodeTranslator {
             case 187: {// NEW
                 int index = ((code[i++] & 0xFF) << 8) | (code[i++] & 0xFF);
                 ClassEntry ref = pool.getClass(index);
-                block.append(new TypeInsn(Insn.NEW, ref.name));
+                block.append(new TypeInsn(Insn.NEW, "L" + ref.name + ";"));
                 break;
             }
             case 188: {// NEWARRAY
@@ -646,7 +646,11 @@ public class BytecodeTranslator {
             case 189: {// ANEWARRAY
                 int index = ((code[i++] & 0xFF) << 8) | (code[i++] & 0xFF);
                 ClassEntry ref = pool.getClass(index);
-                block.append(new TypeInsn(Insn.NEWARRAY, ref.name));
+                String desc = ref.name;
+                if (!desc.startsWith("[") && (desc.length() > 1 || "BSIJFDCZ".indexOf(desc.charAt(0)) == -1)) {
+                    desc = "L" + desc + ";";
+                }
+                block.append(new TypeInsn(Insn.NEWARRAY, desc));
                 break;
             }
             case 190: // ARRAYLENGTH
@@ -668,7 +672,7 @@ public class BytecodeTranslator {
             case 193: {// INSTANCEOF
                 int index = ((code[i++] & 0xFF) << 8) | (code[i++] & 0xFF);
                 ClassEntry ref = pool.getClass(index);
-                block.append(new TypeInsn(Insn.INSTANCEOF, ref.name));
+                block.append(new TypeInsn(Insn.INSTANCEOF, "L" + ref.name + ";"));
                 break;
             }
             case 194: // MONITORENTER

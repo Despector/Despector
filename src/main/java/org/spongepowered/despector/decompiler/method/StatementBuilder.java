@@ -458,14 +458,14 @@ public final class StatementBuilder {
                 break;
             }
             case Insn.NEW: {
-                TypeSignature type = ClassTypeSignature.of("L" + ((TypeInsn) next).getType() + ";");
+                TypeSignature type = ClassTypeSignature.of(((TypeInsn) next).getType());
                 stack.push(new New(type, null, null));
                 break;
             }
             case Insn.NEWARRAY: {
                 Instruction size = stack.pop();
                 TypeInsn array = (TypeInsn) next;
-                stack.push(new NewArray(ClassTypeSignature.of("L" + array.getType() + ";"), size, null));
+                stack.push(new NewArray(ClassTypeSignature.of(array.getType()), size, null));
                 break;
             }
             case Insn.MULTINEWARRAY: {
