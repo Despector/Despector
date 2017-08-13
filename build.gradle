@@ -1,13 +1,19 @@
-plugins {
-    id 'java'
-    id 'maven'
-
-    id 'idea'
-    id 'eclipse'
-
-    id 'net.minecrell.licenser' version '0.3'
-    id 'com.github.johnrengelman.shadow' version '1.2.4'
+buildscript {
+    repositories {
+        maven {
+            url 'https://plugins.gradle.org/m2/'
+        }
+    }
+    dependencies {
+        classpath 'gradle.plugin.net.minecrell:licenser:0.3'
+        classpath 'com.github.jengelman.gradle.plugins:shadow:2.0.1'
+    }
 }
+
+apply plugin: 'java'
+apply plugin: 'maven'
+apply plugin: 'net.minecrell.licenser'
+apply plugin: 'com.github.johnrengelman.shadow'
 
 defaultTasks 'clean', 'licenseFormat', 'build'
 
@@ -61,7 +67,7 @@ jar {
         attributes(
                 'Built-By': System.properties['user.name'],
                 'Created-By': "${System.properties['java.vm.version']} (${System.properties['java.vm.vendor']})",
-                'Main-Class': "org.spongepowered.despector.Despector"
+                'Main-Class': 'org.spongepowered.despector.Despector'
         )
     }
 }
@@ -104,5 +110,5 @@ artifacts {
 }
 
 task wrapper(type: Wrapper) {
-    gradleVersion = '3.1'
+    gradleVersion = '4.1'
 }
