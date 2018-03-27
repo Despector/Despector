@@ -25,12 +25,14 @@
 package org.spongepowered.test.ast;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 import org.spongepowered.despector.ast.generic.ClassSignature;
 import org.spongepowered.despector.ast.generic.ClassTypeSignature;
 import org.spongepowered.despector.ast.generic.GenericClassTypeSignature;
+import org.spongepowered.despector.ast.generic.MethodSignature;
 import org.spongepowered.despector.ast.generic.TypeArgument;
 import org.spongepowered.despector.ast.generic.TypeParameter;
 import org.spongepowered.despector.ast.generic.TypeSignature;
@@ -87,6 +89,32 @@ public class SignatureParserTest {
         TypeSignature ps = p.getSignature();
         assertEquals(ClassTypeSignature.class, ps.getClass());
         assertEquals("[I", ps.getDescriptor());
+    }
+
+    @Test
+    public void testChildClass() {
+        String sig = "(Lio/github/katrix/katlib/shade/scala/Function1<Lio/github/katrix/katlib/shade/scala/runtime/Nothing$;Ljava/lang/Object;>;)"
+                + "Lio/github/katrix/katlib/shade/scala/Option<Lio/github/katrix/katlib/shade/scala/runtime/Nothing$;>.WithFilter;";
+        MethodSignature mth = SignatureParser.parseMethod(sig);
+        assertEquals(1, mth.getParameters().size());
+        TypeSignature param = mth.getParameters().get(0);
+        assertTrue(param instanceof GenericClassTypeSignature);
+        GenericClassTypeSignature paramGeneric = (GenericClassTypeSignature) param;
+        assertEquals(2, paramGeneric.getArguments().size());
+        TypeArgument arg1 = paramGeneric.getArguments().get(0);
+        assertEquals("Lio/github/katrix/katlib/shade/scala/runtime/Nothing$;", arg1.getSignature().getDescriptor());
+        assertEquals(WildcardType.NONE, arg1.getWildcard());
+        TypeArgument arg2 = paramGeneric.getArguments().get(1);
+        assertEquals("Ljava/lang/Object;", arg2.getSignature().getDescriptor());
+        assertEquals(WildcardType.NONE, arg2.getWildcard());
+        assertTrue(mth.getReturnType() instanceof GenericClassTypeSignature);
+        GenericClassTypeSignature ret = (GenericClassTypeSignature) mth.getReturnType();
+        assertNotNull(ret.getParent());
+        assertEquals("LWithFilter;", ret.getDescriptor());
+        GenericClassTypeSignature parent = ret.getParent();
+        assertEquals(1, parent.getArguments().size());
+        assertEquals("Lio/github/katrix/katlib/shade/scala/runtime/Nothing$;", parent.getArguments().get(0).getSignature().getDescriptor());
+        assertEquals("Lio/github/katrix/katlib/shade/scala/Option;", parent.getDescriptor());
     }
 
 }

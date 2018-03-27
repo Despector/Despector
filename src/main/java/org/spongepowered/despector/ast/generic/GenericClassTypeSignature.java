@@ -41,9 +41,24 @@ public class GenericClassTypeSignature extends TypeSignature {
 
     protected String type_name;
     private List<TypeArgument> args = new ArrayList<>();
+    private GenericClassTypeSignature parent;
 
     public GenericClassTypeSignature(String type) {
         this.type_name = checkNotNull(type, "type");
+        this.parent = null;
+    }
+
+    public GenericClassTypeSignature(GenericClassTypeSignature parent, String type) {
+        this.type_name = checkNotNull(type, "type");
+        this.parent = parent;
+    }
+
+    public GenericClassTypeSignature getParent() {
+        return this.parent;
+    }
+
+    public boolean hasParent() {
+        return this.parent != null;
     }
 
     /**

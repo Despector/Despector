@@ -181,8 +181,38 @@ public final class SignatureParser {
                 sig.getArguments().add(new TypeArgument(wildcard, parseFieldTypeSignature(parser)));
             }
         }
-        if (parser.peek() == '.') {
-            // TODO child class support
+        while (parser.peek() == '.') {
+            parser.pop();
+            StringBuilder child = new StringBuilder();
+            child.append("L");
+            child.append(parser.nextIdentifier());
+            while (parser.check('/')) {
+                child.append('/');
+                child.append(parser.nextIdentifier());
+            }
+            child.append(";");
+            sig = new GenericClassTypeSignature(sig, child.toString());
+            if (parser.check('<')) {
+                while (!parser.check('>')) {
+                    char wild = parser.peek();
+                    WildcardType wildcard = null;
+                    if (wild == '*') {
+                        sig.getArguments().add(new TypeArgument(WildcardType.STAR, null));
+                        parser.skip(1);
+                        continue;
+                    } else if (wild == '+') {
+                        parser.skip(1);
+                        wildcard = WildcardType.EXTENDS;
+                    } else if (wild == '-') {
+                        parser.skip(1);
+                        wildcard = WildcardType.SUPER;
+                    } else {
+                        wildcard = WildcardType.NONE;
+                    }
+                    sig.getArguments().add(new TypeArgument(wildcard, parseFieldTypeSignature(parser)));
+                }
+            }
+
         }
         parser.expect(';');
         return sig;
@@ -211,6 +241,10 @@ public final class SignatureParser {
 
         public char peek() {
             return this.buffer.charAt(this.index);
+        }
+
+        public char pop() {
+            return this.buffer.charAt(this.index++);
         }
 
         public boolean check(char n) {
