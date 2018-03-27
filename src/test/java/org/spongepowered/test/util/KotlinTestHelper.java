@@ -27,6 +27,7 @@ package org.spongepowered.test.util;
 import org.spongepowered.despector.ast.SourceSet;
 import org.spongepowered.despector.ast.type.MethodEntry;
 import org.spongepowered.despector.ast.type.TypeEntry;
+import org.spongepowered.despector.config.LibraryConfiguration;
 import org.spongepowered.despector.decompiler.Decompilers;
 import org.spongepowered.despector.emitter.Emitters;
 import org.spongepowered.despector.emitter.format.EmitterFormat;
@@ -41,6 +42,9 @@ public class KotlinTestHelper {
     private static final SourceSet DUMMY_SOURCE_SET = new SourceSet();
 
     public static String getMethodAsString(byte[] data, String method_name) {
+        LibraryConfiguration.quiet = false;
+        LibraryConfiguration.parallel = false;
+        LibraryConfiguration.force_lang = true;
         TypeEntry type = null;
         try {
             type = Decompilers.KOTLIN.decompile(new ByteArrayInputStream(data), DUMMY_SOURCE_SET);

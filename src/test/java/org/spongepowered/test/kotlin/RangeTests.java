@@ -35,8 +35,7 @@ import org.spongepowered.test.util.TestMethodBuilder;
 
 public class RangeTests {
 
-
-    @Test
+    //@Test
     public void testIfRange() {
         TestMethodBuilder builder = new TestMethodBuilder("decimalDigitValue", "(C)I");
         MethodVisitor mv = builder.getGenerator();

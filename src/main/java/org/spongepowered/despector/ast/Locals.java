@@ -26,7 +26,9 @@ package org.spongepowered.despector.ast;
 
 import com.google.common.collect.Lists;
 import org.spongepowered.despector.ast.generic.ClassTypeSignature;
+import org.spongepowered.despector.ast.generic.MethodSignature;
 import org.spongepowered.despector.ast.generic.TypeSignature;
+import org.spongepowered.despector.ast.type.MethodEntry;
 import org.spongepowered.despector.util.SignatureParser;
 import org.spongepowered.despector.util.serialization.MessagePacker;
 
@@ -40,12 +42,12 @@ import java.util.List;
  */
 public class Locals {
 
+    private MethodEntry method;
     private Local[] locals;
-    private final boolean is_static;
 
-    public Locals(boolean is_static) {
+    public Locals(MethodEntry method) {
         this.locals = new Local[0];
-        this.is_static = is_static;
+        this.method = method;
     }
 
     /**
@@ -57,7 +59,7 @@ public class Locals {
         for (int i = 0; i < other.locals.length; i++) {
             this.locals[i] = other.locals[i];
         }
-        this.is_static = other.is_static;
+        this.method = other.method;
     }
 
     public int getLocalCount() {
@@ -72,7 +74,7 @@ public class Locals {
             int old = this.locals.length;
             this.locals = Arrays.copyOf(this.locals, i + 1);
             for (int o = old; o <= i; o++) {
-                this.locals[o] = new Local(o, this.is_static);
+                this.locals[o] = new Local(this, o, this.method.isStatic());
             }
         }
         return this.locals[i];
@@ -80,8 +82,10 @@ public class Locals {
 
     /**
      * Bakes the local instances using the given label indices.
+     * 
+     * @param methodSignature
      */
-    public void bakeInstances(List<Integer> label_indices) {
+    public void bakeInstances(MethodSignature methodSignature, List<Integer> label_indices) {
         for (Local local : this.locals) {
             local.bakeInstances(label_indices);
         }
@@ -163,13 +167,15 @@ public class Locals {
      */
     public static class Local {
 
+        private final Locals locals;
         private final boolean is_static;
         private final int index;
         private LocalInstance parameter_instance = null;
         private final List<LVT> lvt = Lists.newArrayList();
         private final List<LocalInstance> instances = Lists.newArrayList();
 
-        public Local(int i, boolean is_static) {
+        public Local(Locals locals, int i, boolean is_static) {
+            this.locals = locals;
             this.index = i;
             this.is_static = is_static;
         }
@@ -220,7 +226,7 @@ public class Locals {
                 }
                 LocalInstance insn = new LocalInstance(this, l.name, sig, start - 1, end);
 
-                if (start == 0) {
+                if (this.index < this.locals.method.getParamTypes().size() + (this.is_static ? 0 : 1)) {
                     this.parameter_instance = insn;
                 } else {
                     this.instances.add(insn);
@@ -245,8 +251,13 @@ public class Locals {
             if (!this.is_static && this.index == 0) {
                 n = "this";
             }
-            this.parameter_instance = new LocalInstance(this, n, null, -1, -1);
-            return this.parameter_instance;
+            if (index < this.locals.method.getParamTypes().size() + (this.is_static ? 0 : 1)) {
+                this.parameter_instance = new LocalInstance(this, n, null, -1, -1);
+                return this.parameter_instance;
+            }
+            LocalInstance insn = new LocalInstance(this, n, null, -1, Integer.MAX_VALUE);
+            this.instances.add(insn);
+            return insn;
         }
 
         /**

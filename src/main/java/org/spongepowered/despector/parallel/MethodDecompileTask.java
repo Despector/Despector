@@ -27,6 +27,7 @@ package org.spongepowered.despector.parallel;
 import org.spongepowered.despector.Language;
 import org.spongepowered.despector.ast.Annotation;
 import org.spongepowered.despector.ast.Locals.Local;
+import org.spongepowered.despector.ast.generic.MethodSignature;
 import org.spongepowered.despector.ast.insn.cst.StringConstant;
 import org.spongepowered.despector.ast.stmt.Statement;
 import org.spongepowered.despector.ast.stmt.StatementBlock;
@@ -83,7 +84,8 @@ public class MethodDecompileTask implements Runnable {
             }
             MethodEntry mth = unfinished.mth;
             try {
-                mth.setIR(this.bytecode.createIR(unfinished.code, mth.getLocals(), unfinished.catch_regions, this.pool, this.bootstrap_methods));
+                mth.setIR(this.bytecode.createIR(mth.getMethodSignature(), unfinished.code, mth.getLocals(), unfinished.catch_regions, this.pool,
+                        this.bootstrap_methods));
 
                 if (unfinished.parameter_annotations != null) {
                     for (Map.Entry<Integer, List<Annotation>> e : unfinished.parameter_annotations.entrySet()) {
@@ -138,7 +140,7 @@ public class MethodDecompileTask implements Runnable {
                             text.add(next.toString());
                         }
                     } else {
-                        mth.getLocals().bakeInstances(Collections.emptyList());
+                        mth.getLocals().bakeInstances(new MethodSignature(), Collections.emptyList());
                     }
                     insns.append(new Comment(text));
                 } else {

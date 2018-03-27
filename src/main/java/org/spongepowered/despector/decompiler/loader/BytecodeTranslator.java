@@ -26,6 +26,7 @@ package org.spongepowered.despector.decompiler.loader;
 
 import org.spongepowered.despector.ast.Locals;
 import org.spongepowered.despector.ast.generic.ClassTypeSignature;
+import org.spongepowered.despector.ast.generic.MethodSignature;
 import org.spongepowered.despector.ast.stmt.invoke.InstanceMethodInvoke;
 import org.spongepowered.despector.decompiler.BaseDecompiler.BootstrapMethod;
 import org.spongepowered.despector.decompiler.error.SourceFormatException;
@@ -69,7 +70,7 @@ public class BytecodeTranslator {
 
     }
 
-    public InsnBlock createIR(byte[] code, Locals locals, List<TryCatchRegion> catch_regions, ClassConstantPool pool,
+    public InsnBlock createIR(MethodSignature methodSignature, byte[] code, Locals locals, List<TryCatchRegion> catch_regions, ClassConstantPool pool,
             List<BootstrapMethod> bootstrap_methods) {
         InsnBlock block = new InsnBlock();
         List<Integer> insn_starts = new ArrayList<>();
@@ -731,7 +732,7 @@ public class BytecodeTranslator {
             block.getCatchRegions().add(new TryCatchRegion(start_pc, end_pc, catch_pc, region.getException()));
         }
 
-        locals.bakeInstances(insn_starts);
+        locals.bakeInstances(methodSignature, insn_starts);
 
         return block;
     }

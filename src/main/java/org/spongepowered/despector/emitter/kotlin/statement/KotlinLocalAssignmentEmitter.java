@@ -25,6 +25,7 @@
 package org.spongepowered.despector.emitter.kotlin.statement;
 
 import org.spongepowered.despector.ast.Locals.LocalInstance;
+import org.spongepowered.despector.ast.generic.TypeSignature;
 import org.spongepowered.despector.ast.stmt.assign.LocalAssignment;
 import org.spongepowered.despector.emitter.java.JavaEmitterContext;
 import org.spongepowered.despector.emitter.java.statement.LocalAssignmentEmitter;
@@ -37,6 +38,11 @@ public class KotlinLocalAssignmentEmitter extends LocalAssignmentEmitter {
 
     @Override
     public void emit(JavaEmitterContext ctx, LocalAssignment insn, boolean semicolon) {
+        TypeSignature type = insn.getLocal().getType();
+        if (type == null) {
+            type = insn.getValue().inferType();
+            insn.getLocal().setType(type);
+        }
         if (!insn.getLocal().getLocal().isParameter() && !ctx.isDefined(insn.getLocal())) {
             if (insn.getLocal().isEffectivelyFinal()) {
                 ctx.printString("val ");

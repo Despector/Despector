@@ -141,6 +141,9 @@ public class BaseDecompiler implements Decompiler {
         }
 
         Language actual_lang = Language.JAVA;
+        if (LibraryConfiguration.force_lang && this.lang != Language.ANY) {
+            actual_lang = this.lang;
+        }
         TypeEntry entry = null;
         if ((access_flags & ACC_ANNOTATION) != 0) {
             entry = new AnnotationEntry(set, actual_lang, name);
@@ -238,7 +241,7 @@ public class BaseDecompiler implements Decompiler {
             method.setVarargs((method_access & ACC_VARARGS) != 0);
             method.setStrictFp((method_access & ACC_STRICT) != 0);
             entry.addMethod(method);
-            Locals locals = new Locals(method.isStatic());
+            Locals locals = new Locals(method);
             method.setLocals(locals);
 
             List<String> checked_exceptions = null;
@@ -467,7 +470,9 @@ public class BaseDecompiler implements Decompiler {
         long classloading_time = System.nanoTime() - decompile_start;
         Timing.time_loading_classes += classloading_time;
 
-        entry.setLanguage(actual_lang);
+        if (!LibraryConfiguration.force_lang) {
+            entry.setLanguage(actual_lang);
+        }
 
         MethodDecompileTask task = new MethodDecompileTask(entry, pool, unfinished_methods, this.bytecode, bootstrap_methods);
         if (LibraryConfiguration.parallel) {

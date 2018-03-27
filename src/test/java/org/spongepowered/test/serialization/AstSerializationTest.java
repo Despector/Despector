@@ -31,6 +31,7 @@ import org.spongepowered.despector.ast.Locals.Local;
 import org.spongepowered.despector.ast.Locals.LocalInstance;
 import org.spongepowered.despector.ast.SourceSet;
 import org.spongepowered.despector.ast.generic.ClassTypeSignature;
+import org.spongepowered.despector.ast.type.MethodEntry;
 import org.spongepowered.despector.util.serialization.AstLoader;
 import org.spongepowered.despector.util.serialization.MessagePacker;
 import org.spongepowered.despector.util.serialization.MessageUnpacker;
@@ -43,7 +44,9 @@ public class AstSerializationTest {
 
     @Test
     public void testLocals() throws IOException {
-        Locals locals = new Locals(false);
+        MethodEntry method = new MethodEntry(new SourceSet());
+        method.setStatic(false);
+        Locals locals = new Locals(method);
         Local l = locals.getLocal(0);
         LocalInstance a = new LocalInstance(l, "this", null, -1, -1);
         l.addInstance(a);
@@ -55,7 +58,7 @@ public class AstSerializationTest {
         MessagePacker pack = new MessagePacker(out);
         locals.writeTo(pack);
         MessageUnpacker unpack = new MessageUnpacker(new ByteArrayInputStream(out.toByteArray()));
-        Locals loaded = AstLoader.loadLocals(unpack, false, new SourceSet());
+        Locals loaded = AstLoader.loadLocals(unpack, method, new SourceSet());
 
         l = loaded.getLocal(0);
         Assert.assertEquals(a, l.getParameterInstance());

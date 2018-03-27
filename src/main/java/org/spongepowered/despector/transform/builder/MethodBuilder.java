@@ -53,7 +53,6 @@ public class MethodBuilder {
     private int next_local;
 
     public MethodBuilder() {
-
         reset();
     }
 
@@ -63,6 +62,12 @@ public class MethodBuilder {
     }
 
     public LocalInstance createLocal(String name, TypeSignature type) {
+        if (this.locals == null) {
+            MethodEntry dummy = new MethodEntry(new SourceSet());
+            dummy.setStatic(this.is_static);
+            dummy.setDescription(this.desc);
+            this.locals = new Locals(dummy);
+        }
         Local local = this.locals.getLocal(this.next_local++);
         LocalInstance instance = new LocalInstance(local, name, type, -1, -1);
         if (type.getDescriptor().equals("D") || type.getDescriptor().equals("J")) {
@@ -103,7 +108,7 @@ public class MethodBuilder {
         this.is_abstract = false;
         this.statements.clear();
         this.desc = null;
-        this.locals = new Locals(true);
+        this.locals = null;
         this.next_local = 1;
         return this;
     }

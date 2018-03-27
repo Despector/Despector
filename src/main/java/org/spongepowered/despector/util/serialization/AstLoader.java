@@ -364,7 +364,7 @@ public class AstLoader {
         expectKey(unpack, "methodsignature");
         entry.setMethodSignature(loadMethodSignature(unpack));
         expectKey(unpack, "locals");
-        Locals locals = loadLocals(unpack, entry.isStatic(), set);
+        Locals locals = loadLocals(unpack, entry, set);
         method_locals = locals;
         entry.setLocals(locals);
         expectKey(unpack, "instructions");
@@ -382,9 +382,9 @@ public class AstLoader {
         return entry;
     }
 
-    public static Locals loadLocals(MessageUnpacker unpack, boolean is_static, SourceSet set) throws IOException {
+    public static Locals loadLocals(MessageUnpacker unpack, MethodEntry method, SourceSet set) throws IOException {
         int size = unpack.readArray();
-        Locals locals = new Locals(is_static);
+        Locals locals = new Locals(method);
 
         for (int i = 0; i < size; i++) {
             startMap(unpack, 2);

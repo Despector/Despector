@@ -44,6 +44,8 @@ import java.io.StringWriter;
 import java.util.Map;
 
 public class TestHelper {
+    
+    public static final boolean IS_ECLIPSE = Boolean.valueOf(System.getProperty("despector.eclipse", "false"));
 
     private static final Map<Class<?>, TypeEntry> CACHED_TYPES = Maps.newHashMap();
     private static final SourceSet DUMMY_SOURCE_SET = new SourceSet();

@@ -87,6 +87,8 @@ public class BasicTests {
         Label end = new Label();
         mv.visitLdcInsn("Hello");
         mv.visitVarInsn(ASTORE, 0);
+        Label start2 = new Label();
+        mv.visitLabel(start2);
         mv.visitInsn(ICONST_2);
         mv.visitVarInsn(ISTORE, 1);
         mv.visitIincInsn(1, 5);
@@ -96,7 +98,7 @@ public class BasicTests {
         mv.visitLabel(end);
         mv.visitInsn(RETURN);
         mv.visitLocalVariable("s", "Ljava/lang/String;", null, start, end, 0);
-        mv.visitLocalVariable("a", "I", null, start, end, 1);
+        mv.visitLocalVariable("a", "I", null, start2, end, 1);
 
         String insn = KotlinTestHelper.getMethodAsString(builder.finish(), "main");
         String good = "fun main() {\n"
