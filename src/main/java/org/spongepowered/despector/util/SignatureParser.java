@@ -267,7 +267,7 @@ public final class SignatureParser {
             int start = this.index;
             for (; this.index < this.buffer.length(); this.index++) {
                 char next = this.buffer.charAt(this.index);
-                if ((next >= 'a' && next <= 'z') || (next >= 'A' && next <= 'Z') || next == '_' || next == '$'
+                if (Character.isAlphabetic(next) || next == '_' || next == '$'
                         || (this.index > start && next >= '0' && next <= '9')) {
                     ident.append(next);
                 } else {

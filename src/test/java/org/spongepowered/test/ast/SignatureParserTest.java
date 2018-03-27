@@ -52,6 +52,15 @@ public class SignatureParserTest {
     }
 
     @Test
+    public void testUtf() {
+        String sig = "Ljava/lang/λ;";
+        ClassSignature cls = SignatureParser.parse(sig);
+        assertEquals(0, cls.getParameters().size());
+        assertEquals("Ljava/lang/λ;", cls.getSuperclassSignature().getType());
+        assertEquals(0, cls.getInterfaceSignatures().size());
+    }
+
+    @Test
     public void testBasic2() {
         String sig = "Ljava/lang/Object<TT;>;";
         ClassSignature cls = SignatureParser.parse(sig);
