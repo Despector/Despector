@@ -44,6 +44,7 @@ dependencies {
 license {
     header file('LICENSE')
     include '**/*.java'
+    exclude '**/test/generate/*.java'
     newLine = false
 }
 

@@ -1,0 +1,25 @@
+package org.spongepowered.test.generate;
+
+public class BasicClass {
+
+    public int a;
+    char b;
+    private String c;
+
+    public BasicClass(int a) {
+        this.a = a;
+    }
+
+    public void foo() {
+        this.b = 'b';
+    }
+
+    public void bar(char d) {
+        this.b = d;
+    }
+
+    public String get() {
+        return this.c;
+    }
+
+}

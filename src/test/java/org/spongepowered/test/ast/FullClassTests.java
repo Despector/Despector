@@ -54,6 +54,13 @@ public class FullClassTests {
         LibraryConfiguration.parallel = false;
     }
 
+    // TODO: auto-detect all test cases and generate a junit test per file
+
+    @Test
+    public void testBasic() throws Exception {
+        compare("javaclasses/BasicClass", Language.JAVA);
+    }
+
     @Test
     public void testGenerics() throws Exception {
         compare("javaclasses/GenericsTestClass", Language.JAVA);
