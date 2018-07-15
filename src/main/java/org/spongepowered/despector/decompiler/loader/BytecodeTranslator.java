@@ -600,7 +600,8 @@ public class BytecodeTranslator {
                 InvokeDynamicEntry handle = pool.getInvokeDynamic(index);
                 BootstrapMethod bsm = bootstrap_methods.get(handle.bootstrap_index);
                 MethodRefEntry bsmArg = pool.getMethodRef(((MethodHandleEntry) bsm.arguments[1]).reference_index);
-                block.append(new InvokeDynamicInsn(Insn.INVOKEDYNAMIC, "L" + bsmArg.cls + ";", bsmArg.name, bsmArg.type_name, handle.name, handle.type_name,
+                block.append(new InvokeDynamicInsn(Insn.INVOKEDYNAMIC, "L" + bsmArg.cls + ";", bsmArg.name, bsmArg.type_name, handle.name,
+                        handle.type_name,
                         bsmArg.type == ClassConstantPool.EntryType.INTERFACE_METHOD_REF));
                 break;
             }

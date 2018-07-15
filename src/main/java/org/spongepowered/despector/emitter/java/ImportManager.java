@@ -192,7 +192,7 @@ public class ImportManager {
         for (Annotation anno : method.getAnnotations()) {
             check(anno);
         }
-        if (!method.isAbstract()) {
+        if (!method.isAbstract() && method.getInstructions() != null) {
             method.getInstructions().accept(walker);
         }
         check(method.getReturnType());

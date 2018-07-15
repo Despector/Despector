@@ -188,6 +188,14 @@ public class Locals {
             return this.parameter_instance != null;
         }
 
+        public int getLVTCount() {
+            return this.lvt.size();
+        }
+
+        public LVT getLVTByIndex(int index) {
+            return this.lvt.get(index);
+        }
+
         public void addLVT(int s, int l, String n, String d) {
             this.lvt.add(new LVT(s, l, n, d));
         }

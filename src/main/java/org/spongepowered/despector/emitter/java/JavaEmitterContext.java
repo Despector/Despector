@@ -137,7 +137,7 @@ public class JavaEmitterContext extends AbstractEmitterContext {
     public void markDefined(LocalInstance local) {
         this.defined_locals.add(checkNotNull(local, "local"));
     }
-    
+
     public void resetDefinedLocals() {
         this.defined_locals.clear();
     }
@@ -532,6 +532,11 @@ public class JavaEmitterContext extends AbstractEmitterContext {
             }
         }
         return this;
+    }
+
+    public JavaEmitterContext printStringf(String line, Object... args) {
+        String s = String.format(line, args);
+        return printString(s);
     }
 
     /**

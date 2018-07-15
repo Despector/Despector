@@ -98,6 +98,8 @@ import org.spongepowered.despector.emitter.bytecode.statement.BytecodeLocalAssig
 import org.spongepowered.despector.emitter.bytecode.statement.BytecodeReturnEmitter;
 import org.spongepowered.despector.emitter.bytecode.type.BytecodeClassEntryEmitter;
 import org.spongepowered.despector.emitter.bytecode.type.BytecodeMethodEntryEmitter;
+import org.spongepowered.despector.emitter.ir.IREmitter;
+import org.spongepowered.despector.emitter.ir.MethodIREmitter;
 import org.spongepowered.despector.emitter.java.JavaEmitter;
 import org.spongepowered.despector.emitter.java.JavaEmitterContext;
 import org.spongepowered.despector.emitter.java.condition.AndConditionEmitter;
@@ -190,11 +192,13 @@ public final class Emitters {
     public static final EmitterSet JAVA_SET = new EmitterSet();
     public static final EmitterSet KOTLIN_SET = new EmitterSet();
     public static final EmitterSet BYTECODE_SET = new EmitterSet();
+    public static final EmitterSet IR_SET = new EmitterSet();
 
     public static final Emitter<JavaEmitterContext> JAVA = new JavaEmitter();
     public static final Emitter<JavaEmitterContext> KOTLIN = new KotlinEmitter();
     public static final Emitter<?> WILD = new WildEmitter();
     public static final Emitter<BytecodeEmitterContext> BYTECODE = new BytecodeEmitter();
+    public static final Emitter<JavaEmitterContext> IR = new IREmitter();
 
     @SuppressWarnings("rawtypes")
     private static final EnumMap<Language, Emitter> EMITTERS = new EnumMap<>(Language.class);
@@ -320,6 +324,11 @@ public final class Emitters {
         BYTECODE_SET.setInstructionEmitter(LongConstant.class, new BytecodeLongConstantEmitter());
         BYTECODE_SET.setInstructionEmitter(NullConstant.class, new BytecodeNullConstantEmitter());
         BYTECODE_SET.setInstructionEmitter(TypeConstant.class, new BytecodeTypeConstantEmitter());
+
+        IR_SET.clone(JAVA_SET);
+
+        IR_SET.setAstEmitter(MethodEntry.class, new MethodIREmitter());
+
     }
 
     /**
