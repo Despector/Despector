@@ -95,8 +95,10 @@ public class SwitchEmitter implements StatementEmitter<JavaEmitterContext, Switc
                 StaticFieldAccess arg = (StaticFieldAccess) var.getArrayVar();
                 if (arg.getFieldName().startsWith("$SwitchMap") && ctx.getType() != null) {
                     TypeEntry owner = ctx.getType().getSource().get(arg.getOwnerName());
-                    MethodEntry mth = owner.getStaticMethod("<clinit>");
-                    table = buildSwitchTable(mth, arg.getFieldName());
+                    if(owner != null) {
+                        MethodEntry mth = owner.getStaticMethod("<clinit>");
+                        table = buildSwitchTable(mth, arg.getFieldName());
+                    }
                     String enum_type = arg.getFieldName().substring("$SwitchMap/".length()).replace('$', '/');
                     ctx.emit(((InstanceMethodInvoke) var.getIndex()).getCallee(), ClassTypeSignature.of("L" + enum_type + ";"));
                     synthetic = true;

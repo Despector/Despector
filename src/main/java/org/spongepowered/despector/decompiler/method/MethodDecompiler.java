@@ -46,6 +46,7 @@ import org.spongepowered.despector.decompiler.method.graph.data.opcode.TryCatchM
 import org.spongepowered.despector.decompiler.method.postprocess.StatementPostProcessor;
 import org.spongepowered.despector.decompiler.method.special.SpecialMethodProcessor;
 
+import java.io.StringWriter;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -162,10 +163,26 @@ public class MethodDecompiler {
             System.out.println();
         }
 
+        if (LibraryConfiguration.emit_block_debug) {
+            StringWriter w = new StringWriter();
+            for (OpcodeBlock g : graph) {
+                w.append(g.toString());
+            }
+            entry.block_debug[0] = w.toString();
+        }
+
         // process the graph to perform in-graph operations prior to flattening
         // it to a list of block sections
         for (GraphOperation op : this.cleanup_operations) {
             op.process(partial);
+        }
+
+        if (LibraryConfiguration.emit_block_debug) {
+            StringWriter w = new StringWriter();
+            for (OpcodeBlock g : partial.getGraph()) {
+                w.append(g.toString());
+            }
+            entry.block_debug[1] = w.toString();
         }
 
         if (partial.getEntry().getName().equals(targeted_breakpoint)) {
@@ -180,6 +197,14 @@ public class MethodDecompiler {
         List<BlockSection> flat_graph = new ArrayList<>();
 
         flattenGraph(partial, graph, graph.size(), flat_graph);
+
+        if (LibraryConfiguration.emit_block_debug) {
+            StringWriter w = new StringWriter();
+            for (BlockSection g : flat_graph) {
+                w.append(g.toString());
+            }
+            entry.block_debug[2] = w.toString();
+        }
 
         // Append all block sections to the output in order. This finalizes all
         // decompilation of statements not already decompiled.

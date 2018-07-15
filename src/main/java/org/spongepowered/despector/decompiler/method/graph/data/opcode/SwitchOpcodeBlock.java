@@ -55,7 +55,11 @@ public class SwitchOpcodeBlock extends OpcodeBlock {
 
     @Override
     public String getDebugHeader() {
-        return "Switch: " + this.start_pc + "-" + this.end_pc + " (target: " + (this.target != null ? this.target.getStart() : -1) + ")";
+        String s = "Switch: " + this.start_pc + "-" + this.end_pc + " (target: " + (this.target != null ? this.target.getStart() : -1) + ")\n";
+        for (Map.Entry<Integer, OpcodeBlock> a : this.additional_targets.entrySet()) {
+            s += "    " + a.getKey() + " -> " + a.getValue().getStart() + "\n";
+        }
+        return s;
     }
 
 }

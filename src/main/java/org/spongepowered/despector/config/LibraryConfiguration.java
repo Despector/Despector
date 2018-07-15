@@ -33,5 +33,8 @@ public class LibraryConfiguration {
     public static boolean parallel = true;
     public static boolean print_times = false;
     public static boolean force_lang = false;
+    
+    // Viewer control fields
+    public static boolean emit_block_debug = false;
 
 }

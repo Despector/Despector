@@ -76,6 +76,8 @@ public class MethodEntry extends AstEntry {
     protected boolean is_deprecated;
 
     protected InsnBlock ir;
+    public String[] block_debug = new String[3];
+
     protected Locals locals;
     protected StatementBlock instructions = null;
 

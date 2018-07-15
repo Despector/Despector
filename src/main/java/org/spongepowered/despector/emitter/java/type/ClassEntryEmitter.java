@@ -144,8 +144,10 @@ public class ClassEntryEmitter implements AstEmitter<JavaEmitterContext, ClassEn
                 continue;
             }
             TypeEntry inner_type = type.getSource().get(inner.getName());
-            ctx.newLine();
-            ctx.emit(inner_type);
+            if (inner_type != null) {
+                ctx.newLine();
+                ctx.emit(inner_type);
+            }
         }
         if (ctx.getFormat().brace_position_for_type_declaration == BracePosition.NEXT_LINE_SHIFTED) {
             ctx.printIndentation();
@@ -280,7 +282,7 @@ public class ClassEntryEmitter implements AstEmitter<JavaEmitterContext, ClassEn
                 ctx.printIndentation();
                 ctx.emit(field);
                 Instruction init = initializers.get(field);
-                if(init != null) {
+                if (init != null) {
                     ctx.setField(field);
                     if (ctx.getFormat().align_type_members_on_columns && ctx.getType() != null) {
                         int len = FieldEntryEmitter.getMaxNameLength(ctx, ctx.getType().getFields());
