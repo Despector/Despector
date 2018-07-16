@@ -33,6 +33,7 @@ import org.spongepowered.despector.decompiler.method.graph.RegionProcessor;
 import org.spongepowered.despector.decompiler.method.graph.data.block.BlockSection;
 import org.spongepowered.despector.decompiler.method.graph.data.block.CommentBlockSection;
 import org.spongepowered.despector.decompiler.method.graph.data.block.InlineBlockSection;
+import org.spongepowered.despector.decompiler.method.graph.data.opcode.BodyOpcodeBlock;
 import org.spongepowered.despector.decompiler.method.graph.data.opcode.ConditionalOpcodeBlock;
 import org.spongepowered.despector.decompiler.method.graph.data.opcode.GotoOpcodeBlock;
 import org.spongepowered.despector.decompiler.method.graph.data.opcode.OpcodeBlock;
@@ -108,6 +109,14 @@ public class SubRegionBlockProcessor implements GraphProcessor {
         for (int o = i; o < end; o++) {
             region.add(blocks.get(o));
         }
+        boolean dummy_end_used = false;
+        if (end == blocks.size() - 1 && region_start.getTarget().getStart() == last.getEnd() + 1) {
+            region.add(blocks.get(end));
+            OpcodeBlock dummy = new BodyOpcodeBlock(last.getEnd() + 1, last.getEnd() + 1);
+            last = dummy;
+            region.add(dummy);
+            dummy_end_used = true;
+        }
 
         OpcodeBlock first = region.get(0);
         if (first instanceof ConditionalOpcodeBlock && AstUtil.hasStartingRequirement(first.getOpcodes())
@@ -148,6 +157,9 @@ public class SubRegionBlockProcessor implements GraphProcessor {
         }
 
         if (targeted_in_future && blocks.get(end) instanceof GotoOpcodeBlock) {
+            return end;
+        }
+        if(dummy_end_used) {
             return end;
         }
         return end - 1;

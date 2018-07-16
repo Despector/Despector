@@ -182,6 +182,9 @@ public final class ConditionBuilder {
                 node.setElseTarget(ret_node);
             } else {
                 int target = blocks.indexOf(next.getElseTarget());
+                if (target == -1) {
+                    throw new IllegalStateException("Condition else target was unknown block " + next.getElseTarget().getStart());
+                }
                 node.setElseTarget(nodes.get(target));
             }
         }

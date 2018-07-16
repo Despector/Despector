@@ -35,6 +35,7 @@ import org.spongepowered.despector.decompiler.method.graph.data.block.CommentBlo
 import org.spongepowered.despector.decompiler.method.graph.data.block.SwitchBlockSection;
 import org.spongepowered.despector.decompiler.method.graph.data.block.SwitchBlockSection.SwitchCaseBlockSection;
 import org.spongepowered.despector.decompiler.method.graph.data.opcode.BodyOpcodeBlock;
+import org.spongepowered.despector.decompiler.method.graph.data.opcode.ConditionalOpcodeBlock;
 import org.spongepowered.despector.decompiler.method.graph.data.opcode.GotoOpcodeBlock;
 import org.spongepowered.despector.decompiler.method.graph.data.opcode.OpcodeBlock;
 import org.spongepowered.despector.decompiler.method.graph.data.opcode.SwitchOpcodeBlock;
@@ -82,8 +83,10 @@ public class SwitchBlockProcessor implements GraphProcessor {
                 if (start < blocks.size()) {
                     block = blocks.get(start);
                     while (!sblock.getAdditionalTargets().containsValue(block) && block != end) {
-                        // while we don't run into another case ass blocks to this case
-                        // and we don't run into the end (which we'll find later based on
+                        // while we don't run into another case ass blocks to
+                        // this case
+                        // and we don't run into the end (which we'll find later
+                        // based on
                         // the targets of the break statements).
                         case_region.add(block);
                         start++;
@@ -114,9 +117,19 @@ public class SwitchBlockProcessor implements GraphProcessor {
                     // at the end of the case we use its target to end the last
                     // case
                     end = last.getTarget();
+                    GotoOpcodeBlock goto_block = (GotoOpcodeBlock) last;
                     end_label = ((JumpInsn) last.getLast()).getTarget();
                     case_region.remove(last);
                     cs.setBreaks(true);
+
+                    for (OpcodeBlock o : case_region) {
+                        if (o instanceof ConditionalOpcodeBlock) {
+                            ConditionalOpcodeBlock c = (ConditionalOpcodeBlock) o;
+                            if (c.getTarget() == goto_block.getTarget()) {
+                                c.setTarget(goto_block);
+                            }
+                        }
+                    }
                 }
                 try {
                     // recursively flatten the case area
@@ -141,7 +154,8 @@ public class SwitchBlockProcessor implements GraphProcessor {
                 // set the case pointed to as default as the default block
                 cs.setDefault(true);
             } else if (!all_return && end_label != ts.getDefault()) {
-                // no block was pointed to as default, and they didn't all return
+                // no block was pointed to as default, and they didn't all
+                // return
                 // (if they did all return then we have no way of telling where
                 // the default case ends, and it doesn't matter that we emit it
                 // anyway so we just ignore it and let it sit after the switch)
@@ -174,7 +188,8 @@ public class SwitchBlockProcessor implements GraphProcessor {
                 try {
                     partial.getDecompiler().flattenGraph(partial, case_region, case_region.size(), cs.getBody());
                 } catch (Exception e) {
-                    // TODO: should make a util function for this, it appears in a lot of places
+                    // TODO: should make a util function for this, it appears in
+                    // a lot of places
                     if (ConfigManager.getConfig().print_opcodes_on_error) {
                         List<String> comment = new ArrayList<>();
                         for (OpcodeBlock op : case_region) {
@@ -192,7 +207,7 @@ public class SwitchBlockProcessor implements GraphProcessor {
             if (end == null) {
                 return blocks.indexOf(fartherst);
             }
-            if(!blocks.contains(end)) {
+            if (!blocks.contains(end)) {
                 return blocks.size();
             }
             // end points to the block after the last block which is part of

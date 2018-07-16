@@ -67,6 +67,23 @@ public class IfBlockRegionProcessor implements RegionProcessor {
                 break;
             }
         }
+        for (OpcodeBlock c : condition_blocks) {
+            if (c instanceof ConditionalOpcodeBlock) {
+                ConditionalOpcodeBlock cond = (ConditionalOpcodeBlock) c;
+                if (cond.getTarget().equals(body) && cond.getTarget() != body) {
+                    cond.setTarget(body);
+                }
+                if (cond.getElseTarget().equals(body) && cond.getElseTarget() != body) {
+                    cond.setElseTarget(body);
+                }
+                if (cond.getTarget().equals(cond_ret) && cond.getTarget() != cond_ret) {
+                    cond.setTarget(cond_ret);
+                }
+                if (cond.getElseTarget().equals(cond_ret) && cond.getElseTarget() != cond_ret) {
+                    cond.setElseTarget(cond_ret);
+                }
+            }
+        }
 
         // form the condition from the header
         Condition cond = ConditionBuilder.makeCondition(condition_blocks, partial.getLocals(), body, cond_ret);

@@ -167,4 +167,13 @@ public abstract class OpcodeBlock {
         return builder.toString();
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof OpcodeBlock)) {
+            return false;
+        }
+        OpcodeBlock op = (OpcodeBlock) o;
+        return op.getStart() == this.start_pc && op.getEnd() == this.end_pc;
+    }
+
 }

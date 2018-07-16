@@ -168,7 +168,11 @@ public class Viewer {
 
         for (MethodEntry m : e.getMethods()) {
             p.printf("%s%s {\n", m.getName(), m.getDescription());
-            p.println(m.block_debug[i].replace("\n", "\n    "));
+            String g = m.block_debug[i];
+            if(g == null) {
+                g = "An error occured before this graph could be compiled.\n";
+            }
+            p.println(g.replace("\n", "\n    "));
             p.printf("}\n\n");
         }
 
