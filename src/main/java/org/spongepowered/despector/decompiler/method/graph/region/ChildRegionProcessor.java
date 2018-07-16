@@ -38,6 +38,7 @@ import org.spongepowered.despector.decompiler.method.graph.data.opcode.GotoOpcod
 import org.spongepowered.despector.decompiler.method.graph.data.opcode.OpcodeBlock;
 import org.spongepowered.despector.decompiler.method.graph.data.opcode.ProcessedOpcodeBlock;
 import org.spongepowered.despector.decompiler.method.graph.data.opcode.SwitchOpcodeBlock;
+import org.spongepowered.despector.decompiler.method.graph.data.opcode.TryCatchMarkerOpcodeBlock;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -64,6 +65,7 @@ public class ChildRegionProcessor implements RegionProcessor {
         boolean is_first_condition = true;
         OpcodeBlock sstart = region.get(0);
         if (sstart instanceof SwitchOpcodeBlock) {
+            // handled by switch processor
             return null;
         }
         if (sstart instanceof GotoOpcodeBlock) {
@@ -91,7 +93,7 @@ public class ChildRegionProcessor implements RegionProcessor {
                         }
                     }
                 }
-
+                // form subregion from switch bounds
                 List<OpcodeBlock> subregion = new ArrayList<>();
                 for (int o = i; o <= last; o++) {
                     OpcodeBlock n = region.get(o);
@@ -112,6 +114,40 @@ public class ChildRegionProcessor implements RegionProcessor {
                     region.remove(o);
                 }
                 continue;
+            } else if(next instanceof TryCatchMarkerOpcodeBlock) {
+                TryCatchMarkerOpcodeBlock s = (TryCatchMarkerOpcodeBlock) next;
+                int end = region.indexOf(s.getEndMarker());
+                if (end != -1) {
+                    OpcodeBlock after = region.get(end + 1);
+                    if(after instanceof GotoOpcodeBlock) {
+                        OpcodeBlock after_target = ((GotoOpcodeBlock) after).getTarget();
+                        end = region.indexOf(after_target);
+                        if (end == -1 && after_target == ret) {
+                            end = region.size();
+                        }
+                        List<OpcodeBlock> subregion = new ArrayList<>();
+                        for (int o = i; o < end; o++) {
+                            OpcodeBlock n = region.get(o);
+                            subregion.add(n);
+                        }
+                        
+                        OpcodeBlock sub_ret = end >= region.size() ? ret : region.get(end);
+                        List<BlockSection> secs = new ArrayList<>();
+                        partial.getDecompiler().flattenGraph(partial, subregion, subregion.size() - 1, secs);
+                        checkState(secs.size() == 1);
+                        // the first block is set to the condensed subregion block and
+                        // the rest if the blocks in the subregion are removed.
+                        ProcessedOpcodeBlock replacement = new ProcessedOpcodeBlock(region.get(i).getStart(), region.get(end - 1).getEnd(), secs.get(0));
+                        replacement.setTarget(sub_ret);
+                        GraphOperation.remap(region, region.get(i), replacement);
+                        GraphOperation.remap(region, region.get(i+1), replacement);
+                        region.set(i, replacement);
+                        for (int o = end - 1; o > i; o--) {
+                            region.remove(o);
+                        }
+                        continue;
+                    }
+                }
             } else if (!(next instanceof ConditionalOpcodeBlock) && !(next instanceof GotoOpcodeBlock)) {
                 is_first_condition = false;
                 continue;

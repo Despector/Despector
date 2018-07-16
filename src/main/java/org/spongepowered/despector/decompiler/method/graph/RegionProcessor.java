@@ -221,6 +221,9 @@ public interface RegionProcessor {
                     ConditionalOpcodeBlock cond = (ConditionalOpcodeBlock) next;
                     end_a = blocks.indexOf(cond.getTarget());
                     end_b = blocks.indexOf(cond.getElseTarget());
+                    if(end_a == -1 && end_b == -1) {
+                        break;
+                    }
                     if ((end_a > start && end_a < end) || (end_b > start && end_b < end)) {
                         end_extension = ++pos_ext;
                         next = blocks.get(end + end_extension);

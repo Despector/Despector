@@ -180,22 +180,26 @@ public class MethodIREmitter implements AstEmitter<JavaEmitterContext, MethodEnt
             } else {
                 Local local = method.getLocals().getLocal(param_index);
                 LocalInstance insn = local.getParameterInstance();
-                for (Annotation anno : insn.getAnnotations()) {
-                    ctx.emit(anno);
-                    if (ctx.getFormat().insert_new_line_after_annotation_on_parameter) {
-                        ctx.indent();
-                        ctx.indent();
-                        ctx.newLine();
-                        ctx.printIndentation();
-                        ctx.dedent();
-                        ctx.dedent();
-                    } else {
-                        ctx.printString(" ");
+                if (insn == null) {
+                    ctx.printString("<error-type> local" + i);
+                } else {
+                    for (Annotation anno : insn.getAnnotations()) {
+                        ctx.emit(anno);
+                        if (ctx.getFormat().insert_new_line_after_annotation_on_parameter) {
+                            ctx.indent();
+                            ctx.indent();
+                            ctx.newLine();
+                            ctx.printIndentation();
+                            ctx.dedent();
+                            ctx.dedent();
+                        } else {
+                            ctx.printString(" ");
+                        }
                     }
+                    generics.emitTypeSignature(ctx, insn.getType(), varargs);
+                    ctx.printString(" ");
+                    ctx.printString(insn.getName());
                 }
-                generics.emitTypeSignature(ctx, insn.getType(), varargs);
-                ctx.printString(" ");
-                ctx.printString(insn.getName());
             }
             if (i < param_types.size() - 1) {
                 ctx.printString(" ", ctx.getFormat().insert_space_before_comma_in_method_declaration_parameters);
