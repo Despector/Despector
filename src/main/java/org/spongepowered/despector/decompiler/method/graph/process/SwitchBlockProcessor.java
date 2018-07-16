@@ -54,6 +54,7 @@ public class SwitchBlockProcessor implements GraphProcessor {
         if (region_start instanceof SwitchOpcodeBlock) {
             SwitchOpcodeBlock sblock = (SwitchOpcodeBlock) region_start;
             SwitchInsn ts = (SwitchInsn) sblock.getLast();
+            // create block section for this switch
             SwitchBlockSection sswitch = new SwitchBlockSection(region_start);
             final_blocks.add(sswitch);
             Map<Integer, SwitchCaseBlockSection> cases = new HashMap<>();
@@ -65,6 +66,8 @@ public class SwitchBlockProcessor implements GraphProcessor {
             for (Map.Entry<Integer, Integer> l : ts.getTargets().entrySet()) {
                 SwitchCaseBlockSection cs = cases.get(l.getValue());
                 if (cs != null) {
+                    // if multiple targets for the same block we'll already have
+                    // a case made for this target
                     cs.getTargets().add(l.getKey());
                     continue;
                 }
@@ -79,6 +82,9 @@ public class SwitchBlockProcessor implements GraphProcessor {
                 if (start < blocks.size()) {
                     block = blocks.get(start);
                     while (!sblock.getAdditionalTargets().containsValue(block) && block != end) {
+                        // while we don't run into another case ass blocks to this case
+                        // and we don't run into the end (which we'll find later based on
+                        // the targets of the break statements).
                         case_region.add(block);
                         start++;
                         if (start >= blocks.size()) {
@@ -90,24 +96,30 @@ public class SwitchBlockProcessor implements GraphProcessor {
 
                 OpcodeBlock last = case_region.get(case_region.size() - 1);
                 if (last.getStart() > farthest_break) {
+                    // update the farthest block found
                     fartherst = last;
                     farthest_break = last.getStart();
                 }
                 if (last instanceof BodyOpcodeBlock) {
                     int op = last.getLast().getOpcode();
                     if (op != Insn.RETURN && op != Insn.ARETURN) {
+                        // not the case that all cases return
                         all_return = false;
                     }
                 } else {
                     all_return = false;
                 }
                 if (last instanceof GotoOpcodeBlock) {
+                    // break statements become gotos, so if we find a goto
+                    // at the end of the case we use its target to end the last
+                    // case
                     end = last.getTarget();
                     end_label = ((JumpInsn) last.getLast()).getTarget();
                     case_region.remove(last);
                     cs.setBreaks(true);
                 }
                 try {
+                    // recursively flatten the case area
                     partial.getDecompiler().flattenGraph(partial, case_region, case_region.size(), cs.getBody());
                 } catch (Throwable e) {
                     if (ConfigManager.getConfig().print_opcodes_on_error) {
@@ -126,8 +138,15 @@ public class SwitchBlockProcessor implements GraphProcessor {
             }
             SwitchCaseBlockSection cs = cases.get(ts.getDefault());
             if (cs != null) {
+                // set the case pointed to as default as the default block
                 cs.setDefault(true);
             } else if (!all_return && end_label != ts.getDefault()) {
+                // no block was pointed to as default, and they didn't all return
+                // (if they did all return then we have no way of telling where
+                // the default case ends, and it doesn't matter that we emit it
+                // anyway so we just ignore it and let it sit after the switch)
+                // otherwise we build a new case for everything between the end
+                // of our last case and the end block as the default block.
                 cs = sswitch.new SwitchCaseBlockSection();
                 cases.put(ts.getDefault(), cs);
                 sswitch.addCase(cs);
@@ -155,6 +174,7 @@ public class SwitchBlockProcessor implements GraphProcessor {
                 try {
                     partial.getDecompiler().flattenGraph(partial, case_region, case_region.size(), cs.getBody());
                 } catch (Exception e) {
+                    // TODO: should make a util function for this, it appears in a lot of places
                     if (ConfigManager.getConfig().print_opcodes_on_error) {
                         List<String> comment = new ArrayList<>();
                         for (OpcodeBlock op : case_region) {
@@ -172,6 +192,11 @@ public class SwitchBlockProcessor implements GraphProcessor {
             if (end == null) {
                 return blocks.indexOf(fartherst);
             }
+            if(!blocks.contains(end)) {
+                return blocks.size();
+            }
+            // end points to the block after the last block which is part of
+            // this switch so we subtract 1
             return blocks.indexOf(end) - 1;
         }
         return -1;
