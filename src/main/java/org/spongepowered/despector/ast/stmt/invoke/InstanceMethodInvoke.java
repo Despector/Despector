@@ -44,7 +44,7 @@ public class InstanceMethodInvoke extends MethodInvoke {
 
     public InstanceMethodInvoke(Type type, String name, String desc, String owner, Instruction[] args, Instruction call) {
         super(name, desc, owner, args);
-        this.type = type;
+        this.type = checkNotNull(type, "type");
         this.callee = checkNotNull(call, "callee");
     }
 
@@ -127,7 +127,8 @@ public class InstanceMethodInvoke extends MethodInvoke {
     public static enum Type {
         VIRTUAL,
         SPECIAL,
-        INTERFACE
+        INTERFACE,
+        STATIC,
     }
 
 }

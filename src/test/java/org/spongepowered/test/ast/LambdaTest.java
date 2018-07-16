@@ -184,8 +184,8 @@ public class LambdaTest {
         Assert.assertEquals(good, insn);
     }
 
-    public void test_method_ref(Runnable r) {
-        Runnable a = r::run;
+    public void test_method_ref(Runnable r, String s) {
+        Runnable a = () -> System.out.println(r + s);
         a.run();
     }
 

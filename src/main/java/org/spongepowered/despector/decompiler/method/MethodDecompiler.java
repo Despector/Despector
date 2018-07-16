@@ -45,6 +45,7 @@ import org.spongepowered.despector.decompiler.method.graph.data.opcode.SwitchOpc
 import org.spongepowered.despector.decompiler.method.graph.data.opcode.TryCatchMarkerOpcodeBlock;
 import org.spongepowered.despector.decompiler.method.postprocess.StatementPostProcessor;
 import org.spongepowered.despector.decompiler.method.special.SpecialMethodProcessor;
+import org.spongepowered.despector.decompiler.method.special.UninitializedNewVisitor;
 
 import java.io.StringWriter;
 import java.util.ArrayDeque;
@@ -233,6 +234,8 @@ public class MethodDecompiler {
                 }
             }
         }
+
+        block.accept(new UninitializedNewVisitor());
 
         return block;
     }

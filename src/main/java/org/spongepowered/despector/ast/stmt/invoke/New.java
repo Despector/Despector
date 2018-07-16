@@ -47,8 +47,8 @@ public class New implements Instruction {
 
     public New(TypeSignature type, String ctor_desc, Instruction[] args) {
         this.type = checkNotNull(type, "type");
-        this.ctor = ctor_desc;
-        this.params = args;
+        this.ctor = checkNotNull(ctor_desc, "ctor");
+        this.params = checkNotNull(args, "args");
     }
 
     /**

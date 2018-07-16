@@ -24,6 +24,7 @@
  */
 package org.spongepowered.despector.decompiler.method;
 
+import org.spongepowered.despector.ast.AstVisitor;
 import org.spongepowered.despector.ast.Locals;
 import org.spongepowered.despector.ast.Locals.Local;
 import org.spongepowered.despector.ast.Locals.LocalInstance;
@@ -79,7 +80,9 @@ import org.spongepowered.despector.decompiler.ir.TypeIntInsn;
 import org.spongepowered.despector.decompiler.ir.VarIntInsn;
 import org.spongepowered.despector.decompiler.method.graph.data.opcode.OpcodeBlock;
 import org.spongepowered.despector.util.TypeHelper;
+import org.spongepowered.despector.util.serialization.MessagePacker;
 
+import java.io.IOException;
 import java.util.Deque;
 
 /**
@@ -378,19 +381,17 @@ public final class StatementBuilder {
                     for (int i = args.length - 1; i >= 0; i--) {
                         args[i] = stack.pop();
                     }
-                    if (stack.peek() instanceof New) {
-                        New new_arg = (New) stack.pop();
-                        if (stack.peek() instanceof New) {
-                            New new_arg2 = (New) stack.pop();
+                    if (stack.peek() instanceof UninitializedNew) {
+                        UninitializedNew new_arg = (UninitializedNew) stack.pop();
+                        if (stack.peek() instanceof UninitializedNew) {
+                            UninitializedNew new_arg2 = (UninitializedNew) stack.pop();
                             if (new_arg2 == new_arg) {
-                                new_arg.setCtorDescription(method.getDescription());
-                                new_arg.setParameters(args);
-                                stack.push(new_arg);
+                                stack.push(new New(new_arg.type, method.getDescription(), args));
                                 break;
                             }
                             stack.push(new_arg2);
                         }
-                        New insn = new New(new_arg.getType(), method.getDescription(), args);
+                        New insn = new New(new_arg.type, method.getDescription(), args);
                         block.append(new InvokeStatement(insn));
                         break;
                     } else if (stack.peek() instanceof LocalAccess) {
@@ -451,6 +452,12 @@ public final class StatementBuilder {
                             invoke.getLambdaDescription(), type, invoke.getName());
                     stack.push(handle);
                 } else {
+                    // need to pop off the captured locals which will be on the
+                    // stack, we don't actually care about them for decompiling
+                    int type_args = TypeHelper.paramCount(invoke.getType());
+                    for (int i = 0; i < type_args; i++) {
+                        stack.pop();
+                    }
                     Lambda handle = new Lambda(invoke.getLambdaOwner(), invoke.getLambdaName(), invoke.getLambdaDescription(),
                             type, invoke.getName());
                     stack.push(handle);
@@ -459,7 +466,7 @@ public final class StatementBuilder {
             }
             case Insn.NEW: {
                 TypeSignature type = ClassTypeSignature.of(((TypeInsn) next).getType());
-                stack.push(new New(type, null, null));
+                stack.push(new UninitializedNew(type));
                 break;
             }
             case Insn.NEWARRAY: {
@@ -513,6 +520,30 @@ public final class StatementBuilder {
     }
 
     private StatementBuilder() {
+    }
+
+    private static class UninitializedNew implements Instruction {
+
+        public TypeSignature type;
+
+        public UninitializedNew(TypeSignature t) {
+            this.type = t;
+        }
+
+        @Override
+        public TypeSignature inferType() {
+            throw new IllegalStateException();
+        }
+
+        @Override
+        public void accept(AstVisitor visitor) {
+            throw new IllegalStateException();
+        }
+
+        @Override
+        public void writeTo(MessagePacker pack) throws IOException {
+            throw new IllegalStateException();
+        }
     }
 
 }

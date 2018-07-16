@@ -582,7 +582,7 @@ public class BytecodeTranslator {
             case 184: { // INVOKESTATIC
                 int index = ((code[i++] & 0xFF) << 8) | (code[i++] & 0xFF);
                 MethodRefEntry ref = pool.getMethodRef(index);
-                block.append(new InvokeInsn(Insn.INVOKESTATIC, null, ref.cls, ref.name, ref.type_name));
+                block.append(new InvokeInsn(Insn.INVOKESTATIC, InstanceMethodInvoke.Type.STATIC, ref.cls, ref.name, ref.type_name));
                 break;
             }
             case 185: {// INVOKEINTERFACE

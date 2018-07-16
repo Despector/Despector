@@ -32,6 +32,7 @@ import org.spongepowered.despector.ast.insn.misc.NewArray;
 import org.spongepowered.despector.ast.insn.var.FieldAccess;
 import org.spongepowered.despector.ast.insn.var.InstanceFieldAccess;
 import org.spongepowered.despector.ast.insn.var.StaticFieldAccess;
+import org.spongepowered.despector.ast.stmt.Statement;
 import org.spongepowered.despector.ast.stmt.assign.FieldAssignment;
 import org.spongepowered.despector.ast.stmt.assign.InstanceFieldAssignment;
 import org.spongepowered.despector.ast.stmt.assign.StaticFieldAssignment;
@@ -103,9 +104,13 @@ public class StaticMethodInvokeEmitter implements InstructionEmitter<JavaEmitter
         TypeEntry owner_type = ctx.getType().getSource().get(owner);
         if (owner_type != null) {
             MethodEntry accessor = owner_type.getStaticMethod(arg.getMethodName());
+            Statement stmt0 = accessor.getInstructions().getStatements().get(0);
             if (accessor.getReturnType().equals(VoidTypeSignature.VOID)) {
+                if(!(stmt0 instanceof FieldAssignment)) {
+                    return false;
+                }
                 // setter
-                FieldAssignment assign = (FieldAssignment) accessor.getInstructions().getStatements().get(0);
+                FieldAssignment assign = (FieldAssignment) stmt0;
                 FieldAssignment replacement = null;
                 if (arg.getParameters().length == 2) {
                     replacement = new InstanceFieldAssignment(assign.getFieldName(), assign.getFieldDescription(), assign.getOwnerType(),
@@ -117,8 +122,11 @@ public class StaticMethodInvokeEmitter implements InstructionEmitter<JavaEmitter
                 ctx.emit(replacement, ctx.usesSemicolons());
                 return true;
             }
+            if(!(stmt0 instanceof Return)) {
+                return false;
+            }
             // getter
-            Return ret = (Return) accessor.getInstructions().getStatements().get(0);
+            Return ret = (Return) stmt0;
             FieldAccess getter = (FieldAccess) ret.getValue().get();
             FieldAccess replacement = null;
             if (arg.getParameters().length == 1) {

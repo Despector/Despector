@@ -24,6 +24,7 @@
  */
 package org.spongepowered.despector.ast.insn.condition;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.Lists;
@@ -43,10 +44,12 @@ public class OrCondition extends Condition {
 
     public OrCondition(Condition... args) {
         this.args = Lists.newArrayList(checkNotNull(args, "args"));
+        checkArgument(this.args.size() >= 1, "Not enough operands");
     }
 
     public OrCondition(List<Condition> args) {
         this.args = checkNotNull(args, "args");
+        checkArgument(this.args.size() >= 1, "Not enough operands");
     }
 
     /**

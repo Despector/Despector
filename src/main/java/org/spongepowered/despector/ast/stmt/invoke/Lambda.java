@@ -24,6 +24,8 @@
  */
 package org.spongepowered.despector.ast.stmt.invoke;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import org.spongepowered.despector.ast.AstVisitor;
 import org.spongepowered.despector.ast.generic.TypeSignature;
 import org.spongepowered.despector.ast.insn.Instruction;
@@ -45,11 +47,11 @@ public class Lambda implements Instruction {
     private String lambda_desc;
 
     public Lambda(String owner, String method, String desc, TypeSignature type, String name) {
-        this.lambda_owner = owner;
-        this.lambda_method = method;
-        this.lambda_desc = desc;
-        this.type = type;
-        this.name = name;
+        this.lambda_owner = checkNotNull(owner, "owner");
+        this.lambda_method = checkNotNull(method, "method");
+        this.lambda_desc = checkNotNull(desc, "desc");
+        this.type = checkNotNull(type, "type");
+        this.name = checkNotNull(name, "name");
     }
 
     /**

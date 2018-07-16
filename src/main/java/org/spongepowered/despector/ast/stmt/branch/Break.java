@@ -24,6 +24,8 @@
  */
 package org.spongepowered.despector.ast.stmt.branch;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import org.spongepowered.despector.ast.AstVisitor;
 import org.spongepowered.despector.ast.stmt.Statement;
 import org.spongepowered.despector.ast.stmt.StatementVisitor;
@@ -33,24 +35,29 @@ import org.spongepowered.despector.util.serialization.MessagePacker;
 import java.io.IOException;
 import java.util.List;
 
+import javax.annotation.Nullable;
+
 /**
  * A statement breaking control flow out of a surrounding loop.
  */
 public class Break implements Statement {
 
+    @Nullable
     private Breakable loop;
     private Type type;
     private boolean nested;
 
-    public Break(Breakable loop, Type type, boolean nested) {
+    public Break(@Nullable Breakable loop, Type type, boolean nested) {
         this.loop = loop;
-        this.type = type;
+        this.type = checkNotNull(type, "type");
         this.nested = nested;
     }
+    
 
     /**
      * Gets the loop being broken.
      */
+    @Nullable
     public Breakable getLoop() {
         return this.loop;
     }

@@ -24,6 +24,8 @@
  */
 package org.spongepowered.despector.ast.stmt.invoke;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import org.spongepowered.despector.ast.AstVisitor;
 import org.spongepowered.despector.ast.generic.TypeSignature;
 import org.spongepowered.despector.ast.insn.Instruction;
@@ -46,12 +48,12 @@ public class MethodReference implements Instruction {
     private String lambda_desc;
 
     public MethodReference(Instruction owner_val, String owner, String method, String desc, TypeSignature type, String name) {
-        this.owner_val = owner_val;
-        this.lambda_owner = owner;
-        this.lambda_method = method;
-        this.lambda_desc = desc;
-        this.type = type;
-        this.name = name;
+        this.owner_val = checkNotNull(owner_val, "owner_val");
+        this.lambda_owner = checkNotNull(owner, "owner");
+        this.lambda_method = checkNotNull(method, "method");
+        this.lambda_desc = checkNotNull(desc, "desc");
+        this.type = checkNotNull(type, "type");
+        this.name = checkNotNull(name, "name");
     }
 
     public Instruction getOwnerVal() {

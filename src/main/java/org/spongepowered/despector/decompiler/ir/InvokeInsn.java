@@ -24,6 +24,8 @@
  */
 package org.spongepowered.despector.decompiler.ir;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import org.spongepowered.despector.ast.stmt.invoke.InstanceMethodInvoke;
 import org.spongepowered.despector.util.DebugUtil;
 
@@ -36,10 +38,10 @@ public class InvokeInsn extends Insn {
 
     public InvokeInsn(int op, InstanceMethodInvoke.Type type, String owner, String name, String desc) {
         super(op);
-        this.type = type;
-        this.owner = owner;
-        this.name = name;
-        this.desc = desc;
+        this.type = checkNotNull(type, "type");
+        this.owner = checkNotNull(owner, "owner");
+        this.name = checkNotNull(name, "name");
+        this.desc = checkNotNull(desc, "desc");
     }
 
     public InstanceMethodInvoke.Type getType() {
