@@ -29,6 +29,7 @@ import org.spongepowered.despector.decompiler.ir.Insn;
 import org.spongepowered.despector.decompiler.ir.JumpInsn;
 import org.spongepowered.despector.decompiler.ir.SwitchInsn;
 import org.spongepowered.despector.decompiler.method.PartialMethod;
+import org.spongepowered.despector.decompiler.method.graph.GraphOperation;
 import org.spongepowered.despector.decompiler.method.graph.GraphProcessor;
 import org.spongepowered.despector.decompiler.method.graph.data.block.BlockSection;
 import org.spongepowered.despector.decompiler.method.graph.data.block.CommentBlockSection;
@@ -122,14 +123,45 @@ public class SwitchBlockProcessor implements GraphProcessor {
                     case_region.remove(last);
                     cs.setBreaks(true);
 
+                    OpcodeBlock dummy_end = new BodyOpcodeBlock(goto_block.getStart(), goto_block.getEnd());
+                    dummy_end.setTarget(goto_block);
+                    case_region.add(dummy_end);
+                    GraphOperation.remap(case_region, goto_block, dummy_end);
+
                     for (OpcodeBlock o : case_region) {
                         if (o instanceof ConditionalOpcodeBlock) {
                             ConditionalOpcodeBlock c = (ConditionalOpcodeBlock) o;
-                            if (c.getTarget() == goto_block.getTarget()) {
-                                c.setTarget(goto_block);
+                            if (c.getTarget() == goto_block.getTarget() || c.getTarget().getStart() > dummy_end.getEnd()) {
+                                c.setTarget(dummy_end);
                             }
                         }
                     }
+                } else if (all_return) {
+                    boolean need_dummy = false;
+                    OpcodeBlock case_end = case_region.get(case_region.size() - 1);
+                    for (OpcodeBlock o : case_region) {
+                        if (o instanceof ConditionalOpcodeBlock) {
+                            ConditionalOpcodeBlock c = (ConditionalOpcodeBlock) o;
+                            if (c.getTarget().getStart() > case_end.getEnd()) {
+                                need_dummy = true;
+                            }
+                        }
+                    }
+
+                    if (need_dummy) {
+                        OpcodeBlock dummy_end = new BodyOpcodeBlock(case_end.getEnd(), case_end.getEnd());
+                        case_region.add(dummy_end);
+
+                        for (OpcodeBlock o : case_region) {
+                            if (o instanceof ConditionalOpcodeBlock) {
+                                ConditionalOpcodeBlock c = (ConditionalOpcodeBlock) o;
+                                if (c.getTarget().getStart() > case_end.getEnd()) {
+                                    c.setTarget(dummy_end);
+                                }
+                            }
+                        }
+                    }
+
                 }
                 try {
                     // recursively flatten the case area

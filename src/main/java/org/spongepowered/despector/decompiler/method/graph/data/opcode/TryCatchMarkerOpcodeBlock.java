@@ -110,4 +110,10 @@ public class TryCatchMarkerOpcodeBlock extends OpcodeBlock {
         return "TryCatch: " + this.start_pc + "-" + this.end_pc + " (target: " + (this.target != null ? this.target.getStart() : -1) + ", marker: "
                 + this.marker_type.name() + ")";
     }
+
+    @Override
+    public boolean equals(Object o) {
+        return this == o;
+    }
+    
 }
