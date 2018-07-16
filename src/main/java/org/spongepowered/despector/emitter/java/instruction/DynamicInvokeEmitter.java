@@ -44,7 +44,7 @@ public class DynamicInvokeEmitter implements InstructionEmitter<JavaEmitterConte
     @Override
     public void emit(JavaEmitterContext ctx, Lambda arg, TypeSignature type) {
         TypeEntry owner = ctx.getType().getSource().get(TypeHelper.descToType(arg.getLambdaOwner()));
-        MethodEntry method = owner.getStaticMethod(arg.getLambdaMethod());
+        MethodEntry method = owner.getStaticMethod(arg.getLambdaMethod(), arg.getLambdaDescription());
         if (method == null) {
             method = owner.getMethod(arg.getLambdaMethod());
             if (method == null) {
