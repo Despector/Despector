@@ -68,7 +68,7 @@ public class IfEmitter implements StatementEmitter<JavaEmitterContext, If> {
             ctx.newLine();
             ctx.printIndentation();
         }
-        if (else_ == null) {
+        if (else_ == null || else_.getBody().getStatements().isEmpty()) {
             ctx.printString("}");
         } else {
             StatementBlock else_block = else_.getBody();
