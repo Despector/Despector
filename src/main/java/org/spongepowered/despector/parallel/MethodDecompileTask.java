@@ -82,6 +82,7 @@ public class MethodDecompileTask implements Runnable {
             if (unfinished.code == null) {
                 continue;
             }
+            LibraryConfiguration.total_method_count++;
             MethodEntry mth = unfinished.mth;
             try {
                 mth.setIR(this.bytecode.createIR(mth.getMethodSignature(), unfinished.code, mth.getLocals(), unfinished.catch_regions, this.pool,
@@ -125,12 +126,12 @@ public class MethodDecompileTask implements Runnable {
                         System.err.println("Warning: Failed to find names for all enum constants in " + this.entry.getName());
                     }
                 }
-
             } catch (Exception ex) {
                 if (!LibraryConfiguration.quiet) {
                     System.err.println("Error decompiling method body for " + this.entry.getName() + " " + mth.toString());
                     ex.printStackTrace();
                 }
+                LibraryConfiguration.failed_method_count++;
                 StatementBlock insns = new StatementBlock(StatementBlock.Type.METHOD);
                 if (ConfigManager.getConfig().print_opcodes_on_error) {
                     List<String> text = new ArrayList<>();

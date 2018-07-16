@@ -36,5 +36,7 @@ public class LibraryConfiguration {
     
     // Viewer control fields
     public static boolean emit_block_debug = false;
+    public static int failed_method_count = 0;
+    public static int total_method_count = 0;
 
 }

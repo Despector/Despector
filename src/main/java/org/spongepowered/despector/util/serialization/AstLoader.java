@@ -87,9 +87,10 @@ import org.spongepowered.despector.ast.stmt.branch.If;
 import org.spongepowered.despector.ast.stmt.branch.Switch;
 import org.spongepowered.despector.ast.stmt.branch.TryCatch;
 import org.spongepowered.despector.ast.stmt.branch.While;
-import org.spongepowered.despector.ast.stmt.invoke.Lambda;
 import org.spongepowered.despector.ast.stmt.invoke.InstanceMethodInvoke;
 import org.spongepowered.despector.ast.stmt.invoke.InvokeStatement;
+import org.spongepowered.despector.ast.stmt.invoke.Lambda;
+import org.spongepowered.despector.ast.stmt.invoke.MethodReference;
 import org.spongepowered.despector.ast.stmt.invoke.New;
 import org.spongepowered.despector.ast.stmt.invoke.StaticMethodInvoke;
 import org.spongepowered.despector.ast.stmt.misc.Comment;
@@ -1037,6 +1038,26 @@ public class AstLoader {
                     sizes[i] = loadInstruction(unpack);
                 }
                 return new MultiNewArray(ClassTypeSignature.of(type), sizes);
+            } catch (IOException e) {
+                Throwables.propagate(e);
+            }
+            return null;
+        });
+        instruction_loaders.put(AstSerializer.STATEMENT_ID_METHOD_REF, (unpack) -> {
+            try {
+                expectKey(unpack, "type");
+                TypeSignature type = loadTypeSignature(unpack);
+                expectKey(unpack, "name");
+                String name = unpack.readString();
+                expectKey(unpack, "owner");
+                String lambda_owner = unpack.readString();
+                expectKey(unpack, "method");
+                String lambda_method = unpack.readString();
+                expectKey(unpack, "desc");
+                String lambda_desc = unpack.readString();
+                expectKey(unpack, "owner_val");
+                Instruction owner_val = loadInstruction(unpack);
+                return new MethodReference(owner_val, lambda_owner, lambda_method, lambda_desc, type, name);
             } catch (IOException e) {
                 Throwables.propagate(e);
             }
